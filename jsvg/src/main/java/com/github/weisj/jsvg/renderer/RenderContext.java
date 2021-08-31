@@ -40,29 +40,36 @@ public class RenderContext {
     private final @Nullable JComponent targetComponent;
     private final @NotNull MeasureContext measureContext;
     private final @NotNull PaintContext paintContext;
+    private final @NotNull FontRenderContext fontRenderContext;
     private final @NotNull MeasurableFontSpec fontSpec;
 
-    // Todo: font-size-adjust
-    // Todo: letter-spacing
-
     public RenderContext(@Nullable JComponent targetComponent, @NotNull MeasureContext measureContext) {
-        this(targetComponent, PaintContext.createDefault(), measureContext, MeasurableFontSpec.createDefault());
+        this(targetComponent,
+                PaintContext.createDefault(),
+                FontRenderContext.createDefault(),
+                measureContext,
+                MeasurableFontSpec.createDefault());
     }
 
-    private RenderContext(@Nullable JComponent targetComponent, @NotNull PaintContext paintContext,
-            @NotNull MeasureContext measureContext, @NotNull MeasurableFontSpec fontSpec) {
+    private RenderContext(@Nullable JComponent targetComponent,
+            @NotNull PaintContext paintContext,
+            @NotNull FontRenderContext fontRenderContext,
+            @NotNull MeasureContext measureContext,
+            @NotNull MeasurableFontSpec fontSpec) {
         this.targetComponent = targetComponent;
         this.paintContext = paintContext;
+        this.fontRenderContext = fontRenderContext;
         this.measureContext = measureContext;
         this.fontSpec = fontSpec;
     }
 
     @NotNull
     RenderContext deriveWith(@Nullable PaintContext context, @Nullable AttributeFontSpec attributeFontSpec,
-            @Nullable ViewBox viewBox) {
+            @Nullable ViewBox viewBox, @Nullable FontRenderContext frc) {
         if (context == null && viewBox == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
+        FontRenderContext newFontRenderContext = fontRenderContext;
 
         if (context != null) {
             newPaintContext = new PaintContext(
@@ -73,12 +80,17 @@ public class RenderContext {
                     opacity(context.opacity));
         }
         if (attributeFontSpec != null) {
-            newFontSpec = fontSpec.derive(attributeFontSpec);
+            newFontSpec = newFontSpec.derive(attributeFontSpec);
         }
+        if (frc != null) {
+            newFontRenderContext = newFontRenderContext.derive(frc);
+        }
+
         float em = newFontSpec.effectiveSize(measureContext);
         float ex = SVGFont.exFromEm(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
-        return new RenderContext(targetComponent, newPaintContext, newMeasureContext, newFontSpec);
+        return new RenderContext(targetComponent, newPaintContext, newFontRenderContext,
+                newMeasureContext, newFontSpec);
     }
 
     public @Nullable JComponent targetComponent() {

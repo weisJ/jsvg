@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -54,6 +55,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     private @Nullable SVGNode referencedNode;
 
     private PaintContext paintContext;
+    private FontRenderContext fontRenderContext;
     private AttributeFontSpec fontSpec;
 
     @Override
@@ -79,6 +81,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         referencedNode = attributeNode.getElementByHref(SVGNode.class, href);
 
         paintContext = PaintContext.parse(attributeNode);
+        fontRenderContext = FontRenderContext.parse(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
     }
 
@@ -92,6 +95,11 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     @Override
     public @NotNull PaintContext styleContext() {
         return paintContext;
+    }
+
+    @Override
+    public @NotNull FontRenderContext fontRenderContext() {
+        return fontRenderContext;
     }
 
     @Override

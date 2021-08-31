@@ -74,13 +74,15 @@ public final class NodeRenderer {
         MeasureContext measureContext = context.measureContext();
         @Nullable PaintContext paintContext = null;
         @Nullable AttributeFontSpec fontSpec = null;
+        @Nullable FontRenderContext fontRenderContext = null;
         if (node instanceof HasContext) {
             paintContext = ((HasContext) node).styleContext();
             fontSpec = ((HasContext) node).fontSpec();
+            fontRenderContext = ((HasContext) node).fontRenderContext();
         }
         @Nullable ViewBox viewBox = node instanceof MaybeHasViewBox
                 ? ((MaybeHasViewBox) node).viewBox(measureContext)
                 : null;
-        return context.deriveWith(paintContext, fontSpec, viewBox);
+        return context.deriveWith(paintContext, fontSpec, viewBox, fontRenderContext);
     }
 }

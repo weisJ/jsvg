@@ -35,12 +35,14 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.PaintContext;
 
 public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E> implements Renderable, HasContext {
 
     private boolean isVisible;
     private PaintContext paintContext;
+    private FontRenderContext fontRenderContext;
     private AttributeFontSpec fontSpec;
     private AffineTransform transform;
     private @Nullable ClipPath clipPath;
@@ -51,6 +53,7 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
         super.build(attributeNode);
         isVisible = parseIsVisible(attributeNode);
         paintContext = PaintContext.parse(attributeNode);
+        fontRenderContext = FontRenderContext.parse(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
         transform = attributeNode.parseTransform("transform");
         clipPath = attributeNode.getClipPath();
@@ -74,6 +77,11 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
     @Override
     public final @NotNull PaintContext styleContext() {
         return paintContext;
+    }
+
+    @Override
+    public @NotNull FontRenderContext fontRenderContext() {
+        return fontRenderContext;
     }
 
     @Override

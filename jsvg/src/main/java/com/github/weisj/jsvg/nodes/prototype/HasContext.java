@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes.prototype;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
+import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.PaintContext;
 
 /**
@@ -40,4 +41,7 @@ public interface HasContext {
 
     @NotNull
     AttributeFontSpec fontSpec();
+
+    @NotNull
+    FontRenderContext fontRenderContext();
 }
