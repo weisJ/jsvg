@@ -75,7 +75,7 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
     }
 
     @Override
-    public final @NotNull PaintContext styleContext() {
+    public final @NotNull PaintContext paintContext() {
         return paintContext;
     }
 

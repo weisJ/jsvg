@@ -76,7 +76,7 @@ public final class NodeRenderer {
         @Nullable AttributeFontSpec fontSpec = null;
         @Nullable FontRenderContext fontRenderContext = null;
         if (node instanceof HasContext) {
-            paintContext = ((HasContext) node).styleContext();
+            paintContext = ((HasContext) node).paintContext();
             fontSpec = ((HasContext) node).fontSpec();
             fontRenderContext = ((HasContext) node).fontRenderContext();
         }

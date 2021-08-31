@@ -93,7 +93,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     }
 
     @Override
-    public @NotNull PaintContext styleContext() {
+    public @NotNull PaintContext paintContext() {
         return paintContext;
     }
 
