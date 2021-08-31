@@ -47,7 +47,7 @@ public final class FontResolver {
 
         FontStyle style = fontSpec.style();
         int weight = fontSpec.currentWeight();
-        float size = fontSpec.currentSize().resolveLength(measureContext);
+        float size = fontSpec.effectiveSize(measureContext);
         float stretch = fontSpec.stretch();
 
         Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<>(4, 1f);

@@ -28,14 +28,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Percentage;
+import com.github.weisj.jsvg.geometry.size.Length;
 
 public class AttributeFontSpec extends FontSpec {
     protected final @Nullable FontSize size;
     protected final @Nullable FontWeight weight;
 
-    AttributeFontSpec(@NotNull String[] families, @Nullable FontStyle style, @Percentage float stretch,
-            @Nullable FontSize size, @Nullable FontWeight weight) {
-        super(families, style, stretch);
+    AttributeFontSpec(@NotNull String[] families, @Nullable FontStyle style, @Nullable Length sizeAdjust,
+            @Percentage float stretch, @Nullable FontSize size, @Nullable FontWeight weight) {
+        super(families, style, sizeAdjust, stretch);
         this.size = size;
         this.weight = weight;
     }
@@ -55,6 +56,7 @@ public class AttributeFontSpec extends FontSpec {
                 ", style=" + style +
                 ", weight=" + weight +
                 ", size=" + size +
+                ", sizeAdjust=" + sizeAdjust +
                 ", stretch=" + stretch +
                 '}';
     }
@@ -64,8 +66,8 @@ public class AttributeFontSpec extends FontSpec {
         if (this == o) return true;
         if (!(o instanceof AttributeFontSpec)) return false;
         if (!super.equals(o)) return false;
-        AttributeFontSpec that = (AttributeFontSpec) o;
-        return Objects.equals(size, that.size) && Objects.equals(weight, that.weight);
+        AttributeFontSpec fontSpec = (AttributeFontSpec) o;
+        return Objects.equals(size, fontSpec.size) && Objects.equals(weight, fontSpec.weight);
     }
 
     @Override

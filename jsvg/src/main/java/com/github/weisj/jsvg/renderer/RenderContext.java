@@ -74,7 +74,7 @@ public class RenderContext {
         if (attributeFontSpec != null) {
             newFontSpec = fontSpec.derive(attributeFontSpec);
         }
-        float em = newFontSpec.currentSize().resolveFontSize(measureContext);
+        float em = newFontSpec.effectiveSize(measureContext);
         float ex = SVGFont.exFromEm(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
         return new RenderContext(targetComponent, newPaintContext, newMeasureContext, newFontSpec);

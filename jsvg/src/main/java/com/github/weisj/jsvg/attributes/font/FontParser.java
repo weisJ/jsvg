@@ -41,10 +41,11 @@ public final class FontParser {
         // Todo: https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#fallback_weights
         @Nullable FontWeight weight = parseWeight(node);
         @Nullable FontSize size = parseFontSize(node);
+        @Nullable Length sizeAdjust = node.getLength("font-size-adjust");
         @Nullable FontStyle style = parseFontStyle(node);
         @Percentage float stretch = parseStretch(node);
 
-        return new AttributeFontSpec(fontFamilies, style, stretch, size, weight);
+        return new AttributeFontSpec(fontFamilies, style, sizeAdjust, stretch, size, weight);
     }
 
     private static @Nullable FontWeight parseWeight(@NotNull AttributeNode node) {

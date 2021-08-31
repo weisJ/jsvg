@@ -28,15 +28,17 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
 
 public class MeasurableFontSpec extends FontSpec {
     private final int currentWeight;
     private final @NotNull Length currentSize;
 
-    MeasurableFontSpec(@NotNull String[] families, @Nullable FontStyle style, float stretch,
+    MeasurableFontSpec(@NotNull String[] families, @Nullable FontStyle style, @Nullable Length sizeAdjust,
+            float stretch,
             int currentWeight, @NotNull Length currentSize) {
-        super(families, style, stretch);
+        super(families, style, sizeAdjust, stretch);
         this.currentWeight = currentWeight;
         this.currentSize = currentSize;
     }
@@ -45,6 +47,7 @@ public class MeasurableFontSpec extends FontSpec {
         return new MeasurableFontSpec(
                 new String[] {"Default"},
                 FontStyle.Normal,
+                null,
                 FontStretch.Normal.percentage(),
                 PredefinedFontWeight.Normal.weight(0),
                 Unit.Raw.valueOf(12f));
@@ -71,6 +74,12 @@ public class MeasurableFontSpec extends FontSpec {
         return currentSize;
     }
 
+    public float effectiveSize(@NotNull MeasureContext context) {
+        float exSize = currentSize().resolveFontSize(context);
+        if (sizeAdjust != null) exSize *= sizeAdjust.resolveFontSize(context);
+        return SVGFont.emFromEx(exSize);
+    }
+
     public @NotNull MeasurableFontSpec derive(@Nullable AttributeFontSpec other) {
         if (other == null) return this;
         String[] newFamilies = other.families != null && other.families.length > 0
@@ -85,10 +94,13 @@ public class MeasurableFontSpec extends FontSpec {
         Length newSize = other.size != null
                 ? other.size.size(currentSize)
                 : this.currentSize;
+        Length newSizeAdjust = other.sizeAdjust != null
+                ? other.sizeAdjust
+                : this.sizeAdjust;
         float newStretch = !Length.isUnspecified(other.stretch)
                 ? other.stretch
                 : this.stretch;
-        return new MeasurableFontSpec(newFamilies, newStyle, newStretch, newWeight, newSize);
+        return new MeasurableFontSpec(newFamilies, newStyle, newSizeAdjust, newStretch, newWeight, newSize);
     }
 
     @Override

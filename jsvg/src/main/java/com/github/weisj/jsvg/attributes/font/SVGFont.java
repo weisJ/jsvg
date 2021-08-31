@@ -39,6 +39,10 @@ public interface SVGFont {
         return em / 2f;
     }
 
+    static float emFromEx(float ex) {
+        return 2f * ex;
+    }
+
     float em(@NotNull FontRenderContext context);
 
     float ex(@NotNull FontRenderContext context);

@@ -28,15 +28,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Percentage;
+import com.github.weisj.jsvg.geometry.size.Length;
 
 public class FontSpec {
     protected final @NotNull String[] families;
     protected final @Nullable FontStyle style;
+    protected final @Nullable Length sizeAdjust;
     protected final @Percentage float stretch;
 
-    FontSpec(@NotNull String[] families, @Nullable FontStyle style, @Percentage float stretch) {
+    FontSpec(@NotNull String[] families, @Nullable FontStyle style, @Nullable Length sizeAdjust,
+            @Percentage float stretch) {
         this.families = families;
         this.style = style;
+        this.sizeAdjust = sizeAdjust;
         this.stretch = stretch;
     }
 
@@ -45,6 +49,7 @@ public class FontSpec {
         return "FontSpec{" +
                 "families=" + Arrays.toString(families) +
                 ", style=" + style +
+                ", sizeAdjust=" + sizeAdjust +
                 ", stretch=" + stretch +
                 '}';
     }
@@ -56,12 +61,13 @@ public class FontSpec {
         FontSpec fontSpec = (FontSpec) o;
         return Float.compare(fontSpec.stretch, stretch) == 0
                 && Arrays.equals(families, fontSpec.families)
-                && Objects.equals(style, fontSpec.style);
+                && Objects.equals(style, fontSpec.style)
+                && Objects.equals(sizeAdjust, fontSpec.sizeAdjust);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(style, stretch);
+        int result = Objects.hash(style, sizeAdjust, stretch);
         result = 31 * result + Arrays.hashCode(families);
         return result;
     }
