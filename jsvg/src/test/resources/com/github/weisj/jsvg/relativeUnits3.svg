@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="100" height="100"
+     viewBox="0 0 200 200">
+    <defs fill="red">
+        <rect id="myRect" x="10%" y="0" width="50%" height="50%"/>
+        <text id="myText">Hello</text>
+    </defs>
+
+    <use xlink:href="#myRect" x="110" y="110" fill="yellow"/>
+
+    <svg x="1" y="1" width="50">
+        <use id="myUse" xlink:href="#myRect" fill="green"/>
+    </svg>
+
+    <svg x="50" y="50" viewBox="0 0 100 500">
+        <use xlink:href="#myRect" fill="red"/>
+    </svg>
+    <g letter-spacing="10">
+        <text x="5" y="100" font-size="200%" id="myText2" stroke="black" fill="black">Hello</text>
+    </g>
+
+</svg>

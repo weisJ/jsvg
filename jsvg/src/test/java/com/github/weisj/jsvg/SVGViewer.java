@@ -21,10 +21,11 @@
  */
 package com.github.weisj.jsvg;
 
-import java.awt.GridBagLayout;
+import java.awt.*;
+import java.net.URI;
+import java.util.Objects;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -32,13 +33,31 @@ import com.github.weisj.darklaf.LafManager;
 
 public class SVGViewer {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        URI uri = Objects.requireNonNull(SVGViewer.class.getResource("relativeUnits3.svg")).toURI();
+        SVGLoader loader = new SVGLoader();
+        SVGDocument document = loader.load(uri);
+
+        Objects.requireNonNull(document);
+
         SwingUtilities.invokeLater(() -> {
             LafManager.install();
             JFrame frame = new JFrame("SVGViewer");
 
-            JPanel content = new JPanel(new GridBagLayout());
-            content.add(new JLabel("Hello World!"));
+            JPanel content = new JPanel() {
+
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    ((Graphics2D) g).scale(2, 2);
+                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                            RenderingHints.VALUE_ANTIALIAS_ON);
+                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+                            RenderingHints.VALUE_STROKE_PURE);
+                    document.render(this, (Graphics2D) g);
+                }
+            };
+            content.setPreferredSize(new Dimension(1000, 600));
             frame.setContentPane(content);
 
             frame.pack();

@@ -195,7 +195,10 @@ allprojects {
                 }
             }
             tasks.withType<JavaCompile>().configureEach {
-                options.compilerArgs.addAll(listOf("-Xmaxerrs", "10000", "-Xmaxwarns", "10000", "-Werror"))
+                options.compilerArgs.addAll(listOf("-Xmaxerrs", "10000", "-Xmaxwarns", "10000"))
+                if (!props.bool("noWerror", false)) {
+                    options.compilerArgs.add("-Werror")
+                }
                 options.errorprone {
                     errorproneArgs.add("-XepExcludedPaths:.*/javacc/.*")
                     disableWarningsInGeneratedCode.set(true)
