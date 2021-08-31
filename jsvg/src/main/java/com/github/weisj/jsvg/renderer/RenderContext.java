@@ -39,7 +39,7 @@ public class RenderContext {
 
     private final @Nullable JComponent targetComponent;
     private final @NotNull MeasureContext measureContext;
-    private final @NotNull PaintContext style;
+    private final @NotNull PaintContext paintContext;
     private final @NotNull MeasurableFontSpec fontSpec;
 
     // Todo: font-size-adjust
@@ -49,10 +49,10 @@ public class RenderContext {
         this(targetComponent, PaintContext.createDefault(), measureContext, MeasurableFontSpec.createDefault());
     }
 
-    private RenderContext(@Nullable JComponent targetComponent, @NotNull PaintContext style,
+    private RenderContext(@Nullable JComponent targetComponent, @NotNull PaintContext paintContext,
             @NotNull MeasureContext measureContext, @NotNull MeasurableFontSpec fontSpec) {
         this.targetComponent = targetComponent;
-        this.style = style;
+        this.paintContext = paintContext;
         this.measureContext = measureContext;
         this.fontSpec = fontSpec;
     }
@@ -61,8 +61,9 @@ public class RenderContext {
     RenderContext deriveWith(@Nullable PaintContext context, @Nullable AttributeFontSpec attributeFontSpec,
             @Nullable ViewBox viewBox) {
         if (context == null && viewBox == null) return this;
-        PaintContext newPaintContext = style;
+        PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
+
         if (context != null) {
             newPaintContext = new PaintContext(
                     fillPaint(context.fillPaint),
@@ -89,23 +90,23 @@ public class RenderContext {
     }
 
     public @NotNull SVGPaint strokePaint(@Nullable SVGPaint paint) {
-        return paint != null ? paint : style.strokePaint;
+        return paint != null ? paint : paintContext.strokePaint;
     }
 
     public @NotNull SVGPaint fillPaint(@Nullable SVGPaint paint) {
-        return paint != null ? paint : style.fillPaint;
+        return paint != null ? paint : paintContext.fillPaint;
     }
 
     public @Percentage float fillOpacity(@Percentage float opacity) {
-        return style.fillOpacity * opacity;
+        return paintContext.fillOpacity * opacity;
     }
 
     public @Percentage float strokeOpacity(@Percentage float opacity) {
-        return style.strokeOpacity * opacity;
+        return paintContext.strokeOpacity * opacity;
     }
 
     public @Percentage float opacity(@Percentage float opacity) {
-        return style.opacity * opacity;
+        return paintContext.opacity * opacity;
     }
 
     public @NotNull SVGFont font(@Nullable AttributeFontSpec fontSpec) {
