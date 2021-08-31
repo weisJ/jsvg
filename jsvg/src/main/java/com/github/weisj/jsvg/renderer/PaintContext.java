@@ -46,13 +46,13 @@ public class PaintContext {
         this.opacity = opacity;
     }
 
-    public static PaintContext createDefault() {
+    public static @NotNull PaintContext createDefault() {
         return new PaintContext(
                 SVGPaint.DEFAULT_PAINT, 1,
                 SVGPaint.NONE, 1, 1);
     }
 
-    public static PaintContext parse(@NotNull AttributeNode attributeNode) {
+    public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
         return new PaintContext(
                 attributeNode.getPaint("fill"),
                 attributeNode.getPercentage("fill-opacity", 1),
