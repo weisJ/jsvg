@@ -28,15 +28,16 @@ import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.nodes.text.Text;
 
 @ElementCategories({Category.Container, Category.Structural})
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
      * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
-     * <image>, <marker>, <mask>, <pattern>, <script>, <switch>, <text>, <view>
+     * <image>, <marker>, <mask>, <pattern>, <script>, <switch>, <view>
      */
-    anyOf = {Anchor.class, ClipPath.class, Style.class}
+    anyOf = {Anchor.class, ClipPath.class, Style.class, Text.class}
 )
 public final class Group extends RenderableContainerNode implements ShapedContainer<SVGNode> {
     public static final String TAG = "g";

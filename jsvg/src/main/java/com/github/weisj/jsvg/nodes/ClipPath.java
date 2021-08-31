@@ -31,11 +31,12 @@ import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.nodes.text.Text;
 
 @ElementCategories({/* None */})
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape},
-    anyOf = {Use.class /* <text> */ }
+    anyOf = {Use.class, Text.class}
 )
 public final class ClipPath extends ContainerNode implements ShapedContainer<SVGNode> {
     public static final String TAG = "clippath";
