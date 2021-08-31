@@ -19,15 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.prototype;
+package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.*;
+class StringTextSegment implements TextSegment {
+    private final char[] codepoints;
 
-import org.jetbrains.annotations.NotNull;
+    public StringTextSegment(char[] codepoints) {
+        this.codepoints = codepoints;
+    }
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
-
-public interface HasShape {
-    @NotNull
-    Shape computeShape(@NotNull MeasureContext context);
+    public char[] codepoints() {
+        return codepoints;
+    }
 }

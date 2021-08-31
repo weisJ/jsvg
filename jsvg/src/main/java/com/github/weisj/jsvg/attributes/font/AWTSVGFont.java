@@ -22,64 +22,28 @@
 package com.github.weisj.jsvg.attributes.font;
 
 import java.awt.*;
-import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Percentage;
-import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.Unit;
 
 public class AWTSVGFont implements SVGFont {
     private final @NotNull Font font;
-    private final @NotNull FontStyle style;
+    // Todo: Do something with stretch
     private final @Percentage float stretch;
-    private final int weight;
 
-    public AWTSVGFont(@NotNull Font font, @NotNull FontStyle style,
-            int weight, @Percentage float stretch) {
+    public AWTSVGFont(@NotNull Font font, @Percentage float stretch) {
         this.font = font;
-        this.style = style;
-        this.weight = weight;
         this.stretch = stretch;
+    }
+
+    @Override
+    public @NotNull GlyphVector unicodeGlyphVector(@NotNull Graphics2D g, char[] codepoints) {
+        return font.createGlyphVector(g.getFontRenderContext(), codepoints);
     }
 
     public @NotNull Font font() {
         return font;
-    }
-
-    @Override
-    public @NotNull String family() {
-        return font.getName();
-    }
-
-    @Override
-    public @NotNull FontStyle style() {
-        return style;
-    }
-
-    @Override
-    public int weight() {
-        return weight;
-    }
-
-    @Override
-    public @Percentage float stretch() {
-        return stretch;
-    }
-
-    @Override
-    public @NotNull Length size() {
-        return Unit.Raw.valueOf(font.getSize2D());
-    }
-
-    @Override
-    public float em(@NotNull FontRenderContext context) {
-        return font.getSize2D();
-    }
-
-    @Override
-    public float ex(@NotNull FontRenderContext frc) {
-        return (float) font.createGlyphVector(frc, "x").getLogicalBounds().getHeight();
     }
 }

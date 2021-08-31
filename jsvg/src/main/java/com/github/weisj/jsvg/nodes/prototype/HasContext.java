@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
@@ -36,12 +36,12 @@ public interface HasContext {
 
     // Todo: Make this something that knows how to mutate the RenderContext itself
     // Todo: Make the current StyleContext an implementation of this.
-    @NotNull
+    @Nullable
     PaintContext paintContext();
 
-    @NotNull
+    @Nullable
     AttributeFontSpec fontSpec();
 
-    @NotNull
+    @Nullable
     FontRenderContext fontRenderContext();
 }

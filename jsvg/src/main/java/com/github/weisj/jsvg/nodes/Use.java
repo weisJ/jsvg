@@ -64,8 +64,8 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     }
 
     @Override
-    public boolean isVisible() {
-        return super.isVisible() && referencedNode instanceof Renderable;
+    public boolean isVisible(@NotNull RenderContext context) {
+        return super.isVisible(context) && referencedNode instanceof Renderable;
     }
 
     @Override

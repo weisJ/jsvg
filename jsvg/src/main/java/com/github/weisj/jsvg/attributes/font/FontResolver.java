@@ -61,7 +61,7 @@ public final class FontResolver {
         if (awtStyle != Font.PLAIN) {
             font = font.deriveFont(awtStyle);
         }
-        SVGFont resolvedFont = new AWTSVGFont(font, style, weight, stretch);
+        SVGFont resolvedFont = new AWTSVGFont(font, stretch);
         FontCache.cache.put(key, resolvedFont);
         return resolvedFont;
     }

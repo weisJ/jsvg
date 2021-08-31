@@ -19,15 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.prototype;
+package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.*;
+import java.awt.geom.AffineTransform;
 
-import org.jetbrains.annotations.NotNull;
+class Cursor {
+    AffineTransform transform = new AffineTransform();
+    float x;
+    float y;
+    int glyphOffset;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+    Cursor(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
 
-public interface HasShape {
-    @NotNull
-    Shape computeShape(@NotNull MeasureContext context);
+    @Override
+    public String toString() {
+        return "Cursor{" +
+                "x=" + x +
+                ", y=" + y +
+                ", glyphOffset=" + glyphOffset +
+                '}';
+    }
 }

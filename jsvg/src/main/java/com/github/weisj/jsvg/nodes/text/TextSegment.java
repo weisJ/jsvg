@@ -21,5 +21,14 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
+import java.awt.*;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.renderer.RenderContext;
+
 interface TextSegment {
+    interface RenderableSegment extends TextSegment {
+        void renderSegment(@NotNull Cursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g);
+    }
 }

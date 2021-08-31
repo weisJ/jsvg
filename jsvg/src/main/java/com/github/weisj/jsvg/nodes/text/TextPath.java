@@ -67,7 +67,12 @@ public final class TextPath extends TextContainer {
     }
 
     @Override
-    protected void renderSegment(@NotNull RenderContext context, @NotNull Graphics2D g) {
+    public void renderSegment(@NotNull Cursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
+        throw new UnsupportedOperationException(tagName() + " rendering isn't implemented!");
+    }
+
+    @Override
+    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
         throw new UnsupportedOperationException(tagName() + " rendering isn't implemented!");
     }
 }

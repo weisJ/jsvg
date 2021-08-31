@@ -124,4 +124,8 @@ public class RenderContext {
     public @NotNull SVGFont font(@Nullable AttributeFontSpec fontSpec) {
         return FontResolver.resolve(this.fontSpec.derive(fontSpec), this.measureContext);
     }
+
+    public @NotNull FontRenderContext fontRenderContext() {
+        return fontRenderContext;
+    }
 }

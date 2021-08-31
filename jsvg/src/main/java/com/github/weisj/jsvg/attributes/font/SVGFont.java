@@ -21,17 +21,15 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
-import java.awt.font.FontRenderContext;
+import java.awt.*;
+import java.awt.font.GlyphVector;
 
 import org.jetbrains.annotations.NotNull;
-
-import com.github.weisj.jsvg.attributes.Percentage;
-import com.github.weisj.jsvg.geometry.size.Length;
 
 public interface SVGFont {
 
     static float defaultFontSize() {
-        return 12f;
+        return 10f;
     }
 
     static float exFromEm(float em) {
@@ -43,21 +41,6 @@ public interface SVGFont {
         return 2f * ex;
     }
 
-    float em(@NotNull FontRenderContext context);
-
-    float ex(@NotNull FontRenderContext context);
-
-    int weight();
-
     @NotNull
-    FontStyle style();
-
-    @NotNull
-    Length size();
-
-    @NotNull
-    String family();
-
-    @Percentage
-    float stretch();
+    GlyphVector unicodeGlyphVector(@NotNull Graphics2D g, char[] codepoints);
 }

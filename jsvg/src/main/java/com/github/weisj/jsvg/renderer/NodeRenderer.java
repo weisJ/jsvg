@@ -44,7 +44,7 @@ public final class NodeRenderer {
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Graphics2D g) {
         if (!(node instanceof Renderable)) return;
         Renderable renderable = (Renderable) node;
-        if (!renderable.isVisible()) return;
+        if (!renderable.isVisible(context)) return;
         RenderContext childContext = setupRenderContext(node, context);
 
         Graphics2D childGraphics = (Graphics2D) g.create();

@@ -37,15 +37,16 @@ import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.PaintContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E> implements Renderable, HasContext {
 
-    private boolean isVisible;
-    private PaintContext paintContext;
-    private FontRenderContext fontRenderContext;
-    private AttributeFontSpec fontSpec;
-    private AffineTransform transform;
-    private @Nullable ClipPath clipPath;
+    protected boolean isVisible;
+    protected PaintContext paintContext;
+    protected FontRenderContext fontRenderContext;
+    protected AttributeFontSpec fontSpec;
+    protected AffineTransform transform;
+    protected @Nullable ClipPath clipPath;
 
     @Override
     @MustBeInvokedByOverriders
@@ -60,7 +61,7 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
     }
 
     @Override
-    public boolean isVisible() {
+    public boolean isVisible(@NotNull RenderContext context) {
         return isVisible;
     }
 
@@ -75,17 +76,17 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
     }
 
     @Override
-    public final @NotNull PaintContext paintContext() {
+    public @Nullable PaintContext paintContext() {
         return paintContext;
     }
 
     @Override
-    public @NotNull FontRenderContext fontRenderContext() {
+    public @Nullable FontRenderContext fontRenderContext() {
         return fontRenderContext;
     }
 
     @Override
-    public final @NotNull AttributeFontSpec fontSpec() {
+    public @Nullable AttributeFontSpec fontSpec() {
         return fontSpec;
     }
 }

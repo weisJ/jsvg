@@ -21,12 +21,15 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
+import java.awt.*;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.nodes.Anchor;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.TextContent})
 @PermittedContent(
@@ -40,5 +43,11 @@ public final class Text extends LinearTextContainer {
     @Override
     public final @NotNull String tagName() {
         return TAG;
+    }
+
+    @Override
+    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+        super.render(context, g);
+        // Todo:
     }
 }

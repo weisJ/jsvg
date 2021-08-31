@@ -36,8 +36,7 @@ public class MeasurableFontSpec extends FontSpec {
     private final @NotNull Length currentSize;
 
     MeasurableFontSpec(@NotNull String[] families, @Nullable FontStyle style, @Nullable Length sizeAdjust,
-            float stretch,
-            int currentWeight, @NotNull Length currentSize) {
+            float stretch, int currentWeight, @NotNull Length currentSize) {
         super(families, style, sizeAdjust, stretch);
         this.currentWeight = currentWeight;
         this.currentSize = currentSize;
@@ -50,7 +49,7 @@ public class MeasurableFontSpec extends FontSpec {
                 null,
                 FontStretch.Normal.percentage(),
                 PredefinedFontWeight.Normal.weight(0),
-                Unit.Raw.valueOf(12f));
+                Unit.Raw.valueOf(SVGFont.defaultFontSize()));
     }
 
     public @NotNull String[] families() {
@@ -75,9 +74,11 @@ public class MeasurableFontSpec extends FontSpec {
     }
 
     public float effectiveSize(@NotNull MeasureContext context) {
-        float exSize = currentSize().resolveFontSize(context);
-        if (sizeAdjust != null) exSize *= sizeAdjust.resolveFontSize(context);
-        return SVGFont.emFromEx(exSize);
+        float emSize = currentSize().resolveFontSize(context);
+        if (sizeAdjust != null) {
+            return SVGFont.emFromEx(emSize * sizeAdjust.resolveFontSize(context));
+        }
+        return emSize;
     }
 
     public @NotNull MeasurableFontSpec derive(@Nullable AttributeFontSpec other) {

@@ -22,18 +22,25 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
+import java.awt.font.GlyphMetrics;
+import java.awt.font.GlyphVector;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
 abstract class LinearTextContainer extends TextContainer {
-    protected @Nullable Length x;
-    protected @Nullable Length y;
+    protected Length[] x;
+    protected Length[] y;
     protected Length[] dx;
     protected Length[] dy;
     protected float[] rotate;
@@ -42,15 +49,100 @@ abstract class LinearTextContainer extends TextContainer {
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        x = attributeNode.getLength("x");
-        y = attributeNode.getLength("y");
+        x = attributeNode.getLengthList("x");
+        y = attributeNode.getLengthList("y");
         dx = attributeNode.getLengthList("dx");
         dy = attributeNode.getLengthList("dy");
         rotate = attributeNode.getFloatList("rotate");
     }
 
     @Override
-    protected void renderSegment(@NotNull RenderContext context, @NotNull Graphics2D g) {
-
+    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+        Cursor initialCursor = new Cursor(
+                getXCursorForIndex(context.measureContext(), 0, 0),
+                getYCursorForIndex(context.measureContext(), 0, 0));
+        renderSegment(initialCursor, context, g);
     }
+
+    @Override
+    public void renderSegment(@NotNull Cursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
+        // Todo: Determine whether it is more efficient to build the path as a whole
+        // and do a single paint call instead.
+
+        // Todo: textLength should be taken into consideration.
+        SVGFont font = context.font(null);
+        int localGlyphOffset = cursor.glyphOffset;
+        cursor.glyphOffset = 0;
+        for (TextSegment segment : children()) {
+            if (segment instanceof StringTextSegment) {
+                // Todo line breaks should be treated as if it were a ' '
+                renderGlyphRun((StringTextSegment) segment, cursor, font, context, g);
+            } else if (segment instanceof RenderableSegment) {
+                ((RenderableSegment) segment).renderSegment(cursor, context, g);
+            } else {
+                throw new IllegalStateException("Can't render segment " + segment);
+            }
+        }
+        cursor.glyphOffset = localGlyphOffset;
+    }
+
+    private void renderGlyphRun(@NotNull StringTextSegment segment, @NotNull Cursor cursor, @NotNull SVGFont font,
+            @NotNull RenderContext context, @NotNull Graphics2D g) {
+        MeasureContext measure = context.measureContext();
+        FontRenderContext frc = context.fontRenderContext();
+        float letterSpacing = frc.letterSpacing != null
+                ? frc.letterSpacing.resolveLength(measure)
+                : 0f;
+        char[] codepoints = segment.codepoints();
+        GlyphVector glyphVector = font.unicodeGlyphVector(g, codepoints);
+        // Todo: Gradients for text are complicated. If possible computing the complete text bounds
+        // should be avoided. Rather pass the current transform along to the gradient.
+        Rectangle2D bounds = new Rectangle();
+
+        for (int i = 0, glyphCount = glyphVector.getNumGlyphs(); i < glyphCount; i++) {
+            advanceCursor(cursor, measure);
+            GlyphMetrics gm = glyphVector.getGlyphMetrics(i);
+            Shape glyph = glyphVector.getGlyphOutline(i);
+
+            Point2D glyphPosition = glyphVector.getGlyphPosition(i);
+            cursor.transform.translate(-glyphPosition.getX(), -glyphPosition.getY());
+            Shape renderPath = cursor.transform.createTransformedShape(glyph);
+            ShapeRenderer.renderShape(context, paintContext, g, renderPath, bounds,
+                    true, true);
+
+            cursor.x += gm.getAdvanceX() + letterSpacing;
+            cursor.y += gm.getAdvanceY() + letterSpacing;
+        }
+    }
+
+    private void advanceCursor(@NotNull Cursor cursor, @NotNull MeasureContext measure) {
+        // The positions are specified for the whole recursive content of a span.
+        // We need to account for any eventual text which occurred before.
+        cursor.x = getXCursorForIndex(measure, cursor.x, cursor.glyphOffset);
+        cursor.y = getYCursorForIndex(measure, cursor.y, cursor.glyphOffset);
+        cursor.transform.setToTranslation(cursor.x, cursor.y);
+        if (rotate != null && cursor.glyphOffset < rotate.length) {
+            cursor.transform.rotate(rotate[cursor.glyphOffset]);
+        }
+        cursor.glyphOffset++;
+    }
+
+    private float getXCursorForIndex(@NotNull MeasureContext measure, float current, int index) {
+        if (x != null && index < x.length) {
+            current = x[index].resolveWidth(measure);
+        } else if (dx != null && index < dx.length) {
+            current += dx[index].resolveWidth(measure);
+        }
+        return current;
+    }
+
+    private float getYCursorForIndex(@NotNull MeasureContext measure, float current, int index) {
+        if (y != null && index < y.length) {
+            current = y[index].resolveHeight(measure);
+        } else if (dy != null && index < dy.length) {
+            current += dy[index].resolveHeight(measure);
+        }
+        return current;
+    }
+
 }

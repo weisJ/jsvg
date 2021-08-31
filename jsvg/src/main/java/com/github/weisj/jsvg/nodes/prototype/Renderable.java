@@ -39,7 +39,7 @@ public interface Renderable {
     @Nullable
     Shape clipShape(@NotNull MeasureContext measureContext);
 
-    boolean isVisible();
+    boolean isVisible(@NotNull RenderContext context);
 
     void render(@NotNull RenderContext context, @NotNull Graphics2D g);
 

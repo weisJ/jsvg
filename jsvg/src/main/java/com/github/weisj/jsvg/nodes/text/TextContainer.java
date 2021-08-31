@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -30,14 +31,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
+import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
+import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment {
+abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment.RenderableSegment {
     private final List<TextSegment> segments = new ArrayList<>();
+
+    protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
     protected Length textLength;
 
@@ -45,16 +51,18 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
+        fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength");
     }
 
     @Override
-    public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        // Todo
+    public @Nullable PaintContext paintContext() {
+        // We manage that ourselves.
+        return null;
     }
 
-    protected void renderSegment(@NotNull RenderContext context, @NotNull Graphics2D g) {
+    public void renderSegment(@NotNull Cursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
 
     }
 
@@ -70,7 +78,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
 
     @Override
     public final void addContent(char[] content, int start, int length) {
-        segments.add(new StringTextSegment(new String(content, start, length)));
+        segments.add(new StringTextSegment(Arrays.copyOfRange(content, start, start + length)));
     }
 
     @Override
@@ -78,15 +86,4 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
         return segments;
     }
 
-    protected static class StringTextSegment implements TextSegment {
-        private final @NotNull String content;
-
-        public StringTextSegment(@NotNull String content) {
-            this.content = content;
-        }
-
-        public @NotNull String content() {
-            return content;
-        }
-    }
 }

@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class RenderableSVGNode extends AbstractSVGNode implements Renderable {
 
@@ -50,8 +51,8 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
     }
 
     @Override
-    public boolean isVisible() {
-        return isVisible;
+    public boolean isVisible(@NotNull RenderContext context) {
+        return isVisible && (context.opacity(1) > 0);
     }
 
     @Override

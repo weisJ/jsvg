@@ -29,33 +29,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.attributes.Percentage;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
 public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
-    private @Nullable SVGPaint fillPaint;
-    private @Nullable SVGPaint strokePaint;
+    private PaintContext paintContext;
     private @Nullable Stroke stroke;
-
-    private @Percentage float opacity;
-    private @Percentage float fillOpacity;
-    private @Percentage float strokeOpacity;
 
     private SVGShape shape;
 
     @Override
     public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        fillPaint = attributeNode.getPaint("fill");
-        strokePaint = attributeNode.getPaint("stroke");
-
-        opacity = attributeNode.getPercentage("opacity", 1);
-        fillOpacity = attributeNode.getPercentage("fill-opacity", 1);
-        strokeOpacity = attributeNode.getPercentage("stroke-opacity", 1);
+        paintContext = PaintContext.parse(attributeNode);
 
         // Todo: Support pathLength
         // Todo: Support stroke (similar to how font is handles, as it is a compound property)
@@ -70,38 +60,20 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
     protected abstract @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode);
 
     @Override
-    public @NotNull Shape computeShape(MeasureContext context) {
+    public @NotNull Shape computeShape(@NotNull MeasureContext context) {
         return shape.shape(context);
     }
 
     @Override
+    public boolean isVisible(@NotNull RenderContext context) {
+        return super.isVisible(context);
+    }
+
+    @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        float effectiveOpacity = context.opacity(opacity);
-        float fOpacity = context.fillOpacity(fillOpacity) * effectiveOpacity;
-        SVGPaint fPaint = context.fillPaint(fillPaint);
-
-        float sOpacity = context.strokeOpacity(strokeOpacity) * effectiveOpacity;
-        SVGPaint sPaint = context.strokePaint(strokePaint);
-
-        boolean doFill = shape.canBeFilled() && fOpacity > 0 && fPaint.isVisible();
-        boolean doOutline = sOpacity > 0 && sPaint.isVisible();
-
-        if (doFill || doOutline) {
-            MeasureContext measureContext = context.measureContext();
-            Shape paintShape = shape.shape(measureContext);
-            Rectangle2D bounds = shape.bounds(measureContext, false);
-
-            if (doFill) {
-                g.setComposite(AlphaComposite.SrcOver.derive(fOpacity));
-                g.setPaint(fPaint.paintForBounds(bounds));
-                g.fill(paintShape);
-            }
-            if (doOutline) {
-                g.setComposite(AlphaComposite.SrcOver.derive(sOpacity));
-                g.setPaint(sPaint.paintForBounds(bounds));
-                if (stroke != null) g.setStroke(stroke);
-                g.draw(paintShape);
-            }
-        }
+        MeasureContext measureContext = context.measureContext();
+        Shape paintShape = shape.shape(measureContext);
+        Rectangle2D bounds = shape.bounds(measureContext, false);
+        ShapeRenderer.renderShape(context, paintContext, g, paintShape, bounds, shape.canBeFilled(), true);
     }
 }
