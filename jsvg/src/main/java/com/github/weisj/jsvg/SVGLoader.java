@@ -33,6 +33,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.jetbrains.annotations.NotNull;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -155,6 +156,7 @@ public class SVGLoader {
 
     private class SVGLoadHandler extends DefaultHandler {
 
+        private static final boolean DEBUG_PRINT = false;
         private final PrintStream printer = System.out;
         private int nestingLevel = 0;
         private String ident = "";
@@ -162,18 +164,6 @@ public class SVGLoader {
         private final Map<String, SVGNode> namedElements = new HashMap<>();
         private final Deque<ParsedElement> currentNodeStack = new ArrayDeque<>();
         private ParsedElement rootNode;
-
-        @Override
-        public void startDocument() throws SAXException {
-            printer.println("Start Document");
-            super.startDocument();
-        }
-
-        @Override
-        public void endDocument() throws SAXException {
-            super.endDocument();
-            printer.println("End Document");
-        }
 
         private void setIdent(int level) {
             StringBuilder builder = new StringBuilder();
@@ -193,19 +183,20 @@ public class SVGLoader {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes)
                 throws SAXException {
-            printer.print(ident);
-            printer.print("<" + localName);
-            for (int i = 0, end = attributes.getLength(); i < end; i++) {
-                printer.println();
+            if (DEBUG_PRINT) {
                 printer.print(ident);
-                printer.print(" ");
-                printer.print(attributes.getQName(i));
-                printer.print(" = ");
-                printer.print(attributes.getValue(i));
+                printer.print("<" + localName);
+                for (int i = 0, end = attributes.getLength(); i < end; i++) {
+                    printer.println();
+                    printer.print(ident);
+                    printer.print(" ");
+                    printer.print(attributes.getQName(i));
+                    printer.print(" = ");
+                    printer.print(attributes.getValue(i));
+                }
+                printer.println(">");
+                setIdent(++nestingLevel);
             }
-            printer.println(">");
-            setIdent(++nestingLevel);
-
             ParsedElement lastParsedElement = currentNodeStack.isEmpty()
                     ? null
                     : currentNodeStack.peek();
@@ -245,9 +236,11 @@ public class SVGLoader {
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             super.endElement(uri, localName, qName);
-            setIdent(--nestingLevel);
-            printer.print(ident);
-            printer.println("</" + localName + ">");
+            if (DEBUG_PRINT) {
+                setIdent(--nestingLevel);
+                printer.print(ident);
+                printer.println("</" + localName + ">");
+            }
             if (!currentNodeStack.isEmpty() && currentNodeStack.peek().attributeNode.tagName().equals(qName)) {
                 currentNodeStack.pop();
             }
@@ -256,21 +249,19 @@ public class SVGLoader {
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
             super.characters(ch, start, length);
-            String text = new String(ch, start, length).replace('\n', ' ');
-            if (!isBlank(text)) {
-                printer.print(ident);
-                printer.println(text);
+            if (DEBUG_PRINT) {
+                String text = new String(ch, start, length).replace('\n', ' ');
+                if (!isBlank(text)) {
+                    printer.print(ident);
+                    printer.println(text);
+                }
+            }
+            if (!currentNodeStack.isEmpty() && currentNodeStack.peek().acceptsCharData) {
+                currentNodeStack.peek().node.addContent(ch, start, length);
             }
         }
 
-        @Override
-        public void processingInstruction(String target, String data) throws SAXException {
-            printer.print(ident);
-            printer.println("processingInstruction target = " + target + ", data = " + data);
-            super.processingInstruction(target, data);
-        }
-
-        SVGDocument getDocument() {
+        @NotNull SVGDocument getDocument() {
             rootNode.build();
             return new SVGDocument(rootNode.node);
         }

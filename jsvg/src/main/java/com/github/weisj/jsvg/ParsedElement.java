@@ -29,28 +29,34 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
+import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 class ParsedElement {
     final @Nullable String id;
     final @NotNull AttributeNode attributeNode;
     final @NotNull SVGNode node;
     final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
+    final boolean acceptsCharData;
 
     ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
         this.id = id;
         this.attributeNode = element;
         this.node = node;
+        PermittedContent permittedContent = node.getClass().getAnnotation(PermittedContent.class);
+        if (permittedContent == null) {
+            throw new IllegalStateException("Element <" + node.tagName() + "> doesn't specify permitted content");
+        }
+        acceptsCharData = permittedContent.charData();
     }
 
     void addChild(ParsedElement parsedElement) {
         children.add(parsedElement);
         if (node instanceof Container) {
-            ((Container) node).addChild(parsedElement.id, parsedElement.node);
+            ((Container<?>) node).addChild(parsedElement.id, parsedElement.node);
         }
     }
 
     void build() {
-        System.out.println("Build " + node.tagName());
         // Build depth first to ensure child nodes are processed first.
         // e.g. LinearGradient depends on its stops to be build first.
         for (ParsedElement child : children) {
