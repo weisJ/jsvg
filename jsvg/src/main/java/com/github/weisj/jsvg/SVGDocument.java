@@ -70,7 +70,7 @@ public class SVGDocument {
         float defaultEm = f != null ? f.getSize2D() : SVGFont.defaultFontSize();
         float defaultEx = SVGFont.exFromEm(defaultEm);
 
-        MeasureContext measureContext = new MeasureContext(viewBox, defaultEm, defaultEx);
+        MeasureContext measureContext = new MeasureContext(viewBox.width, viewBox.height, defaultEm, defaultEx);
         RenderContext context = new RenderContext(component, measureContext);
         NodeRenderer.renderNode(root, context, g);
     }

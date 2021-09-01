@@ -29,7 +29,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.google.errorprone.annotations.Immutable;
 
+@Immutable
 public class FontSpec {
     protected final @NotNull String[] families;
     protected final @Nullable FontStyle style;

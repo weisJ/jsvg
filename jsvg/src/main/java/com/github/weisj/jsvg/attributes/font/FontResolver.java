@@ -25,9 +25,7 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.text.AttributedCharacterIterator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -76,6 +74,14 @@ public final class FontResolver {
             private CacheKey(@NotNull MeasurableFontSpec spec, @NotNull MeasureContext context) {
                 this.spec = spec;
                 this.context = context;
+            }
+
+            @Override
+            public String toString() {
+                return "CacheKey{" +
+                        "spec=" + spec +
+                        ", context=" + context +
+                        '}';
             }
 
             @Override

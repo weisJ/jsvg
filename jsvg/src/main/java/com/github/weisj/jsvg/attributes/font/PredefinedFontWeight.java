@@ -25,13 +25,13 @@ public enum PredefinedFontWeight implements FontWeight {
     Normal {
         @Override
         public int weight(int parentWeight) {
-            return 400;
+            return NORMAL_WEIGHT;
         }
     },
     Bold {
         @Override
         public int weight(int parentWeight) {
-            return 700;
+            return BOLD_WEIGHT;
         }
     },
     Bolder {
@@ -55,5 +55,8 @@ public enum PredefinedFontWeight implements FontWeight {
         public int weight(int parentWeight) {
             throw new UnsupportedOperationException("Number needs to be parsed explicitly");
         }
-    }
+    };
+
+    public static final int NORMAL_WEIGHT = 400;
+    public static final int BOLD_WEIGHT = 700;
 }

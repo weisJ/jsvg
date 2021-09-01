@@ -21,41 +21,60 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 
-import org.intellij.lang.annotations.MagicConstant;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Degrees;
 
-public interface FontStyle {
+/**
+ * This interface shouldn't be implemented besides those constants.
+ */
+interface FontStyle {
     FontStyle Normal = new NormalStyle();
     FontStyle Italic = new ItalicStyle();
     FontStyle Oblique = new ObliqueStyle();
-
-    @MagicConstant(intValues = {Font.PLAIN, Font.ITALIC})
-    int awtCode();
 
     default @Nullable AffineTransform transform() {
         return null;
     }
 
-    class NormalStyle implements FontStyle {
+    final class NormalStyle implements FontStyle {
         @Override
-        public int awtCode() {
-            return Font.PLAIN;
+        public String toString() {
+            return "Normal";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof NormalStyle;
+        }
+
+        @Override
+        public int hashCode() {
+            return NormalStyle.class.hashCode();
         }
     }
 
-    class ItalicStyle implements FontStyle {
+    final class ItalicStyle implements FontStyle {
         @Override
-        public int awtCode() {
-            return Font.ITALIC;
+        public String toString() {
+            return "Italic";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof ItalicStyle;
+        }
+
+        @Override
+        public int hashCode() {
+            return ItalicStyle.class.hashCode();
         }
     }
 
-    class ObliqueStyle implements FontStyle {
+    final class ObliqueStyle implements FontStyle {
         public static @Degrees final float DEFAULT_ANGLE = 14;
         private final @Degrees float angle;
 
@@ -72,13 +91,26 @@ public interface FontStyle {
         }
 
         @Override
-        public @Nullable AffineTransform transform() {
+        public @NotNull AffineTransform transform() {
             return AffineTransform.getRotateInstance(Math.toRadians(angle()));
         }
 
         @Override
-        public int awtCode() {
-            return Font.PLAIN;
+        public String toString() {
+            return "Oblique{" + angle() + '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ObliqueStyle)) return false;
+            ObliqueStyle that = (ObliqueStyle) o;
+            return Float.compare(that.angle, angle) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Float.hashCode(angle);
         }
     }
 }

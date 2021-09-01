@@ -75,7 +75,7 @@ public final class SVG extends RenderableContainerNode implements MaybeHasViewBo
     }
 
     @Override
-    public @Nullable ViewBox viewBox(@NotNull MeasureContext measureContext) {
+    public @NotNull ViewBox viewBox(@NotNull MeasureContext measureContext) {
         if (viewBox != null) return viewBox;
         // If there is no viewBox specified we still have to establish a new frame with out current size.
         // Only if we have no sizes (i.e. they are negative) we use the parent viewBox.
@@ -103,8 +103,8 @@ public final class SVG extends RenderableContainerNode implements MaybeHasViewBo
         MeasureContext measureContext = context.measureContext();
         g.translate(x.resolveWidth(measureContext), y.resolveHeight(measureContext));
         ViewBox viewport = new ViewBox(
-                width.orElseIfUnspecified(measureContext.viewBox().width).resolveWidth(measureContext),
-                height.orElseIfUnspecified(measureContext.viewBox().height).resolveLength(measureContext));
+                width.orElseIfUnspecified(measureContext.viewWidth()).resolveWidth(measureContext),
+                height.orElseIfUnspecified(measureContext.viewHeight()).resolveLength(measureContext));
         Graphics2D viewportGraphics = preserveAspectRatio.prepareViewPort(g, viewport, viewBox);
         super.render(context, viewportGraphics);
         viewportGraphics.dispose();

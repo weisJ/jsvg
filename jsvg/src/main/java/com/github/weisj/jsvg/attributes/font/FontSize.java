@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 
-public interface FontSize {
+interface FontSize {
     @NotNull
     Length size(@NotNull Length parentSize);
 }

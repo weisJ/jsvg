@@ -21,23 +21,25 @@
  */
 package com.github.weisj.jsvg.geometry.size;
 
+import java.util.Objects;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 
-public class Length {
+public final class Length {
     public static final float UNSPECIFIED_RAW = java.lang.Float.NEGATIVE_INFINITY;
     public static final Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
     public static final Length ZERO = new Length(Unit.Raw, 0);
 
-    private final Unit unit;
+    private final @NotNull Unit unit;
     private final float value;
 
     private static final float pixelsPerInch = 96f;
     private static final float inchesPerCm = .3936f;
 
 
-    public Length(Unit unit, float value) {
+    public Length(@NotNull Unit unit, float value) {
         this.unit = unit;
         this.value = value;
     }
@@ -79,7 +81,7 @@ public class Length {
      */
     public float resolveWidth(@NotNull MeasureContext context) {
         if (unit == Unit.PERCENTAGE) {
-            return (value / 100f) * context.viewBox().width;
+            return (value / 100f) * context.viewWidth();
         } else {
             return resolveNonPercentage(context);
         }
@@ -92,7 +94,7 @@ public class Length {
      */
     public float resolveHeight(@NotNull MeasureContext context) {
         if (unit == Unit.PERCENTAGE) {
-            return (value / 100f) * context.viewBox().height;
+            return (value / 100f) * context.viewHeight();
         } else {
             return resolveNonPercentage(context);
         }
@@ -106,7 +108,7 @@ public class Length {
      */
     public float resolveLength(@NotNull MeasureContext context) {
         if (unit == Unit.PERCENTAGE) {
-            return (value / 100f) * context.viewBox().normedDiagonalLength();
+            return (value / 100f) * context.normedDiagonalLength();
         } else {
             return resolveNonPercentage(context);
         }
@@ -139,7 +141,7 @@ public class Length {
         return value;
     }
 
-    public Unit unit() {
+    public @NotNull Unit unit() {
         return unit;
     }
 
@@ -160,5 +162,18 @@ public class Length {
     public Length multiply(float scalingFactor) {
         if (scalingFactor == 0) return ZERO;
         return new Length(unit(), scalingFactor * raw());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Length)) return false;
+        Length length = (Length) o;
+        return unit == length.unit && Float.compare(length.value, value) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(unit, value);
     }
 }

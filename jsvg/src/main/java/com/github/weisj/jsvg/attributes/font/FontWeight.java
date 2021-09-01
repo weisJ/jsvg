@@ -21,6 +21,6 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
-public interface FontWeight {
+interface FontWeight {
     int weight(int parentWeight);
 }

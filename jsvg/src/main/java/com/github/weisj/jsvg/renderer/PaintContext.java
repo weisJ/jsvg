@@ -60,4 +60,15 @@ public class PaintContext {
                 attributeNode.getPercentage("stroke-opacity", 1),
                 attributeNode.getPercentage("opacity", 1));
     }
+
+    @Override
+    public String toString() {
+        return "PaintContext{" +
+                "fillPaint=" + fillPaint +
+                ", strokePaint=" + strokePaint +
+                ", opacity=" + opacity +
+                ", fillOpacity=" + fillOpacity +
+                ", strokeOpacity=" + strokeOpacity +
+                '}';
+    }
 }

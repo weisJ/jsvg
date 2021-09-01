@@ -28,7 +28,17 @@ import org.jetbrains.annotations.NotNull;
 
 public interface SVGPaint {
     SVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
-    SVGPaint NONE = b -> PaintParser.DEFAULT_COLOR;
+    SVGPaint NONE = new SVGPaint() {
+        @Override
+        public @NotNull Paint paintForBounds(@NotNull Rectangle2D bounds) {
+            return PaintParser.DEFAULT_COLOR;
+        }
+
+        @Override
+        public String toString() {
+            return "SVGPaint.None";
+        }
+    };
 
     @NotNull
     Paint paintForBounds(@NotNull Rectangle2D bounds);

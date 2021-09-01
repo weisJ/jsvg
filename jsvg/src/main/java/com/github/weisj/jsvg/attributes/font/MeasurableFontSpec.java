@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,9 @@ import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.google.errorprone.annotations.Immutable;
 
+@Immutable
 public class MeasurableFontSpec extends FontSpec {
     private final int currentWeight;
     private final @NotNull Length currentSize;
@@ -48,7 +51,7 @@ public class MeasurableFontSpec extends FontSpec {
                 FontStyle.Normal,
                 null,
                 FontStretch.Normal.percentage(),
-                PredefinedFontWeight.Normal.weight(0),
+                PredefinedFontWeight.NORMAL_WEIGHT,
                 Unit.Raw.valueOf(SVGFont.defaultFontSize()));
     }
 
@@ -102,6 +105,18 @@ public class MeasurableFontSpec extends FontSpec {
                 ? other.stretch
                 : this.stretch;
         return new MeasurableFontSpec(newFamilies, newStyle, newSizeAdjust, newStretch, newWeight, newSize);
+    }
+
+    @Override
+    public String toString() {
+        return "MeasurableFontSpec{" +
+                "families=" + Arrays.toString(families) +
+                ", style=" + style +
+                ", sizeAdjust=" + sizeAdjust +
+                ", stretch=" + stretch +
+                ", currentWeight=" + currentWeight +
+                ", currentSize=" + currentSize +
+                '}';
     }
 
     @Override
