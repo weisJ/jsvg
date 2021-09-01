@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -43,6 +42,9 @@ import com.github.weisj.jsvg.util.CharData;
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment.RenderableSegment {
     private final List<TextSegment> segments = new ArrayList<>();
 
+    // If not set otherwise explicitly this will result
+    // in the leading whitespace being trimmed.
+    private char parentChar = ' ';
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
     protected Length textLength;
@@ -69,13 +71,13 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
     @Override
     protected void doAdd(@NotNull SVGNode node) {
         segments.add((TextSegment) node);
+        ((TextSegment) node).setLastCharOfParent(lastChar());
     }
 
     @Override
     public final void addContent(char[] content, int start, int length) {
-        boolean hasPrecedingSpace = !segments.isEmpty() && lastChar() == ' ';
-        char[] data = CharData.getAddressableCharacters(content, start, length, !hasPrecedingSpace);
-        System.out.println(Arrays.toString(data));
+        boolean keepLeadingSpace = lastChar() != ' ';
+        char[] data = CharData.getAddressableCharacters(content, start, length, keepLeadingSpace);
         if (data.length == 0) return;
         segments.add(new StringTextSegment(data));
     }
@@ -86,7 +88,13 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
     }
 
     @Override
+    public void setLastCharOfParent(char c) {
+        parentChar = c;
+    }
+
+    @Override
     public char lastChar() {
-        return segments.get(segments.size() - 1).lastChar();
+        if (!segments.isEmpty()) return segments.get(segments.size() - 1).lastChar();
+        return parentChar;
     }
 }

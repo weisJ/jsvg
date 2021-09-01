@@ -60,9 +60,7 @@ abstract class LinearTextContainer extends TextContainer {
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        Cursor initialCursor = new Cursor(
-                getXCursorForIndex(context.measureContext(), 0, 0),
-                getYCursorForIndex(context.measureContext(), 0, 0));
+        Cursor initialCursor = new Cursor(0, 0);
         renderSegment(initialCursor, context, g);
     }
 
@@ -73,8 +71,9 @@ abstract class LinearTextContainer extends TextContainer {
 
         // Todo: textLength should be taken into consideration.
         SVGFont font = context.font(null);
-        int localGlyphOffset = cursor.glyphOffset;
-        cursor.glyphOffset = 0;
+
+        Cursor localCursor = cursor.createLocalCursor(this);
+
         for (TextSegment segment : children()) {
             RenderContext currentContext = context;
             if (segment instanceof Renderable) {
@@ -82,17 +81,20 @@ abstract class LinearTextContainer extends TextContainer {
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
-                renderGlyphRun((StringTextSegment) segment, cursor, font, currentContext, g);
+                renderGlyphRun((StringTextSegment) segment, localCursor, font, currentContext, g);
             } else if (segment instanceof RenderableSegment) {
-                ((RenderableSegment) segment).renderSegment(cursor, currentContext, g);
+                ((RenderableSegment) segment).renderSegment(localCursor, currentContext, g);
             } else {
                 throw new IllegalStateException("Can't render segment " + segment);
             }
         }
-        cursor.glyphOffset = localGlyphOffset;
+
+        cursor.restoreFromLocalCursor(localCursor, this);
     }
 
-    private void renderGlyphRun(@NotNull StringTextSegment segment, @NotNull Cursor cursor, @NotNull SVGFont font,
+    // Static to avoid using member variables.
+    private static void renderGlyphRun(@NotNull StringTextSegment segment, @NotNull Cursor cursor,
+            @NotNull SVGFont font,
             @NotNull RenderContext context, @NotNull Graphics2D g) {
         MeasureContext measure = context.measureContext();
         FontRenderContext frc = context.fontRenderContext();
@@ -107,7 +109,7 @@ abstract class LinearTextContainer extends TextContainer {
 
         // Todo: Skip unnecessary whitespace
         for (int i = 0, glyphCount = glyphVector.getNumGlyphs(); i < glyphCount; i++) {
-            advanceCursor(cursor, measure);
+            cursor.advance(measure);
             // Todo: Cache the individual Glyph shapes and metrics in the font
             GlyphMetrics gm = glyphVector.getGlyphMetrics(i);
             Shape glyph = glyphVector.getGlyphOutline(i);
@@ -119,36 +121,6 @@ abstract class LinearTextContainer extends TextContainer {
             cursor.x += gm.getAdvanceX() + letterSpacing;
             cursor.y += gm.getAdvanceY() + letterSpacing;
         }
-    }
-
-    private void advanceCursor(@NotNull Cursor cursor, @NotNull MeasureContext measure) {
-        // The positions are specified for the whole recursive content of a span.
-        // We need to account for any eventual text which occurred before.
-        cursor.x = getXCursorForIndex(measure, cursor.x, cursor.glyphOffset);
-        cursor.y = getYCursorForIndex(measure, cursor.y, cursor.glyphOffset);
-        cursor.transform.setToTranslation(cursor.x, cursor.y);
-        if (rotate != null && cursor.glyphOffset < rotate.length) {
-            cursor.transform.rotate(rotate[cursor.glyphOffset]);
-        }
-        cursor.glyphOffset++;
-    }
-
-    private float getXCursorForIndex(@NotNull MeasureContext measure, float current, int index) {
-        if (x != null && index < x.length) {
-            current = x[index].resolveWidth(measure);
-        } else if (dx != null && index < dx.length) {
-            current += dx[index].resolveWidth(measure);
-        }
-        return current;
-    }
-
-    private float getYCursorForIndex(@NotNull MeasureContext measure, float current, int index) {
-        if (y != null && index < y.length) {
-            current = y[index].resolveHeight(measure);
-        } else if (dy != null && index < dy.length) {
-            current += dy[index].resolveHeight(measure);
-        }
-        return current;
     }
 
 }

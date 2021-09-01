@@ -23,8 +23,29 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.geom.AffineTransform;
 
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+
 class Cursor {
     AffineTransform transform = new AffineTransform();
+
+    Length[] xLocations;
+    int xOff;
+
+    Length[] xDeltas;
+    int dxOff;
+
+    Length[] yLocations;
+    int yOff;
+
+    Length[] yDeltas;
+    int dyOff;
+
+    float[] rotations;
+    int rotOff;
+
     float x;
     float y;
     int glyphOffset;
@@ -32,6 +53,77 @@ class Cursor {
     Cursor(float x, float y) {
         this.x = x;
         this.y = y;
+    }
+
+    void advance(@NotNull MeasureContext measure) {
+        if (xLocations != null && xOff < xLocations.length) {
+            x = xLocations[xOff].resolveWidth(measure);
+            xOff++;
+        }
+        if (xDeltas != null && dxOff < xDeltas.length) {
+            x += xDeltas[dxOff].resolveWidth(measure);
+            dxOff++;
+        }
+
+        if (yLocations != null && yOff < yLocations.length) {
+            y = yLocations[yOff].resolveHeight(measure);
+            yOff++;
+        }
+        if (yDeltas != null && dyOff < yDeltas.length) {
+            y += yDeltas[dyOff].resolveHeight(measure);
+            dyOff++;
+        }
+
+        transform.setToTranslation(x, y);
+
+        if (rotations != null && rotations.length != 0) {
+            float rotation = rotations[rotOff];
+            rotOff = Math.min(rotations.length - 1, rotOff++);
+            transform.rotate(Math.toRadians(rotation));
+        }
+        glyphOffset++;
+    }
+
+    Cursor createLocalCursor(@NotNull LinearTextContainer txt) {
+        Cursor c = new Cursor(x, y);
+        c.transform = transform;
+        c.glyphOffset = 0;
+        if (txt.x.length != 0) {
+            c.xLocations = txt.x;
+        } else {
+            c.xOff = xOff;
+        }
+        if (txt.y.length != 0) {
+            c.yLocations = txt.y;
+        } else {
+            c.yOff = yOff;
+        }
+        if (txt.dx.length != 0) {
+            c.xDeltas = txt.dx;
+        } else {
+            c.dxOff = dxOff;
+        }
+        if (txt.dy.length != 0) {
+            c.yDeltas = txt.dy;
+        } else {
+            c.dyOff = dyOff;
+        }
+        if (txt.rotate.length != 0) {
+            c.rotations = txt.rotate;
+        } else {
+            c.rotOff = rotOff;
+        }
+        return c;
+    }
+
+    void restoreFromLocalCursor(@NotNull Cursor localCursor, @NotNull LinearTextContainer txt) {
+        x = localCursor.x;
+        y = localCursor.y;
+        if (txt.x.length == 0) xOff = localCursor.xOff;
+        if (txt.y.length == 0) yOff = localCursor.yOff;
+        if (txt.dx.length == 0) dxOff = localCursor.dxOff;
+        if (txt.dy.length == 0) dyOff = localCursor.dyOff;
+        if (txt.rotate.length == 0) rotOff = localCursor.rotOff;
     }
 
     @Override
