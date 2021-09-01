@@ -38,10 +38,6 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.github.weisj.jsvg.nodes.*;
-import com.github.weisj.jsvg.nodes.ClipPath;
-import com.github.weisj.jsvg.nodes.Defs;
-import com.github.weisj.jsvg.nodes.Group;
-import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
@@ -181,8 +177,7 @@ public class SVGLoader {
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes)
-                throws SAXException {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) {
             if (DEBUG_PRINT) {
                 printer.print(ident);
                 printer.print("<" + localName);
@@ -230,12 +225,10 @@ public class SVGLoader {
             } else {
                 LOGGER.warning("No node registered for tag " + localName);
             }
-            super.startElement(uri, localName, qName, attributes);
         }
 
         @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-            super.endElement(uri, localName, qName);
+        public void endElement(String uri, String localName, String qName) {
             if (DEBUG_PRINT) {
                 setIdent(--nestingLevel);
                 printer.print(ident);
@@ -247,13 +240,14 @@ public class SVGLoader {
         }
 
         @Override
-        public void characters(char[] ch, int start, int length) throws SAXException {
-            super.characters(ch, start, length);
+        public void characters(char[] ch, int start, int length) {
             if (DEBUG_PRINT) {
                 String text = new String(ch, start, length).replace('\n', ' ');
                 if (!isBlank(text)) {
                     printer.print(ident);
-                    printer.println(text);
+                    printer.print("__");
+                    printer.print(text);
+                    printer.println("__");
                 }
             }
             if (!currentNodeStack.isEmpty() && currentNodeStack.peek().acceptsCharData) {

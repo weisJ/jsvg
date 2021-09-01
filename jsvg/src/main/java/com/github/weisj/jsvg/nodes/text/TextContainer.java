@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -38,6 +37,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.CharData;
 
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment.RenderableSegment {
     private final List<TextSegment> segments = new ArrayList<>();
@@ -71,7 +71,9 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
 
     @Override
     public final void addContent(char[] content, int start, int length) {
-        segments.add(new StringTextSegment(Arrays.copyOfRange(content, start, start + length)));
+        char[] data = CharData.pruneWhiteSpace(content, start, length);
+        if (data.length == 0) return;
+        segments.add(new StringTextSegment(data));
     }
 
     @Override

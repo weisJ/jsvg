@@ -24,7 +24,6 @@ package com.github.weisj.jsvg.nodes;
 import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
