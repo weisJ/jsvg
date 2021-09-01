@@ -21,18 +21,12 @@
  */
 package com.github.weisj.jsvg.nodes.container;
 
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
@@ -41,12 +35,10 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E> implements Renderable, HasContext {
 
-    protected boolean isVisible;
-    protected PaintContext paintContext;
-    protected FontRenderContext fontRenderContext;
-    protected AttributeFontSpec fontSpec;
-    protected AffineTransform transform;
-    protected @Nullable ClipPath clipPath;
+    private boolean isVisible;
+    private PaintContext paintContext;
+    private FontRenderContext fontRenderContext;
+    private AttributeFontSpec fontSpec;
 
     @Override
     @MustBeInvokedByOverriders
@@ -56,8 +48,6 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
         paintContext = PaintContext.parse(attributeNode);
         fontRenderContext = FontRenderContext.parse(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
-        transform = attributeNode.parseTransform("transform");
-        clipPath = attributeNode.getClipPath();
     }
 
     @Override
@@ -66,27 +56,17 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
     }
 
     @Override
-    public @Nullable AffineTransform transform() {
-        return transform;
-    }
-
-    @Override
-    public @Nullable Shape clipShape(@NotNull MeasureContext measureContext) {
-        return clipPath != null ? clipPath.computeShape(measureContext) : null;
-    }
-
-    @Override
-    public @Nullable PaintContext paintContext() {
+    public final @NotNull PaintContext paintContext() {
         return paintContext;
     }
 
     @Override
-    public @Nullable FontRenderContext fontRenderContext() {
+    public final @NotNull FontRenderContext fontRenderContext() {
         return fontRenderContext;
     }
 
     @Override
-    public @Nullable AttributeFontSpec fontSpec() {
+    public final @NotNull AttributeFontSpec fontSpec() {
         return fontSpec;
     }
 }

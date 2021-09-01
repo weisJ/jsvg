@@ -21,20 +21,12 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
-import java.awt.*;
+import java.awt.geom.AffineTransform;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.renderer.RenderContext;
+public interface Transformable {
 
-public interface Renderable {
-
-    boolean isVisible(@NotNull RenderContext context);
-
-    void render(@NotNull RenderContext context, @NotNull Graphics2D g);
-
-    default boolean parseIsVisible(@NotNull AttributeNode node) {
-        return !"none".equals(node.getValue("display"));
-    }
+    @Nullable
+    AffineTransform transform();
 }

@@ -22,32 +22,41 @@
 package com.github.weisj.jsvg.nodes.container;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.geom.AffineTransform;
 
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.prototype.HasClip;
+import com.github.weisj.jsvg.nodes.prototype.HasContext;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.nodes.prototype.Transformable;
 
-public abstract class RenderableContainerNode extends CommonRenderableContainerNode<SVGNode> {
-    private final List<SVGNode> children = new ArrayList<>();
+public abstract class CommonRenderableContainerNode<E> extends BaseRenderableContainerNode<E>
+        implements Renderable, HasContext, Transformable, HasClip {
+
+    private AffineTransform transform;
+    private @Nullable ClipPath clipPath;
 
     @Override
-    protected void doAdd(@NotNull SVGNode node) {
-        children.add(node);
+    @MustBeInvokedByOverriders
+    public void build(@NotNull AttributeNode attributeNode) {
+        super.build(attributeNode);
+        transform = attributeNode.parseTransform("transform");
+        clipPath = attributeNode.getClipPath();
     }
 
     @Override
-    public List<@NotNull ? extends SVGNode> children() {
-        return children;
+    public final @Nullable AffineTransform transform() {
+        return transform;
     }
 
     @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        for (SVGNode child : children()) {
-            NodeRenderer.renderNode(child, context, g);
-        }
+    public final @Nullable Shape clipShape(@NotNull MeasureContext measureContext) {
+        return clipPath != null ? clipPath.computeShape(measureContext) : null;
     }
 }

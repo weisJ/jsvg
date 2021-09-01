@@ -30,10 +30,12 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.nodes.prototype.Transformable;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public abstract class RenderableSVGNode extends AbstractSVGNode implements Renderable {
+public abstract class RenderableSVGNode extends AbstractSVGNode implements Renderable, Transformable, HasClip {
 
     private boolean isVisible;
     private @Nullable AffineTransform transform;

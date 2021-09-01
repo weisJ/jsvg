@@ -32,9 +32,7 @@ import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.nodes.prototype.HasContext;
-import com.github.weisj.jsvg.nodes.prototype.MaybeHasViewBox;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.nodes.prototype.*;
 
 public final class NodeRenderer {
     private static final boolean CLIP_DEBUG = false;
@@ -50,27 +48,29 @@ public final class NodeRenderer {
         Graphics2D childGraphics = (Graphics2D) g.create();
 
         // Transform elements on a non top-level <svg> have no effect.
-        if (!(renderable instanceof SVG)) {
-            AffineTransform transform = renderable.transform();
+        if (!(renderable instanceof SVG) && renderable instanceof Transformable) {
+            AffineTransform transform = ((Transformable) renderable).transform();
             if (transform != null) childGraphics.transform(transform);
         }
 
-        // Todo: When masks are implemented and we decide to paint to an off-screen buffer
-        // we can handle clip shapes as if they were masks (with 1/0 values).
-        Shape childClip = renderable.clipShape(context.measureContext());
-        if (childClip != null) {
-            if (CLIP_DEBUG) {
-                childGraphics.setColor(Color.MAGENTA);
-                childGraphics.draw(childClip);
+        if (renderable instanceof HasClip) {
+            // Todo: When masks are implemented and we decide to paint to an off-screen buffer
+            // we can handle clip shapes as if they were masks (with 1/0 values).
+            Shape childClip = ((HasClip) renderable).clipShape(context.measureContext());
+            if (childClip != null) {
+                if (CLIP_DEBUG) {
+                    childGraphics.setColor(Color.MAGENTA);
+                    childGraphics.draw(childClip);
+                }
+                childGraphics.clip(childClip);
             }
-            childGraphics.clip(childClip);
         }
 
         renderable.render(childContext, childGraphics);
         childGraphics.dispose();
     }
 
-    private static RenderContext setupRenderContext(@NotNull SVGNode node, @NotNull RenderContext context) {
+    public static RenderContext setupRenderContext(@NotNull Object node, @NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
         @Nullable PaintContext paintContext = null;
         @Nullable AttributeFontSpec fontSpec = null;
