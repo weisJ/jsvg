@@ -19,37 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.util;
 
-import java.awt.*;
+import java.awt.geom.GeneralPath;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.attributes.Inherit;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
-import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
-import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.util.PathUtil;
+import com.github.weisj.jsvg.nodes.path.BuildHistory;
+import com.github.weisj.jsvg.nodes.path.PathCommand;
+import com.github.weisj.jsvg.nodes.path.PathParser;
 
-@ElementCategories({Category.Graphic, Category.Shape})
-@PermittedContent(categories = {Category.Animation, Category.Descriptive})
-public final class Path extends ShapeNode {
-    public static final String TAG = "path";
+public final class PathUtil {
+    private PathUtil() {}
 
-    @Override
-    public final @NotNull String tagName() {
-        return TAG;
-    }
+    public static @NotNull SVGShape parseFromPathData(@NotNull String data, @NotNull FillRule fillRule) {
+        PathCommand[] pathCommands = new PathParser(data).parsePathCommand();
 
-    @Override
-    protected @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode) {
-        FillRule fillRule = FillRule.parse(attributeNode.getValue("fill-rule", Inherit.Yes));
-        String pathValue = attributeNode.getValue("d");
-        if (pathValue == null) return new AWTSVGShape(new Rectangle());
-        return PathUtil.parseFromPathData(pathValue, fillRule);
+        int nodeCount = 2;
+        for (PathCommand pathCommand : pathCommands) {
+            nodeCount += pathCommand.getInnerNodes();
+        }
+
+        GeneralPath path = new GeneralPath(fillRule.awtWindingRule, nodeCount);
+        BuildHistory hist = new BuildHistory();
+
+        for (PathCommand pathCommand : pathCommands) {
+            pathCommand.appendPath(path, hist);
+        }
+
+        return new AWTSVGShape(path);
     }
 }

@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
+import java.awt.font.GlyphMetrics;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
@@ -28,8 +29,11 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-class Cursor {
-    AffineTransform transform = new AffineTransform();
+class GlyphCursor {
+    float x;
+    float y;
+    int glyphOffset;
+    final AffineTransform transform;
 
     Length[] xLocations;
     int xOff;
@@ -46,16 +50,30 @@ class Cursor {
     float[] rotations;
     int rotOff;
 
-    float x;
-    float y;
-    int glyphOffset;
-
-    Cursor(float x, float y) {
+    GlyphCursor(float x, float y, @NotNull AffineTransform transform) {
         this.x = x;
         this.y = y;
+        this.transform = transform;
+        this.glyphOffset = 0;
     }
 
-    void advance(@NotNull MeasureContext measure) {
+    GlyphCursor(@NotNull GlyphCursor c) {
+        this(c.x, c.y, c.transform);
+        this.glyphOffset = 0;
+        this.xLocations = c.xLocations;
+        this.xOff = c.xOff;
+        this.yLocations = c.yLocations;
+        this.yOff = c.yOff;
+        this.xDeltas = c.xDeltas;
+        this.dxOff = c.dxOff;
+        this.yDeltas = c.yDeltas;
+        this.dyOff = c.dyOff;
+        this.rotations = c.rotations;
+        this.rotOff = c.rotOff;
+    }
+
+    @NotNull
+    AffineTransform advance(@NotNull MeasureContext measure) {
         if (xLocations != null && xOff < xLocations.length) {
             x = xLocations[xOff].resolveWidth(measure);
             xOff++;
@@ -83,66 +101,11 @@ class Cursor {
         }
 
         glyphOffset++;
+        return transform;
     }
 
-    Cursor createLocalCursor(@NotNull LinearTextContainer txt) {
-        Cursor c = new Cursor(x, y);
-        c.transform = transform;
-        c.glyphOffset = 0;
-        if (txt.x.length != 0) {
-            c.xLocations = txt.x;
-            c.xOff = 0;
-        } else {
-            c.xLocations = xLocations;
-            c.xOff = xOff;
-        }
-        if (txt.y.length != 0) {
-            c.yLocations = txt.y;
-            c.yOff = 0;
-        } else {
-            c.yLocations = yLocations;
-            c.yOff = yOff;
-        }
-        if (txt.dx.length != 0) {
-            c.xDeltas = txt.dx;
-            c.dyOff = 0;
-        } else {
-            c.xDeltas = xDeltas;
-            c.dxOff = dxOff;
-        }
-        if (txt.dy.length != 0) {
-            c.yDeltas = txt.dy;
-            c.dyOff = 0;
-        } else {
-            c.yDeltas = yDeltas;
-            c.dyOff = dyOff;
-        }
-        if (txt.rotate.length != 0) {
-            c.rotations = txt.rotate;
-            c.rotOff = 0;
-        } else {
-            c.rotations = rotations;
-            c.rotOff = rotOff;
-        }
-        return c;
-    }
-
-    void restoreFromLocalCursor(@NotNull Cursor localCursor, @NotNull LinearTextContainer txt) {
-        x = localCursor.x;
-        y = localCursor.y;
-        if (txt.x.length == 0) xOff = localCursor.xOff;
-        if (txt.y.length == 0) yOff = localCursor.yOff;
-        if (txt.dx.length == 0) dxOff = localCursor.dxOff;
-        if (txt.dy.length == 0) dyOff = localCursor.dyOff;
-        if (txt.rotate.length == 0) rotOff = localCursor.rotOff;
-    }
-
-    @Override
-    public String toString() {
-        return "Cursor{" +
-                "x=" + x +
-                ", y=" + y +
-                ", glyphOffset=" + glyphOffset +
-                '}';
+    void consumeGlyph(@NotNull GlyphMetrics gm, float letterSpacing) {
+        // This assumes a horizontal baseline
+        x += gm.getAdvanceX() + letterSpacing;
     }
 }

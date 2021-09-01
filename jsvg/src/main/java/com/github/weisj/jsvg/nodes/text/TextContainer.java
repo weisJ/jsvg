@@ -32,10 +32,13 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
+import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.CharData;
 
@@ -56,11 +59,6 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength");
-    }
-
-    @Override
-    public void renderSegment(@NotNull Cursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
-
     }
 
     @Override
@@ -96,5 +94,37 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
     public char lastChar() {
         if (!segments.isEmpty()) return segments.get(segments.size() - 1).lastChar();
         return parentChar;
+    }
+
+    protected abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);
+
+    protected abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
+
+    @Override
+    public void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
+        // Todo: Determine whether it is more efficient to build the path as a whole
+        // and do a single paint call instead.
+
+        // Todo: textLength should be taken into consideration.
+        SVGFont font = context.font(null);
+
+        GlyphCursor localCursor = createLocalCursor(context, cursor);
+
+        for (TextSegment segment : children()) {
+            RenderContext currentContext = context;
+            if (segment instanceof Renderable) {
+                if (!((Renderable) segment).isVisible(context)) continue;
+                currentContext = NodeRenderer.setupRenderContext(segment, context);
+            }
+            if (segment instanceof StringTextSegment) {
+                GlyphRenderer.renderGlyphRun((StringTextSegment) segment, localCursor, font, currentContext, g);
+            } else if (segment instanceof RenderableSegment) {
+                ((RenderableSegment) segment).renderSegment(localCursor, currentContext, g);
+            } else {
+                throw new IllegalStateException("Can't render segment " + segment);
+            }
+        }
+
+        cleanUpLocalCursor(cursor, localCursor);
     }
 }

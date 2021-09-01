@@ -36,6 +36,8 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.prototype.spec.Category;
+import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 
 public class AttributeNode {
     private final @NotNull String tagName;
@@ -70,6 +72,16 @@ public class AttributeNode {
         if (value == null) return null;
         if (!value.startsWith("#")) return null;
         return getElementById(type, value.substring(1));
+    }
+
+    public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @NotNull Category category,
+            @Nullable String value) {
+        T element = getElementById(type, value);
+        if (element == null) return null;
+        for (Category cat : element.getClass().getAnnotation(ElementCategories.class).value()) {
+            if (cat == category) return element;
+        }
+        return null;
     }
 
     public @NotNull Map<String, String> attributes() {
@@ -169,5 +181,11 @@ public class AttributeNode {
 
     public float getFloat(@NotNull String name, float fallback) {
         return AttributeParser.parseFloat(getValue(name), fallback);
+    }
+
+    public @Nullable String getHref() {
+        String href = getValue("href");
+        if (href == null) return getValue("xlink:href");
+        return href;
     }
 }

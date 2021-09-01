@@ -21,18 +21,22 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.RenderContext;
+class PathGlyphCursor extends GlyphCursor {
 
-interface TextSegment {
-    void setLastCharOfParent(char c);
+    private final @NotNull PathIterator pathIterator;
 
-    char lastChar();
+    PathGlyphCursor(@NotNull PathIterator pathIterator, @NotNull AffineTransform transform) {
+        super(0, 0, transform);
+        this.pathIterator = pathIterator;
+    }
 
-    interface RenderableSegment extends TextSegment {
-        void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g);
+    PathGlyphCursor(@NotNull GlyphCursor cursor, @NotNull PathIterator pathIterator) {
+        super(cursor);
+        this.pathIterator = pathIterator;
     }
 }

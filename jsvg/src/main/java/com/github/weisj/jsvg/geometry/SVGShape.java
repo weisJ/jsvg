@@ -27,15 +27,20 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.prototype.HasShape;
 
-public interface SVGShape {
+public interface SVGShape extends HasShape {
 
     default boolean canBeFilled() {
         return true;
     }
 
-    @NotNull
-    default Shape shape(@NotNull MeasureContext measureContext) {
+    @Override
+    default @NotNull Shape computeShape(@NotNull MeasureContext context) {
+        return shape(context);
+    }
+
+    default @NotNull Shape shape(@NotNull MeasureContext measureContext) {
         return shape(measureContext, true);
     }
 

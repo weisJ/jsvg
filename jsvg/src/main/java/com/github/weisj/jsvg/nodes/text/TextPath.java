@@ -22,19 +22,25 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.text.GlyphRenderMethod;
 import com.github.weisj.jsvg.attributes.text.Side;
 import com.github.weisj.jsvg.attributes.text.Spacing;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.Anchor;
+import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.PathUtil;
 
 @ElementCategories({Category.Graphic, Category.TextContent, Category.TextContentChild})
 @PermittedContent(
@@ -44,6 +50,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 )
 public final class TextPath extends TextContainer {
     public static final String TAG = "textpath";
+
+    private HasShape pathShape;
 
     private Spacing spacing;
     private GlyphRenderMethod renderMethod;
@@ -64,15 +72,38 @@ public final class TextPath extends TextContainer {
         spacing = attributeNode.getEnum("spacing", Spacing.Auto);
         // Todo: Needs to be resolved w.r.t to the paths coordinate system
         startOffset = attributeNode.getLength("startOffset", 0);
-    }
 
-    @Override
-    public void renderSegment(@NotNull Cursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
-        throw new UnsupportedOperationException(tagName() + " rendering isn't implemented!");
+        String pathData = attributeNode.getValue("path");
+        if (pathData != null) {
+            pathShape = PathUtil.parseFromPathData(pathData, FillRule.EvenOdd);
+        } else {
+            String href = attributeNode.getHref();
+            pathShape = attributeNode.getElementByHref(HasShape.class, Category.BasicShape, href);
+        }
     }
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        throw new UnsupportedOperationException(tagName() + " rendering isn't implemented!");
+        renderSegment(new PathGlyphCursor(createPathIterator(context), new AffineTransform()), context, g);
+    }
+
+    private @NotNull PathIterator createPathIterator(@NotNull RenderContext context) {
+        MeasureContext measureContext = context.measureContext();
+        Shape path = pathShape.computeShape(measureContext);
+        // For fonts this is a good enough approximation
+        float flatness = measureContext.ex() / 2f;
+        return path.getPathIterator(null, flatness);
+    }
+
+    @Override
+    protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
+        // Todo: Incorporate TextSpans. their x/dx properties move along the path, though y/dy doesn't
+        return new PathGlyphCursor(current, createPathIterator(context));
+    }
+
+    @Override
+    protected void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
+        current.x = local.x;
+        current.y = local.y;
     }
 }
