@@ -30,17 +30,17 @@ public final class CharData {
         // Fixme: Is this unicode compliant?
         // Prune off leading/trailing whitespace.
         if (length == 1) {
-            if (ch[start] <= ' ') return new char[0];
+            if (Character.isWhitespace(ch[start])) return new char[0];
         } else {
-            boolean startsWithWhiteSpace = ch[start] <= ' ';
-            while (length > 0 && ch[start] <= ' ') {
-                ch[start] = ' ';
+            boolean startsWithWhiteSpace = Character.isWhitespace(ch[start]);
+            while (length > 0 && Character.isWhitespace(ch[start])) {
+                ch[start] = Character.SPACE_SEPARATOR;
                 start++;
                 length--;
             }
-            boolean endsWithWhiteSpace = ch[start + length - 1] <= ' ';
-            while (length >= 0 && ch[start + length - 1] <= ' ') {
-                ch[start + length - 1] = ' ';
+            boolean endsWithWhiteSpace = Character.isWhitespace(ch[start + length - 1]);
+            while (length >= 0 && Character.isWhitespace(ch[start + length - 1])) {
+                ch[start + length - 1] = Character.SPACE_SEPARATOR;
                 length--;
             }
             // Preserve at least one character of leading/trailing whitespace

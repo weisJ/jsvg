@@ -45,7 +45,7 @@ public class PathParser {
     }
 
     private boolean isWhiteSpaceOrSeparator(char c) {
-        return c <= ' ' || c == ',';
+        return c == ',' || Character.isWhitespace(c);
     }
 
     private char peek() {

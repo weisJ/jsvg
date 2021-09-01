@@ -115,7 +115,7 @@ public final class AttributeParser {
         boolean inWhiteSpace = false;
         for (; i < max; i++) {
             char c = value.charAt(i);
-            if (c <= ' ') {
+            if (Character.isWhitespace(c)) {
                 if (!inWhiteSpace && !requireComma && (i - start) > 0) {
                     list.add(value.substring(start, i));
                     start = i + 1;
