@@ -242,7 +242,7 @@ public class SVGLoader {
         @Override
         public void characters(char[] ch, int start, int length) {
             if (DEBUG_PRINT) {
-                String text = new String(ch, start, length).replace('\n', ' ');
+                String text = new String(ch, start, length).replace("\n", "\\n");
                 if (!isBlank(text)) {
                     printer.print(ident);
                     printer.print("__");

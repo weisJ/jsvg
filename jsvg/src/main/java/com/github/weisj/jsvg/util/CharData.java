@@ -21,39 +21,49 @@
  */
 package com.github.weisj.jsvg.util;
 
-import java.util.Arrays;
-
 public final class CharData {
     private CharData() {}
 
-    public static char[] pruneWhiteSpace(char[] ch, int start, int length) {
-        // Fixme: Is this unicode compliant?
-        // Prune off leading/trailing whitespace.
-        if (length == 1) {
-            if (Character.isWhitespace(ch[start])) return new char[0];
-        } else {
-            boolean startsWithWhiteSpace = Character.isWhitespace(ch[start]);
-            while (length > 0 && Character.isWhitespace(ch[start])) {
-                ch[start] = Character.SPACE_SEPARATOR;
-                start++;
-                length--;
+    public static char[] getAddressableCharacters(char[] ch, int offset, int length, boolean keepLeadingSpace) {
+        int bufferIndex = 0;
+        char[] buffer = new char[length];
+
+        int begin = offset;
+        int end = offset + length;
+        boolean whitespaceSinceSegmentBreak = false;
+        boolean encounteredVisibleChar = keepLeadingSpace;
+        while (begin < end) {
+            char c = ch[begin];
+            boolean segmentBreak = isSegmentBreak(c);
+            boolean whiteSpace = isWhitespace(c);
+            if (!segmentBreak && !whiteSpace) {
+                // We have a valid character.
+                // First check if we need to insert a collapsed space.
+                if (encounteredVisibleChar && whitespaceSinceSegmentBreak) {
+                    // If we encounter a non segment-break non-whitespace character we insert
+                    // a space if we have encountered one before.
+                    buffer[bufferIndex++] = ' ';
+                }
+                encounteredVisibleChar = true;
+                whitespaceSinceSegmentBreak = false;
+                buffer[bufferIndex++] = c;
+            } else {
+                whitespaceSinceSegmentBreak = !segmentBreak;
             }
-            boolean endsWithWhiteSpace = Character.isWhitespace(ch[start + length - 1]);
-            while (length >= 0 && Character.isWhitespace(ch[start + length - 1])) {
-                ch[start + length - 1] = Character.SPACE_SEPARATOR;
-                length--;
-            }
-            // Preserve at least one character of leading/trailing whitespace
-            if (startsWithWhiteSpace) {
-                start--;
-                length++;
-            }
-            if (endsWithWhiteSpace) {
-                length++;
-            }
-            if (length == 0) return new char[0];
-            if (length == 1 && startsWithWhiteSpace) return new char[0];
+            begin++;
         }
-        return Arrays.copyOfRange(ch, start, start + length);
+        if (whitespaceSinceSegmentBreak) buffer[bufferIndex++] = ' ';
+
+        char[] result = new char[bufferIndex];
+        System.arraycopy(buffer, 0, result, 0, bufferIndex);
+        return result;
+    }
+
+    private static boolean isSegmentBreak(char c) {
+        return c == '\n' || c == '\r';
+    }
+
+    private static boolean isWhitespace(char c) {
+        return c == ' ' || c == '\t';
     }
 }

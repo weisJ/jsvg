@@ -31,4 +31,8 @@ class StringTextSegment implements TextSegment {
     public char[] codepoints() {
         return codepoints;
     }
+
+    public char lastChar() {
+        return codepoints[codepoints.length - 1];
+    }
 }

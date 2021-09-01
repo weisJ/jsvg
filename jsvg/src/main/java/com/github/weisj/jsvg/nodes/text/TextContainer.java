@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -55,6 +56,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
         textLength = attributeNode.getLength("textLength");
     }
 
+    @Override
     public void renderSegment(@NotNull Cursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
 
     }
@@ -71,7 +73,9 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
 
     @Override
     public final void addContent(char[] content, int start, int length) {
-        char[] data = CharData.pruneWhiteSpace(content, start, length);
+        boolean hasPrecedingSpace = !segments.isEmpty() && lastChar() == ' ';
+        char[] data = CharData.getAddressableCharacters(content, start, length, !hasPrecedingSpace);
+        System.out.println(Arrays.toString(data));
         if (data.length == 0) return;
         segments.add(new StringTextSegment(data));
     }
@@ -81,4 +85,8 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
         return segments;
     }
 
+    @Override
+    public char lastChar() {
+        return segments.get(segments.size() - 1).lastChar();
+    }
 }

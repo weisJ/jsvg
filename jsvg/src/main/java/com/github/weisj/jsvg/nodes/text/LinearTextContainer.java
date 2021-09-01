@@ -82,7 +82,6 @@ abstract class LinearTextContainer extends TextContainer {
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
-                // Todo line breaks should be treated as if it were a ' '
                 renderGlyphRun((StringTextSegment) segment, cursor, font, currentContext, g);
             } else if (segment instanceof RenderableSegment) {
                 ((RenderableSegment) segment).renderSegment(cursor, currentContext, g);
@@ -109,9 +108,9 @@ abstract class LinearTextContainer extends TextContainer {
         // Todo: Skip unnecessary whitespace
         for (int i = 0, glyphCount = glyphVector.getNumGlyphs(); i < glyphCount; i++) {
             advanceCursor(cursor, measure);
+            // Todo: Cache the individual Glyph shapes and metrics in the font
             GlyphMetrics gm = glyphVector.getGlyphMetrics(i);
             Shape glyph = glyphVector.getGlyphOutline(i);
-
             Point2D glyphPosition = glyphVector.getGlyphPosition(i);
             cursor.transform.translate(-glyphPosition.getX(), -glyphPosition.getY());
             Shape renderPath = cursor.transform.createTransformedShape(glyph);
