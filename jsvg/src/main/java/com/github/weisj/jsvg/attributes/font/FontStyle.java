@@ -92,7 +92,7 @@ interface FontStyle {
 
         @Override
         public @NotNull AffineTransform transform() {
-            return AffineTransform.getRotateInstance(Math.toRadians(angle()));
+            return AffineTransform.getShearInstance(-Math.toRadians(angle()), 0);
         }
 
         @Override
