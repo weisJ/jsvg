@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public class AWTSVGShape implements SVGShape {
-    private @NotNull final Shape shape;
+    private final @NotNull Shape shape;
     private Rectangle2D bounds;
 
     public AWTSVGShape(@NotNull Shape shape) {
