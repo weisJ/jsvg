@@ -26,11 +26,13 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.google.errorprone.annotations.Immutable;
 
+@Immutable
 public final class Length {
     public static final float UNSPECIFIED_RAW = java.lang.Float.NEGATIVE_INFINITY;
-    public static final Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
-    public static final Length ZERO = new Length(Unit.Raw, 0);
+    public static final @NotNull Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
+    public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
 
     private final @NotNull Unit unit;
     private final float value;

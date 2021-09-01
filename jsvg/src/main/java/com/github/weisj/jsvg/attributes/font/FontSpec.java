@@ -32,6 +32,8 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
+// Can only be constructed by internal code upholding that the families array isn't modified.
+@SuppressWarnings("Immutable")
 public class FontSpec {
     protected final @NotNull String[] families;
     protected final @Nullable FontStyle style;

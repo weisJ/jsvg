@@ -21,6 +21,9 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
+import com.google.errorprone.annotations.Immutable;
+
+@Immutable
 public class NumberFontWeight implements FontWeight {
     private final float weight;
 

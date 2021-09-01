@@ -26,7 +26,9 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.google.errorprone.annotations.Immutable;
 
+@Immutable
 public class LengthFontSize implements FontSize {
     private final @NotNull Length size;
 
