@@ -78,9 +78,10 @@ class Cursor {
 
         if (rotations != null && rotations.length != 0) {
             float rotation = rotations[rotOff];
-            rotOff = Math.min(rotations.length - 1, rotOff++);
+            rotOff = Math.min(rotations.length - 1, rotOff + 1);
             transform.rotate(Math.toRadians(rotation));
         }
+
         glyphOffset++;
     }
 
@@ -90,27 +91,37 @@ class Cursor {
         c.glyphOffset = 0;
         if (txt.x.length != 0) {
             c.xLocations = txt.x;
+            c.xOff = 0;
         } else {
+            c.xLocations = xLocations;
             c.xOff = xOff;
         }
         if (txt.y.length != 0) {
             c.yLocations = txt.y;
+            c.yOff = 0;
         } else {
+            c.yLocations = yLocations;
             c.yOff = yOff;
         }
         if (txt.dx.length != 0) {
             c.xDeltas = txt.dx;
+            c.dyOff = 0;
         } else {
+            c.xDeltas = xDeltas;
             c.dxOff = dxOff;
         }
         if (txt.dy.length != 0) {
             c.yDeltas = txt.dy;
+            c.dyOff = 0;
         } else {
+            c.yDeltas = yDeltas;
             c.dyOff = dyOff;
         }
         if (txt.rotate.length != 0) {
             c.rotations = txt.rotate;
+            c.rotOff = 0;
         } else {
+            c.rotations = rotations;
             c.rotOff = rotOff;
         }
         return c;
