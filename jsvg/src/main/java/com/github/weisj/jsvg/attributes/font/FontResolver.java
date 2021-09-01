@@ -44,21 +44,38 @@ public final class FontResolver {
         String[] families = fontSpec.families();
 
         FontStyle style = fontSpec.style();
-        int weight = fontSpec.currentWeight();
+        int normalWeight = PredefinedFontWeight.NORMAL_WEIGHT;
+        float currentWeight = fontSpec.currentWeight();
+        if (currentWeight > normalWeight) {
+            // The bold weight for css and awt differ. We compensate for this difference to ensure
+            // that bold css fonts correspond to bold awt fonts, as this is the most commonly supported
+            // font variation.
+            float awtWeightCompensationFactor =
+                    (TextAttribute.WEIGHT_BOLD * normalWeight) / PredefinedFontWeight.BOLD_WEIGHT;
+            currentWeight *= awtWeightCompensationFactor;
+        }
+
+        float weight = currentWeight / normalWeight;
         float size = fontSpec.effectiveSize(measureContext);
         float stretch = fontSpec.stretch();
+
+        // Todo: Convert css weights to awt weights.
 
         Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<>(4, 1f);
         attributes.put(TextAttribute.FAMILY, families[0]);
         attributes.put(TextAttribute.SIZE, size);
-        attributes.put(TextAttribute.WEIGHT, weight / 100f);
-        AffineTransform transform = style.transform();
-        if (transform != null) attributes.put(TextAttribute.TRANSFORM, transform);
-        int awtStyle = style.awtCode();
-        Font font = new Font(attributes);
-        if (awtStyle != Font.PLAIN) {
-            font = font.deriveFont(awtStyle);
+        attributes.put(TextAttribute.WEIGHT, weight);
+
+        if (style == FontStyle.Normal) {
+            attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
+        } else if (style == FontStyle.Italic) {
+            attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+        } else {
+            AffineTransform transform = style.transform();
+            if (transform != null) attributes.put(TextAttribute.TRANSFORM, transform);
         }
+
+        Font font = new Font(attributes);
         SVGFont resolvedFont = new AWTSVGFont(font, stretch);
         FontCache.cache.put(key, resolvedFont);
         return resolvedFont;

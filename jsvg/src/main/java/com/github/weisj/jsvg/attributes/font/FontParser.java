@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
-import java.awt.*;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +52,7 @@ public final class FontParser {
             if (node.hasAttribute("font-weight")) {
                 weight = new NumberFontWeight(
                         Math.max(1, Math.min(1000, node.getFloat("font-weight",
-                                PredefinedFontWeight.Normal.weight(0)))));
+                                PredefinedFontWeight.NORMAL_WEIGHT))));
             } else {
                 weight = null;
             }
