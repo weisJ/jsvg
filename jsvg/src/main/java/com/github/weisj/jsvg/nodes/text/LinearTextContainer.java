@@ -107,7 +107,6 @@ abstract class LinearTextContainer extends TextContainer {
         // should be avoided. Rather pass the current transform along to the gradient.
         Rectangle2D bounds = new Rectangle();
 
-        // Todo: Skip unnecessary whitespace
         for (int i = 0, glyphCount = glyphVector.getNumGlyphs(); i < glyphCount; i++) {
             cursor.advance(measure);
             // Todo: Cache the individual Glyph shapes and metrics in the font
@@ -118,9 +117,8 @@ abstract class LinearTextContainer extends TextContainer {
             Shape renderPath = cursor.transform.createTransformedShape(glyph);
             ShapeRenderer.renderShape(context, g, renderPath, bounds, true, true);
 
+            // This assumes a horizontal baseline
             cursor.x += gm.getAdvanceX() + letterSpacing;
-            cursor.y += gm.getAdvanceY() + letterSpacing;
         }
     }
-
 }
