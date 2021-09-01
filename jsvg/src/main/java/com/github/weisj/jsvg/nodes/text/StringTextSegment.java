@@ -25,6 +25,7 @@ class StringTextSegment implements TextSegment {
     private final char[] codepoints;
 
     public StringTextSegment(char[] codepoints) {
+        assert codepoints.length != 0;
         this.codepoints = codepoints;
     }
 
@@ -34,5 +35,10 @@ class StringTextSegment implements TextSegment {
 
     public char lastChar() {
         return codepoints[codepoints.length - 1];
+    }
+
+    @Override
+    public void setLastCharOfParent(char c) {
+        // Ignore. We don't need the value as we always have a valid last character ourselves.
     }
 }

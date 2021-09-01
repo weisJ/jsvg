@@ -28,6 +28,8 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 interface TextSegment {
+    void setLastCharOfParent(char c);
+
     char lastChar();
 
     interface RenderableSegment extends TextSegment {
