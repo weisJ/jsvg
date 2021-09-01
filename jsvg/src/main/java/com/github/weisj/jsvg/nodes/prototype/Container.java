@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes.prototype;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +36,8 @@ import com.github.weisj.jsvg.nodes.SVGNode;
  * @param <E> the type of the exposed children. This doesn't need to be a subtype of {@link SVGNode}.
  */
 public interface Container<E> {
+
+    @ApiStatus.Internal
     void addChild(@Nullable String id, @NotNull SVGNode node);
 
     List<@NotNull ? extends E> children();
