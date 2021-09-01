@@ -134,7 +134,7 @@ public class AttributeNode {
         return AttributeParser.parsePercentage(getValue(key), fallback);
     }
 
-    public Length[] getLengthList(@NotNull String key) {
+    public @NotNull Length[] getLengthList(@NotNull String key) {
         return AttributeParser.parseLengthList(getValue(key));
     }
 
