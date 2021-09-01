@@ -45,6 +45,16 @@ class CharDataTest {
         assertAddressableChars("ABCDEFGHIJKLMNOPQRSTUVW", "ABCDEFGHIJKLMNOPQRSTUVW", false);
     }
 
+    @Test
+    void checkEmptyString() {
+        assertAddressableChars(" ", "", false);
+        assertAddressableChars("\n ", "", false);
+        assertAddressableChars(" \n", "", false);
+        assertAddressableChars("\n            ", "", false);
+        assertAddressableChars("\n   \n\n         ", " ", false);
+        assertAddressableChars("\n   B\n\n         ", "B ", false);
+    }
+
     private void assertAddressableChars(String input, String output, boolean includeLeadingSpace) {
         char[] expected = output.toCharArray();
         char[] got = CharData.getAddressableCharacters(input.toCharArray(), 0, input.length(), includeLeadingSpace);

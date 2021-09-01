@@ -25,11 +25,51 @@ public final class CharData {
     private CharData() {}
 
     public static char[] getAddressableCharacters(char[] ch, int offset, int length, boolean keepLeadingSpace) {
-        int bufferIndex = 0;
-        char[] buffer = new char[length];
-
         int begin = offset;
         int end = offset + length;
+
+        int segmentBreakCount = 0;
+
+        // Prune leading whitespace
+        while (begin < end) {
+            if (isSegmentBreak(ch[begin])) {
+                segmentBreakCount++;
+                begin++;
+            } else if (isWhitespace(ch[begin])) {
+                begin++;
+            } else {
+                break;
+            }
+        }
+        if (begin == end && segmentBreakCount > 1) {
+            return new char[] {' '};
+        }
+
+        // Keep one whitespace char if needed
+        if (keepLeadingSpace && begin > offset) {
+            begin--;
+            ch[begin] = ' ';
+        }
+
+        // Prune trailing whitespace
+        while (begin < end && (isWhitespace(ch[end - 1]) || isSegmentBreak(ch[end - 1]))) {
+            end--;
+        }
+        // Always keep one whitespace character if present
+        segmentBreakCount = 0;
+        while (end < offset + length && isSegmentBreak(ch[end])) {
+            segmentBreakCount++;
+            end++;
+        }
+        if (segmentBreakCount > 0) {
+            // We discard the last segment break.
+            end--;
+        }
+        if (begin == end) return new char[0];
+
+        int bufferIndex = 0;
+        char[] buffer = new char[end - begin];
+
         boolean whitespaceSinceSegmentBreak = false;
         boolean encounteredVisibleChar = keepLeadingSpace;
         while (begin < end) {
@@ -52,7 +92,9 @@ public final class CharData {
             }
             begin++;
         }
-        if (whitespaceSinceSegmentBreak) buffer[bufferIndex++] = ' ';
+        if (whitespaceSinceSegmentBreak || isSegmentBreak(ch[begin - 1])) {
+            buffer[bufferIndex++] = ' ';
+        }
 
         char[] result = new char[bufferIndex];
         System.arraycopy(buffer, 0, result, 0, bufferIndex);
