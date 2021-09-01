@@ -34,7 +34,9 @@ import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
@@ -74,11 +76,16 @@ abstract class LinearTextContainer extends TextContainer {
         int localGlyphOffset = cursor.glyphOffset;
         cursor.glyphOffset = 0;
         for (TextSegment segment : children()) {
+            RenderContext currentContext = context;
+            if (segment instanceof Renderable) {
+                if (!((Renderable) segment).isVisible(context)) continue;
+                currentContext = NodeRenderer.setupRenderContext(segment, context);
+            }
             if (segment instanceof StringTextSegment) {
                 // Todo line breaks should be treated as if it were a ' '
-                renderGlyphRun((StringTextSegment) segment, cursor, font, context, g);
+                renderGlyphRun((StringTextSegment) segment, cursor, font, currentContext, g);
             } else if (segment instanceof RenderableSegment) {
-                ((RenderableSegment) segment).renderSegment(cursor, context, g);
+                ((RenderableSegment) segment).renderSegment(cursor, currentContext, g);
             } else {
                 throw new IllegalStateException("Can't render segment " + segment);
             }
@@ -99,6 +106,7 @@ abstract class LinearTextContainer extends TextContainer {
         // should be avoided. Rather pass the current transform along to the gradient.
         Rectangle2D bounds = new Rectangle();
 
+        // Todo: Skip unnecessary whitespace
         for (int i = 0, glyphCount = glyphVector.getNumGlyphs(); i < glyphCount; i++) {
             advanceCursor(cursor, measure);
             GlyphMetrics gm = glyphVector.getGlyphMetrics(i);
@@ -107,8 +115,7 @@ abstract class LinearTextContainer extends TextContainer {
             Point2D glyphPosition = glyphVector.getGlyphPosition(i);
             cursor.transform.translate(-glyphPosition.getX(), -glyphPosition.getY());
             Shape renderPath = cursor.transform.createTransformedShape(glyph);
-            ShapeRenderer.renderShape(context, paintContext, g, renderPath, bounds,
-                    true, true);
+            ShapeRenderer.renderShape(context, g, renderPath, bounds, true, true);
 
             cursor.x += gm.getAdvanceX() + letterSpacing;
             cursor.y += gm.getAdvanceY() + letterSpacing;

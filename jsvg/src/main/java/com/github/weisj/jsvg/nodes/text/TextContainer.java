@@ -37,7 +37,6 @@ import com.github.weisj.jsvg.attributes.text.LengthAdjust;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
-import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment.RenderableSegment {
@@ -54,12 +53,6 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength");
-    }
-
-    @Override
-    public @Nullable PaintContext paintContext() {
-        // We manage that ourselves.
-        return null;
     }
 
     public void renderSegment(@NotNull Cursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {

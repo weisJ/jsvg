@@ -31,9 +31,8 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 public final class ShapeRenderer {
     private ShapeRenderer() {}
 
-    public static void renderShape(@NotNull RenderContext context,
-            @NotNull PaintContext paintContext, @NotNull Graphics2D g,
-            @NotNull Shape shape, @NotNull Rectangle2D bounds,
+    public static void renderShape(@NotNull RenderContext context, @NotNull PaintContext paintContext,
+            @NotNull Graphics2D g, @NotNull Shape shape, @NotNull Rectangle2D bounds,
             boolean allowFill, boolean allowOutline) {
         float absOpacity = context.opacity(paintContext.opacity);
         float fOpacity = context.fillOpacity(paintContext.fillOpacity) * absOpacity;
@@ -42,6 +41,24 @@ public final class ShapeRenderer {
         float sOpacity = context.strokeOpacity(paintContext.strokeOpacity) * absOpacity;
         SVGPaint sPaint = context.strokePaint(paintContext.strokePaint);
 
+        doRenderShape(g, shape, bounds, allowFill, allowOutline, fOpacity, fPaint, sOpacity, sPaint);
+    }
+
+    public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull Shape shape, @NotNull Rectangle2D bounds,
+            boolean allowFill, boolean allowOutline) {
+        float absOpacity = context.opacity(1);
+        float fOpacity = context.fillOpacity(1) * absOpacity;
+        SVGPaint fPaint = context.fillPaint(null);
+
+        float sOpacity = context.strokeOpacity(1) * absOpacity;
+        SVGPaint sPaint = context.strokePaint(null);
+
+        doRenderShape(g, shape, bounds, allowFill, allowOutline, fOpacity, fPaint, sOpacity, sPaint);
+    }
+
+    private static void doRenderShape(@NotNull Graphics2D g, @NotNull Shape shape, @NotNull Rectangle2D bounds,
+            boolean allowFill, boolean allowOutline, float fOpacity, SVGPaint fPaint, float sOpacity, SVGPaint sPaint) {
         boolean doFill = allowFill && fOpacity > 0 && fPaint.isVisible();
         boolean doOutline = allowOutline && sOpacity > 0 && sPaint.isVisible();
 

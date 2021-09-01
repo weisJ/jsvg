@@ -66,7 +66,7 @@ public class RenderContext {
     @NotNull
     RenderContext deriveWith(@Nullable PaintContext context, @Nullable AttributeFontSpec attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc) {
-        if (context == null && viewBox == null) return this;
+        if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
         FontRenderContext newFontRenderContext = fontRenderContext;
@@ -127,5 +127,16 @@ public class RenderContext {
 
     public @NotNull FontRenderContext fontRenderContext() {
         return fontRenderContext;
+    }
+
+    @Override
+    public String toString() {
+        return "RenderContext{" +
+                "\n  measureContext=" + measureContext +
+                ",\n  paintContext=" + paintContext +
+                ",\n  fontRenderContext=" + fontRenderContext +
+                ",\n  fontSpec=" + fontSpec +
+                ",\n  targetComponent=" + targetComponent +
+                "\n}";
     }
 }
