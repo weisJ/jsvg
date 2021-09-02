@@ -76,7 +76,7 @@ public class AttributeNode {
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @NotNull Category category,
             @Nullable String value) {
-        T element = getElementById(type, value);
+        T element = getElementByHref(type, value);
         if (element == null) return null;
         for (Category cat : element.getClass().getAnnotation(ElementCategories.class).value()) {
             if (cat == category) return element;
