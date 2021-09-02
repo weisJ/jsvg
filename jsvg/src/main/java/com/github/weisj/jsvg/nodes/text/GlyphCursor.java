@@ -84,30 +84,17 @@ class GlyphCursor {
 
     @Nullable
     AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull GlyphMetrics gm, float letterSpacing) {
-        if (xLocations != null && xOff < xLocations.length) {
-            x = xLocations[xOff].resolveWidth(measure);
-            xOff++;
-        }
-        if (xDeltas != null && dxOff < xDeltas.length) {
-            x += xDeltas[dxOff].resolveWidth(measure);
-            dxOff++;
-        }
+        x = nextX(measure);
+        x += nextDeltaX(measure);
 
-        if (yLocations != null && yOff < yLocations.length) {
-            y = yLocations[yOff].resolveHeight(measure);
-            yOff++;
-        }
-        if (yDeltas != null && dyOff < yDeltas.length) {
-            y += yDeltas[dyOff].resolveHeight(measure);
-            dyOff++;
-        }
+        y = nextY(measure);
+        y += nextDeltaY(measure);
 
         transform.setToTranslation(x, y);
 
-        if (rotations != null && rotations.length != 0) {
-            float rotation = rotations[rotOff];
-            rotOff = Math.min(rotations.length - 1, rotOff + 1);
-            transform.rotate(Math.toRadians(rotation));
+        double rotation = nextRotation();
+        if (rotation != 0) {
+            transform.rotate(rotation);
         }
 
         glyphOffset++;
@@ -116,5 +103,44 @@ class GlyphCursor {
         x += gm.getAdvanceX() + letterSpacing;
 
         return transform;
+    }
+
+    protected float nextX(@NotNull MeasureContext measure) {
+        if (xLocations != null && xOff < xLocations.length) {
+            x = xLocations[xOff].resolveWidth(measure);
+            xOff++;
+        }
+        return x;
+    }
+
+    protected float nextDeltaX(@NotNull MeasureContext measure) {
+        if (xDeltas != null && dxOff < xDeltas.length) {
+            return xDeltas[dxOff++].resolveWidth(measure);
+        }
+        return 0;
+    }
+
+    protected float nextY(@NotNull MeasureContext measure) {
+        if (yLocations != null && yOff < yLocations.length) {
+            y = yLocations[yOff].resolveHeight(measure);
+            yOff++;
+        }
+        return y;
+    }
+
+    protected float nextDeltaY(@NotNull MeasureContext measure) {
+        if (yDeltas != null && dyOff < yDeltas.length) {
+            return yDeltas[dyOff++].resolveHeight(measure);
+        }
+        return 0;
+    }
+
+    protected double nextRotation() {
+        if (rotations != null && rotations.length != 0) {
+            float rotation = rotations[rotOff];
+            rotOff = Math.min(rotations.length - 1, rotOff + 1);
+            return Math.toRadians(rotation);
+        }
+        return 0;
     }
 }

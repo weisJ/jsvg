@@ -98,8 +98,11 @@ class PathGlyphCursor extends GlyphCursor {
     @Override
     @Nullable
     AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull GlyphMetrics gm, float letterSpacing) {
-        // Todo: Incorporate TextSpans. their x/dx properties move along the path, though y/dy doesn't
+        // Todo: Absolute x positions require arbitrary moves along the path
         if (pathIterator.isDone() && segmentLength < EPS) return null;
+
+        float delta = nextDeltaX(measure);
+        if (delta != 0) advance(delta);
 
         // Safe starting location of glyph
         float curX = x;
