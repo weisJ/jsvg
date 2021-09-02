@@ -60,8 +60,8 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
     protected abstract @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode);
 
     @Override
-    public @NotNull Shape computeShape(@NotNull MeasureContext context) {
-        return shape.shape(context);
+    public @NotNull SVGShape shape() {
+        return shape;
     }
 
     @Override

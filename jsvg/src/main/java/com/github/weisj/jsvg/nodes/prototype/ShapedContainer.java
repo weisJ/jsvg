@@ -23,21 +23,33 @@ package com.github.weisj.jsvg.nodes.prototype;
 
 import java.awt.*;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public interface ShapedContainer<E> extends Container<E>, HasShape {
+public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
 
     @Override
-    default @NotNull Shape computeShape(@NotNull MeasureContext measureContext) {
+    default @NotNull SVGShape shape() {
+        return this;
+    }
+
+    @Override
+    default @NotNull Shape shape(@NotNull MeasureContext measureContext, boolean validate) {
         GeneralPath shape = new GeneralPath();
         for (E child : children()) {
             if (!(child instanceof HasShape)) continue;
-            Shape childShape = ((HasShape) child).computeShape(measureContext);
+            Shape childShape = ((HasShape) child).shape().shape(measureContext, validate);
             shape.append(childShape, false);
         }
         return shape;
+    }
+
+    @Override
+    default Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
+        return shape(measureContext, validate).getBounds();
     }
 }

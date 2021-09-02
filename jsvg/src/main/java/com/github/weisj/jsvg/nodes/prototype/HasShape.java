@@ -21,13 +21,11 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
-import java.awt.*;
-
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.SVGShape;
 
 public interface HasShape {
     @NotNull
-    Shape computeShape(@NotNull MeasureContext context);
+    SVGShape shape();
 }

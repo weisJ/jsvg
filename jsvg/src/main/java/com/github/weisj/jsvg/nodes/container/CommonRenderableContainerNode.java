@@ -57,6 +57,6 @@ public abstract class CommonRenderableContainerNode<E> extends BaseRenderableCon
 
     @Override
     public final @Nullable Shape clipShape(@NotNull MeasureContext measureContext) {
-        return clipPath != null ? clipPath.computeShape(measureContext) : null;
+        return clipPath != null ? clipPath.shape(measureContext) : null;
     }
 }

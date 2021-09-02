@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.text.GlyphRenderMethod;
 import com.github.weisj.jsvg.attributes.text.Side;
 import com.github.weisj.jsvg.attributes.text.Spacing;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.Anchor;
@@ -54,7 +55,7 @@ public final class TextPath extends TextContainer {
     public static final String TAG = "textpath";
     private static final boolean DEBUG = false;
 
-    private HasShape pathShape;
+    private SVGShape pathShape;
 
     private Spacing spacing;
     private GlyphRenderMethod renderMethod;
@@ -81,7 +82,11 @@ public final class TextPath extends TextContainer {
             pathShape = PathUtil.parseFromPathData(pathData, FillRule.EvenOdd);
         } else {
             String href = attributeNode.getHref();
-            pathShape = attributeNode.getElementByHref(HasShape.class, Category.Shape /* BasicShape or Path */, href);
+            HasShape shaped =
+                    attributeNode.getElementByHref(HasShape.class, Category.Shape /* BasicShape or Path */, href);
+            if (shaped != null) {
+                pathShape = shaped.shape();
+            }
         }
     }
 
@@ -144,7 +149,7 @@ public final class TextPath extends TextContainer {
 
     private @NotNull PathIterator createPathIterator(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
-        Shape path = pathShape.computeShape(measureContext);
+        Shape path = pathShape.shape(measureContext);
         // For fonts this is a good enough approximation
         float flatness = measureContext.ex() / 4f;
         return path.getPathIterator(null, flatness);

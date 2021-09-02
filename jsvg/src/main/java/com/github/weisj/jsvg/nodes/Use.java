@@ -29,6 +29,8 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
+import com.github.weisj.jsvg.geometry.AWTSVGShape;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.HasContext;
@@ -86,10 +88,10 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     }
 
     @Override
-    public @NotNull Shape computeShape(@NotNull MeasureContext measureContext) {
+    public @NotNull SVGShape shape() {
         return referencedNode instanceof HasShape
-                ? ((HasShape) referencedNode).computeShape(measureContext)
-                : new Rectangle();
+                ? ((HasShape) referencedNode).shape()
+                : AWTSVGShape.EMPTY;
     }
 
     @Override

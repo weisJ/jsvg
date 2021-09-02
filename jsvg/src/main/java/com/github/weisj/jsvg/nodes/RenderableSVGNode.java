@@ -49,7 +49,7 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
     @Override
     public @Nullable Shape clipShape(@NotNull MeasureContext context) {
         ClipPath clip = clipPath();
-        return clip != null ? clip.computeShape(context) : null;
+        return clip != null ? clip.shape(context) : null;
     }
 
     @Override

@@ -25,7 +25,7 @@ import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -47,9 +47,9 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
     }
 
     @Override
-    public @NotNull Shape computeShape(@NotNull MeasureContext measureContext) {
+    public @NotNull SVGShape shape() {
         // Todo: Handle bounding-box stuff as well (i.e. combined stroke etc.)
         // We might need to pass the render context here as well.
-        return ShapedContainer.super.computeShape(measureContext);
+        return ShapedContainer.super.shape();
     }
 }
