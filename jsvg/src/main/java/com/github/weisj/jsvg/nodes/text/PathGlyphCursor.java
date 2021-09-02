@@ -41,18 +41,20 @@ class PathGlyphCursor extends GlyphCursor {
     private final float[] cords;
     private final @NotNull PathIterator pathIterator;
 
-    PathGlyphCursor(@NotNull PathIterator pathIterator, @NotNull AffineTransform transform) {
-        super(0, 0, transform);
+    PathGlyphCursor(@NotNull PathIterator pathIterator, float startOffset) {
+        super(0, 0, new AffineTransform());
         this.pathIterator = pathIterator;
         this.cords = new float[2];
         setupIterator(pathIterator);
+        advance(startOffset);
     }
 
-    PathGlyphCursor(@NotNull GlyphCursor cursor, @NotNull PathIterator pathIterator) {
+    PathGlyphCursor(@NotNull GlyphCursor cursor, float startOffset, @NotNull PathIterator pathIterator) {
         super(cursor);
         this.pathIterator = pathIterator;
         this.cords = new float[2];
         setupIterator(pathIterator);
+        advance(startOffset);
     }
 
     private PathGlyphCursor(@NotNull PathGlyphCursor pathCursor) {

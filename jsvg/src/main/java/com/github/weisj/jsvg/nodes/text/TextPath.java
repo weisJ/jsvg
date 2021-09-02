@@ -22,10 +22,8 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -42,6 +40,7 @@ import com.github.weisj.jsvg.nodes.Anchor;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
+import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.PathUtil;
@@ -58,11 +57,12 @@ public final class TextPath extends TextContainer {
 
     private SVGShape pathShape;
 
-    private Spacing spacing;
-    private GlyphRenderMethod renderMethod;
+    private @NotImplemented Spacing spacing;
+    private @NotImplemented GlyphRenderMethod renderMethod;
     private Side side;
 
     private Length startOffset;
+    private @NotImplemented Length textLength;
 
     @Override
     public final @NotNull String tagName() {
@@ -73,13 +73,11 @@ public final class TextPath extends TextContainer {
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         renderMethod = attributeNode.getEnum("method", GlyphRenderMethod.Align);
-        if (renderMethod == GlyphRenderMethod.Stretch) {
-            Logger.getLogger(TextPath.class.getName()).warning("method=stretch isn't yet implemented");
-        }
         side = attributeNode.getEnum("side", Side.Left);
         spacing = attributeNode.getEnum("spacing", Spacing.Auto);
         // Todo: Needs to be resolved w.r.t to the paths coordinate system
         startOffset = attributeNode.getLength("startOffset", 0);
+        textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
 
         String pathData = attributeNode.getValue("path");
         if (pathData != null) {
@@ -101,7 +99,10 @@ public final class TextPath extends TextContainer {
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderSegment(new PathGlyphCursor(createPathIterator(context), new AffineTransform()), context, g);
+        PathGlyphCursor cursor = new PathGlyphCursor(
+                createPathIterator(context),
+                startOffset.resolveLength(context.measureContext()));
+        renderSegment(cursor, context, g);
     }
 
     @Override
@@ -166,7 +167,9 @@ public final class TextPath extends TextContainer {
 
     @Override
     protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
-        return new PathGlyphCursor(current, createPathIterator(context));
+        return new PathGlyphCursor(current,
+                startOffset.resolveLength(context.measureContext()),
+                createPathIterator(context));
     }
 
     @Override
