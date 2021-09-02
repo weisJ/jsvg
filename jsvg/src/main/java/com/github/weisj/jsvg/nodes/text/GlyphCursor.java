@@ -25,6 +25,7 @@ import java.awt.font.GlyphMetrics;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -72,8 +73,8 @@ class GlyphCursor {
         this.rotOff = c.rotOff;
     }
 
-    @NotNull
-    AffineTransform advance(@NotNull MeasureContext measure) {
+    @Nullable
+    AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull GlyphMetrics gm, float letterSpacing) {
         if (xLocations != null && xOff < xLocations.length) {
             x = xLocations[xOff].resolveWidth(measure);
             xOff++;
@@ -101,11 +102,10 @@ class GlyphCursor {
         }
 
         glyphOffset++;
-        return transform;
-    }
 
-    void consumeGlyph(@NotNull GlyphMetrics gm, float letterSpacing) {
         // This assumes a horizontal baseline
         x += gm.getAdvanceX() + letterSpacing;
+
+        return transform;
     }
 }

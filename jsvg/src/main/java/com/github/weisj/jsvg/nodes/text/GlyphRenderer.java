@@ -25,7 +25,6 @@ import java.awt.*;
 import java.awt.font.GlyphMetrics;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +36,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
 final class GlyphRenderer {
+    private static final boolean DEBUG = false;
+
     private GlyphRenderer() {}
 
     // Static to avoid using member variables.
@@ -47,23 +48,31 @@ final class GlyphRenderer {
         float letterSpacing = frc.letterSpacing != null
                 ? frc.letterSpacing.resolveLength(measure)
                 : 0f;
-        char[] codepoints = segment.codepoints();
-        GlyphVector glyphVector = font.unicodeGlyphVector(g, codepoints);
         // Todo: Gradients for text are complicated. If possible computing the complete text bounds
         // should be avoided. Rather pass the current transform along to the gradient.
         Rectangle2D bounds = new Rectangle();
 
-        for (int i = 0, glyphCount = glyphVector.getNumGlyphs(); i < glyphCount; i++) {
-            AffineTransform glyphTransform = cursor.advance(measure);
+        char[] codepointsBuffer = new char[1];
+        for (char codepoint : segment.codepoints()) {
+            codepointsBuffer[0] = codepoint;
+            GlyphVector glyphVector = font.unicodeGlyphVector(g, codepointsBuffer);
+            GlyphMetrics gm = glyphVector.getGlyphMetrics(0);
+            AffineTransform glyphTransform = cursor.advance(codepoint, measure, gm, letterSpacing);
+            if (glyphTransform == null) break;
+            if (gm.isWhitespace()) continue; // Todo: this doesn't reliably detect whitespace. Move into cache
             // Todo: Cache the individual Glyph shapes and metrics in the font
-            GlyphMetrics gm = glyphVector.getGlyphMetrics(i);
-            Shape glyph = glyphVector.getGlyphOutline(i);
-            Point2D glyphPosition = glyphVector.getGlyphPosition(i);
-            glyphTransform.translate(-glyphPosition.getX(), -glyphPosition.getY());
+            Shape glyph = glyphVector.getGlyphOutline(0);
             Shape renderPath = glyphTransform.createTransformedShape(glyph);
             ShapeRenderer.renderShape(context, g, renderPath, bounds, true, true);
 
-            cursor.consumeGlyph(gm, letterSpacing);
+            if (DEBUG) paintDebugGlyph(g, glyphTransform, glyph);
         }
+    }
+
+    private static void paintDebugGlyph(@NotNull Graphics2D g, @NotNull AffineTransform glyphTransform,
+            @NotNull Shape glyph) {
+        g.setColor(Color.MAGENTA);
+        g.setStroke(new BasicStroke(0.5f));
+        g.draw(glyphTransform.createTransformedShape(glyph.getBounds()));
     }
 }

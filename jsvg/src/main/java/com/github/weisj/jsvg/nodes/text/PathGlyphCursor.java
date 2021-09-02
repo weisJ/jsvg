@@ -21,22 +21,134 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
+import java.awt.font.GlyphMetrics;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 class PathGlyphCursor extends GlyphCursor {
 
+    private static final float EPS = 0.0001f;
+
+    private float xStart;
+    private float yStart;
+    private float segmentLength;
+
+    private final float[] cords = new float[2];
     private final @NotNull PathIterator pathIterator;
 
     PathGlyphCursor(@NotNull PathIterator pathIterator, @NotNull AffineTransform transform) {
         super(0, 0, transform);
         this.pathIterator = pathIterator;
+        setupIterator(pathIterator);
     }
 
     PathGlyphCursor(@NotNull GlyphCursor cursor, @NotNull PathIterator pathIterator) {
         super(cursor);
         this.pathIterator = pathIterator;
+        setupIterator(pathIterator);
+    }
+
+    private void setupIterator(@NotNull PathIterator pathIterator) {
+        if (!pathIterator.isDone()) {
+            if (pathIterator.currentSegment(cords) != PathIterator.SEG_MOVETO) {
+                throw new IllegalStateException("Path iterator didn't establish starting position");
+            }
+            xStart = cords[0];
+            yStart = cords[1];
+            x = xStart;
+            y = yStart;
+        } else {
+            xStart = x;
+            yStart = y;
+        }
+    }
+
+    @Override
+    @Nullable
+    AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull GlyphMetrics gm, float letterSpacing) {
+        // Todo: Incorporate TextSpans. their x/dx properties move along the path, though y/dy doesn't
+        if (pathIterator.isDone() && segmentLength < EPS) return null;
+
+        // Safe starting location of glyph
+        float curX = x;
+        float curY = y;
+        // Move the advance of the glyph
+        advance(gm.getAdvanceX());
+
+        transform.setToTranslation(curX, curY);
+        float charRotation = calculateSegmentRotation(curX, curY, x, y);
+        transform.rotate(charRotation, 0, 0);
+
+        advance(letterSpacing);
+        return transform;
+    }
+
+    private void advance(float distance) {
+        advanceInsideSegment(advanceIntoSegment(distance));
+    }
+
+    private float advanceIntoSegment(float distance) {
+        if (distance < EPS) return 0;
+        // Fixme: This gets weird if we are on a vertex.
+        while (!pathIterator.isDone() && segmentLength < distance) {
+            distance -= segmentLength;
+            iterateToNextSegment();
+            segmentLength = calculateSegmentLength();
+        }
+        return distance;
+    }
+
+    private void advanceInsideSegment(float distance) {
+        if (distance < EPS) return;
+        float xStep = cords[0] - x;
+        float yStep = cords[1] - y;
+        float fraction = distance / segmentLength;
+        x += xStep * fraction;
+        y += yStep * fraction;
+        segmentLength -= distance;
+    }
+
+    private void iterateToNextSegment() {
+        assert !pathIterator.isDone();
+        do {
+            x = cords[0];
+            y = cords[1];
+            switch (pathIterator.currentSegment(cords)) {
+                case PathIterator.SEG_CLOSE:
+                    // We are closing the path. Restore cords to last moved-to location.
+                    cords[0] = xStart;
+                    cords[1] = yStart;
+                    return;
+                case PathIterator.SEG_LINETO:
+                    // The coordinates of the segment end are in cords.
+                    pathIterator.next();
+                    return;
+                case PathIterator.SEG_MOVETO:
+                    // Moving doesn't advance into a new line segment.
+                    xStart = x;
+                    yStart = y;
+                    break;
+                default:
+                    throw new IllegalStateException();
+            }
+            pathIterator.next();
+        } while (!pathIterator.isDone());
+    }
+
+    private float calculateSegmentRotation(float x1, float y1, float x2, float y2) {
+        return (float) Math.atan2(y2 - y1, x2 - x1);
+    }
+
+    private float calculateSegmentLength() {
+        return norm(cords[0] - x, cords[1] - y);
+    }
+
+    private float norm(float a, float b) {
+        return (float) Math.sqrt(a * a + b * b);
     }
 }

@@ -23,7 +23,9 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -50,6 +52,7 @@ import com.github.weisj.jsvg.util.PathUtil;
 )
 public final class TextPath extends TextContainer {
     public static final String TAG = "textpath";
+    private static final boolean DEBUG = false;
 
     private HasShape pathShape;
 
@@ -78,8 +81,13 @@ public final class TextPath extends TextContainer {
             pathShape = PathUtil.parseFromPathData(pathData, FillRule.EvenOdd);
         } else {
             String href = attributeNode.getHref();
-            pathShape = attributeNode.getElementByHref(HasShape.class, Category.BasicShape, href);
+            pathShape = attributeNode.getElementByHref(HasShape.class, Category.Shape /* BasicShape or Path */, href);
         }
+    }
+
+    @Override
+    public boolean isVisible(@NotNull RenderContext context) {
+        return pathShape != null && super.isVisible(context);
     }
 
     @Override
@@ -87,17 +95,63 @@ public final class TextPath extends TextContainer {
         renderSegment(new PathGlyphCursor(createPathIterator(context), new AffineTransform()), context, g);
     }
 
+    @Override
+    public void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
+        System.out.println("Start: " + Arrays.toString(((StringTextSegment) segments().get(0)).codepoints()));
+        super.renderSegment(cursor, context, g);
+        System.out.println("End====================");
+        if (DEBUG) paintDebugPath(context, g);
+    }
+
+    private void paintDebugPath(@NotNull RenderContext context, @NotNull Graphics2D g) {
+        PathIterator pathIterator = createPathIterator(context);
+        float startX = 0;
+        float startY = 0;
+        float curX = 0;
+        float curY = 0;
+        g.setStroke(new BasicStroke(0.5f));
+        float[] cord = new float[2];
+        while (!pathIterator.isDone()) {
+            switch (pathIterator.currentSegment(cord)) {
+                case PathIterator.SEG_LINETO:
+                    g.setColor(Color.MAGENTA);
+                    g.draw(new Line2D.Float(curX, curY, cord[0], cord[1]));
+                    g.setColor(Color.RED);
+                    g.fillRect((int) curX - 2, (int) curY - 2, 4, 4);
+                    g.fillRect((int) cord[0] - 2, (int) cord[1] - 2, 4, 4);
+                    curX = cord[0];
+                    curY = cord[1];
+                    break;
+                case PathIterator.SEG_MOVETO:
+                    curX = cord[0];
+                    curY = cord[1];
+                    startX = curX;
+                    startY = curY;
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    g.setColor(Color.MAGENTA);
+                    g.draw(new Line2D.Float(curX, curY, startX, startY));
+                    g.setColor(Color.RED);
+                    g.fillRect((int) curX - 2, (int) curY - 2, 4, 4);
+                    g.fillRect((int) startX - 2, (int) startY - 2, 4, 4);
+                    curX = startX;
+                    curY = startY;
+                    break;
+            }
+            pathIterator.next();
+        }
+    }
+
     private @NotNull PathIterator createPathIterator(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
         Shape path = pathShape.computeShape(measureContext);
         // For fonts this is a good enough approximation
-        float flatness = measureContext.ex() / 2f;
+        float flatness = measureContext.ex() / 4f;
         return path.getPathIterator(null, flatness);
     }
 
     @Override
     protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
-        // Todo: Incorporate TextSpans. their x/dx properties move along the path, though y/dy doesn't
         return new PathGlyphCursor(current, createPathIterator(context));
     }
 

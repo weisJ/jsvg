@@ -23,7 +23,9 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +45,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.CharData;
 
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment.RenderableSegment {
+    private static final boolean CHAR_DEBUG = false;
     private final List<TextSegment> segments = new ArrayList<>();
 
     // If not set otherwise explicitly this will result
@@ -51,6 +54,10 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
     protected Length textLength;
+
+    protected @NotNull List<TextSegment> segments() {
+        return segments;
+    }
 
     @Override
     @MustBeInvokedByOverriders
@@ -77,6 +84,13 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
         boolean keepLeadingSpace = lastChar() != ' ';
         char[] data = CharData.getAddressableCharacters(content, start, length, keepLeadingSpace);
         if (data.length == 0) return;
+        if (CHAR_DEBUG) {
+            String msg = "["
+                    + new String(content, start, length).replace("\n", "\\n")
+                    + "] => "
+                    + Arrays.toString(data);
+            Logger.getLogger(TextContainer.class.getName()).info(msg);
+        }
         segments.add(new StringTextSegment(data));
     }
 
