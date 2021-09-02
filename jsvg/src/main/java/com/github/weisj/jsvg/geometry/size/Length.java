@@ -30,7 +30,7 @@ import com.google.errorprone.annotations.Immutable;
 
 @Immutable
 public final class Length {
-    public static final float UNSPECIFIED_RAW = java.lang.Float.NEGATIVE_INFINITY;
+    public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
     public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
 
@@ -47,7 +47,7 @@ public final class Length {
     }
 
     public static boolean isUnspecified(float value) {
-        return value == UNSPECIFIED_RAW;
+        return Float.isNaN(value);
     }
 
     private float resolveNonPercentage(@NotNull MeasureContext context) {
