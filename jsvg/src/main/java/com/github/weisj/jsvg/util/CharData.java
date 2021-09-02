@@ -24,6 +24,11 @@ package com.github.weisj.jsvg.util;
 public final class CharData {
     private CharData() {}
 
+    // Todo: If there is trailing whitespace and the next segment is a separate text-span we need to
+    // insert a space.
+    // Maybe always keep the space and return the TextSegment directly with a flag indicating whether
+    // the space should
+    // be "painted".
     public static char[] getAddressableCharacters(char[] ch, int offset, int length, boolean keepLeadingSpace) {
         int begin = offset;
         int end = offset + length;
@@ -56,15 +61,23 @@ public final class CharData {
             end--;
         }
         // Always keep one whitespace character if present
-        segmentBreakCount = 0;
-        while (end < offset + length && isSegmentBreak(ch[end])) {
-            segmentBreakCount++;
-            end++;
+        boolean foundWhiteSpace = end < length + offset;
+        if (foundWhiteSpace) {
+            segmentBreakCount = 0;
+            while (end < offset + length && isSegmentBreak(ch[end])) {
+                segmentBreakCount++;
+                end++;
+            }
+            if (segmentBreakCount > 0) {
+                // We discard the last segment break.
+                end--;
+            } else {
+                // No segment breaks. We still want to keep one whitespace char though
+                ch[end] = ' ';
+                end++;
+            }
         }
-        if (segmentBreakCount > 0) {
-            // We discard the last segment break.
-            end--;
-        }
+
         if (begin == end) return new char[0];
 
         int bufferIndex = 0;

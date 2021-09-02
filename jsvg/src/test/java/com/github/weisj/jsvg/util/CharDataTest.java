@@ -55,6 +55,11 @@ class CharDataTest {
         assertAddressableChars("\n   B\n\n         ", "B ", false);
     }
 
+    @Test
+    void checkTrailingSpace() {
+        assertAddressableChars("A ", "A ", false);
+    }
+
     private void assertAddressableChars(String input, String output, boolean includeLeadingSpace) {
         char[] expected = output.toCharArray();
         char[] got = CharData.getAddressableCharacters(input.toCharArray(), 0, input.length(), includeLeadingSpace);
