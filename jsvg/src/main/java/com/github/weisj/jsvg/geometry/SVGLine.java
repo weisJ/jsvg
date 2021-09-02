@@ -70,8 +70,14 @@ public class SVGLine implements SVGShape {
 
     @Override
     public double pathLength(@NotNull MeasureContext measureContext) {
-        float dx = x2.resolveWidth(measureContext) - x1.resolveWidth(measureContext);
-        float dy = y2.resolveWidth(measureContext) - y1.resolveWidth(measureContext);
+        return lineLength(
+                x1.resolveWidth(measureContext), y1.resolveHeight(measureContext),
+                x2.resolveWidth(measureContext), y2.resolveHeight(measureContext));
+    }
+
+    static double lineLength(double x1, double y1, double x2, double y2) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
         return Math.sqrt(dx * dx + dy * dy);
     }
 }

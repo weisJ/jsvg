@@ -69,10 +69,11 @@ public class SVGEllipse implements SVGShape {
     public double pathLength(@NotNull MeasureContext measureContext) {
         float a = rx.resolveWidth(measureContext);
         float b = ry.resolveHeight(measureContext);
+        if (a == b) return SVGCircle.circumference(a);
         return ellipseCircumference(a, b);
     }
 
-    static double ellipseCircumference(float a, float b) {
+    static double ellipseCircumference(double a, double b) {
         // This cannot be computed exactly as the circumference is given by an elliptic integral which
         // doesn't have a solution in terms of elementary functions.
         // The following approximation is due to Hudson

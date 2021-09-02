@@ -64,6 +64,10 @@ public class SVGCircle implements SVGShape {
 
     @Override
     public double pathLength(@NotNull MeasureContext measureContext) {
-        return 2 * Math.PI * r.resolveLength(measureContext);
+        return circumference(r.resolveLength(measureContext));
+    }
+
+    static double circumference(double radius) {
+        return 2 * Math.PI;
     }
 }

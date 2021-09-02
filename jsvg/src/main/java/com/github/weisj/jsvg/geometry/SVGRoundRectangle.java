@@ -79,7 +79,7 @@ public class SVGRoundRectangle implements SVGShape {
         double l = 2 * ((w.resolveWidth(measureContext) - 2 * a) + (h.resolveHeight(measureContext) - 2 * b));
         if (a == b) {
             // All 4 corners together form a circle
-            return l + 2 * Math.PI * a;
+            return l + SVGCircle.circumference(a);
         } else {
             // All 4 corners together form an ellipse
             return l + SVGEllipse.ellipseCircumference(a, b);
