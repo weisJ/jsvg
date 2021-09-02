@@ -114,6 +114,11 @@ class CharacterDataParser {
         }
     }
 
+    public boolean canFlush(boolean dueToSegmentBreak) {
+        if (state == State.SEGMENT_START) return false;
+        return dueToSegmentBreak || buffer.length() > 0;
+    }
+
     public char[] flush(boolean dueToSegmentBreak) {
         if (dueToSegmentBreak && state != State.CHARACTER) {
             // We ended on a non-character and hence have to insert a whitespace

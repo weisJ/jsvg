@@ -196,9 +196,7 @@ public class SVGLoader {
                     ? null
                     : currentNodeStack.peek();
 
-            if (lastParsedElement != null && lastParsedElement.characterDataParser != null) {
-                lastParsedElement.node.addContent(lastParsedElement.characterDataParser.flush(true));
-            }
+            if (lastParsedElement != null) flushText(lastParsedElement, true);
 
             Supplier<SVGNode> nodeSupplier = nodeMap.get(localName.toLowerCase(Locale.ENGLISH));
             if (nodeSupplier != null) {
@@ -239,10 +237,13 @@ public class SVGLoader {
                 printer.println("</" + localName + ">");
             }
             if (!currentNodeStack.isEmpty() && currentNodeStack.peek().attributeNode.tagName().equals(qName)) {
-                ParsedElement element = currentNodeStack.pop();
-                if (element.characterDataParser != null) {
-                    element.node.addContent(element.characterDataParser.flush(false));
-                }
+                flushText(currentNodeStack.pop(), false);
+            }
+        }
+
+        private void flushText(@NotNull ParsedElement element, boolean segmentBreak) {
+            if (element.characterDataParser != null && element.characterDataParser.canFlush(segmentBreak)) {
+                element.node.addContent(element.characterDataParser.flush(segmentBreak));
             }
         }
 
