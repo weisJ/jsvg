@@ -25,7 +25,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
-import java.util.Arrays;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.attributes.text.Spacing;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.util.ReversePathIterator;
 import com.github.weisj.jsvg.nodes.Anchor;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -72,6 +73,9 @@ public final class TextPath extends TextContainer {
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         renderMethod = attributeNode.getEnum("method", GlyphRenderMethod.Align);
+        if (renderMethod == GlyphRenderMethod.Stretch) {
+            Logger.getLogger(TextPath.class.getName()).warning("method=stretch isn't yet implemented");
+        }
         side = attributeNode.getEnum("side", Side.Left);
         spacing = attributeNode.getEnum("spacing", Spacing.Auto);
         // Todo: Needs to be resolved w.r.t to the paths coordinate system
@@ -102,9 +106,7 @@ public final class TextPath extends TextContainer {
 
     @Override
     public void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
-        System.out.println("Start: " + Arrays.toString(((StringTextSegment) segments().get(0)).codepoints()));
         super.renderSegment(cursor, context, g);
-        System.out.println("End====================");
         if (DEBUG) paintDebugPath(context, g);
     }
 
@@ -151,8 +153,15 @@ public final class TextPath extends TextContainer {
         MeasureContext measureContext = context.measureContext();
         Shape path = pathShape.shape(measureContext);
         // For fonts this is a good enough approximation
-        float flatness = measureContext.ex() / 4f;
-        return path.getPathIterator(null, flatness);
+        float flatness = 0.1f * measureContext.ex();
+        switch (side) {
+            case Left:
+                return path.getPathIterator(null, flatness);
+            case Right:
+                return new ReversePathIterator(path.getPathIterator(null, flatness));
+            default:
+                throw new IllegalStateException();
+        }
     }
 
     @Override

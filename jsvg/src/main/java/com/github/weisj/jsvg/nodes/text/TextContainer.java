@@ -42,7 +42,6 @@ import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment.RenderableSegment {
-    private static final boolean CHAR_DEBUG = false;
     private final List<TextSegment> segments = new ArrayList<>();
 
     protected AttributeFontSpec fontSpec;
