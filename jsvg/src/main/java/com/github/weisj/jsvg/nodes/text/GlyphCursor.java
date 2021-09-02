@@ -82,6 +82,9 @@ class GlyphCursor {
         y = local.y;
     }
 
+    /*
+     * Return a null value indicates that the iteration should stop.
+     */
     @Nullable
     AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull GlyphMetrics gm, float letterSpacing) {
         x = nextX(measure);

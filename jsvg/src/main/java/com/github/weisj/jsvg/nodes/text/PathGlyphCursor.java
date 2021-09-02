@@ -110,7 +110,17 @@ class PathGlyphCursor extends GlyphCursor {
         float curX = x;
         float curY = y;
         // Move the advance of the glyph
-        advance(gm.getAdvanceX());
+        float advanceDist = gm.getAdvanceX();
+        if (segmentLength > advanceDist / 2f) {
+            // The midpoint of the glyph is guaranteed to be inside the path.
+            advance(advanceDist);
+        } else {
+            // To ensure the midpoint of the glyph is still on the path first
+            // move the first half. Then check if we overshot. If not move the remaining half.
+            advance(advanceDist / 2f);
+            if (pathIterator.isDone() && segmentLength < EPS) return null;
+            advance(advanceDist / 2f);
+        }
 
         transform.setToTranslation(curX, curY);
         float charRotation = calculateSegmentRotation(curX, curY, x, y);

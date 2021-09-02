@@ -58,6 +58,7 @@ final class GlyphRenderer {
             GlyphVector glyphVector = font.unicodeGlyphVector(g, codepointsBuffer);
             GlyphMetrics gm = glyphVector.getGlyphMetrics(0);
             AffineTransform glyphTransform = cursor.advance(codepoint, measure, gm, letterSpacing);
+            // If null no more characters should be processed.
             if (glyphTransform == null) break;
             if (gm.isWhitespace()) continue; // Todo: this doesn't reliably detect whitespace. Move into cache
             // Todo: Cache the individual Glyph shapes and metrics in the font
