@@ -64,4 +64,20 @@ public class SVGEllipse implements SVGShape {
         if (validate) validateShape(measureContext);
         return ellipse.getBounds2D();
     }
+
+    @Override
+    public double pathLength(@NotNull MeasureContext measureContext) {
+        float a = rx.resolveWidth(measureContext);
+        float b = ry.resolveHeight(measureContext);
+        return ellipseCircumference(a, b);
+    }
+
+    static double ellipseCircumference(float a, float b) {
+        // This cannot be computed exactly as the circumference is given by an elliptic integral which
+        // doesn't have a solution in terms of elementary functions.
+        // The following approximation is due to Hudson
+        double h = ((a - b) * (a - b)) / ((a + b) * (a + b));
+        double h4 = h / 4f;
+        return 0.25f * Math.PI * (a + b) * (3 * (1 + h4) + (1 / (1f - h4)));
+    }
 }

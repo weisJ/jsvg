@@ -63,4 +63,9 @@ public class SVGRectangle implements SVGShape {
         if (validate) validateShape(measureContext);
         return rect;
     }
+
+    @Override
+    public double pathLength(@NotNull MeasureContext measureContext) {
+        return 2 * (w.resolveWidth(measureContext) + h.resolveHeight(measureContext));
+    }
 }

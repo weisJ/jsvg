@@ -71,4 +71,18 @@ public class SVGRoundRectangle implements SVGShape {
         if (validate) validateShape(measureContext);
         return rect.getBounds2D();
     }
+
+    @Override
+    public double pathLength(@NotNull MeasureContext measureContext) {
+        float a = rx.resolveWidth(measureContext);
+        float b = ry.resolveHeight(measureContext);
+        double l = 2 * ((w.resolveWidth(measureContext) - 2 * a) + (h.resolveHeight(measureContext) - 2 * b));
+        if (a == b) {
+            // All 4 corners together form a circle
+            return l + 2 * Math.PI * a;
+        } else {
+            // All 4 corners together form an ellipse
+            return l + SVGEllipse.ellipseCircumference(a, b);
+        }
+    }
 }

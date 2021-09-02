@@ -52,4 +52,9 @@ public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
     default Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
         return shape(measureContext, validate).getBounds();
     }
+
+    @Override
+    default double pathLength(@NotNull MeasureContext measureContext) {
+        throw new IllegalStateException("Cannot calculate the length of a container-shape");
+    }
 }

@@ -67,4 +67,11 @@ public class SVGLine implements SVGShape {
         if (validate) validateShape(measureContext);
         return line.getBounds2D();
     }
+
+    @Override
+    public double pathLength(@NotNull MeasureContext measureContext) {
+        float dx = x2.resolveWidth(measureContext) - x1.resolveWidth(measureContext);
+        float dy = y2.resolveWidth(measureContext) - y1.resolveWidth(measureContext);
+        return Math.sqrt(dx * dx + dy * dy);
+    }
 }

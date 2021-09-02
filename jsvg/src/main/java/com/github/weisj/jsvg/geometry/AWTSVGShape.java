@@ -27,14 +27,22 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.util.Todo;
 
 public class AWTSVGShape implements SVGShape {
-    public static final SVGShape EMPTY = new AWTSVGShape(new Rectangle());
+    public static final SVGShape EMPTY = new AWTSVGShape(new Rectangle(), 0f);
     private final @NotNull Shape shape;
     private Rectangle2D bounds;
 
+    private double pathLength;
+
     public AWTSVGShape(@NotNull Shape shape) {
+        this(shape, Double.NaN);
+    }
+
+    private AWTSVGShape(@NotNull Shape shape, double pathLength) {
         this.shape = shape;
+        this.pathLength = pathLength;
     }
 
     @Override
@@ -46,5 +54,17 @@ public class AWTSVGShape implements SVGShape {
     public Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
         if (bounds == null) bounds = shape.getBounds2D();
         return bounds;
+    }
+
+    @Override
+    public double pathLength(@NotNull MeasureContext measureContext) {
+        if (Double.isNaN(pathLength)) {
+            pathLength = computePathLength();
+        }
+        return pathLength;
+    }
+
+    private double computePathLength() {
+        return Todo.todo();
     }
 }

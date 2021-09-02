@@ -61,4 +61,9 @@ public class SVGCircle implements SVGShape {
         if (validate) validateShape(measureContext);
         return circle.getBounds2D();
     }
+
+    @Override
+    public double pathLength(@NotNull MeasureContext measureContext) {
+        return 2 * Math.PI * r.resolveLength(measureContext);
+    }
 }
