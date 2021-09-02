@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.font.GlyphMetrics;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
@@ -86,7 +85,7 @@ class GlyphCursor {
      * Return a null value indicates that the iteration should stop.
      */
     @Nullable
-    AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull GlyphMetrics gm, float letterSpacing) {
+    AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull Glyph glyph, float letterSpacing) {
         x = nextX(measure);
         x += nextDeltaX(measure);
 
@@ -103,7 +102,7 @@ class GlyphCursor {
         glyphOffset++;
 
         // This assumes a horizontal baseline
-        x += gm.getAdvanceX() + letterSpacing;
+        x += glyph.advance() + letterSpacing;
 
         return transform;
     }

@@ -22,28 +22,49 @@
 package com.github.weisj.jsvg.attributes.font;
 
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphMetrics;
 import java.awt.font.GlyphVector;
+import java.util.HashMap;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Percentage;
+import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
+import com.github.weisj.jsvg.nodes.text.Glyph;
 
 public class AWTSVGFont implements SVGFont {
     private final @NotNull Font font;
-    // Todo: Do something with stretch
-    private final @Percentage float stretch;
+    private final @NotImplemented @Percentage float stretch;
+    private final FontRenderContext frc = new FontRenderContext(null, true, true);
+    private final HashMap<Character, Glyph> glyphCache;
 
     public AWTSVGFont(@NotNull Font font, @Percentage float stretch) {
         this.font = font;
         this.stretch = stretch;
-    }
-
-    @Override
-    public @NotNull GlyphVector unicodeGlyphVector(@NotNull Graphics2D g, char[] codepoints) {
-        return font.createGlyphVector(g.getFontRenderContext(), codepoints);
+        this.glyphCache = new HashMap<>();
     }
 
     public @NotNull Font font() {
         return font;
+    }
+
+    @Override
+    public @NotNull Glyph codepointGlyph(char codepoint) {
+        Glyph glyph = glyphCache.get(codepoint);
+        if (glyph != null) return glyph;
+        glyph = createGlyph(codepoint);
+        glyphCache.put(codepoint, glyph);
+        return glyph;
+    }
+
+    @NotNull
+    private Glyph createGlyph(char codepoint) {
+        char[] buffer = new char[] {codepoint};
+        GlyphVector glyphVector = font.createGlyphVector(frc, buffer);
+        GlyphMetrics gm = glyphVector.getGlyphMetrics(0);
+        float advance = gm.getAdvanceX();
+        Shape shape = glyphVector.getGlyphOutline(0);
+        return new Glyph(codepoint, shape, advance, gm.getBounds2D().isEmpty());
     }
 }

@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.font.GlyphMetrics;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 
@@ -99,7 +98,7 @@ class PathGlyphCursor extends GlyphCursor {
 
     @Override
     @Nullable
-    AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull GlyphMetrics gm, float letterSpacing) {
+    AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull Glyph glyph, float letterSpacing) {
         // Todo: Absolute x positions require arbitrary moves along the path
         if (pathIterator.isDone() && segmentLength < EPS) return null;
 
@@ -110,7 +109,7 @@ class PathGlyphCursor extends GlyphCursor {
         float curX = x;
         float curY = y;
         // Move the advance of the glyph
-        float advanceDist = gm.getAdvanceX();
+        float advanceDist = glyph.advance();
         if (segmentLength > advanceDist / 2f) {
             // The midpoint of the glyph is guaranteed to be inside the path.
             advance(advanceDist);

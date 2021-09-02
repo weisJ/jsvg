@@ -22,8 +22,6 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
-import java.awt.font.GlyphMetrics;
-import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
@@ -52,21 +50,17 @@ final class GlyphRenderer {
         // should be avoided. Rather pass the current transform along to the gradient.
         Rectangle2D bounds = new Rectangle();
 
-        char[] codepointsBuffer = new char[1];
         for (char codepoint : segment.codepoints()) {
-            codepointsBuffer[0] = codepoint;
-            GlyphVector glyphVector = font.unicodeGlyphVector(g, codepointsBuffer);
-            GlyphMetrics gm = glyphVector.getGlyphMetrics(0);
-            AffineTransform glyphTransform = cursor.advance(codepoint, measure, gm, letterSpacing);
+            Glyph glyph = font.codepointGlyph(codepoint);
+            AffineTransform glyphTransform = cursor.advance(codepoint, measure, glyph, letterSpacing);
             // If null no more characters should be processed.
             if (glyphTransform == null) break;
-            if (gm.isWhitespace()) continue; // Todo: this doesn't reliably detect whitespace. Move into cache
-            // Todo: Cache the individual Glyph shapes and metrics in the font
-            Shape glyph = glyphVector.getGlyphOutline(0);
-            Shape renderPath = glyphTransform.createTransformedShape(glyph);
+            if (!glyph.isRendered()) continue;
+            Shape glyphOutline = glyph.glyphOutline();
+            Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
             ShapeRenderer.renderShape(context, g, renderPath, bounds, true, true);
 
-            if (DEBUG) paintDebugGlyph(g, glyphTransform, glyph);
+            if (DEBUG) paintDebugGlyph(g, glyphTransform, glyphOutline);
         }
     }
 

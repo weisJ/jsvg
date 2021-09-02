@@ -19,27 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.font;
+package com.github.weisj.jsvg.nodes.text;
+
+import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.text.Glyph;
+public class Glyph {
+    private final @NotNull Shape outline;
+    private final float advance;
+    private final char codepoint;
+    private final boolean isEmpty;
 
-public interface SVGFont {
-
-    static float defaultFontSize() {
-        return 10f;
+    public Glyph(char codepoint, @NotNull Shape outline, float advance, boolean isEmpty) {
+        this.codepoint = codepoint;
+        this.outline = outline;
+        this.advance = advance;
+        this.isEmpty = isEmpty;
     }
 
-    static float exFromEm(float em) {
-        // The spec allows to treat ex as 0.5 of the em value.
-        return em / 2f;
+    public char codepoint() {
+        return codepoint;
     }
 
-    static float emFromEx(float ex) {
-        return 2f * ex;
+    public float advance() {
+        return advance;
     }
 
-    @NotNull
-    Glyph codepointGlyph(char codepoint);
+    public @NotNull Shape glyphOutline() {
+        return outline;
+    }
+
+    public boolean isRendered() {
+        return !isEmpty;
+    }
 }
