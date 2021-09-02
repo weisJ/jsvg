@@ -38,19 +38,46 @@ class PathGlyphCursor extends GlyphCursor {
     private float yStart;
     private float segmentLength;
 
-    private final float[] cords = new float[2];
+    private final float[] cords;
     private final @NotNull PathIterator pathIterator;
 
     PathGlyphCursor(@NotNull PathIterator pathIterator, @NotNull AffineTransform transform) {
         super(0, 0, transform);
         this.pathIterator = pathIterator;
+        this.cords = new float[2];
         setupIterator(pathIterator);
     }
 
     PathGlyphCursor(@NotNull GlyphCursor cursor, @NotNull PathIterator pathIterator) {
         super(cursor);
         this.pathIterator = pathIterator;
+        this.cords = new float[2];
         setupIterator(pathIterator);
+    }
+
+    private PathGlyphCursor(@NotNull PathGlyphCursor pathCursor) {
+        super(pathCursor);
+        // We only ever transition one into a PathGlyphCursor (from a linear one)
+        // hence we can share all out state without the problem of overwriting it.
+        this.pathIterator = pathCursor.pathIterator;
+        this.xStart = pathCursor.xStart;
+        this.yStart = pathCursor.yStart;
+        this.segmentLength = pathCursor.segmentLength;
+        this.cords = pathCursor.cords;
+    }
+
+    @Override
+    GlyphCursor derive() {
+        return new PathGlyphCursor(this);
+    }
+
+    void updateFrom(GlyphCursor local) {
+        super.updateFrom(local);
+        assert local instanceof PathGlyphCursor;
+        PathGlyphCursor glyphCursor = (PathGlyphCursor) local;
+        xStart = glyphCursor.xStart;
+        yStart = glyphCursor.yStart;
+        segmentLength = glyphCursor.segmentLength;
     }
 
     private void setupIterator(@NotNull PathIterator pathIterator) {

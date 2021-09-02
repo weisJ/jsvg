@@ -56,7 +56,7 @@ abstract class LinearTextContainer extends TextContainer {
 
     @Override
     protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
-        GlyphCursor local = new GlyphCursor(current);
+        GlyphCursor local = current.derive();
         if (x.length != 0) {
             local.xLocations = x;
             local.xOff = 0;
@@ -82,8 +82,7 @@ abstract class LinearTextContainer extends TextContainer {
 
     @Override
     protected void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
-        current.x = local.x;
-        current.y = local.y;
+        current.updateFrom(local);
         if (x.length == 0) current.xOff = local.xOff;
         if (y.length == 0) current.yOff = local.yOff;
         if (dx.length == 0) current.dxOff = local.dxOff;

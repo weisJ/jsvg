@@ -162,7 +162,6 @@ public final class TextPath extends TextContainer {
 
     @Override
     protected void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
-        current.x = local.x;
-        current.y = local.y;
+        current.updateFrom(local);
     }
 }

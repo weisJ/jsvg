@@ -73,6 +73,15 @@ class GlyphCursor {
         this.rotOff = c.rotOff;
     }
 
+    GlyphCursor derive() {
+        return new GlyphCursor(this);
+    }
+
+    void updateFrom(GlyphCursor local) {
+        x = local.x;
+        y = local.y;
+    }
+
     @Nullable
     AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull GlyphMetrics gm, float letterSpacing) {
         if (xLocations != null && xOff < xLocations.length) {

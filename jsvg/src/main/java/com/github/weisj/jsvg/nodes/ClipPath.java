@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import java.awt.*;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.SVGShape;
