@@ -101,8 +101,8 @@ class PathGlyphCursor extends GlyphCursor {
         // Todo: Absolute x positions require arbitrary moves along the path
         if (pathIterator.isDone() && segmentLength < EPS) return null;
 
-        float delta = nextDeltaX(measure);
-        if (delta != 0) advance(delta);
+        float deltaX = nextDeltaX(measure);
+        if (deltaX != 0) advance(deltaX);
 
         // Safe starting location of glyph
         float curX = x;
@@ -113,6 +113,15 @@ class PathGlyphCursor extends GlyphCursor {
         transform.setToTranslation(curX, curY);
         float charRotation = calculateSegmentRotation(curX, curY, x, y);
         transform.rotate(charRotation, 0, 0);
+
+        float deltaY = nextDeltaY(measure);
+        if (deltaY != 0) {
+            // Adjust the location along the paths normal vector.
+            float nx = -(y - curY);
+            float ny = (x - curX);
+            float nn = deltaY / norm(nx, ny);
+            transform.translate(nx * nn, ny * nn);
+        }
 
         advance(letterSpacing);
         return transform;
