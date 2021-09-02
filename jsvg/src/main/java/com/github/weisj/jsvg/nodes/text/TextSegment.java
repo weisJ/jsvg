@@ -28,10 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 interface TextSegment {
-    void setLastCharOfParent(char c);
-
-    char lastChar();
-
     interface RenderableSegment extends TextSegment {
         void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g);
     }

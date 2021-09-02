@@ -36,7 +36,7 @@ class ParsedElement {
     final @NotNull AttributeNode attributeNode;
     final @NotNull SVGNode node;
     final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
-    final boolean acceptsCharData;
+    final CharacterDataParser characterDataParser;
 
     ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
         this.id = id;
@@ -46,7 +46,11 @@ class ParsedElement {
         if (permittedContent == null) {
             throw new IllegalStateException("Element <" + node.tagName() + "> doesn't specify permitted content");
         }
-        acceptsCharData = permittedContent.charData();
+        if (permittedContent.charData()) {
+            characterDataParser = new CharacterDataParser();
+        } else {
+            characterDataParser = null;
+        }
     }
 
     void addChild(ParsedElement parsedElement) {

@@ -43,5 +43,5 @@ public abstract class AbstractSVGNode implements SVGNode {
     }
 
     @Override
-    public void addContent(char[] content, int start, int length) {}
+    public void addContent(char[] content) {}
 }

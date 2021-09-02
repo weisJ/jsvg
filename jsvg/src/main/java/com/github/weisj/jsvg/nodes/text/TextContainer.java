@@ -23,9 +23,7 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -42,15 +40,11 @@ import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.util.CharData;
 
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment.RenderableSegment {
     private static final boolean CHAR_DEBUG = false;
     private final List<TextSegment> segments = new ArrayList<>();
 
-    // If not set otherwise explicitly this will result
-    // in the leading whitespace being trimmed.
-    private char parentChar = ' ';
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
     protected Length textLength;
@@ -76,38 +70,17 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
     @Override
     protected void doAdd(@NotNull SVGNode node) {
         segments.add((TextSegment) node);
-        ((TextSegment) node).setLastCharOfParent(lastChar());
     }
 
     @Override
-    public final void addContent(char[] content, int start, int length) {
-        boolean keepLeadingSpace = lastChar() != ' ';
-        char[] data = CharData.getAddressableCharacters(content, start, length, keepLeadingSpace);
-        if (data.length == 0) return;
-        if (CHAR_DEBUG) {
-            String msg = "["
-                    + new String(content, start, length).replace("\n", "\\n")
-                    + "] => "
-                    + Arrays.toString(data);
-            Logger.getLogger(TextContainer.class.getName()).info(msg);
-        }
-        segments.add(new StringTextSegment(data));
+    public final void addContent(char[] content) {
+        if (content.length == 0) return;
+        segments.add(new StringTextSegment(content));
     }
 
     @Override
     public List<@NotNull ? extends TextSegment> children() {
         return segments;
-    }
-
-    @Override
-    public void setLastCharOfParent(char c) {
-        parentChar = c;
-    }
-
-    @Override
-    public char lastChar() {
-        if (!segments.isEmpty()) return segments.get(segments.size() - 1).lastChar();
-        return parentChar;
     }
 
     protected abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);

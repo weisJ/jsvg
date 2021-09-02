@@ -196,6 +196,10 @@ public class SVGLoader {
                     ? null
                     : currentNodeStack.peek();
 
+            if (lastParsedElement != null && lastParsedElement.characterDataParser != null) {
+                lastParsedElement.node.addContent(lastParsedElement.characterDataParser.flush(true));
+            }
+
             Supplier<SVGNode> nodeSupplier = nodeMap.get(localName.toLowerCase(Locale.ENGLISH));
             if (nodeSupplier != null) {
                 SVGNode newNode = nodeSupplier.get();
@@ -235,7 +239,10 @@ public class SVGLoader {
                 printer.println("</" + localName + ">");
             }
             if (!currentNodeStack.isEmpty() && currentNodeStack.peek().attributeNode.tagName().equals(qName)) {
-                currentNodeStack.pop();
+                ParsedElement element = currentNodeStack.pop();
+                if (element.characterDataParser != null) {
+                    element.node.addContent(element.characterDataParser.flush(false));
+                }
             }
         }
 
@@ -250,8 +257,8 @@ public class SVGLoader {
                     printer.println("__");
                 }
             }
-            if (!currentNodeStack.isEmpty() && currentNodeStack.peek().acceptsCharData) {
-                currentNodeStack.peek().node.addContent(ch, start, length);
+            if (!currentNodeStack.isEmpty() && currentNodeStack.peek().characterDataParser != null) {
+                currentNodeStack.peek().characterDataParser.append(ch, start, length);
             }
         }
 

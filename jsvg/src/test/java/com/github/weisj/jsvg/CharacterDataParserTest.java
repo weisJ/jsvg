@@ -19,28 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.util;
+package com.github.weisj.jsvg;
+
 
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class CharDataTest {
+class CharacterDataParserTest {
 
     @Test
     void checkDuplicateWhitespace() {
-        assertAddressableChars("   A B C  \nD", "A B CD", false);
+        assertAddressableChars("   A B C  \nD", "A B C D", false);
         assertAddressableChars("   A B   C  \n   D", "A B C D", false);
-        assertAddressableChars("   A\nB   C  \nD", "AB CD", false);
+        assertAddressableChars("   A\nB   C  \nD", "A B C D", false);
 
-        assertAddressableChars("   A B C  \n   D", " A B C D", true);
-        assertAddressableChars("   A B   C  \n   D", " A B C D", true);
-        assertAddressableChars("   A\nB   C  \nD", " AB CD", true);
-        assertAddressableChars("A\nB   C  \n   D", "AB C D", true);
+        assertAddressableChars("   A B C  \n   D", "A B C D", true);
+        assertAddressableChars("   A B   C  \n   D", "A B C D", true);
+        assertAddressableChars("   A\nB   C  \nD", "A B C D", true);
+        assertAddressableChars("A\nB   C  \n   D", "A B C D", true);
+
+        assertAddressableChars("   A B C  \n   D\n", "A B C D ", true);
+        assertAddressableChars("   A B   C  \n   D\n ", "A B C D ", true);
+        assertAddressableChars("   A\nB   C  \nD\n  ", "A B C D ", true);
+        assertAddressableChars("A\nB   C  \n   D\n   ", "A B C D ", true);
 
         assertAddressableChars("Hello\n    World\n !\n  ( )", "Hello World ! ( )", false);
-        assertAddressableChars("A ", "A ", false);
         assertAddressableChars("A\n B", "A B", false);
         assertAddressableChars("ABCDEFGHIJKLMNOPQRSTUVW", "ABCDEFGHIJKLMNOPQRSTUVW", false);
     }
@@ -51,18 +56,28 @@ class CharDataTest {
         assertAddressableChars("\n ", "", false);
         assertAddressableChars(" \n", "", false);
         assertAddressableChars("\n            ", "", false);
-        assertAddressableChars("\n   \n\n         ", " ", false);
-        assertAddressableChars("\n   B\n\n         ", "B ", false);
+        assertAddressableChars("\n   \n\n         ", "", false);
+        assertAddressableChars("\n   B\n\n         ", "B", false);
+
+        assertAddressableChars(" ", " ", true);
+        assertAddressableChars("\n ", " ", true);
+        assertAddressableChars(" \n", " ", true);
+        assertAddressableChars("\n            ", " ", true);
+        assertAddressableChars("\n   \n\n         ", " ", true);
+        assertAddressableChars("\n   B\n\n         ", "B ", true);
     }
 
     @Test
     void checkTrailingSpace() {
-        assertAddressableChars("A ", "A ", false);
+        assertAddressableChars("A ", "A", false);
+        assertAddressableChars("A ", "A ", true);
     }
 
-    private void assertAddressableChars(String input, String output, boolean includeLeadingSpace) {
+    private void assertAddressableChars(String input, String output, boolean partialFlush) {
+        CharacterDataParser parser = new CharacterDataParser();
+        parser.append(input.toCharArray(), 0, input.length());
         char[] expected = output.toCharArray();
-        char[] got = CharData.getAddressableCharacters(input.toCharArray(), 0, input.length(), includeLeadingSpace);
+        char[] got = parser.flush(partialFlush);
         Assertions.assertArrayEquals(expected, got,
                 "Expected: " + Arrays.toString(expected) + " but got " + Arrays.toString(got));
     }
