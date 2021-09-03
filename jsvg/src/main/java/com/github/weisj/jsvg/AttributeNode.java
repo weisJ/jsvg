@@ -65,7 +65,7 @@ public class AttributeNode {
     }
 
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
-        return getElementById(type, AttributeParser.parseUrl(value));
+        return getElementByHref(type, AttributeParser.parseUrl(value));
     }
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @Nullable String value) {

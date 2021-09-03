@@ -156,8 +156,8 @@ public final class AttributeParser {
 
     public static @Nullable String parseUrl(@Nullable String value) {
         if (value == null) return null;
-        if (!value.startsWith("url(#") || !value.endsWith(")")) return null;
-        return value.substring(5, value.length() - 1);
+        if (!value.startsWith("url(") || !value.endsWith(")")) return value;
+        return value.substring(4, value.length() - 1);
     }
 
 
