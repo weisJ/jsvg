@@ -158,6 +158,10 @@ public class AttributeNode {
         return AttributeParser.parseEnum(getValue(key), fallback);
     }
 
+    public <E extends Enum<E>> @Nullable E getEnumNullable(@NotNull String key, @NotNull Class<E> enumType) {
+        return AttributeParser.parseEnum(getValue(key), enumType);
+    }
+
     public @Nullable ClipPath getClipPath() {
         return getElementByUrl(ClipPath.class, getValue("clip-path"));
     }

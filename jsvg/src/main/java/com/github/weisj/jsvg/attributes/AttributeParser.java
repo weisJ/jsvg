@@ -138,14 +138,20 @@ public final class AttributeParser {
     }
 
     public static <E extends Enum<E>> @NotNull E parseEnum(@Nullable String value, @NotNull E fallback) {
-        if (value == null) return fallback;
-        for (E enumConstant : fallback.getDeclaringClass().getEnumConstants()) {
+        E e = parseEnum(value, fallback.getDeclaringClass());
+        if (e == null) return fallback;
+        return e;
+    }
+
+    public static <E extends Enum<E>> @Nullable E parseEnum(@Nullable String value, @NotNull Class<E> enumType) {
+        if (value == null) return null;
+        for (E enumConstant : enumType.getEnumConstants()) {
             String name = enumConstant instanceof HasMatchName
                     ? ((HasMatchName) enumConstant).matchName()
                     : enumConstant.name();
             if (name.equalsIgnoreCase(value)) return enumConstant;
         }
-        return fallback;
+        return null;
     }
 
     public static @Nullable String parseUrl(@Nullable String value) {
