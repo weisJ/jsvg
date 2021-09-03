@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.renderer;
 
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
@@ -37,19 +38,25 @@ public class PaintContext {
     public final @Percentage float fillOpacity;
     public final @Percentage float strokeOpacity;
 
+    public final @Nullable StrokeContext strokeContext;
+
     public PaintContext(SVGPaint fillPaint, float fillOpacity,
-            SVGPaint strokePaint, float strokeOpacity, float opacity) {
+            SVGPaint strokePaint, float strokeOpacity, float opacity,
+            @NotNull StrokeContext strokeContext) {
         this.fillPaint = fillPaint;
         this.strokePaint = strokePaint;
         this.fillOpacity = fillOpacity;
         this.strokeOpacity = strokeOpacity;
         this.opacity = opacity;
+        // Avoid creating unnecessary intermediate contexts during painting.
+        this.strokeContext = strokeContext.isTrivial() ? null : strokeContext;
     }
 
     public static @NotNull PaintContext createDefault() {
         return new PaintContext(
                 SVGPaint.DEFAULT_PAINT, 1,
-                SVGPaint.NONE, 1, 1);
+                SVGPaint.NONE, 1, 1,
+                StrokeContext.createDefault());
     }
 
     public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
@@ -58,7 +65,8 @@ public class PaintContext {
                 attributeNode.getPercentage("fill-opacity", 1),
                 attributeNode.getPaint("stroke"),
                 attributeNode.getPercentage("stroke-opacity", 1),
-                attributeNode.getPercentage("opacity", 1));
+                attributeNode.getPercentage("opacity", 1),
+                StrokeContext.parse(attributeNode));
     }
 
     @Override
@@ -69,6 +77,7 @@ public class PaintContext {
                 ", opacity=" + opacity +
                 ", fillOpacity=" + fillOpacity +
                 ", strokeOpacity=" + strokeOpacity +
+                ", strokeContext=" + strokeContext +
                 '}';
     }
 }

@@ -38,11 +38,15 @@ final class GlyphRenderer {
 
     private GlyphRenderer() {}
 
-    // Static to avoid using member variables.
     static void renderGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
             @NotNull RenderContext context, @NotNull Graphics2D g) {
         MeasureContext measure = context.measureContext();
         FontRenderContext frc = context.fontRenderContext();
+
+        // Use pathLengthFactor of 1 as pathLength isn't allowed on text
+        // Otherwise we would have to do expensive computations for the length of a text outline.
+        Stroke stroke = context.stroke(1f, null);
+
         float letterSpacing = frc.letterSpacing != null
                 ? frc.letterSpacing.resolveLength(measure)
                 : 0f;
@@ -58,7 +62,7 @@ final class GlyphRenderer {
             if (!glyph.isRendered()) continue;
             Shape glyphOutline = glyph.glyphOutline();
             Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
-            ShapeRenderer.renderShape(context, g, renderPath, bounds, true, true);
+            ShapeRenderer.renderShape(context, g, renderPath, bounds, stroke, true, true);
 
             if (DEBUG) paintDebugGlyph(g, glyphTransform, glyphOutline);
         }

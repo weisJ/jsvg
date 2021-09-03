@@ -23,13 +23,12 @@ package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.SVGShape;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.renderer.PaintContext;
@@ -38,22 +37,14 @@ import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
 public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
     private PaintContext paintContext;
-    private @Nullable Stroke stroke;
-
+    private Length pathLength;
     private SVGShape shape;
 
     @Override
     public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
+        pathLength = attributeNode.getLength("pathLength", Length.UNSPECIFIED);
         paintContext = PaintContext.parse(attributeNode);
-
-        // Todo: Support pathLength
-        // Todo: Support stroke (similar to how font is handles, as it is a compound property)
-        float[] dash = attributeNode.getFloatList("stroke-dasharray");
-        if (dash.length > 0) {
-            System.out.println("Dash Array:" + Arrays.toString(dash));
-        }
-
         shape = buildShape(attributeNode);
     }
 
@@ -74,6 +65,13 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
         MeasureContext measureContext = context.measureContext();
         Shape paintShape = shape.shape(measureContext);
         Rectangle2D bounds = shape.bounds(measureContext, false);
-        ShapeRenderer.renderShape(context, paintContext, g, paintShape, bounds, shape.canBeFilled(), true);
+        float pathLengthFactor = 1f;
+        if (pathLength.isSpecified()) {
+            double effectiveLength = pathLength.resolveLength(measureContext);
+            double actualLength = shape.pathLength(measureContext);
+            pathLengthFactor = (float) (actualLength / effectiveLength);
+        }
+        ShapeRenderer.renderShape(context, paintContext, g, paintShape, bounds,
+                shape.canBeFilled(), true, pathLengthFactor);
     }
 }

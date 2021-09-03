@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.renderer;
 
+import java.awt.*;
+
 import javax.swing.*;
 
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +35,7 @@ import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.stroke.StrokeResolver;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public class RenderContext {
@@ -77,7 +80,8 @@ public class RenderContext {
                     fillOpacity(context.fillOpacity),
                     strokePaint(context.strokePaint),
                     strokeOpacity(context.strokeOpacity),
-                    opacity(context.opacity));
+                    opacity(context.opacity),
+                    strokeContext().derive(context.strokeContext));
         }
         if (attributeFontSpec != null) {
             newFontSpec = newFontSpec.derive(attributeFontSpec);
@@ -91,6 +95,13 @@ public class RenderContext {
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
         return new RenderContext(targetComponent, newPaintContext, newFontRenderContext,
                 newMeasureContext, newFontSpec);
+    }
+
+    private @NotNull StrokeContext strokeContext() {
+        // This will never be null for a RenderContext.
+        // Our deriving mechanism together with non-null initial values prohibits this.
+        assert paintContext.strokeContext != null;
+        return paintContext.strokeContext;
     }
 
     public @Nullable JComponent targetComponent() {
@@ -119,6 +130,10 @@ public class RenderContext {
 
     public @Percentage float opacity(@Percentage float opacity) {
         return paintContext.opacity * opacity;
+    }
+
+    public @NotNull Stroke stroke(float pathLengthFactor, @Nullable StrokeContext context) {
+        return StrokeResolver.resolve(pathLengthFactor, measureContext, strokeContext().derive(context));
     }
 
     public @NotNull SVGFont font(@Nullable AttributeFontSpec fontSpec) {

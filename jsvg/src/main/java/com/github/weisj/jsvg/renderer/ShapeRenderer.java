@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 
@@ -33,7 +34,7 @@ public final class ShapeRenderer {
 
     public static void renderShape(@NotNull RenderContext context, @NotNull PaintContext paintContext,
             @NotNull Graphics2D g, @NotNull Shape shape, @NotNull Rectangle2D bounds,
-            boolean allowFill, boolean allowOutline) {
+            boolean allowFill, boolean allowOutline, float pathLengthFactor) {
         float absOpacity = context.opacity(paintContext.opacity);
         float fOpacity = context.fillOpacity(paintContext.fillOpacity) * absOpacity;
         SVGPaint fPaint = context.fillPaint(paintContext.fillPaint);
@@ -41,11 +42,13 @@ public final class ShapeRenderer {
         float sOpacity = context.strokeOpacity(paintContext.strokeOpacity) * absOpacity;
         SVGPaint sPaint = context.strokePaint(paintContext.strokePaint);
 
-        doRenderShape(g, shape, bounds, allowFill, allowOutline, fOpacity, fPaint, sOpacity, sPaint);
+        Stroke stroke = allowOutline ? context.stroke(pathLengthFactor, paintContext.strokeContext) : null;
+
+        doRenderShape(g, shape, bounds, allowFill, allowOutline, fOpacity, fPaint, sOpacity, sPaint, stroke);
     }
 
     public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @NotNull Rectangle2D bounds,
+            @NotNull Shape shape, @NotNull Rectangle2D bounds, @Nullable Stroke stroke,
             boolean allowFill, boolean allowOutline) {
         float absOpacity = context.opacity(1);
         float fOpacity = context.fillOpacity(1) * absOpacity;
@@ -54,11 +57,12 @@ public final class ShapeRenderer {
         float sOpacity = context.strokeOpacity(1) * absOpacity;
         SVGPaint sPaint = context.strokePaint(null);
 
-        doRenderShape(g, shape, bounds, allowFill, allowOutline, fOpacity, fPaint, sOpacity, sPaint);
+        doRenderShape(g, shape, bounds, allowFill, allowOutline, fOpacity, fPaint, sOpacity, sPaint, stroke);
     }
 
     private static void doRenderShape(@NotNull Graphics2D g, @NotNull Shape shape, @NotNull Rectangle2D bounds,
-            boolean allowFill, boolean allowOutline, float fOpacity, SVGPaint fPaint, float sOpacity, SVGPaint sPaint) {
+            boolean allowFill, boolean allowOutline, float fOpacity, SVGPaint fPaint, float sOpacity, SVGPaint sPaint,
+            @Nullable Stroke stroke) {
         boolean doFill = allowFill && fOpacity > 0 && fPaint.isVisible();
         boolean doOutline = allowOutline && sOpacity > 0 && sPaint.isVisible();
 
@@ -68,10 +72,10 @@ public final class ShapeRenderer {
                 g.setPaint(fPaint.paintForBounds(bounds));
                 g.fill(shape);
             }
-            if (doOutline) {
+            if (doOutline && stroke != null) {
                 g.setComposite(AlphaComposite.SrcOver.derive(sOpacity));
                 g.setPaint(sPaint.paintForBounds(bounds));
-                // Todo: Handle stroke in PaintContext if (stroke != null) g.setStroke(stroke);
+                g.setStroke(stroke);
                 g.draw(shape);
             }
         }
