@@ -101,11 +101,11 @@ public final class SVG extends RenderableContainerNode implements MaybeHasViewBo
         if (width.isZero() || height.isZero()) return;
         MeasureContext measureContext = context.measureContext();
         g.translate(x.resolveWidth(measureContext), y.resolveHeight(measureContext));
-        ViewBox viewport = new ViewBox(
-                width.orElseIfUnspecified(measureContext.viewWidth()).resolveWidth(measureContext),
-                height.orElseIfUnspecified(measureContext.viewHeight()).resolveLength(measureContext));
-        Graphics2D viewportGraphics = preserveAspectRatio.prepareViewPort(g, viewport, viewBox);
-        super.render(context, viewportGraphics);
-        viewportGraphics.dispose();
+        float viewWidth = width.orElseIfUnspecified(measureContext.viewWidth()).resolveWidth(measureContext);
+        float viewHeight = height.orElseIfUnspecified(measureContext.viewHeight()).resolveHeight(measureContext);
+        g.clipRect(0, 0, (int) viewWidth, (int) viewHeight);
+
+        g.transform(preserveAspectRatio.computeViewPortTransform(viewWidth, viewHeight, viewBox));
+        super.render(context, g);
     }
 }

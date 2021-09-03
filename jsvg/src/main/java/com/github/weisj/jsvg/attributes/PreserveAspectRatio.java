@@ -22,10 +22,12 @@
 package com.github.weisj.jsvg.attributes;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 
 public final class PreserveAspectRatio {
 
@@ -193,19 +195,15 @@ public final class PreserveAspectRatio {
         return Objects.hash(align, meetOrSlice);
     }
 
-    public @NotNull Graphics2D prepareViewPort(@NotNull Graphics2D g, @NotNull ViewBox viewport,
+    public @NotNull AffineTransform computeViewPortTransform(float viewWidth, float viewHeight,
             @Nullable ViewBox viewBox) {
-        Graphics2D viewportGraphics = (Graphics2D) g.create();
-        viewportGraphics.clipRect((int) viewport.x, (int) viewport.y, (int) viewport.width, (int) viewport.height);
-
-        viewportGraphics.translate(viewport.x, viewport.y);
+        AffineTransform viewTransform = new AffineTransform();
         if (viewBox != null) {
-            viewportGraphics.translate(-viewBox.x, -viewBox.y);
             if (align == Align.None) {
-                viewportGraphics.scale(viewport.width / viewBox.width, viewport.height / viewBox.height);
+                viewTransform.scale(viewWidth / viewBox.width, viewHeight / viewBox.height);
             } else {
-                float xScale = viewport.width / viewBox.width;
-                float yScale = viewport.height / viewBox.height;
+                float xScale = viewWidth / viewBox.width;
+                float yScale = viewHeight / viewBox.height;
 
                 switch (meetOrSlice) {
                     case Meet:
@@ -218,14 +216,15 @@ public final class PreserveAspectRatio {
                         throw new IllegalStateException();
                 }
 
-                viewportGraphics.translate(
-                        align.xAlign.align(viewport.width, viewBox.width * xScale),
-                        align.yAlign.align(viewport.height, viewBox.height * yScale));
-                viewportGraphics.scale(xScale, yScale);
+                viewTransform.translate(
+                        align.xAlign.align(viewWidth, viewBox.width * xScale),
+                        align.yAlign.align(viewHeight, viewBox.height * yScale));
+                viewTransform.scale(xScale, yScale);
             }
+            viewTransform.translate(-viewBox.x, -viewBox.y);
         }
 
-        return viewportGraphics;
+        return viewTransform;
     }
 
     @Override
