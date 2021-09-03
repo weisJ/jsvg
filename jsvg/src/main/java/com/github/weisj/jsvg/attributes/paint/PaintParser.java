@@ -80,11 +80,12 @@ public final class PaintParser {
                 int startIndex = isRgba ? 5 : 4;
                 String[] values = AttributeParser.parseStringList(
                         value.substring(startIndex, value.length() - 1), false);
+                isRgba = isRgba && values.length >= 4;
                 return new Color(
-                        parseColorComponent(values[0]),
-                        parseColorComponent(values[1]),
-                        parseColorComponent(values[2]),
-                        isRgba ? parseColorComponent(values[3]) : 255);
+                        parseColorComponent(values[0], false),
+                        parseColorComponent(values[1], false),
+                        parseColorComponent(values[2], false),
+                        isRgba ? parseColorComponent(values[3], true) : 255);
             }
             return ColorLookup.colorMap().get(value);
         } catch (Exception e) {
@@ -100,7 +101,7 @@ public final class PaintParser {
         return new AwtSVGPaint(color);
     }
 
-    private static int parseColorComponent(String value) {
+    private static int parseColorComponent(String value, boolean percentage) {
         float parsed;
         if (value.endsWith("%")) {
             parsed = AttributeParser.parseFloat(value.substring(0, value.length() - 1), 0);
@@ -108,6 +109,7 @@ public final class PaintParser {
             parsed *= 255;
         } else {
             parsed = AttributeParser.parseFloat(value, 0);
+            if (percentage) parsed *= 255;
         }
         return Math.min(255, Math.max(0, (int) parsed));
     }
