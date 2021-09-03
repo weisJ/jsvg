@@ -39,10 +39,10 @@ import com.github.weisj.jsvg.nodes.text.Text;
     categories = {Category.Container, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient,
             Category.Animation},
     /*
-     * <altGlyphDef> <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>, <image>,
+     * <altGlyphDef> <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
      * <marker>, <mask>, <pattern>, <script>, <switch>, <view>
      */
-    anyOf = {Anchor.class, ClipPath.class, Style.class, Text.class}
+    anyOf = {Anchor.class, ClipPath.class, Image.class, Style.class, Text.class}
 )
 public final class Anchor extends RenderableContainerNode implements ShapedContainer<SVGNode> {
     public static final String TAG = "a";

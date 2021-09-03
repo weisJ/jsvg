@@ -58,6 +58,7 @@ public class SVGLoader {
         nodeMap.put(Desc.TAG, Desc::new);
         nodeMap.put(Ellipse.TAG, Ellipse::new);
         nodeMap.put(Group.TAG, Group::new);
+        nodeMap.put(Image.TAG, Image::new);
         nodeMap.put(Line.TAG, Line::new);
         nodeMap.put(LinearGradient.TAG, LinearGradient::new);
         nodeMap.put(Metadata.TAG, Metadata::new);
@@ -91,9 +92,6 @@ public class SVGLoader {
          *  - Pattern
          *  - Style
          *  - Symbol
-         *  - TSpan
-         *  - Text
-         *  - TextPath
          *  - VKern? (deprecated)
          * @formatter:on
          */
