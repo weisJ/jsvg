@@ -101,7 +101,7 @@ public class MeasurableFontSpec extends FontSpec {
         Length newSizeAdjust = other.sizeAdjust != null
                 ? other.sizeAdjust
                 : this.sizeAdjust;
-        float newStretch = !Length.isUnspecified(other.stretch)
+        float newStretch = Length.isSpecified(other.stretch)
                 ? other.stretch
                 : this.stretch;
         return new MeasurableFontSpec(newFamilies, newStyle, newSizeAdjust, newStretch, newWeight, newSize);

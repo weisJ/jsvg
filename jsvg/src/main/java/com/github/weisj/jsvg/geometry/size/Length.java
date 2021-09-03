@@ -50,6 +50,10 @@ public final class Length {
         return Float.isNaN(value);
     }
 
+    public static boolean isSpecified(float value) {
+        return !isUnspecified(value);
+    }
+
     private float resolveNonPercentage(@NotNull MeasureContext context) {
         // If we are unspecified this will return the raw unspecified value, which we want.
         if (unit == Unit.Raw) return value;
@@ -151,8 +155,12 @@ public final class Length {
         return isUnspecified(raw());
     }
 
+    public boolean isSpecified() {
+        return !isUnspecified();
+    }
+
     public @NotNull Length coerceNonNegative() {
-        if (!isUnspecified() && raw() <= 0) return ZERO;
+        if (isSpecified() && raw() <= 0) return ZERO;
         return this;
     }
 

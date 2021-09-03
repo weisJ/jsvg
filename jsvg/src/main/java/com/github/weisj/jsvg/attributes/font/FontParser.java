@@ -72,7 +72,7 @@ public final class FontParser {
         FontSize fontSize = node.getEnum("font-size", PredefinedFontSize.Number);
         if (fontSize == PredefinedFontSize.Number) {
             Length size = node.getLength("font-size", Length.UNSPECIFIED);
-            fontSize = !size.isUnspecified()
+            fontSize = size.isSpecified()
                     ? new LengthFontSize(size)
                     : null;
         }
