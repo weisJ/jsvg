@@ -86,13 +86,11 @@ public class SVGLoader {
          *  - HKern? (deprecated)
          *  - Hatch-path? (experimental)
          *  - Hatch? (experimental)
-         *  - Image
          *  - Marker
          *  - Mask
          *  - MissingGlyph? (deprecated)
          *  - Pattern
          *  - Style
-         *  - Symbol
          *  - VKern? (deprecated)
          * @formatter:on
          */
