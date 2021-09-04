@@ -26,8 +26,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
@@ -36,7 +36,7 @@ import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 
-abstract class AbstractGradient extends ContainerNode implements SVGPaint {
+abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends ContainerNode implements SVGPaint {
     protected AffineTransform gradientTransform;
     protected GradientUnits gradientUnits;
     protected MultipleGradientPaint.CycleMethod spreadMethod;
@@ -53,14 +53,20 @@ abstract class AbstractGradient extends ContainerNode implements SVGPaint {
     }
 
     @Override
-    @MustBeInvokedByOverriders
-    public void build(@NotNull AttributeNode attributeNode) {
+    public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
 
-        gradientUnits = attributeNode.getEnum("gradientUnits", GradientUnits.ObjectBoundingBox);
-        gradientTransform = attributeNode.parseTransform("gradientTransform");
+        Self template = parseTemplate(attributeNode);
 
-        spreadMethod = MultipleGradientPaint.CycleMethod.NO_CYCLE;
+        gradientUnits = attributeNode.getEnum("gradientUnits",
+                template != null ? template.gradientUnits : GradientUnits.ObjectBoundingBox);
+        gradientTransform = attributeNode.parseTransform("gradientTransform");
+        if (gradientTransform == null && template != null)
+            gradientTransform = template.gradientTransform;
+
+        spreadMethod = template != null
+                ? template.spreadMethod
+                : MultipleGradientPaint.CycleMethod.NO_CYCLE;
         String spreadMethodStr = attributeNode.getValue("spreadMethod");
         if ("repeat".equalsIgnoreCase(spreadMethodStr)) {
             spreadMethod = MultipleGradientPaint.CycleMethod.REPEAT;
@@ -69,26 +75,36 @@ abstract class AbstractGradient extends ContainerNode implements SVGPaint {
         }
 
         List<Stop> stops = childrenOfType(Stop.class);
-
-        boolean realGradient = false;
-        colors = new Color[stops.size()];
-        offsets = new float[stops.size()];
-        for (int i = 0; i < offsets.length; i++) {
-            Stop stop = stops.get(i);
-            offsets[i] = stop.offset();
-            colors[i] = stop.color();
-            if (i > 0) {
-                realGradient = realGradient || !colors[i].equals(colors[i - 1]);
+        if (stops.size() == 0 && template != null) {
+            colors = template.colors();
+            offsets = template.offsets();
+        } else {
+            boolean realGradient = false;
+            colors = new Color[stops.size()];
+            offsets = new float[stops.size()];
+            for (int i = 0; i < offsets.length; i++) {
+                Stop stop = stops.get(i);
+                offsets[i] = stop.offset();
+                colors[i] = stop.color();
+                if (i > 0) {
+                    realGradient = realGradient || !colors[i].equals(colors[i - 1]);
+                }
+            }
+            if (!realGradient && colors.length > 0) {
+                colors = new Color[] {colors[0]};
+                offsets = new float[] {0f};
             }
         }
-        if (!realGradient && colors.length > 0) {
-            colors = new Color[] {colors[0]};
-            offsets = new float[] {0f};
-        }
         // Todo: Sort gradients, throw away duplicate entries (by appearance).
-
-        // Todo: href prototype
     }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private Self parseTemplate(@NotNull AttributeNode attributeNode) {
+        return (Self) attributeNode.getElementByHref(getClass(), attributeNode.getHref());
+    }
+
+    protected abstract void buildGradient(@NotNull AttributeNode attributeNode, @Nullable Self template);
 
     @Override
     public final @NotNull Paint paintForBounds(@NotNull Rectangle2D bounds) {

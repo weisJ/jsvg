@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
@@ -39,7 +40,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
     categories = Category.Descriptive,
     anyOf = {Stop.class /* <animate>, <animateTransform>, <set> */ }
 )
-public final class LinearGradient extends AbstractGradient {
+public final class LinearGradient extends AbstractGradient<LinearGradient> {
     public static final String TAG = "lineargradient";
 
     private @Percentage float x1;
@@ -53,12 +54,11 @@ public final class LinearGradient extends AbstractGradient {
     }
 
     @Override
-    public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
-        x1 = attributeNode.getPercentage("x1", 0);
-        x2 = attributeNode.getPercentage("x2", 1);
-        y1 = attributeNode.getPercentage("y1", 0);
-        y2 = attributeNode.getPercentage("y2", 0);
+    protected void buildGradient(@NotNull AttributeNode attributeNode, @Nullable LinearGradient template) {
+        x1 = attributeNode.getPercentage("x1", template != null ? template.x1 : 0);
+        x2 = attributeNode.getPercentage("x2", template != null ? template.x2 : 1);
+        y1 = attributeNode.getPercentage("y1", template != null ? template.y1 : 0);
+        y2 = attributeNode.getPercentage("y2", template != null ? template.y2 : 0);
     }
 
     @Override

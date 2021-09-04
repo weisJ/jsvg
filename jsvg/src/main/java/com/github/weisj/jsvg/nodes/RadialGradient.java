@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
@@ -39,7 +40,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
     categories = Category.Descriptive,
     anyOf = {Stop.class /* <animate>, <animateTransform>, <set> */ }
 )
-public final class RadialGradient extends AbstractGradient {
+public final class RadialGradient extends AbstractGradient<RadialGradient> {
     public static final String TAG = "radialgradient";
 
     private @Percentage float cx;
@@ -54,13 +55,12 @@ public final class RadialGradient extends AbstractGradient {
     }
 
     @Override
-    public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
-        cx = attributeNode.getPercentage("cx", 0.5f);
-        cy = attributeNode.getPercentage("cy", 0.5f);
-        fr = attributeNode.getPercentage("fr", 0);
-        fx = attributeNode.getPercentage("fx", cx);
-        fy = attributeNode.getPercentage("fy", cy);
+    protected void buildGradient(@NotNull AttributeNode attributeNode, @Nullable RadialGradient template) {
+        cx = attributeNode.getPercentage("cx", template != null ? template.cx : 0.5f);
+        cy = attributeNode.getPercentage("cy", template != null ? template.cy : 0.5f);
+        fr = attributeNode.getPercentage("fr", template != null ? template.fr : 0f);
+        fx = attributeNode.getPercentage("fx", template != null ? template.fx : cx);
+        fy = attributeNode.getPercentage("fy", template != null ? template.fy : cy);
     }
 
     @Override
