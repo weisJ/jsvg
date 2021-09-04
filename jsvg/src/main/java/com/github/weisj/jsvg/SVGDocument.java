@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGDocument {
+    private static final boolean DEBUG = true;
     private final @NotNull SVGNode root;
 
     public SVGDocument(@NotNull SVGNode root) {
@@ -68,6 +69,10 @@ public class SVGDocument {
         } else {
             Rectangle clip = g.getClipBounds();
             viewBox = new ViewBox(clip.x, clip.y, clip.width, clip.height);
+        }
+        if (DEBUG) {
+            g.setColor(Color.MAGENTA);
+            g.draw(viewBox);
         }
 
         MeasureContext measureContext = new MeasureContext(viewBox.width, viewBox.height, defaultEm, defaultEx);
