@@ -71,6 +71,7 @@ public class SVGLoader {
         nodeMap.put(SolidColor.TAG, SolidColor::new);
         nodeMap.put(Stop.TAG, Stop::new);
         nodeMap.put(Style.TAG, Style::new);
+        nodeMap.put(Symbol.TAG, Symbol::new);
         nodeMap.put(Text.TAG, Text::new);
         nodeMap.put(TextPath.TAG, TextPath::new);
         nodeMap.put(TextSpan.TAG, TextSpan::new);

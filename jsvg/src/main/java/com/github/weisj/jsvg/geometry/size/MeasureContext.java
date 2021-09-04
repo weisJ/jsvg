@@ -49,8 +49,8 @@ public class MeasureContext {
         float newVh = vh;
         if (viewBox != null) {
             // If any width or height are unspecified keep the width/height of the parent viewPort.
-            if (!viewBox.hasUnspecifiedWidth()) newVw = viewBox.width;
-            if (!viewBox.hasUnspecifiedHeight()) newVh = viewBox.height;
+            if (viewBox.hasSpecifiedWidth()) newVw = viewBox.width;
+            if (viewBox.hasSpecifiedHeight()) newVh = viewBox.height;
         }
         float effectiveEm = Length.isUnspecified(em) ? this.em : em;
         float effectiveEx = Length.isUnspecified(ex) ? this.ex : ex;

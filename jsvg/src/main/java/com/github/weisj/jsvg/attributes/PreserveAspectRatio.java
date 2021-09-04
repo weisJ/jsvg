@@ -21,12 +21,13 @@
  */
 package com.github.weisj.jsvg.attributes;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 
 
 public final class PreserveAspectRatio {
@@ -195,35 +196,31 @@ public final class PreserveAspectRatio {
         return Objects.hash(align, meetOrSlice);
     }
 
-    public @NotNull AffineTransform computeViewPortTransform(float viewWidth, float viewHeight,
-            @Nullable ViewBox viewBox) {
+    public @NotNull AffineTransform computeViewPortTransform(FloatSize size, @NotNull ViewBox viewBox) {
         AffineTransform viewTransform = new AffineTransform();
-        if (viewBox != null) {
-            if (align == Align.None) {
-                viewTransform.scale(viewWidth / viewBox.width, viewHeight / viewBox.height);
-            } else {
-                float xScale = viewWidth / viewBox.width;
-                float yScale = viewHeight / viewBox.height;
+        if (align == Align.None) {
+            viewTransform.scale(size.width / viewBox.width, size.height / viewBox.height);
+        } else {
+            float xScale = size.width / viewBox.width;
+            float yScale = size.height / viewBox.height;
 
-                switch (meetOrSlice) {
-                    case Meet:
-                        xScale = yScale = Math.min(xScale, yScale);
-                        break;
-                    case Slice:
-                        xScale = yScale = Math.max(xScale, yScale);
-                        break;
-                    default:
-                        throw new IllegalStateException();
-                }
-
-                viewTransform.translate(
-                        align.xAlign.align(viewWidth, viewBox.width * xScale),
-                        align.yAlign.align(viewHeight, viewBox.height * yScale));
-                viewTransform.scale(xScale, yScale);
+            switch (meetOrSlice) {
+                case Meet:
+                    xScale = yScale = Math.min(xScale, yScale);
+                    break;
+                case Slice:
+                    xScale = yScale = Math.max(xScale, yScale);
+                    break;
+                default:
+                    throw new IllegalStateException();
             }
-            viewTransform.translate(-viewBox.x, -viewBox.y);
-        }
 
+            viewTransform.translate(
+                    align.xAlign.align(size.width, viewBox.width * xScale),
+                    align.yAlign.align(size.height, viewBox.height * yScale));
+            viewTransform.scale(xScale, yScale);
+        }
+        viewTransform.translate(-viewBox.x, -viewBox.y);
         return viewTransform;
     }
 

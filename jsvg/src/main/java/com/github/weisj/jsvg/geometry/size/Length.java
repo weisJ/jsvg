@@ -55,6 +55,7 @@ public final class Length {
     }
 
     private float resolveNonPercentage(@NotNull MeasureContext context) {
+        if (isUnspecified()) throw new IllegalStateException("Can't resolve size of unspecified lenght");
         // If we are unspecified this will return the raw unspecified value, which we want.
         if (unit == Unit.Raw) return value;
         assert unit != Unit.PERCENTAGE;

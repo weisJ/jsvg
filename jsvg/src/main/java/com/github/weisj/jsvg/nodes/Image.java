@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.SVGRenderingHints;
 import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -100,7 +101,8 @@ public final class Image extends RenderableSVGNode {
         ViewBox viewBox = new ViewBox(imgWidth, imgHeight);
 
         g.translate(x.resolveWidth(measure), y.resolveHeight(measure));
-        AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(viewWidth, viewHeight, viewBox);
+        AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(
+                new FloatSize(viewWidth, viewHeight), viewBox);
         Object imageAntialiasing = g.getRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING);
         if (imageAntialiasing == SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF) {
             g.drawImage(img, imgTransform, context.targetComponent());

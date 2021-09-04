@@ -34,6 +34,6 @@ public interface MaybeHasViewBox {
 
     default @Nullable ViewBox parseViewBox(@NotNull AttributeNode attributeNode) {
         float[] viewBoxCords = attributeNode.getFloatList("viewBox");
-        return viewBoxCords.length > 0 ? new ViewBox(viewBoxCords) : null;
+        return viewBoxCords.length == 4 ? new ViewBox(viewBoxCords) : null;
     }
 }

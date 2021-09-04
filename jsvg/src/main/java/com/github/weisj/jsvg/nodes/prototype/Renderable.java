@@ -30,6 +30,16 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface Renderable {
 
+    /**
+     * Indicated whether the element can only be rendered through means of instantiation e.g. being referenced in
+     * a use tag. Instantiation doesn't create a new element it only controls, when an element can be rendered.
+     *
+     * @return true if only rendered if instantiated.
+     */
+    default boolean requiresInstantiation() {
+        return false;
+    }
+
     boolean isVisible(@NotNull RenderContext context);
 
     void render(@NotNull RenderContext context, @NotNull Graphics2D g);

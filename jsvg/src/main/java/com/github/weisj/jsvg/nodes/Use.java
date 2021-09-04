@@ -27,12 +27,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.container.InnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
@@ -75,8 +77,8 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         super.build(attributeNode);
         x = attributeNode.getLength("x", 0);
         y = attributeNode.getLength("y", 0);
-        width = attributeNode.getLength("width", 0);
-        height = attributeNode.getLength("height", 0);
+        width = attributeNode.getLength("width", Length.UNSPECIFIED);
+        height = attributeNode.getLength("height", Length.UNSPECIFIED);
 
         String href = attributeNode.getValue("href");
         if (href == null) href = attributeNode.getValue("xlink:href");
@@ -111,12 +113,21 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        // Todo: width/height change child if it is svg/symbol
-        // Todo: Viewport changes transform.
         if (referencedNode != null) {
             MeasureContext measureContext = context.measureContext();
             g.translate(x.resolveWidth(measureContext), y.resolveHeight(measureContext));
-            NodeRenderer.renderNode(referencedNode, context, g);
+
+            try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, g, true)) {
+                if (info == null) return;
+                if (referencedNode instanceof InnerViewContainer) {
+                    ViewBox targetViewBox = new ViewBox(0, 0, Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
+                    if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
+                    if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
+                    ((InnerViewContainer) referencedNode).renderByUse(targetViewBox, info.context, info.g);
+                } else {
+                    info.renderable.render(info.context, info.g);
+                }
+            }
         }
     }
 

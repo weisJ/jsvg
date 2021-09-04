@@ -39,10 +39,35 @@ public final class NodeRenderer {
 
     private NodeRenderer() {}
 
+    public static class Info implements AutoCloseable {
+        public final Renderable renderable;
+        public final RenderContext context;
+        public final Graphics2D g;
+
+        public Info(Renderable renderable, RenderContext context, Graphics2D g) {
+            this.renderable = renderable;
+            this.context = context;
+            this.g = g;
+        }
+
+        @Override
+        public void close() {
+            g.dispose();
+        }
+    }
+
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Graphics2D g) {
-        if (!(node instanceof Renderable)) return;
+        try (Info info = createRenderInfo(node, context, g, false)) {
+            if (info != null) info.renderable.render(info.context, info.g);
+        }
+    }
+
+    public static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
+            @NotNull Graphics2D g, boolean doInstantiate) {
+        if (!(node instanceof Renderable)) return null;
         Renderable renderable = (Renderable) node;
-        if (!renderable.isVisible(context)) return;
+        if (!doInstantiate && renderable.requiresInstantiation()) return null;
+        if (!renderable.isVisible(context)) return null;
         RenderContext childContext = setupRenderContext(node, context);
 
         Graphics2D childGraphics = (Graphics2D) g.create();
@@ -66,11 +91,10 @@ public final class NodeRenderer {
             }
         }
 
-        renderable.render(childContext, childGraphics);
-        childGraphics.dispose();
+        return new Info(renderable, childContext, childGraphics);
     }
 
-    public static RenderContext setupRenderContext(@NotNull Object node, @NotNull RenderContext context) {
+    public static @NotNull RenderContext setupRenderContext(@NotNull Object node, @NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
         @Nullable PaintContext paintContext = null;
         @Nullable AttributeFontSpec fontSpec = null;

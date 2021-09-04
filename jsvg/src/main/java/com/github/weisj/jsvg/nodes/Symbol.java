@@ -21,10 +21,16 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import org.jetbrains.annotations.NotNull;
+import java.awt.geom.Point2D;
 
-import com.github.weisj.jsvg.geometry.size.FloatSize;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.AttributeParser;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.container.InnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -40,21 +46,47 @@ import com.github.weisj.jsvg.nodes.text.Text;
      */
     anyOf = {Anchor.class, ClipPath.class, Image.class, Style.class, Text.class}
 )
-public final class SVG extends InnerViewContainer {
-    public static final String TAG = "svg";
+public final class Symbol extends InnerViewContainer {
+    public static final String TAG = "symbol";
 
-    private static final float FALLBACK_WIDTH = 300;
-    private static final float FALLBACK_HEIGHT = 150;
+    private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
+    private static final Length Center = new Length(Unit.PERCENTAGE, 50f);
+    private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);
+
+    private Length refX;
+    private Length refY;
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 
     @Override
-    public @NotNull FloatSize size(@NotNull MeasureContext context) {
-        return new FloatSize(
-                width.orElseIfUnspecified(FALLBACK_WIDTH).resolveWidth(context),
-                height.orElseIfUnspecified(FALLBACK_HEIGHT).resolveHeight(context));
+    protected Point2D innerLocation(@NotNull MeasureContext context) {
+        return new Point2D.Float(-refX.resolveWidth(context), -refY.resolveHeight(context));
+    }
+
+    @Override
+    public void build(@NotNull AttributeNode attributeNode) {
+        super.build(attributeNode);
+        refX = parseReferenceLength(attributeNode.getValue("refX"), "left", "right");
+        refY = parseReferenceLength(attributeNode.getValue("refY"), "top", "bottom");
+    }
+
+    private Length parseReferenceLength(@Nullable String value, @NotNull String topLeft, @NotNull String bottomRight) {
+        if (topLeft.equals(value)) {
+            return TopOrLeft;
+        } else if ("center".equals(value)) {
+            return Center;
+        } else if (bottomRight.equals(value)) {
+            return BottomOrRight;
+        } else {
+            return AttributeParser.parseLength(value, Length.ZERO);
+        }
+    }
+
+    @Override
+    public boolean requiresInstantiation() {
+        return true;
     }
 }

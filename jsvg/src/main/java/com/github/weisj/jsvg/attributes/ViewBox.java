@@ -23,6 +23,9 @@ package com.github.weisj.jsvg.attributes;
 
 import java.awt.geom.Rectangle2D;
 
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 
 public final class ViewBox extends Rectangle2D.Float {
@@ -39,12 +42,28 @@ public final class ViewBox extends Rectangle2D.Float {
         this(0, 0, w, h);
     }
 
-    public boolean hasUnspecifiedWidth() {
-        return Length.isUnspecified(width);
+    public ViewBox(FloatSize size) {
+        this(size.width, size.height);
     }
 
-    public boolean hasUnspecifiedHeight() {
-        return Length.isUnspecified(height);
+    public @NotNull FloatSize size() {
+        return new FloatSize(width, height);
+    }
+
+    public boolean hasSpecifiedX() {
+        return Length.isSpecified(x);
+    }
+
+    public boolean hasSpecifiedY() {
+        return Length.isSpecified(y);
+    }
+
+    public boolean hasSpecifiedWidth() {
+        return Length.isSpecified(width);
+    }
+
+    public boolean hasSpecifiedHeight() {
+        return Length.isSpecified(height);
     }
 
     @Override

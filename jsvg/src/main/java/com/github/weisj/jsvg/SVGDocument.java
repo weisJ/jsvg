@@ -46,29 +46,29 @@ public class SVGDocument {
 
     public void render(@Nullable JComponent component, @NotNull Graphics2D g) {
         ViewBox viewBox;
+
+        Font f = g.getFont();
+        if (f == null && component != null) f = component.getFont();
+        float defaultEm = f != null ? f.getSize2D() : SVGFont.defaultFontSize();
+        float defaultEx = SVGFont.exFromEm(defaultEm);
+        MeasureContext initialMeasure = new MeasureContext(0, 0, defaultEm, defaultEx);
+
         if (root instanceof SVG) {
-            float width = ((SVG) root).width().raw();
-            float height = ((SVG) root).width().raw();
-            viewBox = new ViewBox(0, 0, width, height);
+            viewBox = new ViewBox(((SVG) root).size(initialMeasure));
 
             // A transform on an <svg> element should behave as if it were applied on the parent.
             // It seems like this implies that any rotations etc. should behave as if they were centered
             // on the viewport.
             AffineTransform transform = ((SVG) root).transform();
             if (transform != null) {
-                g.translate(width / 2, height / 2);
+                g.translate(viewBox.width / 2, viewBox.height / 2);
                 g.transform(transform);
-                g.translate(-width / 2, -height / 2);
+                g.translate(-viewBox.width / 2, -viewBox.height / 2);
             }
         } else {
             Rectangle clip = g.getClipBounds();
             viewBox = new ViewBox(clip.x, clip.y, clip.width, clip.height);
         }
-
-        Font f = g.getFont();
-        if (f == null && component != null) f = component.getFont();
-        float defaultEm = f != null ? f.getSize2D() : SVGFont.defaultFontSize();
-        float defaultEx = SVGFont.exFromEm(defaultEm);
 
         MeasureContext measureContext = new MeasureContext(viewBox.width, viewBox.height, defaultEm, defaultEx);
         RenderContext context = new RenderContext(component, measureContext);

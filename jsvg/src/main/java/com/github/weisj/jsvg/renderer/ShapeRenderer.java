@@ -67,6 +67,7 @@ public final class ShapeRenderer {
         boolean doOutline = allowOutline && sOpacity > 0 && sPaint.isVisible();
 
         if (doFill || doOutline) {
+            Composite composite = g.getComposite();
             if (doFill) {
                 g.setComposite(AlphaComposite.SrcOver.derive(fOpacity));
                 g.setPaint(fPaint.paintForBounds(bounds));
@@ -78,6 +79,7 @@ public final class ShapeRenderer {
                 g.setStroke(stroke);
                 g.draw(shape);
             }
+            g.setComposite(composite);
         }
     }
 }
