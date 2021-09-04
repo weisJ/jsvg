@@ -79,23 +79,45 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             colors = template.colors();
             offsets = template.offsets();
         } else {
-            boolean realGradient = false;
-            colors = new Color[stops.size()];
-            offsets = new float[stops.size()];
-            for (int i = 0; i < offsets.length; i++) {
-                Stop stop = stops.get(i);
-                offsets[i] = stop.offset();
-                colors[i] = stop.color();
-                if (i > 0) {
-                    realGradient = realGradient || !colors[i].equals(colors[i - 1]);
-                }
-            }
-            if (!realGradient && colors.length > 0) {
-                colors = new Color[] {colors[0]};
-                offsets = new float[] {0f};
-            }
+            parseStops(stops);
         }
-        // Todo: Sort gradients, throw away duplicate entries (by appearance).
+
+        buildGradient(attributeNode, template);
+    }
+
+    private void parseStops(@NotNull List<Stop> stops) {
+        stops.sort((s1, s2) -> Float.compare(s1.offset(), s2.offset()));
+        colors = new Color[stops.size()];
+        offsets = new float[stops.size()];
+
+        boolean realGradient = false;
+        for (int i = 0; i < offsets.length; i++) {
+            Stop stop = stops.get(i);
+            // Clamp the offset
+            float offset = Math.max(0, Math.min(1, stop.offset()));
+
+            if (i > 0) {
+                // Keep track whether the provided colors and offsets are actually different.
+                realGradient = realGradient
+                        || !colors[i].equals(colors[i - 1])
+                        || offset > stops.get(i - 1).offset();
+            }
+
+            if (i > 0 && offset <= offsets[i - 1]) {
+                // The awt gradient implementations really don't like it if
+                // two offsets are equal. Hence we use the next possible float value instead as it will produce
+                // the same effect as if the equal values were used.
+                offset = Math.nextAfter(offset, Double.MAX_VALUE);
+            }
+
+            offsets[i] = offset;
+            colors[i] = stop.color();
+        }
+
+        if (!realGradient && colors.length > 0) {
+            colors = new Color[] {colors[0]};
+            offsets = new float[] {0f};
+        }
     }
 
     @SuppressWarnings("unchecked")
