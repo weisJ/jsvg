@@ -50,7 +50,13 @@ public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
 
     @Override
     default Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
-        return shape(measureContext, validate).getBounds();
+        Rectangle2D bounds = new Rectangle2D.Float();
+        for (E child : children()) {
+            if (!(child instanceof HasShape)) continue;
+            Rectangle2D childBounds = ((HasShape) child).shape().bounds(measureContext, validate);
+            Rectangle2D.union(bounds, childBounds, bounds);
+        }
+        return bounds;
     }
 
     @Override
