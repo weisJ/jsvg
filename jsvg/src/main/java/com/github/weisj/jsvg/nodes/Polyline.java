@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 @ElementCategories({Category.BasicShape, Category.Graphic, Category.Shape})
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})
-public class Polyline extends AbstractPolyShape {
+public final class Polyline extends AbstractPolyShape {
     public static final String TAG = "polyline";
 
     @Override

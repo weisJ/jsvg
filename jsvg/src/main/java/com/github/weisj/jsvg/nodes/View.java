@@ -35,7 +35,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 @PermittedContent(
     categories = Category.Descriptive
 )
-public class View extends MetaSVGNode {
+public final class View extends MetaSVGNode {
     public static final String TAG = "view";
 
     @Override
