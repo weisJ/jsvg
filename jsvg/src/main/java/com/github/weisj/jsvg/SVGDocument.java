@@ -58,7 +58,9 @@ public class SVGDocument {
         MeasureContext initialMeasure = bounds != null
                 ? MeasureContext.createInitial(bounds.width, bounds.height, defaultEm, defaultEx)
                 : MeasureContext.createInitial(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, defaultEm, defaultEx);
-        if (bounds == null) bounds = new ViewBox(root.size(initialMeasure));
+        RenderContext context = new RenderContext(component, initialMeasure);
+
+        if (bounds == null) bounds = new ViewBox(root.size(context));
 
         // A transform on an <svg> element should behave as if it were applied on the parent.
         // It seems like this implies that any rotations etc. should behave as if they were centered
@@ -76,8 +78,6 @@ public class SVGDocument {
             g.setColor(Color.MAGENTA);
             g.drawRect(0, 0, (int) bounds.width - 1, (int) bounds.height - 1);
         }
-
-        RenderContext context = new RenderContext(component, initialMeasure);
         root.renderByUse(bounds, context, g);
     }
 }

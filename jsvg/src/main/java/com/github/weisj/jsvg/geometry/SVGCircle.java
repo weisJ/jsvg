@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGCircle implements MeasurableShape {
 
@@ -51,14 +52,14 @@ public class SVGCircle implements MeasurableShape {
     }
 
     @Override
-    public @NotNull Shape shape(@NotNull MeasureContext measureContext, boolean validate) {
-        if (validate) validateShape(measureContext);
+    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+        if (validate) validateShape(context.measureContext());
         return circle;
     }
 
     @Override
-    public Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
-        if (validate) validateShape(measureContext);
+    public @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
+        if (validate) validateShape(context.measureContext());
         return circle.getBounds2D();
     }
 
@@ -68,6 +69,6 @@ public class SVGCircle implements MeasurableShape {
     }
 
     static double circumference(double radius) {
-        return 2 * Math.PI;
+        return 2 * Math.PI * radius;
     }
 }

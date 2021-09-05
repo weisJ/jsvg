@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGEllipse implements MeasurableShape {
 
@@ -54,14 +55,14 @@ public class SVGEllipse implements MeasurableShape {
     }
 
     @Override
-    public @NotNull Shape shape(@NotNull MeasureContext measureContext, boolean validate) {
-        if (validate) validateShape(measureContext);
+    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+        if (validate) validateShape(context.measureContext());
         return ellipse;
     }
 
     @Override
-    public Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
-        if (validate) validateShape(measureContext);
+    public @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
+        if (validate) validateShape(context.measureContext());
         return ellipse.getBounds2D();
     }
 

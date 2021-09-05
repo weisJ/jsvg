@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGLine implements MeasurableShape {
 
@@ -57,14 +58,14 @@ public class SVGLine implements MeasurableShape {
     }
 
     @Override
-    public @NotNull Shape shape(@NotNull MeasureContext measureContext, boolean validate) {
-        if (validate) validateShape(measureContext);
+    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+        if (validate) validateShape(context.measureContext());
         return line;
     }
 
     @Override
-    public Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
-        if (validate) validateShape(measureContext);
+    public @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
+        if (validate) validateShape(context.measureContext());
         return line.getBounds2D();
     }
 

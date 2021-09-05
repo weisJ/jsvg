@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -50,8 +51,19 @@ abstract class LinearTextContainer extends TextContainer {
     }
 
     @Override
+    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+        GeneralPath textPath = new GeneralPath();
+        appendTextShape(createCursor(), textPath, context);
+        return textPath;
+    }
+
+    @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderSegment(new GlyphCursor(0, 0, new AffineTransform()), context, g);
+        renderSegment(createCursor(), context, g);
+    }
+
+    private @NotNull GlyphCursor createCursor() {
+        return new GlyphCursor(0, 0, new AffineTransform());
     }
 
     @Override

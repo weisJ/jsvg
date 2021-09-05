@@ -26,7 +26,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface SVGShape {
 
@@ -34,12 +34,17 @@ public interface SVGShape {
         return true;
     }
 
-    default @NotNull Shape shape(@NotNull MeasureContext measureContext) {
-        return shape(measureContext, true);
+    default @NotNull Shape shape(@NotNull RenderContext context) {
+        return shape(context, true);
     }
 
     @NotNull
-    Shape shape(@NotNull MeasureContext measureContext, boolean validate);
+    Shape shape(@NotNull RenderContext context, boolean validate);
 
-    Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate);
+    @NotNull
+    Rectangle2D bounds(@NotNull RenderContext context, boolean validate);
+
+    default boolean usesOptimizedBoundsCalculation() {
+        return true;
+    }
 }

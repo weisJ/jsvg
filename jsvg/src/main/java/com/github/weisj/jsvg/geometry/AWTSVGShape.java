@@ -29,6 +29,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class AWTSVGShape implements MeasurableShape {
     public static final SVGShape EMPTY = new AWTSVGShape(new Rectangle(), 0f);
@@ -47,12 +48,12 @@ public class AWTSVGShape implements MeasurableShape {
     }
 
     @Override
-    public @NotNull Shape shape(@NotNull MeasureContext measureContext, boolean validate) {
+    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
         return shape;
     }
 
     @Override
-    public Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
+    public @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
         if (bounds == null) bounds = shape.getBounds2D();
         return bounds;
     }

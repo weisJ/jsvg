@@ -28,7 +28,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.SVGShape;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
 
@@ -38,22 +38,22 @@ public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
     }
 
     @Override
-    default @NotNull Shape shape(@NotNull MeasureContext measureContext, boolean validate) {
+    default @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
         GeneralPath shape = new GeneralPath();
         for (E child : children()) {
             if (!(child instanceof HasShape)) continue;
-            Shape childShape = ((HasShape) child).shape().shape(measureContext, validate);
+            Shape childShape = ((HasShape) child).shape().shape(context, validate);
             shape.append(childShape, false);
         }
         return shape;
     }
 
     @Override
-    default Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate) {
+    default @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
         Rectangle2D bounds = new Rectangle2D.Float();
         for (E child : children()) {
             if (!(child instanceof HasShape)) continue;
-            Rectangle2D childBounds = ((HasShape) child).shape().bounds(measureContext, validate);
+            Rectangle2D childBounds = ((HasShape) child).shape().bounds(context, validate);
             Rectangle2D.union(bounds, childBounds, bounds);
         }
         return bounds;

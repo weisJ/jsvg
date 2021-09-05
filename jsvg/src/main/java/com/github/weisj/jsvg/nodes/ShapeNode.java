@@ -64,8 +64,10 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
     @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
         MeasureContext measureContext = context.measureContext();
-        Shape paintShape = shape.shape(measureContext);
-        Rectangle2D bounds = shape.bounds(measureContext, false);
+        Shape paintShape = shape.shape(context);
+        Rectangle2D bounds = shape.usesOptimizedBoundsCalculation()
+                ? shape.bounds(context, false)
+                : paintShape.getBounds2D();
         float pathLengthFactor = 1f;
         if (pathLength.isSpecified()) {
             double effectiveLength = pathLength.resolveLength(measureContext);

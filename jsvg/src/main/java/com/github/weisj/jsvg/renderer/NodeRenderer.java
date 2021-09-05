@@ -88,7 +88,7 @@ public final class NodeRenderer {
                 // Elements with an invalid clip shouldn't be painted
                 if (!childClip.isValid()) return null;
                 // Todo: Is this using the correct measuring context?
-                Shape childClipShape = childClip.shape(context.measureContext());
+                Shape childClipShape = childClip.shape(context);
                 if (CLIP_DEBUG) {
                     childGraphics.setColor(Color.MAGENTA);
                     childGraphics.draw(childClipShape);

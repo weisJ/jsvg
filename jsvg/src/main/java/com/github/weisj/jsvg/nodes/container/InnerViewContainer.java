@@ -59,9 +59,10 @@ public abstract class InnerViewContainer extends RenderableContainerNode impleme
         return new Point2D.Float(0, 0);
     }
 
-    public @NotNull FloatSize size(@NotNull MeasureContext context) {
+    public @NotNull FloatSize size(@NotNull RenderContext context) {
+        MeasureContext measure = context.measureContext();
         if (width.isSpecified() && height.isSpecified()) {
-            return new FloatSize(width.resolveWidth(context), height.resolveHeight(context));
+            return new FloatSize(width.resolveWidth(measure), height.resolveHeight(measure));
         }
         Rectangle2D bounds = bounds(context, true);
         return new FloatSize((float) bounds.getWidth(), (float) bounds.getHeight());
@@ -107,14 +108,14 @@ public abstract class InnerViewContainer extends RenderableContainerNode impleme
             if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth() && useSiteViewBox.hasSpecifiedHeight()) {
                 size = useSiteViewBox.size();
             } else {
-                size = size(measureContext);
+                size = size(context);
                 if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth()) size.width = useSiteViewBox.width;
                 if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedHeight()) size.height = useSiteViewBox.height;
             }
             AffineTransform viewTransform = preserveAspectRatio.computeViewPortTransform(size, viewBox);
             g.transform(viewTransform);
         } else {
-            size = size(measureContext);
+            size = size(context);
         }
         FloatSize viewSize = viewBox != null ? viewBox.size() : size;
 
