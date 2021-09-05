@@ -23,32 +23,23 @@ package com.github.weisj.jsvg.nodes;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.container.RenderableContainerNode;
-import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.nodes.text.Text;
 
 /**
- * As jsvg is only a static renderer without interaction the anchor tag behaves just as if it were a
- * group.
+ * There currently isn't eny mechanism to instantiate a view. Therefore
+ * this element is a meta node for now.
  */
-@ElementCategories(Category.Container)
+@ElementCategories({/* None */})
 @PermittedContent(
-    categories = {Category.Container, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient,
-            Category.Animation},
-    /*
-     * <altGlyphDef> <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
-     * <marker>, <mask>, <pattern>, <script>, <switch>
-     */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Style.class, Text.class, View.class}
+    categories = Category.Descriptive
 )
-public final class Anchor extends RenderableContainerNode implements ShapedContainer<SVGNode> {
-    public static final String TAG = "a";
+public class View extends MetaSVGNode {
+    public static final String TAG = "view";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 }

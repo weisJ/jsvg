@@ -77,6 +77,7 @@ public class SVGLoader {
         nodeMap.put(TextSpan.TAG, TextSpan::new);
         nodeMap.put(Title.TAG, Title::new);
         nodeMap.put(Use.TAG, Use::new);
+        nodeMap.put(View.TAG, View::new);
         /* @formatter:off
          * Todo
          *  - Filters (et al.)
