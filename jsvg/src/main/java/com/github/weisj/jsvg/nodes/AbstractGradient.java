@@ -32,14 +32,14 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.SpreadMethod;
-import com.github.weisj.jsvg.attributes.paint.GradientUnits;
+import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 
 abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends ContainerNode implements SVGPaint {
     protected AffineTransform gradientTransform;
-    protected GradientUnits gradientUnits;
+    protected UnitType gradientUnits;
     protected SpreadMethod spreadMethod;
 
     private @NotNull Color[] colors;
@@ -60,13 +60,14 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         Self template = parseTemplate(attributeNode);
 
         gradientUnits = attributeNode.getEnum("gradientUnits",
-                template != null ? template.gradientUnits : GradientUnits.ObjectBoundingBox);
+                template != null ? template.gradientUnits : UnitType.ObjectBoundingBox);
+        spreadMethod = attributeNode.getEnum("spreadMethod",
+                template != null ? template.spreadMethod : SpreadMethod.Pad);
+
         gradientTransform = attributeNode.parseTransform("gradientTransform");
         if (gradientTransform == null && template != null)
             gradientTransform = template.gradientTransform;
 
-        spreadMethod = template != null ? template.spreadMethod : SpreadMethod.Pad;
-        spreadMethod = attributeNode.getEnum("spreadMethod", spreadMethod);
 
         List<Stop> stops = childrenOfType(Stop.class);
         if (stops.size() == 0 && template != null) {
@@ -137,7 +138,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     protected @NotNull AffineTransform computeViewTransform(@NotNull Rectangle2D bounds) {
         AffineTransform viewTransform = new AffineTransform();
 
-        if (gradientUnits == GradientUnits.ObjectBoundingBox) {
+        if (gradientUnits == UnitType.ObjectBoundingBox) {
             viewTransform.setToTranslation(bounds.getX(), bounds.getY());
             viewTransform.scale(bounds.getWidth(), bounds.getHeight());
         }

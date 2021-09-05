@@ -19,11 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.paint;
+package com.github.weisj.jsvg.attributes;
 
-import com.github.weisj.jsvg.attributes.Default;
-
-public enum GradientUnits {
+public enum UnitType {
     UserSpaceOnUse,
     @Default
     ObjectBoundingBox
