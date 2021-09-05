@@ -22,15 +22,18 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.util.ReversePathIterator;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -41,12 +44,20 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
     private Length pathLength;
     private MeasurableShape shape;
 
+    private Marker markerStart;
+    private Marker markerMid;
+    private Marker markerEnd;
+
     @Override
     public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         pathLength = attributeNode.getLength("pathLength", Length.UNSPECIFIED);
         paintContext = PaintContext.parse(attributeNode);
         shape = buildShape(attributeNode);
+
+        markerStart = attributeNode.getElementByHref(Marker.class, "marker-start");
+        markerMid = attributeNode.getElementByHref(Marker.class, "marker-mid");
+        markerEnd = attributeNode.getElementByHref(Marker.class, "marker-end");
     }
 
     protected abstract @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode);
@@ -76,5 +87,85 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
         }
         ShapeRenderer.renderShape(context, paintContext, g, paintShape, bounds,
                 shape.canBeFilled(), true, pathLengthFactor);
+
+        renderMarkers(context, paintShape, g);
+    }
+
+    protected void renderMarkers(@NotNull RenderContext context, @NotNull Shape shape, @NotNull Graphics2D g) {
+        if (markerStart == null && markerMid == null && markerEnd == null) return;
+        if (markerStart != null) {
+            renderMarkers(context, g, shape.getPathIterator(null),
+                    markerStart, markerMid, markerEnd);
+        } else {
+            // use reverse path iterator. If there is no markerMid this avoids stepping through
+            // the complete path iterator.
+            renderMarkers(context, g, new ReversePathIterator(shape.getPathIterator(null)),
+                    markerEnd, markerMid, markerStart);
+        }
+    }
+
+    protected boolean shouldPaintStartEndMarkersInMiddle() {
+        return true;
+    }
+
+    private void renderMarkers(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull PathIterator iterator,
+            @Nullable Marker start, @Nullable Marker mid, @Nullable Marker end) {
+        float[] args = new float[6];
+        float xStart = 0;
+        float yStart = 0;
+
+        // Todo: Marker orientation
+
+        boolean first = true;
+        boolean onlyFirst = mid == null && end == null;
+        boolean startEndInMiddle = shouldPaintStartEndMarkersInMiddle();
+        while (!iterator.isDone()) {
+            int type = iterator.currentSegment(args);
+            iterator.next();
+
+            if (!first && onlyFirst) return;
+
+            if (first && type != PathIterator.SEG_MOVETO) {
+                paintSingleMarker(context, g, start, xStart, yStart);
+                first = false;
+            }
+
+            Marker marker = mid;
+            if (first) marker = start;
+            if (iterator.isDone()) marker = end;
+
+            first = false;
+
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    xStart = args[0];
+                    yStart = args[1];
+                    if (startEndInMiddle) marker = start;
+                    paintSingleMarker(context, g, marker, xStart, yStart);
+                    break;
+                case PathIterator.SEG_LINETO:
+                    paintSingleMarker(context, g, marker, args[0], args[1]);
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    paintSingleMarker(context, g, marker, args[2], args[3]);
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    paintSingleMarker(context, g, marker, args[4], args[5]);
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    if (startEndInMiddle) marker = end;
+                    paintSingleMarker(context, g, marker, xStart, yStart);
+                    break;
+            }
+        }
+    }
+
+    private void paintSingleMarker(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @Nullable Marker marker, float x, float y) {
+        if (marker == null) return;
+        Graphics2D markerGraphics = (Graphics2D) g.create();
+        markerGraphics.translate(x, y);
+        marker.render(context, markerGraphics);
     }
 }

@@ -73,7 +73,7 @@ public class AttributeNode {
         return attributes;
     }
 
-    public <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
+    private <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
         if (id == null) return null;
         // Todo: Look up in spec how elements should be resolved if multiple elements have the same id.
         SVGNode node = namedElements.get(id);
@@ -81,13 +81,14 @@ public class AttributeNode {
     }
 
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
-        return getElementByHref(type, AttributeParser.parseUrl(value));
+        String url = AttributeParser.parseUrl(value);
+        if (url != null && url.startsWith("#")) url = url.substring(1);
+        return getElementById(type, url);
     }
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @Nullable String value) {
         if (value == null) return null;
-        if (!value.startsWith("#")) return null;
-        return getElementById(type, value.substring(1));
+        return getElementByUrl(type, value);
     }
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @NotNull Category category,

@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
