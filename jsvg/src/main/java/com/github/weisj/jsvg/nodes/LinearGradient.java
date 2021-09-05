@@ -68,7 +68,7 @@ public final class LinearGradient extends AbstractGradient<LinearGradient> {
         Point2D.Float pt2 = new Point2D.Float(x2, y2);
         if (pt1.equals(pt2)) return gradColors[0];
 
-        return new LinearGradientPaint(pt1, pt2, gradOffsets, gradColors, spreadMethod,
+        return new LinearGradientPaint(pt1, pt2, gradOffsets, gradColors, spreadMethod.cycleMethod(),
                 MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
     }
 

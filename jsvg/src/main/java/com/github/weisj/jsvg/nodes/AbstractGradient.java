@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
+import com.github.weisj.jsvg.attributes.SpreadMethod;
 import com.github.weisj.jsvg.attributes.paint.GradientUnits;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
@@ -39,7 +40,7 @@ import com.github.weisj.jsvg.nodes.container.ContainerNode;
 abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends ContainerNode implements SVGPaint {
     protected AffineTransform gradientTransform;
     protected GradientUnits gradientUnits;
-    protected MultipleGradientPaint.CycleMethod spreadMethod;
+    protected SpreadMethod spreadMethod;
 
     private @NotNull Color[] colors;
     private @Percentage float[] offsets;
@@ -64,15 +65,8 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         if (gradientTransform == null && template != null)
             gradientTransform = template.gradientTransform;
 
-        spreadMethod = template != null
-                ? template.spreadMethod
-                : MultipleGradientPaint.CycleMethod.NO_CYCLE;
-        String spreadMethodStr = attributeNode.getValue("spreadMethod");
-        if ("repeat".equalsIgnoreCase(spreadMethodStr)) {
-            spreadMethod = MultipleGradientPaint.CycleMethod.REPEAT;
-        } else if ("reflect".equalsIgnoreCase(spreadMethodStr)) {
-            spreadMethod = MultipleGradientPaint.CycleMethod.REFLECT;
-        }
+        spreadMethod = template != null ? template.spreadMethod : SpreadMethod.Pad;
+        spreadMethod = attributeNode.getEnum("spreadMethod", spreadMethod);
 
         List<Stop> stops = childrenOfType(Stop.class);
         if (stops.size() == 0 && template != null) {
@@ -100,8 +94,8 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             if (i > 0) {
                 // Keep track whether the provided colors and offsets are actually different.
                 realGradient = realGradient
-                    || stopOffset > stops.get(i - 1).offset()
-                    || !stopColor.equals(colors[i - 1]);
+                        || stopOffset > stops.get(i - 1).offset()
+                        || !stopColor.equals(colors[i - 1]);
             }
 
             if (i > 0 && stopOffset <= offsets[i - 1]) {

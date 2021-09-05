@@ -68,7 +68,7 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
             @Percentage float[] gradOffsets, @NotNull Color[] gradColors) {
         Point2D.Float pt1 = new Point2D.Float(cy, cy);
         Point2D.Float pt2 = new Point2D.Float(fx, fy);
-        return new RadialGradientPaint(pt1, fr, pt2, gradOffsets, gradColors, spreadMethod,
+        return new RadialGradientPaint(pt1, fr, pt2, gradOffsets, gradColors, spreadMethod.cycleMethod(),
                 MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
     }
 
