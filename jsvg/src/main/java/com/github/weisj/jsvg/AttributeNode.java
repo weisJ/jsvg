@@ -40,6 +40,10 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 
 public class AttributeNode {
+    private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
+    private static final Length Center = new Length(Unit.PERCENTAGE, 50f);
+    private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);
+
     private final @NotNull String tagName;
     private final @NotNull Map<String, String> attributes;
     private final @Nullable AttributeNode parent;
@@ -49,12 +53,24 @@ public class AttributeNode {
             @Nullable AttributeNode parent,
             @NotNull Map<@NotNull String, @NotNull SVGNode> namedElements) {
         this.tagName = tagName;
-        this.attributes = attributes;
+        this.attributes = preprocessAttributes(attributes);
         this.parent = parent;
         this.namedElements = namedElements;
         if (attributes.containsKey("style")) {
             SVGLoader.LOGGER.warning("<style> not yet implemented.");
         }
+    }
+
+    private static @NotNull Map<String, String> preprocessAttributes(@NotNull Map<String, String> attributes) {
+        String styleStr = attributes.get("style");
+        if (styleStr != null) {
+            String[] styles = styleStr.split(";");
+            for (String style : styles) {
+                String[] styleDef = style.split(":", 2);
+                attributes.put(styleDef[0].trim(), styleDef[1].trim());
+            }
+        }
+        return attributes;
     }
 
     public <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
@@ -140,6 +156,28 @@ public class AttributeNode {
     @Contract("_,!null -> !null")
     private @Nullable Length getLengthInternal(@NotNull String key, @Nullable Length fallback) {
         return AttributeParser.parseLength(getValue(key), fallback);
+    }
+
+    public @NotNull Length getHorizontalReferenceLength(@NotNull String key) {
+        return parseReferenceLength(key, "left", "right");
+    }
+
+    public @NotNull Length getVerticalReferenceLength(@NotNull String key) {
+        return parseReferenceLength(key, "top", "bottom");
+    }
+
+    private @NotNull Length parseReferenceLength(@NotNull String key, @NotNull String topLeft,
+            @NotNull String bottomRight) {
+        String value = getValue(key);
+        if (topLeft.equals(value)) {
+            return TopOrLeft;
+        } else if ("center".equals(value)) {
+            return Center;
+        } else if (bottomRight.equals(value)) {
+            return BottomOrRight;
+        } else {
+            return AttributeParser.parseLength(value, Length.ZERO);
+        }
     }
 
     public @Percentage float getPercentage(@NotNull String key, @Percentage float fallback) {
