@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 
@@ -98,11 +99,21 @@ public final class TextPath extends TextContainer {
     }
 
     @Override
+    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+        GeneralPath textPath = new GeneralPath();
+        appendTextShape(createCursor(context), textPath, context);
+        return textPath;
+    }
+
+    @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        PathGlyphCursor cursor = new PathGlyphCursor(
+        renderSegment(createCursor(context), context, g);
+    }
+
+    private @NotNull PathGlyphCursor createCursor(@NotNull RenderContext context) {
+        return new PathGlyphCursor(
                 createPathIterator(context),
                 startOffset.resolveLength(context.measureContext()));
-        renderSegment(cursor, context, g);
     }
 
     @Override
@@ -152,7 +163,7 @@ public final class TextPath extends TextContainer {
 
     private @NotNull PathIterator createPathIterator(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
-        Shape path = pathShape.shape(measureContext);
+        Shape path = pathShape.shape(context);
         // For fonts this is a good enough approximation
         float flatness = 0.1f * measureContext.ex();
         switch (side) {

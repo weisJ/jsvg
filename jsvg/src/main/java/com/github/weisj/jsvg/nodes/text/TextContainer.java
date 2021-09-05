@@ -22,6 +22,8 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +46,7 @@ import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
-        implements TextSegment.RenderableSegment, HasShape {
+        implements TextSegment.RenderableSegment, HasShape, SVGShape {
     private final List<TextSegment> segments = new ArrayList<>();
 
     protected AttributeFontSpec fontSpec;
@@ -119,6 +121,41 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
 
     @Override
     public @NotNull SVGShape shape() {
-        return null;
+        return this;
+    }
+
+    @Override
+    public boolean usesOptimizedBoundsCalculation() {
+        return false;
+    }
+
+    public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull GeneralPath textShape,
+            @NotNull RenderContext context) {
+        SVGFont font = context.font(null);
+        GlyphCursor localCursor = createLocalCursor(context, cursor);
+
+        for (TextSegment segment : children()) {
+            RenderContext currentContext = context;
+            if (segment instanceof Renderable) {
+                if (!((Renderable) segment).isVisible(context)) continue;
+                currentContext = NodeRenderer.setupRenderContext(segment, context);
+            }
+            if (segment instanceof StringTextSegment) {
+                Shape glyphRun = GlyphRenderer.layoutGlyphRun((StringTextSegment) segment, localCursor, font,
+                        currentContext.measureContext());
+                textShape.append(glyphRun, false);
+            } else if (segment instanceof RenderableSegment) {
+                ((RenderableSegment) segment).appendTextShape(localCursor, textShape, currentContext);
+            } else {
+                throw new IllegalStateException("Can't compute shape of segment " + segment);
+            }
+        }
+
+        cleanUpLocalCursor(cursor, localCursor);
+    }
+
+    @Override
+    public @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
+        return shape(context, validate).getBounds2D();
     }
 }

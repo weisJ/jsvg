@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
+import java.awt.geom.GeneralPath;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -30,5 +31,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 interface TextSegment {
     interface RenderableSegment extends TextSegment {
         void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g);
+
+        void appendTextShape(@NotNull GlyphCursor cursor, @NotNull GeneralPath textShape,
+                @NotNull RenderContext context);
     }
 }
