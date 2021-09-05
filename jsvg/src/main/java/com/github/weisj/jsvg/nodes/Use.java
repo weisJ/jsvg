@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.container.InnerViewContainer;
+import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
@@ -123,11 +123,11 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
 
             try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, g, true)) {
                 if (info == null) return;
-                if (referencedNode instanceof InnerViewContainer) {
+                if (referencedNode instanceof CommonInnerViewContainer) {
                     ViewBox targetViewBox = new ViewBox(0, 0, Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
                     if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
                     if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
-                    ((InnerViewContainer) referencedNode).renderByUse(targetViewBox, info.context, info.g);
+                    ((CommonInnerViewContainer) referencedNode).renderAtLocation(targetViewBox, info.context, info.g);
                 } else {
                     info.renderable.render(info.context, info.g);
                 }

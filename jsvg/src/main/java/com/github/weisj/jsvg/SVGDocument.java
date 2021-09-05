@@ -78,6 +78,6 @@ public class SVGDocument {
             g.setColor(Color.MAGENTA);
             g.drawRect(0, 0, (int) bounds.width - 1, (int) bounds.height - 1);
         }
-        root.renderByUse(bounds, context, g);
+        root.renderAtLocation(bounds, context, g);
     }
 }

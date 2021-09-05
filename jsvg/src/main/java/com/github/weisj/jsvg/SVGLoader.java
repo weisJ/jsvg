@@ -61,6 +61,7 @@ public class SVGLoader {
         nodeMap.put(Image.TAG, Image::new);
         nodeMap.put(Line.TAG, Line::new);
         nodeMap.put(LinearGradient.TAG, LinearGradient::new);
+        nodeMap.put(Marker.TAG, Marker::new);
         nodeMap.put(Metadata.TAG, Metadata::new);
         nodeMap.put(Path.TAG, Path::new);
         nodeMap.put(Pattern.TAG, Pattern::new);

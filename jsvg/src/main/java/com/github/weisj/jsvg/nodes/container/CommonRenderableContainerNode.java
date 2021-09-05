@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.container;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;

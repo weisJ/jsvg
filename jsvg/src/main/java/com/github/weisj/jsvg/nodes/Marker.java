@@ -26,15 +26,18 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
+import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
-@ElementCategories({Category.Container, Category.Structural})
+@ElementCategories(Category.Container)
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
@@ -44,15 +47,24 @@ import com.github.weisj.jsvg.nodes.text.Text;
     anyOf = {Anchor.class, ClipPath.class, Image.class, Marker.class, Pattern.class, Style.class, Text.class,
             View.class}
 )
-public final class Symbol extends CommonInnerViewContainer {
-    public static final String TAG = "symbol";
+public final class Marker extends BaseInnerViewContainer {
+    public static final String TAG = "marker";
 
     private Length refX;
     private Length refY;
 
+    private UnitType markerUnits;
+    private Length markerHeight;
+    private Length markerWidth;
+
     @Override
     public @NotNull String tagName() {
         return TAG;
+    }
+
+    @Override
+    protected Point2D outerLocation(@NotNull MeasureContext context) {
+        return new Point2D.Float(0, 0);
     }
 
     @Override
@@ -61,10 +73,23 @@ public final class Symbol extends CommonInnerViewContainer {
     }
 
     @Override
+    public @NotNull FloatSize size(@NotNull RenderContext context) {
+        // Todo: respect markerUnits
+        MeasureContext measure = context.measureContext();
+        return new FloatSize(markerWidth.resolveWidth(measure), markerHeight.resolveHeight(measure));
+    }
+
+    @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         refX = attributeNode.getHorizontalReferenceLength("refX");
-        refY = attributeNode.getVerticalReferenceLength("refY");
+        refY = attributeNode.getHorizontalReferenceLength("refY");
+
+        // Todo: orient
+        // Todo: this actually uses userSpaceOnUse|strokeWidth
+        markerUnits = attributeNode.getEnum("markerUnits", UnitType.ObjectBoundingBox);
+        markerWidth = attributeNode.getLength("markerWidth", 3);
+        markerHeight = attributeNode.getLength("markerHeight", 3);
     }
 
     @Override

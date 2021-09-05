@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.container.InnerViewContainer;
+import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -36,12 +36,13 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
-     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
-     * <marker>, <mask>>, <script>, <switch>
+     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>, <mask>,
+     * <script>, <switch>
      */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Pattern.class, Style.class, Text.class, View.class}
+    anyOf = {Anchor.class, ClipPath.class, Image.class, Marker.class, Pattern.class, Style.class, Text.class,
+            View.class}
 )
-public final class SVG extends InnerViewContainer {
+public final class SVG extends CommonInnerViewContainer {
     public static final String TAG = "svg";
 
     private static final float FALLBACK_WIDTH = 300;

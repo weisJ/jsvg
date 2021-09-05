@@ -46,10 +46,11 @@ import com.github.weisj.jsvg.util.Todo;
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
-     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
-     * <marker>, <mask>, <script>, <switch>
+     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>, <mask>,
+     * <script>, <switch>
      */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Pattern.class, Style.class, Text.class, View.class}
+    anyOf = {Anchor.class, ClipPath.class, Image.class, Marker.class, Pattern.class, Style.class, Text.class,
+            View.class}
 )
 public final class Pattern extends ContainerNode implements SVGPaint {
     public static final String TAG = "pattern";
