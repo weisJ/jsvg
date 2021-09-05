@@ -101,6 +101,7 @@ class GlyphCursor {
 
         glyphOffset++;
 
+        // Todo: Also handle non-horizontal and bidi text
         // This assumes a horizontal baseline
         x += glyph.advance() + letterSpacing;
 
