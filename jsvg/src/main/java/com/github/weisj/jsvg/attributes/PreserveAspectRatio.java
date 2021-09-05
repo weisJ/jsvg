@@ -171,9 +171,16 @@ public final class PreserveAspectRatio {
     }
 
     public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation) {
+        return parse(preserveAspectRation, null);
+    }
+
+    public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation,
+            @Nullable PreserveAspectRatio fallback) {
         Align align = Align.xMidYMid;
         MeetOrSlice meetOrSlice = MeetOrSlice.Meet;
-        if (preserveAspectRation == null) return new PreserveAspectRatio(align, meetOrSlice);
+        if (preserveAspectRation == null) {
+            return fallback != null ? fallback : new PreserveAspectRatio(align, meetOrSlice);
+        }
         String[] components = AttributeParser.parseStringList(preserveAspectRation, false);
         if (components.length < 1 || components.length > 2)
             throw new IllegalArgumentException("Too many arguments specified: " + preserveAspectRation);

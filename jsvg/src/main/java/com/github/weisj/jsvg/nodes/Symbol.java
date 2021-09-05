@@ -42,9 +42,9 @@ import com.github.weisj.jsvg.nodes.text.Text;
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
      * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
-     * <marker>, <mask>, <pattern>, <script>, <switch>
+     * <marker>, <mask>, <script>, <switch>
      */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Style.class, Text.class, View.class}
+    anyOf = {Anchor.class, ClipPath.class, Image.class, Pattern.class, Style.class, Text.class, View.class}
 )
 public final class Symbol extends InnerViewContainer {
     public static final String TAG = "symbol";

@@ -63,6 +63,7 @@ public class SVGLoader {
         nodeMap.put(LinearGradient.TAG, LinearGradient::new);
         nodeMap.put(Metadata.TAG, Metadata::new);
         nodeMap.put(Path.TAG, Path::new);
+        nodeMap.put(Pattern.TAG, Pattern::new);
         nodeMap.put(Polygon.TAG, Polygon::new);
         nodeMap.put(Polyline.TAG, Polyline::new);
         nodeMap.put(RadialGradient.TAG, RadialGradient::new);
@@ -90,7 +91,6 @@ public class SVGLoader {
          *  - Marker
          *  - Mask
          *  - MissingGlyph? (deprecated)
-         *  - Pattern
          *  - Style
          *  - VKern? (deprecated)
          * @formatter:on

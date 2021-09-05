@@ -192,4 +192,9 @@ public class AttributeNode {
         if (href == null) return getValue("xlink:href");
         return href;
     }
+
+    public @Nullable ViewBox getViewBox() {
+        float[] viewBoxCords = getFloatList("viewBox");
+        return viewBoxCords.length == 4 ? new ViewBox(viewBoxCords) : null;
+    }
 }

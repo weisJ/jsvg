@@ -78,17 +78,12 @@ public abstract class InnerViewContainer extends RenderableContainerNode impleme
         super.build(attributeNode);
         x = attributeNode.getLength("x", 0);
         y = attributeNode.getLength("y", 0);
-        viewBox = parseViewBox(attributeNode);
+        viewBox = attributeNode.getViewBox();
         width = attributeNode.getLength("width",
                 viewBox != null ? Unit.Raw.valueOf(viewBox.width) : Length.UNSPECIFIED);
         height = attributeNode.getLength("height",
                 viewBox != null ? Unit.Raw.valueOf(viewBox.height) : Length.UNSPECIFIED);
         preserveAspectRatio = PreserveAspectRatio.parse(attributeNode.getValue("preserveAspectRatio"));
-    }
-
-    private @Nullable ViewBox parseViewBox(@NotNull AttributeNode attributeNode) {
-        float[] viewBoxCords = attributeNode.getFloatList("viewBox");
-        return viewBoxCords.length == 4 ? new ViewBox(viewBoxCords) : null;
     }
 
     @Override
