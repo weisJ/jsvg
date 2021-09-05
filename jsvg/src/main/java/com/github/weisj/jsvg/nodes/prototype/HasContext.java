@@ -34,8 +34,6 @@ import com.github.weisj.jsvg.renderer.PaintContext;
  */
 public interface HasContext {
 
-    // Todo: Make this something that knows how to mutate the RenderContext itself
-    // Todo: Make the current StyleContext an implementation of this.
     @NotNull
     PaintContext paintContext();
 

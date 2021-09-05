@@ -32,12 +32,11 @@ import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
-import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
 
 public abstract class CommonRenderableContainerNode<E> extends BaseRenderableContainerNode<E>
-        implements Renderable, HasContext, Transformable, HasClip {
+        implements Renderable, Transformable, HasClip {
 
     private AffineTransform transform;
     private @Nullable ClipPath clipPath;

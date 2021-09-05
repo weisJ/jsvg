@@ -29,9 +29,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.container.InnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.*;
 
 public final class NodeRenderer {
@@ -95,7 +95,9 @@ public final class NodeRenderer {
     }
 
     public static @NotNull RenderContext setupRenderContext(@NotNull Object node, @NotNull RenderContext context) {
-        MeasureContext measureContext = context.measureContext();
+        // Inner views are excluded, as they have to establish their own context with a separate viewBox.
+        if (node instanceof InnerViewContainer) return context;
+
         @Nullable PaintContext paintContext = null;
         @Nullable AttributeFontSpec fontSpec = null;
         @Nullable FontRenderContext fontRenderContext = null;
@@ -104,9 +106,14 @@ public final class NodeRenderer {
             fontSpec = ((HasContext) node).fontSpec();
             fontRenderContext = ((HasContext) node).fontRenderContext();
         }
-        @Nullable ViewBox viewBox = node instanceof MaybeHasViewBox
-                ? ((MaybeHasViewBox) node).viewBox(measureContext)
-                : null;
+        return context.deriveWith(paintContext, fontSpec, null, fontRenderContext);
+    }
+
+    public static @NotNull RenderContext setupInnerViewRenderContext(@NotNull InnerViewContainer node,
+            @NotNull ViewBox viewBox, @NotNull RenderContext context) {
+        PaintContext paintContext = node.paintContext();
+        AttributeFontSpec fontSpec = node.fontSpec();
+        FontRenderContext fontRenderContext = node.fontRenderContext();
         return context.deriveWith(paintContext, fontSpec, viewBox, fontRenderContext);
     }
 }

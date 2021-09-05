@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.container;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -37,12 +38,11 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.nodes.prototype.MaybeHasViewBox;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public abstract class InnerViewContainer extends RenderableContainerNode
-        implements MaybeHasViewBox, ShapedContainer<SVGNode> {
+public abstract class InnerViewContainer extends RenderableContainerNode implements ShapedContainer<SVGNode> {
     protected Length x;
     protected Length y;
     protected Length width;
@@ -68,14 +68,6 @@ public abstract class InnerViewContainer extends RenderableContainerNode
     }
 
     @Override
-    public @NotNull ViewBox viewBox(@NotNull MeasureContext measureContext) {
-        if (viewBox != null) return viewBox;
-        // If there is no viewBox specified we still have to establish a new frame with out current size.
-        // Only if we have no sizes (i.e. they are negative) we use the parent viewBox.
-        return new ViewBox(size(measureContext));
-    }
-
-    @Override
     public boolean isVisible(@NotNull RenderContext context) {
         return !width.isZero() && !height.isZero() && super.isVisible(context);
     }
@@ -94,6 +86,11 @@ public abstract class InnerViewContainer extends RenderableContainerNode
         preserveAspectRatio = PreserveAspectRatio.parse(attributeNode.getValue("preserveAspectRatio"));
     }
 
+    private @Nullable ViewBox parseViewBox(@NotNull AttributeNode attributeNode) {
+        float[] viewBoxCords = attributeNode.getFloatList("viewBox");
+        return viewBoxCords.length == 4 ? new ViewBox(viewBoxCords) : null;
+    }
+
     @Override
     public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
         renderByUse(null, context, g);
@@ -110,24 +107,28 @@ public abstract class InnerViewContainer extends RenderableContainerNode
         }
         g.translate(xPos, yPos);
 
+        FloatSize size;
         if (viewBox != null) {
-            FloatSize size;
             if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth() && useSiteViewBox.hasSpecifiedHeight()) {
                 size = useSiteViewBox.size();
             } else {
                 size = size(measureContext);
-                if (useSiteViewBox != null) {
-                    if (useSiteViewBox.hasSpecifiedWidth()) size.width = useSiteViewBox.width;
-                    if (useSiteViewBox.hasSpecifiedHeight()) size.height = useSiteViewBox.height;
-                }
+                if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth()) size.width = useSiteViewBox.width;
+                if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedHeight()) size.height = useSiteViewBox.height;
             }
-            System.out.println(size + " " + viewBox);
-            g.transform(preserveAspectRatio.computeViewPortTransform(size, viewBox));
+            g.clipRect(0, 0, (int) size.width, (int) size.height);
+            AffineTransform viewTransform = preserveAspectRatio.computeViewPortTransform(size, viewBox);
+            g.transform(viewTransform);
+        } else {
+            size = size(measureContext);
+            g.clipRect(0, 0, (int) size.width, (int) size.height);
         }
+        FloatSize viewSize = viewBox != null ? viewBox.size() : size;
 
         Point2D innerPos = innerLocation(measureContext);
         g.translate(innerPos.getX(), innerPos.getY());
-        g.clipRect(0, 0, (int) measureContext.viewWidth(), (int) measureContext.viewHeight());
-        super.render(context, g);
+
+        RenderContext innerContext = NodeRenderer.setupInnerViewRenderContext(this, new ViewBox(viewSize), context);
+        super.render(innerContext, g);
     }
 }

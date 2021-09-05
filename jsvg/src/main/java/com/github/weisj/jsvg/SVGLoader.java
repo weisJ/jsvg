@@ -262,7 +262,7 @@ public class SVGLoader {
 
         @NotNull SVGDocument getDocument() {
             rootNode.build();
-            return new SVGDocument(rootNode.node);
+            return new SVGDocument((SVG) rootNode.node);
         }
     }
 
