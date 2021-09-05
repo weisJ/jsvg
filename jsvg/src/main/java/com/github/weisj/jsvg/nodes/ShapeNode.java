@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -38,7 +39,7 @@ import com.github.weisj.jsvg.renderer.ShapeRenderer;
 public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
     private PaintContext paintContext;
     private Length pathLength;
-    private SVGShape shape;
+    private MeasurableShape shape;
 
     @Override
     public final void build(@NotNull AttributeNode attributeNode) {
@@ -48,7 +49,7 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
         shape = buildShape(attributeNode);
     }
 
-    protected abstract @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode);
+    protected abstract @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode);
 
     @Override
     public @NotNull SVGShape shape() {

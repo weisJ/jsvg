@@ -19,32 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.geometry;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.geometry.MeasurableShape;
-import com.github.weisj.jsvg.geometry.SVGCircle;
-import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
-import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-@ElementCategories({Category.BasicShape, Category.Graphic, Category.Shape})
-@PermittedContent(categories = {Category.Animation, Category.Descriptive})
-public final class Circle extends ShapeNode {
-    public static final String TAG = "circle";
+public interface MeasurableLength {
+    double pathLength(@NotNull MeasureContext measureContext);
 
-    @Override
-    public final @NotNull String tagName() {
-        return TAG;
-    }
-
-    @Override
-    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
-        return new SVGCircle(
-                attributeNode.getLength("cx", 0),
-                attributeNode.getLength("cy", 0),
-                attributeNode.getLength("r", 0));
-    }
 }

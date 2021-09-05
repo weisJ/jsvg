@@ -58,9 +58,4 @@ public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
         }
         return bounds;
     }
-
-    @Override
-    default double pathLength(@NotNull MeasureContext measureContext) {
-        throw new IllegalStateException("Cannot calculate the length of a container-shape");
-    }
 }

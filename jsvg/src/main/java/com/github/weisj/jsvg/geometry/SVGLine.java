@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public class SVGLine implements SVGShape {
+public class SVGLine implements MeasurableShape {
 
     private final @NotNull Line2D.Float line = new Line2D.Float();
     private final Length x1;

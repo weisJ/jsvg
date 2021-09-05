@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public class SVGRectangle implements SVGShape {
+public class SVGRectangle implements MeasurableShape {
 
     private final @NotNull Rectangle2D.Float rect = new Rectangle2D.Float();
     private final @NotNull Length x;

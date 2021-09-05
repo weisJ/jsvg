@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public class SVGRoundRectangle implements SVGShape {
+public class SVGRoundRectangle implements MeasurableShape {
 
     private final @NotNull RoundRectangle2D.Float rect = new RoundRectangle2D.Float();
     private final @NotNull Length x;

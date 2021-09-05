@@ -30,11 +30,11 @@ import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.Inherit;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
-import com.github.weisj.jsvg.geometry.SVGShape;
+import com.github.weisj.jsvg.geometry.MeasurableShape;
 
 public abstract class AbstractPolyShape extends ShapeNode {
     @Override
-    protected final @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode) {
+    protected final @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
         // Todo: fill-rule should be in RenderContext
         FillRule fillRule = FillRule.parse(attributeNode.getValue("fill-rule", Inherit.Yes));
         float[] points = attributeNode.getFloatList("points");

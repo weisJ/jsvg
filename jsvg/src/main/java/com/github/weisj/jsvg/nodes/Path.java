@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.Inherit;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
-import com.github.weisj.jsvg.geometry.SVGShape;
+import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -46,7 +46,7 @@ public final class Path extends ShapeNode {
     }
 
     @Override
-    protected @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode) {
+    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
         FillRule fillRule = FillRule.parse(attributeNode.getValue("fill-rule", Inherit.Yes));
         String pathValue = attributeNode.getValue("d");
         if (pathValue == null) return new AWTSVGShape(new Rectangle());

@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public class SVGEllipse implements SVGShape {
+public class SVGEllipse implements MeasurableShape {
 
     private final @NotNull Ellipse2D.Float ellipse = new Ellipse2D.Float();
     private final @NotNull Length cx;

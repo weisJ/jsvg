@@ -42,6 +42,4 @@ public interface SVGShape {
     Shape shape(@NotNull MeasureContext measureContext, boolean validate);
 
     Rectangle2D bounds(@NotNull MeasureContext measureContext, boolean validate);
-
-    double pathLength(@NotNull MeasureContext measureContext);
 }

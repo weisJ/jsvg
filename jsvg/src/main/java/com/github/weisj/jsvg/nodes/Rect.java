@@ -25,9 +25,9 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGRectangle;
 import com.github.weisj.jsvg.geometry.SVGRoundRectangle;
-import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -44,7 +44,7 @@ public final class Rect extends ShapeNode {
     }
 
     @Override
-    protected @NotNull SVGShape buildShape(@NotNull AttributeNode node) {
+    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode node) {
         Length x = node.getLength("x", 0);
         Length y = node.getLength("y", 0);
         Length width = node.getLength("width", 0);
