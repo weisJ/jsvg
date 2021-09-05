@@ -56,8 +56,8 @@ public class SVGDocument {
         float defaultEx = SVGFont.exFromEm(defaultEm);
 
         MeasureContext initialMeasure = bounds != null
-                ? new MeasureContext(bounds.width, bounds.height, defaultEm, defaultEx)
-                : new MeasureContext(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, defaultEm, defaultEx);
+                ? MeasureContext.createInitial(bounds.width, bounds.height, defaultEm, defaultEx)
+                : MeasureContext.createInitial(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, defaultEm, defaultEx);
         if (bounds == null) bounds = new ViewBox(root.size(initialMeasure));
 
         // A transform on an <svg> element should behave as if it were applied on the parent.

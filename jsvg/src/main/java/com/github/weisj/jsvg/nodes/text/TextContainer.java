@@ -34,14 +34,17 @@ import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
+import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> implements TextSegment.RenderableSegment {
+abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
+        implements TextSegment.RenderableSegment, HasShape {
     private final List<TextSegment> segments = new ArrayList<>();
 
     protected AttributeFontSpec fontSpec;
@@ -112,5 +115,10 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment> im
         }
 
         cleanUpLocalCursor(cursor, localCursor);
+    }
+
+    @Override
+    public @NotNull SVGShape shape() {
+        return null;
     }
 }

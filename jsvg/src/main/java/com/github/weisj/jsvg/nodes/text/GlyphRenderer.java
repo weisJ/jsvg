@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -41,18 +42,27 @@ final class GlyphRenderer {
     static void renderGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
             @NotNull RenderContext context, @NotNull Graphics2D g) {
         MeasureContext measure = context.measureContext();
-        FontRenderContext frc = context.fontRenderContext();
 
         // Use pathLengthFactor of 1 as pathLength isn't allowed on text
         // Otherwise we would have to do expensive computations for the length of a text outline.
         Stroke stroke = context.stroke(1f, null);
 
-        float letterSpacing = frc.letterSpacing != null
-                ? frc.letterSpacing.resolveLength(measure)
-                : 0f;
         // Todo: Gradients for text are complicated. If possible computing the complete text bounds
         // should be avoided. Rather pass the current transform along to the gradient.
         Rectangle2D bounds = new Rectangle();
+
+        Shape glyphRun = layoutGlyphRun(segment, cursor, font, measure);
+        ShapeRenderer.renderShape(context, g, glyphRun, bounds, stroke, true, true);
+    }
+
+    static Shape layoutGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
+            @NotNull MeasureContext measure) {
+        FontRenderContext frc = measure.fontRenderContext();
+        float letterSpacing = frc.letterSpacing != null
+                ? frc.letterSpacing.resolveLength(measure)
+                : 0f;
+
+        GeneralPath glyphPath = new GeneralPath();
 
         for (char codepoint : segment.codepoints()) {
             Glyph glyph = font.codepointGlyph(codepoint);
@@ -62,16 +72,12 @@ final class GlyphRenderer {
             if (!glyph.isRendered()) continue;
             Shape glyphOutline = glyph.glyphOutline();
             Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
-            ShapeRenderer.renderShape(context, g, renderPath, bounds, stroke, true, true);
-
-            if (DEBUG) paintDebugGlyph(g, glyphTransform, glyphOutline);
+            glyphPath.append(renderPath, false);
+            if (DEBUG) {
+                glyphPath.append(glyphTransform.createTransformedShape(glyphOutline.getBounds2D()), false);
+            }
         }
-    }
 
-    private static void paintDebugGlyph(@NotNull Graphics2D g, @NotNull AffineTransform glyphTransform,
-            @NotNull Shape glyph) {
-        g.setColor(Color.MAGENTA);
-        g.setStroke(new BasicStroke(0.5f));
-        g.draw(glyphTransform.createTransformedShape(glyph.getBounds()));
+        return glyphPath;
     }
 }

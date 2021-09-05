@@ -43,25 +43,21 @@ public class RenderContext {
     private final @Nullable JComponent targetComponent;
     private final @NotNull MeasureContext measureContext;
     private final @NotNull PaintContext paintContext;
-    private final @NotNull FontRenderContext fontRenderContext;
     private final @NotNull MeasurableFontSpec fontSpec;
 
     public RenderContext(@Nullable JComponent targetComponent, @NotNull MeasureContext measureContext) {
         this(targetComponent,
                 PaintContext.createDefault(),
-                FontRenderContext.createDefault(),
                 measureContext,
                 MeasurableFontSpec.createDefault());
     }
 
     private RenderContext(@Nullable JComponent targetComponent,
             @NotNull PaintContext paintContext,
-            @NotNull FontRenderContext fontRenderContext,
             @NotNull MeasureContext measureContext,
             @NotNull MeasurableFontSpec fontSpec) {
         this.targetComponent = targetComponent;
         this.paintContext = paintContext;
-        this.fontRenderContext = fontRenderContext;
         this.measureContext = measureContext;
         this.fontSpec = fontSpec;
     }
@@ -72,7 +68,6 @@ public class RenderContext {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
-        FontRenderContext newFontRenderContext = fontRenderContext;
 
         if (context != null) {
             newPaintContext = new PaintContext(
@@ -86,15 +81,11 @@ public class RenderContext {
         if (attributeFontSpec != null) {
             newFontSpec = newFontSpec.derive(attributeFontSpec);
         }
-        if (frc != null) {
-            newFontRenderContext = newFontRenderContext.derive(frc);
-        }
 
         float em = newFontSpec.effectiveSize(measureContext);
         float ex = SVGFont.exFromEm(em);
-        MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
-        return new RenderContext(targetComponent, newPaintContext, newFontRenderContext,
-                newMeasureContext, newFontSpec);
+        MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex, frc);
+        return new RenderContext(targetComponent, newPaintContext, newMeasureContext, newFontSpec);
     }
 
     private @NotNull StrokeContext strokeContext() {
@@ -140,16 +131,11 @@ public class RenderContext {
         return FontResolver.resolve(this.fontSpec.derive(fontSpec), this.measureContext);
     }
 
-    public @NotNull FontRenderContext fontRenderContext() {
-        return fontRenderContext;
-    }
-
     @Override
     public String toString() {
         return "RenderContext{" +
                 "\n  measureContext=" + measureContext +
                 ",\n  paintContext=" + paintContext +
-                ",\n  fontRenderContext=" + fontRenderContext +
                 ",\n  fontSpec=" + fontSpec +
                 ",\n  targetComponent=" + targetComponent +
                 "\n}";

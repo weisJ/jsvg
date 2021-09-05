@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
@@ -35,15 +36,26 @@ public class MeasureContext {
     private final float vh;
     private final float em;
     private final float ex;
+    private final FontRenderContext fontRenderContext;
 
-    public MeasureContext(float vw, float vh, float em, float ex) {
+    public MeasureContext(float vw, float vh, float em, float ex, @NotNull FontRenderContext fontRenderContext) {
         this.vw = vw;
         this.vh = vh;
         this.em = em;
         this.ex = ex;
+        this.fontRenderContext = fontRenderContext;
     }
 
-    public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex) {
+    public static @NotNull MeasureContext createInitial(float vw, float vh, float em, float ex) {
+        return new MeasureContext(vw, vh, em, ex, FontRenderContext.createDefault());
+    }
+
+    public @NotNull FontRenderContext fontRenderContext() {
+        return fontRenderContext;
+    }
+
+    public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex,
+            @Nullable FontRenderContext frc) {
         if (viewBox == null && Length.isUnspecified(em) && Length.isUnspecified(ex)) return this;
         float newVw = vw;
         float newVh = vh;
@@ -54,7 +66,8 @@ public class MeasureContext {
         }
         float effectiveEm = Length.isUnspecified(em) ? this.em : em;
         float effectiveEx = Length.isUnspecified(ex) ? this.ex : ex;
-        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx);
+        FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
+        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, effectiveFrc);
     }
 
     public float viewWidth() {
