@@ -131,6 +131,10 @@ public class RenderContext {
         return FontResolver.resolve(this.fontSpec.derive(fontSpec), this.measureContext);
     }
 
+    public @NotNull MeasurableFontSpec fontSpec() {
+        return fontSpec;
+    }
+
     @Override
     public String toString() {
         return "RenderContext{" +

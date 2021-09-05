@@ -26,7 +26,7 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.attributes.MarkerUnitType;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -53,7 +53,7 @@ public final class Marker extends BaseInnerViewContainer {
     private Length refX;
     private Length refY;
 
-    private UnitType markerUnits;
+    private MarkerUnitType markerUnits;
     private Length markerHeight;
     private Length markerWidth;
 
@@ -74,9 +74,13 @@ public final class Marker extends BaseInnerViewContainer {
 
     @Override
     public @NotNull FloatSize size(@NotNull RenderContext context) {
-        // Todo: respect markerUnits
         MeasureContext measure = context.measureContext();
-        return new FloatSize(markerWidth.resolveWidth(measure), markerHeight.resolveHeight(measure));
+        if (markerUnits == MarkerUnitType.StrokeWidth) {
+            float strokeWidth = context.fontSpec().currentSize().resolveLength(measure);
+            return new FloatSize(markerWidth.raw() * strokeWidth, markerHeight.raw() * strokeWidth);
+        } else {
+            return new FloatSize(markerWidth.resolveWidth(measure), markerHeight.resolveHeight(measure));
+        }
     }
 
     @Override
@@ -85,9 +89,8 @@ public final class Marker extends BaseInnerViewContainer {
         refX = attributeNode.getHorizontalReferenceLength("refX");
         refY = attributeNode.getHorizontalReferenceLength("refY");
 
-        // Todo: orient
-        // Todo: this actually uses userSpaceOnUse|strokeWidth
-        markerUnits = attributeNode.getEnum("markerUnits", UnitType.ObjectBoundingBox);
+        // Todo: orient, Length needs to support angels for that (needs opt-in)
+        markerUnits = attributeNode.getEnum("markerUnits", MarkerUnitType.StrokeWidth);
         markerWidth = attributeNode.getLength("markerWidth", 3);
         markerHeight = attributeNode.getLength("markerHeight", 3);
     }
