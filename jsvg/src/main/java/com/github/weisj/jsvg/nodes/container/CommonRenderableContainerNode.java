@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
@@ -55,7 +54,7 @@ public abstract class CommonRenderableContainerNode<E> extends BaseRenderableCon
     }
 
     @Override
-    public final @Nullable Shape clipShape(@NotNull MeasureContext measureContext) {
-        return clipPath != null ? clipPath.shape(measureContext) : null;
+    public @Nullable ClipPath clipPath() {
+        return clipPath;
     }
 }

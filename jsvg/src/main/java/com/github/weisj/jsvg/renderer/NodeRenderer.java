@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
+import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.InnerViewContainer;
@@ -81,13 +82,18 @@ public final class NodeRenderer {
         if (renderable instanceof HasClip) {
             // Todo: When masks are implemented and we decide to paint to an off-screen buffer
             // we can handle clip shapes as if they were masks (with 1/0 values).
-            Shape childClip = ((HasClip) renderable).clipShape(context.measureContext());
+            ClipPath childClip = ((HasClip) renderable).clipPath();
+
             if (childClip != null) {
+                // Elements with an invalid clip shouldn't be painted
+                if (!childClip.isValid()) return null;
+                // Todo: Is this using the correct measuring context?
+                Shape childClipShape = childClip.shape(context.measureContext());
                 if (CLIP_DEBUG) {
                     childGraphics.setColor(Color.MAGENTA);
-                    childGraphics.draw(childClip);
+                    childGraphics.draw(childClipShape);
                 }
-                childGraphics.clip(childClip);
+                childGraphics.clip(childClipShape);
             }
         }
 

@@ -21,15 +21,12 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
-import java.awt.*;
-
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.ClipPath;
 
 public interface HasClip {
 
     @Nullable
-    Shape clipShape(@NotNull MeasureContext measureContext);
+    ClipPath clipPath();
 }

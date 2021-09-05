@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
@@ -38,10 +39,33 @@ import com.github.weisj.jsvg.nodes.text.Text;
 )
 public final class ClipPath extends ContainerNode implements ShapedContainer<SVGNode> {
     public static final String TAG = "clippath";
+    private boolean isValid;
 
     @Override
     public final @NotNull String tagName() {
         return TAG;
+    }
+
+    public boolean isValid() {
+        return isValid;
+    }
+
+    @Override
+    public void build(@NotNull AttributeNode attributeNode) {
+        super.build(attributeNode);
+        isValid = checkIsValid();
+    }
+
+    private boolean checkIsValid() {
+        for (SVGNode child : children()) {
+            if (!(child instanceof Use)) continue;
+            SVGNode referenced = ((Use) child).referencedNode();
+            if (referenced == null) continue;
+            if (!isAcceptableType(referenced)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

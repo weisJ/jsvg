@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -29,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
@@ -42,14 +40,8 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
 
     private @Nullable ClipPath clipPath;
 
-    protected @Nullable ClipPath clipPath() {
+    public @Nullable ClipPath clipPath() {
         return clipPath;
-    }
-
-    @Override
-    public @Nullable Shape clipShape(@NotNull MeasureContext context) {
-        ClipPath clip = clipPath();
-        return clip != null ? clip.shape(context) : null;
     }
 
     @Override

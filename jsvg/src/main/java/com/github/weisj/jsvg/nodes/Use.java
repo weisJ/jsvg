@@ -67,6 +67,10 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         return TAG;
     }
 
+    public @Nullable SVGNode referencedNode() {
+        return referencedNode;
+    }
+
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
         return super.isVisible(context) && referencedNode instanceof Renderable;

@@ -50,7 +50,7 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
         return true;
     }
 
-    private boolean isAcceptableType(@NotNull SVGNode node) {
+    protected boolean isAcceptableType(@NotNull SVGNode node) {
         PermittedContent allowedNodes = getClass().getAnnotation(PermittedContent.class);
         if (allowedNodes == null) {
             throw new IllegalStateException(
