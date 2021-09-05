@@ -94,24 +94,25 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         for (int i = 0; i < offsets.length; i++) {
             Stop stop = stops.get(i);
             // Clamp the offset
-            float offset = Math.max(0, Math.min(1, stop.offset()));
+            float stopOffset = Math.max(0, Math.min(1, stop.offset()));
+            Color stopColor = stop.color();
 
             if (i > 0) {
                 // Keep track whether the provided colors and offsets are actually different.
                 realGradient = realGradient
-                        || !colors[i].equals(colors[i - 1])
-                        || offset > stops.get(i - 1).offset();
+                    || stopOffset > stops.get(i - 1).offset()
+                    || !stopColor.equals(colors[i - 1]);
             }
 
-            if (i > 0 && offset <= offsets[i - 1]) {
+            if (i > 0 && stopOffset <= offsets[i - 1]) {
                 // The awt gradient implementations really don't like it if
                 // two offsets are equal. Hence we use the next possible float value instead as it will produce
                 // the same effect as if the equal values were used.
-                offset = Math.nextAfter(offset, Double.MAX_VALUE);
+                stopOffset = Math.nextAfter(stopOffset, Double.MAX_VALUE);
             }
 
-            offsets[i] = offset;
-            colors[i] = stop.color();
+            offsets[i] = stopOffset;
+            colors[i] = stopColor;
         }
 
         if (!realGradient && colors.length > 0) {
