@@ -31,6 +31,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
+import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -43,11 +46,11 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 public final class RadialGradient extends AbstractGradient<RadialGradient> {
     public static final String TAG = "radialgradient";
 
-    private @Percentage float cx;
-    private @Percentage float cy;
-    private @Percentage float fr;
-    private @Percentage float fx;
-    private @Percentage float fy;
+    private Length cx;
+    private Length cy;
+    private Length fr;
+    private Length fx;
+    private Length fy;
 
     @Override
     public final @NotNull String tagName() {
@@ -56,19 +59,20 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
 
     @Override
     protected void buildGradient(@NotNull AttributeNode attributeNode, @Nullable RadialGradient template) {
-        cx = attributeNode.getPercentage("cx", template != null ? template.cx : 0.5f);
-        cy = attributeNode.getPercentage("cy", template != null ? template.cy : 0.5f);
-        fr = attributeNode.getPercentage("fr", template != null ? template.fr : 0f);
-        fx = attributeNode.getPercentage("fx", template != null ? template.fx : cx);
-        fy = attributeNode.getPercentage("fy", template != null ? template.fy : cy);
+        cx = attributeNode.getLength("cx", template != null ? template.cx : Unit.PERCENTAGE.valueOf(50));
+        cy = attributeNode.getLength("cy", template != null ? template.cy : Unit.PERCENTAGE.valueOf(50));
+        fr = attributeNode.getLength("fr", template != null ? template.fr : Unit.PERCENTAGE.valueOf(0));
+        fx = attributeNode.getLength("fx", template != null ? template.fx : cx);
+        fy = attributeNode.getLength("fy", template != null ? template.fy : cy);
     }
 
     @Override
-    protected @NotNull Paint gradientForBounds(@NotNull Rectangle2D bounds,
+    protected @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
             @Percentage float[] gradOffsets, @NotNull Color[] gradColors) {
-        Point2D.Float pt1 = new Point2D.Float(cy, cy);
-        Point2D.Float pt2 = new Point2D.Float(fx, fy);
-        return new RadialGradientPaint(pt1, fr, pt2, gradOffsets, gradColors, spreadMethod.cycleMethod(),
+        Point2D.Float pt1 = new Point2D.Float(cx.resolveWidth(measure), cy.resolveHeight(measure));
+        Point2D.Float pt2 = new Point2D.Float(fx.resolveWidth(measure), fy.resolveHeight(measure));
+        return new RadialGradientPaint(pt1, fr.resolveLength(measure), pt2,
+                gradOffsets, gradColors, spreadMethod.cycleMethod(),
                 MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
     }
 

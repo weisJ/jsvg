@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -36,7 +37,7 @@ import com.github.weisj.jsvg.util.ColorUtil;
 @ElementCategories(Category.Gradient)
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})
 public final class SolidColor extends AbstractSVGNode implements SVGPaint {
-    public static final String TAG = "sloidcolor";
+    public static final String TAG = "solidcolor";
     private Color color;
 
     @Override
@@ -53,7 +54,7 @@ public final class SolidColor extends AbstractSVGNode implements SVGPaint {
     }
 
     @Override
-    public @NotNull Paint paintForBounds(@NotNull Rectangle2D bounds) {
+    public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
         return color;
     }
 }

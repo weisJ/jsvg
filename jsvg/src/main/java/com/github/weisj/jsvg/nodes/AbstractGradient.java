@@ -35,6 +35,7 @@ import com.github.weisj.jsvg.attributes.SpreadMethod;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 
 abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends ContainerNode implements SVGPaint {
@@ -125,14 +126,14 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     protected abstract void buildGradient(@NotNull AttributeNode attributeNode, @Nullable Self template);
 
     @Override
-    public final @NotNull Paint paintForBounds(@NotNull Rectangle2D bounds) {
+    public final @NotNull Paint paintForBounds(@NotNull MeasureContext context, @NotNull Rectangle2D bounds) {
         Color[] gradColors = colors();
         if (gradColors.length == 0) return PaintParser.DEFAULT_COLOR;
         if (gradColors.length == 1) return gradColors[0];
-        return gradientForBounds(bounds, offsets(), gradColors);
+        return gradientForBounds(context, bounds, offsets(), gradColors);
     }
 
-    protected abstract @NotNull Paint gradientForBounds(@NotNull Rectangle2D bounds,
+    protected abstract @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
             @Percentage float[] gradOffsets, @NotNull Color[] gradColors);
 
     protected @NotNull AffineTransform computeViewTransform(@NotNull Rectangle2D bounds) {

@@ -26,11 +26,13 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+
 public interface SVGPaint {
     SVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
     SVGPaint NONE = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull Rectangle2D bounds) {
+        public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
             return PaintParser.DEFAULT_COLOR;
         }
 
@@ -41,7 +43,7 @@ public interface SVGPaint {
     };
 
     @NotNull
-    Paint paintForBounds(@NotNull Rectangle2D bounds);
+    Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds);
 
     default boolean isVisible() {
         return this != NONE;

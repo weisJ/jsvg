@@ -26,6 +26,8 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+
 public class AwtSVGPaint implements SVGPaint {
 
     private final @NotNull Paint paint;
@@ -35,7 +37,7 @@ public class AwtSVGPaint implements SVGPaint {
     }
 
     @Override
-    public @NotNull Paint paintForBounds(@NotNull Rectangle2D b) {
+    public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D b) {
         return paint;
     }
 

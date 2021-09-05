@@ -44,7 +44,8 @@ public final class ShapeRenderer {
 
         Stroke stroke = allowOutline ? context.stroke(pathLengthFactor, paintContext.strokeContext) : null;
 
-        doRenderShape(g, shape, bounds, allowFill, allowOutline, fOpacity, fPaint, sOpacity, sPaint, stroke);
+        doRenderShape(context, g, shape, bounds, allowFill, allowOutline,
+                fOpacity, fPaint, sOpacity, sPaint, stroke);
     }
 
     public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
@@ -57,12 +58,14 @@ public final class ShapeRenderer {
         float sOpacity = context.strokeOpacity(1) * absOpacity;
         SVGPaint sPaint = context.strokePaint(null);
 
-        doRenderShape(g, shape, bounds, allowFill, allowOutline, fOpacity, fPaint, sOpacity, sPaint, stroke);
+        doRenderShape(context, g, shape, bounds, allowFill, allowOutline,
+                fOpacity, fPaint, sOpacity, sPaint, stroke);
     }
 
-    private static void doRenderShape(@NotNull Graphics2D g, @NotNull Shape shape, @NotNull Rectangle2D bounds,
-            boolean allowFill, boolean allowOutline, float fOpacity, SVGPaint fPaint, float sOpacity, SVGPaint sPaint,
-            @Nullable Stroke stroke) {
+    private static void doRenderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull Shape shape, @NotNull Rectangle2D bounds,
+            boolean allowFill, boolean allowOutline, float fOpacity, SVGPaint fPaint, float sOpacity,
+            @NotNull SVGPaint sPaint, @Nullable Stroke stroke) {
         boolean doFill = allowFill && fOpacity > 0 && fPaint.isVisible();
         boolean doOutline = allowOutline && sOpacity > 0 && sPaint.isVisible();
 
@@ -70,12 +73,12 @@ public final class ShapeRenderer {
             Composite composite = g.getComposite();
             if (doFill) {
                 g.setComposite(AlphaComposite.SrcOver.derive(fOpacity));
-                g.setPaint(fPaint.paintForBounds(bounds));
+                g.setPaint(fPaint.paintForBounds(context.measureContext(), bounds));
                 g.fill(shape);
             }
             if (doOutline && stroke != null) {
                 g.setComposite(AlphaComposite.SrcOver.derive(sOpacity));
-                g.setPaint(sPaint.paintForBounds(bounds));
+                g.setPaint(sPaint.paintForBounds(context.measureContext(), bounds));
                 g.setStroke(stroke);
                 g.draw(shape);
             }
