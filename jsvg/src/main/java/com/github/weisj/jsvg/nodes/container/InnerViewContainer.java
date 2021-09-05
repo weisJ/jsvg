@@ -116,19 +116,19 @@ public abstract class InnerViewContainer extends RenderableContainerNode impleme
                 if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth()) size.width = useSiteViewBox.width;
                 if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedHeight()) size.height = useSiteViewBox.height;
             }
-            g.clipRect(0, 0, (int) size.width, (int) size.height);
             AffineTransform viewTransform = preserveAspectRatio.computeViewPortTransform(size, viewBox);
             g.transform(viewTransform);
         } else {
             size = size(measureContext);
-            g.clipRect(0, 0, (int) size.width, (int) size.height);
         }
         FloatSize viewSize = viewBox != null ? viewBox.size() : size;
 
-        Point2D innerPos = innerLocation(measureContext);
-        g.translate(innerPos.getX(), innerPos.getY());
-
         RenderContext innerContext = NodeRenderer.setupInnerViewRenderContext(this, new ViewBox(viewSize), context);
+        MeasureContext innerMeasure = innerContext.measureContext();
+        Point2D innerPos = innerLocation(innerMeasure);
+        g.translate(innerPos.getX(), innerPos.getY());
+        // Todo: This should be determined by the overflow parameter
+        g.clipRect(0, 0, (int) innerMeasure.viewWidth(), (int) innerMeasure.viewHeight());
         super.render(innerContext, g);
     }
 }
