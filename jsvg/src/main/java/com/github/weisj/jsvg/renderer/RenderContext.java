@@ -88,7 +88,7 @@ public class RenderContext {
         return new RenderContext(targetComponent, newPaintContext, newMeasureContext, newFontSpec);
     }
 
-    private @NotNull StrokeContext strokeContext() {
+    public @NotNull StrokeContext strokeContext() {
         // This will never be null for a RenderContext.
         // Our deriving mechanism together with non-null initial values prohibits this.
         assert paintContext.strokeContext != null;
@@ -129,10 +129,6 @@ public class RenderContext {
 
     public @NotNull SVGFont font(@Nullable AttributeFontSpec fontSpec) {
         return FontResolver.resolve(this.fontSpec.derive(fontSpec), this.measureContext);
-    }
-
-    public @NotNull MeasurableFontSpec fontSpec() {
-        return fontSpec;
     }
 
     @Override

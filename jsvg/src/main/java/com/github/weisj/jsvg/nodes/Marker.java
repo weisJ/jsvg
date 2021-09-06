@@ -77,7 +77,9 @@ public final class Marker extends BaseInnerViewContainer {
     public @NotNull FloatSize size(@NotNull RenderContext context) {
         MeasureContext measure = context.measureContext();
         if (markerUnits == MarkerUnitType.StrokeWidth) {
-            float strokeWidth = context.fontSpec().currentSize().resolveLength(measure);
+            Length strokeWidthLength = context.strokeContext().strokeWidth;
+            assert strokeWidthLength != null;
+            float strokeWidth = strokeWidthLength.resolveLength(measure);
             return new FloatSize(markerWidth.raw() * strokeWidth, markerHeight.raw() * strokeWidth);
         } else {
             return new FloatSize(markerWidth.resolveWidth(measure), markerHeight.resolveHeight(measure));
