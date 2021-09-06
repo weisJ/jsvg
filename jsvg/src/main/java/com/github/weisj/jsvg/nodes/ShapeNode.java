@@ -58,10 +58,15 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
         paintContext = PaintContext.parse(attributeNode);
         shape = buildShape(attributeNode);
 
-        // Todo: marker property prototype
+        Marker template = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker"));
         markerStart = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-start"));
+        if (markerStart == null) markerStart = template;
+
         markerMid = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-mid"));
+        if (markerMid == null) markerMid = template;
+
         markerEnd = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-end"));
+        if (markerEnd == null) markerEnd = template;
     }
 
     protected abstract @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode);
