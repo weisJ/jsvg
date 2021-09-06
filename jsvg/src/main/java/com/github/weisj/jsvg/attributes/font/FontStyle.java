@@ -26,21 +26,36 @@ import java.awt.geom.AffineTransform;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Degrees;
+import com.github.weisj.jsvg.attributes.Radian;
 
 /**
  * This interface shouldn't be implemented besides those constants.
  */
-interface FontStyle {
-    FontStyle Normal = new NormalStyle();
-    FontStyle Italic = new ItalicStyle();
-    FontStyle Oblique = new ObliqueStyle();
+abstract class FontStyle {
 
-    default @Nullable AffineTransform transform() {
+    public @Nullable AffineTransform transform() {
         return null;
     }
 
-    final class NormalStyle implements FontStyle {
+    public static @NotNull FontStyle normal() {
+        return Normal.INSTANCE;
+    }
+
+    public static @NotNull FontStyle italic() {
+        return Italic.INSTANCE;
+    }
+
+    public static @NotNull FontStyle oblique() {
+        return Oblique.DEFAULT;
+    }
+
+    public static @NotNull FontStyle oblique(@Radian float angle) {
+        return new Oblique(angle);
+    }
+
+    static final class Normal extends FontStyle {
+        private static final @NotNull FontStyle.Normal INSTANCE = new Normal();
+
         @Override
         public String toString() {
             return "Normal";
@@ -48,16 +63,18 @@ interface FontStyle {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof NormalStyle;
+            return obj instanceof Normal;
         }
 
         @Override
         public int hashCode() {
-            return NormalStyle.class.hashCode();
+            return Normal.class.hashCode();
         }
     }
 
-    final class ItalicStyle implements FontStyle {
+    static final class Italic extends FontStyle {
+        private static final @NotNull FontStyle.Italic INSTANCE = new Italic();
+
         @Override
         public String toString() {
             return "Italic";
@@ -65,46 +82,40 @@ interface FontStyle {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof ItalicStyle;
+            return obj instanceof Italic;
         }
 
         @Override
         public int hashCode() {
-            return ItalicStyle.class.hashCode();
+            return Italic.class.hashCode();
         }
     }
 
-    final class ObliqueStyle implements FontStyle {
-        public static @Degrees final float DEFAULT_ANGLE = 14;
-        private final @Degrees float angle;
+    static final class Oblique extends FontStyle {
+        public static final @Radian float DEFAULT_ANGLE = (float) Math.toRadians(14);
+        public static final @NotNull FontStyle.Oblique DEFAULT = new Oblique(DEFAULT_ANGLE);
 
-        public ObliqueStyle() {
-            this(DEFAULT_ANGLE);
-        }
+        private final @Radian float angle;
 
-        public ObliqueStyle(@Degrees float angle) {
+        public Oblique(@Radian float angle) {
             this.angle = angle;
-        }
-
-        public @Degrees float angle() {
-            return angle;
         }
 
         @Override
         public @NotNull AffineTransform transform() {
-            return AffineTransform.getShearInstance(-Math.toRadians(angle()), 0);
+            return AffineTransform.getShearInstance(-angle, 0);
         }
 
         @Override
         public String toString() {
-            return "Oblique{" + angle() + '}';
+            return "Oblique{" + angle + '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof ObliqueStyle)) return false;
-            ObliqueStyle that = (ObliqueStyle) o;
+            if (!(o instanceof Oblique)) return false;
+            Oblique that = (Oblique) o;
             return Float.compare(that.angle, angle) == 0;
         }
 

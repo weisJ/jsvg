@@ -83,16 +83,16 @@ public final class FontParser {
         FontStyle style = null;
         String styleStr = node.getValue("font-style");
         if ("normal".equalsIgnoreCase(styleStr)) {
-            style = FontStyle.Normal;
+            style = FontStyle.normal();
         } else if ("italic".equalsIgnoreCase(styleStr)) {
-            style = FontStyle.Italic;
+            style = FontStyle.italic();
         } else if (styleStr != null && styleStr.startsWith("oblique")) {
             String[] comps = styleStr.split(" ", 2);
             if (comps.length == 2) {
-                style = new FontStyle.ObliqueStyle(
-                        AttributeParser.parseFloat(comps[1], FontStyle.ObliqueStyle.DEFAULT_ANGLE));
+                style = new FontStyle.Oblique(
+                        AttributeParser.parseAngle(comps[1], FontStyle.Oblique.DEFAULT_ANGLE));
             } else {
-                style = FontStyle.Oblique;
+                style = FontStyle.oblique();
             }
         }
         return style;

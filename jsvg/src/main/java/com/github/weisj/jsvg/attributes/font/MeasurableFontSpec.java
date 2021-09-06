@@ -48,7 +48,7 @@ public class MeasurableFontSpec extends FontSpec {
     public static @NotNull MeasurableFontSpec createDefault() {
         return new MeasurableFontSpec(
                 new String[] {"Default"},
-                FontStyle.Normal,
+                FontStyle.normal(),
                 null,
                 FontStretch.Normal.percentage(),
                 PredefinedFontWeight.NORMAL_WEIGHT,

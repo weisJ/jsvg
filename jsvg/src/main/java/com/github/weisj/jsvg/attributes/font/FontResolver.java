@@ -66,9 +66,9 @@ public final class FontResolver {
         attributes.put(TextAttribute.SIZE, size);
         attributes.put(TextAttribute.WEIGHT, weight);
 
-        if (style == FontStyle.Normal) {
+        if (style instanceof FontStyle.Normal) {
             attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
-        } else if (style == FontStyle.Italic) {
+        } else if (style instanceof FontStyle.Italic) {
             attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
         } else {
             AffineTransform transform = style.transform();
