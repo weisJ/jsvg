@@ -52,4 +52,9 @@ public final class Path extends ShapeNode {
         if (pathValue == null) return new AWTSVGShape(new Rectangle());
         return PathUtil.parseFromPathData(pathValue, fillRule);
     }
+
+    @Override
+    protected boolean shouldPaintStartEndMarkersInMiddle() {
+        return false;
+    }
 }

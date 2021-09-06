@@ -41,4 +41,9 @@ public final class Polyline extends AbstractPolyShape {
     protected boolean doClose() {
         return false;
     }
+
+    @Override
+    protected boolean shouldPaintStartEndMarkersInMiddle() {
+        return false;
+    }
 }
