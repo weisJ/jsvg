@@ -35,7 +35,7 @@ public final class PaintParser {
 
     private PaintParser() {}
 
-    public static @Nullable Color parseColor(String value) {
+    public static @Nullable Color parseColor(@Nullable String value) {
         if (value == null || value.isEmpty()) return null;
         if ("currentcolor".equals(value)) {
             // Todo: Handle currentcolor;
@@ -169,6 +169,7 @@ public final class PaintParser {
             colorMap.put("darkcyan", new Color(0x008b8b));
             colorMap.put("darkgoldenrod", new Color(0xb8860b));
             colorMap.put("darkgray", new Color(0xa9a9a9));
+            colorMap.put("darkgrey", new Color(0xa9a9a9));
             colorMap.put("darkgreen", new Color(0x006400));
             colorMap.put("darkkhaki", new Color(0xbdb76b));
             colorMap.put("darkmagenta", new Color(0x8b008b));
@@ -180,11 +181,13 @@ public final class PaintParser {
             colorMap.put("darkseagreen", new Color(0x8fbc8f));
             colorMap.put("darkslateblue", new Color(0x483d8b));
             colorMap.put("darkslategray", new Color(0x2f4f4f));
+            colorMap.put("darkslategrey", new Color(0x2f4f4f));
             colorMap.put("darkturquoise", new Color(0x00ced1));
             colorMap.put("darkviolet", new Color(0x9400d3));
             colorMap.put("deeppink", new Color(0xff1493));
             colorMap.put("deepskyblue", new Color(0x00bfff));
             colorMap.put("dimgray", new Color(0x696969));
+            colorMap.put("dimgrey", new Color(0x696969));
             colorMap.put("dodgerblue", new Color(0x1e90ff));
             colorMap.put("feldspar", new Color(0xd19275));
             colorMap.put("firebrick", new Color(0xb22222));
@@ -196,6 +199,7 @@ public final class PaintParser {
             colorMap.put("gold", new Color(0xffd700));
             colorMap.put("goldenrod", new Color(0xdaa520));
             colorMap.put("gray", new Color(0x808080));
+            colorMap.put("grey", new Color(0x808080));
             colorMap.put("green", new Color(0x008000));
             colorMap.put("greenyellow", new Color(0xadff2f));
             colorMap.put("honeydew", new Color(0xf0fff0));
@@ -220,6 +224,7 @@ public final class PaintParser {
             colorMap.put("lightskyblue", new Color(0x87cefa));
             colorMap.put("lightslateblue", new Color(0x8470ff));
             colorMap.put("lightslategray", new Color(0x778899));
+            colorMap.put("lightslategrey", new Color(0x778899));
             colorMap.put("lightsteelblue", new Color(0xb0c4de));
             colorMap.put("lightyellow", new Color(0xffffe0));
             colorMap.put("lime", new Color(0x00ff00));
@@ -272,6 +277,7 @@ public final class PaintParser {
             colorMap.put("skyblue", new Color(0x87ceeb));
             colorMap.put("slateblue", new Color(0x6a5acd));
             colorMap.put("slategray", new Color(0x708090));
+            colorMap.put("slategrey", new Color(0x708090));
             colorMap.put("snow", new Color(0xfffafa));
             colorMap.put("springgreen", new Color(0x00ff7f));
             colorMap.put("steelblue", new Color(0x4682b4));
