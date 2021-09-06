@@ -37,19 +37,19 @@ public abstract class MarkerOrientation {
     }
 
     public static @NotNull MarkerOrientation parse(@Nullable String value) {
-        if (value == null) return AutoOrientation.INSTANCE;
+        if (value == null) return AngleOrientation.DEFAULT;
         if ("auto".equals(value)) return AutoOrientation.INSTANCE;
         if ("auto-start-reverse".equals(value)) return AutoStartReverseOrientation.INSTANCE;
         @Radian float angle = AttributeParser.parseAngle(value, Length.UNSPECIFIED_RAW);
         if (Length.isSpecified(angle)) return new AngleOrientation(angle);
-        return AutoOrientation.INSTANCE;
+        return AngleOrientation.DEFAULT;
     }
 
     public abstract @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
             float dyOut);
 
     private final static class AutoOrientation extends MarkerOrientation {
-        private static final AutoOrientation INSTANCE = new AutoOrientation();
+        private static final @NotNull AutoOrientation INSTANCE = new AutoOrientation();
 
         @Override
         public @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
@@ -68,7 +68,7 @@ public abstract class MarkerOrientation {
     }
 
     private final static class AutoStartReverseOrientation extends MarkerOrientation {
-        private static final AutoStartReverseOrientation INSTANCE = new AutoStartReverseOrientation();
+        private static final @NotNull AutoStartReverseOrientation INSTANCE = new AutoStartReverseOrientation();
 
         @Override
         public @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
@@ -87,6 +87,7 @@ public abstract class MarkerOrientation {
     }
 
     private final static class AngleOrientation extends MarkerOrientation {
+        private static final @NotNull AngleOrientation DEFAULT = new AngleOrientation(0);
         private final @Radian float angle;
 
         private AngleOrientation(@Radian float angle) {
