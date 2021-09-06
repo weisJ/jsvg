@@ -45,35 +45,43 @@ public class RenderContext {
     private final @NotNull PaintContext paintContext;
     private final @NotNull MeasurableFontSpec fontSpec;
 
-    public RenderContext(@Nullable JComponent targetComponent, @NotNull MeasureContext measureContext) {
-        this(targetComponent,
+    private final @Nullable ContextElementAttributes contextElementAttributes;
+
+    public static @NotNull RenderContext createInitial(@Nullable JComponent targetComponent,
+            @NotNull MeasureContext measureContext) {
+        return new RenderContext(targetComponent,
                 PaintContext.createDefault(),
                 measureContext,
-                MeasurableFontSpec.createDefault());
+                MeasurableFontSpec.createDefault(),
+                null);
     }
 
     private RenderContext(@Nullable JComponent targetComponent,
             @NotNull PaintContext paintContext,
             @NotNull MeasureContext measureContext,
-            @NotNull MeasurableFontSpec fontSpec) {
+            @NotNull MeasurableFontSpec fontSpec,
+            @Nullable ContextElementAttributes contextElementAttributes) {
         this.targetComponent = targetComponent;
         this.paintContext = paintContext;
         this.measureContext = measureContext;
         this.fontSpec = fontSpec;
+        this.contextElementAttributes = contextElementAttributes;
     }
 
     @NotNull
-    RenderContext deriveWith(@Nullable PaintContext context, @Nullable AttributeFontSpec attributeFontSpec,
-            @Nullable ViewBox viewBox, @Nullable FontRenderContext frc) {
+    RenderContext derive(@Nullable PaintContext context, @Nullable AttributeFontSpec attributeFontSpec,
+            @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
+            @Nullable ContextElementAttributes contextAttributes) {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
 
         if (context != null) {
             newPaintContext = new PaintContext(
-                    fillPaint(context.fillPaint),
+                    context.color != null ? context.color : paintContext.color,
+                    context.fillPaint != null ? context.fillPaint : paintContext.fillPaint,
                     fillOpacity(context.fillOpacity),
-                    strokePaint(context.strokePaint),
+                    context.strokePaint != null ? context.strokePaint : paintContext.strokePaint,
                     strokeOpacity(context.strokeOpacity),
                     opacity(context.opacity),
                     strokeContext().derive(context.strokeContext));
@@ -82,10 +90,14 @@ public class RenderContext {
             newFontSpec = newFontSpec.derive(attributeFontSpec);
         }
 
+        ContextElementAttributes newContextAttributes = contextElementAttributes;
+        if (contextAttributes != null) newContextAttributes = contextAttributes;
+
         float em = newFontSpec.effectiveSize(measureContext);
         float ex = SVGFont.exFromEm(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex, frc);
-        return new RenderContext(targetComponent, newPaintContext, newMeasureContext, newFontSpec);
+        return new RenderContext(targetComponent, newPaintContext, newMeasureContext, newFontSpec,
+                newContextAttributes);
     }
 
     public @NotNull StrokeContext strokeContext() {
@@ -104,11 +116,24 @@ public class RenderContext {
     }
 
     public @NotNull SVGPaint strokePaint(@Nullable SVGPaint paint) {
-        return paint != null ? paint : paintContext.strokePaint;
+        return resolvePaint(paint != null ? paint : paintContext.strokePaint);
     }
 
     public @NotNull SVGPaint fillPaint(@Nullable SVGPaint paint) {
-        return paint != null ? paint : paintContext.fillPaint;
+        return resolvePaint(paint != null ? paint : paintContext.fillPaint);
+    }
+
+    private @NotNull SVGPaint resolvePaint(@NotNull SVGPaint p) {
+        if (p == SVGPaint.DEFAULT_PAINT) return paintContext.color;
+        if (p == SVGPaint.CONTEXT_STROKE) {
+            if (contextElementAttributes == null) return SVGPaint.NONE;
+            return contextElementAttributes.strokePaint;
+        }
+        if (p == SVGPaint.CONTEXT_FILL) {
+            if (contextElementAttributes == null) return SVGPaint.NONE;
+            return contextElementAttributes.fillPaint;
+        }
+        return p;
     }
 
     public @Percentage float fillOpacity(@Percentage float opacity) {
@@ -138,6 +163,7 @@ public class RenderContext {
                 ",\n  paintContext=" + paintContext +
                 ",\n  fontSpec=" + fontSpec +
                 ",\n  targetComponent=" + targetComponent +
+                ",\n  contextElementAttributes=" + contextElementAttributes +
                 "\n}";
     }
 }

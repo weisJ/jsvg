@@ -19,34 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.renderer;
 
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
+import java.util.Objects;
+
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 
-public abstract class AbstractSVGNode implements SVGNode {
+public class ContextElementAttributes {
+    public final @NotNull SVGPaint fillPaint;
+    public final @NotNull SVGPaint strokePaint;
 
-    private @Nullable String id;
-
-    @Override
-    public @Nullable String id() {
-        return id;
+    public ContextElementAttributes(@NotNull SVGPaint fillPaint, @NotNull SVGPaint strokePaint) {
+        this.fillPaint = fillPaint;
+        this.strokePaint = strokePaint;
     }
 
     @Override
-    @MustBeInvokedByOverriders
-    public void build(@NotNull AttributeNode attributeNode) {
-        id = attributeNode.getValue("id");
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ContextElementAttributes)) return false;
+        ContextElementAttributes that = (ContextElementAttributes) o;
+        return fillPaint.equals(that.fillPaint) && strokePaint.equals(that.strokePaint);
     }
 
     @Override
-    public void addContent(char[] content) {}
+    public int hashCode() {
+        return Objects.hash(fillPaint, strokePaint);
+    }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{id='" + id + '\'' + '}';
+        return "ContextElementAttributes{" +
+                "fillPaint=" + fillPaint +
+                ", strokePaint=" + strokePaint +
+                '}';
     }
 }

@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public interface SVGPaint {
-    SVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
+    AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
     SVGPaint NONE = new SVGPaint() {
         @Override
         public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
@@ -39,6 +39,39 @@ public interface SVGPaint {
         @Override
         public String toString() {
             return "SVGPaint.None";
+        }
+    };
+    SVGPaint CURRENT_COLOR = new SVGPaint() {
+        @Override
+        public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+            return PaintParser.DEFAULT_COLOR;
+        }
+
+        @Override
+        public String toString() {
+            return "SVGPaint.CurrentColor";
+        }
+    };
+    SVGPaint CONTEXT_FILL = new SVGPaint() {
+        @Override
+        public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+            return PaintParser.DEFAULT_COLOR;
+        }
+
+        @Override
+        public String toString() {
+            return "SVGPaint.ContextFill";
+        }
+    };
+    SVGPaint CONTEXT_STROKE = new SVGPaint() {
+        @Override
+        public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+            return PaintParser.DEFAULT_COLOR;
+        }
+
+        @Override
+        public String toString() {
+            return "SVGPaint.ContextStroke";
         }
     };
 

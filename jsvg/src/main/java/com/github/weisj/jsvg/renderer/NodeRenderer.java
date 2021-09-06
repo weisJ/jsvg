@@ -33,10 +33,8 @@ import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
-import com.github.weisj.jsvg.nodes.prototype.HasClip;
-import com.github.weisj.jsvg.nodes.prototype.HasContext;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
-import com.github.weisj.jsvg.nodes.prototype.Transformable;
+import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
+import com.github.weisj.jsvg.nodes.prototype.*;
 
 public final class NodeRenderer {
     private static final boolean CLIP_DEBUG = false;
@@ -67,15 +65,15 @@ public final class NodeRenderer {
     }
 
     public static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
-            @NotNull Graphics2D g, @Nullable Class<?> instantiableType) {
+            @NotNull Graphics2D g, @Nullable Instantiator instantiator) {
         if (!(node instanceof Renderable)) return null;
         Renderable renderable = (Renderable) node;
-        if (renderable.requiresInstantiation()
-                && (instantiableType == null || !instantiableType.isInstance(renderable))) {
+        boolean instantiated = renderable.requiresInstantiation();
+        if (instantiated && (instantiator == null || !instantiator.canInstantiate(node))) {
             return null;
         }
         if (!renderable.isVisible(context)) return null;
-        RenderContext childContext = setupRenderContext(node, context);
+        RenderContext childContext = setupRenderContext(instantiator, node, context);
 
         Graphics2D childGraphics = (Graphics2D) g.create();
 
@@ -106,9 +104,15 @@ public final class NodeRenderer {
         return new Info(renderable, childContext, childGraphics);
     }
 
+
     public static @NotNull RenderContext setupRenderContext(@NotNull Object node, @NotNull RenderContext context) {
+        return setupRenderContext(null, node, context);
+    }
+
+    private static @NotNull RenderContext setupRenderContext(@Nullable Instantiator instantiator, @NotNull Object node,
+            @NotNull RenderContext context) {
         // Inner views are excluded, as they have to establish their own context with a separate viewBox.
-        if (node instanceof BaseInnerViewContainer) return context;
+        if (node instanceof CommonInnerViewContainer) return context;
 
         @Nullable PaintContext paintContext = null;
         @Nullable AttributeFontSpec fontSpec = null;
@@ -118,7 +122,10 @@ public final class NodeRenderer {
             fontSpec = ((HasContext) node).fontSpec();
             fontRenderContext = ((HasContext) node).fontRenderContext();
         }
-        return context.deriveWith(paintContext, fontSpec, null, fontRenderContext);
+        @Nullable ContextElementAttributes contextElementAttributes = null;
+        if (instantiator != null) contextElementAttributes = instantiator.createContextAttributes(context);
+
+        return context.derive(paintContext, fontSpec, null, fontRenderContext, contextElementAttributes);
     }
 
     public static @NotNull RenderContext setupInnerViewRenderContext(@NotNull BaseInnerViewContainer node,
@@ -126,6 +133,6 @@ public final class NodeRenderer {
         PaintContext paintContext = node.paintContext();
         AttributeFontSpec fontSpec = node.fontSpec();
         FontRenderContext fontRenderContext = node.fontRenderContext();
-        return context.deriveWith(paintContext, fontSpec, viewBox, fontRenderContext);
+        return context.derive(paintContext, fontSpec, viewBox, fontRenderContext, null);
     }
 }

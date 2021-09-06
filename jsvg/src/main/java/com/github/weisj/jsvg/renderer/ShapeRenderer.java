@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.attributes.Radian;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.nodes.Marker;
+import com.github.weisj.jsvg.nodes.ShapeNode;
 
 public final class ShapeRenderer {
     private static final boolean DEBUG_MARKERS = true;
@@ -94,7 +95,8 @@ public final class ShapeRenderer {
         }
     }
 
-    public static void renderMarkers(@NotNull RenderContext context, @NotNull Graphics2D g,
+    public static void renderMarkers(@NotNull ShapeNode shapeNode, @NotNull RenderContext context,
+            @NotNull Graphics2D g,
             @NotNull PathIterator iterator, boolean shouldPaintStartEndMarkersInMiddle,
             @Nullable Marker start, @Nullable Marker mid, @Nullable Marker end) {
         float[] args = new float[6];
@@ -136,13 +138,14 @@ public final class ShapeRenderer {
                     dyIn = dyOut = 0;
                     x = xStart = args[0];
                     y = yStart = args[1];
-                    if (shouldPaintStartEndMarkersInMiddle) {
+                    if (shouldPaintStartEndMarkersInMiddle || markerToPaint == null) {
                         nextMarker = start;
                         nextMarkerType = MarkerOrientation.MarkerType.Start;
                     }
                     if (markerToPaint != null) {
-                        paintSingleMarker(context, g, markerToPaintType, markerToPaint,
+                        paintSingleMarker(shapeNode, context, g, markerToPaintType, markerToPaint,
                                 xPaint, yPaint, 0, 0, dx, dy);
+                        if (onlyFirst) return;
                     }
                     markerToPaint = nextMarker;
                     markerToPaintType = nextMarkerType;
@@ -181,17 +184,19 @@ public final class ShapeRenderer {
                     break;
             }
 
-            paintSingleMarker(context, g, markerToPaintType, markerToPaint,
+            paintSingleMarker(shapeNode, context, g, markerToPaintType, markerToPaint,
                     xPaint, yPaint, dx, dy, dxOut, dyOut);
             if (onlyFirst) return;
 
             markerToPaint = nextMarker;
             markerToPaintType = nextMarkerType;
         }
-        paintSingleMarker(context, g, markerToPaintType, markerToPaint, x, y, dxIn, dyIn, 0, 0);
+        paintSingleMarker(shapeNode, context, g, markerToPaintType, markerToPaint,
+                x, y, dxIn, dyIn, 0, 0);
     }
 
-    public static void paintSingleMarker(@NotNull RenderContext context, @NotNull Graphics2D g,
+    public static void paintSingleMarker(@NotNull ShapeNode shapeNode, @NotNull RenderContext context,
+            @NotNull Graphics2D g,
             @Nullable MarkerOrientation.MarkerType type, @Nullable Marker marker,
             float x, float y, float dxIn, float dyIn, float dxOut, float dyOut) {
         if (marker == null) return;
@@ -209,17 +214,15 @@ public final class ShapeRenderer {
             markerGraphics.rotate(rotation);
         }
 
-        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, context, g, Marker.class)) {
-            if (info == null) return;
-            marker.render(info.context, info.g);
+        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, context, markerGraphics, shapeNode)) {
+            if (info != null) info.renderable.render(info.context, info.g);
         }
 
-        marker.render(context, markerGraphics);
         markerGraphics.dispose();
     }
 
-    private static void paintDebugMarkerAndRotate(@NotNull RenderContext context, @NotNull Graphics2D markerGraphics,
-            @NotNull Marker marker, float rotation) {
+    private static void paintDebugMarkerAndRotate(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull Marker marker, @Radian float rotation) {
         FloatSize size = marker.size(context);
 
         GeneralPath p = new GeneralPath();
@@ -229,14 +232,16 @@ public final class ShapeRenderer {
         p.lineTo(size.width, size.height / 2f);
         p.lineTo(0.8 * size.width, 0.65f * size.height);
 
-        markerGraphics.setStroke(new BasicStroke(0.5f));
+        g.setStroke(new BasicStroke(0.5f));
 
-        markerGraphics.setColor(Color.MAGENTA.darker().darker());
-        markerGraphics.draw(new Rectangle2D.Float(0, 0, size.width, size.height));
-        markerGraphics.draw(p);
-        markerGraphics.rotate(rotation);
-        markerGraphics.setColor(Color.MAGENTA);
-        markerGraphics.draw(new Rectangle2D.Float(0, 0, size.width, size.height));
-        markerGraphics.draw(p);
+        g.setColor(Color.MAGENTA.darker().darker());
+        g.draw(new Rectangle2D.Float(0, 0, size.width, size.height));
+        g.draw(p);
+
+        g.rotate(rotation);
+
+        g.setColor(Color.MAGENTA);
+        g.draw(new Rectangle2D.Float(0, 0, size.width, size.height));
+        g.draw(p);
     }
 }

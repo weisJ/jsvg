@@ -58,7 +58,7 @@ public class SVGDocument {
         MeasureContext initialMeasure = bounds != null
                 ? MeasureContext.createInitial(bounds.width, bounds.height, defaultEm, defaultEx)
                 : MeasureContext.createInitial(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, defaultEm, defaultEx);
-        RenderContext context = new RenderContext(component, initialMeasure);
+        RenderContext context = RenderContext.createInitial(component, initialMeasure);
 
         if (bounds == null) bounds = new ViewBox(root.size(context));
 

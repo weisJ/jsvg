@@ -37,18 +37,17 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.nodes.prototype.Instantiator;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.renderer.FontRenderContext;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
+import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.PaintContext;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.GraphicsReferencing, Category.Structural})
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})
-public final class Use extends RenderableSVGNode implements HasContext, HasShape {
+public final class Use extends RenderableSVGNode implements HasContext, HasShape, Instantiator {
     public static final String TAG = "use";
 
     private Length x;
@@ -116,13 +115,17 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     }
 
     @Override
+    public boolean canInstantiate(@NotNull SVGNode node) {
+        return node instanceof CommonInnerViewContainer;
+    }
+
+    @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
         if (referencedNode != null) {
             MeasureContext measureContext = context.measureContext();
             g.translate(x.resolveWidth(measureContext), y.resolveHeight(measureContext));
 
-            try (NodeRenderer.Info info =
-                    NodeRenderer.createRenderInfo(referencedNode, context, g, CommonInnerViewContainer.class)) {
+            try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, g, this)) {
                 if (info == null) return;
                 if (referencedNode instanceof CommonInnerViewContainer) {
                     ViewBox targetViewBox = new ViewBox(0, 0, Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);

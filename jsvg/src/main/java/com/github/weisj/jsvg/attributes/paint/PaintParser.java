@@ -35,12 +35,9 @@ public final class PaintParser {
 
     private PaintParser() {}
 
+    // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
     public static @Nullable Color parseColor(@Nullable String value) {
         if (value == null || value.isEmpty()) return null;
-        if ("currentcolor".equals(value)) {
-            // Todo: Handle currentcolor;
-            throw new UnsupportedOperationException("currentcolor not yet implemented");
-        }
         try {
             if (value.charAt(0) == '#') {
                 int rgba = 0xff000000;
@@ -96,6 +93,9 @@ public final class PaintParser {
 
     public static @Nullable SVGPaint parsePaint(String value) {
         if ("none".equals(value)) return SVGPaint.NONE;
+        if ("currentcolor".equals(value)) return SVGPaint.CURRENT_COLOR;
+        if ("context-fill".equals(value)) return SVGPaint.CONTEXT_FILL;
+        if ("context-stroke".equals(value)) return SVGPaint.CONTEXT_STROKE;
         Color color = parseColor(value);
         if (color == null) return null;
         return new AwtSVGPaint(color);

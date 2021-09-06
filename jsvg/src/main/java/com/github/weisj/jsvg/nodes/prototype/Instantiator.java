@@ -19,34 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.nodes.prototype;
 
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.renderer.ContextElementAttributes;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
-public abstract class AbstractSVGNode implements SVGNode {
+public interface Instantiator {
 
-    private @Nullable String id;
+    boolean canInstantiate(@NotNull SVGNode node);
 
-    @Override
-    public @Nullable String id() {
-        return id;
-    }
-
-    @Override
-    @MustBeInvokedByOverriders
-    public void build(@NotNull AttributeNode attributeNode) {
-        id = attributeNode.getValue("id");
-    }
-
-    @Override
-    public void addContent(char[] content) {}
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "{id='" + id + '\'' + '}';
+    default @NotNull ContextElementAttributes createContextAttributes(@NotNull RenderContext context) {
+        return new ContextElementAttributes(context.fillPaint(null), context.strokePaint(null));
     }
 }

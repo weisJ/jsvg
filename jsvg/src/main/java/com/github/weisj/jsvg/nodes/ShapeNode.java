@@ -32,11 +32,13 @@ import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.nodes.prototype.Instantiator;
+import com.github.weisj.jsvg.renderer.ContextElementAttributes;
 import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
-public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
+public abstract class ShapeNode extends RenderableSVGNode implements HasShape, Instantiator {
     private PaintContext paintContext;
     private Length pathLength;
     private MeasurableShape shape;
@@ -52,6 +54,7 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
         paintContext = PaintContext.parse(attributeNode);
         shape = buildShape(attributeNode);
 
+        // Todo: These are actually inheritable and hence have to go into the RenderContext
         Marker template = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker"));
         markerStart = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-start"));
         if (markerStart == null) markerStart = template;
@@ -76,6 +79,18 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
     }
 
     @Override
+    public boolean canInstantiate(@NotNull SVGNode node) {
+        return node instanceof Marker;
+    }
+
+    @Override
+    public @NotNull ContextElementAttributes createContextAttributes(@NotNull RenderContext context) {
+        return new ContextElementAttributes(
+                context.fillPaint(paintContext.fillPaint),
+                context.strokePaint(paintContext.strokePaint));
+    }
+
+    @Override
     public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
         MeasureContext measureContext = context.measureContext();
         Shape paintShape = shape.shape(context);
@@ -96,8 +111,8 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape {
 
     private void renderMarkers(@NotNull RenderContext context, @NotNull Shape shape, @NotNull Graphics2D g) {
         if (markerStart == null && markerMid == null && markerEnd == null) return;
-        ShapeRenderer.renderMarkers(context, g, shape.getPathIterator(null), shouldPaintStartEndMarkersInMiddle(),
-                markerStart, markerMid, markerEnd);
+        ShapeRenderer.renderMarkers(this, context, g, shape.getPathIterator(null),
+                shouldPaintStartEndMarkersInMiddle(), markerStart, markerMid, markerEnd);
     }
 
     protected boolean shouldPaintStartEndMarkersInMiddle() {

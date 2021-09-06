@@ -27,10 +27,12 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
+import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 
 public class PaintContext {
 
+    public final AwtSVGPaint color;
     public final SVGPaint fillPaint;
     public final SVGPaint strokePaint;
 
@@ -40,9 +42,10 @@ public class PaintContext {
 
     public final @Nullable StrokeContext strokeContext;
 
-    public PaintContext(SVGPaint fillPaint, float fillOpacity,
+    public PaintContext(AwtSVGPaint color, SVGPaint fillPaint, float fillOpacity,
             SVGPaint strokePaint, float strokeOpacity, float opacity,
             @NotNull StrokeContext strokeContext) {
+        this.color = color;
         this.fillPaint = fillPaint;
         this.strokePaint = strokePaint;
         this.fillOpacity = fillOpacity;
@@ -54,6 +57,7 @@ public class PaintContext {
 
     public static @NotNull PaintContext createDefault() {
         return new PaintContext(
+                SVGPaint.DEFAULT_PAINT,
                 SVGPaint.DEFAULT_PAINT, 1,
                 SVGPaint.NONE, 1, 1,
                 StrokeContext.createDefault());
@@ -61,6 +65,8 @@ public class PaintContext {
 
     public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
         return new PaintContext(
+                // Note: this may be current-color again, but treating it as null will make no difference at all.
+                new AwtSVGPaint(attributeNode.getColor("color")),
                 attributeNode.getPaint("fill"),
                 attributeNode.getPercentage("fill-opacity", 1),
                 attributeNode.getPaint("stroke"),
@@ -72,7 +78,8 @@ public class PaintContext {
     @Override
     public String toString() {
         return "PaintContext{" +
-                "fillPaint=" + fillPaint +
+                "color=" + color +
+                ", fillPaint=" + fillPaint +
                 ", strokePaint=" + strokePaint +
                 ", opacity=" + opacity +
                 ", fillOpacity=" + fillOpacity +
