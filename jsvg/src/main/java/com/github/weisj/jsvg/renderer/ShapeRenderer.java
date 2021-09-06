@@ -22,14 +22,22 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.MarkerOrientation;
+import com.github.weisj.jsvg.attributes.Radian;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.nodes.Marker;
 
 public final class ShapeRenderer {
+    private static final boolean DEBUG_MARKERS = true;
+
     private ShapeRenderer() {}
 
     public static void renderShape(@NotNull RenderContext context, @NotNull PaintContext paintContext,
@@ -84,5 +92,146 @@ public final class ShapeRenderer {
             }
             g.setComposite(composite);
         }
+    }
+
+    public static void renderMarkers(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull PathIterator iterator, boolean shouldPaintStartEndMarkersInMiddle,
+            @Nullable Marker start, @Nullable Marker mid, @Nullable Marker end) {
+        float[] args = new float[6];
+
+        float x = 0;
+        float y = 0;
+        float xStart = 0;
+        float yStart = 0;
+
+        float dxIn = 0;
+        float dyIn = 0;
+        float dxOut = 0;
+        float dyOut = 0;
+
+        boolean onlyFirst = mid == null && end == null;
+
+        Marker markerToPaint = null;
+        MarkerOrientation.MarkerType markerToPaintType = null;
+
+        pathWhile: while (!iterator.isDone()) {
+            int type = iterator.currentSegment(args);
+            iterator.next();
+
+            Marker nextMarker = iterator.isDone()
+                    ? end
+                    : mid;
+            MarkerOrientation.MarkerType nextMarkerType = iterator.isDone()
+                    ? MarkerOrientation.MarkerType.End
+                    : MarkerOrientation.MarkerType.Mid;
+
+            float xPaint = x;
+            float yPaint = y;
+            float dx = dxIn;
+            float dy = dyIn;
+
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    dxIn = dxOut = 0;
+                    dyIn = dyOut = 0;
+                    x = xStart = args[0];
+                    y = yStart = args[1];
+                    if (shouldPaintStartEndMarkersInMiddle) {
+                        nextMarker = start;
+                        nextMarkerType = MarkerOrientation.MarkerType.Start;
+                    }
+                    if (markerToPaint != null) {
+                        paintSingleMarker(context, g, markerToPaintType, markerToPaint,
+                                xPaint, yPaint, 0, 0, dx, dy);
+                    }
+                    markerToPaint = nextMarker;
+                    markerToPaintType = nextMarkerType;
+                    continue pathWhile;
+                case PathIterator.SEG_LINETO:
+                    dxOut = dxIn = args[0] - x;
+                    dyOut = dyIn = args[1] - y;
+                    x = args[0];
+                    y = args[1];
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    dxOut = args[0] - x;
+                    dyOut = args[1] - y;
+                    dxIn = args[2] - args[0];
+                    dyIn = args[3] - args[1];
+                    x = args[2];
+                    y = args[3];
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    dxOut = args[0] - x;
+                    dyOut = args[1] - y;
+                    dxIn = args[4] - args[2];
+                    dyIn = args[5] - args[3];
+                    x = args[4];
+                    y = args[5];
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    dxOut = dxIn = xStart - x;
+                    dyOut = dyIn = yStart - y;
+                    x = xStart;
+                    y = yStart;
+                    if (shouldPaintStartEndMarkersInMiddle) {
+                        nextMarker = end;
+                        nextMarkerType = MarkerOrientation.MarkerType.End;
+                    }
+                    break;
+            }
+
+            paintSingleMarker(context, g, markerToPaintType, markerToPaint,
+                    xPaint, yPaint, dx, dy, dxOut, dyOut);
+            if (onlyFirst) return;
+
+            markerToPaint = nextMarker;
+            markerToPaintType = nextMarkerType;
+        }
+        paintSingleMarker(context, g, markerToPaintType, markerToPaint, x, y, dxIn, dyIn, 0, 0);
+    }
+
+    public static void paintSingleMarker(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @Nullable MarkerOrientation.MarkerType type, @Nullable Marker marker,
+            float x, float y, float dxIn, float dyIn, float dxOut, float dyOut) {
+        if (marker == null) return;
+        assert type != null;
+
+        MarkerOrientation orientation = marker.orientation();
+        @Radian float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
+
+        Graphics2D markerGraphics = (Graphics2D) g.create();
+        markerGraphics.translate(x, y);
+
+        if (DEBUG_MARKERS) {
+            paintDebugMarkerAndRotate(context, markerGraphics, marker, rotation);
+        } else {
+            markerGraphics.rotate(rotation);
+        }
+        marker.render(context, markerGraphics);
+        markerGraphics.dispose();
+    }
+
+    private static void paintDebugMarkerAndRotate(@NotNull RenderContext context, @NotNull Graphics2D markerGraphics,
+            @NotNull Marker marker, float rotation) {
+        FloatSize size = marker.size(context);
+
+        GeneralPath p = new GeneralPath();
+        p.moveTo(0, size.height / 2f);
+        p.lineTo(size.width, size.height / 2f);
+        p.moveTo(0.8 * size.width, 0.35f * size.height);
+        p.lineTo(size.width, size.height / 2f);
+        p.lineTo(0.8 * size.width, 0.65f * size.height);
+
+
+        markerGraphics.setStroke(new BasicStroke(0.5f));
+
+        markerGraphics.setColor(Color.MAGENTA.darker().darker());
+        markerGraphics.draw(new Rectangle2D.Float(0, 0, size.width, size.height));
+        markerGraphics.draw(p);
+        markerGraphics.rotate(rotation);
+        markerGraphics.setColor(Color.MAGENTA);
+        markerGraphics.draw(new Rectangle2D.Float(0, 0, size.width, size.height));
+        markerGraphics.draw(p);
     }
 }
