@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.HasMatchName;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 
@@ -83,6 +84,24 @@ public final class AttributeParser {
         if (value == null) return fallback;
         try {
             return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    public static @Radian float parseAngle(@Nullable String value, float fallback) {
+        if (value == null) return fallback;
+        AngleUnit unit = AngleUnit.Raw;
+        String lower = value.toLowerCase(Locale.ENGLISH);
+        for (AngleUnit u : AngleUnit.units()) {
+            if (lower.endsWith(u.suffix())) {
+                unit = u;
+                break;
+            }
+        }
+        String str = lower.substring(0, lower.length() - unit.suffix().length());
+        try {
+            return unit.toRadians(Float.parseFloat(str), AngleUnit.Deg);
         } catch (NumberFormatException e) {
             return fallback;
         }
@@ -159,7 +178,6 @@ public final class AttributeParser {
         if (!value.startsWith("url(") || !value.endsWith(")")) return value;
         return value.substring(4, value.length() - 1);
     }
-
 
     private static final Pattern TRANSFORM_PATTERN = Pattern.compile("\\w+\\([^)]*\\)");
 
