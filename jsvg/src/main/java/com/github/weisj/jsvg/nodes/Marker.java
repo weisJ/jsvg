@@ -21,12 +21,12 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.MarkerOrientation;
 import com.github.weisj.jsvg.attributes.MarkerUnitType;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -54,6 +54,8 @@ public final class Marker extends BaseInnerViewContainer {
     private Length refX;
     private Length refY;
 
+    private MarkerOrientation orientation;
+
     private MarkerUnitType markerUnits;
     private Length markerHeight;
     private Length markerWidth;
@@ -61,6 +63,10 @@ public final class Marker extends BaseInnerViewContainer {
     @Override
     public @NotNull String tagName() {
         return TAG;
+    }
+
+    public @NotNull MarkerOrientation orientation() {
+        return orientation;
     }
 
     @Override
@@ -92,7 +98,8 @@ public final class Marker extends BaseInnerViewContainer {
         refX = attributeNode.getHorizontalReferenceLength("refX");
         refY = attributeNode.getHorizontalReferenceLength("refY");
 
-        // Todo: orient, Length needs to support angels for that (needs opt-in)
+        orientation = MarkerOrientation.parse(attributeNode.getValue("orient"));
+
         markerUnits = attributeNode.getEnum("markerUnits", MarkerUnitType.StrokeWidth);
         markerWidth = attributeNode.getLength("markerWidth", 3);
         markerHeight = attributeNode.getLength("markerHeight", 3);
