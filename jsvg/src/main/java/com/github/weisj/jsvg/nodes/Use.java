@@ -121,7 +121,8 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
             MeasureContext measureContext = context.measureContext();
             g.translate(x.resolveWidth(measureContext), y.resolveHeight(measureContext));
 
-            try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, g, true)) {
+            try (NodeRenderer.Info info =
+                    NodeRenderer.createRenderInfo(referencedNode, context, g, CommonInnerViewContainer.class)) {
                 if (info == null) return;
                 if (referencedNode instanceof CommonInnerViewContainer) {
                     ViewBox targetViewBox = new ViewBox(0, 0, Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);

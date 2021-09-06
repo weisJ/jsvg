@@ -208,6 +208,12 @@ public final class ShapeRenderer {
         } else {
             markerGraphics.rotate(rotation);
         }
+
+        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, context, g, Marker.class)) {
+            if (info == null) return;
+            marker.render(info.context, info.g);
+        }
+
         marker.render(context, markerGraphics);
         markerGraphics.dispose();
     }
@@ -222,7 +228,6 @@ public final class ShapeRenderer {
         p.moveTo(0.8 * size.width, 0.35f * size.height);
         p.lineTo(size.width, size.height / 2f);
         p.lineTo(0.8 * size.width, 0.65f * size.height);
-
 
         markerGraphics.setStroke(new BasicStroke(0.5f));
 

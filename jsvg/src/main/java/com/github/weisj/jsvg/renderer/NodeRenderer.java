@@ -33,7 +33,10 @@ import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
-import com.github.weisj.jsvg.nodes.prototype.*;
+import com.github.weisj.jsvg.nodes.prototype.HasClip;
+import com.github.weisj.jsvg.nodes.prototype.HasContext;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.nodes.prototype.Transformable;
 
 public final class NodeRenderer {
     private static final boolean CLIP_DEBUG = false;
@@ -58,16 +61,19 @@ public final class NodeRenderer {
     }
 
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Graphics2D g) {
-        try (Info info = createRenderInfo(node, context, g, false)) {
+        try (Info info = createRenderInfo(node, context, g, null)) {
             if (info != null) info.renderable.render(info.context, info.g);
         }
     }
 
     public static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
-            @NotNull Graphics2D g, boolean doInstantiate) {
+            @NotNull Graphics2D g, @Nullable Class<?> instantiableType) {
         if (!(node instanceof Renderable)) return null;
         Renderable renderable = (Renderable) node;
-        if (!doInstantiate && renderable.requiresInstantiation()) return null;
+        if (renderable.requiresInstantiation()
+                && (instantiableType == null || !instantiableType.isInstance(renderable))) {
+            return null;
+        }
         if (!renderable.isVisible(context)) return null;
         RenderContext childContext = setupRenderContext(node, context);
 
