@@ -27,7 +27,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
-interface FontSize {
+public interface FontSize {
     @NotNull
     Length size(@NotNull Length parentSize);
 }

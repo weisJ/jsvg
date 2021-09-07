@@ -84,6 +84,12 @@ public class MeasurableFontSpec extends FontSpec {
         return emSize;
     }
 
+    public @NotNull MeasurableFontSpec withFontSize(@Nullable FontSize size, @Nullable Length sizeAdjust) {
+        if (size == null && sizeAdjust == null) return this;
+        return new MeasurableFontSpec(families, style, sizeAdjust != null ? sizeAdjust : this.sizeAdjust, stretch,
+                currentWeight, size != null ? size.size(currentSize) : this.currentSize);
+    }
+
     public @NotNull MeasurableFontSpec derive(@Nullable AttributeFontSpec other) {
         if (other == null) return this;
         String[] newFamilies = other.families != null && other.families.length > 0

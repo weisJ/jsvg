@@ -39,14 +39,14 @@ public final class FontParser {
         // Todo: https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#fallback_weights
         @Nullable FontWeight weight = parseWeight(node);
         @Nullable FontSize size = parseFontSize(node);
-        @Nullable Length sizeAdjust = node.getLength("font-size-adjust");
+        @Nullable Length sizeAdjust = parseSizeAdjust(node);
         @Nullable FontStyle style = parseFontStyle(node);
         @Percentage float stretch = parseStretch(node);
 
         return new AttributeFontSpec(fontFamilies, style, sizeAdjust, stretch, size, weight);
     }
 
-    private static @Nullable FontWeight parseWeight(@NotNull AttributeNode node) {
+    public static @Nullable FontWeight parseWeight(@NotNull AttributeNode node) {
         FontWeight weight = node.getEnum("font-weight", PredefinedFontWeight.Number);
         if (weight == PredefinedFontWeight.Number) {
             if (node.hasAttribute("font-weight")) {
@@ -60,7 +60,7 @@ public final class FontParser {
         return weight;
     }
 
-    private static @Percentage float parseStretch(@NotNull AttributeNode node) {
+    public static @Percentage float parseStretch(@NotNull AttributeNode node) {
         FontStretch stretch = node.getEnum("font-stretch", FontStretch.Percentage);
         return stretch == FontStretch.Percentage
                 ? AttributeParser.parsePercentage(node.getValue("font-stretch"),
@@ -68,7 +68,7 @@ public final class FontParser {
                 : stretch.percentage();
     }
 
-    private static @Nullable FontSize parseFontSize(@NotNull AttributeNode node) {
+    public static @Nullable FontSize parseFontSize(@NotNull AttributeNode node) {
         FontSize fontSize = node.getEnum("font-size", PredefinedFontSize.Number);
         if (fontSize == PredefinedFontSize.Number) {
             Length size = node.getLength("font-size", Length.UNSPECIFIED);
@@ -79,7 +79,11 @@ public final class FontParser {
         return fontSize;
     }
 
-    private static @Nullable FontStyle parseFontStyle(@NotNull AttributeNode node) {
+    public static @Nullable Length parseSizeAdjust(@NotNull AttributeNode node) {
+        return node.getLength("font-size-adjust");
+    }
+
+    public static @Nullable FontStyle parseFontStyle(@NotNull AttributeNode node) {
         FontStyle style = null;
         String styleStr = node.getValue("font-style");
         if ("normal".equalsIgnoreCase(styleStr)) {

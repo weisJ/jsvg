@@ -27,21 +27,27 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.font.FontParser;
+import com.github.weisj.jsvg.attributes.font.FontSize;
+import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.prototype.HasPaintContext;
-import com.github.weisj.jsvg.nodes.prototype.HasShape;
-import com.github.weisj.jsvg.nodes.prototype.Instantiator;
+import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
-public abstract class ShapeNode extends RenderableSVGNode implements HasShape, HasPaintContext, Instantiator {
+public abstract class ShapeNode extends RenderableSVGNode
+        implements HasShape, HasPaintContext, HasFontContext, Instantiator {
     private PaintContext paintContext;
+    private FontSize fontSize;
+    private Length fontSizeAdjust;
+
     private Length pathLength;
     private MeasurableShape shape;
+
 
     private Marker markerStart;
     private Marker markerMid;
@@ -53,14 +59,20 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape, H
     }
 
     @Override
+    public @NotNull Mutator<MeasurableFontSpec> fontSpec() {
+        return s -> s.withFontSize(fontSize, fontSizeAdjust);
+    }
+
+    @Override
     public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        pathLength = attributeNode.getLength("pathLength", Length.UNSPECIFIED);
         paintContext = PaintContext.parse(attributeNode);
+
+        fontSize = FontParser.parseFontSize(attributeNode);
+        fontSizeAdjust = FontParser.parseSizeAdjust(attributeNode);
+
         shape = buildShape(attributeNode);
-        // Todo: We probably also need to parse the font-spec as it can affect sizes referenced as
-        // Unit.Em/Unit.Ex. Theoretically we'd only need to parse the font-size as we don't compute the ex
-        // size based on the font.
+        pathLength = attributeNode.getLength("pathLength", Length.UNSPECIFIED);
 
         // Todo: These are actually inheritable and hence have to go into the RenderContext
         // Todo: The marker shorthand is a bit more complicated than just being a template.
