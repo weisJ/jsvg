@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
-import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -55,9 +54,10 @@ public class SVGDocument {
         float defaultEm = f != null ? f.getSize2D() : SVGFont.defaultFontSize();
         float defaultEx = SVGFont.exFromEm(defaultEm);
 
+
         MeasureContext initialMeasure = bounds != null
-                ? MeasureContext.createInitial(bounds.width, bounds.height, defaultEm, defaultEx)
-                : MeasureContext.createInitial(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, defaultEm, defaultEx);
+                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx)
+                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx);
         RenderContext context = RenderContext.createInitial(component, initialMeasure);
 
         if (bounds == null) bounds = new ViewBox(root.size(context));
@@ -71,13 +71,15 @@ public class SVGDocument {
             g.transform(transform);
             g.translate(-bounds.width / 2, -bounds.height / 2);
         }
-        g.translate(bounds.x, bounds.y);
-        g.clipRect(0, 0, (int) bounds.width, (int) bounds.height);
 
         if (DEBUG) {
             g.setColor(Color.MAGENTA);
-            g.drawRect(0, 0, (int) bounds.width - 1, (int) bounds.height - 1);
+            g.draw(bounds);
         }
-        root.renderAtLocation(bounds, context, g);
+
+        g.clip(bounds);
+        g.translate(bounds.x, bounds.y);
+
+        root.renderWithSize(bounds.size(), context, g);
     }
 }

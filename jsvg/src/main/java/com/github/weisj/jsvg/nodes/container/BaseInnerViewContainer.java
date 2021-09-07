@@ -27,12 +27,12 @@ import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -58,46 +58,39 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
 
     @Override
     public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderAtLocation(null, context, g);
+        renderWithSize(size(context), context, g);
     }
 
     protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
         return NodeRenderer.setupInnerViewRenderContext(viewBox, context, true);
     }
 
-    public void renderAtLocation(@Nullable ViewBox useSiteViewBox, @NotNull RenderContext context,
-            @NotNull Graphics2D g) {
+    public void renderWithSize(@NotNull FloatSize useSiteSize, @NotNull RenderContext context, @NotNull Graphics2D g) {
         MeasureContext measureContext = context.measureContext();
-        Point2D outerPos = outerLocation(measureContext);
-        float xPos = (float) outerPos.getX();
-        float yPos = (float) outerPos.getY();
-        if (useSiteViewBox != null) {
-            if (useSiteViewBox.hasSpecifiedX()) xPos = useSiteViewBox.x;
-            if (useSiteViewBox.hasSpecifiedY()) yPos = useSiteViewBox.y;
-        }
-        g.translate(xPos, yPos);
 
-        AffineTransform viewTransform = null;
-        FloatSize size;
-        if (viewBox != null) {
-            if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth() && useSiteViewBox.hasSpecifiedHeight()) {
-                size = useSiteViewBox.size();
-            } else {
-                size = size(context);
-                if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth()) size.width = useSiteViewBox.width;
-                if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedHeight()) size.height = useSiteViewBox.height;
-            }
-            viewTransform = preserveAspectRatio.computeViewPortTransform(size, viewBox);
-        } else {
-            size = size(context);
+        Point2D outerPos = outerLocation(measureContext);
+
+        if (Length.isUnspecified(useSiteSize.width) || Length.isUnspecified(useSiteSize.height)) {
+            FloatSize size = size(context);
+            if (Length.isUnspecified(useSiteSize.width)) useSiteSize.width = size.width;
+            if (Length.isUnspecified(useSiteSize.height)) useSiteSize.height = size.height;
         }
-        FloatSize viewSize = viewBox != null ? viewBox.size() : size;
+
+        g.translate(outerPos.getX(), outerPos.getY());
+
+        AffineTransform viewTransform = viewBox != null
+                ? preserveAspectRatio.computeViewPortTransform(useSiteSize, viewBox)
+                : null;
+        FloatSize viewSize = viewBox != null
+                ? viewBox.size()
+                : useSiteSize;
 
         RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
         MeasureContext innerMeasure = innerContext.measureContext();
 
         Point2D innerPos = innerLocation(innerMeasure);
         if (viewTransform != null) {
+            // This is safe to do as computeViewPortTransform will never produce shear or rotation transforms.
             innerPos.setLocation(
                     innerPos.getX() * viewTransform.getScaleX(),
                     innerPos.getY() * viewTransform.getScaleY());
@@ -106,9 +99,10 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
         g.translate(innerPos.getX(), innerPos.getY());
 
         // Todo: This should be determined by the overflow parameter
-        g.clipRect(0, 0, (int) size.width, (int) size.height);
-
+        g.clip(new ViewBox(useSiteSize));
         if (viewTransform != null) g.transform(viewTransform);
+
+
         super.render(innerContext, g);
     }
 }

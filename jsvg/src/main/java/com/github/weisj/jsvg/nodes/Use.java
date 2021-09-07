@@ -27,11 +27,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
@@ -128,10 +128,10 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
             try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, g, this)) {
                 if (info == null) return;
                 if (referencedNode instanceof CommonInnerViewContainer) {
-                    ViewBox targetViewBox = new ViewBox(0, 0, Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
+                    FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
                     if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
                     if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
-                    ((CommonInnerViewContainer) referencedNode).renderAtLocation(targetViewBox, info.context, info.g);
+                    ((CommonInnerViewContainer) referencedNode).renderWithSize(targetViewBox, info.context, info.g);
                 } else {
                     info.renderable.render(info.context, info.g);
                 }

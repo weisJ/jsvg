@@ -30,7 +30,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Container, Category.Structural})
 @PermittedContent(
@@ -53,11 +52,13 @@ public final class SVG extends CommonInnerViewContainer {
         return TAG;
     }
 
-    @Override
-    public @NotNull FloatSize size(@NotNull RenderContext context) {
-        MeasureContext measure = context.measureContext();
+    public @NotNull FloatSize sizeForTopLevel(float em, float ex) {
+        MeasureContext topLevelContext =
+                MeasureContext.createInitial(new FloatSize(FALLBACK_WIDTH, FALLBACK_HEIGHT), em, ex);
         return new FloatSize(
-                width.orElseIfUnspecified(FALLBACK_WIDTH).resolveWidth(measure),
-                height.orElseIfUnspecified(FALLBACK_HEIGHT).resolveHeight(measure));
+                width.orElseIfUnspecified(viewBox != null ? viewBox.width : FALLBACK_WIDTH)
+                        .resolveWidth(topLevelContext),
+                height.orElseIfUnspecified(viewBox != null ? viewBox.height : FALLBACK_HEIGHT)
+                        .resolveHeight(topLevelContext));
     }
 }

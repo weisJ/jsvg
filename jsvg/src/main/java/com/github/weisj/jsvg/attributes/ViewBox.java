@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.attributes;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +58,10 @@ public final class ViewBox extends Rectangle2D.Float {
 
     public @NotNull FloatSize size() {
         return new FloatSize(width, height);
+    }
+
+    public @NotNull Point2D.Float location() {
+        return new Point2D.Float(x, y);
     }
 
     public boolean hasSpecifiedX() {

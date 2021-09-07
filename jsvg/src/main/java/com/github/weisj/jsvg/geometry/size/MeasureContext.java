@@ -46,8 +46,8 @@ public class MeasureContext {
         this.fontRenderContext = fontRenderContext;
     }
 
-    public static @NotNull MeasureContext createInitial(float vw, float vh, float em, float ex) {
-        return new MeasureContext(vw, vh, em, ex, FontRenderContext.createDefault());
+    public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex) {
+        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, FontRenderContext.createDefault());
     }
 
     public @NotNull FontRenderContext fontRenderContext() {

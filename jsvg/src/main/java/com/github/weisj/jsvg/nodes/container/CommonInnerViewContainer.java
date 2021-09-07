@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.nodes.container;
 
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +30,6 @@ import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -54,11 +52,9 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
 
     public @NotNull FloatSize size(@NotNull RenderContext context) {
         MeasureContext measure = context.measureContext();
-        if (width.isSpecified() && height.isSpecified()) {
-            return new FloatSize(width.resolveWidth(measure), height.resolveHeight(measure));
-        }
-        Rectangle2D bounds = bounds(context, true);
-        return new FloatSize((float) bounds.getWidth(), (float) bounds.getHeight());
+        return new FloatSize(
+                width.orElseIfUnspecified(measure.viewWidth()).resolveWidth(measure),
+                height.orElseIfUnspecified(measure.viewHeight()).resolveHeight(measure));
     }
 
     @Override
@@ -72,9 +68,7 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
         super.build(attributeNode);
         x = attributeNode.getLength("x", 0);
         y = attributeNode.getLength("y", 0);
-        width = attributeNode.getLength("width",
-                viewBox != null ? Unit.Raw.valueOf(viewBox.width) : Length.UNSPECIFIED);
-        height = attributeNode.getLength("height",
-                viewBox != null ? Unit.Raw.valueOf(viewBox.height) : Length.UNSPECIFIED);
+        width = attributeNode.getLength("width", Length.UNSPECIFIED);
+        height = attributeNode.getLength("height", Length.UNSPECIFIED);
     }
 }
