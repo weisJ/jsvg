@@ -61,6 +61,10 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
         renderAtLocation(null, context, g);
     }
 
+    protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
+        return NodeRenderer.setupInnerViewRenderContext(viewBox, context, true);
+    }
+
     public void renderAtLocation(@Nullable ViewBox useSiteViewBox, @NotNull RenderContext context,
             @NotNull Graphics2D g) {
         MeasureContext measureContext = context.measureContext();
@@ -89,7 +93,7 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
         }
         FloatSize viewSize = viewBox != null ? viewBox.size() : size;
 
-        RenderContext innerContext = NodeRenderer.setupInnerViewRenderContext(new ViewBox(viewSize), context);
+        RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
         MeasureContext innerMeasure = innerContext.measureContext();
 
         Point2D innerPos = innerLocation(innerMeasure);

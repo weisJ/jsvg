@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.MarkerOrientation;
 import com.github.weisj.jsvg.attributes.MarkerUnitType;
+import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -36,6 +37,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories(Category.Container)
@@ -108,5 +110,10 @@ public final class Marker extends BaseInnerViewContainer {
     @Override
     public boolean requiresInstantiation() {
         return true;
+    }
+
+    protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
+        // Markers do not inherit properties from the element they are referenced by.
+        return NodeRenderer.setupInnerViewRenderContext(viewBox, context, false);
     }
 }

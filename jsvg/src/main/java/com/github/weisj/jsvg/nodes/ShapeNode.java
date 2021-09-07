@@ -55,6 +55,8 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape, I
         shape = buildShape(attributeNode);
 
         // Todo: These are actually inheritable and hence have to go into the RenderContext
+        // Todo: The marker shorthand is a bit more complicated than just being a template.
+        // https://www.w3.org/TR/svg-markers/#MarkerShorthand
         Marker template = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker"));
         markerStart = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-start"));
         if (markerStart == null) markerStart = template;

@@ -73,8 +73,9 @@ public final class ShapeRenderer {
 
     private static void doRenderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
             @NotNull Shape shape, @NotNull Rectangle2D bounds,
-            boolean allowFill, boolean allowOutline, float fOpacity, SVGPaint fPaint, float sOpacity,
-            @NotNull SVGPaint sPaint, @Nullable Stroke stroke) {
+            boolean allowFill, boolean allowOutline,
+            float fOpacity, @NotNull SVGPaint fPaint,
+            float sOpacity, @NotNull SVGPaint sPaint, @Nullable Stroke stroke) {
         boolean doFill = allowFill && fOpacity > 0 && fPaint.isVisible();
         boolean doOutline = allowOutline && sOpacity > 0 && sPaint.isVisible();
 
@@ -96,8 +97,7 @@ public final class ShapeRenderer {
     }
 
     public static void renderMarkers(@NotNull ShapeNode shapeNode, @NotNull RenderContext context,
-            @NotNull Graphics2D g,
-            @NotNull PathIterator iterator, boolean shouldPaintStartEndMarkersInMiddle,
+            @NotNull Graphics2D g, @NotNull PathIterator iterator, boolean shouldPaintStartEndMarkersInMiddle,
             @Nullable Marker start, @Nullable Marker mid, @Nullable Marker end) {
         float[] args = new float[6];
 

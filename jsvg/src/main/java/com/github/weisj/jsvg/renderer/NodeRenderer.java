@@ -29,6 +29,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
+import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
+import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
@@ -124,7 +127,18 @@ public final class NodeRenderer {
     }
 
     public static @NotNull RenderContext setupInnerViewRenderContext(@NotNull ViewBox viewBox,
-            @NotNull RenderContext context) {
-        return context.derive(null, null, viewBox, null, null);
+            @NotNull RenderContext context, boolean inheritAttributes) {
+        if (inheritAttributes) {
+            return context.derive(null, null, viewBox, null, null);
+        } else {
+            MeasureContext newMeasure = context.measureContext().derive(viewBox,
+                    Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, FontRenderContext.createDefault());
+            return new RenderContext(
+                    context.targetComponent(),
+                    PaintContext.createDefault(),
+                    newMeasure,
+                    MeasurableFontSpec.createDefault(),
+                    context.contextElementAttributes());
+        }
     }
 }

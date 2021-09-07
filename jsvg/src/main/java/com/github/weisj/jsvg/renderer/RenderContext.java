@@ -56,7 +56,7 @@ public class RenderContext {
                 null);
     }
 
-    private RenderContext(@Nullable JComponent targetComponent,
+    RenderContext(@Nullable JComponent targetComponent,
             @NotNull PaintContext paintContext,
             @NotNull MeasureContext measureContext,
             @NotNull MeasurableFontSpec fontSpec,
@@ -105,6 +105,11 @@ public class RenderContext {
         // Our deriving mechanism together with non-null initial values prohibits this.
         assert paintContext.strokeContext != null;
         return paintContext.strokeContext;
+    }
+
+    @Nullable
+    ContextElementAttributes contextElementAttributes() {
+        return contextElementAttributes;
     }
 
     public @Nullable JComponent targetComponent() {
