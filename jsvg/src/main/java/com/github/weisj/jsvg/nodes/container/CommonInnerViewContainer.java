@@ -25,6 +25,7 @@ import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -41,13 +42,14 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
     protected Length height;
 
     @Override
-    protected Point2D outerLocation(@NotNull MeasureContext context) {
+    protected @NotNull Point2D outerLocation(@NotNull MeasureContext context) {
         return new Point2D.Float(x.resolveWidth(context), y.resolveHeight(context));
     }
 
     @Override
-    protected Point2D anchorLocation(@NotNull MeasureContext context) {
-        return new Point2D.Float(0, 0);
+    protected @Nullable Point2D anchorLocation(@NotNull MeasureContext context) {
+        // By default we aren't anchored.
+        return null;
     }
 
     public @NotNull FloatSize size(@NotNull RenderContext context) {

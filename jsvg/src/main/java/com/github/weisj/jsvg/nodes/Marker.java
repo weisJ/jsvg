@@ -73,12 +73,12 @@ public final class Marker extends BaseInnerViewContainer {
     }
 
     @Override
-    protected Point2D outerLocation(@NotNull MeasureContext context) {
+    protected @NotNull Point2D outerLocation(@NotNull MeasureContext context) {
         return new Point2D.Float(0, 0);
     }
 
     @Override
-    protected Point2D anchorLocation(@NotNull MeasureContext context) {
+    protected @NotNull Point2D anchorLocation(@NotNull MeasureContext context) {
         return new Point2D.Float(-refX.resolveWidth(context), -refY.resolveHeight(context));
     }
 

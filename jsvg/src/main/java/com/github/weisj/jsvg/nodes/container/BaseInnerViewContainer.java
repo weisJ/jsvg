@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
@@ -42,9 +43,9 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
     protected ViewBox viewBox;
     protected PreserveAspectRatio preserveAspectRatio;
 
-    protected abstract Point2D outerLocation(@NotNull MeasureContext context);
+    protected abstract @NotNull Point2D outerLocation(@NotNull MeasureContext context);
 
-    protected abstract Point2D anchorLocation(@NotNull MeasureContext context);
+    protected abstract @Nullable Point2D anchorLocation(@NotNull MeasureContext context);
 
     public abstract @NotNull FloatSize size(@NotNull RenderContext context);
 
@@ -90,14 +91,15 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
         MeasureContext innerMeasure = innerContext.measureContext();
 
         Point2D anchorPos = anchorLocation(innerMeasure);
-        if (viewTransform != null) {
-            // This is safe to do as computeViewPortTransform will never produce shear or rotation transforms.
-            anchorPos.setLocation(
-                    anchorPos.getX() * viewTransform.getScaleX() - viewTransform.getTranslateX(),
-                    anchorPos.getY() * viewTransform.getScaleY() - viewTransform.getTranslateY());
+        if (anchorPos != null) {
+            if (viewTransform != null) {
+                // This is safe to do as computeViewPortTransform will never produce shear or rotation transforms.
+                anchorPos.setLocation(
+                        anchorPos.getX() * viewTransform.getScaleX() - viewTransform.getTranslateX(),
+                        anchorPos.getY() * viewTransform.getScaleY() - viewTransform.getTranslateY());
+            }
+            g.translate(anchorPos.getX(), anchorPos.getY());
         }
-
-        g.translate(anchorPos.getX(), anchorPos.getY());
 
         // Todo: This should be determined by the overflow parameter
         g.clip(new ViewBox(useSiteSize));
