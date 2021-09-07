@@ -44,7 +44,7 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
 
     protected abstract Point2D outerLocation(@NotNull MeasureContext context);
 
-    protected abstract Point2D innerLocation(@NotNull MeasureContext context);
+    protected abstract Point2D anchorLocation(@NotNull MeasureContext context);
 
     public abstract @NotNull FloatSize size(@NotNull RenderContext context);
 
@@ -89,15 +89,15 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
         RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
         MeasureContext innerMeasure = innerContext.measureContext();
 
-        Point2D innerPos = innerLocation(innerMeasure);
+        Point2D anchorPos = anchorLocation(innerMeasure);
         if (viewTransform != null) {
             // This is safe to do as computeViewPortTransform will never produce shear or rotation transforms.
-            innerPos.setLocation(
-                    innerPos.getX() * viewTransform.getScaleX(),
-                    innerPos.getY() * viewTransform.getScaleY());
+            anchorPos.setLocation(
+                    anchorPos.getX() * viewTransform.getScaleX() - viewTransform.getTranslateX(),
+                    anchorPos.getY() * viewTransform.getScaleY() - viewTransform.getTranslateY());
         }
 
-        g.translate(innerPos.getX(), innerPos.getY());
+        g.translate(anchorPos.getX(), anchorPos.getY());
 
         // Todo: This should be determined by the overflow parameter
         g.clip(new ViewBox(useSiteSize));

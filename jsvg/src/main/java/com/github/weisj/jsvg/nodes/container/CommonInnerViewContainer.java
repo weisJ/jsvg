@@ -46,7 +46,7 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
     }
 
     @Override
-    protected Point2D innerLocation(@NotNull MeasureContext context) {
+    protected Point2D anchorLocation(@NotNull MeasureContext context) {
         return new Point2D.Float(0, 0);
     }
 

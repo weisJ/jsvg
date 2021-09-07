@@ -58,6 +58,9 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape, H
         pathLength = attributeNode.getLength("pathLength", Length.UNSPECIFIED);
         paintContext = PaintContext.parse(attributeNode);
         shape = buildShape(attributeNode);
+        // Todo: We probably also need to parse the font-spec as it can affect sizes referenced as
+        // Unit.Em/Unit.Ex. Theoretically we'd only need to parse the font-size as we don't compute the ex
+        // size based on the font.
 
         // Todo: These are actually inheritable and hence have to go into the RenderContext
         // Todo: The marker shorthand is a bit more complicated than just being a template.
