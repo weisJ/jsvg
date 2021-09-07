@@ -28,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -112,8 +111,8 @@ public final class NodeRenderer {
 
     private static @NotNull RenderContext setupRenderContext(@Nullable Instantiator instantiator, @NotNull Object node,
             @NotNull RenderContext context) {
-        @Nullable PaintContext paintContext = null;
-        @Nullable AttributeFontSpec fontSpec = null;
+        @Nullable Mutator<PaintContext> paintContext = null;
+        @Nullable Mutator<MeasurableFontSpec> fontSpec = null;
         @Nullable FontRenderContext fontRenderContext = null;
         if (node instanceof HasPaintContext) {
             paintContext = ((HasPaintContext) node).paintContext();

@@ -23,13 +23,8 @@ package com.github.weisj.jsvg.nodes.prototype;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.PaintContext;
-
-/**
- * Informs the renderer that an element provides styling information which can be inherited by its children.
- */
-public interface HasPaintContext {
+public interface Mutator<T> {
 
     @NotNull
-    Mutator<PaintContext> paintContext();
+    T mutate(@NotNull T element);
 }

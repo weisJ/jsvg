@@ -29,8 +29,9 @@ import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.nodes.prototype.Mutator;
 
-public class PaintContext {
+public class PaintContext implements Mutator<PaintContext> {
 
     public final AwtSVGPaint color;
     public final SVGPaint fillPaint;
@@ -44,7 +45,7 @@ public class PaintContext {
 
     public PaintContext(AwtSVGPaint color, SVGPaint fillPaint, float fillOpacity,
             SVGPaint strokePaint, float strokeOpacity, float opacity,
-            @NotNull StrokeContext strokeContext) {
+            @Nullable StrokeContext strokeContext) {
         this.color = color;
         this.fillPaint = fillPaint;
         this.strokePaint = strokePaint;
@@ -52,7 +53,7 @@ public class PaintContext {
         this.strokeOpacity = strokeOpacity;
         this.opacity = opacity;
         // Avoid creating unnecessary intermediate contexts during painting.
-        this.strokeContext = strokeContext.isTrivial() ? null : strokeContext;
+        this.strokeContext = strokeContext == null || strokeContext.isTrivial() ? null : strokeContext;
     }
 
     public static @NotNull PaintContext createDefault() {
@@ -73,6 +74,24 @@ public class PaintContext {
                 attributeNode.getPercentage("stroke-opacity", 1),
                 attributeNode.getPercentage("opacity", 1),
                 StrokeContext.parse(attributeNode));
+    }
+
+    public @NotNull PaintContext derive(@NotNull PaintContext context) {
+        return new PaintContext(
+                context.color != null ? context.color : color,
+                context.fillPaint != null ? context.fillPaint : fillPaint,
+                fillOpacity * context.fillOpacity,
+                context.strokePaint != null ? context.strokePaint : strokePaint,
+                strokeOpacity * context.strokeOpacity,
+                opacity * context.opacity,
+                strokeContext != null
+                        ? strokeContext.derive(context.strokeContext)
+                        : context.strokeContext);
+    }
+
+    @Override
+    public @NotNull PaintContext mutate(@NotNull PaintContext element) {
+        return element.derive(this);
     }
 
     @Override

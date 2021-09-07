@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.nodes.prototype;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
+import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
 
 /**
@@ -32,7 +32,7 @@ import com.github.weisj.jsvg.renderer.FontRenderContext;
 public interface HasFontContext {
 
     @NotNull
-    AttributeFontSpec fontSpec();
+    Mutator<MeasurableFontSpec> fontSpec();
 
     @NotNull
     FontRenderContext fontRenderContext();

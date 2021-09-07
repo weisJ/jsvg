@@ -30,13 +30,13 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.stroke.StrokeResolver;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.prototype.Mutator;
 
 public class RenderContext {
 
@@ -69,26 +69,16 @@ public class RenderContext {
     }
 
     @NotNull
-    RenderContext derive(@Nullable PaintContext context, @Nullable AttributeFontSpec attributeFontSpec,
+    RenderContext derive(@Nullable Mutator<PaintContext> context,
+            @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
             @Nullable ContextElementAttributes contextAttributes) {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
 
-        if (context != null) {
-            newPaintContext = new PaintContext(
-                    context.color != null ? context.color : paintContext.color,
-                    context.fillPaint != null ? context.fillPaint : paintContext.fillPaint,
-                    paintContext.fillOpacity * context.fillOpacity,
-                    context.strokePaint != null ? context.strokePaint : paintContext.strokePaint,
-                    paintContext.strokeOpacity * context.strokeOpacity,
-                    paintContext.opacity * context.opacity,
-                    strokeContext().derive(context.strokeContext));
-        }
-        if (attributeFontSpec != null) {
-            newFontSpec = newFontSpec.derive(attributeFontSpec);
-        }
+        if (context != null) newPaintContext = context.mutate(paintContext);
+        if (attributeFontSpec != null) newFontSpec = attributeFontSpec.mutate(newFontSpec);
 
         ContextElementAttributes newContextAttributes = contextElementAttributes;
         if (contextAttributes != null) newContextAttributes = contextAttributes;

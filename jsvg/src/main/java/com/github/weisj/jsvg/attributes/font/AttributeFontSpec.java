@@ -29,8 +29,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.nodes.prototype.Mutator;
 
-public class AttributeFontSpec extends FontSpec {
+public class AttributeFontSpec extends FontSpec implements Mutator<MeasurableFontSpec> {
     protected final @Nullable FontSize size;
     protected final @Nullable FontWeight weight;
 
@@ -47,6 +48,11 @@ public class AttributeFontSpec extends FontSpec {
 
     public @Nullable FontSize size() {
         return size;
+    }
+
+    @Override
+    public @NotNull MeasurableFontSpec mutate(@NotNull MeasurableFontSpec element) {
+        return element.derive(this);
     }
 
     @Override
