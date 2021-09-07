@@ -25,6 +25,7 @@ import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.Nullable;
 
+// Todo: Needs transform-origin. For top-level svg its 50%,50%
 public interface Transformable {
 
     @Nullable
