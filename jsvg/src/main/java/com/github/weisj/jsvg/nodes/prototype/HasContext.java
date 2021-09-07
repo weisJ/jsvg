@@ -23,6 +23,8 @@ package com.github.weisj.jsvg.nodes.prototype;
 
 /**
  * Informs the renderer that an element provides styling information which can be inherited by its children.
+ *
+ * Umbrella interface for all available contexts.
  */
-public interface HasContext extends HasPaintContext, HasFontContext {
+public interface HasContext extends HasPaintContext, HasFontContext, HasFontRenderContext {
 }

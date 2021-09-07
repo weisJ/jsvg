@@ -114,13 +114,11 @@ public final class NodeRenderer {
         @Nullable Mutator<PaintContext> paintContext = null;
         @Nullable Mutator<MeasurableFontSpec> fontSpec = null;
         @Nullable FontRenderContext fontRenderContext = null;
-        if (node instanceof HasPaintContext) {
-            paintContext = ((HasPaintContext) node).paintContext();
-        }
-        if (node instanceof HasFontContext) {
-            fontSpec = ((HasFontContext) node).fontSpec();
-            fontRenderContext = ((HasFontContext) node).fontRenderContext();
-        }
+
+        if (node instanceof HasPaintContext) paintContext = ((HasPaintContext) node).paintContext();
+        if (node instanceof HasFontContext) fontSpec = ((HasFontContext) node).fontSpec();
+        if (node instanceof HasFontRenderContext) fontRenderContext = ((HasFontRenderContext) node).fontRenderContext();
+
         @Nullable ContextElementAttributes contextElementAttributes = null;
         if (instantiator != null) contextElementAttributes = instantiator.createContextAttributes(context);
 
