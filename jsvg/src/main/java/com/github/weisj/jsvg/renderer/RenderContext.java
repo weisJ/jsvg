@@ -80,10 +80,10 @@ public class RenderContext {
             newPaintContext = new PaintContext(
                     context.color != null ? context.color : paintContext.color,
                     context.fillPaint != null ? context.fillPaint : paintContext.fillPaint,
-                    fillOpacity(context.fillOpacity),
+                    paintContext.fillOpacity * context.fillOpacity,
                     context.strokePaint != null ? context.strokePaint : paintContext.strokePaint,
-                    strokeOpacity(context.strokeOpacity),
-                    opacity(context.opacity),
+                    paintContext.strokeOpacity * context.strokeOpacity,
+                    paintContext.opacity * context.opacity,
                     strokeContext().derive(context.strokeContext));
         }
         if (attributeFontSpec != null) {
@@ -120,12 +120,12 @@ public class RenderContext {
         return measureContext;
     }
 
-    public @NotNull SVGPaint strokePaint(@Nullable SVGPaint paint) {
-        return resolvePaint(paint != null ? paint : paintContext.strokePaint);
+    public @NotNull SVGPaint strokePaint() {
+        return resolvePaint(paintContext.strokePaint);
     }
 
-    public @NotNull SVGPaint fillPaint(@Nullable SVGPaint paint) {
-        return resolvePaint(paint != null ? paint : paintContext.fillPaint);
+    public @NotNull SVGPaint fillPaint() {
+        return resolvePaint(paintContext.fillPaint);
     }
 
     private @NotNull SVGPaint resolvePaint(@NotNull SVGPaint p) {
@@ -141,24 +141,24 @@ public class RenderContext {
         return p;
     }
 
-    public @Percentage float fillOpacity(@Percentage float opacity) {
-        return paintContext.fillOpacity * opacity;
+    public @Percentage float rawOpacity() {
+        return paintContext.opacity;
     }
 
-    public @Percentage float strokeOpacity(@Percentage float opacity) {
-        return paintContext.strokeOpacity * opacity;
+    public @Percentage float fillOpacity() {
+        return paintContext.fillOpacity * paintContext.opacity;
     }
 
-    public @Percentage float opacity(@Percentage float opacity) {
-        return paintContext.opacity * opacity;
+    public @Percentage float strokeOpacity() {
+        return paintContext.strokeOpacity * paintContext.opacity;
     }
 
-    public @NotNull Stroke stroke(float pathLengthFactor, @Nullable StrokeContext context) {
-        return StrokeResolver.resolve(pathLengthFactor, measureContext, strokeContext().derive(context));
+    public @NotNull Stroke stroke(float pathLengthFactor) {
+        return StrokeResolver.resolve(pathLengthFactor, measureContext, strokeContext());
     }
 
-    public @NotNull SVGFont font(@Nullable AttributeFontSpec fontSpec) {
-        return FontResolver.resolve(this.fontSpec.derive(fontSpec), this.measureContext);
+    public @NotNull SVGFont font() {
+        return FontResolver.resolve(this.fontSpec, this.measureContext);
     }
 
     @Override

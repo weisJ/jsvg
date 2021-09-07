@@ -32,6 +32,6 @@ public interface Instantiator {
     boolean canInstantiate(@NotNull SVGNode node);
 
     default @NotNull ContextElementAttributes createContextAttributes(@NotNull RenderContext context) {
-        return new ContextElementAttributes(context.fillPaint(null), context.strokePaint(null));
+        return new ContextElementAttributes(context.fillPaint(), context.strokePaint());
     }
 }

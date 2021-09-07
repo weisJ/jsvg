@@ -115,10 +115,12 @@ public final class NodeRenderer {
         @Nullable PaintContext paintContext = null;
         @Nullable AttributeFontSpec fontSpec = null;
         @Nullable FontRenderContext fontRenderContext = null;
-        if (node instanceof HasContext) {
-            paintContext = ((HasContext) node).paintContext();
-            fontSpec = ((HasContext) node).fontSpec();
-            fontRenderContext = ((HasContext) node).fontRenderContext();
+        if (node instanceof HasPaintContext) {
+            paintContext = ((HasPaintContext) node).paintContext();
+        }
+        if (node instanceof HasFontContext) {
+            fontSpec = ((HasFontContext) node).fontSpec();
+            fontRenderContext = ((HasFontContext) node).fontRenderContext();
         }
         @Nullable ContextElementAttributes contextElementAttributes = null;
         if (instantiator != null) contextElementAttributes = instantiator.createContextAttributes(context);

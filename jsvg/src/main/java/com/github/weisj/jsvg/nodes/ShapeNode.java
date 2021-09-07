@@ -31,14 +31,14 @@ import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.prototype.HasPaintContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
-import com.github.weisj.jsvg.renderer.ContextElementAttributes;
 import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
-public abstract class ShapeNode extends RenderableSVGNode implements HasShape, Instantiator {
+public abstract class ShapeNode extends RenderableSVGNode implements HasShape, HasPaintContext, Instantiator {
     private PaintContext paintContext;
     private Length pathLength;
     private MeasurableShape shape;
@@ -46,6 +46,11 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape, I
     private Marker markerStart;
     private Marker markerMid;
     private Marker markerEnd;
+
+    @Override
+    public @NotNull PaintContext paintContext() {
+        return paintContext;
+    }
 
     @Override
     public final void build(@NotNull AttributeNode attributeNode) {
@@ -83,13 +88,6 @@ public abstract class ShapeNode extends RenderableSVGNode implements HasShape, I
     @Override
     public boolean canInstantiate(@NotNull SVGNode node) {
         return node instanceof Marker;
-    }
-
-    @Override
-    public @NotNull ContextElementAttributes createContextAttributes(@NotNull RenderContext context) {
-        return new ContextElementAttributes(
-                context.fillPaint(paintContext.fillPaint),
-                context.strokePaint(paintContext.strokePaint));
     }
 
     @Override

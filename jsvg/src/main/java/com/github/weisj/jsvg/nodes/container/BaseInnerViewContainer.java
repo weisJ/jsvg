@@ -65,7 +65,8 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
         return NodeRenderer.setupInnerViewRenderContext(viewBox, context, true);
     }
 
-    public void renderWithSize(@NotNull FloatSize useSiteSize, @NotNull RenderContext context, @NotNull Graphics2D g) {
+    public final void renderWithSize(@NotNull FloatSize useSiteSize, @NotNull RenderContext context,
+            @NotNull Graphics2D g) {
         MeasureContext measureContext = context.measureContext();
 
         Point2D outerPos = outerLocation(measureContext);

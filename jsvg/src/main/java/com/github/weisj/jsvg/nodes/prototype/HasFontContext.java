@@ -21,8 +21,19 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
+import com.github.weisj.jsvg.renderer.FontRenderContext;
+
 /**
  * Informs the renderer that an element provides styling information which can be inherited by its children.
  */
-public interface HasContext extends HasPaintContext, HasFontContext {
+public interface HasFontContext {
+
+    @NotNull
+    AttributeFontSpec fontSpec();
+
+    @NotNull
+    FontRenderContext fontRenderContext();
 }

@@ -97,7 +97,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
         // and do a single paint call instead.
 
         // Todo: textLength should be taken into consideration.
-        SVGFont font = context.font(null);
+        SVGFont font = context.font();
 
         GlyphCursor localCursor = createLocalCursor(context, cursor);
 
@@ -131,7 +131,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
 
     public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull GeneralPath textShape,
             @NotNull RenderContext context) {
-        SVGFont font = context.font(null);
+        SVGFont font = context.font();
         GlyphCursor localCursor = createLocalCursor(context, cursor);
 
         for (TextSegment segment : children()) {

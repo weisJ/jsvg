@@ -46,7 +46,7 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return isVisible && (context.opacity(1) > 0);
+        return isVisible && (context.rawOpacity() > 0);
     }
 
     @Override

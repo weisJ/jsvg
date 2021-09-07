@@ -45,7 +45,7 @@ final class GlyphRenderer {
 
         // Use pathLengthFactor of 1 as pathLength isn't allowed on text
         // Otherwise we would have to do expensive computations for the length of a text outline.
-        Stroke stroke = context.stroke(1f, null);
+        Stroke stroke = context.stroke(1f);
 
         // Todo: Gradients for text are complicated. If possible computing the complete text bounds
         // should be avoided. Rather pass the current transform along to the gradient.

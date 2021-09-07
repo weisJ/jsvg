@@ -44,14 +44,13 @@ public final class ShapeRenderer {
     public static void renderShape(@NotNull RenderContext context, @NotNull PaintContext paintContext,
             @NotNull Graphics2D g, @NotNull Shape shape, @NotNull Rectangle2D bounds,
             boolean allowFill, boolean allowOutline, float pathLengthFactor) {
-        float absOpacity = context.opacity(paintContext.opacity);
-        float fOpacity = context.fillOpacity(paintContext.fillOpacity) * absOpacity;
-        SVGPaint fPaint = context.fillPaint(paintContext.fillPaint);
+        float fOpacity = context.fillOpacity();
+        SVGPaint fPaint = context.fillPaint();
 
-        float sOpacity = context.strokeOpacity(paintContext.strokeOpacity) * absOpacity;
-        SVGPaint sPaint = context.strokePaint(paintContext.strokePaint);
+        float sOpacity = context.strokeOpacity();
+        SVGPaint sPaint = context.strokePaint();
 
-        Stroke stroke = allowOutline ? context.stroke(pathLengthFactor, paintContext.strokeContext) : null;
+        Stroke stroke = allowOutline ? context.stroke(pathLengthFactor) : null;
 
         doRenderShape(context, g, shape, bounds, allowFill, allowOutline,
                 fOpacity, fPaint, sOpacity, sPaint, stroke);
@@ -60,12 +59,11 @@ public final class ShapeRenderer {
     public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
             @NotNull Shape shape, @NotNull Rectangle2D bounds, @Nullable Stroke stroke,
             boolean allowFill, boolean allowOutline) {
-        float absOpacity = context.opacity(1);
-        float fOpacity = context.fillOpacity(1) * absOpacity;
-        SVGPaint fPaint = context.fillPaint(null);
+        float fOpacity = context.fillOpacity();
+        SVGPaint fPaint = context.fillPaint();
 
-        float sOpacity = context.strokeOpacity(1) * absOpacity;
-        SVGPaint sPaint = context.strokePaint(null);
+        float sOpacity = context.strokeOpacity();
+        SVGPaint sPaint = context.strokePaint();
 
         doRenderShape(context, g, shape, bounds, allowFill, allowOutline,
                 fOpacity, fPaint, sOpacity, sPaint, stroke);
