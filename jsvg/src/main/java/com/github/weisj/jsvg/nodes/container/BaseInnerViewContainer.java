@@ -73,6 +73,7 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
         }
         g.translate(xPos, yPos);
 
+        AffineTransform viewTransform = null;
         FloatSize size;
         if (viewBox != null) {
             if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth() && useSiteViewBox.hasSpecifiedHeight()) {
@@ -82,8 +83,7 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
                 if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedWidth()) size.width = useSiteViewBox.width;
                 if (useSiteViewBox != null && useSiteViewBox.hasSpecifiedHeight()) size.height = useSiteViewBox.height;
             }
-            AffineTransform viewTransform = preserveAspectRatio.computeViewPortTransform(size, viewBox);
-            g.transform(viewTransform);
+            viewTransform = preserveAspectRatio.computeViewPortTransform(size, viewBox);
         } else {
             size = size(context);
         }
@@ -91,10 +91,20 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
 
         RenderContext innerContext = NodeRenderer.setupInnerViewRenderContext(this, new ViewBox(viewSize), context);
         MeasureContext innerMeasure = innerContext.measureContext();
+
         Point2D innerPos = innerLocation(innerMeasure);
+        if (viewTransform != null) {
+            innerPos.setLocation(
+                    innerPos.getX() * viewTransform.getScaleX(),
+                    innerPos.getY() * viewTransform.getScaleY());
+        }
+
         g.translate(innerPos.getX(), innerPos.getY());
+
         // Todo: This should be determined by the overflow parameter
-        g.clipRect(0, 0, (int) innerMeasure.viewWidth(), (int) innerMeasure.viewHeight());
+        g.clipRect(0, 0, (int) size.width, (int) size.height);
+
+        if (viewTransform != null) g.transform(viewTransform);
         super.render(innerContext, g);
     }
 }
