@@ -37,12 +37,12 @@ import com.github.weisj.jsvg.nodes.Marker;
 import com.github.weisj.jsvg.nodes.ShapeNode;
 
 public final class ShapeRenderer {
-    private static final boolean DEBUG_MARKERS = true;
+    private static final boolean DEBUG_MARKERS = false;
 
     private ShapeRenderer() {}
 
-    public static void renderShape(@NotNull RenderContext context, @NotNull PaintContext paintContext,
-            @NotNull Graphics2D g, @NotNull Shape shape, @NotNull Rectangle2D bounds,
+    public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull Shape shape, @NotNull Rectangle2D bounds,
             boolean allowFill, boolean allowOutline, float pathLengthFactor) {
         float fOpacity = context.fillOpacity();
         SVGPaint fPaint = context.fillPaint();

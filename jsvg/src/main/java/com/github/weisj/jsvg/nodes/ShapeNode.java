@@ -118,7 +118,7 @@ public abstract class ShapeNode extends RenderableSVGNode
             double actualLength = shape.pathLength(measureContext);
             pathLengthFactor = (float) (actualLength / effectiveLength);
         }
-        ShapeRenderer.renderShape(context, paintContext, g, paintShape, bounds,
+        ShapeRenderer.renderShape(context, g, paintShape, bounds,
                 shape.canBeFilled(), true, pathLengthFactor);
 
         renderMarkers(context, paintShape, g);
