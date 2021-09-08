@@ -1,0 +1,13 @@
+<svg width="500" height="50" viewBox="0 0 500 50" xmlns="http://www.w3.org/2000/svg">
+
+    <rect id="myRect" x="0" y="0" width="100" height="50" fill="green" stroke="yellow"/>
+    <text x="20" y="30"
+          font-family="Arial"
+          font-size="26"
+          font-style="italic">
+        You are
+        <tspan font-family="sans-serif" font-weight="bold" fill="red">not <tspan fill="blue">inner</tspan></tspan>
+        a <tspan x="280" dx="0 5 10 15 -5 20" dy="1 2 3 4 -10">banana</tspan>!
+    </text>
+    <rect x="275" y="0" width="5" height="50" fill="red"/>
+</svg>

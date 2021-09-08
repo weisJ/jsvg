@@ -7,12 +7,6 @@
     <rect x="5" y="5" width="3990" height="1990"
           fill="none" stroke="blue" stroke-width="10"/>
 
-    <g font-family="bar, monospace" font-size="150">
-        <text font-family="foo" x="200" y="150" fill="red" stroke="none">
-            Hello
-        </text>
-    </g>
-
     <g fill="blue" stroke="none" font-family="Verdana" font-size="150">
         <!-- Absolute unit specifiers -->
         <g transform="translate(400,0)">

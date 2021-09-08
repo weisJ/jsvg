@@ -4,7 +4,6 @@
      viewBox="0 0 200 200">
     <defs fill="red">
         <rect id="myRect" x="10%" y="0" width="50%" height="50%"/>
-        <text id="myText">Hello</text>
     </defs>
 
     <use xlink:href="#myRect" x="110" y="110" fill="yellow"/>
@@ -16,8 +15,4 @@
     <svg x="50" y="50" viewBox="0 0 100 500">
         <use xlink:href="#myRect" fill="red"/>
     </svg>
-    <g letter-spacing="10">
-        <text x="5" y="100" font-size="200%" id="myText2" stroke="black" fill="black">Hello</text>
-    </g>
-
 </svg>

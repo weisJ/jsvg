@@ -1,0 +1,21 @@
+<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- horizontal line to materialized the text base line -->
+    <g stroke="black">
+        <line x1="0" y1="40%" x2="100%" y2="40%"/>
+        <line x1="0" y1="90%" x2="100%" y2="90%"/>
+
+        <!-- vertical line to materialized the x positioning -->
+        <line x1="25%" y1="0" x2="25%" y2="100%"/>
+        <line x1="50%" y1="0" x2="50%" y2="100%"/>
+        <line x1="75%" y1="0" x2="75%" y2="100%"/>
+    </g>
+
+    <text y="20" fill="red" font-family="Arial" font-size="20">
+        <!-- x with a single value -->
+        <tspan>Test</tspan>
+        <tspan y="40%" x="50%">SVG</tspan>
+
+        <!-- x with multiple values -->
+        <tspan y="90%" x="25%, 50%, 75%">SVG</tspan>
+    </text>
+</svg>

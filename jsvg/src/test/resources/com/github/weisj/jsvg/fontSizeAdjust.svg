@@ -7,6 +7,6 @@
         This text uses the Verdana font (10px), which has relatively large lowercase letters.
     </text>
     <text y="60" font-family="Times, serif" font-size="10px" font-size-adjust="0.58">
-        This text uses the Times font (10px), which is hard to read in small sizes.
+        This is the 10px Times, but now adjusted to the same aspect ratio as the Verdana.
     </text>
 </svg>
