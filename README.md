@@ -3,7 +3,7 @@
     <img src="https://raw.githubusercontent.com/weisJ/jsvg/master/images/svg_logo.png" 
          alt="The SVG logo rendered by JSVG"
          align="center" width="150" height="150">
-    </br>
+    <br>
     <em>The SVG logo rendered using JSVG</em>
 </p>
 
