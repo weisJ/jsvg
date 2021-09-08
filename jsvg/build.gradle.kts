@@ -15,5 +15,9 @@ dependencies {
 }
 
 tasks.test {
+    doFirst {
+        workingDir = File(project.rootDir, "build/ref_test")
+        workingDir.mkdirs()
+    }
     useJUnitPlatform()
 }
