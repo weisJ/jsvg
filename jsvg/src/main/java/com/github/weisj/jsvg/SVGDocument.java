@@ -45,7 +45,7 @@ public class SVGDocument {
     }
 
     public @NotNull FloatSize size() {
-        float em =  SVGFont.defaultFontSize();
+        float em = SVGFont.defaultFontSize();
         return root.sizeForTopLevel(em, SVGFont.exFromEm(em));
     }
 
