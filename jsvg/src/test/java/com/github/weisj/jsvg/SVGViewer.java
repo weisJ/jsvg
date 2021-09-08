@@ -22,48 +22,85 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
-import java.net.URI;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.darklaf.LafManager;
+import com.github.weisj.jsvg.attributes.ViewBox;
 
 public class SVGViewer {
 
-    public static void main(String[] args) throws Exception {
-        URI uri = Objects.requireNonNull(SVGViewer.class.getResource("relativeUnits3.svg")).toURI();
-        SVGLoader loader = new SVGLoader();
-        SVGDocument document = loader.load(uri);
-
-        Objects.requireNonNull(document);
-
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             LafManager.install();
             JFrame frame = new JFrame("SVGViewer");
 
-            JPanel content = new JPanel() {
+            JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
+            iconBox.setSelectedItem("aspect3.svg");
 
-                @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    ((Graphics2D) g).scale(2, 2);
-                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                            RenderingHints.VALUE_ANTIALIAS_ON);
-                    ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-                            RenderingHints.VALUE_STROKE_PURE);
-                    document.render(this, (Graphics2D) g);
-                }
-            };
-            content.setPreferredSize(new Dimension(1000, 600));
-            frame.setContentPane(content);
+            SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
+            svgPanel.setPreferredSize(new Dimension(1000, 600));
+            iconBox.addItemListener(e -> svgPanel.selectIcon((String) iconBox.getSelectedItem()));
+
+            Box box = Box.createHorizontalBox();
+            box.add(Box.createHorizontalGlue());
+            box.add(iconBox);
+            box.add(Box.createHorizontalGlue());
+
+            frame.add(box, BorderLayout.NORTH);
+            frame.add(svgPanel, BorderLayout.CENTER);
 
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
         });
+    }
+
+    private static String[] findIcons() {
+        String pack = SVGViewer.class.getPackage().getName();
+        try (ResourceWalker walker = ResourceWalker.walkResources(pack)) {
+            return walker.stream().filter(p -> p.endsWith("svg"))
+                    .map(p -> p.substring(pack.length() + 1))
+                    .toArray(String[]::new);
+        }
+    }
+
+    private static class SVGPanel extends JPanel {
+        private final Map<String, SVGDocument> iconCache = new HashMap<>();
+        private SVGDocument document;
+
+        public SVGPanel(@NotNull String iconName) {
+            selectIcon(iconName);
+        }
+
+        private void selectIcon(@NotNull String name) {
+            document = iconCache.computeIfAbsent(name, n -> {
+                try {
+                    URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
+                    SVGLoader loader = new SVGLoader();
+                    return loader.load(url);
+                } catch (Exception e) {
+                    throw new RuntimeException(name, e);
+                }
+            });
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+                    RenderingHints.VALUE_STROKE_PURE);
+            document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
+        }
     }
 }
