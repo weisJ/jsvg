@@ -53,8 +53,8 @@ public final class SVG extends CommonInnerViewContainer {
     }
 
     public @NotNull FloatSize sizeForTopLevel(float em, float ex) {
-        MeasureContext topLevelContext =
-                MeasureContext.createInitial(new FloatSize(FALLBACK_WIDTH, FALLBACK_HEIGHT), em, ex);
+        // Use a viewport of size 100x100 to interpret percentage values as raw pixels.
+        MeasureContext topLevelContext = MeasureContext.createInitial(new FloatSize(100, 100), em, ex);
         return new FloatSize(
                 width.orElseIfUnspecified(viewBox != null ? viewBox.width : FALLBACK_WIDTH)
                         .resolveWidth(topLevelContext),
