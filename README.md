@@ -1,6 +1,7 @@
 [![Autostyle](https://github.com/weisJ/jsvg/actions/workflows/autostyle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/autostyle.yml)
 [![CI](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml)
 # JSVG - A Java SVG implementation
+
 <p align="center">
     <img src="https://raw.githubusercontent.com/weisJ/jsvg/master/images/svg_logo.png" 
          alt="The SVG logo rendered by JSVG"
@@ -15,6 +16,7 @@ it decidedly won't support at all. This implementation only tries to be a static
 scripting languages or interaction. Animations aren't currently implemented but are planned to be supported.
 
 #How to use
+
 There currently isn't any stable version of the library as the api is still evolving.
 However, snapshot builds will be release to maven:
 ````kotlin
@@ -37,6 +39,7 @@ class. It will produce an [`SVGDocument`](https://github.com/weisJ/jsvg/blob/mas
 can be rendered to any `Graphics2D` object you like (e.g. a `BufferedImage` or a swing component).
 
 #Supported features
+
 For supported elements most of the attributes which apply to them are implemented.
 
 - :white_check_mark:: The element is supported
