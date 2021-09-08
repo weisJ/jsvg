@@ -10,6 +10,8 @@ dependencies {
     testImplementation(libs.test.junit.api)
     testRuntimeOnly(libs.test.junit.engine)
     testCompileOnly(libs.nullabilityAnnotations)
+    testImplementation(libs.test.batik)
+    testImplementation(libs.test.imageCompare)
 }
 
 tasks.test {
