@@ -1,4 +1,12 @@
 # JSVG - A Java SVG implementation
+<p align="center">
+    <img src="https://raw.githubusercontent.com/weisJ/jsvg/master/images/svg_logo.png" 
+         alt="The SVG logo rendered by JSVG"
+         align="center" width="150" height="150">
+    </br>
+    <em>The SVG logo rendered using JSVG</em>
+</p>
+
 JSVG is an SVG user agent using AWT graphics. Its aim is to provide a small and fast implementation.
 This library is under active development and doesn't yet support all features of the SVG specification, some of which
 it decidedly won't support at all. This implementation only tries to be a static user agent meaning it won't support any
