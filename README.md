@@ -1,3 +1,5 @@
+[![Autostyle](https://github.com/weisJ/jsvg/actions/workflows/autostyle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/autostyle.yml)
+[![CI](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml)
 # JSVG - A Java SVG implementation
 <p align="center">
     <img src="https://raw.githubusercontent.com/weisJ/jsvg/master/images/svg_logo.png" 
@@ -12,6 +14,27 @@ This library is under active development and doesn't yet support all features of
 it decidedly won't support at all. This implementation only tries to be a static user agent meaning it won't support any
 scripting languages or interaction. Animations aren't currently implemented but are planned to be supported.
 
+#How to use
+There currently isn't any stable version of the library as the api is still evolving.
+However, snapshot builds will be release to maven:
+````kotlin
+repositories {
+    maven {
+        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+    }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
+}
+
+dependencies {
+    implementation("com.github.weisj:jsvg:latest.integration")
+}
+````
+To load an svg icon you can use the [`SVGLoader`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/SVGLoader.java)
+class. It will produce an [`SVGDocument`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/SVGDocument.java) which
+can be rendered to any `Graphics2D` object you like (e.g. a `BufferedImage` or a swing component).
 
 #Supported features
 For supported elements most of the attributes which apply to them are implemented.
