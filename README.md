@@ -15,7 +15,7 @@ This library is under active development and doesn't yet support all features of
 it decidedly won't support at all. This implementation only tries to be a static user agent meaning it won't support any
 scripting languages or interaction. Animations aren't currently implemented but are planned to be supported.
 
-#How to use
+## How to use
 
 There currently isn't any stable version of the library as the api is still evolving.
 However, snapshot builds will be release to maven:
@@ -38,7 +38,7 @@ To load an svg icon you can use the [`SVGLoader`](https://github.com/weisJ/jsvg/
 class. It will produce an [`SVGDocument`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/SVGDocument.java) which
 can be rendered to any `Graphics2D` object you like (e.g. a `BufferedImage` or a swing component).
 
-#Supported features
+## Supported features
 
 For supported elements most of the attributes which apply to them are implemented.
 
