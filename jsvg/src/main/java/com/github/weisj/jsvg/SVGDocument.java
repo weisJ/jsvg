@@ -31,29 +31,33 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGDocument {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private final @NotNull SVG root;
 
     public SVGDocument(@NotNull SVG root) {
         this.root = root;
     }
 
+    public @NotNull FloatSize size() {
+        float em = 12f;
+        return root.sizeForTopLevel(em, SVGFont.exFromEm(em));
+    }
+
     public void render(@Nullable JComponent component, @NotNull Graphics2D g) {
         render(component, g, null);
     }
-
 
     public void render(@Nullable JComponent component, @NotNull Graphics2D g, @Nullable ViewBox bounds) {
         Font f = g.getFont();
         if (f == null && component != null) f = component.getFont();
         float defaultEm = f != null ? f.getSize2D() : SVGFont.defaultFontSize();
         float defaultEx = SVGFont.exFromEm(defaultEm);
-
 
         MeasureContext initialMeasure = bounds != null
                 ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx)

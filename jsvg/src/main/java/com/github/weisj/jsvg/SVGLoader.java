@@ -22,7 +22,7 @@
 package com.github.weisj.jsvg;
 
 import java.io.*;
-import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -34,6 +34,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -113,7 +114,17 @@ public class SVGLoader {
         xmlReader = saxParser.getXMLReader();
     }
 
-    public SVGDocument load(URI xmlBase) {
+    public @Nullable SVGDocument load(@NotNull URL xmlBase) {
+        try {
+            return load(xmlBase.openStream());
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Could not read " + xmlBase, e);
+        }
+        return null;
+    }
+
+
+    public @Nullable SVGDocument load(@NotNull InputStream inputStream) {
         try {
             xmlReader.setEntityResolver(
                     (publicId, systemId) -> {
@@ -122,13 +133,12 @@ public class SVGLoader {
                     });
             SVGLoadHandler handler = new SVGLoadHandler();
             xmlReader.setContentHandler(handler);
-            InputStream is = xmlBase.toURL().openStream();
-            xmlReader.parse(new InputSource(createDocumentInputStream(is)));
+            xmlReader.parse(new InputSource(createDocumentInputStream(inputStream)));
             return handler.getDocument();
         } catch (SAXParseException e) {
-            LOGGER.log(Level.WARNING, "Error processing " + xmlBase, e);
+            LOGGER.log(Level.WARNING, "Error processing ", e);
         } catch (Throwable e) {
-            LOGGER.log(Level.WARNING, "Could not load SVG " + xmlBase, e);
+            LOGGER.log(Level.WARNING, "Could not load SVG ", e);
         }
         return null;
     }
