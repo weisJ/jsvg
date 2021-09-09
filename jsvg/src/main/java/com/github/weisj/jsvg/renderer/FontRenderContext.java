@@ -50,7 +50,7 @@ public class FontRenderContext {
     }
 
     public @NotNull FontRenderContext derive(@Nullable FontRenderContext frc) {
-        if (frc == null) return this;
+        if (frc == null || frc == this) return this;
         return new FontRenderContext(
                 frc.letterSpacing != null ? frc.letterSpacing : letterSpacing,
                 frc.baselineAlignment != null ? frc.baselineAlignment : baselineAlignment);

@@ -49,6 +49,10 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
 
     public abstract @NotNull FloatSize size(@NotNull RenderContext context);
 
+    public @Nullable ViewBox viewBox() {
+        return viewBox;
+    }
+
     @Override
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
@@ -59,15 +63,21 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
 
     @Override
     public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderWithSize(size(context), context, g);
+        renderWithSize(size(context), viewBox(), null, context, g);
     }
 
     protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
         return NodeRenderer.setupInnerViewRenderContext(viewBox, context, true);
     }
 
-    public final void renderWithSize(@NotNull FloatSize useSiteSize, @NotNull RenderContext context,
-            @NotNull Graphics2D g) {
+    public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
+            @NotNull RenderContext context, @NotNull Graphics2D g) {
+        renderWithSize(useSiteSize, view, null, context, g);
+    }
+
+    public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
+            @Nullable PreserveAspectRatio preserveAspectRatio,
+            @NotNull RenderContext context, @NotNull Graphics2D g) {
         MeasureContext measureContext = context.measureContext();
 
         Point2D outerPos = outerLocation(measureContext);
@@ -77,15 +87,18 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
             if (Length.isUnspecified(useSiteSize.width)) useSiteSize.width = size.width;
             if (Length.isUnspecified(useSiteSize.height)) useSiteSize.height = size.height;
         }
+        if (preserveAspectRatio == null) preserveAspectRatio = this.preserveAspectRatio;
 
         g.translate(outerPos.getX(), outerPos.getY());
 
-        AffineTransform viewTransform = viewBox != null
-                ? preserveAspectRatio.computeViewPortTransform(useSiteSize, viewBox)
+        AffineTransform viewTransform = view != null
+                ? preserveAspectRatio.computeViewPortTransform(useSiteSize, view)
                 : null;
-        FloatSize viewSize = viewBox != null
-                ? viewBox.size()
+        FloatSize viewSize = view != null
+                ? view.size()
                 : useSiteSize;
+
+        System.out.println(viewTransform);
 
         RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
         MeasureContext innerMeasure = innerContext.measureContext();
@@ -104,7 +117,6 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
         // Todo: This should be determined by the overflow parameter
         g.clip(new ViewBox(useSiteSize));
         if (viewTransform != null) g.transform(viewTransform);
-
 
         super.render(innerContext, g);
     }

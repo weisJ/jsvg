@@ -131,7 +131,8 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
                     FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
                     if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
                     if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
-                    ((CommonInnerViewContainer) referencedNode).renderWithSize(targetViewBox, info.context, info.g);
+                    CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
+                    view.renderWithSize(targetViewBox, view.viewBox(), info.context, info.g);
                 } else {
                     info.renderable.render(info.context, info.g);
                 }

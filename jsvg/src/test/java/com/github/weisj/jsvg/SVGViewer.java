@@ -100,6 +100,7 @@ public class SVGViewer {
                     RenderingHints.VALUE_ANTIALIAS_ON);
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                     RenderingHints.VALUE_STROKE_PURE);
+            System.out.println("======");
             document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
         }
     }

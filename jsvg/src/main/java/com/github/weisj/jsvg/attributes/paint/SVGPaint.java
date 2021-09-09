@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.attributes.paint;
 
-import java.awt.Paint;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +32,8 @@ public interface SVGPaint {
     AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
     SVGPaint NONE = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+        public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
+                @NotNull Rectangle2D bounds) {
             return PaintParser.DEFAULT_COLOR;
         }
 
@@ -43,7 +44,8 @@ public interface SVGPaint {
     };
     SVGPaint CURRENT_COLOR = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+        public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
+                @NotNull Rectangle2D bounds) {
             return PaintParser.DEFAULT_COLOR;
         }
 
@@ -54,7 +56,8 @@ public interface SVGPaint {
     };
     SVGPaint CONTEXT_FILL = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+        public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
+                @NotNull Rectangle2D bounds) {
             return PaintParser.DEFAULT_COLOR;
         }
 
@@ -65,7 +68,8 @@ public interface SVGPaint {
     };
     SVGPaint CONTEXT_STROKE = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+        public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
+                @NotNull Rectangle2D bounds) {
             return PaintParser.DEFAULT_COLOR;
         }
 
@@ -76,7 +80,7 @@ public interface SVGPaint {
     };
 
     @NotNull
-    Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds);
+    Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Rectangle2D bounds);
 
     default boolean isVisible() {
         return this != NONE;

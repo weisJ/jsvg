@@ -81,12 +81,12 @@ public final class ShapeRenderer {
             Composite composite = g.getComposite();
             if (doFill) {
                 g.setComposite(AlphaComposite.SrcOver.derive(fOpacity));
-                g.setPaint(fPaint.paintForBounds(context.measureContext(), bounds));
+                g.setPaint(fPaint.paintForBounds(g, context.measureContext(), bounds));
                 g.fill(shape);
             }
             if (doOutline && stroke != null) {
                 g.setComposite(AlphaComposite.SrcOver.derive(sOpacity));
-                g.setPaint(sPaint.paintForBounds(context.measureContext(), bounds));
+                g.setPaint(sPaint.paintForBounds(g, context.measureContext(), bounds));
                 g.setStroke(stroke);
                 g.draw(shape);
             }

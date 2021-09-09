@@ -126,7 +126,8 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     protected abstract void buildGradient(@NotNull AttributeNode attributeNode, @Nullable Self template);
 
     @Override
-    public final @NotNull Paint paintForBounds(@NotNull MeasureContext context, @NotNull Rectangle2D bounds) {
+    public final @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext context,
+            @NotNull Rectangle2D bounds) {
         Color[] gradColors = colors();
         if (gradColors.length == 0) return PaintParser.DEFAULT_COLOR;
         if (gradColors.length == 1) return gradColors[0];

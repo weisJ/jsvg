@@ -109,7 +109,7 @@ For supported elements most of the attributes which apply to them are implemente
 |:warning:missing-glyph|:x:|
 |mpath|:x:|
 |path|:white_check_mark:|
-|pattern|:x:|
+|pattern|:white_check_mark:|
 |polygon|:white_check_mark:|
 |polyline|:white_check_mark:|
 |radialGradient|:white_check_mark:|

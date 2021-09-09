@@ -170,6 +170,10 @@ public final class PreserveAspectRatio {
         this.meetOrSlice = meetOrSlice;
     }
 
+    public static @NotNull PreserveAspectRatio none() {
+        return new PreserveAspectRatio(Align.None, MeetOrSlice.Meet);
+    }
+
     public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation) {
         return parse(preserveAspectRation, null);
     }

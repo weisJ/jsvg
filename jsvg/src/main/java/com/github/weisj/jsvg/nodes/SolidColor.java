@@ -54,7 +54,8 @@ public final class SolidColor extends AbstractSVGNode implements SVGPaint {
     }
 
     @Override
-    public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+    public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
+            @NotNull Rectangle2D bounds) {
         return color;
     }
 }

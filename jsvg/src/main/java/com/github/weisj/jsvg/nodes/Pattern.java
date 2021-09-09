@@ -23,7 +23,9 @@ package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,14 +35,16 @@ import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.container.ContainerNode;
+import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
+import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
-import com.github.weisj.jsvg.util.Todo;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories(Category.Container)
 @PermittedContent(
@@ -52,7 +56,7 @@ import com.github.weisj.jsvg.util.Todo;
     anyOf = {Anchor.class, ClipPath.class, Image.class, Marker.class, Pattern.class, Style.class, Text.class,
             View.class}
 )
-public final class Pattern extends ContainerNode implements SVGPaint {
+public final class Pattern extends BaseInnerViewContainer implements SVGPaint, ShapedContainer<SVGNode> {
     public static final String TAG = "pattern";
 
     private Length x;
@@ -64,12 +68,26 @@ public final class Pattern extends ContainerNode implements SVGPaint {
     private UnitType patternContentUnits;
     private AffineTransform patternTransform;
 
-    private ViewBox viewBox;
-    private PreserveAspectRatio preserveAspectRatio;
-
     @Override
     public @NotNull String tagName() {
         return TAG;
+    }
+
+    @Override
+    protected @NotNull Point2D outerLocation(@NotNull MeasureContext context) {
+        return new Point2D.Float(0, 0);
+    }
+
+    @Override
+    protected @Nullable Point2D anchorLocation(@NotNull MeasureContext context) {
+        return null;
+    }
+
+    @Override
+    public @NotNull FloatSize size(@NotNull RenderContext context) {
+        return new FloatSize(
+                width.resolveWidth(context.measureContext()),
+                height.resolveHeight(context.measureContext()));
     }
 
     @Override
@@ -77,18 +95,16 @@ public final class Pattern extends ContainerNode implements SVGPaint {
         super.build(attributeNode);
         Pattern template = parseTemplate(attributeNode);
 
+        if (viewBox == null && template != null) viewBox = template.viewBox;
+        preserveAspectRatio = template != null ? template.preserveAspectRatio : preserveAspectRatio;
+
         x = attributeNode.getLength("x", template != null ? template.x : Length.ZERO);
         y = attributeNode.getLength("y", template != null ? template.y : Length.ZERO);
         // Note: width == 0 || height == 0 implies nothing should be painted.
-        width = attributeNode.getLength("width", template != null ? template.width : Length.ZERO);
-        height = attributeNode.getLength("height", template != null ? template.height : Length.ZERO);
-
-        viewBox = attributeNode.getViewBox();
-        if (viewBox == null && template != null) viewBox = template.viewBox;
-
-        preserveAspectRatio = PreserveAspectRatio.parse(
-                attributeNode.getValue("preserveAspectRatio"),
-                template != null ? template.preserveAspectRatio : null);
+        width = attributeNode.getLength("width", template != null ? template.width : Length.ZERO)
+                .coerceNonNegative();
+        height = attributeNode.getLength("height", template != null ? template.height : Length.ZERO)
+                .coerceNonNegative();
 
         patternTransform = attributeNode.parseTransform("patternTransform");
         if (patternTransform == null && template != null) patternTransform = template.patternTransform;
@@ -96,7 +112,7 @@ public final class Pattern extends ContainerNode implements SVGPaint {
         patternUnits = attributeNode.getEnum("patternUnits",
                 template != null ? template.patternUnits : UnitType.ObjectBoundingBox);
         patternContentUnits = attributeNode.getEnum("patternContentUnits",
-                template != null ? template.patternContentUnits : UnitType.ObjectBoundingBox);
+                template != null ? template.patternContentUnits : UnitType.UserSpaceOnUse);
     }
 
     @Nullable
@@ -110,8 +126,64 @@ public final class Pattern extends ContainerNode implements SVGPaint {
     }
 
     @Override
-    public @NotNull Paint paintForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
-        // Todo: Implement pattern paints. Option: Paint to a buffer and use a TexturePaint
-        return Todo.todo("Pattern not et implemented");
+    public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
+            @NotNull Rectangle2D bounds) {
+        MeasureContext objectBoundingBoxMeasure = (patternUnits == UnitType.ObjectBoundingBox
+                || patternContentUnits == UnitType.ObjectBoundingBox)
+                        ? measure.derive(new ViewBox(bounds), measure.em(), measure.ex(), measure.fontRenderContext())
+                        : null;
+
+        MeasureContext patternMeasure = patternUnits == UnitType.ObjectBoundingBox
+                ? objectBoundingBoxMeasure
+                : measure;
+        ViewBox patternBounds = new ViewBox(
+                x.resolveWidth(patternMeasure), y.resolveHeight(patternMeasure),
+                width.resolveWidth(patternMeasure), height.resolveHeight(patternMeasure));
+
+        AffineTransform at = g.getTransform();
+        double sx = at.getScaleX();
+        double sy = at.getScaleY();
+
+        double shx = at.getShearX();
+        double shy = at.getShearY();
+
+        // The Scale is the "hypotenuse" of the matrix vectors.
+        double scaleX = Math.sqrt(sx * sx + shy * shy);
+        double scaleY = Math.sqrt(sy * sy + shx * shx);
+
+        int dw = (int) (Math.ceil(patternBounds.getWidth() * scaleX));
+        int dh = (int) (Math.ceil(patternBounds.getHeight() * scaleY));
+
+        double tileScaleX = dw / patternBounds.getWidth();
+        double tileScaleY = dh / patternBounds.getHeight();
+
+        AffineTransform tileTransform = AffineTransform.getScaleInstance(tileScaleX, tileScaleY);
+
+        BufferedImage img = new BufferedImage(dw, dh, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D imgGraphics = (Graphics2D) img.getGraphics();
+        imgGraphics.setRenderingHints(g.getRenderingHints());
+        imgGraphics.transform(tileTransform);
+
+        RenderContext patternContext;
+        FloatSize size;
+        ViewBox view = viewBox;
+        PreserveAspectRatio aspectRation = this.preserveAspectRatio;
+        if (viewBox == null && patternContentUnits == UnitType.ObjectBoundingBox) {
+            assert objectBoundingBoxMeasure != null;
+            patternContext = RenderContext.createInitial(null, objectBoundingBoxMeasure);
+            size = new FloatSize((float) bounds.getWidth(), (float) bounds.getHeight());
+            view = new ViewBox(bounds(patternContext, true));
+            view.x = view.y = 0;
+            aspectRation = PreserveAspectRatio.none();
+        } else {
+            size = patternBounds.size();
+            patternContext = RenderContext.createInitial(null, measure);
+        }
+        renderWithSize(size, view, aspectRation, patternContext, imgGraphics);
+        imgGraphics.dispose();
+
+        // Todo: patternTransform
+
+        return new TexturePaint(img, patternBounds);
     }
 }
