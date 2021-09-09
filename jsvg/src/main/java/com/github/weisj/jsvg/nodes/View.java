@@ -28,7 +28,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 /**
- * There currently isn't eny mechanism to instantiate a view. Therefore
+ * There currently isn't any mechanism to instantiate a view. Therefore
  * this element is a meta node for now.
  */
 @ElementCategories({/* None */})
