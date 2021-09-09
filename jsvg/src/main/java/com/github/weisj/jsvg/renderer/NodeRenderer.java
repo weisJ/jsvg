@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +31,6 @@ import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
-import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.*;
 
@@ -78,9 +76,8 @@ public final class NodeRenderer {
         Graphics2D childGraphics = (Graphics2D) g.create();
 
         // Transform elements on a non top-level <svg> have no effect.
-        if (!(renderable instanceof SVG) && renderable instanceof Transformable) {
-            AffineTransform transform = ((Transformable) renderable).transform();
-            if (transform != null) childGraphics.transform(transform);
+        if (renderable instanceof Transformable) {
+            ((Transformable) renderable).applyTransform(childGraphics, childContext.measureContext());
         }
 
         if (renderable instanceof HasClip) {

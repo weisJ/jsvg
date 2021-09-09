@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 
 import javax.swing.*;
 
@@ -66,15 +65,7 @@ public class SVGDocument {
 
         if (bounds == null) bounds = new ViewBox(root.size(context));
 
-        // A transform on an <svg> element should behave as if it were applied on the parent.
-        // It seems like this implies that any rotations etc. should behave as if they were centered
-        // on the viewport.
-        AffineTransform transform = root.transform();
-        if (transform != null) {
-            g.translate(bounds.width / 2, bounds.height / 2);
-            g.transform(transform);
-            g.translate(-bounds.width / 2, -bounds.height / 2);
-        }
+        root.applyTransform(g, initialMeasure);
 
         if (DEBUG) {
             g.setColor(Color.MAGENTA);

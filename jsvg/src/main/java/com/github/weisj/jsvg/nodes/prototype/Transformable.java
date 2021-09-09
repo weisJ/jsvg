@@ -21,13 +21,30 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
+import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-// Todo: Needs transform-origin. For top-level svg its 50%,50%
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+
 public interface Transformable {
 
     @Nullable
     AffineTransform transform();
+
+    @NotNull
+    Point2D transformOrigin(@NotNull MeasureContext context);
+
+    default void applyTransform(@NotNull Graphics2D g, @NotNull MeasureContext measureContext) {
+        AffineTransform transform = transform();
+        if (transform != null) {
+            Point2D transformOrigin = transformOrigin(measureContext);
+            g.translate(transformOrigin.getX(), transformOrigin.getY());
+            g.transform(transform);
+            g.translate(-transformOrigin.getX(), -transformOrigin.getY());
+        }
+    }
 }

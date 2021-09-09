@@ -22,12 +22,15 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
@@ -37,6 +40,8 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
 
     private boolean isVisible;
     private @Nullable AffineTransform transform;
+    private Length transformOriginX;
+    private Length transformOriginY;
 
     private @Nullable ClipPath clipPath;
 
@@ -55,11 +60,22 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
     }
 
     @Override
+    public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
+        return new Point2D.Float(
+                transformOriginX.resolveWidth(context),
+                transformOriginY.resolveHeight(context));
+    }
+
+    @Override
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         isVisible = parseIsVisible(attributeNode);
         clipPath = attributeNode.getClipPath();
         transform = attributeNode.parseTransform("transform");
+
+        Length[] transformOrigin = attributeNode.getLengthList("transform-origin");
+        transformOriginX = transformOrigin.length > 0 ? transformOrigin[0] : Length.ZERO;
+        transformOriginY = transformOrigin.length > 1 ? transformOrigin[1] : Length.ZERO;
     }
 }

@@ -21,10 +21,15 @@
  */
 package com.github.weisj.jsvg.nodes;
 
+import java.awt.geom.Point2D;
+
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -44,12 +49,29 @@ import com.github.weisj.jsvg.nodes.text.Text;
 public final class SVG extends CommonInnerViewContainer {
     public static final String TAG = "svg";
 
+    private static final @NotNull Length TOP_LEVEL_TRANSFORM_ORIGIN = Unit.PERCENTAGE.valueOf(50);
     private static final float FALLBACK_WIDTH = 300;
     private static final float FALLBACK_HEIGHT = 150;
+
+    private boolean isTopLevel;
 
     @Override
     public final @NotNull String tagName() {
         return TAG;
+    }
+
+    @Override
+    public void build(@NotNull AttributeNode attributeNode) {
+        super.build(attributeNode);
+        isTopLevel = attributeNode.parent() == null;
+    }
+
+    @Override
+    public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
+        if (!isTopLevel) return super.transformOrigin(context);
+        return new Point2D.Float(
+                TOP_LEVEL_TRANSFORM_ORIGIN.resolveWidth(context),
+                TOP_LEVEL_TRANSFORM_ORIGIN.resolveHeight(context));
     }
 
     public @NotNull FloatSize sizeForTopLevel(float em, float ex) {

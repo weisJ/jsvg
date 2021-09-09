@@ -98,8 +98,6 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
                 ? view.size()
                 : useSiteSize;
 
-        System.out.println(viewTransform);
-
         RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
         MeasureContext innerMeasure = innerContext.measureContext();
 

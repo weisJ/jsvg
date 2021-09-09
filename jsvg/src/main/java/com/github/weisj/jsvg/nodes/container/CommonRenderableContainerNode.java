@@ -22,12 +22,15 @@
 package com.github.weisj.jsvg.nodes.container;
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
@@ -37,6 +40,9 @@ public abstract class CommonRenderableContainerNode<E> extends BaseRenderableCon
         implements Renderable, Transformable, HasClip {
 
     private AffineTransform transform;
+    private Length transformOriginX;
+    private Length transformOriginY;
+
     private @Nullable ClipPath clipPath;
 
     @Override
@@ -44,7 +50,17 @@ public abstract class CommonRenderableContainerNode<E> extends BaseRenderableCon
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         transform = attributeNode.parseTransform("transform");
+        Length[] transformOrigin = attributeNode.getLengthList("transform-origin");
+        transformOriginX = transformOrigin.length > 0 ? transformOrigin[0] : Length.ZERO;
+        transformOriginY = transformOrigin.length > 1 ? transformOrigin[1] : Length.ZERO;
         clipPath = attributeNode.getClipPath();
+    }
+
+    @Override
+    public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
+        return new Point2D.Float(
+                transformOriginX.resolveWidth(context),
+                transformOriginY.resolveHeight(context));
     }
 
     @Override
