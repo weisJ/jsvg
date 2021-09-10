@@ -21,13 +21,17 @@
  */
 package com.github.weisj.jsvg.renderer;
 
+import java.util.Objects;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.text.BaselineAlignment;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.google.errorprone.annotations.Immutable;
 
+@Immutable
 public class FontRenderContext {
     // Note: An unspecified value is different from 0.
     // Unlike 0 it allows us to use spacing different than 0 if needed.
@@ -37,6 +41,19 @@ public class FontRenderContext {
     public FontRenderContext(@Nullable Length letterSpacing, @Nullable BaselineAlignment baselineAlignment) {
         this.letterSpacing = letterSpacing;
         this.baselineAlignment = baselineAlignment;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FontRenderContext)) return false;
+        FontRenderContext that = (FontRenderContext) o;
+        return Objects.equals(letterSpacing, that.letterSpacing) && baselineAlignment == that.baselineAlignment;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(letterSpacing, baselineAlignment);
     }
 
     public static @NotNull FontRenderContext createDefault() {
@@ -50,7 +67,7 @@ public class FontRenderContext {
     }
 
     public @NotNull FontRenderContext derive(@Nullable FontRenderContext frc) {
-        if (frc == null || frc == this) return this;
+        if (frc == null || frc.equals(this)) return this;
         return new FontRenderContext(
                 frc.letterSpacing != null ? frc.letterSpacing : letterSpacing,
                 frc.baselineAlignment != null ? frc.baselineAlignment : baselineAlignment);
