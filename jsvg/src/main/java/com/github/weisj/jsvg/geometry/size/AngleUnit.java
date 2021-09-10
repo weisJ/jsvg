@@ -37,7 +37,6 @@ public enum AngleUnit {
     static AngleUnit[] units = values();
 
     private static final double GRADIANS_TO_RADIANS = Math.PI * (2f / 400f);
-    private static final double TURNS_TO_RADIANS = Math.PI * (2f / 400f);
 
     public static AngleUnit[] units() {
         return units;
