@@ -103,6 +103,8 @@ class CharacterDataParser {
                     case WHITESPACE_AFTER_SEGMENT_BREAK:
                         state = State.WHITESPACE_AFTER_SEGMENT_BREAK;
                         break;
+                    default:
+                        break;
                 }
             } else {
                 // c is a segment break
