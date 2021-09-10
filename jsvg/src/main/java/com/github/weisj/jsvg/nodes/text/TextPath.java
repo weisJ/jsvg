@@ -63,7 +63,6 @@ public final class TextPath extends TextContainer {
     private Side side;
 
     private Length startOffset;
-    private @NotImplemented Length textLength;
 
     @Override
     public final @NotNull String tagName() {
@@ -78,7 +77,6 @@ public final class TextPath extends TextContainer {
         spacing = attributeNode.getEnum("spacing", Spacing.Auto);
         // Todo: Needs to be resolved w.r.t to the paths coordinate system
         startOffset = attributeNode.getLength("startOffset", 0);
-        textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
 
         String pathData = attributeNode.getValue("path");
         if (pathData != null) {

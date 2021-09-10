@@ -42,6 +42,7 @@ import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -51,7 +52,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
 
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
-    protected Length textLength;
+    protected @NotImplemented Length textLength;
 
     protected @NotNull List<TextSegment> segments() {
         return segments;
@@ -63,7 +64,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
         super.build(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
-        textLength = attributeNode.getLength("textLength");
+        textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
     }
 
     @Override
@@ -129,6 +130,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
         return false;
     }
 
+    @Override
     public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull GeneralPath textShape,
             @NotNull RenderContext context) {
         SVGFont font = context.font();
