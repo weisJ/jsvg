@@ -151,8 +151,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         double scaleX = Math.sqrt(sx * sx + shy * shy);
         double scaleY = Math.sqrt(sy * sy + shx * shx);
 
-        int dw = (int) (Math.ceil(patternBounds.getWidth() * scaleX));
-        int dh = (int) (Math.ceil(patternBounds.getHeight() * scaleY));
+        int dw = (int) Math.ceil(patternBounds.getWidth() * scaleX);
+        int dh = (int) Math.ceil(patternBounds.getHeight() * scaleY);
 
         double tileScaleX = dw / patternBounds.getWidth();
         double tileScaleY = dh / patternBounds.getHeight();
