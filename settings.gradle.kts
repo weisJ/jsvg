@@ -11,6 +11,7 @@ pluginManagement {
         idv("com.github.vlsi.license-gather", "com.github.vlsi.vlsi-release-plugins")
         idv("com.github.vlsi.stage-vote-release", "com.github.vlsi.vlsi-release-plugins")
         idv("net.ltgt.errorprone")
+        idv("me.champeau.jmh")
     }
 }
 rootProject.name = "jsvg-root"

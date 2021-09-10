@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    id("me.champeau.jmh")
 }
 
 dependencies {
@@ -10,8 +11,12 @@ dependencies {
     testImplementation(libs.test.junit.api)
     testRuntimeOnly(libs.test.junit.engine)
     testCompileOnly(libs.nullabilityAnnotations)
+    testImplementation(libs.test.svgSalamander)
     testImplementation(libs.test.batik)
     testImplementation(libs.test.imageCompare)
+
+    jmh(libs.test.svgSalamander)
+    jmh(libs.test.batik)
 }
 
 tasks.test {
