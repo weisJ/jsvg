@@ -73,7 +73,7 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
         Point2D.Float pt2 = new Point2D.Float(fx.resolveWidth(measure), fy.resolveHeight(measure));
         return new RadialGradientPaint(pt1, fr.resolveLength(measure), pt2,
                 gradOffsets, gradColors, spreadMethod.cycleMethod(),
-                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
+                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(measure, bounds));
     }
 
     @Override

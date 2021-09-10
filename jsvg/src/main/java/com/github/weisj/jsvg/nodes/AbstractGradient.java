@@ -137,12 +137,13 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     protected abstract @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
             @Percentage float[] gradOffsets, @NotNull Color[] gradColors);
 
-    protected @NotNull AffineTransform computeViewTransform(@NotNull Rectangle2D bounds) {
+    protected @NotNull AffineTransform computeViewTransform(@NotNull MeasureContext measure,
+            @NotNull Rectangle2D bounds) {
         AffineTransform viewTransform = new AffineTransform();
 
         if (gradientUnits == UnitType.ObjectBoundingBox) {
             viewTransform.setToTranslation(bounds.getX(), bounds.getY());
-            viewTransform.scale(bounds.getWidth(), bounds.getHeight());
+            viewTransform.scale(bounds.getWidth() / measure.viewWidth(), bounds.getHeight() / measure.viewHeight());
         }
         if (gradientTransform != null) viewTransform.concatenate(gradientTransform);
         return viewTransform;
