@@ -118,9 +118,9 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     }
 
     @SuppressWarnings("unchecked")
-    @Nullable
-    private Self parseTemplate(@NotNull AttributeNode attributeNode) {
-        return (Self) attributeNode.getElementByHref(getClass(), attributeNode.getHref());
+    private @Nullable Self parseTemplate(@NotNull AttributeNode attributeNode) {
+        Self template = (Self) attributeNode.getElementByHref(getClass(), attributeNode.getHref());
+        return template != this ? template : null;
     }
 
     protected abstract void buildGradient(@NotNull AttributeNode attributeNode, @Nullable Self template);

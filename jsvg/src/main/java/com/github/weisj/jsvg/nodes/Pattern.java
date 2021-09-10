@@ -115,9 +115,9 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
                 template != null ? template.patternContentUnits : UnitType.UserSpaceOnUse);
     }
 
-    @Nullable
-    private Pattern parseTemplate(@NotNull AttributeNode attributeNode) {
-        return attributeNode.getElementByHref(Pattern.class, attributeNode.getHref());
+    private @Nullable Pattern parseTemplate(@NotNull AttributeNode attributeNode) {
+        Pattern template = attributeNode.getElementByHref(Pattern.class, attributeNode.getHref());
+        return template != this ? template : null;
     }
 
     @Override
