@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.kitfox.svg.app.beans.SVGIcon;
 
 public class SVGViewer {
 
@@ -56,6 +58,21 @@ public class SVGViewer {
             frame.add(box, BorderLayout.NORTH);
             frame.add(svgPanel, BorderLayout.CENTER);
 
+            Box renderingMode = Box.createHorizontalBox();
+            JRadioButton jsvg = new JRadioButton(RenderingMode.JSVG.name());
+            jsvg.setSelected(true);
+            jsvg.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.JSVG));
+            JRadioButton svgSalamander = new JRadioButton(RenderingMode.SVG_SALAMANDER.name());
+            svgSalamander.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.SVG_SALAMANDER));
+
+            ButtonGroup bg = new ButtonGroup();
+            bg.add(jsvg);
+            bg.add(svgSalamander);
+            renderingMode.add(jsvg);
+            renderingMode.add(svgSalamander);
+            renderingMode.add(Box.createHorizontalGlue());
+            frame.add(renderingMode, BorderLayout.SOUTH);
+
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -72,12 +89,31 @@ public class SVGViewer {
         }
     }
 
+    private enum RenderingMode {
+        JSVG,
+        SVG_SALAMANDER
+    }
+
     private static class SVGPanel extends JPanel {
         private final Map<String, SVGDocument> iconCache = new HashMap<>();
         private SVGDocument document;
+        private RenderingMode mode = RenderingMode.JSVG;
+        private final SVGIcon icon = new SVGIcon() {
+            @Override
+            public int getIconHeightIgnoreAutosize() {
+                return SVGPanel.this.getHeight();
+            }
+
+            @Override
+            public int getIconWidthIgnoreAutosize() {
+                return SVGPanel.this.getWidth();
+            }
+        };
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
+            icon.setAutosize(SVGIcon.AUTOSIZE_BESTFIT);
+            icon.setAntiAlias(true);
         }
 
         private void selectIcon(@NotNull String name) {
@@ -90,6 +126,16 @@ public class SVGViewer {
                     throw new RuntimeException(name, e);
                 }
             });
+            try {
+                icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            repaint();
+        }
+
+        private void setRenderingMode(@NotNull RenderingMode mode) {
+            this.mode = mode;
             repaint();
         }
 
@@ -101,7 +147,11 @@ public class SVGViewer {
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                     RenderingHints.VALUE_STROKE_PURE);
             System.out.println("======");
-            document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
+            if (mode == RenderingMode.JSVG) {
+                document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
+            } else {
+                icon.paintIcon(this, g, 0, 0);
+            }
         }
     }
 }
