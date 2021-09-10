@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +31,8 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 class GlyphCursor {
+    final Rectangle2D completeGlyphRunBounds;
+
     float x;
     float y;
     int glyphOffset;
@@ -51,14 +54,19 @@ class GlyphCursor {
     int rotOff;
 
     GlyphCursor(float x, float y, @NotNull AffineTransform transform) {
+        this(x, y, transform, new Rectangle2D.Float(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, 0, 0));
+    }
+
+    private GlyphCursor(float x, float y, @NotNull AffineTransform transform, @NotNull Rectangle2D glyphBounds) {
         this.x = x;
         this.y = y;
         this.transform = transform;
+        this.completeGlyphRunBounds = glyphBounds;
         this.glyphOffset = 0;
     }
 
     GlyphCursor(@NotNull GlyphCursor c) {
-        this(c.x, c.y, c.transform);
+        this(c.x, c.y, c.transform, c.completeGlyphRunBounds);
         this.glyphOffset = 0;
         this.xLocations = c.xLocations;
         this.xOff = c.xOff;

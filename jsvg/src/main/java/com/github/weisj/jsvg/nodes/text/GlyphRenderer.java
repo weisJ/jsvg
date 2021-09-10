@@ -29,6 +29,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -39,20 +40,40 @@ final class GlyphRenderer {
 
     private GlyphRenderer() {}
 
-    static void renderGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
-            @NotNull RenderContext context, @NotNull Graphics2D g) {
+    static void prepareGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
+            @NotNull RenderContext context) {
         MeasureContext measure = context.measureContext();
+
+        Shape glyphRun = layoutGlyphRun(segment, cursor, font, measure);
+        Rectangle2D bounds = glyphRun.getBounds2D();
+
+        if (Length.isUnspecified((float) cursor.completeGlyphRunBounds.getX())) {
+            cursor.completeGlyphRunBounds.setRect(bounds);
+        } else {
+            Rectangle2D.union(cursor.completeGlyphRunBounds, bounds, cursor.completeGlyphRunBounds);
+        }
+
+        segment.currentGlyphRun = glyphRun;
+        segment.currentRenderContext = context;
+    }
+
+    static void renderGlyphRun(@NotNull StringTextSegment segment, @NotNull Rectangle2D completeGlyphRunBounds,
+            @NotNull Graphics2D g) {
+        RenderContext context = segment.currentRenderContext;
+        assert context != null;
+
+        Shape glyphRun = segment.currentGlyphRun;
+        assert glyphRun != null;
 
         // Use pathLengthFactor of 1 as pathLength isn't allowed on text
         // Otherwise we would have to do expensive computations for the length of a text outline.
         Stroke stroke = context.stroke(1f);
 
-        // Todo: Gradients for text are complicated. If possible computing the complete text bounds
-        // should be avoided. Rather pass the current transform along to the gradient.
-        Rectangle2D bounds = new Rectangle();
+        ShapeRenderer.renderShape(context, g, glyphRun, completeGlyphRunBounds, stroke, true, true);
 
-        Shape glyphRun = layoutGlyphRun(segment, cursor, font, measure);
-        ShapeRenderer.renderShape(context, g, glyphRun, bounds, stroke, true, true);
+        // Invalidate the glyphRun. Avoids holding onto the RenderContext, which may reference a JComponent.
+        segment.currentRenderContext = null;
+        segment.currentGlyphRun = null;
     }
 
     static Shape layoutGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,

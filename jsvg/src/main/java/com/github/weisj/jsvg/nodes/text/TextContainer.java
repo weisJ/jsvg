@@ -94,9 +94,31 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
 
     @Override
     public void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
-        // Todo: Determine whether it is more efficient to build the path as a whole
-        // and do a single paint call instead.
+        prepareSegmentForRendering(cursor, context);
+        renderSegmentWithoutLayout(cursor, context, g);
+    }
 
+    @Override
+    public void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
+            @NotNull Graphics2D g) {
+        for (TextSegment segment : children()) {
+            RenderContext currentContext = context;
+            if (segment instanceof Renderable) {
+                if (!((Renderable) segment).isVisible(context)) continue;
+                currentContext = NodeRenderer.setupRenderContext(segment, context);
+            }
+            if (segment instanceof StringTextSegment) {
+                GlyphRenderer.renderGlyphRun((StringTextSegment) segment, cursor.completeGlyphRunBounds, g);
+            } else if (segment instanceof RenderableSegment) {
+                ((RenderableSegment) segment).renderSegmentWithoutLayout(cursor, currentContext, g);
+            } else {
+                throw new IllegalStateException("Can't render segment " + segment);
+            }
+        }
+    }
+
+    @Override
+    public void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context) {
         // Todo: textLength should be taken into consideration.
         SVGFont font = context.font();
 
@@ -109,9 +131,9 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
-                GlyphRenderer.renderGlyphRun((StringTextSegment) segment, localCursor, font, currentContext, g);
+                GlyphRenderer.prepareGlyphRun((StringTextSegment) segment, localCursor, font, currentContext);
             } else if (segment instanceof RenderableSegment) {
-                ((RenderableSegment) segment).renderSegment(localCursor, currentContext, g);
+                ((RenderableSegment) segment).prepareSegmentForRendering(localCursor, currentContext);
             } else {
                 throw new IllegalStateException("Can't render segment " + segment);
             }

@@ -30,6 +30,11 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 interface TextSegment {
     interface RenderableSegment extends TextSegment {
+        void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context);
+
+        void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
+                @NotNull Graphics2D g);
+
         void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g);
 
         void appendTextShape(@NotNull GlyphCursor cursor, @NotNull GeneralPath textShape,

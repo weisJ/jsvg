@@ -21,8 +21,18 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
+import java.awt.*;
+
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.renderer.RenderContext;
+
 class StringTextSegment implements TextSegment {
     private final char[] codepoints;
+    @Nullable
+    Shape currentGlyphRun = null;
+    @Nullable
+    RenderContext currentRenderContext = null;
 
     public StringTextSegment(char[] codepoints) {
         assert codepoints.length != 0;
