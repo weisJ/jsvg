@@ -1,4 +1,4 @@
-<svg width="100%" height="100%" viewBox="0 0 500 120"
+<svg width="1000" height="1000" viewBox="0 0 500 120"
      xmlns="http://www.w3.org/2000/svg" version="1.1">
     <desc>
         Example tspan05 - propagation of rotation values to nested tspan elements.
