@@ -113,6 +113,7 @@ public final class Marker extends BaseInnerViewContainer {
         return true;
     }
 
+    @Override
     protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
         // Markers do not inherit properties from the element they are referenced by.
         return NodeRenderer.setupInnerViewRenderContext(viewBox, context, false);

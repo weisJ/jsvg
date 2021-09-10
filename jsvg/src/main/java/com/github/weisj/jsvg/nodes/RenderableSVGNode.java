@@ -45,6 +45,7 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
 
     private @Nullable ClipPath clipPath;
 
+    @Override
     public @Nullable ClipPath clipPath() {
         return clipPath;
     }

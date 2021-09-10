@@ -52,6 +52,7 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
         return null;
     }
 
+    @Override
     public @NotNull FloatSize size(@NotNull RenderContext context) {
         MeasureContext measure = context.measureContext();
         return new FloatSize(

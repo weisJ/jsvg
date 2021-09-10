@@ -72,6 +72,7 @@ class PathGlyphCursor extends GlyphCursor {
         return new PathGlyphCursor(this);
     }
 
+    @Override
     void updateFrom(GlyphCursor local) {
         super.updateFrom(local);
         assert local instanceof PathGlyphCursor;

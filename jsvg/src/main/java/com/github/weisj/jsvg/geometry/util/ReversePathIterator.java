@@ -144,6 +144,7 @@ public class ReversePathIterator implements PathIterator {
      * @see #WIND_EVEN_ODD
      * @see #WIND_NON_ZERO
      */
+    @Override
     public int getWindingRule() {
         return windingRule;
     }
@@ -173,6 +174,7 @@ public class ReversePathIterator implements PathIterator {
      * along the primary direction of traversal as long as there are
      * more points in that direction.
      */
+    @Override
     public void next() {
         coordIndex += coordinatesForSegmentType(segmentTypes[segmentIndex++]);
     }
@@ -183,6 +185,7 @@ public class ReversePathIterator implements PathIterator {
      * @return <code>true</code> if all the segments have
      *         been read; <code>false</code> otherwise.
      */
+    @Override
     public boolean isDone() {
         return segmentIndex >= segmentTypes.length;
     }
@@ -209,6 +212,7 @@ public class ReversePathIterator implements PathIterator {
      * @see #SEG_CUBICTO
      * @see #SEG_CLOSE
      */
+    @Override
     public int currentSegment(double[] coords) {
         final int segmentType = segmentTypes[segmentIndex];
         final int copy = coordinatesForSegmentType(segmentType);
@@ -240,6 +244,7 @@ public class ReversePathIterator implements PathIterator {
      * @see #SEG_CUBICTO
      * @see #SEG_CLOSE
      */
+    @Override
     public int currentSegment(float[] coords) {
         final int segmentType = segmentTypes[segmentIndex];
         final int copy = coordinatesForSegmentType(segmentType);
