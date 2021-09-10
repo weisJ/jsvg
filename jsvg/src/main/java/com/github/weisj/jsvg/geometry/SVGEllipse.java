@@ -43,7 +43,7 @@ public class SVGEllipse implements MeasurableShape {
         this.cx = cx;
         this.cy = cy;
         this.rx = rx;
-        this.ry = rx;
+        this.ry = ry;
     }
 
     private void validateShape(@NotNull MeasureContext measureContext) {
