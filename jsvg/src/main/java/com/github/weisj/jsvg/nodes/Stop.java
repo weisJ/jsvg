@@ -24,10 +24,13 @@ package com.github.weisj.jsvg.nodes;
 import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
+import com.github.weisj.jsvg.nodes.path.BezierPathCommand;
+import com.github.weisj.jsvg.nodes.path.PathParser;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -40,6 +43,7 @@ public final class Stop extends AbstractSVGNode {
 
     private @NotNull Color color = PaintParser.DEFAULT_COLOR;
     private @Percentage float offset;
+    private @Nullable BezierPathCommand path;
 
     @Override
     public final @NotNull String tagName() {
@@ -54,6 +58,10 @@ public final class Stop extends AbstractSVGNode {
         return offset;
     }
 
+    public @Nullable BezierPathCommand bezierCommand() {
+        return path;
+    }
+
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
@@ -61,6 +69,8 @@ public final class Stop extends AbstractSVGNode {
         float opacity = attributeNode.getPercentage("stop-opacity", c.getAlpha() / 255f);
         color = ColorUtil.withAlpha(c, opacity);
         offset = attributeNode.getPercentage("offset", 0);
+        String pathData = attributeNode.getValue("path");
+        path = new PathParser(pathData).parseMeshCommand();
     }
 
     @Override

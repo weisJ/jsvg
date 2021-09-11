@@ -24,6 +24,10 @@ package com.github.weisj.jsvg.nodes.path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.geometry.size.Length;
+
 /**
  * A helper for parsing {@link PathCommand}s.
  *
@@ -35,9 +39,9 @@ public class PathParser {
     private int index;
     private char currentCommand;
 
-    public PathParser(String input) {
+    public PathParser(@Nullable String input) {
         this.input = input;
-        this.inputLength = input.length();
+        this.inputLength = input != null ? input.length() : 0;
     }
 
     private boolean isCommandChar(char c) {
@@ -94,6 +98,11 @@ public class PathParser {
         }
     }
 
+    private float nextFloatOrUnspecified() {
+        if (!hasNext()) return Length.UNSPECIFIED_RAW;
+        return nextFloat();
+    }
+
     private float nextFloat() {
         int start = index;
         NumberCharState state = new NumberCharState();
@@ -111,6 +120,31 @@ public class PathParser {
                     + input.substring(start, Math.min(input.length(), start + 10))
                     + " (index=" + index + " in input=" + input + ")";
             throw new IllegalStateException(msg, e);
+        }
+    }
+
+    public @Nullable BezierPathCommand parseMeshCommand() {
+        if (input == null) return null;
+        char peekChar = peek();
+        currentCommand = 'z';
+        if (isCommandChar(peekChar)) {
+            consume();
+            currentCommand = peekChar;
+        }
+        consumeWhiteSpaceOrSeparator();
+        switch (currentCommand) {
+            case 'l':
+                return new LineToBezier(true, nextFloatOrUnspecified(), nextFloatOrUnspecified());
+            case 'L':
+                return new LineToBezier(false, nextFloatOrUnspecified(), nextFloatOrUnspecified());
+            case 'c':
+                return new CubicBezierCommand(true, nextFloat(), nextFloat(), nextFloat(), nextFloat(),
+                        nextFloatOrUnspecified(), nextFloatOrUnspecified());
+            case 'C':
+                return new CubicBezierCommand(false, nextFloat(), nextFloat(), nextFloat(), nextFloat(),
+                        nextFloatOrUnspecified(), nextFloatOrUnspecified());
+            default:
+                throw new IllegalStateException("Only commands c C l L allowed");
         }
     }
 

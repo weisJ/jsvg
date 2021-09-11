@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="-20 -20 190 190">
+    <marker id="circ" viewBox="0 0 10 10" refX="5" refY="5">
+        <circle cx="5" cy="5" r="5" fill="context-stroke"/>
+    </marker>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
+            markerWidth="6" markerHeight="6"
+            orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/>
+    </marker>
+
+    <meshgradient x="20" y="20">
+        <meshrow>
+            <meshpatch>
+                <stop path="c  25,-25  75, 25  100,0" stop-color="green" />
+                <stop path="c  25, 25 -25, 75  0,100" stop-color="cyan" />
+                <stop path="c -25, 25 -75,-25 -100,0" stop-color="red" />
+                <stop path="c -25,-25, 25,-75"        stop-color="yellow" />
+            </meshpatch>
+        </meshrow>
+    </meshgradient>
+
+    <line x1="20" y1="20" x2="45" y2="-5" stroke="lightgreen" marker-start="url(#circ)" marker-end="url(#circ)"/>
+    <line x1="95" y1="45" x2="120" y2="20" stroke="lightgreen" marker-start="url(#circ)" marker-end="url(#circ)"/>
+
+    <line x1="20" y1="20" x2="45" y2="45" stroke="magenta" marker-start="url(#circ)" marker-end="url(#circ)"/>
+    <line x1="-5" y1="95" x2="20" y2="120" stroke="magenta" marker-start="url(#circ)" marker-end="url(#circ)"/>
+
+    <line x1="45" y1="95" x2="20" y2="120" stroke="orange" marker-start="url(#circ)" marker-end="url(#circ)"/>
+    <line x1="120" y1="120" x2="95" y2="145" stroke="orange" marker-start="url(#circ)" marker-end="url(#circ)"/>
+
+    <line x1="120" y1="120" x2="95" y2="95" stroke="lightblue" marker-start="url(#circ)" marker-end="url(#circ)"/>
+    <line x1="145" y1="45" x2="120" y2="20" stroke="lightblue" marker-start="url(#circ)" marker-end="url(#circ)"/>
+
+    <path d="M20,20   C  45,-5  95,45 120,20" fill="none" stroke="green" marker-end="url(#arrow)"/>
+    <path d="M120,20  C 145,45  95,95 120,120" fill="none" stroke="blue" marker-end="url(#arrow)"/>
+    <path d="M120,120 C  95,145 45,95  20,120" fill="none" stroke="red" marker-end="url(#arrow)"/>
+    <path d="M20,120 C  -5,95  45,45  20,20" fill="none" stroke="purple" marker-end="url(#arrow)"/>
+</svg>

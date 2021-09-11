@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 300 300">
+    <rect x="0" y="0" width="10" height="10" fill="lightblue"/>
+    <rect x="10" y="0" width="10" height="10" fill="purple"/>
+    <rect x="20" y="0" width="10" height="10" fill="red"/>
+    <meshgradient x="50" y="50" id="example"> <!-- x, y used for initial point in first patch. -->
+        <meshrow> <!-- No attributes, used only to define begin/end of row. -->
+            <meshpatch>
+                <stop path="c  25,-25  75, 25  100,0" stop-color="lightblue" />
+                <stop path="c  25, 25 -25, 75  0,100" stop-color="purple" />
+                <stop path="c -25, 25 -75,-25 -100,0" stop-color="red" />
+                <stop path="c -25,-25, 25,-75"        stop-color="purple" /> <!-- Last point not needed (closed path). -->
+            </meshpatch>
+            <meshpatch>
+                <stop path="c  25,-25  75, 25  100,0" /> <!-- stop-color from previous patch. -->
+                <stop path="c  25, 25 -25, 75  0,100" stop-color="lightblue" />
+                <stop path="c -25, 25 -75,-25"        stop-color="purple" /> <!-- Last point not needed (closed path). -->
+                <!-- Last path (left side) taken from right side of previous path (with points reversed). -->
+            </meshpatch>
+        </meshrow>
+        <meshrow> <!-- New row. -->
+            <meshpatch>
+                <!-- First path (top side) taken from bottom path of patch above. -->
+                <stop path="c  25, 25 -25, 75  0,100" /> <!-- stop-color from patch above. -->
+                <stop path="c -25, 25 -75,-25 -100,0" stop-color="purple" />
+                <stop path="c -25,-25, 25,-75"        stop-color="lightblue" /> <!-- Last point not needed (closed path). -->
+            </meshpatch>
+            <meshpatch>
+                <!-- First path (top side) taken from bottom path of patch above (with points reversed). -->
+                <stop path="c  25, 25 -25, 75  0,100" /> <!-- stop-color from patch above. -->
+                <stop path="c -25, 25 -75,-25"        stop-color="lightblue" /> <!-- Last point not needed (closed path). -->
+                <!-- Last path (left side) taken from right side of previous path (with points reversed). -->
+            </meshpatch>
+        </meshrow>
+    </meshgradient>
+</svg>

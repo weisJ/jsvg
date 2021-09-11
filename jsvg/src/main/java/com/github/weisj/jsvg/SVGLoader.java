@@ -39,6 +39,9 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.github.weisj.jsvg.nodes.*;
+import com.github.weisj.jsvg.nodes.mesh.MeshGradient;
+import com.github.weisj.jsvg.nodes.mesh.MeshPatch;
+import com.github.weisj.jsvg.nodes.mesh.MeshRow;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
@@ -63,6 +66,9 @@ public class SVGLoader {
         nodeMap.put(Line.TAG, Line::new);
         nodeMap.put(LinearGradient.TAG, LinearGradient::new);
         nodeMap.put(Marker.TAG, Marker::new);
+        nodeMap.put(MeshGradient.TAG, MeshGradient::new);
+        nodeMap.put(MeshPatch.TAG, MeshPatch::new);
+        nodeMap.put(MeshRow.TAG, MeshRow::new);
         nodeMap.put(Metadata.TAG, Metadata::new);
         nodeMap.put(Path.TAG, Path::new);
         nodeMap.put(Pattern.TAG, Pattern::new);

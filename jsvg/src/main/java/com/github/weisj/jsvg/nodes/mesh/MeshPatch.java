@@ -1,0 +1,101 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021 Jannis Weis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+package com.github.weisj.jsvg.nodes.mesh;
+
+import static com.github.weisj.jsvg.nodes.mesh.CoonPatch.lerp;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.geometry.util.ScaleUtil;
+import com.github.weisj.jsvg.nodes.Stop;
+import com.github.weisj.jsvg.nodes.container.ContainerNode;
+import com.github.weisj.jsvg.nodes.prototype.spec.Category;
+import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
+import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+
+@ElementCategories({ /* None */})
+@PermittedContent(
+    categories = Category.Descriptive,
+    anyOf = {Stop.class /* <script> */}
+)
+public final class MeshPatch extends ContainerNode {
+    public static final String TAG = "meshpatch";
+    private static final int SCALED_MIN_DEPTH = 6;
+
+    Color north;
+    Color east;
+    Color south;
+    Color west;
+    final @NotNull CoonPatch coonPatch = new CoonPatch(null, null, null, null);
+
+    @Override
+    public @NotNull String tagName() {
+        return TAG;
+    }
+
+    public void renderPath(@NotNull Graphics2D g) {
+        AffineTransform at = g.getTransform();
+        float scaleX = (float) ScaleUtil.scaleYOfTransform(at);
+        float scaleY = (float) ScaleUtil.scaleYOfTransform(at);
+        int depth = Math.max(
+                Math.max(coonPatch.north.estimateStepCount(scaleX, scaleY),
+                        coonPatch.east.estimateStepCount(scaleX, scaleY)),
+                Math.max(coonPatch.south.estimateStepCount(scaleX, scaleY),
+                        coonPatch.west.estimateStepCount(scaleX, scaleY)));
+        if (scaleX * scaleY >= 1) {
+            depth = Math.max(SCALED_MIN_DEPTH, depth);
+        }
+        renderPath(g, coonPatch, depth);
+    }
+
+    private void renderPath(@NotNull Graphics2D g, @NotNull CoonPatch patch, int depth) {
+        if (depth == 0) {
+            CoonValues weights = patch.coonValues;
+            float u = (weights.north.x + weights.east.x + weights.south.x + weights.west.x) / 4;
+            float v = (weights.north.y + weights.east.y + weights.south.y + weights.west.y) / 4;
+            g.setColor(bilinearInterpolation(u, v));
+            Shape s = patch.toShape();
+            g.fill(s);
+        } else {
+            Subdivided<CoonPatch> patchSubdivided = patch.subdivide();
+            renderPath(g, patchSubdivided.northWest, depth - 1);
+            renderPath(g, patchSubdivided.northEast, depth - 1);
+            renderPath(g, patchSubdivided.southEast, depth - 1);
+            renderPath(g, patchSubdivided.southWest, depth - 1);
+        }
+    }
+
+    private Color bilinearInterpolation(float dx, float dy) {
+        float r = lerp(dy, lerp(dx, north.getRed(), east.getRed()), lerp(dx, west.getRed(), south.getRed()));
+        float g = lerp(dy, lerp(dx, north.getGreen(), east.getGreen()), lerp(dx, west.getGreen(), south.getGreen()));
+        float b = lerp(dy, lerp(dx, north.getBlue(), east.getBlue()), lerp(dx, west.getBlue(), south.getBlue()));
+        float a = lerp(dy, lerp(dx, north.getAlpha(), east.getAlpha()), lerp(dx, west.getAlpha(), south.getAlpha()));
+        return new Color(clamp(r), clamp(g), clamp(b), clamp(a));
+    }
+
+    private int clamp(float v) {
+        return Math.max(Math.min(255, (int) v), 0);
+    }
+}
