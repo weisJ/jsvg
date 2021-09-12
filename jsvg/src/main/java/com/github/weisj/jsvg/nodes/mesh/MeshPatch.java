@@ -67,12 +67,13 @@ public final class MeshPatch extends ContainerNode {
                         coonPatch.east.estimateStepCount(scaleX, scaleY)),
                 Math.max(coonPatch.south.estimateStepCount(scaleX, scaleY),
                         coonPatch.west.estimateStepCount(scaleX, scaleY)));
-        renderPath(g, coonPatch, Math.min(MAX_DEPTH, depth));
+        renderPath(g, coonPatch, scaleX, scaleY, Math.min(MAX_DEPTH, depth));
     }
 
-    private void renderPath(@NotNull Graphics2D g, @NotNull CoonPatch patch, int depth) {
-        if (depth == 0) {
-            CoonValues weights = patch.coonValues;
+    private void renderPath(@NotNull Graphics2D g, @NotNull CoonPatch patch, float scaleX, float scaleY, int depth) {
+        CoonValues weights = patch.coonValues;
+        if (depth == 0 || GeometryUtil.distanceSquared(weights.north, weights.south, scaleX, scaleY)
+                * GeometryUtil.distanceSquared(weights.east, weights.west, scaleX, scaleY) < 0.00001) {
             float u = (weights.north.x + weights.east.x + weights.south.x + weights.west.x) / 4;
             float v = (weights.north.y + weights.east.y + weights.south.y + weights.west.y) / 4;
             g.setColor(bilinearInterpolation(u, v));
@@ -80,10 +81,10 @@ public final class MeshPatch extends ContainerNode {
             g.fill(s);
         } else {
             Subdivided<CoonPatch> patchSubdivided = patch.subdivide();
-            renderPath(g, patchSubdivided.northWest, depth - 1);
-            renderPath(g, patchSubdivided.northEast, depth - 1);
-            renderPath(g, patchSubdivided.southEast, depth - 1);
-            renderPath(g, patchSubdivided.southWest, depth - 1);
+            renderPath(g, patchSubdivided.northWest, scaleX, scaleY, depth - 1);
+            renderPath(g, patchSubdivided.northEast, scaleX, scaleY, depth - 1);
+            renderPath(g, patchSubdivided.southEast, scaleX, scaleY, depth - 1);
+            renderPath(g, patchSubdivided.southWest, scaleX, scaleY, depth - 1);
         }
     }
 

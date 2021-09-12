@@ -58,6 +58,10 @@ public final class GeometryUtil {
         return distanceSquared(scaleX * p1.x, scaleY * p1.y, scaleX * p2.x, scaleY * p2.y);
     }
 
+    public static double distanceSquared(@NotNull Point2D.Float p1, @NotNull Point2D.Float p2) {
+        return distanceSquared(p1.x, p1.y, p2.x, p2.y);
+    }
+
     public static double distanceSquared(double x1, double y1, double x2, double y2) {
         double dx = x2 - x1;
         double dy = y2 - y1;
