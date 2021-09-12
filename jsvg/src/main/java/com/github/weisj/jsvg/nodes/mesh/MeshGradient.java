@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.mesh;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +64,7 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
         x = attributeNode.getLength("x", 0);
         y = attributeNode.getLength("y", 0);
         gradientUnits = attributeNode.getEnum("gradientUnits", UnitType.ObjectBoundingBox);
-        MeshBuilder.buildMesh(this);
+        MeshBuilder.buildMesh(this, new Point2D.Float(x.raw(), y.raw()));
         // Todo: type bilinear|bicubic
         // Todo: href template
         // Todo: transform
@@ -71,14 +72,14 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
 
     public void renderMesh(@NotNull MeasureContext measure, @NotNull Graphics2D g) {
         Graphics2D meshGraphics = (Graphics2D) g.create();
-        meshGraphics.translate(x.resolveWidth(measure), y.resolveHeight(measure));
+        // meshGraphics.translate(x.resolveWidth(measure), y.resolveHeight(measure));
 
         meshGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         for (SVGNode child : children()) {
             MeshRow row = (MeshRow) child;
             for (SVGNode node : row.children()) {
                 MeshPatch patch = (MeshPatch) node;
-                patch.renderPath(g);
+                patch.renderPath(meshGraphics);
             }
         }
         meshGraphics.dispose();
@@ -88,7 +89,9 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
     public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Shape clip = g.getClip();
+        Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
         g.setClip(shape);
+        g.translate(b.getX(), b.getY());
         renderMesh(measure, g);
         g.setClip(clip);
     }
@@ -97,7 +100,9 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
     public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Shape clip = g.getClip();
+        Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
         g.setClip(g.getStroke().createStrokedShape(shape));
+        g.translate(b.getX(), b.getY());
         renderMesh(measure, g);
         g.setClip(clip);
     }

@@ -36,8 +36,8 @@ import com.github.weisj.jsvg.nodes.Stop;
 final class MeshBuilder {
     private MeshBuilder() {}
 
-    static void buildMesh(@NotNull MeshGradient meshGradient) {
-        Point2D.Float start = new Point2D.Float(0, 0);
+    static void buildMesh(@NotNull MeshGradient meshGradient, @NotNull Point2D.Float origin) {
+        Point2D.Float start = origin;
 
         int patchCount = -1;
         List<@NotNull ? extends SVGNode> rows = meshGradient.children();
@@ -114,8 +114,6 @@ final class MeshBuilder {
                     assert patchLeft != null;
                     patch.coonPatch.south.d = patchLeft.coonPatch.east.d;
                 }
-
-                System.out.println(patch.north + " " + patch.east + " " + patch.south + " " + patch.west);
 
                 try {
                     assertPatchDefined(patch.coonPatch);
