@@ -42,7 +42,7 @@ public final class ShapeRenderer {
     private ShapeRenderer() {}
 
     public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @NotNull Rectangle2D bounds,
+            @NotNull Shape shape, @Nullable Rectangle2D bounds,
             boolean allowFill, boolean allowOutline, float pathLengthFactor) {
         float fOpacity = context.fillOpacity();
         SVGPaint fPaint = context.fillPaint();
@@ -57,7 +57,7 @@ public final class ShapeRenderer {
     }
 
     public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @NotNull Rectangle2D bounds, @Nullable Stroke stroke,
+            @NotNull Shape shape, @Nullable Rectangle2D bounds, @Nullable Stroke stroke,
             boolean allowFill, boolean allowOutline) {
         float fOpacity = context.fillOpacity();
         SVGPaint fPaint = context.fillPaint();
@@ -70,7 +70,7 @@ public final class ShapeRenderer {
     }
 
     private static void doRenderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @NotNull Rectangle2D bounds,
+            @NotNull Shape shape, @Nullable Rectangle2D bounds,
             boolean allowFill, boolean allowOutline,
             float fOpacity, @NotNull SVGPaint fPaint,
             float sOpacity, @NotNull SVGPaint sPaint, @Nullable Stroke stroke) {
@@ -81,14 +81,12 @@ public final class ShapeRenderer {
             Composite composite = g.getComposite();
             if (doFill) {
                 g.setComposite(AlphaComposite.SrcOver.derive(fOpacity));
-                g.setPaint(fPaint.paintForBounds(g, context.measureContext(), bounds));
-                g.fill(shape);
+                fPaint.fillShape(g, context.measureContext(), shape, bounds);
             }
             if (doOutline && stroke != null) {
                 g.setComposite(AlphaComposite.SrcOver.derive(sOpacity));
-                g.setPaint(sPaint.paintForBounds(g, context.measureContext(), bounds));
                 g.setStroke(stroke);
-                g.draw(shape);
+                sPaint.drawShape(g, context.measureContext(), shape, bounds);
             }
             g.setComposite(composite);
         }

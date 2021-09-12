@@ -22,13 +22,11 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -36,13 +34,18 @@ import com.github.weisj.jsvg.util.ColorUtil;
 
 @ElementCategories(Category.Gradient)
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})
-public final class SolidColor extends AbstractSVGNode implements SVGPaint {
+public final class SolidColor extends AbstractSVGNode implements SimplePaintSVGPaint {
     public static final String TAG = "solidcolor";
     private Color color;
 
     @Override
     public final @NotNull String tagName() {
         return TAG;
+    }
+
+    @Override
+    public @NotNull Paint paint() {
+        return color;
     }
 
     @Override
@@ -53,9 +56,5 @@ public final class SolidColor extends AbstractSVGNode implements SVGPaint {
         color = ColorUtil.withAlpha(c, opacity);
     }
 
-    @Override
-    public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
-            @NotNull Rectangle2D bounds) {
-        return color;
-    }
+
 }

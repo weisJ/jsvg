@@ -127,7 +127,22 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     }
 
     @Override
-    public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
+    public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds) {
+        Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
+        g.setPaint(paintForBounds(g, measure, b));
+        g.fill(shape);
+    }
+
+    @Override
+    public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds) {
+        Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
+        g.setPaint(paintForBounds(g, measure, b));
+        g.draw(shape);
+    }
+
+    private @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
             @NotNull Rectangle2D bounds) {
         MeasureContext objectBoundingBoxMeasure = (patternUnits == UnitType.ObjectBoundingBox
                 || patternContentUnits == UnitType.ObjectBoundingBox)

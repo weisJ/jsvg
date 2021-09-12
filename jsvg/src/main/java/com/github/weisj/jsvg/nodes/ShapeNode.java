@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.font.FontParser;
@@ -109,9 +110,9 @@ public abstract class ShapeNode extends RenderableSVGNode
     public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
         MeasureContext measureContext = context.measureContext();
         Shape paintShape = shape.shape(context);
-        Rectangle2D bounds = shape.usesOptimizedBoundsCalculation()
+        @Nullable Rectangle2D bounds = shape.usesOptimizedBoundsCalculation()
                 ? shape.bounds(context, false)
-                : paintShape.getBounds2D();
+                : null;
         float pathLengthFactor = 1f;
         if (pathLength.isSpecified()) {
             double effectiveLength = pathLength.resolveLength(measureContext);

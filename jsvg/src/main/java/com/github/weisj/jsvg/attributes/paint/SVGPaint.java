@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
@@ -32,10 +33,12 @@ public interface SVGPaint {
     AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
     SVGPaint NONE = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
-                @NotNull Rectangle2D bounds) {
-            return PaintParser.DEFAULT_COLOR;
-        }
+        public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+                @Nullable Rectangle2D bounds) {}
+
+        @Override
+        public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+                @Nullable Rectangle2D bounds) {}
 
         @Override
         public String toString() {
@@ -44,10 +47,12 @@ public interface SVGPaint {
     };
     SVGPaint CURRENT_COLOR = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
-                @NotNull Rectangle2D bounds) {
-            return PaintParser.DEFAULT_COLOR;
-        }
+        public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+                @Nullable Rectangle2D bounds) {}
+
+        @Override
+        public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+                @Nullable Rectangle2D bounds) {}
 
         @Override
         public String toString() {
@@ -56,10 +61,12 @@ public interface SVGPaint {
     };
     SVGPaint CONTEXT_FILL = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
-                @NotNull Rectangle2D bounds) {
-            return PaintParser.DEFAULT_COLOR;
-        }
+        public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+                @Nullable Rectangle2D bounds) {}
+
+        @Override
+        public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+                @Nullable Rectangle2D bounds) {}
 
         @Override
         public String toString() {
@@ -68,10 +75,12 @@ public interface SVGPaint {
     };
     SVGPaint CONTEXT_STROKE = new SVGPaint() {
         @Override
-        public @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
-                @NotNull Rectangle2D bounds) {
-            return PaintParser.DEFAULT_COLOR;
-        }
+        public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+                @Nullable Rectangle2D bounds) {}
+
+        @Override
+        public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+                @Nullable Rectangle2D bounds) {}
 
         @Override
         public String toString() {
@@ -79,8 +88,11 @@ public interface SVGPaint {
         }
     };
 
-    @NotNull
-    Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Rectangle2D bounds);
+    void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds);
+
+    void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds);
 
     default boolean isVisible() {
         return this != NONE;

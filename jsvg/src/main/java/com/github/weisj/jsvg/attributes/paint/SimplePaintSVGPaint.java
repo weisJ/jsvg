@@ -22,27 +22,29 @@
 package com.github.weisj.jsvg.attributes.paint;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public class AwtSVGPaint implements SimplePaintSVGPaint {
+public interface SimplePaintSVGPaint extends SVGPaint {
 
-    private final @NotNull Paint paint;
+    @NotNull
+    Paint paint();
 
-    public AwtSVGPaint(@NotNull Paint paint) {
-        this.paint = paint;
+    @Override
+    default void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds) {
+        g.setPaint(paint());
+        g.fill(shape);
     }
 
     @Override
-    public @NotNull Paint paint() {
-        return paint;
-    }
-
-    @Override
-    public String toString() {
-        return "AwtSVGPaint{" +
-                "paint=" + paint +
-                '}';
+    default void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds) {
+        g.setPaint(paint());
+        g.draw(shape);
     }
 }
