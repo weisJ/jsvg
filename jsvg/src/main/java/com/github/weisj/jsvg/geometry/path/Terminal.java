@@ -19,32 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.path;
+package com.github.weisj.jsvg.geometry.path;
 
-import java.awt.geom.Point2D;
+import java.awt.geom.GeneralPath;
 
-import org.jetbrains.annotations.NotNull;
+/**
+ * Finishes a path
+ *
+ * @author Mark McKay
+ * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
+ */
+public class Terminal extends PathCommand {
 
-import com.github.weisj.jsvg.nodes.mesh.Bezier;
-
-class LineToBezier implements BezierPathCommand {
-
-    private final boolean relative;
-    private final float x;
-    private final float y;
-
-    public LineToBezier(boolean relative, float x, float y) {
-        this.relative = relative;
-        this.x = x;
-        this.y = y;
+    @Override
+    public void appendPath(GeneralPath path, BuildHistory hist) {
+        path.closePath();
+        hist.setLastPoint(hist.startPoint.x, hist.startPoint.y);
+        hist.setLastKnot(hist.startPoint.x, hist.startPoint.y);
     }
 
     @Override
-    public @NotNull Bezier createBezier(@NotNull Point2D.Float start) {
-        if (relative) {
-            return Bezier.straightLine(start, new Point2D.Float(x, y));
-        } else {
-            return Bezier.straightLine(start, new Point2D.Float(start.x + x, start.y + y));
-        }
+    public int getInnerNodes() {
+        return 0;
     }
+
+    @Override
+    public String toString() {
+        return "Z";
+    }
+
 }

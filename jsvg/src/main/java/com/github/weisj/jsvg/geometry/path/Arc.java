@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.path;
+package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;

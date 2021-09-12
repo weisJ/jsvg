@@ -19,8 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.path;
-
+package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.GeneralPath;
 
@@ -28,12 +27,21 @@ import java.awt.geom.GeneralPath;
  * @author Mark McKay
  * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
  */
-class MoveTo extends PathCommand {
+class Cubic extends PathCommand {
+
+    private final float k1x;
+    private final float k1y;
+    private final float k2x;
+    private final float k2y;
     private final float x;
     private final float y;
 
-    public MoveTo(boolean isRelative, float x, float y) {
+    public Cubic(boolean isRelative, float k1x, float k1y, float k2x, float k2y, float x, float y) {
         super(isRelative);
+        this.k1x = k1x;
+        this.k1y = k1y;
+        this.k2x = k2x;
+        this.k2y = k2y;
         this.x = x;
         this.y = y;
     }
@@ -43,21 +51,22 @@ class MoveTo extends PathCommand {
         float xOff = isRelative ? hist.lastPoint.x : 0f;
         float yOff = isRelative ? hist.lastPoint.y : 0f;
 
-        path.moveTo(x + xOff, y + yOff);
-        hist.setStartPoint(x + xOff, y + yOff);
+        path.curveTo(k1x + xOff, k1y + yOff,
+                k2x + xOff, k2y + yOff,
+                x + xOff, y + yOff);
         hist.setLastPoint(x + xOff, y + yOff);
-        hist.setLastKnot(x + xOff, y + yOff);
+        hist.setLastKnot(k2x + xOff, k2y + yOff);
     }
 
     @Override
     public int getInnerNodes() {
-        return 2;
+        return 6;
     }
 
     @Override
     public String toString() {
-        return "M " + x + " " + y;
+        return "C " + k1x + " " + k1y
+                + " " + k2x + " " + k2y
+                + " " + x + " " + y;
     }
-
-
 }

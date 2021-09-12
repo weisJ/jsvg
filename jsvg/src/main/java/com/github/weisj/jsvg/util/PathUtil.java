@@ -28,9 +28,9 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
-import com.github.weisj.jsvg.nodes.path.BuildHistory;
-import com.github.weisj.jsvg.nodes.path.PathCommand;
-import com.github.weisj.jsvg.nodes.path.PathParser;
+import com.github.weisj.jsvg.geometry.path.BuildHistory;
+import com.github.weisj.jsvg.geometry.path.PathCommand;
+import com.github.weisj.jsvg.geometry.path.PathParser;
 
 public final class PathUtil {
     private PathUtil() {}

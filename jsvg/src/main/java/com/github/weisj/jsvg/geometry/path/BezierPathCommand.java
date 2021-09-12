@@ -19,41 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.path;
+package com.github.weisj.jsvg.geometry.path;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 
-/**
- * @author Mark McKay
- * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
- */
-class Horizontal extends PathCommand {
+import org.jetbrains.annotations.NotNull;
 
-    private final float x;
+import com.github.weisj.jsvg.nodes.mesh.Bezier;
 
-    public Horizontal(boolean isRelative, float x) {
-        super(isRelative);
-        this.x = x;
-    }
+public interface BezierPathCommand {
 
-    @Override
-    public void appendPath(GeneralPath path, BuildHistory hist) {
-        float xOff = isRelative ? hist.lastPoint.x : 0f;
-        float yOff = hist.lastPoint.y;
-
-        path.lineTo(x + xOff, yOff);
-        hist.setLastPoint(x + xOff, yOff);
-        hist.setLastKnot(x + xOff, yOff);
-    }
-
-    @Override
-    public int getInnerNodes() {
-        return 2;
-    }
-
-    @Override
-    public String toString() {
-        return "H " + x;
-    }
-
+    @NotNull
+    Bezier createBezier(@NotNull Point2D.Float start);
 }

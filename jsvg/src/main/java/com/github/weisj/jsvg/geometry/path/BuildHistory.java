@@ -19,47 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.path;
+package com.github.weisj.jsvg.geometry.path;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 
-class QuadraticSmooth extends PathCommand {
+/**
+ * When building a path from command segments, most need to cache information
+ * (such as the point finished at) for future commands. This structure allows
+ * that
+ *
+ * @author Mark McKay
+ * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
+ */
+public class BuildHistory {
 
-    private final float x;
-    private final float y;
+    Point2D.Float startPoint = new Point2D.Float();
+    Point2D.Float lastPoint = new Point2D.Float();
+    Point2D.Float lastKnot = new Point2D.Float();
 
-    public QuadraticSmooth(boolean isRelative, float x, float y) {
-        super(isRelative);
-        this.x = x;
-        this.y = y;
+    public void setStartPoint(float x, float y) {
+        startPoint.setLocation(x, y);
     }
 
-    @Override
-    public void appendPath(GeneralPath path, BuildHistory hist) {
-        float xOff = isRelative ? hist.lastPoint.x : 0f;
-        float yOff = isRelative ? hist.lastPoint.y : 0f;
-
-        float oldKx = hist.lastKnot.x;
-        float oldKy = hist.lastKnot.y;
-        float oldX = hist.lastPoint.x;
-        float oldY = hist.lastPoint.y;
-
-        // Calc knot as reflection of old knot
-        float kx = oldX * 2f - oldKx;
-        float ky = oldY * 2f - oldKy;
-
-        path.quadTo(kx, ky, x + xOff, y + yOff);
-        hist.setLastPoint(x + xOff, y + yOff);
-        hist.setLastKnot(kx, ky);
+    public void setLastPoint(float x, float y) {
+        lastPoint.setLocation(x, y);
     }
 
-    @Override
-    public int getInnerNodes() {
-        return 4;
-    }
-
-    @Override
-    public String toString() {
-        return "T " + x + " " + y;
+    public void setLastKnot(float x, float y) {
+        lastKnot.setLocation(x, y);
     }
 }

@@ -19,29 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.path;
+package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.GeneralPath;
 
-/**
- * @author Mark McKay
- * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
- */
-class Cubic extends PathCommand {
+class QuadraticSmooth extends PathCommand {
 
-    private final float k1x;
-    private final float k1y;
-    private final float k2x;
-    private final float k2y;
     private final float x;
     private final float y;
 
-    public Cubic(boolean isRelative, float k1x, float k1y, float k2x, float k2y, float x, float y) {
+    public QuadraticSmooth(boolean isRelative, float x, float y) {
         super(isRelative);
-        this.k1x = k1x;
-        this.k1y = k1y;
-        this.k2x = k2x;
-        this.k2y = k2y;
         this.x = x;
         this.y = y;
     }
@@ -51,22 +39,27 @@ class Cubic extends PathCommand {
         float xOff = isRelative ? hist.lastPoint.x : 0f;
         float yOff = isRelative ? hist.lastPoint.y : 0f;
 
-        path.curveTo(k1x + xOff, k1y + yOff,
-                k2x + xOff, k2y + yOff,
-                x + xOff, y + yOff);
+        float oldKx = hist.lastKnot.x;
+        float oldKy = hist.lastKnot.y;
+        float oldX = hist.lastPoint.x;
+        float oldY = hist.lastPoint.y;
+
+        // Calc knot as reflection of old knot
+        float kx = oldX * 2f - oldKx;
+        float ky = oldY * 2f - oldKy;
+
+        path.quadTo(kx, ky, x + xOff, y + yOff);
         hist.setLastPoint(x + xOff, y + yOff);
-        hist.setLastKnot(k2x + xOff, k2y + yOff);
+        hist.setLastKnot(kx, ky);
     }
 
     @Override
     public int getInnerNodes() {
-        return 6;
+        return 4;
     }
 
     @Override
     public String toString() {
-        return "C " + k1x + " " + k1y
-                + " " + k2x + " " + k2y
-                + " " + x + " " + y;
+        return "T " + x + " " + y;
     }
 }

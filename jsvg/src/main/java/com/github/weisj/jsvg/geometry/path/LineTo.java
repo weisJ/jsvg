@@ -19,33 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.path;
+package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.GeneralPath;
 
 /**
- * Finishes a path
- *
  * @author Mark McKay
  * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
  */
-public class Terminal extends PathCommand {
+class LineTo extends PathCommand {
+
+    private final float x;
+    private final float y;
+
+    public LineTo(boolean isRelative, float x, float y) {
+        super(isRelative);
+        this.x = x;
+        this.y = y;
+    }
 
     @Override
     public void appendPath(GeneralPath path, BuildHistory hist) {
-        path.closePath();
-        hist.setLastPoint(hist.startPoint.x, hist.startPoint.y);
-        hist.setLastKnot(hist.startPoint.x, hist.startPoint.y);
+        float xOff = isRelative ? hist.lastPoint.x : 0f;
+        float yOff = isRelative ? hist.lastPoint.y : 0f;
+
+        path.lineTo(x + xOff, y + yOff);
+        hist.setLastPoint(x + xOff, y + yOff);
+        hist.setLastKnot(x + xOff, y + yOff);
     }
 
     @Override
     public int getInnerNodes() {
-        return 0;
+        return 2;
     }
 
     @Override
     public String toString() {
-        return "Z";
+        return "L " + x + " " + y;
     }
-
 }

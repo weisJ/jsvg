@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.path;
+package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.GeneralPath;
 
@@ -27,23 +27,23 @@ import java.awt.geom.GeneralPath;
  * @author Mark McKay
  * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
  */
-class Vertical extends PathCommand {
+class Horizontal extends PathCommand {
 
-    private final float y;
+    private final float x;
 
-    public Vertical(boolean isRelative, float y) {
+    public Horizontal(boolean isRelative, float x) {
         super(isRelative);
-        this.y = y;
+        this.x = x;
     }
 
     @Override
     public void appendPath(GeneralPath path, BuildHistory hist) {
-        float xOff = hist.lastPoint.x;
-        float yOff = isRelative ? hist.lastPoint.y : 0f;
+        float xOff = isRelative ? hist.lastPoint.x : 0f;
+        float yOff = hist.lastPoint.y;
 
-        path.lineTo(xOff, y + yOff);
-        hist.setLastPoint(xOff, y + yOff);
-        hist.setLastKnot(xOff, y + yOff);
+        path.lineTo(x + xOff, yOff);
+        hist.setLastPoint(x + xOff, yOff);
+        hist.setLastKnot(x + xOff, yOff);
     }
 
     @Override
@@ -53,6 +53,7 @@ class Vertical extends PathCommand {
 
     @Override
     public String toString() {
-        return "V " + y;
+        return "H " + x;
     }
+
 }
