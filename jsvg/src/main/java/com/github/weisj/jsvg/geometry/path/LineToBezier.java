@@ -42,9 +42,9 @@ class LineToBezier implements BezierPathCommand {
     @Override
     public @NotNull Bezier createBezier(@NotNull Point2D.Float start) {
         if (relative) {
-            return Bezier.straightLine(start, new Point2D.Float(x, y));
-        } else {
             return Bezier.straightLine(start, new Point2D.Float(start.x + x, start.y + y));
+        } else {
+            return Bezier.straightLine(start, new Point2D.Float(x, y));
         }
     }
 }
