@@ -48,7 +48,7 @@ class CubicBezierCommand implements BezierPathCommand {
     }
 
     @Override
-    public @NotNull Bezier createBezier(Point2D.@NotNull Float start) {
+    public @NotNull Bezier createBezier(@NotNull Point2D.Float start) {
         if (relative) {
             return new Bezier(start,
                     new Point2D.Float(start.x + bx, start.y + by),

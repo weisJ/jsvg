@@ -37,7 +37,7 @@ public class CoonPatch {
     public Bezier south;
     public Bezier west;
 
-    public final CoonValues coonValues;
+    public final @NotNull CoonValues coonValues;
 
     CoonPatch(Bezier north, Bezier east, Bezier south, Bezier west) {
         this(north, east, south, west,
@@ -48,7 +48,7 @@ public class CoonPatch {
         return new CoonPatch(null, null, null, null);
     }
 
-    CoonPatch(Bezier north, Bezier east, Bezier south, Bezier west, CoonValues coonValues) {
+    CoonPatch(Bezier north, Bezier east, Bezier south, Bezier west, @NotNull CoonValues coonValues) {
         this.north = north;
         this.east = east;
         this.south = south;
@@ -56,7 +56,7 @@ public class CoonPatch {
         this.coonValues = coonValues;
     }
 
-    public Shape toShape() {
+    public @NotNull Shape toShape() {
         GeneralPath p = new GeneralPath(Path2D.WIND_EVEN_ODD);
         p.moveTo(north.a.x, north.a.y);
         north.appendTo(p);
