@@ -46,6 +46,7 @@ For supported elements most of the attributes which apply to them are implemente
 - (:white_check_mark:): The element is supported, but won't have any effect (e.g. it's currently not possible to query the content of a `<desc>` element)
 - :x:: The element is currently not supported
 - :warning:: The element is deprecated in the spec and has a low priority of getting implemented.
+- :microscope:: The element is an experimental part of the svg 2.* spec. It may not fully behave as expected.
 
 |Element|Status|
 |-------|------|
@@ -103,6 +104,9 @@ For supported elements most of the attributes which apply to them are implemente
 |image|:white_check_mark:|
 |line|:white_check_mark:|
 |linearGradient|:white_check_mark:|
+|meshgradient :microscope:|:white_check_mark:|
+|meshrow :microscope:|:white_check_mark:|
+|meshpatch :microscope:|:white_check_mark:|
 |marker|:white_check_mark:|
 |mask|:x:|
 |metadata|(:white_check_mark:)|
@@ -116,6 +120,7 @@ For supported elements most of the attributes which apply to them are implemente
 |rect|:white_check_mark:|
 |script|:x:|
 |set|:x:|
+|solidColor|:white_check_mark:|
 |stop|:white_check_mark:|
 |style|:x:|
 |svg|:white_check_mark:|
