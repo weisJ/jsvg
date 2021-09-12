@@ -32,4 +32,5 @@
             </meshpatch>
         </meshrow>
     </meshgradient>
+    <rect x="0" y="0" width="300" height="300" fill="url(#example)"/>
 </svg>

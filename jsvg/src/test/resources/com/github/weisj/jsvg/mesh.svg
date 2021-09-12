@@ -8,16 +8,20 @@
         <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/>
     </marker>
 
-    <meshgradient x="20" y="20">
-        <meshrow>
-            <meshpatch>
-                <stop path="c  25,-25  75, 25  100,0" stop-color="green" />
-                <stop path="c  25, 25 -25, 75  0,100" stop-color="cyan" />
-                <stop path="c -25, 25 -75,-25 -100,0" stop-color="red" />
-                <stop path="c -25,-25, 25,-75"        stop-color="yellow" />
-            </meshpatch>
-        </meshrow>
-    </meshgradient>
+    <defs>
+        <meshgradient id="meshGrad" x="20" y="20">
+            <meshrow>
+                <meshpatch>
+                    <stop path="c  25,-25  75, 25  100,0" stop-color="green" />
+                    <stop path="c  25, 25 -25, 75  0,100" stop-color="cyan" />
+                    <stop path="c -25, 25 -75,-25 -100,0" stop-color="red" />
+                    <stop path="c -25,-25, 25,-75"        stop-color="yellow" />
+                </meshpatch>
+            </meshrow>
+        </meshgradient>
+    </defs>
+
+    <rect width="210" height="210" fill="url(#meshGrad)" stroke="black"/>
 
     <line x1="20" y1="20" x2="45" y2="-5" stroke="lightgreen" marker-start="url(#circ)" marker-end="url(#circ)"/>
     <line x1="95" y1="45" x2="120" y2="20" stroke="lightgreen" marker-start="url(#circ)" marker-end="url(#circ)"/>
