@@ -104,9 +104,9 @@ For supported elements most of the attributes which apply to them are implemente
 |image|:white_check_mark:|
 |line|:white_check_mark:|
 |linearGradient|:white_check_mark:|
-|meshgradient :microscope:|:white_check_mark:|
-|meshrow :microscope:|:white_check_mark:|
-|meshpatch :microscope:|:white_check_mark:|
+|:microscope:meshgradient|:white_check_mark:|
+|:microscope:meshrow|:white_check_mark:|
+|:microscope:meshpatch|:white_check_mark:|
 |marker|:white_check_mark:|
 |mask|:x:|
 |metadata|(:white_check_mark:)|
