@@ -56,9 +56,6 @@ public class AttributeNode {
         this.attributes = preprocessAttributes(attributes);
         this.parent = parent;
         this.namedElements = namedElements;
-        if (attributes.containsKey("style")) {
-            SVGLoader.LOGGER.warning("<style> not yet implemented.");
-        }
     }
 
     private static @NotNull Map<String, String> preprocessAttributes(@NotNull Map<String, String> attributes) {
