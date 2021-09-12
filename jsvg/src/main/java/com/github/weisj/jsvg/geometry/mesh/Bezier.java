@@ -22,14 +22,13 @@
 package com.github.weisj.jsvg.geometry.mesh;
 
 import static com.github.weisj.jsvg.geometry.mesh.MeshUtil.p;
-import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
+import static com.github.weisj.jsvg.geometry.util.GeometryUtil.distanceSquared;
 import static com.github.weisj.jsvg.geometry.util.GeometryUtil.midPoint;
 
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
-
-import com.github.weisj.jsvg.geometry.SVGLine;
 
 public class Bezier {
     public @NotNull Point2D.Float a;
@@ -45,11 +44,15 @@ public class Bezier {
         this.d = d;
     }
 
-    public Bezier inverse() {
+    public void appendTo(@NotNull GeneralPath p) {
+        p.curveTo(b.x, b.y, c.x, c.y, d.x, d.y);
+    }
+
+    public @NotNull Bezier inverse() {
         return new Bezier(d, c, b, a);
     }
 
-    public Split<Bezier> split() {
+    public @NotNull Split<Bezier> split() {
         Point2D.Float ab = midPoint(a, b);
         Point2D.Float bc = midPoint(b, c);
         Point2D.Float cd = midPoint(c, d);
@@ -61,11 +64,11 @@ public class Bezier {
                 new Bezier(abbcbccd, bccd, cd, d));
     }
 
-    public static Bezier straightLine(Point2D.Float a, Point2D.Float b) {
-        return new Bezier(a, lerp(1 / 3f, b, a), lerp(2 / 3f, b, a), b);
+    public static @NotNull Bezier straightLine(Point2D.Float a, Point2D.Float b) {
+        return new LineBezier(a, b);
     }
 
-    public static Bezier combine(Bezier b1, Bezier b2, Bezier b3) {
+    public static @NotNull Bezier combine(@NotNull Bezier b1, @NotNull Bezier b2, @NotNull Bezier b3) {
         return new Bezier(
                 p(b1.a.x + b2.a.x - b3.a.x, b1.a.y + b2.a.y - b3.a.y),
                 p(b1.b.x + b2.b.x - b3.b.x, b1.b.y + b2.b.y - b3.b.y),
@@ -74,7 +77,7 @@ public class Bezier {
     }
 
     public int estimateStepCount(float scaleX, float scaleY) {
-        float steps = Math.max(
+        double steps = Math.max(
                 Math.max(distanceSquared(a, b, scaleX, scaleY), distanceSquared(c, d, scaleX, scaleY)),
                 Math.max(distanceSquared(a, c, scaleX, scaleY) / 4, distanceSquared(b, d, scaleX, scaleY) / 4));
         steps *= 18;
@@ -82,10 +85,6 @@ public class Bezier {
         return (Math.getExponent(steps) + 1) / 2;
     }
 
-    private static float distanceSquared(@NotNull Point2D.Float p1, @NotNull Point2D.Float p2, float scaleX,
-            float scaleY) {
-        return (float) SVGLine.lineLength(scaleX * p1.x, scaleY * p1.y, scaleX * p2.x, scaleY * p2.y);
-    }
 
     @Override
     public String toString() {

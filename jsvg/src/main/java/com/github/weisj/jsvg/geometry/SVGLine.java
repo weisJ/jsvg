@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGLine implements MeasurableShape {
@@ -76,9 +77,7 @@ public class SVGLine implements MeasurableShape {
                 x2.resolveWidth(measureContext), y2.resolveHeight(measureContext));
     }
 
-    public static double lineLength(double x1, double y1, double x2, double y2) {
-        double dx = x2 - x1;
-        double dy = y2 - y1;
-        return Math.sqrt(dx * dx + dy * dy);
+    static double lineLength(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(GeometryUtil.distanceSquared(x1, y1, x2, y2));
     }
 }

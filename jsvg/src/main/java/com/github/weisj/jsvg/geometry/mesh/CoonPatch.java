@@ -59,16 +59,12 @@ public class CoonPatch {
     public Shape toShape() {
         GeneralPath p = new GeneralPath(Path2D.WIND_EVEN_ODD);
         p.moveTo(north.a.x, north.a.y);
-        appendBezier(p, north);
-        appendBezier(p, east);
-        appendBezier(p, south);
-        appendBezier(p, west);
+        north.appendTo(p);
+        east.appendTo(p);
+        south.appendTo(p);
+        west.appendTo(p);
         p.closePath();
         return p;
-    }
-
-    private void appendBezier(GeneralPath p, Bezier bezier) {
-        p.curveTo(bezier.b.x, bezier.b.y, bezier.c.x, bezier.c.y, bezier.d.x, bezier.d.y);
     }
 
     public Subdivided<CoonPatch> subdivide() {

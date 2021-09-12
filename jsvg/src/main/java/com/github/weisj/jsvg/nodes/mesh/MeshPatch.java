@@ -90,15 +90,15 @@ public final class MeshPatch extends ContainerNode {
         }
     }
 
-    private Color bilinearInterpolation(float dx, float dy) {
+    private @NotNull Color bilinearInterpolation(float dx, float dy) {
         float r = lerp(dy, lerp(dx, north.getRed(), east.getRed()), lerp(dx, west.getRed(), south.getRed()));
         float g = lerp(dy, lerp(dx, north.getGreen(), east.getGreen()), lerp(dx, west.getGreen(), south.getGreen()));
         float b = lerp(dy, lerp(dx, north.getBlue(), east.getBlue()), lerp(dx, west.getBlue(), south.getBlue()));
         float a = lerp(dy, lerp(dx, north.getAlpha(), east.getAlpha()), lerp(dx, west.getAlpha(), south.getAlpha()));
-        return new Color(clamp(r), clamp(g), clamp(b), clamp(a));
+        return new Color(clampColor(r), clampColor(g), clampColor(b), clampColor(a));
     }
 
-    private int clamp(float v) {
+    private int clampColor(float v) {
         return Math.max(Math.min(255, (int) v), 0);
     }
 }

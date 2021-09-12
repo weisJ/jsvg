@@ -21,14 +21,29 @@
  */
 package com.github.weisj.jsvg.geometry.mesh;
 
+import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
+
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+
 import org.jetbrains.annotations.NotNull;
 
-class Split<T> {
-    public final @NotNull T left;
-    public final @NotNull T right;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 
-    public Split(@NotNull T left, @NotNull T right) {
-        this.left = left;
-        this.right = right;
+class LineBezier extends Bezier {
+
+    LineBezier(@NotNull Point2D.Float a, @NotNull Point2D.Float b) {
+        super(a, lerp(1 / 3f, b, a), lerp(2 / 3f, b, a), b);
+    }
+
+    @Override
+    public void appendTo(@NotNull GeneralPath p) {
+        p.lineTo(d.x, d.y);
+    }
+
+    @Override
+    public @NotNull Split<Bezier> split() {
+        Point2D.Float mid = GeometryUtil.midPoint(a, d);
+        return new Split<>(new LineBezier(a, mid), new LineBezier(mid, d));
     }
 }

@@ -52,4 +52,15 @@ public final class GeometryUtil {
     public static float lerp(float t, float a, float b) {
         return (1 - t) * a + t * b;
     }
+
+    public static double distanceSquared(@NotNull Point2D.Float p1, @NotNull Point2D.Float p2, float scaleX,
+            float scaleY) {
+        return distanceSquared(scaleX * p1.x, scaleY * p1.y, scaleX * p2.x, scaleY * p2.y);
+    }
+
+    public static double distanceSquared(double x1, double y1, double x2, double y2) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        return dx * dx + dy * dy;
+    }
 }
