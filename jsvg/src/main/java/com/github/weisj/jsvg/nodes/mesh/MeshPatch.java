@@ -72,8 +72,8 @@ public final class MeshPatch extends ContainerNode {
 
     private void renderPath(@NotNull Graphics2D g, @NotNull CoonPatch patch, float scaleX, float scaleY, int depth) {
         CoonValues weights = patch.coonValues;
-        // Check if we have reached the limit of discernible colors. This happens if our color weights spectrum
-        // allows for less that approximately (1/255)^3, which is our "relative color-depth".
+        // Check if we have reached the limit of discernible colors. This happens if our color weights
+        // spectrum allows for less that approximately (1/255)^3, which is our "relative color-depth".
         if (depth == 0 || GeometryUtil.distanceSquared(weights.north, weights.south, scaleX, scaleY)
                 * GeometryUtil.distanceSquared(weights.east, weights.west, scaleX, scaleY) < 0.000001) {
             float u = (weights.north.x + weights.east.x + weights.south.x + weights.west.x) / 4;
