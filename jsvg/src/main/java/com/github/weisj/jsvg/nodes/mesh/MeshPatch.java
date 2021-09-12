@@ -21,14 +21,17 @@
  */
 package com.github.weisj.jsvg.nodes.mesh;
 
-import static com.github.weisj.jsvg.nodes.mesh.CoonPatch.lerp;
+import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.util.ScaleUtil;
+import com.github.weisj.jsvg.geometry.mesh.CoonPatch;
+import com.github.weisj.jsvg.geometry.mesh.CoonValues;
+import com.github.weisj.jsvg.geometry.mesh.Subdivided;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.Stop;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -48,7 +51,7 @@ public final class MeshPatch extends ContainerNode {
     Color east;
     Color south;
     Color west;
-    final @NotNull CoonPatch coonPatch = new CoonPatch(null, null, null, null);
+    final @NotNull CoonPatch coonPatch = CoonPatch.createUninitialized();
 
     @Override
     public @NotNull String tagName() {
@@ -57,8 +60,8 @@ public final class MeshPatch extends ContainerNode {
 
     public void renderPath(@NotNull Graphics2D g) {
         AffineTransform at = g.getTransform();
-        float scaleX = (float) ScaleUtil.scaleYOfTransform(at);
-        float scaleY = (float) ScaleUtil.scaleYOfTransform(at);
+        float scaleX = (float) GeometryUtil.scaleYOfTransform(at);
+        float scaleY = (float) GeometryUtil.scaleYOfTransform(at);
         int depth = Math.max(
                 Math.max(coonPatch.north.estimateStepCount(scaleX, scaleY),
                         coonPatch.east.estimateStepCount(scaleX, scaleY)),

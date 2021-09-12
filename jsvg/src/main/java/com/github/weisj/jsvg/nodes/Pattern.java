@@ -38,7 +38,7 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.geometry.util.ScaleUtil;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -158,8 +158,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
 
         AffineTransform at = g.getTransform();
 
-        double scaleX = ScaleUtil.scaleXOfTransform(at);
-        double scaleY = ScaleUtil.scaleYOfTransform(at);
+        double scaleX = GeometryUtil.scaleXOfTransform(at);
+        double scaleY = GeometryUtil.scaleYOfTransform(at);
 
         int dw = (int) Math.ceil(patternBounds.getWidth() * scaleX);
         int dh = (int) Math.ceil(patternBounds.getHeight() * scaleY);

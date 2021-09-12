@@ -19,18 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.mesh;
+package com.github.weisj.jsvg.geometry.mesh;
 
 import java.awt.geom.Point2D;
+
+import org.jetbrains.annotations.NotNull;
 
 final class MeshUtil {
     private MeshUtil() {}
 
-    static Point2D.Float midPoint(Point2D.Float x, Point2D.Float y) {
-        return new Point2D.Float((x.x + y.x) / 2, (x.y + y.y) / 2);
-    }
-
-    static Point2D.Float p(float x, float y) {
+    static @NotNull Point2D.Float p(float x, float y) {
         return new Point2D.Float(x, y);
     }
 }

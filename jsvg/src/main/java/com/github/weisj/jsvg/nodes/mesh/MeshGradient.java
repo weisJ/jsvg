@@ -22,28 +22,29 @@
 package com.github.weisj.jsvg.nodes.mesh;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories(Category.Gradient)
 @PermittedContent(
     categories = Category.Descriptive,
     anyOf = {MeshRow.class /* <animate>, <animateTransform>, <script>, <set> */}
 )
-public final class MeshGradient extends ContainerNode implements Renderable {
+public final class MeshGradient extends ContainerNode implements SVGPaint {
     public static final String TAG = "meshgradient";
 
     private Length x;
@@ -66,17 +67,9 @@ public final class MeshGradient extends ContainerNode implements Renderable {
         // Todo: type bilinear|bicubic
         // Todo: href template
         // Todo: transform
-        // Todo: Make this work as a SVGPaint
     }
 
-    @Override
-    public boolean isVisible(@NotNull RenderContext context) {
-        return true;
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        MeasureContext measure = context.measureContext();
+    public void renderMesh(@NotNull MeasureContext measure, @NotNull Graphics2D g) {
         Graphics2D meshGraphics = (Graphics2D) g.create();
         meshGraphics.translate(x.resolveWidth(measure), y.resolveHeight(measure));
 
@@ -89,5 +82,23 @@ public final class MeshGradient extends ContainerNode implements Renderable {
             }
         }
         meshGraphics.dispose();
+    }
+
+    @Override
+    public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds) {
+        Shape clip = g.getClip();
+        g.setClip(shape);
+        renderMesh(measure, g);
+        g.setClip(clip);
+    }
+
+    @Override
+    public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds) {
+        Shape clip = g.getClip();
+        g.setClip(g.getStroke().createStrokedShape(shape));
+        renderMesh(measure, g);
+        g.setClip(clip);
     }
 }

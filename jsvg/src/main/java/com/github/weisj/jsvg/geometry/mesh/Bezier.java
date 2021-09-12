@@ -19,11 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.mesh;
+package com.github.weisj.jsvg.geometry.mesh;
 
-import static com.github.weisj.jsvg.nodes.mesh.CoonPatch.lerp;
-import static com.github.weisj.jsvg.nodes.mesh.MeshUtil.midPoint;
-import static com.github.weisj.jsvg.nodes.mesh.MeshUtil.p;
+import static com.github.weisj.jsvg.geometry.mesh.MeshUtil.p;
+import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
+import static com.github.weisj.jsvg.geometry.util.GeometryUtil.midPoint;
 
 import java.awt.geom.Point2D;
 

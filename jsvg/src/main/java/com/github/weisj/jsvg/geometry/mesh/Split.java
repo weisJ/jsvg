@@ -19,18 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.mesh;
+package com.github.weisj.jsvg.geometry.mesh;
 
-class Subdivided<T> {
-    public final T northWest;
-    public final T northEast;
-    public final T southWest;
-    public final T southEast;
+class Split<T> {
+    public final T left;
+    public final T right;
 
-    public Subdivided(T northWest, T northEast, T southWest, T southEast) {
-        this.northWest = northWest;
-        this.northEast = northEast;
-        this.southWest = southWest;
-        this.southEast = southEast;
+    public Split(T left, T right) {
+        this.left = left;
+        this.right = right;
     }
 }

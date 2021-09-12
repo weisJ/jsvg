@@ -25,7 +25,7 @@ import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.mesh.Bezier;
+import com.github.weisj.jsvg.geometry.mesh.Bezier;
 
 class CubicBezierCommand implements BezierPathCommand {
 

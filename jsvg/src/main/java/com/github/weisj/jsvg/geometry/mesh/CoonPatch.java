@@ -19,17 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.mesh;
+package com.github.weisj.jsvg.geometry.mesh;
 
-import static com.github.weisj.jsvg.nodes.mesh.MeshUtil.midPoint;
-import static com.github.weisj.jsvg.nodes.mesh.MeshUtil.p;
+import static com.github.weisj.jsvg.geometry.mesh.MeshUtil.p;
+import static com.github.weisj.jsvg.geometry.util.GeometryUtil.midPoint;
 
 import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
-class CoonPatch {
+import org.jetbrains.annotations.NotNull;
+
+public class CoonPatch {
     public Bezier north;
     public Bezier east;
     public Bezier south;
@@ -40,6 +42,10 @@ class CoonPatch {
     CoonPatch(Bezier north, Bezier east, Bezier south, Bezier west) {
         this(north, east, south, west,
                 new CoonValues(p(0, 0), p(1, 0), p(1, 1), p(0, 1)));
+    }
+
+    public static @NotNull CoonPatch createUninitialized() {
+        return new CoonPatch(null, null, null, null);
     }
 
     CoonPatch(Bezier north, Bezier east, Bezier south, Bezier west, CoonValues coonValues) {
@@ -109,42 +115,30 @@ class CoonPatch {
                 Bezier.straightLine(westTop.a, eastTop.d),
                 Bezier.straightLine(midWestLinear, midEastLinear)).split();
 
-        Subdivided<CoonValues> weights = subdivideWeights();
-        CoonPatch northWest = new CoonPatch(
-                northLeft, splitNorthSouth.left, splitWestEast.left.inverse(), westTop,
-                weights.northWest);
-        CoonPatch northEast = new CoonPatch(
-                northRight, eastTop, splitWestEast.right.inverse(), splitNorthSouth.left.inverse(),
-                weights.northEast);
-        CoonPatch southWest = new CoonPatch(
-                splitWestEast.left, splitNorthSouth.right, southLeft, westBottom,
-                weights.southWest);
-        CoonPatch southEast = new CoonPatch(
-                splitWestEast.right, eastBottom, southRight, splitNorthSouth.right.inverse(),
-                weights.southEast);
-        return new Subdivided<>(northWest, northEast, southWest, southEast);
-    }
-
-    private Subdivided<CoonValues> subdivideWeights() {
         Point2D.Float midNorthValue = midPoint(coonValues.north, coonValues.east);
         Point2D.Float midWestValue = midPoint(coonValues.north, coonValues.west);
         Point2D.Float midSouthValue = midPoint(coonValues.west, coonValues.south);
         Point2D.Float midEastValue = midPoint(coonValues.east, coonValues.south);
 
         Point2D.Float gridMidValue = midPoint(midSouthValue, midNorthValue);
-        CoonValues northWest = new CoonValues(coonValues.north, midNorthValue, gridMidValue, midWestValue);
-        CoonValues northEast = new CoonValues(midNorthValue, coonValues.east, midEastValue, gridMidValue);
-        CoonValues southWest = new CoonValues(midWestValue, gridMidValue, midSouthValue, coonValues.west);
-        CoonValues southEast = new CoonValues(gridMidValue, midEastValue, coonValues.south, midSouthValue);
+        CoonValues northWestWeights = new CoonValues(coonValues.north, midNorthValue, gridMidValue, midWestValue);
+        CoonValues northEastWeights = new CoonValues(midNorthValue, coonValues.east, midEastValue, gridMidValue);
+        CoonValues southWestWeights = new CoonValues(midWestValue, gridMidValue, midSouthValue, coonValues.west);
+        CoonValues southEastWeights = new CoonValues(gridMidValue, midEastValue, coonValues.south, midSouthValue);
+
+        CoonPatch northWest = new CoonPatch(
+                northLeft, splitNorthSouth.left, splitWestEast.left.inverse(), westTop,
+                northWestWeights);
+        CoonPatch northEast = new CoonPatch(
+                northRight, eastTop, splitWestEast.right.inverse(), splitNorthSouth.left.inverse(),
+                northEastWeights);
+        CoonPatch southWest = new CoonPatch(
+                splitWestEast.left, splitNorthSouth.right, southLeft, westBottom,
+                southWestWeights);
+        CoonPatch southEast = new CoonPatch(
+                splitWestEast.right, eastBottom, southRight, splitNorthSouth.right.inverse(),
+                southEastWeights);
         return new Subdivided<>(northWest, northEast, southWest, southEast);
-    }
-
-    static Point2D.Float lerp(float t, Point2D.Float a, Point2D.Float b) {
-        return new Point2D.Float(lerp(t, b.x, a.x), lerp(t, b.y, a.y));
-    }
-
-    static float lerp(float t, float a, float b) {
-        return (1 - t) * a + t * b;
     }
 
     @Override

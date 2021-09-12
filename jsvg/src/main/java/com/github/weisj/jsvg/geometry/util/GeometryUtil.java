@@ -22,11 +22,12 @@
 package com.github.weisj.jsvg.geometry.util;
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class ScaleUtil {
-    private ScaleUtil() {}
+public final class GeometryUtil {
+    private GeometryUtil() {}
 
     public static double scaleXOfTransform(@NotNull AffineTransform at) {
         double sx = at.getScaleX();
@@ -38,5 +39,17 @@ public final class ScaleUtil {
         double sy = at.getScaleY();
         double shx = at.getShearX();
         return Math.sqrt(sy * sy + shx * shx);
+    }
+
+    public static @NotNull Point2D.Float midPoint(@NotNull Point2D.Float x, @NotNull Point2D.Float y) {
+        return new Point2D.Float((x.x + y.x) / 2, (x.y + y.y) / 2);
+    }
+
+    public static @NotNull Point2D.Float lerp(float t, @NotNull Point2D.Float a, @NotNull Point2D.Float b) {
+        return new Point2D.Float(lerp(t, b.x, a.x), lerp(t, b.y, a.y));
+    }
+
+    public static float lerp(float t, float a, float b) {
+        return (1 - t) * a + t * b;
     }
 }

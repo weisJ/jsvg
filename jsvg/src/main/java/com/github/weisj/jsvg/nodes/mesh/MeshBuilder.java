@@ -27,6 +27,8 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.mesh.Bezier;
+import com.github.weisj.jsvg.geometry.mesh.CoonPatch;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.Stop;
