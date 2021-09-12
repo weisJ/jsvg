@@ -45,7 +45,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 )
 public final class MeshPatch extends ContainerNode {
     public static final String TAG = "meshpatch";
-    private static final int SCALED_MIN_DEPTH = 6;
+    private static final int MAX_DEPTH = 8;
 
     Color north;
     Color east;
@@ -67,10 +67,7 @@ public final class MeshPatch extends ContainerNode {
                         coonPatch.east.estimateStepCount(scaleX, scaleY)),
                 Math.max(coonPatch.south.estimateStepCount(scaleX, scaleY),
                         coonPatch.west.estimateStepCount(scaleX, scaleY)));
-        if (scaleX * scaleY >= 1) {
-            depth = Math.max(SCALED_MIN_DEPTH, depth);
-        }
-        renderPath(g, coonPatch, depth);
+        renderPath(g, coonPatch, Math.min(MAX_DEPTH, depth));
     }
 
     private void renderPath(@NotNull Graphics2D g, @NotNull CoonPatch patch, int depth) {
