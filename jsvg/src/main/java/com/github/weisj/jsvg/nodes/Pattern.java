@@ -46,6 +46,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.TransformedPaint;
 
 @ElementCategories(Category.Container)
 @PermittedContent(
@@ -192,8 +193,9 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         renderWithSize(size, view, aspectRation, patternContext, imgGraphics);
         imgGraphics.dispose();
 
-        // Todo: patternTransform
-
-        return new TexturePaint(img, patternBounds);
+        // Fixme: When patternTransform != null antialiasing is broken
+        return patternTransform != null
+                ? new TransformedPaint(new TexturePaint(img, patternBounds), patternTransform)
+                : new TexturePaint(img, patternBounds);
     }
 }
