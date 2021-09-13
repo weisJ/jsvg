@@ -23,6 +23,8 @@ package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.Path2D;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Finishes a path
  *
@@ -32,7 +34,7 @@ import java.awt.geom.Path2D;
 public class Terminal extends PathCommand {
 
     @Override
-    public void appendPath(Path2D path, BuildHistory hist) {
+    public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
         path.closePath();
         hist.setLastPoint(hist.startPoint.x, hist.startPoint.y);
         hist.setLastKnot(hist.startPoint.x, hist.startPoint.y);

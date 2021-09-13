@@ -23,6 +23,8 @@ package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.Path2D;
 
+import org.jetbrains.annotations.NotNull;
+
 public abstract class PathCommand {
 
     public boolean isRelative = false;
@@ -33,7 +35,7 @@ public abstract class PathCommand {
         this.isRelative = isRelative;
     }
 
-    abstract public void appendPath(Path2D path, BuildHistory hist);
+    abstract public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist);
 
     abstract public int getInnerNodes();
 }

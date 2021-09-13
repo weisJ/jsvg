@@ -26,6 +26,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * This is a little used SVG function, as most editors will save curves as
  * Beziers.  To reduce the need to rely on the Batik library, this functionality
@@ -61,7 +63,7 @@ class Arc extends PathCommand {
     }
 
     @Override
-    public void appendPath(Path2D path, BuildHistory hist) {
+    public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
         float xOff = isRelative ? hist.lastPoint.x : 0f;
         float yOff = isRelative ? hist.lastPoint.y : 0f;
 
@@ -104,7 +106,7 @@ class Arc extends PathCommand {
      * @param x0 - The absolute x coordinate of the initial point of the arc.
      * @param y0 - The absolute y coordinate of the initial point of the arc.
      */
-    private void arcTo(Path2D path, float rx, float ry,
+    private void arcTo(@NotNull Path2D path, float rx, float ry,
             float angle,
             boolean largeArcFlag,
             boolean sweepFlag,
@@ -151,7 +153,7 @@ class Arc extends PathCommand {
      * @return arc shape
      *
      */
-    private static Arc2D computeRawArc(
+    private static @NotNull Arc2D computeRawArc(
             double x0, double y0,
             double rx, double ry,
             double angle,

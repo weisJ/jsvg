@@ -23,6 +23,8 @@ package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.Path2D;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Mark McKay
  * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
@@ -49,7 +51,7 @@ class Quadratic extends PathCommand {
     }
 
     @Override
-    public void appendPath(Path2D path, BuildHistory hist) {
+    public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
         float xOff = isRelative ? hist.lastPoint.x : 0f;
         float yOff = isRelative ? hist.lastPoint.y : 0f;
 
