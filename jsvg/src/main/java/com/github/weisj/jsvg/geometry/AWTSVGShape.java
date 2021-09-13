@@ -31,18 +31,18 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public class AWTSVGShape implements MeasurableShape {
-    public static final SVGShape EMPTY = new AWTSVGShape(new Rectangle(), 0f);
-    private final @NotNull Shape shape;
+public class AWTSVGShape<T extends Shape> implements MeasurableShape {
+    public static final SVGShape EMPTY = new AWTSVGShape<>(new Rectangle(), 0f);
+    protected final @NotNull T shape;
     private Rectangle2D bounds;
 
     private double pathLength;
 
-    public AWTSVGShape(@NotNull Shape shape) {
+    public AWTSVGShape(@NotNull T shape) {
         this(shape, Double.NaN);
     }
 
-    private AWTSVGShape(@NotNull Shape shape, double pathLength) {
+    private AWTSVGShape(@NotNull T shape, double pathLength) {
         this.shape = shape;
         this.pathLength = pathLength;
     }

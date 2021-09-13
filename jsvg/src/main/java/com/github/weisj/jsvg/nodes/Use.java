@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
@@ -60,6 +61,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     private PaintContext paintContext;
     private FontRenderContext fontRenderContext;
     private AttributeFontSpec fontSpec;
+    private FillRule fillRule;
 
     @Override
     public final @NotNull String tagName() {
@@ -90,6 +92,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         paintContext = PaintContext.parse(attributeNode);
         fontRenderContext = FontRenderContext.parse(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
+        fillRule = parseFillRule(attributeNode);
     }
 
     @Override
@@ -112,6 +115,11 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     @Override
     public @NotNull AttributeFontSpec fontSpec() {
         return fontSpec;
+    }
+
+    @Override
+    public @NotNull FillRule fillRule() {
+        return fillRule;
     }
 
     @Override

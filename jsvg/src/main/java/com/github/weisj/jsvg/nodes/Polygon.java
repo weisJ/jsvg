@@ -37,6 +37,8 @@ public final class Polygon extends AbstractPolyShape {
         return TAG;
     }
 
+
+
     @Override
     protected boolean doClose() {
         return true;

@@ -21,10 +21,20 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.FillRule;
+
 /**
  * Informs the renderer that an element provides styling information which can be inherited by its children.
- *
- * Umbrella interface for all available contexts.
  */
-public interface HasContext extends HasPaintContext, HasFontContext, HasFontRenderContext, HasFillRule {
+public interface HasFillRule {
+
+    @NotNull
+    FillRule fillRule();
+
+    default @NotNull FillRule parseFillRule(@NotNull AttributeNode attributeNode) {
+        return attributeNode.getEnum("fill-rule", FillRule.Inherit);
+    }
 }

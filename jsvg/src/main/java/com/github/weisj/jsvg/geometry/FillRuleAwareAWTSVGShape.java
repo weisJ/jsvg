@@ -19,12 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.prototype;
+package com.github.weisj.jsvg.geometry;
 
-/**
- * Informs the renderer that an element provides styling information which can be inherited by its children.
- *
- * Umbrella interface for all available contexts.
- */
-public interface HasContext extends HasPaintContext, HasFontContext, HasFontRenderContext, HasFillRule {
+
+import java.awt.*;
+import java.awt.geom.Path2D;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.renderer.RenderContext;
+
+public class FillRuleAwareAWTSVGShape extends AWTSVGShape<Path2D> {
+
+    public FillRuleAwareAWTSVGShape(@NotNull Path2D shape) {
+        super(shape);
+    }
+
+    @Override
+    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+        shape.setWindingRule(context.fillRule().awtWindingRule);
+        return super.shape(context, validate);
+    }
 }

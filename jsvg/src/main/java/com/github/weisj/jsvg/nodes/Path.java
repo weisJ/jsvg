@@ -27,9 +27,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.attributes.Inherit;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.nodes.prototype.HasFillRule;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -37,8 +37,10 @@ import com.github.weisj.jsvg.util.PathUtil;
 
 @ElementCategories({Category.Graphic, Category.Shape})
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})
-public final class Path extends ShapeNode {
+public final class Path extends ShapeNode implements HasFillRule {
     public static final String TAG = "path";
+
+    private FillRule fillRule;
 
     @Override
     public final @NotNull String tagName() {
@@ -46,10 +48,15 @@ public final class Path extends ShapeNode {
     }
 
     @Override
+    public @NotNull FillRule fillRule() {
+        return fillRule;
+    }
+
+    @Override
     protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
-        FillRule fillRule = FillRule.parse(attributeNode.getValue("fill-rule", Inherit.Yes));
+        fillRule = parseFillRule(attributeNode);
         String pathValue = attributeNode.getValue("d");
-        if (pathValue == null) return new AWTSVGShape(new Rectangle());
+        if (pathValue == null) return new AWTSVGShape<>(new Rectangle());
         return PathUtil.parseFromPathData(pathValue, fillRule);
     }
 

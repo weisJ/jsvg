@@ -26,6 +26,7 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -111,21 +112,23 @@ public final class NodeRenderer {
         @Nullable Mutator<PaintContext> paintContext = null;
         @Nullable Mutator<MeasurableFontSpec> fontSpec = null;
         @Nullable FontRenderContext fontRenderContext = null;
+        @Nullable FillRule fillRule = null;
 
         if (node instanceof HasPaintContext) paintContext = ((HasPaintContext) node).paintContext();
         if (node instanceof HasFontContext) fontSpec = ((HasFontContext) node).fontSpec();
         if (node instanceof HasFontRenderContext) fontRenderContext = ((HasFontRenderContext) node).fontRenderContext();
+        if (node instanceof HasFillRule) fillRule = ((HasFillRule) node).fillRule();
 
         @Nullable ContextElementAttributes contextElementAttributes = null;
         if (instantiator != null) contextElementAttributes = instantiator.createContextAttributes(context);
 
-        return context.derive(paintContext, fontSpec, null, fontRenderContext, contextElementAttributes);
+        return context.derive(paintContext, fontSpec, null, fontRenderContext, fillRule, contextElementAttributes);
     }
 
     public static @NotNull RenderContext setupInnerViewRenderContext(@NotNull ViewBox viewBox,
             @NotNull RenderContext context, boolean inheritAttributes) {
         if (inheritAttributes) {
-            return context.derive(null, null, viewBox, null, null);
+            return context.derive(null, null, viewBox, null, null, null);
         } else {
             MeasureContext newMeasure = context.measureContext().derive(viewBox,
                     Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, FontRenderContext.createDefault());
@@ -134,6 +137,7 @@ public final class NodeRenderer {
                     PaintContext.createDefault(),
                     newMeasure,
                     MeasurableFontSpec.createDefault(),
+                    context.fillRule(),
                     context.contextElementAttributes());
         }
     }

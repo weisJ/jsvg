@@ -26,7 +26,7 @@ import java.awt.geom.GeneralPath;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.geometry.AWTSVGShape;
+import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.path.BuildHistory;
 import com.github.weisj.jsvg.geometry.path.PathCommand;
@@ -50,6 +50,6 @@ public final class PathUtil {
             pathCommand.appendPath(path, hist);
         }
 
-        return new AWTSVGShape(path);
+        return new FillRuleAwareAWTSVGShape(path);
     }
 }

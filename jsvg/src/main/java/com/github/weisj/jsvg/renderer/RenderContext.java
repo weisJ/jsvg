@@ -28,6 +28,7 @@ import javax.swing.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
@@ -44,6 +45,7 @@ public class RenderContext {
     private final @NotNull MeasureContext measureContext;
     private final @NotNull PaintContext paintContext;
     private final @NotNull MeasurableFontSpec fontSpec;
+    private final @NotNull FillRule fillRule;
 
     private final @Nullable ContextElementAttributes contextElementAttributes;
 
@@ -53,6 +55,7 @@ public class RenderContext {
                 PaintContext.createDefault(),
                 measureContext,
                 MeasurableFontSpec.createDefault(),
+                FillRule.Nonzero,
                 null);
     }
 
@@ -60,11 +63,13 @@ public class RenderContext {
             @NotNull PaintContext paintContext,
             @NotNull MeasureContext measureContext,
             @NotNull MeasurableFontSpec fontSpec,
+            @NotNull FillRule fillRule,
             @Nullable ContextElementAttributes contextElementAttributes) {
         this.targetComponent = targetComponent;
         this.paintContext = paintContext;
         this.measureContext = measureContext;
         this.fontSpec = fontSpec;
+        this.fillRule = fillRule;
         this.contextElementAttributes = contextElementAttributes;
     }
 
@@ -72,10 +77,11 @@ public class RenderContext {
     RenderContext derive(@Nullable Mutator<PaintContext> context,
             @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
-            @Nullable ContextElementAttributes contextAttributes) {
+            @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes) {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
+        FillRule newFillRule = fillRule != null && fillRule != FillRule.Inherit ? fillRule : this.fillRule;
 
         if (context != null) newPaintContext = context.mutate(paintContext);
         if (attributeFontSpec != null) newFontSpec = attributeFontSpec.mutate(newFontSpec);
@@ -87,7 +93,7 @@ public class RenderContext {
         float ex = SVGFont.exFromEm(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex, frc);
         return new RenderContext(targetComponent, newPaintContext, newMeasureContext, newFontSpec,
-                newContextAttributes);
+                newFillRule, newContextAttributes);
     }
 
     public @NotNull StrokeContext strokeContext() {
@@ -108,6 +114,10 @@ public class RenderContext {
 
     public @NotNull MeasureContext measureContext() {
         return measureContext;
+    }
+
+    public @NotNull FillRule fillRule() {
+        return fillRule;
     }
 
     public @NotNull SVGPaint strokePaint() {

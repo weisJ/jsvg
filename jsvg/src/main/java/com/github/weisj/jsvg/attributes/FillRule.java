@@ -40,16 +40,12 @@ public enum FillRule {
      * that point to infinity in any direction and counting the number of path segments from the given
      * shape that the ray crosses. If this number is odd, the point is inside; if even, the point is outside.
      */
-    EvenOdd(Path2D.WIND_EVEN_ODD);
+    EvenOdd(Path2D.WIND_EVEN_ODD),
+    Inherit(-1);
 
     public final int awtWindingRule;
 
     FillRule(int awtWindingRule) {
         this.awtWindingRule = awtWindingRule;
-    }
-
-    public static FillRule parse(String value) {
-        if ("evenodd".equals(value)) return EvenOdd;
-        return Nonzero;
     }
 }

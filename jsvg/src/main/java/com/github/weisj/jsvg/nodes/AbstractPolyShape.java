@@ -23,31 +23,40 @@ package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.attributes.Inherit;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
+import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.nodes.prototype.HasFillRule;
 
-public abstract class AbstractPolyShape extends ShapeNode {
+public abstract class AbstractPolyShape extends ShapeNode implements HasFillRule {
+
+    private FillRule fillRule;
+
+    @Override
+    public @NotNull FillRule fillRule() {
+        return fillRule;
+    }
+
     @Override
     protected final @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
-        // Todo: fill-rule should be in RenderContext
-        FillRule fillRule = FillRule.parse(attributeNode.getValue("fill-rule", Inherit.Yes));
+        fillRule = parseFillRule(attributeNode);
         float[] points = attributeNode.getFloatList("points");
         if (points.length > 0) {
-            GeneralPath path = new GeneralPath(fillRule.awtWindingRule, points.length / 2);
+            GeneralPath path = new GeneralPath(Path2D.WIND_EVEN_ODD, points.length / 2);
             path.moveTo(points[0], points[1]);
             for (int i = 2; i < points.length; i += 2) {
                 path.lineTo(points[i], points[i + 1]);
             }
             if (doClose()) path.closePath();
-            return new AWTSVGShape(path);
+            return new FillRuleAwareAWTSVGShape(path);
         } else {
-            return new AWTSVGShape(new Rectangle());
+            return new AWTSVGShape<>(new Rectangle());
         }
     }
 

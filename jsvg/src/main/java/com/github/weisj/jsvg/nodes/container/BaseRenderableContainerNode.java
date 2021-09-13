@@ -25,6 +25,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.nodes.prototype.HasContext;
@@ -39,6 +40,7 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
     private PaintContext paintContext;
     private FontRenderContext fontRenderContext;
     private AttributeFontSpec fontSpec;
+    private FillRule fillRule;
 
     @Override
     @MustBeInvokedByOverriders
@@ -48,6 +50,7 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
         paintContext = PaintContext.parse(attributeNode);
         fontRenderContext = FontRenderContext.parse(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
+        fillRule = parseFillRule(attributeNode);
     }
 
     @Override
@@ -68,5 +71,10 @@ public abstract class BaseRenderableContainerNode<E> extends BaseContainerNode<E
     @Override
     public final @NotNull AttributeFontSpec fontSpec() {
         return fontSpec;
+    }
+
+    @Override
+    public final @NotNull FillRule fillRule() {
+        return fillRule;
     }
 }

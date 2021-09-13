@@ -1,0 +1,19 @@
+<svg viewBox="-10 -10 220 120" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <polygon id="star" stroke="red"
+                 points="50,0 21,90 98,35 2,35 79,90"/>
+        <polygon id="star2" stroke="red"
+                 points="150,0 121,90 198,35 102,35 179,90"/>
+    </defs>
+
+    <!-- Default value for fill-rule -->
+    <use xlink:href="#star" fill-rule="nonzero"/>
+
+    <!--
+    The center of the shape has two
+    path segments (shown by the red stroke)
+    between it and infinity. It is therefore
+    considered outside the shape, and not filled.
+    -->
+    <use xlink:href="#star2" fill-rule="evenodd"/>
+</svg>
