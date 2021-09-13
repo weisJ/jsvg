@@ -22,7 +22,7 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -153,7 +153,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
     }
 
     @Override
-    public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull GeneralPath textShape,
+    public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull Path2D textShape,
             @NotNull RenderContext context) {
         SVGFont font = context.font();
         GlyphCursor localCursor = createLocalCursor(context, cursor);

@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.geometry.path;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 
 /**
  * @author Mark McKay
@@ -43,7 +43,7 @@ class CubicSmooth extends PathCommand {
     }
 
     @Override
-    public void appendPath(GeneralPath path, BuildHistory hist) {
+    public void appendPath(Path2D path, BuildHistory hist) {
         float xOff = isRelative ? hist.lastPoint.x : 0f;
         float yOff = isRelative ? hist.lastPoint.y : 0f;
 

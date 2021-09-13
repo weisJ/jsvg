@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -83,7 +83,7 @@ final class GlyphRenderer {
                 ? frc.letterSpacing.resolveLength(measure)
                 : 0f;
 
-        GeneralPath glyphPath = new GeneralPath();
+        Path2D glyphPath = new Path2D.Float();
 
         for (char codepoint : segment.codepoints()) {
             Glyph glyph = font.codepointGlyph(codepoint);

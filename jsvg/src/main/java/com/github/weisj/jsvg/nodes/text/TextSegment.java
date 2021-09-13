@@ -22,7 +22,7 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +37,6 @@ interface TextSegment {
 
         void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g);
 
-        void appendTextShape(@NotNull GlyphCursor cursor, @NotNull GeneralPath textShape,
-                @NotNull RenderContext context);
+        void appendTextShape(@NotNull GlyphCursor cursor, @NotNull Path2D textShape, @NotNull RenderContext context);
     }
 }

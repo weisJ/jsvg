@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.util;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -43,7 +43,7 @@ public final class PathUtil {
             nodeCount += pathCommand.getInnerNodes();
         }
 
-        GeneralPath path = new GeneralPath(fillRule.awtWindingRule, nodeCount);
+        Path2D path = new Path2D.Float(fillRule.awtWindingRule, nodeCount);
         BuildHistory hist = new BuildHistory();
 
         for (PathCommand pathCommand : pathCommands) {

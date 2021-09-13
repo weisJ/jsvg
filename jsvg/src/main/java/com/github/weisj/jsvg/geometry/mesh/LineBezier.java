@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.geometry.mesh;
 
 import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +37,7 @@ class LineBezier extends Bezier {
     }
 
     @Override
-    public void appendTo(@NotNull GeneralPath p) {
+    public void appendTo(@NotNull Path2D p) {
         p.lineTo(d.x, d.y);
     }
 

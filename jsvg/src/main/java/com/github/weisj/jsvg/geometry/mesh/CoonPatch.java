@@ -25,7 +25,6 @@ import static com.github.weisj.jsvg.geometry.mesh.MeshUtil.p;
 import static com.github.weisj.jsvg.geometry.util.GeometryUtil.midPoint;
 
 import java.awt.*;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
@@ -57,7 +56,7 @@ public class CoonPatch {
     }
 
     public @NotNull Shape toShape() {
-        GeneralPath p = new GeneralPath(Path2D.WIND_EVEN_ODD);
+        Path2D p = new Path2D.Float(Path2D.WIND_EVEN_ODD);
         p.moveTo(north.a.x, north.a.y);
         north.appendTo(p);
         east.appendTo(p);

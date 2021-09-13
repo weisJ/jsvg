@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.geometry.path;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 
 /**
  * This is a little used SVG function, as most editors will save curves as
@@ -60,9 +60,8 @@ class Arc extends PathCommand {
         this.y = y;
     }
 
-    // public void appendPath(ExtendedGeneralPath path, BuildHistory hist)
     @Override
-    public void appendPath(GeneralPath path, BuildHistory hist) {
+    public void appendPath(Path2D path, BuildHistory hist) {
         float xOff = isRelative ? hist.lastPoint.x : 0f;
         float yOff = isRelative ? hist.lastPoint.y : 0f;
 
@@ -105,7 +104,7 @@ class Arc extends PathCommand {
      * @param x0 - The absolute x coordinate of the initial point of the arc.
      * @param y0 - The absolute y coordinate of the initial point of the arc.
      */
-    private void arcTo(GeneralPath path, float rx, float ry,
+    private void arcTo(Path2D path, float rx, float ry,
             float angle,
             boolean largeArcFlag,
             boolean sweepFlag,

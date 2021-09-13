@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +47,7 @@ public abstract class AbstractPolyShape extends ShapeNode implements HasFillRule
         fillRule = parseFillRule(attributeNode);
         float[] points = attributeNode.getFloatList("points");
         if (points.length > 0) {
-            GeneralPath path = new GeneralPath(Path2D.WIND_EVEN_ODD, points.length / 2);
+            Path2D path = new Path2D.Float(Path2D.WIND_EVEN_ODD, points.length / 2);
             path.moveTo(points[0], points[1]);
             for (int i = 2; i < points.length; i += 2) {
                 path.lineTo(points[i], points[i + 1]);

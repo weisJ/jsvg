@@ -22,7 +22,7 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
@@ -221,7 +221,7 @@ public final class ShapeRenderer {
             @NotNull Marker marker, @Radian float rotation) {
         FloatSize size = marker.size(context);
 
-        GeneralPath p = new GeneralPath();
+        Path2D p = new Path2D.Float();
         p.moveTo(0, size.height / 2f);
         p.lineTo(size.width, size.height / 2f);
         p.moveTo(0.8 * size.width, 0.35f * size.height);

@@ -25,7 +25,7 @@ import static com.github.weisj.jsvg.geometry.mesh.MeshUtil.p;
 import static com.github.weisj.jsvg.geometry.util.GeometryUtil.distanceSquared;
 import static com.github.weisj.jsvg.geometry.util.GeometryUtil.midPoint;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +44,7 @@ public class Bezier {
         this.d = d;
     }
 
-    public void appendTo(@NotNull GeneralPath p) {
+    public void appendTo(@NotNull Path2D p) {
         p.curveTo(b.x, b.y, c.x, c.y, d.x, d.y);
     }
 

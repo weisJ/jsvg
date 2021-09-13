@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.geometry.path;
 
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 
 /**
  * Finishes a path
@@ -32,7 +32,7 @@ import java.awt.geom.GeneralPath;
 public class Terminal extends PathCommand {
 
     @Override
-    public void appendPath(GeneralPath path, BuildHistory hist) {
+    public void appendPath(Path2D path, BuildHistory hist) {
         path.closePath();
         hist.setLastPoint(hist.startPoint.x, hist.startPoint.y);
         hist.setLastKnot(hist.startPoint.x, hist.startPoint.y);

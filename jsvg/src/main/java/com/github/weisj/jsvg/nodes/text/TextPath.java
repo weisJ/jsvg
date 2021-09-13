@@ -22,8 +22,8 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 
 import org.jetbrains.annotations.NotNull;
@@ -98,7 +98,7 @@ public final class TextPath extends TextContainer {
 
     @Override
     public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
-        GeneralPath textPath = new GeneralPath();
+        Path2D textPath = new Path2D.Float();
         appendTextShape(createCursor(context), textPath, context);
         return textPath;
     }

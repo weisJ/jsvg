@@ -22,7 +22,7 @@
 package com.github.weisj.jsvg.nodes.prototype;
 
 import java.awt.*;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,7 @@ public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
 
     @Override
     default @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
-        GeneralPath shape = new GeneralPath();
+        Path2D shape = new Path2D.Float();
         for (E child : children()) {
             if (!(child instanceof HasShape)) continue;
             Shape childShape = ((HasShape) child).shape().shape(context, validate);
