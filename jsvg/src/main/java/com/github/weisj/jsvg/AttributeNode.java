@@ -111,19 +111,7 @@ public class AttributeNode {
     }
 
     public @Nullable String getValue(@NotNull String key) {
-        return getValue(key, Inherit.No);
-    }
-
-    public @Nullable String getValue(@NotNull String key, Inherit inherited) {
-        // Search through hierarchy if any parent declares the attribute.
-        AttributeNode node = this;
-        String value = null;
-        int depth = 0;
-        while (value == null && node != null && depth <= inherited.maxDepth()) {
-            value = node.attributes.get(key);
-            node = node.parent;
-            depth++;
-        }
+        String value = attributes.get(key);
         return value != null ? value.trim() : null;
     }
 
