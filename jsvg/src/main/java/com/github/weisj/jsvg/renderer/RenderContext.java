@@ -169,6 +169,7 @@ public class RenderContext {
                 ",\n  fontSpec=" + fontSpec +
                 ",\n  targetComponent=" + targetComponent +
                 ",\n  contextElementAttributes=" + contextElementAttributes +
+                ",\n fillRule=" + fillRule +
                 "\n}";
     }
 }
