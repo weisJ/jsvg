@@ -48,6 +48,7 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
 
     private Length cx;
     private Length cy;
+    private Length r;
     private Length fr;
     private Length fx;
     private Length fy;
@@ -61,6 +62,7 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
     protected void buildGradient(@NotNull AttributeNode attributeNode, @Nullable RadialGradient template) {
         cx = attributeNode.getLength("cx", template != null ? template.cx : Unit.PERCENTAGE.valueOf(50));
         cy = attributeNode.getLength("cy", template != null ? template.cy : Unit.PERCENTAGE.valueOf(50));
+        r = attributeNode.getLength("r", template != null ? template.r : Unit.PERCENTAGE.valueOf(50));
         fr = attributeNode.getLength("fr", template != null ? template.fr : Unit.PERCENTAGE.valueOf(0));
         fx = attributeNode.getLength("fx", template != null ? template.fx : cx);
         fy = attributeNode.getLength("fy", template != null ? template.fy : cy);
@@ -69,10 +71,30 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
     @Override
     protected @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
             @Percentage float[] gradOffsets, @NotNull Color[] gradColors) {
-        Point2D.Float pt1 = new Point2D.Float(cx.resolveWidth(measure), cy.resolveHeight(measure));
-        Point2D.Float pt2 = new Point2D.Float(fx.resolveWidth(measure), fy.resolveHeight(measure));
-        return new RadialGradientPaint(pt1, fr.resolveLength(measure), pt2,
-                gradOffsets, gradColors, spreadMethod.cycleMethod(),
+        Point2D.Float center = new Point2D.Float(cx.resolveWidth(measure), cy.resolveHeight(measure));
+        Point2D.Float focusCenter = new Point2D.Float(fx.resolveWidth(measure), fy.resolveHeight(measure));
+        float[] offsets = gradOffsets;
+        Color[] offsetColors = gradColors;
+        float radius = r.resolveLength(measure);
+        float focusRadius = fr.resolveLength(measure);
+        // Todo: Do this once when building stops.
+        if (focusRadius > 0) {
+            float[] newOffsets = new float[offsets.length + 1];
+            System.arraycopy(offsets, 0, newOffsets, 1, offsets.length);
+            Color[] newColors = new Color[gradColors.length + 1];
+            System.arraycopy(offsetColors, 0, newColors, 1, gradColors.length);
+            offsetColors = newColors;
+            newColors[0] = gradColors[0];
+            offsets = newOffsets;
+            offsets[0] = Math.nextAfter(focusRadius / radius, Float.NEGATIVE_INFINITY);
+            float offset = focusRadius / radius;
+            float factor = 1 - offset;
+            for (int i = 1; i < offsets.length; i++) {
+                offsets[i] = offset + offsets[i] * factor;
+            }
+        }
+        return new RadialGradientPaint(center, radius, focusCenter,
+                offsets, offsetColors, spreadMethod.cycleMethod(),
                 MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(measure, bounds));
     }
 
@@ -83,6 +105,7 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
                 ", gradientTransform=" + gradientTransform +
                 ", cx=" + cx +
                 ", cy=" + cy +
+                ", r=" + r +
                 ", fr=" + fr +
                 ", fx=" + fx +
                 ", fy=" + fy +
