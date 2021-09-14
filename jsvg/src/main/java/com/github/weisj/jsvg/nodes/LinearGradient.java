@@ -72,7 +72,7 @@ public final class LinearGradient extends AbstractGradient<LinearGradient> {
         if (pt1.equals(pt2)) return gradColors[0];
 
         return new LinearGradientPaint(pt1, pt2, gradOffsets, gradColors, spreadMethod.cycleMethod(),
-                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(measure, bounds));
+                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
     }
 
     @Override

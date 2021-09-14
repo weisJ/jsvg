@@ -73,29 +73,32 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
             @Percentage float[] gradOffsets, @NotNull Color[] gradColors) {
         Point2D.Float center = new Point2D.Float(cx.resolveWidth(measure), cy.resolveHeight(measure));
         Point2D.Float focusCenter = new Point2D.Float(fx.resolveWidth(measure), fy.resolveHeight(measure));
-        float[] offsets = gradOffsets;
-        Color[] offsetColors = gradColors;
+
         float radius = r.resolveLength(measure);
         float focusRadius = fr.resolveLength(measure);
-        // Todo: Do this once when building stops.
+
+        float[] offsets = gradOffsets;
+        Color[] offsetColors = gradColors;
         if (focusRadius > 0) {
+            // Todo: This isn't entirely correct. The 0% offset should lie on the boundary of the circle, which
+            // is skewed the way we handle it currently.
             float[] newOffsets = new float[offsets.length + 1];
-            System.arraycopy(offsets, 0, newOffsets, 1, offsets.length);
+            newOffsets[0] = Math.nextAfter(focusRadius / radius, Float.NEGATIVE_INFINITY);
+            float offset = focusRadius / radius;
+            float factor = 1 - offset;
+            for (int i = 1; i < newOffsets.length; i++) {
+                newOffsets[i] = offset + offsets[i - 1] * factor;
+            }
+            offsets = newOffsets;
+
             Color[] newColors = new Color[gradColors.length + 1];
             System.arraycopy(offsetColors, 0, newColors, 1, gradColors.length);
             offsetColors = newColors;
             newColors[0] = gradColors[0];
-            offsets = newOffsets;
-            offsets[0] = Math.nextAfter(focusRadius / radius, Float.NEGATIVE_INFINITY);
-            float offset = focusRadius / radius;
-            float factor = 1 - offset;
-            for (int i = 1; i < offsets.length; i++) {
-                offsets[i] = offset + offsets[i] * factor;
-            }
         }
         return new RadialGradientPaint(center, radius, focusCenter,
                 offsets, offsetColors, spreadMethod.cycleMethod(),
-                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(measure, bounds));
+                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
     }
 
     @Override

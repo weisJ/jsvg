@@ -92,7 +92,7 @@ public final class PaintParser {
     }
 
     public static @Nullable SVGPaint parsePaint(String value) {
-        if ("none".equals(value)) return SVGPaint.NONE;
+        if ("none".equals(value) || "transparent".equals(value)) return SVGPaint.NONE;
         if ("currentcolor".equals(value)) return SVGPaint.CURRENT_COLOR;
         if ("context-fill".equals(value)) return SVGPaint.CONTEXT_FILL;
         if ("context-stroke".equals(value)) return SVGPaint.CONTEXT_STROKE;

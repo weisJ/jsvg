@@ -21,8 +21,33 @@
  */
 package com.github.weisj.jsvg.attributes;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+
 public enum UnitType {
     UserSpaceOnUse,
     @Default
-    ObjectBoundingBox
+    ObjectBoundingBox;
+
+    public @NotNull MeasureContext deriveMeasure(@NotNull MeasureContext measure) {
+        if (this == ObjectBoundingBox) {
+            return measure.derive(1, 1);
+        } else {
+            return measure;
+        }
+    }
+
+    public @NotNull AffineTransform viewTransform(@NotNull Rectangle2D bounds) {
+        if (this == ObjectBoundingBox) {
+            AffineTransform at = AffineTransform.getTranslateInstance(bounds.getX(), bounds.getY());
+            at.scale(bounds.getWidth(), bounds.getHeight());
+            return at;
+        } else {
+            return new AffineTransform();
+        }
+    }
 }

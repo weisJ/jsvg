@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 
 abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends ContainerNode implements SVGPaint {
     protected AffineTransform gradientTransform;
@@ -129,7 +130,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        g.setPaint(paintForBounds(measure, b));
+        GraphicsUtil.safelySetPaint(g, paintForBounds(measure, b));
         g.fill(shape);
     }
 
@@ -137,7 +138,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        g.setPaint(paintForBounds(measure, b));
+        GraphicsUtil.safelySetPaint(g, paintForBounds(measure, b));
         g.draw(shape);
     }
 
@@ -145,20 +146,14 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         Color[] gradColors = colors();
         if (gradColors.length == 0) return PaintParser.DEFAULT_COLOR;
         if (gradColors.length == 1) return gradColors[0];
-        return gradientForBounds(context, bounds, offsets(), gradColors);
+        return gradientForBounds(gradientUnits.deriveMeasure(context), bounds, offsets(), gradColors);
     }
 
     protected abstract @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
             @Percentage float[] gradOffsets, @NotNull Color[] gradColors);
 
-    protected @NotNull AffineTransform computeViewTransform(@NotNull MeasureContext measure,
-            @NotNull Rectangle2D bounds) {
-        AffineTransform viewTransform = new AffineTransform();
-
-        if (gradientUnits == UnitType.ObjectBoundingBox) {
-            viewTransform.setToTranslation(bounds.getX(), bounds.getY());
-            viewTransform.scale(bounds.getWidth() / measure.viewWidth(), bounds.getHeight() / measure.viewHeight());
-        }
+    protected @NotNull AffineTransform computeViewTransform(@NotNull Rectangle2D bounds) {
+        AffineTransform viewTransform = gradientUnits.viewTransform(bounds);
         if (gradientTransform != null) viewTransform.concatenate(gradientTransform);
         return viewTransform;
     }
