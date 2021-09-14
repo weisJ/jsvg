@@ -50,6 +50,8 @@ For supported elements most of the attributes which apply to them are implemente
 
 
 ## Shape and container elements
+|Element|Status|
+|-------|------|
 |a|:white_check_mark:|
 |circle|:white_check_mark:|
 |clipPath|:white_check_mark:|
@@ -71,6 +73,8 @@ For supported elements most of the attributes which apply to them are implemente
 |view|(:white_check_mark:)|
 
 ## Paint server elements
+|Element|Status|
+|-------|------|
 |linearGradient|:white_check_mark:|
 |:microscope:meshgradient|:white_check_mark:|
 |:microscope:meshrow|:white_check_mark:|
