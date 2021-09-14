@@ -214,12 +214,24 @@ public final class AttributeParser {
                     tx.translate(values[0], values[1]);
                 }
                 break;
+            case "translatex":
+                tx.translate(values[0], 0);
+                break;
+            case "translatey":
+                tx.translate(0, values[0]);
+                break;
             case "scale":
                 if (values.length == 1) {
                     tx.scale(values[0], values[0]);
                 } else {
                     tx.scale(values[0], values[1]);
                 }
+                break;
+            case "scalex":
+                tx.scale(values[0], 1);
+                break;
+            case "scaley":
+                tx.scale(1, values[0]);
                 break;
             case "rotate":
                 if (values.length > 2) {
