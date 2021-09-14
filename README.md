@@ -108,7 +108,7 @@ For supported elements most of the attributes which apply to them are implemente
 |:microscope:meshrow|:white_check_mark:|
 |:microscope:meshpatch|:white_check_mark:|
 |marker|:white_check_mark:|
-|mask|:x:|
+|mask|:white_check_mark:|
 |metadata|(:white_check_mark:)|
 |:warning:missing-glyph|:x:|
 |mpath|:x:|
