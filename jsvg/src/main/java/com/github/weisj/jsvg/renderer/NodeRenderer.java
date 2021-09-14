@@ -32,7 +32,9 @@ import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.*;
+import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.*;
 
 public final class NodeRenderer {
@@ -81,6 +83,7 @@ public final class NodeRenderer {
         }
 
         if (renderable instanceof HasClip) {
+            Rectangle2D elementBounds = null;
             // Todo: When masks are implemented and we decide to paint to an off-screen buffer
             // we can handle clip shapes as if they were masks (with 1/0 values).
             ClipPath childClip = ((HasClip) renderable).clipPath();
@@ -88,8 +91,9 @@ public final class NodeRenderer {
             if (childClip != null) {
                 // Elements with an invalid clip shouldn't be painted
                 if (!childClip.isValid()) return null;
-                // Todo: Is this using the correct measuring context?
-                Shape childClipShape = childClip.shape(context);
+                elementBounds = elementBounds(renderable, childContext);
+
+                Shape childClipShape = childClip.clipShape(childContext, elementBounds);
                 if (CLIP_DEBUG) {
                     Paint paint = childGraphics.getPaint();
                     childGraphics.setPaint(Color.MAGENTA);
@@ -102,18 +106,23 @@ public final class NodeRenderer {
             Mask mask = ((HasClip) renderable).mask();
             if (mask != null) {
                 // Todo: Proper object bounding box
-                Rectangle2D elementBounds;
-                if (renderable instanceof HasShape) {
-                    elementBounds = ((HasShape) renderable).shape().bounds(childContext, true);
-                } else {
-                    MeasureContext measureContext = childContext.measureContext();
-                    elementBounds = new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());
-                }
+                if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
                 GraphicsUtil.safelySetPaint(childGraphics, mask.createMaskPaint(g, childContext, elementBounds));
             }
         }
 
         return new Info(renderable, childContext, childGraphics);
+    }
+
+    private static @NotNull Rectangle2D elementBounds(@NotNull Object node, @NotNull RenderContext childContext) {
+        Rectangle2D elementBounds;
+        if (node instanceof HasShape) {
+            elementBounds = ((HasShape) node).shape().bounds(childContext, true);
+        } else {
+            MeasureContext measureContext = childContext.measureContext();
+            elementBounds = new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());
+        }
+        return elementBounds;
     }
 
 

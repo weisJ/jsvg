@@ -21,16 +21,20 @@
  */
 package com.github.weisj.jsvg.nodes;
 
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.geometry.SVGShape;
+import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({/* None */})
 @PermittedContent(
@@ -40,6 +44,8 @@ import com.github.weisj.jsvg.nodes.text.Text;
 public final class ClipPath extends ContainerNode implements ShapedContainer<SVGNode> {
     public static final String TAG = "clippath";
     private boolean isValid;
+
+    private UnitType clipPathUnits;
 
     @Override
     public final @NotNull String tagName() {
@@ -54,6 +60,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         isValid = checkIsValid();
+        clipPathUnits = attributeNode.getEnum("clipPathUnits", UnitType.UserSpaceOnUse);
     }
 
     private boolean checkIsValid() {
@@ -68,10 +75,14 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         return true;
     }
 
-    @Override
-    public @NotNull SVGShape shape() {
+    public @NotNull Shape clipShape(@NotNull RenderContext context, @NotNull Rectangle2D elementBounds) {
         // Todo: Handle bounding-box stuff as well (i.e. combined stroke etc.)
         // We might need to pass the render context here as well.
-        return ShapedContainer.super.shape();
+        Shape shape = ShapedContainer.super.shape().shape(context);
+        if (clipPathUnits == UnitType.ObjectBoundingBox) {
+            return clipPathUnits.viewTransform(elementBounds).createTransformedShape(shape);
+        } else {
+            return shape;
+        }
     }
 }
