@@ -26,6 +26,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public enum UnitType {
@@ -49,5 +50,22 @@ public enum UnitType {
         } else {
             return new AffineTransform();
         }
+    }
+
+    public @NotNull Rectangle2D.Double computeViewBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
+            @NotNull Length x, @NotNull Length y, @NotNull Length width, @NotNull Length height) {
+        MeasureContext patternMeasure = deriveMeasure(measure);
+        Rectangle2D.Double viewBounds = new Rectangle2D.Double(
+                x.resolveWidth(patternMeasure), y.resolveHeight(patternMeasure),
+                width.resolveWidth(patternMeasure), height.resolveHeight(patternMeasure));
+
+        if (this == UnitType.ObjectBoundingBox) {
+            viewBounds.x *= bounds.getWidth();
+            viewBounds.y *= bounds.getHeight();
+            viewBounds.width *= bounds.getWidth();
+            viewBounds.height *= bounds.getHeight();
+        }
+
+        return viewBounds;
     }
 }

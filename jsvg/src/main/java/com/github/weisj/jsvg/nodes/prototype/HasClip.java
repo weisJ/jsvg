@@ -24,9 +24,13 @@ package com.github.weisj.jsvg.nodes.prototype;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
 
 public interface HasClip {
 
     @Nullable
     ClipPath clipPath();
+
+    @Nullable
+    Mask mask();
 }

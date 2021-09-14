@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 
 public interface SimplePaintSVGPaint extends SVGPaint {
 
@@ -37,14 +38,14 @@ public interface SimplePaintSVGPaint extends SVGPaint {
     @Override
     default void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        g.setPaint(paint());
+        GraphicsUtil.safelySetPaint(g, paint());
         g.fill(shape);
     }
 
     @Override
     default void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        g.setPaint(paint());
+        GraphicsUtil.safelySetPaint(g, paint());
         g.draw(shape);
     }
 }

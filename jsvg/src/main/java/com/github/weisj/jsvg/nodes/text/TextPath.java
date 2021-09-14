@@ -117,7 +117,11 @@ public final class TextPath extends TextContainer {
     @Override
     public void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
         super.renderSegment(cursor, context, g);
-        if (DEBUG) paintDebugPath(context, g);
+        if (DEBUG) {
+            Graphics2D debugGraphics = (Graphics2D) g.create();
+            paintDebugPath(context, debugGraphics);
+            debugGraphics.dispose();
+        }
     }
 
     private void paintDebugPath(@NotNull RenderContext context, @NotNull Graphics2D g) {

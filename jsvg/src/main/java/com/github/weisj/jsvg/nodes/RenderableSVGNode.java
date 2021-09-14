@@ -44,10 +44,16 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
     private Length transformOriginY;
 
     private @Nullable ClipPath clipPath;
+    private @Nullable Mask mask;
 
     @Override
     public @Nullable ClipPath clipPath() {
         return clipPath;
+    }
+
+    @Override
+    public @Nullable Mask mask() {
+        return mask;
     }
 
     @Override
@@ -73,6 +79,7 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
         super.build(attributeNode);
         isVisible = parseIsVisible(attributeNode);
         clipPath = attributeNode.getClipPath();
+        mask = attributeNode.getMask();
         transform = attributeNode.parseTransform("transform");
 
         Length[] transformOrigin = attributeNode.getLengthList("transform-origin");

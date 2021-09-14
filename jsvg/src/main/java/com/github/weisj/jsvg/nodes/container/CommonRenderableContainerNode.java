@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
@@ -44,6 +45,7 @@ public abstract class CommonRenderableContainerNode<E> extends BaseRenderableCon
     private Length transformOriginY;
 
     private @Nullable ClipPath clipPath;
+    private @Nullable Mask mask;
 
     @Override
     @MustBeInvokedByOverriders
@@ -54,6 +56,7 @@ public abstract class CommonRenderableContainerNode<E> extends BaseRenderableCon
         transformOriginX = transformOrigin.length > 0 ? transformOrigin[0] : Length.ZERO;
         transformOriginY = transformOrigin.length > 1 ? transformOrigin[1] : Length.ZERO;
         clipPath = attributeNode.getClipPath();
+        mask = attributeNode.getMask();
     }
 
     @Override
@@ -71,5 +74,10 @@ public abstract class CommonRenderableContainerNode<E> extends BaseRenderableCon
     @Override
     public @Nullable ClipPath clipPath() {
         return clipPath;
+    }
+
+    @Override
+    public @Nullable Mask mask() {
+        return mask;
     }
 }

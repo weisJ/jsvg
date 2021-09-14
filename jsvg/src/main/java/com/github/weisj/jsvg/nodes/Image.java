@@ -42,6 +42,7 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.GraphicsReferencing})
@@ -110,7 +111,7 @@ public final class Image extends RenderableSVGNode {
             g.transform(imgTransform);
             Rectangle imgRect = new Rectangle(0, 0, imgWidth, imgHeight);
             // Painting using a TexturePaint allows for antialiased edges with a nontrivial transform
-            g.setPaint(new TexturePaint(img, imgRect));
+            GraphicsUtil.safelySetPaint(g, new TexturePaint(img, imgRect));
             g.fill(imgRect);
         }
     }

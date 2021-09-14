@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 
 @ElementCategories({ /* None */})
 @PermittedContent(
@@ -78,7 +79,7 @@ public final class MeshPatch extends ContainerNode {
                 * GeometryUtil.distanceSquared(weights.east, weights.west, scaleX, scaleY) < 0.000001) {
             float u = (weights.north.x + weights.east.x + weights.south.x + weights.west.x) / 4;
             float v = (weights.north.y + weights.east.y + weights.south.y + weights.west.y) / 4;
-            g.setColor(bilinearInterpolation(u, v));
+            GraphicsUtil.safelySetPaint(g, bilinearInterpolation(u, v));
             Shape s = patch.toShape();
             g.fill(s.getBounds2D());
         } else {

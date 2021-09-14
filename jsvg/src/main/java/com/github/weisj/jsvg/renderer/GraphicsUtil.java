@@ -19,31 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.renderer;
+
+import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.container.ContainerNode;
-import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
-import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.nodes.text.Text;
+public final class GraphicsUtil {
+    private GraphicsUtil() {}
 
-@ElementCategories({Category.Container, Category.Structural})
-@PermittedContent(
-    categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
-    /*
-     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
-     * <script>, <switch>
-     */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Mask.class, Marker.class, Pattern.class, Style.class,
-            Text.class, View.class}
-)
-public final class Defs extends ContainerNode {
-    public static final String TAG = "defs";
+    public static void safelySetPaint(@NotNull Graphics2D g, @NotNull Paint paint) {
+        g.setPaint(setupPaint(g.getPaint(), paint));
+    }
 
-    @Override
-    public final @NotNull String tagName() {
-        return TAG;
+    public static @NotNull Paint setupPaint(@NotNull Paint current, @NotNull Paint paint) {
+        if (current instanceof WrappingPaint) {
+            ((WrappingPaint) current).setPaint(paint);
+            return current;
+        }
+        return paint;
+    }
+
+    public interface WrappingPaint {
+        void setPaint(@NotNull Paint paint);
     }
 }

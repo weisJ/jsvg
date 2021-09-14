@@ -44,7 +44,7 @@ public class SVGViewer {
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("mesh/mesh2.svg");
+            iconBox.setSelectedItem("mask/mask3.svg");
 
             SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
             svgPanel.setPreferredSize(new Dimension(1000, 600));

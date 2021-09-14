@@ -28,6 +28,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.SVGShape;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
@@ -42,19 +43,32 @@ public interface ShapedContainer<E> extends Container<E>, HasShape, SVGShape {
         Path2D shape = new Path2D.Float();
         for (E child : children()) {
             if (!(child instanceof HasShape)) continue;
-            Shape childShape = ((HasShape) child).shape().shape(context, validate);
+            RenderContext childContext = NodeRenderer.setupRenderContext(child, context);
+            Shape childShape = ((HasShape) child).shape().shape(childContext, validate);
             shape.append(childShape, false);
+        }
+        if (this instanceof Transformable) {
+            return ((Transformable) this).transformShape(shape, context.measureContext());
         }
         return shape;
     }
 
     @Override
     default @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
-        Rectangle2D bounds = new Rectangle2D.Float();
+        Rectangle2D bounds = null;
         for (E child : children()) {
             if (!(child instanceof HasShape)) continue;
-            Rectangle2D childBounds = ((HasShape) child).shape().bounds(context, validate);
-            Rectangle2D.union(bounds, childBounds, bounds);
+            RenderContext childContext = NodeRenderer.setupRenderContext(child, context);
+            Rectangle2D childBounds = ((HasShape) child).shape().bounds(childContext, validate);
+            if (bounds == null) {
+                bounds = childBounds;
+            } else {
+                Rectangle2D.union(bounds, childBounds, bounds);
+            }
+        }
+        if (bounds == null) return new Rectangle2D.Float(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, 0, 0);
+        if (this instanceof Transformable) {
+            return ((Transformable) this).transformShape(bounds, context.measureContext()).getBounds2D();
         }
         return bounds;
     }

@@ -36,7 +36,7 @@ import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGDocument {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private final @NotNull SVG root;
 
     public SVGDocument(@NotNull SVG root) {
@@ -68,8 +68,10 @@ public class SVGDocument {
         root.applyTransform(g, initialMeasure);
 
         if (DEBUG) {
+            Paint paint = g.getPaint();
             g.setColor(Color.MAGENTA);
             g.draw(bounds);
+            g.setPaint(paint);
         }
 
         g.clip(bounds);

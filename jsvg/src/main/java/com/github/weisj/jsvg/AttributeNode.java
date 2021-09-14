@@ -23,6 +23,7 @@ package com.github.weisj.jsvg;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jetbrains.annotations.Contract;
@@ -35,6 +36,7 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -116,7 +118,9 @@ public class AttributeNode {
     }
 
     public @NotNull Color getColor(@NotNull String key) {
-        Color c = PaintParser.parseColor(getValue(key));
+        String value = getValue(key);
+        if (value == null) return PaintParser.DEFAULT_COLOR;
+        Color c = PaintParser.parseColor(value.toLowerCase(Locale.ENGLISH));
         return c != null ? c : PaintParser.DEFAULT_COLOR;
     }
 
@@ -188,6 +192,10 @@ public class AttributeNode {
 
     public @Nullable ClipPath getClipPath() {
         return getElementByUrl(ClipPath.class, getValue("clip-path"));
+    }
+
+    public @Nullable Mask getMask() {
+        return getElementByUrl(Mask.class, getValue("mask"));
     }
 
     public @Nullable AffineTransform parseTransform(@NotNull String key) {

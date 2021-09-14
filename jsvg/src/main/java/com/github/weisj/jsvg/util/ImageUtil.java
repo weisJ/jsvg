@@ -36,10 +36,15 @@ public final class ImageUtil {
             double height) {
         GraphicsConfiguration gc = g.getDeviceConfiguration();
         AffineTransform at = g.getTransform();
-        double scaleX = GeometryUtil.scaleXOfTransform(at);
-        double scaleY = GeometryUtil.scaleYOfTransform(at);
-        int dw = (int) Math.ceil(width * scaleX);
-        int dh = (int) Math.ceil(height * scaleY);
-        return gc.createCompatibleImage(dw, dh, Transparency.TRANSLUCENT);
+        return gc.createCompatibleImage(
+                (int) Math.ceil(GeometryUtil.scaleXOfTransform(at) * width),
+                (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), Transparency.TRANSLUCENT);
+    }
+
+    public static @NotNull BufferedImage createLuminosityBuffer(@NotNull Graphics2D g, double width, double height) {
+        AffineTransform at = g.getTransform();
+        return new BufferedImage(
+                (int) Math.ceil(GeometryUtil.scaleXOfTransform(at) * width),
+                (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), BufferedImage.TYPE_BYTE_GRAY);
     }
 }

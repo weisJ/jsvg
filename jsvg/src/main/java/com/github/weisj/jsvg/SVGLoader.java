@@ -66,6 +66,7 @@ public class SVGLoader {
         nodeMap.put(Line.TAG, Line::new);
         nodeMap.put(LinearGradient.TAG, LinearGradient::new);
         nodeMap.put(Marker.TAG, Marker::new);
+        nodeMap.put(Mask.TAG, Mask::new);
         nodeMap.put(MeshGradient.TAG, MeshGradient::new);
         nodeMap.put(MeshPatch.TAG, MeshPatch::new);
         nodeMap.put(MeshRow.TAG, MeshRow::new);

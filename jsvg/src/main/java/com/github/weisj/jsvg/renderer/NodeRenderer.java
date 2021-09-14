@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,8 +32,7 @@ import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.ClipPath;
-import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.*;
 import com.github.weisj.jsvg.nodes.prototype.*;
 
 public final class NodeRenderer {
@@ -76,7 +76,6 @@ public final class NodeRenderer {
 
         Graphics2D childGraphics = (Graphics2D) g.create();
 
-        // Transform elements on a non top-level <svg> have no effect.
         if (renderable instanceof Transformable) {
             ((Transformable) renderable).applyTransform(childGraphics, childContext.measureContext());
         }
@@ -92,10 +91,25 @@ public final class NodeRenderer {
                 // Todo: Is this using the correct measuring context?
                 Shape childClipShape = childClip.shape(context);
                 if (CLIP_DEBUG) {
-                    childGraphics.setColor(Color.MAGENTA);
+                    Paint paint = childGraphics.getPaint();
+                    childGraphics.setPaint(Color.MAGENTA);
                     childGraphics.draw(childClipShape);
+                    childGraphics.setPaint(paint);
                 }
                 childGraphics.clip(childClipShape);
+            }
+
+            Mask mask = ((HasClip) renderable).mask();
+            if (mask != null) {
+                // Todo: Proper object bounding box
+                Rectangle2D elementBounds;
+                if (renderable instanceof HasShape) {
+                    elementBounds = ((HasShape) renderable).shape().bounds(childContext, true);
+                } else {
+                    MeasureContext measureContext = childContext.measureContext();
+                    elementBounds = new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());
+                }
+                GraphicsUtil.safelySetPaint(childGraphics, mask.createMaskPaint(g, childContext, elementBounds));
             }
         }
 

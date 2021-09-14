@@ -41,7 +41,7 @@ public enum FillRule {
      * shape that the ray crosses. If this number is odd, the point is inside; if even, the point is outside.
      */
     EvenOdd(Path2D.WIND_EVEN_ODD),
-    Inherit(-1);
+    Inherit(Nonzero.awtWindingRule);
 
     public final int awtWindingRule;
 

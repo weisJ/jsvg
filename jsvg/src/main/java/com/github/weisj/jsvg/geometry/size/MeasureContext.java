@@ -54,6 +54,10 @@ public class MeasureContext {
         return fontRenderContext;
     }
 
+    public @NotNull MeasureContext derive(float viewWidth, float viewHeight) {
+        return new MeasureContext(viewWidth, viewHeight, em, ex, fontRenderContext);
+    }
+
     public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex,
             @Nullable FontRenderContext frc) {
         if (viewBox == null && Length.isUnspecified(em) && Length.isUnspecified(ex)) return this;

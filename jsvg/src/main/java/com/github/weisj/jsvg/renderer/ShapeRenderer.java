@@ -205,10 +205,11 @@ public final class ShapeRenderer {
         markerGraphics.translate(x, y);
 
         if (DEBUG_MARKERS) {
-            paintDebugMarkerAndRotate(context, markerGraphics, marker, rotation);
-        } else {
-            markerGraphics.rotate(rotation);
+            Graphics2D debugGraphics = (Graphics2D) markerGraphics.create();
+            paintDebugMarker(context, debugGraphics, marker, rotation);
+            debugGraphics.dispose();
         }
+        markerGraphics.rotate(rotation);
 
         try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, context, markerGraphics, shapeNode)) {
             if (info != null) info.renderable.render(info.context, info.g);
@@ -217,7 +218,7 @@ public final class ShapeRenderer {
         markerGraphics.dispose();
     }
 
-    private static void paintDebugMarkerAndRotate(@NotNull RenderContext context, @NotNull Graphics2D g,
+    private static void paintDebugMarker(@NotNull RenderContext context, @NotNull Graphics2D g,
             @NotNull Marker marker, @Radian float rotation) {
         FloatSize size = marker.size(context);
 

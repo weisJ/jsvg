@@ -53,11 +53,11 @@ import com.github.weisj.jsvg.util.ImageUtil;
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
-     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>, <mask>,
+     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
      * <script>, <switch>
      */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Marker.class, Pattern.class, Style.class, Text.class,
-            View.class}
+    anyOf = {Anchor.class, ClipPath.class, Image.class, Mask.class, Marker.class, Pattern.class, Style.class,
+            Text.class, View.class}
 )
 public final class Pattern extends BaseInnerViewContainer implements SVGPaint, ShapedContainer<SVGNode> {
     public static final String TAG = "pattern";
@@ -152,7 +152,12 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
 
     private @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
             @NotNull Rectangle2D bounds) {
-        ViewBox patternBounds = computePatternBounds(measure, bounds);
+        Rectangle2D.Double patternBounds = patternUnits.computeViewBounds(measure, bounds, x, y, width, height);
+
+        if (patternUnits == UnitType.ObjectBoundingBox) {
+            patternBounds.x += bounds.getX();
+            patternBounds.y += bounds.getY();
+        }
 
         BufferedImage img = ImageUtil.createCompatibleTransparentImage(g, patternBounds.width, patternBounds.height);
         Graphics2D imgGraphics = (Graphics2D) img.getGraphics();
@@ -169,7 +174,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
             view = new ViewBox(0, 0, 1, 1);
             aspectRation = PreserveAspectRatio.none();
         } else {
-            size = patternBounds.size();
+            size = new FloatSize((float) patternBounds.getWidth(), (float) patternBounds.getHeight());
         }
 
         renderWithSize(size, view, aspectRation, patternContext, imgGraphics);
@@ -179,23 +184,5 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         return patternTransform != null
                 ? new TransformedPaint(new TexturePaint(img, patternBounds), patternTransform)
                 : new TexturePaint(img, patternBounds);
-    }
-
-    private @NotNull ViewBox computePatternBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
-        MeasureContext patternMeasure = patternUnits.deriveMeasure(measure);
-        ViewBox patternBounds = new ViewBox(
-                x.resolveWidth(patternMeasure), y.resolveHeight(patternMeasure),
-                width.resolveWidth(patternMeasure), height.resolveHeight(patternMeasure));
-
-        if (patternUnits == UnitType.ObjectBoundingBox) {
-            patternBounds.x *= bounds.getWidth();
-            patternBounds.y *= bounds.getHeight();
-            patternBounds.width *= bounds.getWidth();
-            patternBounds.height *= bounds.getHeight();
-            patternBounds.x += bounds.getX();
-            patternBounds.y += bounds.getY();
-        }
-
-        return patternBounds;
     }
 }

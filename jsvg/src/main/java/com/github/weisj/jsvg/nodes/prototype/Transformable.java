@@ -47,4 +47,17 @@ public interface Transformable {
             g.translate(-transformOrigin.getX(), -transformOrigin.getY());
         }
     }
+
+    default Shape transformShape(@NotNull Shape shape, @NotNull MeasureContext measureContext) {
+        AffineTransform transform = transform();
+        if (transform != null) {
+            Point2D transformOrigin = transformOrigin(measureContext);
+            AffineTransform at = new AffineTransform();
+            at.translate(transformOrigin.getX(), transformOrigin.getY());
+            at.concatenate(transform);
+            at.translate(-transformOrigin.getX(), -transformOrigin.getY());
+            return at.createTransformedShape(shape);
+        }
+        return shape;
+    }
 }

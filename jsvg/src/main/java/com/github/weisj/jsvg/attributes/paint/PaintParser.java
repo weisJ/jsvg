@@ -21,11 +21,13 @@
  */
 package com.github.weisj.jsvg.attributes.paint;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.AttributeParser;
@@ -36,8 +38,8 @@ public final class PaintParser {
     private PaintParser() {}
 
     // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
-    public static @Nullable Color parseColor(@Nullable String value) {
-        if (value == null || value.isEmpty()) return null;
+    public static @Nullable Color parseColor(@NotNull String value) {
+        if (value.isEmpty()) return null;
         try {
             if (value.charAt(0) == '#') {
                 int rgba = 0xff000000;
@@ -84,19 +86,21 @@ public final class PaintParser {
                         parseColorComponent(values[2], false),
                         isRgba ? parseColorComponent(values[3], true) : 255);
             }
-            return ColorLookup.colorMap().get(value);
+            return ColorLookup.colorMap().get(value.toLowerCase(Locale.ENGLISH));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static @Nullable SVGPaint parsePaint(String value) {
-        if ("none".equals(value) || "transparent".equals(value)) return SVGPaint.NONE;
-        if ("currentcolor".equals(value)) return SVGPaint.CURRENT_COLOR;
-        if ("context-fill".equals(value)) return SVGPaint.CONTEXT_FILL;
-        if ("context-stroke".equals(value)) return SVGPaint.CONTEXT_STROKE;
-        Color color = parseColor(value);
+    public static @Nullable SVGPaint parsePaint(@Nullable String value) {
+        if (value == null) return null;
+        String lower = value.toLowerCase(Locale.ENGLISH);
+        if ("none".equals(lower) || "transparent".equals(lower)) return SVGPaint.NONE;
+        if ("currentcolor".equals(lower)) return SVGPaint.CURRENT_COLOR;
+        if ("context-fill".equals(lower)) return SVGPaint.CONTEXT_FILL;
+        if ("context-stroke".equals(lower)) return SVGPaint.CONTEXT_STROKE;
+        Color color = parseColor(lower);
         if (color == null) return null;
         return new AwtSVGPaint(color);
     }

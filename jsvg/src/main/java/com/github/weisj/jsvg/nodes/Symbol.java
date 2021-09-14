@@ -38,11 +38,11 @@ import com.github.weisj.jsvg.nodes.text.Text;
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
-     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>, <mask>,
+     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
      * <script>, <switch>
      */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Marker.class, Pattern.class, Style.class, Text.class,
-            View.class}
+    anyOf = {Anchor.class, ClipPath.class, Image.class, Mask.class, Marker.class, Pattern.class, Style.class,
+            Text.class, View.class}
 )
 public final class Symbol extends CommonInnerViewContainer {
     public static final String TAG = "symbol";
