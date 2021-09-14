@@ -1,0 +1,31 @@
+<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+    <!--
+    A pattern tile that content coordinates and values are
+    computed against the current coordinate user space.
+    Note that the size of the tile is computed against
+    the bounding box of the target element
+    -->
+    <pattern id="p1" width="20%" height="20%"
+             patternContentUnits="userSpaceOnUse">
+        <circle cx="10" cy="10" r="10" />
+    </pattern>
+
+    <!--
+    A pattern tile that content coordinates and values are
+    computed against the bounding box of the target element.
+    Note that the size of the tile is also computed against
+    the bounding box of the target element
+    -->
+    <pattern id="p2" width="20%" height="20%"
+             patternContentUnits="objectBoundingBox">
+        <circle cx=".1" cy=".1" r=".1" />
+    </pattern>
+
+    <!-- Left square with user space tiles -->
+    <rect x="10"  y="10" width="80" height="80"
+          fill="url(#p1)" stroke="red"/>
+
+    <!-- Right square with bounding box tiles -->
+    <rect x="110" y="10" width="80" height="80"
+          fill="url(#p2)" stroke="red"/>
+</svg>

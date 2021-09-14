@@ -38,15 +38,16 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.TransformedPaint;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.Container)
 @PermittedContent(
@@ -128,10 +129,15 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     }
 
     @Override
+    public boolean requiresInstantiation() {
+        return true;
+    }
+
+    @Override
     public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        g.setPaint(paintForBounds(g, measure, b));
+        GraphicsUtil.safelySetPaint(g, paintForBounds(g, measure, b));
         g.fill(shape);
     }
 
@@ -139,57 +145,33 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
+        GraphicsUtil.safelySetPaint(g, paintForBounds(g, measure, b));
         g.setPaint(paintForBounds(g, measure, b));
         g.draw(shape);
     }
 
     private @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
             @NotNull Rectangle2D bounds) {
-        MeasureContext objectBoundingBoxMeasure = (patternUnits == UnitType.ObjectBoundingBox
-                || patternContentUnits == UnitType.ObjectBoundingBox)
-                        ? measure.derive(new ViewBox(bounds), measure.em(), measure.ex(), measure.fontRenderContext())
-                        : null;
+        ViewBox patternBounds = computePatternBounds(measure, bounds);
 
-        MeasureContext patternMeasure = patternUnits == UnitType.ObjectBoundingBox
-                ? objectBoundingBoxMeasure
-                : measure;
-        ViewBox patternBounds = new ViewBox(
-                x.resolveWidth(patternMeasure), y.resolveHeight(patternMeasure),
-                width.resolveWidth(patternMeasure), height.resolveHeight(patternMeasure));
-
-        AffineTransform at = g.getTransform();
-
-        double scaleX = GeometryUtil.scaleXOfTransform(at);
-        double scaleY = GeometryUtil.scaleYOfTransform(at);
-
-        int dw = (int) Math.ceil(patternBounds.getWidth() * scaleX);
-        int dh = (int) Math.ceil(patternBounds.getHeight() * scaleY);
-
-        double tileScaleX = dw / patternBounds.getWidth();
-        double tileScaleY = dh / patternBounds.getHeight();
-
-        AffineTransform tileTransform = AffineTransform.getScaleInstance(tileScaleX, tileScaleY);
-
-        BufferedImage img = new BufferedImage(dw, dh, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage img = ImageUtil.createCompatibleTransparentImage(g, patternBounds.width, patternBounds.height);
         Graphics2D imgGraphics = (Graphics2D) img.getGraphics();
         imgGraphics.setRenderingHints(g.getRenderingHints());
-        imgGraphics.transform(tileTransform);
+        imgGraphics.scale(img.getWidth() / patternBounds.width, img.getHeight() / patternBounds.height);
 
-        RenderContext patternContext;
+        RenderContext patternContext = RenderContext.createInitial(null, patternContentUnits.deriveMeasure(measure));
+
         FloatSize size;
         ViewBox view = viewBox;
         PreserveAspectRatio aspectRation = this.preserveAspectRatio;
-        if (viewBox == null && patternContentUnits == UnitType.ObjectBoundingBox) {
-            assert objectBoundingBoxMeasure != null;
-            patternContext = RenderContext.createInitial(null, objectBoundingBoxMeasure);
-            size = new FloatSize((float) bounds.getWidth(), (float) bounds.getHeight());
-            view = new ViewBox(bounds(patternContext, true));
-            view.x = view.y = 0;
+        if (view == null && patternContentUnits == UnitType.ObjectBoundingBox) {
+            size = new FloatSize(img.getWidth(), img.getHeight());
+            view = new ViewBox(0, 0, 1, 1);
             aspectRation = PreserveAspectRatio.none();
         } else {
             size = patternBounds.size();
-            patternContext = RenderContext.createInitial(null, measure);
         }
+
         renderWithSize(size, view, aspectRation, patternContext, imgGraphics);
         imgGraphics.dispose();
 
@@ -197,5 +179,23 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         return patternTransform != null
                 ? new TransformedPaint(new TexturePaint(img, patternBounds), patternTransform)
                 : new TexturePaint(img, patternBounds);
+    }
+
+    private @NotNull ViewBox computePatternBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds) {
+        MeasureContext patternMeasure = patternUnits.deriveMeasure(measure);
+        ViewBox patternBounds = new ViewBox(
+                x.resolveWidth(patternMeasure), y.resolveHeight(patternMeasure),
+                width.resolveWidth(patternMeasure), height.resolveHeight(patternMeasure));
+
+        if (patternUnits == UnitType.ObjectBoundingBox) {
+            patternBounds.x *= bounds.getWidth();
+            patternBounds.y *= bounds.getHeight();
+            patternBounds.width *= bounds.getWidth();
+            patternBounds.height *= bounds.getHeight();
+            patternBounds.x += bounds.getX();
+            patternBounds.y += bounds.getY();
+        }
+
+        return patternBounds;
     }
 }
