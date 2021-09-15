@@ -89,23 +89,6 @@ public class SVGLoader {
         nodeMap.put(Use.TAG, Use::new);
         nodeMap.put(View.TAG, View::new);
         /* @formatter:off
-         * Todo
-         *  - Filters (et al.)
-         *  - Font? (deprecated)
-         *  - FontFace? (deprecated)
-         *  - Glyph? (deprecated)
-         *  - HKern? (deprecated)
-         *  - Hatch-path? (experimental)
-         *  - Hatch? (experimental)
-         *  - Marker
-         *  - Mask
-         *  - MissingGlyph? (deprecated)
-         *  - Style
-         *  - VKern? (deprecated)
-         * @formatter:on
-         */
-
-        /* @formatter:off
          * Todo: **Ideas**
          *  - Turn current parsers into interfaces. Allow users to specify custom parsers.
          *    This would allow to have darklaf recognize dynamic colors and replace them with appropriate
