@@ -35,6 +35,7 @@ class BasicShapesTest {
         compareImages("line4", wrapTag(100, 100, "<line x1='10' y1='15' x2='80' y2='51' stroke='red'/>"));
         compareImages("line5", wrapTag(100, 200, "<line x1='10' y1='15' x2='80' y2='51' stroke='#000000'/>"));
         compareImages("line6", wrapTag(200, 200, "<line x1='10' y1='15' x2='80' y2='51' stroke='black'/>"));
+        compareImages("line.svg");
     }
 
     @Test
