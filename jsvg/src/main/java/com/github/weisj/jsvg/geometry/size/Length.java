@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.attributes.ViewBox;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
-public final class Length {
+public class Length {
     public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
     public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
@@ -39,7 +39,6 @@ public final class Length {
 
     private static final float pixelsPerInch = 96f;
     private static final float inchesPerCm = .3936f;
-
 
     public Length(@NotNull Unit unit, float value) {
         this.unit = unit;

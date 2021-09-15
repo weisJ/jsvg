@@ -35,6 +35,8 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.HasMatchName;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.time.TimeUnit;
+import com.github.weisj.jsvg.attributes.time.TimeValue;
 import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
@@ -56,6 +58,25 @@ public final class AttributeParser {
         String str = lower.substring(0, lower.length() - unit.suffix().length());
         try {
             return unit.valueOf(Float.parseFloat(str));
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    @Contract("_,!null -> !null")
+    public static @Nullable TimeValue parseTime(@Nullable String value, @Nullable TimeValue fallback) {
+        if (value == null) return fallback;
+        TimeUnit unit = TimeUnit.Raw;
+        String lower = value.toLowerCase(Locale.ENGLISH);
+        for (TimeUnit u : TimeUnit.units()) {
+            if (lower.endsWith(u.suffix())) {
+                unit = u;
+                break;
+            }
+        }
+        String str = lower.substring(0, lower.length() - unit.suffix().length());
+        try {
+            return unit.valueOf(Integer.parseInt(str));
         } catch (NumberFormatException e) {
             return fallback;
         }

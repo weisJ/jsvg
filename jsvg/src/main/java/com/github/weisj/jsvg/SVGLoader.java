@@ -39,6 +39,7 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.github.weisj.jsvg.nodes.*;
+import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.mesh.MeshGradient;
 import com.github.weisj.jsvg.nodes.mesh.MeshPatch;
 import com.github.weisj.jsvg.nodes.mesh.MeshRow;
@@ -88,6 +89,8 @@ public class SVGLoader {
         nodeMap.put(Title.TAG, Title::new);
         nodeMap.put(Use.TAG, Use::new);
         nodeMap.put(View.TAG, View::new);
+
+        nodeMap.put(Animate.TAG, Animate::new);
         /* @formatter:off
          * Todo
          *  - Filters (et al.)
@@ -231,7 +234,11 @@ public class SVGLoader {
                         newNode);
 
                 if (lastParsedElement != null) {
-                    lastParsedElement.addChild(parsedElement);
+                    if (parsedElement.node instanceof Animate) {
+                        lastParsedElement.addAnimationElement(parsedElement);
+                    } else {
+                        lastParsedElement.addChild(parsedElement);
+                    }
                 }
                 if (rootNode == null) rootNode = parsedElement;
 

@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 public class SVGDocument {
     private static final boolean DEBUG = false;
     private final @NotNull SVG root;
+    private long time;
 
     public SVGDocument(@NotNull SVG root) {
         this.root = root;
@@ -46,6 +47,14 @@ public class SVGDocument {
     public @NotNull FloatSize size() {
         float em = SVGFont.defaultFontSize();
         return root.sizeForTopLevel(em, SVGFont.exFromEm(em));
+    }
+
+    public long time() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     public void render(@Nullable JComponent component, @NotNull Graphics2D g) {
@@ -59,8 +68,8 @@ public class SVGDocument {
         float defaultEx = SVGFont.exFromEm(defaultEm);
 
         MeasureContext initialMeasure = bounds != null
-                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx)
-                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx);
+                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx, time)
+                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx, time);
         RenderContext context = RenderContext.createInitial(component, initialMeasure);
 
         if (bounds == null) bounds = new ViewBox(root.size(context));

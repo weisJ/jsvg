@@ -44,7 +44,7 @@ public class SVGViewer {
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("mesh/mesh2.svg");
+            iconBox.setSelectedItem("animated.svg");
 
             SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
             svgPanel.setPreferredSize(new Dimension(1000, 600));
@@ -70,6 +70,12 @@ public class SVGViewer {
             bg.add(svgSalamander);
             renderingMode.add(jsvg);
             renderingMode.add(svgSalamander);
+            renderingMode.add(Box.createHorizontalGlue());
+
+            JSpinner timeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 100));
+            timeSpinner.addChangeListener(e -> svgPanel.setTime((int) timeSpinner.getValue()));
+
+            renderingMode.add(timeSpinner);
             renderingMode.add(Box.createHorizontalGlue());
             frame.add(renderingMode, BorderLayout.SOUTH);
 
@@ -109,6 +115,11 @@ public class SVGViewer {
                 return SVGPanel.this.getWidth();
             }
         };
+
+        void setTime(long time) {
+            document.setTime(time);
+            repaint();
+        }
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);

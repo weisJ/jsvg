@@ -36,6 +36,7 @@ class ParsedElement {
     final @NotNull AttributeNode attributeNode;
     final @NotNull SVGNode node;
     final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
+    final @NotNull List<@NotNull ParsedElement> animationElements = new ArrayList<>();
     final CharacterDataParser characterDataParser;
 
     ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
@@ -53,11 +54,15 @@ class ParsedElement {
         }
     }
 
-    void addChild(ParsedElement parsedElement) {
+    void addChild(@NotNull ParsedElement parsedElement) {
         children.add(parsedElement);
         if (node instanceof Container) {
             ((Container<?>) node).addChild(parsedElement.id, parsedElement.node);
         }
+    }
+
+    void addAnimationElement(@NotNull ParsedElement animationElement) {
+        animationElements.add(animationElement);
     }
 
     void build() {
@@ -65,6 +70,11 @@ class ParsedElement {
         // e.g. LinearGradient depends on its stops to be build first.
         for (ParsedElement child : children) {
             child.build();
+        }
+        for (ParsedElement animationElement : animationElements) {
+            animationElement.attributeNode.setAnimationTarget(attributeNode);
+            animationElement.build();
+            animationElement.attributeNode.setAnimationTarget(null);
         }
         node.build(attributeNode);
     }

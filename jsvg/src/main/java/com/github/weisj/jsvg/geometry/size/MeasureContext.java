@@ -37,17 +37,21 @@ public class MeasureContext {
     private final float em;
     private final float ex;
     private final FontRenderContext fontRenderContext;
+    private final long time;
 
-    public MeasureContext(float vw, float vh, float em, float ex, @NotNull FontRenderContext fontRenderContext) {
+    public MeasureContext(float vw, float vh, float em, float ex, long time,
+            @NotNull FontRenderContext fontRenderContext) {
         this.vw = vw;
         this.vh = vh;
         this.em = em;
         this.ex = ex;
+        this.time = time;
         this.fontRenderContext = fontRenderContext;
     }
 
-    public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex) {
-        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, FontRenderContext.createDefault());
+    public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex, long time) {
+        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, time,
+                FontRenderContext.createDefault());
     }
 
     public @NotNull FontRenderContext fontRenderContext() {
@@ -55,7 +59,7 @@ public class MeasureContext {
     }
 
     public @NotNull MeasureContext derive(float viewWidth, float viewHeight) {
-        return new MeasureContext(viewWidth, viewHeight, em, ex, fontRenderContext);
+        return new MeasureContext(viewWidth, viewHeight, em, ex, time, fontRenderContext);
     }
 
     public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex,
@@ -71,7 +75,7 @@ public class MeasureContext {
         float effectiveEm = Length.isUnspecified(em) ? this.em : em;
         float effectiveEx = Length.isUnspecified(ex) ? this.ex : ex;
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
-        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, effectiveFrc);
+        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, time, effectiveFrc);
     }
 
     public float viewWidth() {
@@ -94,6 +98,10 @@ public class MeasureContext {
         return ex;
     }
 
+    public long time() {
+        return time;
+    }
+
     @Override
     public String toString() {
         return "MeasureContext{" +
@@ -101,6 +109,8 @@ public class MeasureContext {
                 ", vh=" + vh +
                 ", em=" + em +
                 ", ex=" + ex +
+                ", fontRenderContext=" + fontRenderContext +
+                ", time=" + time +
                 '}';
     }
 
@@ -112,11 +122,12 @@ public class MeasureContext {
         return Float.compare(that.vw, vw) == 0
                 && Float.compare(that.vh, vh) == 0
                 && Float.compare(that.em, em) == 0
-                && Float.compare(that.ex, ex) == 0;
+                && Float.compare(that.ex, ex) == 0 && time == that.time
+                && Objects.equals(fontRenderContext, that.fontRenderContext);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vw, vh, em, ex);
+        return Objects.hash(vw, vh, em, ex, fontRenderContext, time);
     }
 }

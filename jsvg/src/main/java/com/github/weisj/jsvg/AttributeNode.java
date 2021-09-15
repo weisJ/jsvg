@@ -23,6 +23,7 @@ package com.github.weisj.jsvg;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -33,6 +34,8 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.time.TimeValue;
+import com.github.weisj.jsvg.geometry.size.AnimatedLength;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
@@ -50,6 +53,13 @@ public class AttributeNode {
     private final @NotNull Map<String, String> attributes;
     private final @Nullable AttributeNode parent;
     private final @NotNull Map<@NotNull String, @NotNull SVGNode> namedElements;
+    private final @NotNull Map<@NotNull String, @NotNull AnimatedLength> animatedLengths = new HashMap<>();
+
+    private @Nullable AttributeNode animationTarget;
+
+    void setAnimationTarget(@Nullable AttributeNode animationTarget) {
+        this.animationTarget = animationTarget;
+    }
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
             @Nullable AttributeNode parent,
@@ -70,6 +80,18 @@ public class AttributeNode {
             }
         }
         return attributes;
+    }
+
+    public void registerAnimationLength(@NotNull String key, @NotNull AnimatedLength animatedLength) {
+        if (animationTarget != null) animationTarget.animatedLengths.put(key, animatedLength);
+    }
+
+    public @NotNull TimeValue getTime(@NotNull String key, @NotNull TimeValue fallback) {
+        return AttributeParser.parseTime(getValue(key), fallback);
+    }
+
+    public @Nullable TimeValue getTime(@NotNull String key) {
+        return AttributeParser.parseTime(getValue(key), null);
     }
 
     private <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
@@ -145,6 +167,8 @@ public class AttributeNode {
 
     @Contract("_,!null -> !null")
     private @Nullable Length getLengthInternal(@NotNull String key, @Nullable Length fallback) {
+        AnimatedLength animatedLength = animatedLengths.get(key);
+        if (animatedLength != null) return animatedLength;
         return AttributeParser.parseLength(getValue(key), fallback);
     }
 
