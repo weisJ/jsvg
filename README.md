@@ -42,8 +42,9 @@ can be rendered to any `Graphics2D` object you like (e.g. a `BufferedImage` or a
 
 For supported elements most of the attributes which apply to them are implemented.
 
-- :white_check_mark:: The element is supported
+- :white_check_mark:: The element is supported. Note that this doesn't mean that every attribute is supported.
 - (:white_check_mark:): The element is supported, but won't have any effect (e.g. it's currently not possible to query the content of a `<desc>` element)
+- :ballot_box_with_check:: The element is partially implemented and might not support most basic features of the element. 
 - :x:: The element is currently not supported
 - :warning:: The element is deprecated in the spec and has a low priority of getting implemented.
 - :microscope:: The element is an experimental part of the svg 2.* spec. It may not fully behave as expected.
@@ -119,7 +120,7 @@ For supported elements most of the attributes which apply to them are implemente
 |feFuncB|:x:|
 |feFuncG|:x:|
 |feFuncR|:x:|
-|feGaussianBlur|:x:|
+|feGaussianBlur|:white_check_mark:|
 |feImage|:x:|
 |feMerge|:x:|
 |feMergeNode|:x:|
@@ -130,7 +131,7 @@ For supported elements most of the attributes which apply to them are implemente
 |feSpotLight|:x:|
 |feTile|:x:|
 |feTurbulence|:x:|
-|filter|:x:|
+|filter|:ballot_box_with_check:|
 
 ### Font elements
 |Element|Status|
