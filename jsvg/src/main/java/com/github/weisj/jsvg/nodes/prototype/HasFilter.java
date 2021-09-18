@@ -19,35 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.container;
+package com.github.weisj.jsvg.nodes.prototype;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
-import org.jetbrains.annotations.NotNull;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 
-import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
-import com.github.weisj.jsvg.renderer.RenderContext;
+public interface HasFilter {
 
-public abstract class RenderableContainerNode extends CommonRenderableContainerNode<SVGNode> {
-    private final List<SVGNode> children = new ArrayList<>();
-
-    @Override
-    protected void doAdd(@NotNull SVGNode node) {
-        children.add(node);
-    }
-
-    @Override
-    public List<? extends @NotNull SVGNode> children() {
-        return children;
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        for (SVGNode child : children()) {
-            NodeRenderer.renderNode(child, context, g);
-        }
-    }
+    @Nullable
+    Filter filter();
 }

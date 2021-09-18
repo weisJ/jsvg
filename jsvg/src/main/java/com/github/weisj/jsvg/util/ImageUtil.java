@@ -34,11 +34,10 @@ public final class ImageUtil {
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(@NotNull Graphics2D g, double width,
             double height) {
-        GraphicsConfiguration gc = g.getDeviceConfiguration();
         AffineTransform at = g.getTransform();
-        return gc.createCompatibleImage(
+        return new BufferedImage(
                 (int) Math.ceil(GeometryUtil.scaleXOfTransform(at) * width),
-                (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), Transparency.TRANSLUCENT);
+                (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), BufferedImage.TYPE_INT_ARGB_PRE);
     }
 
     public static @NotNull BufferedImage createLuminosityBuffer(@NotNull Graphics2D g, double width, double height) {

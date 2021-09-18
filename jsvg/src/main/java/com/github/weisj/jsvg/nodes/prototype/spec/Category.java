@@ -29,6 +29,7 @@ public enum Category {
     // Descriptions don't provide any information
     // in a static context.
     Descriptive(false),
+    FilterPrimitive,
     Gradient,
     Graphic,
     GraphicsReferencing,

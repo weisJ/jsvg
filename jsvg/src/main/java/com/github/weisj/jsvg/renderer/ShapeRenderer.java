@@ -212,7 +212,7 @@ public final class ShapeRenderer {
         markerGraphics.rotate(rotation);
 
         try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, context, markerGraphics, shapeNode)) {
-            if (info != null) info.renderable.render(info.context, info.g);
+            if (info != null) info.renderable.render(info.context, info.graphics());
         }
 
         markerGraphics.dispose();

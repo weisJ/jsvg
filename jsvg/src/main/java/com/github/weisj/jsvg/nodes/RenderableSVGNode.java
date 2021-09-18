@@ -31,12 +31,15 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
+import com.github.weisj.jsvg.nodes.prototype.HasFilter;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public abstract class RenderableSVGNode extends AbstractSVGNode implements Renderable, Transformable, HasClip {
+public abstract class RenderableSVGNode extends AbstractSVGNode
+        implements Renderable, Transformable, HasClip, HasFilter {
 
     private boolean isVisible;
     private @Nullable AffineTransform transform;
@@ -45,6 +48,7 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
 
     private @Nullable ClipPath clipPath;
     private @Nullable Mask mask;
+    private @Nullable Filter filter;
 
     @Override
     public @Nullable ClipPath clipPath() {
@@ -54,6 +58,11 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
     @Override
     public @Nullable Mask mask() {
         return mask;
+    }
+
+    @Override
+    public @Nullable Filter filter() {
+        return filter;
     }
 
     @Override
@@ -80,8 +89,9 @@ public abstract class RenderableSVGNode extends AbstractSVGNode implements Rende
         isVisible = parseIsVisible(attributeNode);
         clipPath = attributeNode.getClipPath();
         mask = attributeNode.getMask();
-        transform = attributeNode.parseTransform("transform");
+        filter = attributeNode.getFilter();
 
+        transform = attributeNode.parseTransform("transform");
         Length[] transformOrigin = attributeNode.getLengthList("transform-origin");
         transformOriginX = transformOrigin.length > 0 ? transformOrigin[0] : Length.ZERO;
         transformOriginY = transformOrigin.length > 1 ? transformOrigin[1] : Length.ZERO;

@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 
@@ -66,7 +67,7 @@ public class AttributeNode {
             String[] styles = styleStr.split(";");
             for (String style : styles) {
                 String[] styleDef = style.split(":", 2);
-                attributes.put(styleDef[0].trim(), styleDef[1].trim());
+                attributes.put(styleDef[0].trim().toLowerCase(Locale.ENGLISH), styleDef[1].trim());
             }
         }
         return attributes;
@@ -196,6 +197,10 @@ public class AttributeNode {
 
     public @Nullable Mask getMask() {
         return getElementByUrl(Mask.class, getValue("mask"));
+    }
+
+    public @Nullable Filter getFilter() {
+        return getElementByUrl(Filter.class, getValue("filter"));
     }
 
     public @Nullable AffineTransform parseTransform(@NotNull String key) {

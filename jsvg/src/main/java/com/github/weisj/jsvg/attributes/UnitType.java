@@ -35,8 +35,13 @@ public enum UnitType {
     ObjectBoundingBox;
 
     public @NotNull MeasureContext deriveMeasure(@NotNull MeasureContext measure) {
+        return deriveMeasure(measure, 1, 1);
+    }
+
+    public @NotNull MeasureContext deriveMeasure(@NotNull MeasureContext measure, double objectWidth,
+            double objectHeight) {
         if (this == ObjectBoundingBox) {
-            return measure.derive(1, 1);
+            return measure.derive((float) objectWidth, (float) objectHeight);
         } else {
             return measure;
         }
@@ -54,18 +59,9 @@ public enum UnitType {
 
     public @NotNull Rectangle2D.Double computeViewBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
             @NotNull Length x, @NotNull Length y, @NotNull Length width, @NotNull Length height) {
-        MeasureContext patternMeasure = deriveMeasure(measure);
-        Rectangle2D.Double viewBounds = new Rectangle2D.Double(
+        MeasureContext patternMeasure = deriveMeasure(measure, bounds.getWidth(), bounds.getHeight());
+        return new Rectangle2D.Double(
                 x.resolveWidth(patternMeasure), y.resolveHeight(patternMeasure),
                 width.resolveWidth(patternMeasure), height.resolveHeight(patternMeasure));
-
-        if (this == UnitType.ObjectBoundingBox) {
-            viewBounds.x *= bounds.getWidth();
-            viewBounds.y *= bounds.getHeight();
-            viewBounds.width *= bounds.getWidth();
-            viewBounds.height *= bounds.getHeight();
-        }
-
-        return viewBounds;
     }
 }

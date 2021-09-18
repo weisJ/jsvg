@@ -35,22 +35,27 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.*;
 
 public final class NodeRenderer {
-    private static final boolean CLIP_DEBUG = true;
+    private static final boolean CLIP_DEBUG = false;
 
     private NodeRenderer() {}
 
     public static class Info implements AutoCloseable {
-        public final Renderable renderable;
-        public final RenderContext context;
-        public final Graphics2D g;
+        public final @NotNull Renderable renderable;
+        public final @NotNull RenderContext context;
+        protected final @NotNull Graphics2D g;
 
-        public Info(Renderable renderable, RenderContext context, Graphics2D g) {
+        Info(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Graphics2D g) {
             this.renderable = renderable;
             this.context = context;
             this.g = g;
+        }
+
+        public @NotNull Graphics2D graphics() {
+            return g;
         }
 
         @Override
@@ -59,9 +64,33 @@ public final class NodeRenderer {
         }
     }
 
+    private static class InfoWithFilter extends Info {
+        private final @NotNull Filter filter;
+        private final @NotNull Filter.FilterInfo filterInfo;
+
+        InfoWithFilter(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Graphics2D g,
+                @NotNull Filter filter, @NotNull Rectangle2D elementBounds) {
+            super(renderable, context, g);
+            this.filter = filter;
+            this.filterInfo = filter.createFilterInfo(g, context, elementBounds);
+        }
+
+        @Override
+        public @NotNull Graphics2D graphics() {
+            return filterInfo.graphics();
+        }
+
+        @Override
+        public void close() {
+            filter.applyFilter(context, filterInfo);
+            filterInfo.blitImage(this.g, this.context.targetComponent());
+            super.close();
+        }
+    }
+
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Graphics2D g) {
         try (Info info = createRenderInfo(node, context, g, null)) {
-            if (info != null) info.renderable.render(info.context, info.g);
+            if (info != null) info.renderable.render(info.context, info.graphics());
         }
     }
 
@@ -87,8 +116,8 @@ public final class NodeRenderer {
             ((Transformable) renderable).applyTransform(childGraphics, childContext.measureContext());
         }
 
+        Rectangle2D elementBounds = null;
         if (renderable instanceof HasClip) {
-            Rectangle2D elementBounds = null;
 
             Mask mask = ((HasClip) renderable).mask();
             if (mask != null) {
@@ -120,13 +149,22 @@ public final class NodeRenderer {
             }
         }
 
-        return new Info(renderable, childContext, childGraphics);
+        Filter filter = renderable instanceof HasFilter
+                ? ((HasFilter) renderable).filter()
+                : null;
+
+        if (filter != null) {
+            if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
+            return new InfoWithFilter(renderable, childContext, childGraphics, filter, elementBounds);
+        } else {
+            return new Info(renderable, childContext, childGraphics);
+        }
     }
 
     private static @NotNull Rectangle2D elementBounds(@NotNull Object node, @NotNull RenderContext childContext) {
         Rectangle2D elementBounds;
         if (node instanceof HasShape) {
-            elementBounds = ((HasShape) node).elementBounds(childContext);
+            elementBounds = ((HasShape) node).untransformedElementBounds(childContext);
         } else {
             MeasureContext measureContext = childContext.measureContext();
             elementBounds = new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());

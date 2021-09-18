@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -33,17 +34,17 @@ import com.github.weisj.jsvg.nodes.text.Text;
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
-     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
-     * <script>, <switch>
+     * <altGlyphDef>, <color-profile>, <cursor>, <font>, <font-face>, <foreignObject>, <script>,
+     * <switch>
      */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Mask.class, Marker.class, Pattern.class, Style.class,
-            Text.class, View.class}
+    anyOf = {Anchor.class, ClipPath.class, Filter.class, Image.class, Mask.class, Marker.class, Pattern.class,
+            Style.class, Text.class, View.class}
 )
 public final class Defs extends ContainerNode {
     public static final String TAG = "defs";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 }

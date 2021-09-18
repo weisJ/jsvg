@@ -35,6 +35,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.container.RenderableContainerNode;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -49,11 +50,11 @@ import com.github.weisj.jsvg.util.ImageUtil;
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
-     * <altGlyphDef>, <color-profile>, <cursor>, <filter>, <font>, <font-face>, <foreignObject>,
-     * <script>, <switch>
+     * <altGlyphDef>, <color-profile>, <cursor>, <font>, <font-face>, <foreignObject>, <script>,
+     * <switch>
      */
-    anyOf = {Anchor.class, ClipPath.class, Image.class, Marker.class, Mask.class, Pattern.class, Style.class,
-            Text.class, View.class}
+    anyOf = {Anchor.class, ClipPath.class, Filter.class, Image.class, Marker.class, Mask.class, Pattern.class,
+            Style.class, Text.class, View.class}
 )
 public final class Mask extends RenderableContainerNode implements Instantiator {
     private static final boolean DEBUG = false;
@@ -116,7 +117,7 @@ public final class Mask extends RenderableContainerNode implements Instantiator 
         }
 
         try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(this, maskContext, imgGraphics, this)) {
-            if (info != null) info.renderable.render(info.context, info.g);
+            if (info != null) info.renderable.render(info.context, info.graphics());
         }
         imgGraphics.dispose();
 

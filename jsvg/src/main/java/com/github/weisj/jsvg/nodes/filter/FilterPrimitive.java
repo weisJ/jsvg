@@ -19,35 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.container;
+package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.image.BufferedImageOp;
 
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
+import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.nodes.AbstractSVGNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public abstract class RenderableContainerNode extends CommonRenderableContainerNode<SVGNode> {
-    private final List<SVGNode> children = new ArrayList<>();
+public abstract class FilterPrimitive extends AbstractSVGNode {
+
+    Length x;
+    Length y;
+    Length width;
+    Length height;
+
+    // Todo: out/result parameters
 
     @Override
-    protected void doAdd(@NotNull SVGNode node) {
-        children.add(node);
+    @MustBeInvokedByOverriders
+    public void build(@NotNull AttributeNode attributeNode) {
+        super.build(attributeNode);
+        x = attributeNode.getLength("x", Unit.PERCENTAGE.valueOf(0));
+        y = attributeNode.getLength("y", Unit.PERCENTAGE.valueOf(0));
+        width = attributeNode.getLength("width", Unit.PERCENTAGE.valueOf(100));
+        height = attributeNode.getLength("height", Unit.PERCENTAGE.valueOf(100));
     }
 
-    @Override
-    public List<? extends @NotNull SVGNode> children() {
-        return children;
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        for (SVGNode child : children()) {
-            NodeRenderer.renderNode(child, context, g);
-        }
-    }
+    public abstract @NotNull BufferedImageOp[] createImageOps(@NotNull RenderContext context,
+            @NotNull Filter.FilterInfo filterInfo);
 }
