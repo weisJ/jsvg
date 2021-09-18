@@ -126,7 +126,7 @@ final class ReferenceTest {
         });
     }
 
-    private static BufferedImage render(@NotNull InputStream inputStream) throws Exception {
+    private static BufferedImage render(@NotNull InputStream inputStream) {
         SVGDocument document = Objects.requireNonNull(new SVGLoader().load(inputStream));
         FloatSize size = document.size();
         BufferedImage image = new BufferedImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);

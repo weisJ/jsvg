@@ -118,13 +118,9 @@ public class SVGViewer {
 
         private void selectIcon(@NotNull String name) {
             document = iconCache.computeIfAbsent(name, n -> {
-                try {
-                    URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
-                    SVGLoader loader = new SVGLoader();
-                    return loader.load(url);
-                } catch (Exception e) {
-                    throw new RuntimeException(name, e);
-                }
+                URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
+                SVGLoader loader = new SVGLoader();
+                return loader.load(url);
             });
             try {
                 icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());

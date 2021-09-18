@@ -53,7 +53,7 @@ public class SVGLoader {
 
     private final XMLReader xmlReader;
 
-    public SVGLoader() throws ParserConfigurationException, SAXException {
+    public SVGLoader() {
         nodeMap = new HashMap<>();
         nodeMap.put(Anchor.TAG, Anchor::new);
         nodeMap.put(Circle.TAG, Circle::new);
@@ -98,10 +98,14 @@ public class SVGLoader {
          * @formatter:ob
          */
 
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-        saxParserFactory.setNamespaceAware(true);
-        SAXParser saxParser = saxParserFactory.newSAXParser();
-        xmlReader = saxParser.getXMLReader();
+        try {
+            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+            saxParserFactory.setNamespaceAware(true);
+            SAXParser saxParser = saxParserFactory.newSAXParser();
+            xmlReader = saxParser.getXMLReader();
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {

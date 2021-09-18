@@ -26,8 +26,6 @@ import java.awt.image.BufferedImage;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -38,7 +36,6 @@ import org.apache.batik.util.SVGConstants;
 import org.jetbrains.annotations.NotNull;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
-import org.xml.sax.SAXException;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -52,7 +49,7 @@ public class RasterizationBenchmark {
         private SVGDocument document;
 
         @Setup
-        public void loadDocument() throws ParserConfigurationException, SAXException {
+        public void loadDocument() {
             document = new SVGLoader()
                     .load(Objects.requireNonNull(RasterizationBenchmark.class.getResourceAsStream(SVG_IMAGE)));
         }
