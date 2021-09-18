@@ -95,7 +95,7 @@ public class SVGLoader {
          *    SVGPaint implementations to avoid patching the svg structure itself.
          *    Doing this avoids the need for keeping the SVG structure around for modification
          *    (which isn't in scope for this project).
-         * @formatter:ob
+         * @formatter:on
          */
 
         try {
@@ -266,7 +266,8 @@ public class SVGLoader {
             }
         }
 
-        @NotNull SVGDocument getDocument() {
+        @NotNull
+        SVGDocument getDocument() {
             rootNode.build();
             return new SVGDocument((SVG) rootNode.node);
         }
