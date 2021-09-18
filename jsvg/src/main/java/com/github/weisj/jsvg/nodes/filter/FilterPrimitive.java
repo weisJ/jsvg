@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.*;
 import java.awt.image.BufferedImageOp;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -51,6 +52,6 @@ public abstract class FilterPrimitive extends AbstractSVGNode {
         height = attributeNode.getLength("height", Unit.PERCENTAGE.valueOf(100));
     }
 
-    public abstract @NotNull BufferedImageOp[] createImageOps(@NotNull RenderContext context,
+    public abstract @NotNull BufferedImageOp[] createImageOps(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull Filter.FilterInfo filterInfo);
 }

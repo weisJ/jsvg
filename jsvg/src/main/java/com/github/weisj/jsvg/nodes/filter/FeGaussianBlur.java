@@ -31,6 +31,7 @@ import java.awt.image.Kernel;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -45,6 +46,7 @@ public final class FeGaussianBlur extends FilterPrimitive {
     public static final String TAG = "fegaussianblur";
 
     private float[] stdDeviation;
+    private EdgeMode edgeMode;
 
     private double xCurrent;
     private double yCurrent;
@@ -60,10 +62,11 @@ public final class FeGaussianBlur extends FilterPrimitive {
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         stdDeviation = attributeNode.getFloatList("stdDeviation");
+        edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.Duplicate);
     }
 
     @Override
-    public @NotNull BufferedImageOp[] createImageOps(@NotNull RenderContext context,
+    public @NotNull BufferedImageOp[] createImageOps(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull Filter.FilterInfo filterInfo) {
         if (stdDeviation.length == 0) return new BufferedImageOp[0];
         AffineTransform at = filterInfo.graphics().getTransform();
@@ -73,10 +76,10 @@ public final class FeGaussianBlur extends FilterPrimitive {
         if (xSigma < 0 || ySigma < 0) return new BufferedImageOp[0];
 
         BufferedImageOp xOp = xSigma > 0
-                ? createGaussianBlurFilter(xSigma, true)
+                ? createGaussianBlurFilter(g, xSigma, true)
                 : null;
         BufferedImageOp yOp = ySigma > 0
-                ? createGaussianBlurFilter(ySigma, false)
+                ? createGaussianBlurFilter(g, ySigma, false)
                 : null;
 
         if (xOp != null && yOp != null) {
@@ -89,7 +92,7 @@ public final class FeGaussianBlur extends FilterPrimitive {
         return new BufferedImageOp[0];
     }
 
-    private @NotNull BufferedImageOp createGaussianBlurFilter(double sigma, boolean horizontal) {
+    private @NotNull BufferedImageOp createGaussianBlurFilter(@NotNull Graphics2D g, double sigma, boolean horizontal) {
         double radius = 2f * sigma + 1;
         int size = (int) Math.ceil(radius) + 1;
         if (horizontal && xBlur != null && xCurrent == sigma) return xBlur;
@@ -124,9 +127,9 @@ public final class FeGaussianBlur extends FilterPrimitive {
         }
 
         if (horizontal) {
-            xBlur = new ConvolveOp(new Kernel(size, 1, data), ConvolveOp.EDGE_ZERO_FILL, null);
+            xBlur = new ConvolveOp(new Kernel(size, 1, data), edgeMode.awtCode(), g.getRenderingHints());
         } else {
-            yBlur = new ConvolveOp(new Kernel(1, size, data), ConvolveOp.EDGE_ZERO_FILL, null);
+            yBlur = new ConvolveOp(new Kernel(1, size, data), edgeMode.awtCode(), g.getRenderingHints());
         }
 
         return horizontal ? xBlur : yBlur;

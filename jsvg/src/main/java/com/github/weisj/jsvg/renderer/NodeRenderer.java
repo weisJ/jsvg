@@ -82,7 +82,7 @@ public final class NodeRenderer {
 
         @Override
         public void close() {
-            filter.applyFilter(context, filterInfo);
+            filter.applyFilter(this.g, context, filterInfo);
             filterInfo.blitImage(this.g, this.context.targetComponent());
             super.close();
         }

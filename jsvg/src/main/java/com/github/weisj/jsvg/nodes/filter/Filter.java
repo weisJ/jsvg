@@ -102,7 +102,7 @@ public final class Filter extends ContainerNode {
         return new FilterInfo(g, image, imageBounds, filterRegion, elementBounds);
     }
 
-    public void applyFilter(@NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
+    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
         for (SVGNode child : children()) {
             FilterPrimitive filterPrimitive = (FilterPrimitive) child;
             Rectangle2D.Double filterPrimitiveRegion = filterPrimitiveUnits.computeViewBounds(
@@ -118,7 +118,7 @@ public final class Filter extends ContainerNode {
 
             Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.imageBounds, filterPrimitiveRegion);
 
-            BufferedImageOp[] imageOp = filterPrimitive.createImageOps(context, filterInfo);
+            BufferedImageOp[] imageOp = filterPrimitive.createImageOps(g, context, filterInfo);
 
             for (BufferedImageOp bufferedImageOp : imageOp) {
                 // Todo: Respect filterPrimitiveRegion
