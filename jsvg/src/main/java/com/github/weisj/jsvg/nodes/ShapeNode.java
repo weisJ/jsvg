@@ -32,7 +32,6 @@ import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontSize;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
-import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.*;
@@ -64,6 +63,10 @@ public abstract class ShapeNode extends RenderableSVGNode
         return s -> s.withFontSize(fontSize, fontSizeAdjust);
     }
 
+    public @NotNull MeasurableShape shape() {
+        return shape;
+    }
+
     @Override
     public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
@@ -92,8 +95,13 @@ public abstract class ShapeNode extends RenderableSVGNode
     protected abstract @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode);
 
     @Override
-    public @NotNull SVGShape shape() {
-        return shape;
+    public @NotNull Shape untransformedElementShape(@NotNull RenderContext context) {
+        return shape.shape(context);
+    }
+
+    @Override
+    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context) {
+        return shape.bounds(context, true);
     }
 
     @Override

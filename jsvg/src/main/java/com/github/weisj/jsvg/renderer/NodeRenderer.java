@@ -65,6 +65,11 @@ public final class NodeRenderer {
         }
     }
 
+    public static @NotNull RenderContext createChildContext(@NotNull SVGNode node, @NotNull RenderContext context,
+            @Nullable Instantiator instantiator) {
+        return setupRenderContext(instantiator, node, context);
+    }
+
     public static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
             @NotNull Graphics2D g, @Nullable Instantiator instantiator) {
         if (!(node instanceof Renderable)) return null;
@@ -74,7 +79,7 @@ public final class NodeRenderer {
             return null;
         }
         if (!renderable.isVisible(context)) return null;
-        RenderContext childContext = setupRenderContext(instantiator, node, context);
+        RenderContext childContext = createChildContext(node, context, instantiator);
 
         Graphics2D childGraphics = (Graphics2D) g.create();
 
@@ -96,9 +101,12 @@ public final class NodeRenderer {
                 Shape childClipShape = childClip.clipShape(childContext, elementBounds);
                 if (CLIP_DEBUG) {
                     Paint paint = childGraphics.getPaint();
+                    Shape clip = childGraphics.getClip();
+                    childGraphics.setClip(null);
                     childGraphics.setPaint(Color.MAGENTA);
                     childGraphics.draw(childClipShape);
                     childGraphics.setPaint(paint);
+                    childGraphics.setClip(clip);
                 }
                 childGraphics.clip(childClipShape);
             }
@@ -117,7 +125,7 @@ public final class NodeRenderer {
     private static @NotNull Rectangle2D elementBounds(@NotNull Object node, @NotNull RenderContext childContext) {
         Rectangle2D elementBounds;
         if (node instanceof HasShape) {
-            elementBounds = ((HasShape) node).shape().bounds(childContext, true);
+            elementBounds = ((HasShape) node).elementBounds(childContext);
         } else {
             MeasureContext measureContext = childContext.measureContext();
             elementBounds = new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());

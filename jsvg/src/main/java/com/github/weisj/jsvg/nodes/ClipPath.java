@@ -48,7 +48,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
     private UnitType clipPathUnits;
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 
@@ -78,7 +78,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
     public @NotNull Shape clipShape(@NotNull RenderContext context, @NotNull Rectangle2D elementBounds) {
         // Todo: Handle bounding-box stuff as well (i.e. combined stroke etc.)
         // We might need to pass the render context here as well.
-        Shape shape = ShapedContainer.super.shape().shape(context);
+        Shape shape = ShapedContainer.super.elementShape(context);
         if (clipPathUnits == UnitType.ObjectBoundingBox) {
             return clipPathUnits.viewTransform(elementBounds).createTransformedShape(shape);
         } else {

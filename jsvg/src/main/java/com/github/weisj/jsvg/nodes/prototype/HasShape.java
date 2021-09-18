@@ -21,11 +21,35 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.SVGShape;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface HasShape {
+
+    default @NotNull Shape elementShape(@NotNull RenderContext context) {
+        Shape shape = untransformedElementShape(context);
+        if (this instanceof Transformable) {
+            return ((Transformable) this).transformShape(shape, context.measureContext());
+        }
+        return shape;
+    }
+
+
     @NotNull
-    SVGShape shape();
+    Shape untransformedElementShape(@NotNull RenderContext context);
+
+    default @NotNull Rectangle2D elementBounds(@NotNull RenderContext context) {
+        Rectangle2D shape = untransformedElementBounds(context);
+        if (this instanceof Transformable) {
+            return ((Transformable) this).transformShape(shape, context.measureContext()).getBounds2D();
+        }
+        return shape;
+    }
+
+    @NotNull
+    Rectangle2D untransformedElementBounds(@NotNull RenderContext context);
 }

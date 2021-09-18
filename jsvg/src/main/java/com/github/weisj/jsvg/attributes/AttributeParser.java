@@ -89,6 +89,15 @@ public final class AttributeParser {
         }
     }
 
+    public static double parseDouble(@Nullable String value, double fallback) {
+        if (value == null) return fallback;
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
     public static @Radian float parseAngle(@Nullable String value, float fallback) {
         if (value == null) return fallback;
         AngleUnit unit = AngleUnit.Raw;
@@ -121,6 +130,15 @@ public final class AttributeParser {
         float[] ret = new float[values.length];
         for (int i = 0; i < ret.length; i++) {
             ret[i] = parseFloat(values[i], 0);
+        }
+        return ret;
+    }
+
+    public static double[] parseDoubleList(@Nullable String value) {
+        String[] values = parseStringList(value, false);
+        double[] ret = new double[values.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = parseDouble(values[i], 0);
         }
         return ret;
     }
@@ -202,7 +220,7 @@ public final class AttributeParser {
         int first = value.indexOf('(');
         int last = value.lastIndexOf(')');
         String command = value.substring(0, value.indexOf('(')).toLowerCase(Locale.ENGLISH);
-        float[] values = parseFloatList(value.substring(first + 1, last));
+        double[] values = parseDoubleList(value.substring(first + 1, last));
         switch (command) {
             case "matrix":
                 tx.concatenate(new AffineTransform(values));

@@ -36,7 +36,6 @@ import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
-import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
@@ -47,7 +46,7 @@ import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
-        implements TextSegment.RenderableSegment, HasShape, SVGShape {
+        implements TextSegment.RenderableSegment, HasShape {
     private final List<TextSegment> segments = new ArrayList<>();
 
     protected AttributeFontSpec fontSpec;
@@ -84,7 +83,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
     }
 
     @Override
-    public List<@NotNull ? extends TextSegment> children() {
+    public List<? extends @NotNull TextSegment> children() {
         return segments;
     }
 
@@ -143,16 +142,6 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
     }
 
     @Override
-    public @NotNull SVGShape shape() {
-        return this;
-    }
-
-    @Override
-    public boolean usesOptimizedBoundsCalculation() {
-        return false;
-    }
-
-    @Override
     public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull Path2D textShape,
             @NotNull RenderContext context) {
         SVGFont font = context.font();
@@ -179,7 +168,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
     }
 
     @Override
-    public @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
-        return shape(context, validate).getBounds2D();
+    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context) {
+        return untransformedElementShape(context).getBounds2D();
     }
 }

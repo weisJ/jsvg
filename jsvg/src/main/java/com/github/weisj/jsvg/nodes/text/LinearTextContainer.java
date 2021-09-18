@@ -50,8 +50,9 @@ abstract class LinearTextContainer extends TextContainer {
         rotate = attributeNode.getFloatList("rotate");
     }
 
+
     @Override
-    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+    public @NotNull Shape untransformedElementShape(@NotNull RenderContext context) {
         Path2D textPath = new Path2D.Float();
         appendTextShape(createCursor(), textPath, context);
         return textPath;

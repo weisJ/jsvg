@@ -38,7 +38,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.ReversePathIterator;
 import com.github.weisj.jsvg.nodes.Anchor;
-import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.nodes.ShapeNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
@@ -65,7 +65,7 @@ public final class TextPath extends TextContainer {
     private Length startOffset;
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 
@@ -83,8 +83,8 @@ public final class TextPath extends TextContainer {
             pathShape = PathUtil.parseFromPathData(pathData, FillRule.EvenOdd);
         } else {
             String href = attributeNode.getHref();
-            HasShape shaped =
-                    attributeNode.getElementByHref(HasShape.class, Category.Shape /* BasicShape or Path */, href);
+            ShapeNode shaped =
+                    attributeNode.getElementByHref(ShapeNode.class, Category.Shape /* BasicShape or Path */, href);
             if (shaped != null) {
                 pathShape = shaped.shape();
             }
@@ -97,7 +97,7 @@ public final class TextPath extends TextContainer {
     }
 
     @Override
-    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+    public @NotNull Shape untransformedElementShape(@NotNull RenderContext context) {
         Path2D textPath = new Path2D.Float();
         appendTextShape(createCursor(context), textPath, context);
         return textPath;

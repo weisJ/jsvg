@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +32,6 @@ import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
-import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -64,7 +64,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     private FillRule fillRule;
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 
@@ -96,10 +96,21 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     }
 
     @Override
-    public @NotNull SVGShape shape() {
+    public @NotNull Shape untransformedElementShape(@NotNull RenderContext context) {
+        // Todo: Inner views need to handle this differently
         return referencedNode instanceof HasShape
-                ? ((HasShape) referencedNode).shape()
-                : AWTSVGShape.EMPTY;
+                ? ((HasShape) referencedNode)
+                        .elementShape(NodeRenderer.createChildContext(referencedNode, context, this))
+                : AWTSVGShape.EMPTY_SHAPE;
+    }
+
+    @Override
+    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context) {
+        // Todo: Inner views need to handle this differently
+        return referencedNode instanceof HasShape
+                ? ((HasShape) referencedNode)
+                        .elementBounds(NodeRenderer.createChildContext(referencedNode, context, this))
+                : AWTSVGShape.EMPTY_SHAPE;
     }
 
     @Override
