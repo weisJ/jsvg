@@ -77,7 +77,6 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
 
     public @NotNull Shape clipShape(@NotNull RenderContext context, @NotNull Rectangle2D elementBounds) {
         // Todo: Handle bounding-box stuff as well (i.e. combined stroke etc.)
-        // We might need to pass the render context here as well.
         Shape shape = ShapedContainer.super.elementShape(context);
         if (clipPathUnits == UnitType.ObjectBoundingBox) {
             return clipPathUnits.viewTransform(elementBounds).createTransformedShape(shape);

@@ -38,7 +38,7 @@ import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.*;
 
 public final class NodeRenderer {
-    private static final boolean CLIP_DEBUG = false;
+    private static final boolean CLIP_DEBUG = true;
 
     private NodeRenderer() {}
 
@@ -89,16 +89,23 @@ public final class NodeRenderer {
 
         if (renderable instanceof HasClip) {
             Rectangle2D elementBounds = null;
-            // Todo: When masks are implemented and we decide to paint to an off-screen buffer
-            // we can handle clip shapes as if they were masks (with 1/0 values).
+
+            Mask mask = ((HasClip) renderable).mask();
+            if (mask != null) {
+                // Todo: Proper object bounding box
+                elementBounds = elementBounds(renderable, childContext);
+                GraphicsUtil.safelySetPaint(childGraphics, mask.createMaskPaint(g, childContext, elementBounds));
+            }
+
             ClipPath childClip = ((HasClip) renderable).clipPath();
 
             if (childClip != null) {
                 // Elements with an invalid clip shouldn't be painted
                 if (!childClip.isValid()) return null;
-                elementBounds = elementBounds(renderable, childContext);
+                if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
 
                 Shape childClipShape = childClip.clipShape(childContext, elementBounds);
+
                 if (CLIP_DEBUG) {
                     Paint paint = childGraphics.getPaint();
                     Shape clip = childGraphics.getClip();
@@ -108,14 +115,8 @@ public final class NodeRenderer {
                     childGraphics.setPaint(paint);
                     childGraphics.setClip(clip);
                 }
-                childGraphics.clip(childClipShape);
-            }
 
-            Mask mask = ((HasClip) renderable).mask();
-            if (mask != null) {
-                // Todo: Proper object bounding box
-                if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
-                GraphicsUtil.safelySetPaint(childGraphics, mask.createMaskPaint(g, childContext, elementBounds));
+                childGraphics.clip(childClipShape);
             }
         }
 
