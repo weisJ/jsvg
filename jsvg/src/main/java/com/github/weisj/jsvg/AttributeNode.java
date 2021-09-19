@@ -183,6 +183,10 @@ public class AttributeNode {
         return AttributeParser.parseFloatList(getValue(key));
     }
 
+    public double[] getDoubleList(@NotNull String key) {
+        return AttributeParser.parseDoubleList(getValue(key));
+    }
+
     public <E extends Enum<E>> @NotNull E getEnum(@NotNull String key, @NotNull E fallback) {
         return AttributeParser.parseEnum(getValue(key), fallback);
     }

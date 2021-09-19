@@ -108,7 +108,7 @@ For supported elements most of the attributes which apply to them are implemente
 |Element|Status|
 |-------|------|
 |feBlend|:x:|
-|feColorMatrix|:x:|
+|feColorMatrix|:white_check_mark:|
 |feComponentTransfer|:x:|
 |feComposite|:x:|
 |feConvolveMatrix|:x:|

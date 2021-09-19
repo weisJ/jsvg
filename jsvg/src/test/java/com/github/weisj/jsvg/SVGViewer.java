@@ -44,7 +44,7 @@ public class SVGViewer {
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("mesh/mesh2.svg");
+            iconBox.setSelectedItem("filter/colormatrix.svg");
 
             SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
             svgPanel.setPreferredSize(new Dimension(1000, 600));
@@ -97,6 +97,7 @@ public class SVGViewer {
     private static class SVGPanel extends JPanel {
         private final Map<String, SVGDocument> iconCache = new HashMap<>();
         private SVGDocument document;
+        private String selectedIconName;
         private RenderingMode mode = RenderingMode.JSVG;
         private final SVGIcon icon = new SVGIcon() {
             @Override
@@ -117,22 +118,26 @@ public class SVGViewer {
         }
 
         private void selectIcon(@NotNull String name) {
-            document = iconCache.computeIfAbsent(name, n -> {
-                URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
-                SVGLoader loader = new SVGLoader();
-                return loader.load(url);
-            });
-            try {
-                icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
+            if (mode == RenderingMode.JSVG) {
+                document = iconCache.computeIfAbsent(name, n -> {
+                    URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
+                    SVGLoader loader = new SVGLoader();
+                    return loader.load(url);
+                });
+            } else {
+                try {
+                    icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
             }
+            this.selectedIconName = name;
             repaint();
         }
 
         private void setRenderingMode(@NotNull RenderingMode mode) {
             this.mode = mode;
-            repaint();
+            selectIcon(selectedIconName);
         }
 
         @Override

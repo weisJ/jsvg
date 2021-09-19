@@ -23,9 +23,9 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ImageObserver;
+import java.awt.image.*;
+
+import javax.swing.*;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -118,12 +118,14 @@ public final class Filter extends ContainerNode {
 
             Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.imageBounds, filterPrimitiveRegion);
 
-            BufferedImageOp[] imageOp = filterPrimitive.createImageOps(g, context, filterInfo);
+            ImageFilter[] filterOps = filterPrimitive.createImageOps(g, context, filterInfo);
 
-            for (BufferedImageOp bufferedImageOp : imageOp) {
+            ImageProducer producer = filterInfo.image.getSource();
+            for (ImageFilter filterOp : filterOps) {
                 // Todo: Respect filterPrimitiveRegion
-                filterInfo.image = bufferedImageOp.filter(filterInfo.image, null);
+                producer = new FilteredImageSource(producer, filterOp);
             }
+            filterInfo.producer = producer;
         }
     }
 
@@ -136,8 +138,9 @@ public final class Filter extends ContainerNode {
         private final @NotNull Rectangle2D elementBounds;
         public final @NotNull Rectangle2D imageBounds;
         private final @NotNull Graphics2D imageGraphics;
+        private @NotNull final BufferedImage image;
 
-        private @NotNull BufferedImage image;
+        public ImageProducer producer;
 
         private FilterInfo(@NotNull Graphics2D g, @NotNull BufferedImage image, @NotNull Rectangle2D imageBounds,
                 @NotNull Rectangle2D filterRegion, @NotNull Rectangle2D elementBounds) {
@@ -157,14 +160,17 @@ public final class Filter extends ContainerNode {
             return imageGraphics;
         }
 
-        public void blitImage(@NotNull Graphics2D g, @Nullable ImageObserver observer) {
+        public void blitImage(@NotNull Graphics2D g, @Nullable JComponent target) {
             if (DEBUG) {
                 GraphicsUtil.safelySetPaint(g, Color.RED);
                 g.draw(imageBounds);
             }
             g.translate(imageBounds.getX(), imageBounds.getY());
             g.scale(imageBounds.getWidth() / image.getWidth(), imageBounds.getHeight() / image.getHeight());
-            g.drawImage(image, null, observer);
+            Image image = target != null
+                    ? target.createImage(producer)
+                    : Toolkit.getDefaultToolkit().createImage(producer);
+            g.drawImage(image, 0, 0, target);
         }
     }
 }
