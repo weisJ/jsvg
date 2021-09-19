@@ -69,6 +69,10 @@ public final class Filter extends ContainerNode {
         return TAG;
     }
 
+    public boolean hasEffect() {
+        return !children().isEmpty();
+    }
+
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
@@ -103,6 +107,8 @@ public final class Filter extends ContainerNode {
     }
 
     public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
+        ImageProducer producer = filterInfo.image.getSource();
+
         for (SVGNode child : children()) {
             FilterPrimitive filterPrimitive = (FilterPrimitive) child;
             Rectangle2D.Double filterPrimitiveRegion = filterPrimitiveUnits.computeViewBounds(
@@ -120,7 +126,6 @@ public final class Filter extends ContainerNode {
 
             ImageFilter[] filterOps = filterPrimitive.createImageOps(g, context, filterInfo);
 
-            ImageProducer producer = filterInfo.image.getSource();
             for (ImageFilter filterOp : filterOps) {
                 // Todo: Respect filterPrimitiveRegion
                 producer = new FilteredImageSource(producer, filterOp);

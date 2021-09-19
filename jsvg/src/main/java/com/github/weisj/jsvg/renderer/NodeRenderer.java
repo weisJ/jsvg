@@ -153,7 +153,7 @@ public final class NodeRenderer {
                 ? ((HasFilter) renderable).filter()
                 : null;
 
-        if (filter != null) {
+        if (filter != null && filter.hasEffect()) {
             if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
             return new InfoWithFilter(renderable, childContext, childGraphics, filter, elementBounds);
         } else {
