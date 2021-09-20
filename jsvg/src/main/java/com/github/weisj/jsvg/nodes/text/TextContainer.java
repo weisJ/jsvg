@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
+import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
@@ -53,6 +54,8 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
     protected LengthAdjust lengthAdjust;
     protected @NotImplemented Length textLength;
 
+    protected TextAnchor textAnchor;
+
     protected @NotNull List<TextSegment> segments() {
         return segments;
     }
@@ -64,6 +67,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
+        textAnchor = attributeNode.getEnum("text-anchor", TextAnchor.Start);
     }
 
     @Override
@@ -91,9 +95,25 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
 
     protected abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
 
-    @Override
-    public void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context, @NotNull Graphics2D g) {
+    protected final void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
+            @NotNull Graphics2D g) {
         prepareSegmentForRendering(cursor, context);
+
+        double offset;
+        switch (textAnchor) {
+            default:
+            case Start:
+                offset = 0;
+                break;
+            case Middle:
+                offset = cursor.completeGlyphRunBounds.getWidth() / 2f;
+                break;
+            case End:
+                offset = cursor.completeGlyphRunBounds.getWidth();
+                break;
+        }
+        g.translate(-offset, 0);
+
         renderSegmentWithoutLayout(cursor, context, g);
     }
 

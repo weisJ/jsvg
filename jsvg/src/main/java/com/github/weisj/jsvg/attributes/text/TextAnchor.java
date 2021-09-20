@@ -19,22 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.text;
+package com.github.weisj.jsvg.attributes.text;
 
-import java.awt.*;
-import java.awt.geom.Path2D;
-
-import org.jetbrains.annotations.NotNull;
-
-import com.github.weisj.jsvg.renderer.RenderContext;
-
-interface TextSegment {
-    interface RenderableSegment extends TextSegment {
-        void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context);
-
-        void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
-                @NotNull Graphics2D g);
-
-        void appendTextShape(@NotNull GlyphCursor cursor, @NotNull Path2D textShape, @NotNull RenderContext context);
-    }
+public enum TextAnchor {
+    Start,
+    Middle,
+    End
 }
