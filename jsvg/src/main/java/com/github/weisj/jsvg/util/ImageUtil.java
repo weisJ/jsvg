@@ -64,8 +64,6 @@ public final class ImageUtil {
     }
 
     public static int getINT_RGBA_DataAdjust(@NotNull WritableRaster raster) {
-        DataBufferInt dstDB = (DataBufferInt) raster.getDataBuffer();
-        SinglePixelPackedSampleModel sppsm = (SinglePixelPackedSampleModel) raster.getSampleModel();
-        return sppsm.getScanlineStride() - raster.getWidth();
+        return ((SinglePixelPackedSampleModel) raster.getSampleModel()).getScanlineStride() - raster.getWidth();
     }
 }
