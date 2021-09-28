@@ -113,7 +113,7 @@ For supported elements most of the attributes which apply to them are implemente
 |feComposite|:x:|
 |feConvolveMatrix|:x:|
 |feDiffuseLighting|:x:|
-|feDisplacementMap|:x:|
+|feDisplacementMap|:white_check_mark:|
 |feDistantLight|:x:|
 |feFlood|:x:|
 |feFuncA|:x:|
@@ -130,7 +130,7 @@ For supported elements most of the attributes which apply to them are implemente
 |feSpecularLighting|:x:|
 |feSpotLight|:x:|
 |feTile|:x:|
-|feTurbulence|:x:|
+|feTurbulence|:white_check_mark:|
 |filter|:ballot_box_with_check:|
 
 ### Font elements
