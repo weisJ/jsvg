@@ -39,9 +39,7 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.github.weisj.jsvg.nodes.*;
-import com.github.weisj.jsvg.nodes.filter.FeColorMatrix;
-import com.github.weisj.jsvg.nodes.filter.FeGaussianBlur;
-import com.github.weisj.jsvg.nodes.filter.Filter;
+import com.github.weisj.jsvg.nodes.filter.*;
 import com.github.weisj.jsvg.nodes.mesh.MeshGradient;
 import com.github.weisj.jsvg.nodes.mesh.MeshPatch;
 import com.github.weisj.jsvg.nodes.mesh.MeshRow;
@@ -65,6 +63,7 @@ public class SVGLoader {
         nodeMap.put(Desc.TAG, Desc::new);
         nodeMap.put(Ellipse.TAG, Ellipse::new);
         nodeMap.put(FeColorMatrix.TAG, FeColorMatrix::new);
+        nodeMap.put(FeDisplacementMap.TAG, FeDisplacementMap::new);
         nodeMap.put(FeGaussianBlur.TAG, FeGaussianBlur::new);
         nodeMap.put(Filter.TAG, Filter::new);
         nodeMap.put(Group.TAG, Group::new);
