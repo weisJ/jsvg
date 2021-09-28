@@ -80,6 +80,15 @@ public final class AttributeParser {
         }
     }
 
+    public static int parseInt(@Nullable String value, int fallback) {
+        if (value == null) return fallback;
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
     public static float parseFloat(@Nullable String value, float fallback) {
         if (value == null) return fallback;
         try {

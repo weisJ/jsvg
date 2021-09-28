@@ -228,6 +228,10 @@ public class AttributeNode {
         return AttributeParser.parseFloat(getValue(name), fallback);
     }
 
+    public int getInt(@NotNull String key, int fallback) {
+        return AttributeParser.parseInt(getValue(key), fallback);
+    }
+
     public @Nullable String getHref() {
         String href = getValue("href");
         if (href == null) return getValue("xlink:href");
