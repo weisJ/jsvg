@@ -231,11 +231,11 @@ public final class PerlinTurbulence {
                 // adding it afterward simplifies to subtracting it once.
                 stitchInfo.width *= 2;
                 stitchInfo.wrapX *= 2;
-                stitchInfo.wrapX += PerlinN;
+                stitchInfo.wrapX += (int) PerlinN;
 
                 stitchInfo.height *= 2;
                 stitchInfo.wrapY *= 2;
-                stitchInfo.wrapY += PerlinN;
+                stitchInfo.wrapY += (int) PerlinN;
             }
         }
 

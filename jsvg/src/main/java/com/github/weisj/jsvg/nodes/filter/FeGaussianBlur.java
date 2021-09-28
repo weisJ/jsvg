@@ -119,7 +119,7 @@ public final class FeGaussianBlur extends FilterPrimitive {
         }
 
         for (int i = 0; i < data.length; i++) {
-            data[i] /= total;
+            data[i] = (float) (data[i] / total);
         }
 
         if (horizontal) {
