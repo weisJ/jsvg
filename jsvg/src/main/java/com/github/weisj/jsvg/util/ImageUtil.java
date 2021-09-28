@@ -24,6 +24,9 @@ package com.github.weisj.jsvg.util;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.awt.image.SinglePixelPackedSampleModel;
+import java.awt.image.WritableRaster;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -45,5 +48,24 @@ public final class ImageUtil {
         return new BufferedImage(
                 (int) Math.ceil(GeometryUtil.scaleXOfTransform(at) * width),
                 (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), BufferedImage.TYPE_BYTE_GRAY);
+    }
+
+    public static int[] getINT_RGBA_DataBank(@NotNull WritableRaster raster) {
+        DataBufferInt dstDB = (DataBufferInt) raster.getDataBuffer();
+        return dstDB.getBankData()[0];
+    }
+
+    public static int getINT_RGBA_DataOffset(@NotNull WritableRaster raster) {
+        DataBufferInt dstDB = (DataBufferInt) raster.getDataBuffer();
+        SinglePixelPackedSampleModel sppsm = (SinglePixelPackedSampleModel) raster.getSampleModel();
+        return dstDB.getOffset() + sppsm.getOffset(
+                raster.getMinX() - raster.getSampleModelTranslateX(),
+                raster.getMinY() - raster.getSampleModelTranslateY());
+    }
+
+    public static int getINT_RGBA_DataAdjust(@NotNull WritableRaster raster) {
+        DataBufferInt dstDB = (DataBufferInt) raster.getDataBuffer();
+        SinglePixelPackedSampleModel sppsm = (SinglePixelPackedSampleModel) raster.getSampleModel();
+        return sppsm.getScanlineStride() - raster.getWidth();
     }
 }

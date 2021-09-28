@@ -65,6 +65,7 @@ public class SVGLoader {
         nodeMap.put(FeColorMatrix.TAG, FeColorMatrix::new);
         nodeMap.put(FeDisplacementMap.TAG, FeDisplacementMap::new);
         nodeMap.put(FeGaussianBlur.TAG, FeGaussianBlur::new);
+        nodeMap.put(FeTurbulence.TAG, FeTurbulence::new);
         nodeMap.put(Filter.TAG, Filter::new);
         nodeMap.put(Group.TAG, Group::new);
         nodeMap.put(Image.TAG, Image::new);
