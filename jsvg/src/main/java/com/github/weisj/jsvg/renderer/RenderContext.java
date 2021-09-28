@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
+import java.awt.image.ImageProducer;
 
 import javax.swing.*;
 
@@ -171,5 +172,13 @@ public class RenderContext {
                 ",\n  contextElementAttributes=" + contextElementAttributes +
                 ",\n fillRule=" + fillRule +
                 "\n}";
+    }
+
+    public @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
+        if (targetComponent != null) {
+            return targetComponent.createImage(imageProducer);
+        } else {
+            return Toolkit.getDefaultToolkit().createImage(imageProducer);
+        }
     }
 }

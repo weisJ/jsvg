@@ -63,31 +63,29 @@ public final class FeGaussianBlur extends FilterPrimitive {
         edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.Duplicate);
     }
 
+
     @Override
-    public @NotNull ImageFilter[] createImageOps(@NotNull Graphics2D g, @NotNull RenderContext context,
-            @NotNull Filter.FilterInfo filterInfo) {
-        if (stdDeviation.length == 0) return new ImageFilter[0];
+    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
+            @NotNull FilterContext filterContext) {
+        if (stdDeviation.length == 0) return;
+
+        Filter.FilterInfo filterInfo = filterContext.info();
         AffineTransform at = filterInfo.graphics().getTransform();
         double xSigma = GeometryUtil.scaleXOfTransform(at) * stdDeviation[0];
         double ySigma = GeometryUtil.scaleYOfTransform(at) * stdDeviation[Math.min(stdDeviation.length - 1, 1)];
 
-        if (xSigma < 0 || ySigma < 0) return new ImageFilter[0];
+        if (xSigma < 0 || ySigma < 0) return;
 
-        ImageFilter xOp = xSigma > 0
-                ? createGaussianBlurFilter(g, xSigma, true)
-                : null;
-        ImageFilter yOp = ySigma > 0
-                ? createGaussianBlurFilter(g, ySigma, false)
-                : null;
+        ImageProducer input = inputChannel(filterContext).producer();
 
-        if (xOp != null && yOp != null) {
-            return new ImageFilter[] {xOp, yOp};
-        } else if (xOp != null) {
-            return new ImageFilter[] {xOp};
-        } else if (yOp != null) {
-            return new ImageFilter[] {yOp};
+        if (xSigma > 0) {
+            input = new FilteredImageSource(input, createGaussianBlurFilter(g, xSigma, true));
         }
-        return new ImageFilter[0];
+        if (ySigma > 0) {
+            input = new FilteredImageSource(input, createGaussianBlurFilter(g, ySigma, false));
+        }
+
+        saveResult(new ImageProducerChannel(input), filterContext);
     }
 
     private @NotNull ImageFilter createGaussianBlurFilter(@NotNull Graphics2D g, double sigma, boolean horizontal) {

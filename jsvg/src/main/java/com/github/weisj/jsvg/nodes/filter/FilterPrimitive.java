@@ -22,12 +22,12 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
-import java.awt.image.ImageFilter;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.AbstractSVGNode;
@@ -40,7 +40,21 @@ public abstract class FilterPrimitive extends AbstractSVGNode {
     Length width;
     Length height;
 
-    // Todo: out/result parameters
+    private Object inputChannel;
+    private Object resultChannel;
+
+    protected @NotNull Channel inputChannel(@NotNull FilterContext context) {
+        Channel input = context.getChannel(inputChannel);
+        if (input == null) throw new IllegalStateException("Input channel [" + inputChannel + "] doesn't exist.");
+        return input;
+    }
+
+    protected void saveResult(@NotNull Channel output, @NotNull FilterContext filterContext) {
+        filterContext.addResult(resultChannel, output);
+        if (resultChannel != DefaultFilterChannel.LastResult) {
+            filterContext.addResult(DefaultFilterChannel.LastResult, output);
+        }
+    }
 
     @Override
     @MustBeInvokedByOverriders
@@ -50,8 +64,13 @@ public abstract class FilterPrimitive extends AbstractSVGNode {
         y = attributeNode.getLength("y", Unit.PERCENTAGE.valueOf(0));
         width = attributeNode.getLength("width", Unit.PERCENTAGE.valueOf(100));
         height = attributeNode.getLength("height", Unit.PERCENTAGE.valueOf(100));
+
+        inputChannel = attributeNode.getValue("in");
+        if (inputChannel == null) inputChannel = DefaultFilterChannel.LastResult;
+        resultChannel = attributeNode.getValue("result");
+        if (resultChannel == null) resultChannel = DefaultFilterChannel.LastResult;
     }
 
-    public abstract @NotNull ImageFilter[] createImageOps(@NotNull Graphics2D g, @NotNull RenderContext context,
-            @NotNull Filter.FilterInfo filterInfo);
+    public abstract void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
+            @NotNull FilterContext filterContext);
 }

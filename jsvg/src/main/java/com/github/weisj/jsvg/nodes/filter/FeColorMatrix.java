@@ -98,10 +98,10 @@ public final class FeColorMatrix extends FilterPrimitive {
     }
 
     @Override
-    public @NotNull ImageFilter[] createImageOps(@NotNull Graphics2D g, @NotNull RenderContext context,
-            Filter.@NotNull FilterInfo filterInfo) {
-        if (filter == null) return new ImageFilter[0];
-        return new ImageFilter[] {filter};
+    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
+            @NotNull FilterContext filterContext) {
+        if (filter == null) return;
+        saveResult(inputChannel(filterContext).applyFilter(filter), filterContext);
     }
 
     private static int toRgbRange(double value) {

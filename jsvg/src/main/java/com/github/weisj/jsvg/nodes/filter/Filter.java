@@ -24,14 +24,14 @@ package com.github.weisj.jsvg.nodes.filter;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
-
-import javax.swing.*;
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
@@ -109,6 +109,12 @@ public final class Filter extends ContainerNode {
     public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
         ImageProducer producer = filterInfo.image.getSource();
 
+        FilterContext filterContext = new FilterContext(filterInfo);
+
+        Channel sourceChannel = new ImageProducerChannel(producer);
+        filterContext.addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
+        filterContext.addResult(DefaultFilterChannel.LastResult, sourceChannel);
+
         for (SVGNode child : children()) {
             FilterPrimitive filterPrimitive = (FilterPrimitive) child;
             Rectangle2D.Double filterPrimitiveRegion = filterPrimitiveUnits.computeViewBounds(
@@ -124,14 +130,13 @@ public final class Filter extends ContainerNode {
 
             Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.imageBounds, filterPrimitiveRegion);
 
-            ImageFilter[] filterOps = filterPrimitive.createImageOps(g, context, filterInfo);
+            filterPrimitive.applyFilter(g, context, filterContext);
 
-            for (ImageFilter filterOp : filterOps) {
-                // Todo: Respect filterPrimitiveRegion
-                producer = new FilteredImageSource(producer, filterOp);
-            }
-            filterInfo.producer = producer;
+            // Todo: Respect filterPrimitiveRegion
         }
+
+        filterInfo.producer = Objects.requireNonNull(
+                filterContext.getChannel(DefaultFilterChannel.LastResult)).producer();
     }
 
     @Override
@@ -140,18 +145,24 @@ public final class Filter extends ContainerNode {
     }
 
     public static class FilterInfo {
-        private final @NotNull Rectangle2D elementBounds;
         public final @NotNull Rectangle2D imageBounds;
-        private final @NotNull Graphics2D imageGraphics;
-        private @NotNull final BufferedImage image;
+        public final int imageWidth;
+        public final int imageHeight;
 
-        public ImageProducer producer;
+        private final @NotNull Rectangle2D elementBounds;
+        private final @NotNull Graphics2D imageGraphics;
+        private final @NotNull BufferedImage image;
+
+        private ImageProducer producer;
 
         private FilterInfo(@NotNull Graphics2D g, @NotNull BufferedImage image, @NotNull Rectangle2D imageBounds,
                 @NotNull Rectangle2D filterRegion, @NotNull Rectangle2D elementBounds) {
             this.image = image;
             this.imageBounds = imageBounds;
             this.elementBounds = elementBounds;
+
+            this.imageWidth = image.getWidth();
+            this.imageHeight = image.getHeight();
 
             this.imageGraphics = image.createGraphics();
             this.imageGraphics.setRenderingHints(g.getRenderingHints());
@@ -165,17 +176,24 @@ public final class Filter extends ContainerNode {
             return imageGraphics;
         }
 
-        public void blitImage(@NotNull Graphics2D g, @Nullable JComponent target) {
+        public @NotNull Rectangle2D tile() {
+            return new Rectangle2D.Double(
+                    imageBounds.getX() - elementBounds.getX(),
+                    imageBounds.getY() - elementBounds.getY(),
+                    imageBounds.getWidth(),
+                    imageBounds.getHeight());
+        }
+
+        public void blitImage(@NotNull Graphics2D g, @NotNull RenderContext context) {
             if (DEBUG) {
                 GraphicsUtil.safelySetPaint(g, Color.RED);
                 g.draw(imageBounds);
             }
             g.translate(imageBounds.getX(), imageBounds.getY());
             g.scale(imageBounds.getWidth() / image.getWidth(), imageBounds.getHeight() / image.getHeight());
-            Image image = target != null
-                    ? target.createImage(producer)
-                    : Toolkit.getDefaultToolkit().createImage(producer);
-            g.drawImage(image, 0, 0, target);
+
+            Image image = context.createImage(producer);
+            g.drawImage(image, 0, 0, context.targetComponent());
         }
     }
 }
