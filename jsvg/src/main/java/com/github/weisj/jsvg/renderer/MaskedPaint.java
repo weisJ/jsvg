@@ -45,6 +45,7 @@ public class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint {
         return paint;
     }
 
+    @Override
     public void setPaint(@NotNull Paint paint) {
         this.paint = GraphicsUtil.setupPaint(this.paint, paint);
     }
