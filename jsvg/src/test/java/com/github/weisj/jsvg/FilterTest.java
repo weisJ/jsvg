@@ -24,6 +24,8 @@ package com.github.weisj.jsvg;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 
 class FilterTest {
 
@@ -40,6 +42,7 @@ class FilterTest {
     }
 
     @Test
+    @EnabledForJreRange(min = JRE.JAVA_9)
     void testTurbulence() {
         compareImages("filter/turbulence1.svg");
         compareImages("filter/turbulence2.svg");
