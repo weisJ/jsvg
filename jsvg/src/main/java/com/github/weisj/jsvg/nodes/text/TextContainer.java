@@ -36,7 +36,6 @@ import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
-import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
@@ -54,8 +53,6 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
     protected LengthAdjust lengthAdjust;
     protected @NotImplemented Length textLength;
 
-    protected TextAnchor textAnchor;
-
     protected @NotNull List<TextSegment> segments() {
         return segments;
     }
@@ -67,7 +64,6 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
-        textAnchor = attributeNode.getEnum("text-anchor", TextAnchor.Start);
     }
 
     @Override
@@ -100,7 +96,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
         prepareSegmentForRendering(cursor, context);
 
         double offset;
-        switch (textAnchor) {
+        switch (context.fontRenderContext().textAnchor()) {
             default:
             case Start:
                 offset = 0;
@@ -175,7 +171,7 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
             }
             if (segment instanceof StringTextSegment) {
                 Shape glyphRun = GlyphRenderer.layoutGlyphRun((StringTextSegment) segment, localCursor, font,
-                        currentContext.measureContext());
+                        currentContext.measureContext(), currentContext.fontRenderContext());
                 textShape.append(glyphRun, false);
             } else if (segment instanceof RenderableSegment) {
                 ((RenderableSegment) segment).appendTextShape(localCursor, textShape, currentContext);

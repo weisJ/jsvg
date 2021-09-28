@@ -201,11 +201,12 @@ public final class NodeRenderer {
             return context.derive(null, null, viewBox, null, null, null);
         } else {
             MeasureContext newMeasure = context.measureContext().derive(viewBox,
-                    Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, FontRenderContext.createDefault());
+                    Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
             return new RenderContext(
                     context.targetComponent(),
                     PaintContext.createDefault(),
                     newMeasure,
+                    FontRenderContext.createDefault(),
                     MeasurableFontSpec.createDefault(),
                     context.fillRule(),
                     context.contextElementAttributes());

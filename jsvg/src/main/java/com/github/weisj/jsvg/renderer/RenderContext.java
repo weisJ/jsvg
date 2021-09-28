@@ -45,16 +45,21 @@ public class RenderContext {
     private final @Nullable JComponent targetComponent;
     private final @NotNull MeasureContext measureContext;
     private final @NotNull PaintContext paintContext;
+
+    private final @NotNull FontRenderContext fontRenderContext;
     private final @NotNull MeasurableFontSpec fontSpec;
+
     private final @NotNull FillRule fillRule;
 
     private final @Nullable ContextElementAttributes contextElementAttributes;
+
 
     public static @NotNull RenderContext createInitial(@Nullable JComponent targetComponent,
             @NotNull MeasureContext measureContext) {
         return new RenderContext(targetComponent,
                 PaintContext.createDefault(),
                 measureContext,
+                FontRenderContext.createDefault(),
                 MeasurableFontSpec.createDefault(),
                 FillRule.Nonzero,
                 null);
@@ -63,12 +68,14 @@ public class RenderContext {
     RenderContext(@Nullable JComponent targetComponent,
             @NotNull PaintContext paintContext,
             @NotNull MeasureContext measureContext,
+            @NotNull FontRenderContext fontRenderContext,
             @NotNull MeasurableFontSpec fontSpec,
             @NotNull FillRule fillRule,
             @Nullable ContextElementAttributes contextElementAttributes) {
         this.targetComponent = targetComponent;
         this.paintContext = paintContext;
         this.measureContext = measureContext;
+        this.fontRenderContext = fontRenderContext;
         this.fontSpec = fontSpec;
         this.fillRule = fillRule;
         this.contextElementAttributes = contextElementAttributes;
@@ -92,8 +99,11 @@ public class RenderContext {
 
         float em = newFontSpec.effectiveSize(measureContext);
         float ex = SVGFont.exFromEm(em);
-        MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex, frc);
-        return new RenderContext(targetComponent, newPaintContext, newMeasureContext, newFontSpec,
+        MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
+
+        FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
+
+        return new RenderContext(targetComponent, newPaintContext, newMeasureContext, effectiveFrc, newFontSpec,
                 newFillRule, newContextAttributes);
     }
 
@@ -115,6 +125,10 @@ public class RenderContext {
 
     public @NotNull MeasureContext measureContext() {
         return measureContext;
+    }
+
+    public @NotNull FontRenderContext fontRenderContext() {
+        return fontRenderContext;
     }
 
     public @NotNull FillRule fillRule() {

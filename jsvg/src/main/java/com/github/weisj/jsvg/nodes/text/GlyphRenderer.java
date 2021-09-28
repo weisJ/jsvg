@@ -44,7 +44,7 @@ final class GlyphRenderer {
             @NotNull RenderContext context) {
         MeasureContext measure = context.measureContext();
 
-        Shape glyphRun = layoutGlyphRun(segment, cursor, font, measure);
+        Shape glyphRun = layoutGlyphRun(segment, cursor, font, measure, context.fontRenderContext());
         Rectangle2D bounds = glyphRun.getBounds2D();
 
         if (Length.isUnspecified((float) cursor.completeGlyphRunBounds.getX())) {
@@ -77,11 +77,8 @@ final class GlyphRenderer {
     }
 
     static Shape layoutGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
-            @NotNull MeasureContext measure) {
-        FontRenderContext frc = measure.fontRenderContext();
-        float letterSpacing = frc.letterSpacing != null
-                ? frc.letterSpacing.resolveLength(measure)
-                : 0f;
+            @NotNull MeasureContext measure, @NotNull FontRenderContext fontRenderContext) {
+        float letterSpacing = fontRenderContext.letterSpacing().resolveLength(measure);
 
         Path2D glyphPath = new Path2D.Float();
 

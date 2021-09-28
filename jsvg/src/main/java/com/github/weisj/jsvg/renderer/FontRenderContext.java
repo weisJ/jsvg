@@ -28,19 +28,31 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.text.BaselineAlignment;
+import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
 public class FontRenderContext {
     // Note: An unspecified value is different from 0.
-    // Unlike 0 it allows us to use spacing different than 0 if needed.
-    public final @Nullable Length letterSpacing;
-    public final @Nullable BaselineAlignment baselineAlignment;
+    // Unlike 0 it allows us to use spacing different from 0 if needed.
+    private final @Nullable Length letterSpacing;
+    private final @Nullable BaselineAlignment baselineAlignment;
+    private final @Nullable TextAnchor textAnchor;
 
-    public FontRenderContext(@Nullable Length letterSpacing, @Nullable BaselineAlignment baselineAlignment) {
+    public FontRenderContext(@Nullable Length letterSpacing, @Nullable BaselineAlignment baselineAlignment,
+            @Nullable TextAnchor textAnchor) {
         this.letterSpacing = letterSpacing;
         this.baselineAlignment = baselineAlignment;
+        this.textAnchor = textAnchor;
+    }
+
+    public @NotNull Length letterSpacing() {
+        return letterSpacing != null ? letterSpacing : Length.ZERO;
+    }
+
+    public @NotNull TextAnchor textAnchor() {
+        return textAnchor != null ? textAnchor : TextAnchor.Start;
     }
 
     @Override
@@ -57,19 +69,21 @@ public class FontRenderContext {
     }
 
     public static @NotNull FontRenderContext createDefault() {
-        return new FontRenderContext(null, null);
+        return new FontRenderContext(null, null, null);
     }
 
     public static @NotNull FontRenderContext parse(@NotNull AttributeNode attributeNode) {
         return new FontRenderContext(
                 attributeNode.getLength("latter-spacing"),
-                attributeNode.getEnum("baseline-alignment", BaselineAlignment.Auto));
+                attributeNode.getEnum("baseline-alignment", BaselineAlignment.Auto),
+                attributeNode.getEnumNullable("text-anchor", TextAnchor.class));
     }
 
     public @NotNull FontRenderContext derive(@Nullable FontRenderContext frc) {
         if (frc == null || frc.equals(this)) return this;
         return new FontRenderContext(
                 frc.letterSpacing != null ? frc.letterSpacing : letterSpacing,
-                frc.baselineAlignment != null ? frc.baselineAlignment : baselineAlignment);
+                frc.baselineAlignment != null ? frc.baselineAlignment : baselineAlignment,
+                frc.textAnchor != null ? frc.textAnchor : textAnchor);
     }
 }
