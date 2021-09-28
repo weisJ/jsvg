@@ -52,13 +52,16 @@ public class AttributeNode {
     private final @Nullable AttributeNode parent;
     private final @NotNull Map<@NotNull String, @NotNull SVGNode> namedElements;
 
+    private final @NotNull AttributeParser attributeParser;
+
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
-            @Nullable AttributeNode parent,
-            @NotNull Map<@NotNull String, @NotNull SVGNode> namedElements) {
+            @Nullable AttributeNode parent, @NotNull Map<@NotNull String, @NotNull SVGNode> namedElements,
+            @NotNull AttributeParser attributeParser) {
         this.tagName = tagName;
         this.attributes = preprocessAttributes(attributes);
         this.parent = parent;
         this.namedElements = namedElements;
+        this.attributeParser = attributeParser;
     }
 
     private static @NotNull Map<String, String> preprocessAttributes(@NotNull Map<String, String> attributes) {
@@ -81,7 +84,7 @@ public class AttributeNode {
     }
 
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
-        String url = AttributeParser.parseUrl(value);
+        String url = attributeParser.parseUrl(value);
         if (url != null && url.startsWith("#")) url = url.substring(1);
         return getElementById(type, url);
     }
@@ -121,7 +124,7 @@ public class AttributeNode {
     public @NotNull Color getColor(@NotNull String key) {
         String value = getValue(key);
         if (value == null) return PaintParser.DEFAULT_COLOR;
-        Color c = PaintParser.parseColor(value.toLowerCase(Locale.ENGLISH));
+        Color c = attributeParser.paintParser().parseColor(value.toLowerCase(Locale.ENGLISH), this);
         return c != null ? c : PaintParser.DEFAULT_COLOR;
     }
 
@@ -129,7 +132,7 @@ public class AttributeNode {
         String value = getValue(key);
         SVGPaint paint = getElementByUrl(SVGPaint.class, value);
         if (paint != null) return paint;
-        return AttributeParser.parsePaint(value);
+        return attributeParser.parsePaint(value, this);
     }
 
     public @Nullable Length getLength(@NotNull String key) {
@@ -146,7 +149,7 @@ public class AttributeNode {
 
     @Contract("_,!null -> !null")
     private @Nullable Length getLengthInternal(@NotNull String key, @Nullable Length fallback) {
-        return AttributeParser.parseLength(getValue(key), fallback);
+        return attributeParser.parseLength(getValue(key), fallback);
     }
 
     public @NotNull Length getHorizontalReferenceLength(@NotNull String key) {
@@ -167,32 +170,32 @@ public class AttributeNode {
         } else if (bottomRight.equals(value)) {
             return BottomOrRight;
         } else {
-            return AttributeParser.parseLength(value, Length.ZERO);
+            return attributeParser.parseLength(value, Length.ZERO);
         }
     }
 
     public @Percentage float getPercentage(@NotNull String key, @Percentage float fallback) {
-        return AttributeParser.parsePercentage(getValue(key), fallback);
+        return attributeParser.parsePercentage(getValue(key), fallback);
     }
 
     public @NotNull Length[] getLengthList(@NotNull String key) {
-        return AttributeParser.parseLengthList(getValue(key));
+        return attributeParser.parseLengthList(getValue(key));
     }
 
     public float[] getFloatList(@NotNull String key) {
-        return AttributeParser.parseFloatList(getValue(key));
+        return attributeParser.parseFloatList(getValue(key));
     }
 
     public double[] getDoubleList(@NotNull String key) {
-        return AttributeParser.parseDoubleList(getValue(key));
+        return attributeParser.parseDoubleList(getValue(key));
     }
 
     public <E extends Enum<E>> @NotNull E getEnum(@NotNull String key, @NotNull E fallback) {
-        return AttributeParser.parseEnum(getValue(key), fallback);
+        return attributeParser.parseEnum(getValue(key), fallback);
     }
 
     public <E extends Enum<E>> @Nullable E getEnumNullable(@NotNull String key, @NotNull Class<E> enumType) {
-        return AttributeParser.parseEnum(getValue(key), enumType);
+        return attributeParser.parseEnum(getValue(key), enumType);
     }
 
     public @Nullable ClipPath getClipPath() {
@@ -208,7 +211,7 @@ public class AttributeNode {
     }
 
     public @Nullable AffineTransform parseTransform(@NotNull String key) {
-        return AttributeParser.parseTransform(getValue(key));
+        return attributeParser.parseTransform(getValue(key));
     }
 
     public boolean hasAttribute(@NotNull String name) {
@@ -221,15 +224,15 @@ public class AttributeNode {
 
 
     public @NotNull String[] getStringList(@NotNull String name, boolean requireComma) {
-        return AttributeParser.parseStringList(getValue(name), requireComma);
+        return attributeParser.parseStringList(getValue(name), requireComma);
     }
 
     public float getFloat(@NotNull String name, float fallback) {
-        return AttributeParser.parseFloat(getValue(name), fallback);
+        return attributeParser.parseFloat(getValue(name), fallback);
     }
 
     public int getInt(@NotNull String key, int fallback) {
-        return AttributeParser.parseInt(getValue(key), fallback);
+        return attributeParser.parseInt(getValue(key), fallback);
     }
 
     public @Nullable String getHref() {
@@ -241,5 +244,9 @@ public class AttributeNode {
     public @Nullable ViewBox getViewBox() {
         float[] viewBoxCords = getFloatList("viewBox");
         return viewBoxCords.length == 4 ? new ViewBox(viewBoxCords) : null;
+    }
+
+    public @NotNull AttributeParser parser() {
+        return attributeParser;
     }
 }

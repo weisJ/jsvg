@@ -174,23 +174,24 @@ public final class PreserveAspectRatio {
         return new PreserveAspectRatio(Align.None, MeetOrSlice.Meet);
     }
 
-    public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation) {
-        return parse(preserveAspectRation, null);
+    public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation,
+            @NotNull AttributeParser parser) {
+        return parse(preserveAspectRation, null, parser);
     }
 
     public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation,
-            @Nullable PreserveAspectRatio fallback) {
+            @Nullable PreserveAspectRatio fallback, @NotNull AttributeParser parser) {
         Align align = Align.xMidYMid;
         MeetOrSlice meetOrSlice = MeetOrSlice.Meet;
         if (preserveAspectRation == null) {
             return fallback != null ? fallback : new PreserveAspectRatio(align, meetOrSlice);
         }
-        String[] components = AttributeParser.parseStringList(preserveAspectRation, false);
+        String[] components = parser.parseStringList(preserveAspectRation, false);
         if (components.length < 1 || components.length > 2)
             throw new IllegalArgumentException("Too many arguments specified: " + preserveAspectRation);
-        align = AttributeParser.parseEnum(components[0], align);
+        align = parser.parseEnum(components[0], align);
         if (components.length > 1)
-            meetOrSlice = AttributeParser.parseEnum(components[1], meetOrSlice);
+            meetOrSlice = parser.parseEnum(components[1], meetOrSlice);
         return new PreserveAspectRatio(align, meetOrSlice);
     }
 

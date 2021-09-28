@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.AttributeNode;
-import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
 
@@ -63,7 +62,7 @@ public final class FontParser {
     public static @Percentage float parseStretch(@NotNull AttributeNode node) {
         FontStretch stretch = node.getEnum("font-stretch", FontStretch.Percentage);
         return stretch == FontStretch.Percentage
-                ? AttributeParser.parsePercentage(node.getValue("font-stretch"),
+                ? node.parser().parsePercentage(node.getValue("font-stretch"),
                         Length.UNSPECIFIED_RAW, 0.5f, 2f)
                 : stretch.percentage();
     }
@@ -94,7 +93,7 @@ public final class FontParser {
             String[] comps = styleStr.split(" ", 2);
             if (comps.length == 2) {
                 style = new FontStyle.Oblique(
-                        AttributeParser.parseAngle(comps[1], FontStyle.Oblique.DEFAULT_ANGLE));
+                        node.parser().parseAngle(comps[1], FontStyle.Oblique.DEFAULT_ANGLE));
             } else {
                 style = FontStyle.oblique();
             }

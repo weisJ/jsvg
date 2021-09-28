@@ -102,7 +102,7 @@ public final class Marker extends BaseInnerViewContainer {
         refX = attributeNode.getHorizontalReferenceLength("refX");
         refY = attributeNode.getHorizontalReferenceLength("refY");
 
-        orientation = MarkerOrientation.parse(attributeNode.getValue("orient"));
+        orientation = MarkerOrientation.parse(attributeNode.getValue("orient"), attributeNode.parser());
 
         markerUnits = attributeNode.getEnum("markerUnits", MarkerUnitType.StrokeWidth);
         markerWidth = attributeNode.getLength("markerWidth", 3);

@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.HasMatchName;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
@@ -40,10 +41,15 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 
 public final class AttributeParser {
-    private AttributeParser() {}
+
+    private final @NotNull PaintParser paintParser;
+
+    public AttributeParser(@NotNull PaintParser paintParser) {
+        this.paintParser = paintParser;
+    }
 
     @Contract("_,!null -> !null")
-    public static @Nullable Length parseLength(@Nullable String value, @Nullable Length fallback) {
+    public @Nullable Length parseLength(@Nullable String value, @Nullable Length fallback) {
         if (value == null) return fallback;
         Unit unit = Unit.Raw;
         String lower = value.toLowerCase(Locale.ENGLISH);
@@ -61,11 +67,11 @@ public final class AttributeParser {
         }
     }
 
-    public static @Percentage float parsePercentage(@Nullable String value, float fallback) {
+    public @Percentage float parsePercentage(@Nullable String value, float fallback) {
         return parsePercentage(value, fallback, 0, 1);
     }
 
-    public static @Percentage float parsePercentage(@Nullable String value, float fallback, float min, float max) {
+    public @Percentage float parsePercentage(@Nullable String value, float fallback, float min, float max) {
         if (value == null) return fallback;
         try {
             float parsed;
@@ -80,7 +86,7 @@ public final class AttributeParser {
         }
     }
 
-    public static int parseInt(@Nullable String value, int fallback) {
+    public int parseInt(@Nullable String value, int fallback) {
         if (value == null) return fallback;
         try {
             return Integer.parseInt(value);
@@ -89,7 +95,7 @@ public final class AttributeParser {
         }
     }
 
-    public static float parseFloat(@Nullable String value, float fallback) {
+    public float parseFloat(@Nullable String value, float fallback) {
         if (value == null) return fallback;
         try {
             return Float.parseFloat(value);
@@ -98,7 +104,7 @@ public final class AttributeParser {
         }
     }
 
-    public static double parseDouble(@Nullable String value, double fallback) {
+    public double parseDouble(@Nullable String value, double fallback) {
         if (value == null) return fallback;
         try {
             return Double.parseDouble(value);
@@ -107,7 +113,7 @@ public final class AttributeParser {
         }
     }
 
-    public static @Radian float parseAngle(@Nullable String value, float fallback) {
+    public @Radian float parseAngle(@Nullable String value, float fallback) {
         if (value == null) return fallback;
         AngleUnit unit = AngleUnit.Raw;
         String lower = value.toLowerCase(Locale.ENGLISH);
@@ -125,7 +131,7 @@ public final class AttributeParser {
         }
     }
 
-    public static Length[] parseLengthList(@Nullable String value) {
+    public Length[] parseLengthList(@Nullable String value) {
         String[] values = parseStringList(value, false);
         Length[] ret = new Length[values.length];
         for (int i = 0; i < ret.length; i++) {
@@ -134,7 +140,7 @@ public final class AttributeParser {
         return ret;
     }
 
-    public static float[] parseFloatList(@Nullable String value) {
+    public float[] parseFloatList(@Nullable String value) {
         String[] values = parseStringList(value, false);
         float[] ret = new float[values.length];
         for (int i = 0; i < ret.length; i++) {
@@ -143,7 +149,7 @@ public final class AttributeParser {
         return ret;
     }
 
-    public static double[] parseDoubleList(@Nullable String value) {
+    public double[] parseDoubleList(@Nullable String value) {
         String[] values = parseStringList(value, false);
         double[] ret = new double[values.length];
         for (int i = 0; i < ret.length; i++) {
@@ -152,7 +158,7 @@ public final class AttributeParser {
         return ret;
     }
 
-    public static @NotNull String[] parseStringList(@Nullable String value, boolean requireComma) {
+    public @NotNull String[] parseStringList(@Nullable String value, boolean requireComma) {
         if (value == null || value.isEmpty()) return new String[0];
         List<String> list = new ArrayList<>();
         int max = value.length();
@@ -179,17 +185,17 @@ public final class AttributeParser {
         return list.toArray(new String[0]);
     }
 
-    public static @Nullable SVGPaint parsePaint(@Nullable String value) {
-        return PaintParser.parsePaint(value);
+    public @Nullable SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode attributeNode) {
+        return paintParser.parsePaint(value, attributeNode);
     }
 
-    public static <E extends Enum<E>> @NotNull E parseEnum(@Nullable String value, @NotNull E fallback) {
+    public <E extends Enum<E>> @NotNull E parseEnum(@Nullable String value, @NotNull E fallback) {
         E e = parseEnum(value, fallback.getDeclaringClass());
         if (e == null) return fallback;
         return e;
     }
 
-    public static <E extends Enum<E>> @Nullable E parseEnum(@Nullable String value, @NotNull Class<E> enumType) {
+    public <E extends Enum<E>> @Nullable E parseEnum(@Nullable String value, @NotNull Class<E> enumType) {
         if (value == null) return null;
         for (E enumConstant : enumType.getEnumConstants()) {
             String name = enumConstant instanceof HasMatchName
@@ -200,7 +206,7 @@ public final class AttributeParser {
         return null;
     }
 
-    public static @Nullable String parseUrl(@Nullable String value) {
+    public @Nullable String parseUrl(@Nullable String value) {
         if (value == null) return null;
         if (!value.startsWith("url(") || !value.endsWith(")")) return value;
         return value.substring(4, value.length() - 1);
@@ -208,7 +214,7 @@ public final class AttributeParser {
 
     private static final Pattern TRANSFORM_PATTERN = Pattern.compile("\\w+\\([^)]*\\)");
 
-    public static @Nullable AffineTransform parseTransform(@Nullable String value) {
+    public @Nullable AffineTransform parseTransform(@Nullable String value) {
         if (value == null) return null;
         final Matcher transformMatcher = TRANSFORM_PATTERN.matcher(value);
         AffineTransform transform = new AffineTransform();
@@ -225,7 +231,7 @@ public final class AttributeParser {
         return transform;
     }
 
-    private static void parseSingleTransform(@NotNull String value, @NotNull AffineTransform tx) {
+    private void parseSingleTransform(@NotNull String value, @NotNull AffineTransform tx) {
         int first = value.indexOf('(');
         int last = value.lastIndexOf(')');
         String command = value.substring(0, value.indexOf('(')).toLowerCase(Locale.ENGLISH);
@@ -276,5 +282,9 @@ public final class AttributeParser {
             default:
                 throw new IllegalArgumentException("Unknown transform type: " + command);
         }
+    }
+
+    public @NotNull PaintParser paintParser() {
+        return paintParser;
     }
 }

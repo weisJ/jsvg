@@ -33,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.SVGRenderingHints;
-import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -76,8 +75,9 @@ public final class Image extends RenderableSVGNode {
         y = attributeNode.getLength("y", 0);
         width = attributeNode.getLength("width", Length.UNSPECIFIED);
         height = attributeNode.getLength("height", Length.UNSPECIFIED);
-        preserveAspectRatio = PreserveAspectRatio.parse(attributeNode.getValue("preserveAspectRatio"));
-        String url = AttributeParser.parseUrl(attributeNode.getHref());
+        preserveAspectRatio = PreserveAspectRatio.parse(
+                attributeNode.getValue("preserveAspectRatio"), attributeNode.parser());
+        String url = attributeNode.parser().parseUrl(attributeNode.getHref());
         if (url != null) {
             try {
                 URL parsedUrl = new URL(url);

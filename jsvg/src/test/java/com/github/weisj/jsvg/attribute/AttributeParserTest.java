@@ -24,11 +24,20 @@ package com.github.weisj.jsvg.attribute;
 import java.util.Random;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.AttributeParser;
+import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
 
 class AttributeParserTest {
+
+    private AttributeParser parser;
+
+    @BeforeEach
+    void setup() {
+        parser = new AttributeParser(new DefaultPaintParser());
+    }
 
     @Test
     void testStringListNoRequiredComma() {
@@ -45,7 +54,7 @@ class AttributeParserTest {
         Random r = new Random();
         for (int i = 0; i < 20; i++) {
             float[] arr = generateRandomFloatArray(r);
-            float[] parsed = AttributeParser.parseFloatList(appendToList(box(arr), r, false));
+            float[] parsed = parser.parseFloatList(appendToList(box(arr), r, false));
             Assertions.assertArrayEquals(arr, parsed);
         }
     }
@@ -62,7 +71,7 @@ class AttributeParserTest {
         Random r = new Random();
         for (int i = 0; i < 20; i++) {
             String[] arr = generateRandomStringArray(r);
-            String[] parsed = AttributeParser.parseStringList(
+            String[] parsed = parser.parseStringList(
                     appendToList(arr, r, requireComma), requireComma);
             Assertions.assertArrayEquals(arr, parsed);
         }

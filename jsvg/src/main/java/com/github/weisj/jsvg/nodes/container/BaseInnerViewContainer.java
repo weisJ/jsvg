@@ -58,7 +58,8 @@ public abstract class BaseInnerViewContainer extends RenderableContainerNode {
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         viewBox = attributeNode.getViewBox();
-        preserveAspectRatio = PreserveAspectRatio.parse(attributeNode.getValue("preserveAspectRatio"));
+        preserveAspectRatio = PreserveAspectRatio.parse(
+                attributeNode.getValue("preserveAspectRatio"), attributeNode.parser());
     }
 
     @Override

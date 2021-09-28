@@ -36,11 +36,11 @@ public abstract class MarkerOrientation {
         End
     }
 
-    public static @NotNull MarkerOrientation parse(@Nullable String value) {
+    public static @NotNull MarkerOrientation parse(@Nullable String value, @NotNull AttributeParser parser) {
         if (value == null) return AngleOrientation.DEFAULT;
         if ("auto".equals(value)) return AutoOrientation.INSTANCE;
         if ("auto-start-reverse".equals(value)) return AutoStartReverseOrientation.INSTANCE;
-        @Radian float angle = AttributeParser.parseAngle(value, Length.UNSPECIFIED_RAW);
+        @Radian float angle = parser.parseAngle(value, Length.UNSPECIFIED_RAW);
         if (Length.isSpecified(angle)) return new AngleOrientation(angle);
         return AngleOrientation.DEFAULT;
     }

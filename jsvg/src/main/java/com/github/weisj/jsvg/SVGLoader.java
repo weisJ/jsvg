@@ -38,6 +38,9 @@ import org.jetbrains.annotations.Nullable;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.github.weisj.jsvg.attributes.AttributeParser;
+import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
+import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.nodes.*;
 import com.github.weisj.jsvg.nodes.filter.*;
 import com.github.weisj.jsvg.nodes.mesh.MeshGradient;
@@ -54,7 +57,25 @@ public class SVGLoader {
 
     private final XMLReader xmlReader;
 
+    private final AttributeParser attributeParser;
+
+    public interface ParserProvider {
+        @NotNull
+        PaintParser createPaintParser();
+    }
+
+    public static class DefaultParserProvider implements ParserProvider {
+        @Override
+        public @NotNull PaintParser createPaintParser() {
+            return new DefaultPaintParser();
+        }
+    }
+
     public SVGLoader() {
+        this(new DefaultParserProvider());
+    }
+
+    public SVGLoader(@NotNull ParserProvider parserProvider) {
         nodeMap = new HashMap<>();
         nodeMap.put(Anchor.TAG, Anchor::new);
         nodeMap.put(Circle.TAG, Circle::new);
@@ -94,15 +115,6 @@ public class SVGLoader {
         nodeMap.put(Title.TAG, Title::new);
         nodeMap.put(Use.TAG, Use::new);
         nodeMap.put(View.TAG, View::new);
-        /* @formatter:off
-         * Todo: **Ideas**
-         *  - Turn current parsers into interfaces. Allow users to specify custom parsers.
-         *    This would allow to have darklaf recognize dynamic colors and replace them with appropriate
-         *    SVGPaint implementations to avoid patching the svg structure itself.
-         *    Doing this avoids the need for keeping the SVG structure around for modification
-         *    (which isn't in scope for this project).
-         * @formatter:on
-         */
 
         try {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
@@ -112,6 +124,8 @@ public class SVGLoader {
         } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
+
+        attributeParser = new AttributeParser(parserProvider.createPaintParser());
     }
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {
@@ -220,7 +234,7 @@ public class SVGLoader {
                         attributes.getValue("id"),
                         new AttributeNode(qName, attrs, lastParsedElement != null
                                 ? lastParsedElement.attributeNode
-                                : null, namedElements),
+                                : null, namedElements, attributeParser),
                         newNode);
 
                 if (lastParsedElement != null) {
