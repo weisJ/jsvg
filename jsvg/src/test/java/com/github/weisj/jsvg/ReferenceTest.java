@@ -53,6 +53,8 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 
 final class ReferenceTest {
 
+    private static final double DEFAULT_TOLERANCE = 0.5;
+
     @Test
     void testIcons() {
         String[] iconNames = {"desktop.svg", "drive.svg", "folder.svg", "general.svg", "homeFolder.svg", "image.svg",
@@ -69,42 +71,55 @@ final class ReferenceTest {
     }
 
     static void compareImages(@NotNull String fileName) {
-        compareImages(fileName, Objects.requireNonNull(ReferenceTest.class.getResource(fileName), fileName));
+        compareImages(fileName, DEFAULT_TOLERANCE);
     }
 
+    static void compareImages(@NotNull String fileName, double tolerance) {
+        compareImages(fileName, Objects.requireNonNull(ReferenceTest.class.getResource(fileName), fileName), tolerance);
+    }
 
-    static void compareImages(@NotNull String name, @NotNull URL url) {
+    static void compareImages(@NotNull String name, @NotNull URL url, double tolerance) {
         try {
             BufferedImage expected = renderReference(url.openStream());
             BufferedImage actual = render(url.openStream());
-            compareImageRasterization(expected, actual, name);
+            compareImageRasterization(expected, actual, name, tolerance);
         } catch (Exception e) {
             Assertions.fail(name, e);
         }
     }
 
     static void compareImages(@NotNull String name, @NotNull String svgContent) {
+        compareImages(name, svgContent, DEFAULT_TOLERANCE);
+    }
+
+    static void compareImages(@NotNull String name, @NotNull String svgContent, double tolerance) {
         try {
             BufferedImage expected =
                     renderReference(new ByteArrayInputStream(svgContent.getBytes(StandardCharsets.UTF_8)));
             BufferedImage actual = render(new ByteArrayInputStream(svgContent.getBytes(StandardCharsets.UTF_8)));
-            compareImageRasterization(expected, actual, name);
+            compareImageRasterization(expected, actual, name, tolerance);
         } catch (Exception e) {
             Assertions.fail(name, e);
         }
     }
 
     private static void compareImageRasterization(@NotNull BufferedImage expected, @NotNull BufferedImage actual,
-            @NotNull String name) {
+            @NotNull String name, double tolerance) {
         ImageComparison comp = new ImageComparison(expected, actual);
-        comp.setAllowingPercentOfDifferentPixels(0.5f);
+        comp.setAllowingPercentOfDifferentPixels(tolerance);
         ImageComparisonResult comparison = comp.compareImages();
-        Assertions.assertEquals(ImageComparisonState.MATCH, comparison.getImageComparisonState(), () -> {
+        ImageComparisonState state = comparison.getImageComparisonState();
+        if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
+            state = ImageComparisonState.MATCH;
+        }
+        Assertions.assertEquals(ImageComparisonState.MATCH, state, () -> {
             StringBuilder sb = new StringBuilder();
             sb.append("Image: ").append(name).append('\n');
             sb.append("Expected size: ").append(expected.getWidth()).append('x').append(expected.getHeight())
                     .append('\n');
             sb.append("Actual size: ").append(actual.getWidth()).append('x').append(actual.getHeight())
+                    .append('\n');
+            sb.append("Difference: ").append(comparison.getDifferencePercent()).append('%')
                     .append('\n');
             List<Rectangle> rects = comparison.getRectangles();
             if (rects != null) {
@@ -121,6 +136,10 @@ final class ReferenceTest {
                 }
                 ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_diff.png"),
                         comparison.getResult());
+                ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_expected.png"),
+                        comparison.getExpected());
+                ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_actual.png"),
+                        comparison.getActual());
             }
             return sb.toString();
         });

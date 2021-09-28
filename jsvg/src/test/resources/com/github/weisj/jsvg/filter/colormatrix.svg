@@ -1,6 +1,7 @@
-<svg width="100%" height="100%" viewBox="0 0 150 500"
+<svg width="300" height="1000" viewBox="0 0 150 500"
      preserveAspectRatio="xMidYMid meet"
      xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
 >
 
     <!-- ref -->
@@ -11,7 +12,7 @@
             <circle cx="40" cy="50" r="20" fill="red" fill-opacity="0.5"/>
         </g>
     </defs>
-    <use href="#circles"/>
+    <use xlink:href="#circles"/>
     <text x="70" y="50">Reference</text>
 
     <!-- identity matrix -->
@@ -24,7 +25,7 @@
                 0 0 1 0 0
                 0 0 0 1 0"/>
     </filter>
-    <use href="#circles" transform="translate(0 70)" filter="url(#colorMeTheSame)"/>
+    <use xlink:href="#circles" transform="translate(0 70)" filter="url(#colorMeTheSame)"/>
     <text x="70" y="120">Identity matrix</text>
 
     <!-- Combine RGB into green matrix -->
@@ -37,7 +38,7 @@
                 0 0 0 0 0
                 0 0 0 1 0"/>
     </filter>
-    <use href="#circles" transform="translate(0 140)" filter="url(#colorMeGreen)"/>
+    <use xlink:href="#circles" transform="translate(0 140)" filter="url(#colorMeGreen)"/>
     <text x="70" y="190">rgbToGreen</text>
 
     <!-- saturate -->
@@ -46,7 +47,7 @@
                        type="saturate"
                        values="0.2"/>
     </filter>
-    <use href="#circles" transform="translate(0 210)" filter="url(#colorMeSaturate)"/>
+    <use xlink:href="#circles" transform="translate(0 210)" filter="url(#colorMeSaturate)"/>
     <text x="70" y="260">saturate</text>
 
     <!-- hueRotate -->
@@ -55,7 +56,7 @@
                        type="hueRotate"
                        values="180"/>
     </filter>
-    <use href="#circles" transform="translate(0 280)" filter="url(#colorMeHueRotate)"/>
+    <use xlink:href="#circles" transform="translate(0 280)" filter="url(#colorMeHueRotate)"/>
     <text x="70" y="330">hueRotate</text>
 
     <!-- luminanceToAlpha -->
@@ -63,6 +64,6 @@
         <feColorMatrix in="SourceGraphic"
                        type="luminanceToAlpha"/>
     </filter>
-    <use href="#circles" transform="translate(0 350)" filter="url(#colorMeLTA)"/>
+    <use xlink:href="#circles" transform="translate(0 350)" filter="url(#colorMeLTA)"/>
     <text x="70" y="400">luminanceToAlpha</text>
 </svg>
