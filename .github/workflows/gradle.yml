@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v1
         if: ${{ failure() }}
         with:
-          name: windows-test-diffs
+          name: macos-test-diffs
           path: build/ref_test
 
   linux:
@@ -107,5 +107,5 @@ jobs:
         uses: actions/upload-artifact@v1
         if: ${{ failure() }}
         with:
-          name: windows-test-diffs
+          name: linux-test-diffs
           path: build/ref_test
