@@ -78,7 +78,7 @@ jobs:
 
   linux:
     name: Linux (Java 8)
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
