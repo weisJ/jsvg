@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.attributes.font;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.HasMatchName;
+import com.github.weisj.jsvg.attributes.HasMatchName;
 
 public enum FontStretch implements HasMatchName {
     Normal(1f),

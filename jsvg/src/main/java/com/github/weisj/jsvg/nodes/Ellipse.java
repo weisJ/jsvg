@@ -23,12 +23,12 @@ package com.github.weisj.jsvg.nodes;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGEllipse;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 @ElementCategories({Category.BasicShape, Category.Graphic, Category.Shape})
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})
@@ -36,7 +36,7 @@ public final class Ellipse extends ShapeNode {
     public static final String TAG = "ellipse";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 

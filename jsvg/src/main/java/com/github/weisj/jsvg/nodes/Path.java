@@ -25,7 +25,6 @@ import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
@@ -33,6 +32,7 @@ import com.github.weisj.jsvg.nodes.prototype.HasFillRule;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.util.PathUtil;
 
 @ElementCategories({Category.Graphic, Category.Shape})
@@ -43,7 +43,7 @@ public final class Path extends ShapeNode implements HasFillRule {
     private FillRule fillRule;
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 

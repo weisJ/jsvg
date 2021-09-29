@@ -38,7 +38,7 @@ public final class Style extends MetaSVGNode {
     }
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 }

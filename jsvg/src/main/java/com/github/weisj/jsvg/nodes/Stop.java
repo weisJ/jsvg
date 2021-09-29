@@ -26,7 +26,6 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.geometry.path.BezierPathCommand;
@@ -34,6 +33,7 @@ import com.github.weisj.jsvg.geometry.path.PathParser;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.util.ColorUtil;
 
 @ElementCategories(Category.Gradient)
@@ -46,7 +46,7 @@ public final class Stop extends AbstractSVGNode {
     private @Nullable BezierPathCommand path;
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 

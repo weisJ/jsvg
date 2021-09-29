@@ -25,11 +25,11 @@ package com.github.weisj.jsvg.renderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public class PaintContext implements Mutator<PaintContext> {
 

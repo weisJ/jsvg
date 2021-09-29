@@ -38,7 +38,7 @@ public final class Text extends LinearTextContainer {
     public static final String TAG = "text";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 }

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +31,11 @@ import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
-class ParsedElement {
-    final @Nullable String id;
-    final @NotNull AttributeNode attributeNode;
-    final @NotNull SVGNode node;
-    final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
+public class ParsedElement {
+    private final @Nullable String id;
+    private final @NotNull AttributeNode attributeNode;
+    private final @NotNull SVGNode node;
+    private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
     final CharacterDataParser characterDataParser;
 
     ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
@@ -51,6 +51,26 @@ class ParsedElement {
         } else {
             characterDataParser = null;
         }
+    }
+
+    public void registerNamedElement(@NotNull String name, @NotNull Object element) {
+        attributeNode.namedElements().put(name, element);
+    }
+
+    public @Nullable String id() {
+        return id;
+    }
+
+    public @NotNull List<ParsedElement> children() {
+        return children;
+    }
+
+    public @NotNull SVGNode node() {
+        return node;
+    }
+
+    public @NotNull AttributeNode attributeNode() {
+        return attributeNode;
     }
 
     void addChild(ParsedElement parsedElement) {

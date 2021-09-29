@@ -39,6 +39,7 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.parser.SVGLoader;
 import com.kitfox.svg.app.beans.SVGIcon;
 
 public class RasterizationBenchmark {

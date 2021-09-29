@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.parser.SVGLoader;
 import com.kitfox.svg.app.beans.SVGIcon;
 
 public class SVGViewer {

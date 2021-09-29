@@ -19,42 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
-
-import java.awt.*;
+package com.github.weisj.jsvg.parser;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
-import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
-import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.util.ColorUtil;
+public interface DomProcessor {
 
-@ElementCategories(Category.Gradient)
-@PermittedContent(categories = {Category.Animation, Category.Descriptive})
-public final class SolidColor extends AbstractSVGNode implements SimplePaintSVGPaint {
-    public static final String TAG = "solidcolor";
-    private Color color;
-
-    @Override
-    public @NotNull String tagName() {
-        return TAG;
-    }
-
-    @Override
-    public @NotNull Paint paint() {
-        return color;
-    }
-
-    @Override
-    public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
-        Color c = attributeNode.getColor("solid-color");
-        float opacity = attributeNode.getPercentage("solid-opacity", c.getAlpha() / 255f);
-        color = ColorUtil.withAlpha(c, opacity);
-    }
-
-
+    void process(@NotNull ParsedElement root);
 }

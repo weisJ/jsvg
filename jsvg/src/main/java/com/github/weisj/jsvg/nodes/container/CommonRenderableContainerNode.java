@@ -28,7 +28,6 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
@@ -38,6 +37,7 @@ import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.HasFilter;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public abstract class CommonRenderableContainerNode<E> extends BaseRenderableContainerNode<E>
         implements Renderable, Transformable, HasClip, HasFilter {

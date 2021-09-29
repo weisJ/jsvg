@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 /**
  * Even though elements of this type can have an id, it doesn't provide any benefit as you

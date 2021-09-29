@@ -19,11 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.parser;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public interface HasMatchName {
+import com.github.weisj.jsvg.attributes.paint.PaintParser;
+
+public interface ParserProvider {
     @NotNull
-    String matchName();
+    PaintParser createPaintParser();
+
+    @Nullable
+    DomProcessor createPreProcessor();
+
+    @Nullable
+    DomProcessor createPostProcessor();
 }

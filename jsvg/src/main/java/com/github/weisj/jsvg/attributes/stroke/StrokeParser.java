@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.attributes.stroke;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public final class StrokeParser {
     public static final LineCap DEFAULT_LINECAP = LineCap.Butt;

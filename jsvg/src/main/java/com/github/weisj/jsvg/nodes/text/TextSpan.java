@@ -38,7 +38,7 @@ public final class TextSpan extends LinearTextContainer {
     public static final String TAG = "tspan";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 }

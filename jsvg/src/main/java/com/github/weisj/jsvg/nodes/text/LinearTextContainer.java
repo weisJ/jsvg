@@ -28,8 +28,8 @@ import java.awt.geom.Path2D;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class LinearTextContainer extends TextContainer {

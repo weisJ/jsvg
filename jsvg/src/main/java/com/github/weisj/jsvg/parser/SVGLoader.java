@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.parser;
 
 import java.io.*;
 import java.net.URL;
@@ -38,9 +38,8 @@ import org.jetbrains.annotations.Nullable;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.attributes.AttributeParser;
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.nodes.*;
 import com.github.weisj.jsvg.nodes.filter.*;
 import com.github.weisj.jsvg.nodes.mesh.MeshGradient;
@@ -53,29 +52,10 @@ import com.github.weisj.jsvg.nodes.text.TextSpan;
 public class SVGLoader {
 
     static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
-    private final Map<String, Supplier<SVGNode>> nodeMap;
-
-    private final XMLReader xmlReader;
-
-    private final AttributeParser attributeParser;
-
-    public interface ParserProvider {
-        @NotNull
-        PaintParser createPaintParser();
-    }
-
-    public static class DefaultParserProvider implements ParserProvider {
-        @Override
-        public @NotNull PaintParser createPaintParser() {
-            return new DefaultPaintParser();
-        }
-    }
+    private final @NotNull Map<String, Supplier<SVGNode>> nodeMap;
+    private final @NotNull XMLReader xmlReader;
 
     public SVGLoader() {
-        this(new DefaultParserProvider());
-    }
-
-    public SVGLoader(@NotNull ParserProvider parserProvider) {
         nodeMap = new HashMap<>();
         nodeMap.put(Anchor.TAG, Anchor::new);
         nodeMap.put(Circle.TAG, Circle::new);
@@ -124,28 +104,34 @@ public class SVGLoader {
         } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
-
-        attributeParser = new AttributeParser(parserProvider.createPaintParser());
     }
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {
+        return load(xmlBase, new DefaultParserProvider());
+    }
+
+
+    public @Nullable SVGDocument load(@NotNull URL xmlBase, @NotNull ParserProvider parserProvider) {
         try {
-            return load(xmlBase.openStream());
+            return load(xmlBase.openStream(), parserProvider);
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Could not read " + xmlBase, e);
         }
         return null;
     }
 
-
     public @Nullable SVGDocument load(@NotNull InputStream inputStream) {
+        return load(inputStream, new DefaultParserProvider());
+    }
+
+    public @Nullable SVGDocument load(@NotNull InputStream inputStream, @NotNull ParserProvider parserProvider) {
         try {
             xmlReader.setEntityResolver(
                     (publicId, systemId) -> {
                         // Ignore all DTDs
                         return new InputSource(new ByteArrayInputStream(new byte[0]));
                     });
-            SVGLoadHandler handler = new SVGLoadHandler();
+            SVGLoadHandler handler = new SVGLoadHandler(parserProvider);
             xmlReader.setContentHandler(handler);
             xmlReader.parse(new InputSource(createDocumentInputStream(inputStream)));
             return handler.getDocument();
@@ -157,7 +143,7 @@ public class SVGLoader {
         return null;
     }
 
-    private InputStream createDocumentInputStream(InputStream is) throws IOException {
+    private InputStream createDocumentInputStream(@NotNull InputStream is) throws IOException {
         BufferedInputStream bin = new BufferedInputStream(is);
         bin.mark(2);
         int b0 = bin.read();
@@ -182,7 +168,16 @@ public class SVGLoader {
 
         private final Map<String, Object> namedElements = new HashMap<>();
         private final Deque<ParsedElement> currentNodeStack = new ArrayDeque<>();
+
         private ParsedElement rootNode;
+
+        private final @NotNull AttributeParser attributeParser;
+        private final @NotNull ParserProvider parserProvider;
+
+        private SVGLoadHandler(@NotNull ParserProvider parserProvider) {
+            this.attributeParser = new AttributeParser(parserProvider.createPaintParser());
+            this.parserProvider = parserProvider;
+        }
 
         private void setIdent(int level) {
             StringBuilder builder = new StringBuilder();
@@ -233,7 +228,7 @@ public class SVGLoader {
                 ParsedElement parsedElement = new ParsedElement(
                         attributes.getValue("id"),
                         new AttributeNode(qName, attrs, lastParsedElement != null
-                                ? lastParsedElement.attributeNode
+                                ? lastParsedElement.attributeNode()
                                 : null, namedElements, attributeParser),
                         newNode);
 
@@ -243,9 +238,9 @@ public class SVGLoader {
                 if (rootNode == null) rootNode = parsedElement;
 
                 currentNodeStack.push(parsedElement);
-                String id = parsedElement.id;
+                String id = parsedElement.id();
                 if (id != null && !namedElements.containsKey(id)) {
-                    namedElements.put(id, parsedElement.node);
+                    namedElements.put(id, parsedElement.node());
                 }
             } else {
                 LOGGER.warning("No node registered for tag " + localName);
@@ -259,14 +254,14 @@ public class SVGLoader {
                 printer.print(ident);
                 printer.println("</" + localName + ">");
             }
-            if (!currentNodeStack.isEmpty() && currentNodeStack.peek().attributeNode.tagName().equals(qName)) {
+            if (!currentNodeStack.isEmpty() && currentNodeStack.peek().attributeNode().tagName().equals(qName)) {
                 flushText(currentNodeStack.pop(), false);
             }
         }
 
         private void flushText(@NotNull ParsedElement element, boolean segmentBreak) {
             if (element.characterDataParser != null && element.characterDataParser.canFlush(segmentBreak)) {
-                element.node.addContent(element.characterDataParser.flush(segmentBreak));
+                element.node().addContent(element.characterDataParser.flush(segmentBreak));
             }
         }
 
@@ -288,8 +283,12 @@ public class SVGLoader {
 
         @NotNull
         SVGDocument getDocument() {
+            DomProcessor preProcessor = parserProvider.createPreProcessor();
+            if (preProcessor != null) preProcessor.process(rootNode);
             rootNode.build();
-            return new SVGDocument((SVG) rootNode.node);
+            DomProcessor postProcessor = parserProvider.createPostProcessor();
+            if (postProcessor != null) postProcessor.process(rootNode);
+            return new SVGDocument((SVG) rootNode.node());
         }
     }
 

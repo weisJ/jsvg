@@ -24,9 +24,9 @@ package com.github.weisj.jsvg.attributes.font;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public final class FontParser {
     private FontParser() {}

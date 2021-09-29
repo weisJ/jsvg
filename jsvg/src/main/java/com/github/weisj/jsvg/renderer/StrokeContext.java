@@ -26,11 +26,11 @@ import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.stroke.LineCap;
 import com.github.weisj.jsvg.attributes.stroke.LineJoin;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public class StrokeContext {
     public final @Nullable Length strokeWidth;

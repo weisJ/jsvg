@@ -25,7 +25,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public abstract class AbstractSVGNode implements SVGNode {
 

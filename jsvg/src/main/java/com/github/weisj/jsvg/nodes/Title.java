@@ -33,7 +33,7 @@ public final class Title extends MetaSVGNode {
     public static final String TAG = "title";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 }

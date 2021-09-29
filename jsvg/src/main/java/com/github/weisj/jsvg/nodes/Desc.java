@@ -31,7 +31,7 @@ public final class Desc extends MetaSVGNode {
     public static final String TAG = "desc";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 }

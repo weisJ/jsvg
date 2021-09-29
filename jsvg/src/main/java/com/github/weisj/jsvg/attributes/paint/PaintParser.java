@@ -26,7 +26,7 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public interface PaintParser {
     Color DEFAULT_COLOR = Color.BLACK;

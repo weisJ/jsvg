@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.attributes.font;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.HasMatchName;
+import com.github.weisj.jsvg.attributes.HasMatchName;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.google.errorprone.annotations.Immutable;

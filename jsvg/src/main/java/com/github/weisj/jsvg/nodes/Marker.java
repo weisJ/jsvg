@@ -21,12 +21,10 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.MarkerOrientation;
 import com.github.weisj.jsvg.attributes.MarkerUnitType;
 import com.github.weisj.jsvg.attributes.ViewBox;
@@ -39,6 +37,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
+import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 

@@ -26,12 +26,12 @@ import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.nodes.prototype.HasFillRule;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public abstract class AbstractPolyShape extends ShapeNode implements HasFillRule {
 

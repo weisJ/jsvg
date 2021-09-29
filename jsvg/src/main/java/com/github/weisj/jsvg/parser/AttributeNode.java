@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.parser;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -63,6 +63,11 @@ public class AttributeNode {
         this.attributeParser = attributeParser;
     }
 
+    @NotNull
+    Map<String, Object> namedElements() {
+        return namedElements;
+    }
+
     private static @NotNull Map<String, String> preprocessAttributes(@NotNull Map<String, String> attributes) {
         String styleStr = attributes.get("style");
         if (styleStr != null) {
@@ -73,10 +78,6 @@ public class AttributeNode {
             }
         }
         return attributes;
-    }
-
-    public void registerNamedElement(@NotNull String name, @NotNull Object element) {
-        namedElements.put(name, element);
     }
 
     private <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {

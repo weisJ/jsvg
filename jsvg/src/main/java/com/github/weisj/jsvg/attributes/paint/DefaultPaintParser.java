@@ -30,8 +30,8 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.AttributeParser;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 public class DefaultPaintParser implements PaintParser {
 

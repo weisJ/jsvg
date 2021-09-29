@@ -31,7 +31,7 @@ public final class Metadata extends MetaSVGNode {
     public static final String TAG = "metadata";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 }

@@ -23,8 +23,8 @@ package com.github.weisj.jsvg.nodes.prototype;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.FillRule;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
 /**
  * Informs the renderer that an element provides styling information which can be inherited by its children.

@@ -33,7 +33,7 @@ public final class Polyline extends AbstractPolyShape {
     public static final String TAG = "polyline";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 

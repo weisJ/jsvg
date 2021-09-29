@@ -24,16 +24,14 @@ package com.github.weisj.jsvg;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.jetbrains.annotations.NotNull;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
-import org.xml.sax.SAXException;
 
+import com.github.weisj.jsvg.parser.SVGLoader;
 import com.kitfox.svg.SVGDiagram;
 import com.kitfox.svg.SVGUniverse;
 
@@ -44,7 +42,7 @@ public class LoadBenchmark {
     @Benchmark
     @Fork(value = 1)
     @BenchmarkMode(Mode.AverageTime)
-    public void jsvgLoading(@NotNull Blackhole blackhole) throws ParserConfigurationException, SAXException {
+    public void jsvgLoading(@NotNull Blackhole blackhole) {
         SVGDocument document = new SVGLoader()
                 .load(Objects.requireNonNull(LoadBenchmark.class.getResourceAsStream(SVG_IMAGE)));
         blackhole.consume(document);

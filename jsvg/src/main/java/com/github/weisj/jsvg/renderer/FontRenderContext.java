@@ -26,10 +26,10 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.AttributeNode;
 import com.github.weisj.jsvg.attributes.text.BaselineAlignment;
 import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.parser.AttributeNode;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable

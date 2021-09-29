@@ -33,7 +33,7 @@ public final class Polygon extends AbstractPolyShape {
     public static final String TAG = "polygon";
 
     @Override
-    public final @NotNull String tagName() {
+    public @NotNull String tagName() {
         return TAG;
     }
 
