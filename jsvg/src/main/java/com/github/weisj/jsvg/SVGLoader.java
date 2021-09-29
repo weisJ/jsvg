@@ -180,7 +180,7 @@ public class SVGLoader {
         private int nestingLevel = 0;
         private String ident = "";
 
-        private final Map<String, SVGNode> namedElements = new HashMap<>();
+        private final Map<String, Object> namedElements = new HashMap<>();
         private final Deque<ParsedElement> currentNodeStack = new ArrayDeque<>();
         private ParsedElement rootNode;
 

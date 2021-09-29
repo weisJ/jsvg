@@ -37,7 +37,6 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
-import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -50,12 +49,12 @@ public class AttributeNode {
     private final @NotNull String tagName;
     private final @NotNull Map<String, String> attributes;
     private final @Nullable AttributeNode parent;
-    private final @NotNull Map<@NotNull String, @NotNull SVGNode> namedElements;
+    private final @NotNull Map<@NotNull String, @NotNull Object> namedElements;
 
     private final @NotNull AttributeParser attributeParser;
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
-            @Nullable AttributeNode parent, @NotNull Map<@NotNull String, @NotNull SVGNode> namedElements,
+            @Nullable AttributeNode parent, @NotNull Map<@NotNull String, @NotNull Object> namedElements,
             @NotNull AttributeParser attributeParser) {
         this.tagName = tagName;
         this.attributes = preprocessAttributes(attributes);
@@ -76,10 +75,14 @@ public class AttributeNode {
         return attributes;
     }
 
+    public void registerNamedElement(@NotNull String name, @NotNull Object element) {
+        namedElements.put(name, element);
+    }
+
     private <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
         if (id == null) return null;
         // Todo: Look up in spec how elements should be resolved if multiple elements have the same id.
-        SVGNode node = namedElements.get(id);
+        Object node = namedElements.get(id);
         return type.isInstance(node) ? type.cast(node) : null;
     }
 
