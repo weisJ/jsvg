@@ -6,24 +6,23 @@ plugins {
 
 dependencies {
     compileOnly(libs.nullabilityAnnotations)
-    compileOnly(libs.tools.errorprone.annotations)
+    compileOnly(toolLibs.errorprone.annotations)
 
-    testImplementation(libs.test.darklaf.core)
-    testImplementation(libs.test.junit.api)
-    testRuntimeOnly(libs.test.junit.engine)
+    testImplementation(testLibs.darklaf.core)
+    testImplementation(testLibs.junit.api)
+    testRuntimeOnly(testLibs.junit.engine)
     testCompileOnly(libs.nullabilityAnnotations)
-    testImplementation(libs.test.svgSalamander)
-    testImplementation(libs.test.batik)
-    testImplementation(libs.test.imageCompare)
+    testImplementation(testLibs.svgSalamander)
+    testImplementation(testLibs.batik)
+    testImplementation(testLibs.imageCompare)
 
-    jmh(libs.test.svgSalamander)
-    jmh(libs.test.batik)
+    jmh(testLibs.svgSalamander)
+    jmh(testLibs.batik)
 }
 
 tasks.test {
     doFirst {
-        workingDir = File(project.rootDir, "build/ref_test")
-        workingDir.mkdirs()
+        workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
     }
     useJUnitPlatform()
 }
