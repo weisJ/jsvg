@@ -1,5 +1,4 @@
-import com.github.autostyle.generic.DefaultCopyrightStyle
-import com.github.autostyle.gradle.BaseFormatExtension
+import com.diffplug.spotless.extra.wtp.EclipseWtpFormatterStep
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
 import com.github.vlsi.gradle.properties.dsl.props
@@ -11,7 +10,7 @@ import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     idea
-    id("com.github.autostyle")
+    id("com.diffplug.spotless")
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.gradle-extensions")
     id("com.github.vlsi.stage-vote-release")
@@ -22,7 +21,7 @@ val skipJavadoc by props()
 val enableMavenLocal by props(false)
 val enableGradleMetadata by props()
 val enableErrorProne by props()
-val skipAutostyle by props(false)
+val skipSpotless by props(false)
 val isRelease = project.stringProperty("release").toBool()
 val snapshotName by props("")
 
@@ -66,32 +65,6 @@ println("Building: JSVG $buildVersion")
 println("     JDK: " + System.getProperty("java.home"))
 println("  Gradle: " + gradle.gradleVersion)
 
-fun BaseFormatExtension.license(addition: String = "") {
-    val extra = if (addition.isEmpty()) "" else "\n$addition"
-    licenseHeader(File("${project.rootDir}/LICENSE").readText() + extra) {
-        copyrightStyle("bat", DefaultCopyrightStyle.REM)
-        copyrightStyle("cmd", DefaultCopyrightStyle.REM)
-    }
-    trimTrailingWhitespace()
-    if (addition.isEmpty()) {
-        endWithNewline()
-    }
-}
-
-fun BaseFormatExtension.configFilter(init: PatternFilterable.() -> Unit) {
-    filter {
-        // Autostyle does not support gitignore yet https://github.com/autostyle/autostyle/issues/13
-        exclude("out/**")
-        exclude(".idea/**", ".run/**")
-        if (project == rootProject) {
-            exclude("gradlew*", "gradle/**")
-        } else {
-            exclude("bin/**")
-        }
-        init()
-    }
-}
-
 allprojects {
     group = "com.github.weisj"
     version = buildVersion
@@ -110,39 +83,31 @@ allprojects {
         resolutionStrategy.cacheChangingModulesFor(0, "seconds")
     }
 
-    if (!skipAutostyle) {
-        apply(plugin = "com.github.autostyle")
-        autostyle {
+    if (!skipSpotless) {
+        apply(plugin = "com.diffplug.spotless")
+        spotless {
+            val spotlessRatchet by props(default = true)
+            if (spotlessRatchet) {
+                ratchetFrom("origin/master")
+            }
             kotlinGradle {
-                ktlint(version = "ktlint".v)
-            }
-            format("properties") {
-                configFilter {
-                    include("**/*.properties")
-                    exclude("**/gradle.properties")
-                }
-                license("\nsuppress inspection \"UnusedProperty\" for whole file")
-            }
-            format("configs") {
-                configFilter {
-                    include("**/*.sh", "**/*.bsh", "**/*.cmd", "**/*.bat")
-                    include("**/*.xsd", "**/*.xsl", "**/*.xml")
-                    exclude("**/*.eclipseformat.xml")
-                }
-                license()
+                ktlint("ktlint".v)
             }
             format("markdown") {
-                filter.include("**/*.md")
+                target("**/*.md")
                 endWithNewline()
+                trimTrailingWhitespace()
+            }
+            format("svg") {
+                target("**/*.svg")
+                eclipseWtp(EclipseWtpFormatterStep.XML)
             }
             plugins.withType<JavaPlugin>().configureEach {
                 java {
                     importOrder("java", "javax", "org", "com")
                     removeUnusedImports()
-                    license()
-                    eclipse {
-                        configFile("${project.rootDir}/java.eclipseformat.xml")
-                    }
+                    eclipse().configFile("${project.rootDir}/config/java.eclipseformat.xml")
+                    licenseHeaderFile("${project.rootDir}/config/LICENSE_HEADER.txt")
                 }
             }
         }

@@ -1,9 +1,9 @@
-[![Autostyle](https://github.com/weisJ/jsvg/actions/workflows/autostyle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/autostyle.yml)
+[![Spotless](https://github.com/weisJ/jsvg/actions/workflows/spotless.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/spotless.yml)
 [![CI](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml)
 # JSVG - A Java SVG implementation
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/weisJ/jsvg/master/images/svg_logo.png" 
+    <img src="https://raw.githubusercontent.com/weisJ/jsvg/master/images/svg_logo.png"
          alt="The SVG logo rendered by JSVG"
          align="center" width="150" height="150">
     <br>
@@ -44,7 +44,7 @@ For supported elements most of the attributes which apply to them are implemente
 
 - :white_check_mark:: The element is supported. Note that this doesn't mean that every attribute is supported.
 - (:white_check_mark:): The element is supported, but won't have any effect (e.g. it's currently not possible to query the content of a `<desc>` element)
-- :ballot_box_with_check:: The element is partially implemented and might not support most basic features of the element. 
+- :ballot_box_with_check:: The element is partially implemented and might not support most basic features of the element.
 - :x:: The element is currently not supported
 - :warning:: The element is deprecated in the spec and has a low priority of getting implemented.
 - :microscope:: The element is an experimental part of the svg 2.* spec. It may not fully behave as expected.
