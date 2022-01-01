@@ -1,4 +1,4 @@
-If you want to contribute to the project please create a corresponding issue with the feature/problem you 
+If you want to contribute to the project please create a corresponding issue with the feature/problem you
 are working on or comment on an existing issue that you would like to work on it.
 
 To ensure proper formatting you can run
