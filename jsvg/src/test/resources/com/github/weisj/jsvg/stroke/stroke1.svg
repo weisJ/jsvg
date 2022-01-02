@@ -1,10 +1,14 @@
-<svg width="160" height="280" viewBox="0 0 160 280" xmlns="http://www.w3.org/2000/svg" version="1.1">
-    <polyline points="40 60 80 20 120 60" stroke="black" stroke-width="20"
-              stroke-linecap="butt" fill="none" stroke-linejoin="miter"/>
+<svg width="160" height="280" viewBox="0 0 160 280"
+	xmlns="http://www.w3.org/2000/svg" version="1.1">
+	<polyline points="40 60 80 20 120 60" stroke="black"
+		stroke-width="20" stroke-linecap="butt" fill="none"
+		stroke-linejoin="miter" />
 
-    <polyline points="40 140 80 100 120 140" stroke="black" stroke-width="20"
-              stroke-linecap="round" fill="none" stroke-linejoin="round"/>
+	<polyline points="40 140 80 100 120 140" stroke="black"
+		stroke-width="20" stroke-linecap="round" fill="none"
+		stroke-linejoin="round" />
 
-    <polyline points="40 220 80 180 120 220" stroke="black" stroke-width="20"
-              stroke-linecap="square" fill="none" stroke-linejoin="bevel"/>
+	<polyline points="40 220 80 180 120 220" stroke="black"
+		stroke-width="20" stroke-linecap="square" fill="none"
+		stroke-linejoin="bevel" />
 </svg>

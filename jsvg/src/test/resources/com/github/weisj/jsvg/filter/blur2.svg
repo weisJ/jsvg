@@ -1,15 +1,19 @@
-<svg viewBox="0 0 480 200" width="408" height="200" xmlns="http://www.w3.org/2000/svg">
-    <filter id="gaussianBlur1">
-        <feGaussianBlur stdDeviation="1" />
-    </filter>
-    <filter id="gaussianBlur2">
-        <feGaussianBlur stdDeviation="5" />
-    </filter>
-    <filter id="gaussianBlur3" x="-30%" y="-30%" width="160%" height="160%">
-        <feGaussianBlur stdDeviation="10" />
-    </filter>
+<svg viewBox="0 0 480 200" width="408" height="200"
+	xmlns="http://www.w3.org/2000/svg">
+	<filter id="gaussianBlur1">
+		<feGaussianBlur stdDeviation="1" />
+	</filter>
+	<filter id="gaussianBlur2">
+		<feGaussianBlur stdDeviation="5" />
+	</filter>
+	<filter id="gaussianBlur3" x="-30%" y="-30%" width="160%"
+		height="160%">
+		<feGaussianBlur stdDeviation="10" />
+	</filter>
 
-    <circle cx="100" cy="100" r="50" filter="url(#gaussianBlur1)"/>
-    <circle cx="100" cy="100" r="50" filter="url(#gaussianBlur2)" transform="translate(140)" />
-    <circle cx="100" cy="100" r="50" filter="url(#gaussianBlur3)" transform="translate(280)" />
+	<circle cx="100" cy="100" r="50" filter="url(#gaussianBlur1)" />
+	<circle cx="100" cy="100" r="50" filter="url(#gaussianBlur2)"
+		transform="translate(140)" />
+	<circle cx="100" cy="100" r="50" filter="url(#gaussianBlur3)"
+		transform="translate(280)" />
 </svg>

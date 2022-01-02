@@ -1,92 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%"
+	viewBox="0 0 100 100">
 
-    <title>SVG Logo</title>
+	<title>SVG Logo</title>
 
-    <a xlink:href="http://www.w3.org/Graphics/SVG/" target="_parent"
-       xlink:title="W3C SVG Working Group home page">
+	<a xlink:href="http://www.w3.org/Graphics/SVG/" target="_parent"
+		xlink:title="W3C SVG Working Group home page">
 
-        <rect
-                id="background"
-                fill="#FF9900"
-                width="100"
-                height="100"
-                rx="4"
-                ry="4"/>
+		<rect id="background" fill="#FF9900" width="100" height="100"
+			rx="4" ry="4" />
 
-        <rect
-                id="top-left"
-                fill="#FFB13B"
-                width="50"
-                height="50"
-                rx="4"
-                ry="4"/>
+		<rect id="top-left" fill="#FFB13B" width="50" height="50" rx="4"
+			ry="4" />
 
-        <rect
-                id="bottom-right"
-                x="50"
-                y="50"
-                fill="#DE8500"
-                width="50"
-                height="50"
-                rx="4"
-                ry="4"/>
+		<rect id="bottom-right" x="50" y="50" fill="#DE8500" width="50"
+			height="50" rx="4" ry="4" />
 
-        <g id="circles" fill="#FF9900">
-            <circle
-                    id="n"
-                    cx="50"
-                    cy="18.4"
-                    r="18.4"/>
+		<g id="circles" fill="#FF9900">
+			<circle id="n" cx="50" cy="18.4" r="18.4" />
 
-            <circle
-                    id="ne"
-                    cx="72.4"
-                    cy="27.6"
-                    r="18.4"/>
+			<circle id="ne" cx="72.4" cy="27.6" r="18.4" />
 
-            <circle
-                    id="e"
-                    cx="81.6"
-                    cy="50"
-                    r="18.4"/>
+			<circle id="e" cx="81.6" cy="50" r="18.4" />
 
-            <circle
-                    id="se"
-                    cx="72.4"
-                    cy="72.4"
-                    r="18.4"/>
+			<circle id="se" cx="72.4" cy="72.4" r="18.4" />
 
-            <circle
-                    id="s"
-                    cx="50"
-                    cy="81.6"
-                    r="18.4"/>
+			<circle id="s" cx="50" cy="81.6" r="18.4" />
 
-            <circle
-                    id="sw"
-                    cx="27.6"
-                    cy="72.4"
-                    r="18.4"/>
+			<circle id="sw" cx="27.6" cy="72.4" r="18.4" />
 
-            <circle
-                    id="w"
-                    cx="18.4"
-                    cy="50"
-                    r="18.4"/>
+			<circle id="w" cx="18.4" cy="50" r="18.4" />
 
-            <circle
-                    id="nw"
-                    cx="27.6"
-                    cy="27.6"
-                    r="18.4"/>
-        </g>
+			<circle id="nw" cx="27.6" cy="27.6" r="18.4" />
+		</g>
 
-        <g id="stars">
-            <path
-                    id="black-star"
-                    d="M  63.086, 18.385
+		<g id="stars">
+			<path id="black-star"
+				d="M  63.086, 18.385
                c  0.000, -7.227  -5.859,-13.086 -13.100,-13.086
                c -7.235,  0.000 -13.096,  5.859 -13.096, 13.086
                c -5.100, -5.110 -13.395, -5.110 -18.497,  0.000
@@ -102,12 +54,10 @@
                c  7.216,  0.000  13.081, -5.869  13.081,-13.098
                c  0.000, -7.227  -5.865,-13.085 -13.081,-13.085
                c  5.101, -5.119   5.101,-13.406   0.000,-18.524
-               C 76.502, 13.275  68.206, 13.275  63.086, 18.385 z"/>
+               C 76.502, 13.275  68.206, 13.275  63.086, 18.385 z" />
 
-            <path
-                    id="white-star"
-                    fill="#FFFFFF"
-                    d="M 55.003, 23.405
+			<path id="white-star" fill="#FFFFFF"
+				d="M 55.003, 23.405
                v 14.488
                L 65.260, 27.640
                c  0.000, -1.812  0.691,-3.618   2.066, -5.005
@@ -155,40 +105,33 @@
                c -1.270, -1.287 -2.082,-3.053  -2.082, -5.023
                c  0.000, -3.908  3.175,-7.079   7.096, -7.079
                c  3.919,  0.000  7.097, 3.168   7.097,  7.079
-               C 57.088, 20.356 56.274,22.119  55.003, 23.405 z"/>
-        </g>
+               C 57.088, 20.356 56.274,22.119  55.003, 23.405 z" />
+		</g>
 
-        <g id="svg-textbox">
-            <path
-                    id="text-backdrop"
-                    fill="black"
-                    d="M  5.30,50.00
+		<g id="svg-textbox">
+			<path id="text-backdrop" fill="black"
+				d="M  5.30,50.00
                H 94.68
                V 90.00
                Q 94.68,95.00 89.68,95.00
                H 10.30
-               Q  5.30,95.00  5.30,90.00 Z"/>
+               Q  5.30,95.00  5.30,90.00 Z" />
 
-            <path
-                    id="shine"
-                    fill="#3F3F3F"
-                    d="M  14.657,54.211
+			<path id="shine" fill="#3F3F3F"
+				d="M  14.657,54.211
                h  71.394
                c   2.908, 0.000   5.312, 2.385   5.312, 5.315
                v  17.910
                c -27.584,-3.403 -54.926,-8.125 -82.011,-7.683
                V  59.526
                C   9.353,56.596  11.743,54.211  14.657,54.211
-               L  14.657,54.211 z"/>
+               L  14.657,54.211 z" />
 
-            <g id="svg-text">
-                <title>SVG</title>
-                <path
-                        id="S"
-                        fill="#FFFFFF"
-                        stroke="#000000"
-                        stroke-width="0.5035"
-                        d="M 18.312,72.927
+			<g id="svg-text">
+				<title>SVG</title>
+				<path id="S" fill="#FFFFFF" stroke="#000000"
+					stroke-width="0.5035"
+					d="M 18.312,72.927
                    c -2.103,-2.107  -3.407, -5.028  -3.407, -8.253
                    c  0.000,-6.445   5.223,-11.672  11.666,-11.672
                    c  6.446, 0.000  11.667,  5.225  11.667, 11.672
@@ -213,26 +156,20 @@
                    l  0.000, 0.000
                    C 23.341,76.350  20.429, 75.036  18.312, 72.927
                    L 18.312,72.927
-                   L 18.312,72.927 z"/>
-                <polygon
-                        id="V"
-                        fill="#FFFFFF"
-                        stroke="#000000"
-                        stroke-width="0.5035"
-                        points="61.588,53.005
+                   L 18.312,72.927 z" />
+				<polygon id="V" fill="#FFFFFF" stroke="#000000"
+					stroke-width="0.5035"
+					points="61.588,53.005
                         53.344,92.854
                         46.494,92.854
                         38.236,53.005
                         45.082,53.005
                         49.920,76.342
-                        54.755,53.005"/>
+                        54.755,53.005" />
 
-                <path
-                        id="G"
-                        fill="#FFFFFF"
-                        stroke="#000000"
-                        stroke-width="0.5035"
-                        d="M 73.255,69.513
+				<path id="G" fill="#FFFFFF" stroke="#000000"
+					stroke-width="0.5035"
+					d="M 73.255,69.513
                h 11.683
                v 11.664
                l  0.000, 0.000
@@ -254,8 +191,8 @@
                v -4.827
                h -4.834
                L 73.255,69.513
-               L 73.255,69.513 z"/>
-            </g>
-        </g>
-    </a>
+               L 73.255,69.513 z" />
+			</g>
+		</g>
+	</a>
 </svg>
