@@ -1,4 +1,5 @@
-<svg width="200" height="200"
-     xmlns="http://www.w3.org/2000/svg">
-    <image href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image/mdn_logo_only_color.png" height="200" width="200"/>
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+	<image
+		href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image/mdn_logo_only_color.png"
+		height="200" width="200" />
 </svg>

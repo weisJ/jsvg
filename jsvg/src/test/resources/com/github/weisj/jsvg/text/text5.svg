@@ -1,78 +1,78 @@
 <svg viewBox="0 0 100 100" width="400" height="400"
-     xmlns:xlink="http://www.w3.org/1999/xlink"
-     xmlns="http://www.w3.org/2000/svg">
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns="http://www.w3.org/2000/svg">
 
-    <!-- to hide the path, it is usually wrapped in a <defs> element -->
-    <!-- <defs> -->
-    <g fill="none" stroke="green">
-        <path id="N" d="M30,15 L70,15"/>
-        <path id="NE" d="M70,15 L85,30"/>
-        <path id="E" d="M85,30 L85,70"/>
-        <path id="SE" d="M85,70 L70,85"/>
-        <path id="S" d="M70,85 L30,85"/>
-        <path id="SW" d="M30,85 L15,70"/>
-        <path id="W" d="M15,70 L15,30"/>
-        <path id="NW" d="M15,30 L30,15"/>
+	<!-- to hide the path, it is usually wrapped in a <defs> element -->
+	<!-- <defs> -->
+	<g fill="none" stroke="green">
+		<path id="N" d="M30,15 L70,15" />
+		<path id="NE" d="M70,15 L85,30" />
+		<path id="E" d="M85,30 L85,70" />
+		<path id="SE" d="M85,70 L70,85" />
+		<path id="S" d="M70,85 L30,85" />
+		<path id="SW" d="M30,85 L15,70" />
+		<path id="W" d="M15,70 L15,30" />
+		<path id="NW" d="M15,30 L30,15" />
 
-        <path id="Np" d="M70,15 L30,15"/>
-        <path id="NEp" d="M85,30 L70,15"/>
-        <path id="Ep" d="M85,70 L85,30"/>
-        <path id="SEp" d="M70,85 L85,70"/>
-        <path id="Sp" d="M30,85 L70,85"/>
-        <path id="SWp" d="M15,70 L30,85"/>
-        <path id="Wp" d="M15,30 L15,70"/>
-        <path id="NWp" d="M30,15 L15,30"/>
-    </g>
-    <!-- </defs> -->
+		<path id="Np" d="M70,15 L30,15" />
+		<path id="NEp" d="M85,30 L70,15" />
+		<path id="Ep" d="M85,70 L85,30" />
+		<path id="SEp" d="M70,85 L85,70" />
+		<path id="Sp" d="M30,85 L70,85" />
+		<path id="SWp" d="M15,70 L30,85" />
+		<path id="Wp" d="M15,30 L15,70" />
+		<path id="NWp" d="M30,15 L15,30" />
+	</g>
+	<!-- </defs> -->
 
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#N">N</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#NE">NE</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#E">E</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#SE">SE</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#S">S</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#SW">SW</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#W">W</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#NW">NW</textPath>
-    </text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#N">N</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#NE">NE</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#E">E</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#SE">SE</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#S">S</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#SW">SW</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#W">W</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#NW">NW</textPath>
+	</text>
 
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#Np">I</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#NEp">I</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#Ep">I</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#SEp">I</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#Sp">I</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#SWp">I</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#Wp">I</textPath>
-    </text>
-    <text font-family="Arial" font-size="12">
-        <textPath xlink:href="#NWp">I</textPath>
-    </text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#Np">I</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#NEp">I</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#Ep">I</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#SEp">I</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#Sp">I</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#SWp">I</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#Wp">I</textPath>
+	</text>
+	<text font-family="Arial" font-size="12">
+		<textPath xlink:href="#NWp">I</textPath>
+	</text>
 
 </svg>
