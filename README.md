@@ -1,4 +1,4 @@
-[![Spotless](https://github.com/weisJ/jsvg/actions/workflows/spotless.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/spotless.yml)
+[![Code Style](https://github.com/weisJ/jsvg/actions/workflows/spotless.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/spotless.yml)
 [![CI](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml)
 # JSVG - A Java SVG implementation
 
@@ -47,7 +47,7 @@ For supported elements most of the attributes which apply to them are implemente
 - :ballot_box_with_check:: The element is partially implemented and might not support most basic features of the element.
 - :x:: The element is currently not supported
 - :warning:: The element is deprecated in the spec and has a low priority of getting implemented.
-- :microscope:: The element is an experimental part of the svg 2.* spec. It may not fully behave as expected.
+- :test_tube:: The element is an experimental part of the svg 2.* spec. It may not fully behave as expected.
 
 
 ## Shape and container elements
@@ -77,9 +77,9 @@ For supported elements most of the attributes which apply to them are implemente
 |Element|Status|
 |-------|------|
 |linearGradient|:white_check_mark:|
-|:microscope:meshgradient|:white_check_mark:|
-|:microscope:meshrow|:white_check_mark:|
-|:microscope:meshpatch|:white_check_mark:|
+|:test_tube:meshgradient|:white_check_mark:|
+|:test_tube:meshrow|:white_check_mark:|
+|:test_tube:meshpatch|:white_check_mark:|
 |pattern|:white_check_mark:|
 |radialGradient|:white_check_mark:|
 |solidColor|:white_check_mark:|
