@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -112,7 +112,7 @@ public final class ShapeRenderer {
         Marker markerToPaint = null;
         MarkerOrientation.MarkerType markerToPaintType = null;
 
-        pathWhile: while (!iterator.isDone()) {
+        while (!iterator.isDone()) {
             int type = iterator.currentSegment(args);
             iterator.next();
 
@@ -145,7 +145,7 @@ public final class ShapeRenderer {
                     }
                     markerToPaint = nextMarker;
                     markerToPaintType = nextMarkerType;
-                    continue pathWhile;
+                    continue;
                 case PathIterator.SEG_LINETO:
                     dxOut = dxIn = args[0] - x;
                     dyOut = dyIn = args[1] - y;
