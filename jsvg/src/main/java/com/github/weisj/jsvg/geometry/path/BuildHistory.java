@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,6 +23,8 @@ package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.Point2D;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * When building a path from command segments, most need to cache information
  * (such as the point finished at) for future commands. This structure allows
@@ -33,9 +35,9 @@ import java.awt.geom.Point2D;
  */
 public class BuildHistory {
 
-    Point2D.Float startPoint = new Point2D.Float();
-    Point2D.Float lastPoint = new Point2D.Float();
-    Point2D.Float lastKnot = new Point2D.Float();
+    final @NotNull Point2D.Float startPoint = new Point2D.Float();
+    final @NotNull Point2D.Float lastPoint = new Point2D.Float();
+    final @NotNull Point2D.Float lastKnot = new Point2D.Float();
 
     public void setStartPoint(float x, float y) {
         startPoint.setLocation(x, y);
