@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -31,6 +31,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.transcoder.TranscoderException;
@@ -51,7 +52,9 @@ import com.github.romankh3.image.comparison.model.Rectangle;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import com.google.errorprone.annotations.CheckReturnValue;
 
+@CheckReturnValue
 final class ReferenceTest {
 
     private static final double DEFAULT_TOLERANCE = 0.5;
@@ -61,7 +64,7 @@ final class ReferenceTest {
         String[] iconNames = {"desktop.svg", "drive.svg", "folder.svg", "general.svg", "homeFolder.svg", "image.svg",
                 "missingImage.svg", "newFolder.svg", "pendingImage.svg", "text.svg", "unknown.svg", "upFolder.svg"};
         for (String iconName : iconNames) {
-            compareImages("icons/" + iconName);
+            Assertions.assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/" + iconName));
         }
     }
 
@@ -71,40 +74,46 @@ final class ReferenceTest {
                 + "</svg>";
     }
 
-    static void compareImages(@NotNull String fileName) {
-        compareImages(fileName, DEFAULT_TOLERANCE);
+    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName) {
+        return compareImages(fileName, DEFAULT_TOLERANCE);
     }
 
-    static void compareImages(@NotNull String fileName, double tolerance) {
-        compareImages(fileName, Objects.requireNonNull(ReferenceTest.class.getResource(fileName), fileName), tolerance);
+    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance) {
+        return compareImages(fileName, Objects.requireNonNull(ReferenceTest.class.getResource(fileName), fileName),
+                tolerance);
     }
 
-    static void compareImages(@NotNull String name, @NotNull URL url, double tolerance) {
+    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull URL url,
+            double tolerance) {
         try {
             BufferedImage expected = renderReference(url.openStream());
             BufferedImage actual = render(url.openStream());
-            compareImageRasterization(expected, actual, name, tolerance);
+            return compareImageRasterization(expected, actual, name, tolerance);
         } catch (Exception e) {
             Assertions.fail(name, e);
+            return ReferenceTestResult.FAILURE;
         }
     }
 
-    static void compareImages(@NotNull String name, @NotNull String svgContent) {
-        compareImages(name, svgContent, DEFAULT_TOLERANCE);
+    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent) {
+        return compareImages(name, svgContent, DEFAULT_TOLERANCE);
     }
 
-    static void compareImages(@NotNull String name, @NotNull String svgContent, double tolerance) {
+    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent,
+            double tolerance) {
         try {
             BufferedImage expected =
                     renderReference(new ByteArrayInputStream(svgContent.getBytes(StandardCharsets.UTF_8)));
             BufferedImage actual = render(new ByteArrayInputStream(svgContent.getBytes(StandardCharsets.UTF_8)));
-            compareImageRasterization(expected, actual, name, tolerance);
+            return compareImageRasterization(expected, actual, name, tolerance);
         } catch (Exception e) {
             Assertions.fail(name, e);
+            return ReferenceTestResult.FAILURE;
         }
     }
 
-    private static void compareImageRasterization(@NotNull BufferedImage expected, @NotNull BufferedImage actual,
+    private static @NotNull ReferenceTest.ReferenceTestResult compareImageRasterization(@NotNull BufferedImage expected,
+            @NotNull BufferedImage actual,
             @NotNull String name, double tolerance) {
         ImageComparison comp = new ImageComparison(expected, actual);
         comp.setAllowingPercentOfDifferentPixels(tolerance);
@@ -113,7 +122,7 @@ final class ReferenceTest {
         if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
             state = ImageComparisonState.MATCH;
         }
-        Assertions.assertEquals(ImageComparisonState.MATCH, state, () -> {
+        return new ReferenceTestResult(state, () -> {
             StringBuilder sb = new StringBuilder();
             sb.append("Image: ").append(name).append('\n');
             sb.append("Expected size: ").append(expected.getWidth()).append('x').append(expected.getHeight())
@@ -167,7 +176,6 @@ final class ReferenceTest {
         transcoderHints.put(ImageTranscoder.KEY_DOCUMENT_ELEMENT_NAMESPACE_URI, SVGConstants.SVG_NAMESPACE_URI);
         transcoderHints.put(ImageTranscoder.KEY_DOCUMENT_ELEMENT, "svg");
 
-
         try {
             TranscoderInput input = new TranscoderInput(inputStream);
             ImageTranscoder t = new ImageTranscoder() {
@@ -189,5 +197,44 @@ final class ReferenceTest {
             throw new IOException("Couldn't convert image");
         }
         return imagePointer[0];
+    }
+
+    static final class ReferenceTestResult {
+        static final @NotNull ReferenceTest.ReferenceTestResult SUCCESS =
+                new ReferenceTestResult(ImageComparisonState.MATCH, () -> "SUCCESS");
+        static final @NotNull ReferenceTest.ReferenceTestResult FAILURE =
+                new ReferenceTestResult(ImageComparisonState.MATCH, () -> "FAILURE");
+
+        private final @NotNull ImageComparisonState comparisonState;
+        private final @NotNull Supplier<@NotNull String> failureLogSupplier;
+        private String failureMessage;
+
+        ReferenceTestResult(
+                @NotNull ImageComparisonState comparisonState,
+                @NotNull Supplier<@NotNull String> failureLogSupplier) {
+            this.comparisonState = comparisonState;
+            this.failureLogSupplier = failureLogSupplier;
+        }
+
+        @Override
+        public String toString() {
+            if (failureMessage == null) {
+                failureMessage = failureLogSupplier.get();
+            }
+            return failureMessage;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ReferenceTestResult)) return false;
+            ReferenceTestResult that = (ReferenceTestResult) o;
+            return comparisonState == that.comparisonState;
+        }
+
+        @Override
+        public int hashCode() {
+            return comparisonState.hashCode();
+        }
     }
 }

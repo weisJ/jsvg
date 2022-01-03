@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,9 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,10 +31,10 @@ class StrokeTest {
 
     @Test
     void strokeRefTest() {
-        compareImages("stroke/stroke1.svg");
-        compareImages("stroke/stroke2.svg");
-        compareImages("stroke/stroke3.svg");
-        compareImages("stroke/stroke4.svg");
-        compareImages("stroke/stroke5.svg");
+        assertEquals(SUCCESS, compareImages("stroke/stroke1.svg"));
+        assertEquals(SUCCESS, compareImages("stroke/stroke2.svg"));
+        assertEquals(SUCCESS, compareImages("stroke/stroke3.svg"));
+        assertEquals(SUCCESS, compareImages("stroke/stroke4.svg"));
+        assertEquals(SUCCESS, compareImages("stroke/stroke5.svg"));
     }
 }

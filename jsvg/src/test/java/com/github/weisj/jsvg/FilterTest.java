@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,9 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
@@ -38,19 +40,19 @@ class FilterTest {
 
     @Test
     void testColorMatrix() {
-        compareImages("filter/colormatrix.svg", 1.5);
+        assertEquals(SUCCESS, compareImages("filter/colormatrix.svg", 1.5));
     }
 
     @Test
     @EnabledForJreRange(min = JRE.JAVA_9)
     void testTurbulence() {
-        compareImages("filter/turbulence1.svg");
-        compareImages("filter/turbulence2.svg");
-        compareImages("filter/turbulence3.svg");
+        assertEquals(SUCCESS, compareImages("filter/turbulence1.svg"));
+        assertEquals(SUCCESS, compareImages("filter/turbulence2.svg"));
+        assertEquals(SUCCESS, compareImages("filter/turbulence3.svg"));
     }
 
     @Test
     void testDisplacementMap() {
-        compareImages("filter/displacement.svg");
+        assertEquals(SUCCESS, compareImages("filter/displacement.svg"));
     }
 }

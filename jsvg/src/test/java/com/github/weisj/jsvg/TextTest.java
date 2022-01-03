@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,9 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,13 +31,13 @@ class TextTest {
 
     @Test
     void textRefTest() {
-        compareImages("text/text1.svg");
-        compareImages("text/text2.svg");
-        compareImages("text/text5.svg");
+        assertEquals(SUCCESS, compareImages("text/text1.svg"));
+        assertEquals(SUCCESS, compareImages("text/text2.svg"));
+        assertEquals(SUCCESS, compareImages("text/text5.svg"));
         // Batik doesn't correctly implement rotation.
-        // compareImages("text/text3.svg");
+        // assertEquals(SUCCESS, compareImages("text/text3.svg"));
         // textPath has to be checked manually.
-        // compareImages("text/text4.svg");
-        // compareImages("text/text6.svg");
+        // assertEquals(SUCCESS, compareImages("text/text4.svg"));
+        // assertEquals(SUCCESS, compareImages("text/text6.svg"));
     }
 }

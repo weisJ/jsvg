@@ -12,6 +12,7 @@ dependencies {
     testImplementation(testLibs.junit.api)
     testRuntimeOnly(testLibs.junit.engine)
     testCompileOnly(libs.nullabilityAnnotations)
+    testCompileOnly(toolLibs.errorprone.annotations)
     testImplementation(testLibs.svgSalamander)
     testImplementation(testLibs.batik)
     testImplementation(testLibs.imageCompare)
