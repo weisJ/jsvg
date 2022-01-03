@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -38,7 +38,7 @@ public class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint {
     public MaskedPaint(@NotNull Paint paint, @NotNull Raster maskRaster, @NotNull Point2D maskOffset) {
         this.paint = paint;
         this.maskRaster = maskRaster;
-        this.maskOffset = new Point((int) Math.floor(maskOffset.getX()), (int) Math.floor(maskOffset.getY()));;
+        this.maskOffset = new Point((int) Math.floor(maskOffset.getX()), (int) Math.floor(maskOffset.getY()));
     }
 
     public @NotNull Paint paint() {
