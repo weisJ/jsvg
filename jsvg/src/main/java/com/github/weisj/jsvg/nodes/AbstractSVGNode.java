@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
 public abstract class AbstractSVGNode implements SVGNode {
-    protected static final Logger LOGGER = Logger.getLogger(SVGNode.class.getName());
     private @Nullable String id;
 
     @Override

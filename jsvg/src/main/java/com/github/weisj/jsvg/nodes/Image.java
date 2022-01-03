@@ -27,6 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -50,6 +51,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
     categories = {Category.Animation, Category.Descriptive}
 )
 public final class Image extends RenderableSVGNode {
+    private static final Logger LOGGER = Logger.getLogger(Image.class.getName());
+
     public static final String TAG = "image";
     private Length x;
     private Length y;
