@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -153,6 +153,8 @@ public final class TextPath extends TextContainer {
                     curX = startX;
                     curY = startY;
                     break;
+                default:
+                    throw new IllegalStateException();
             }
             pathIterator.next();
         }

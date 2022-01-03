@@ -104,8 +104,8 @@ public final class ShapeRenderer {
 
         float dxIn = 0;
         float dyIn = 0;
-        float dxOut = 0;
-        float dyOut = 0;
+        float dxOut;
+        float dyOut;
 
         boolean onlyFirst = mid == null && end == null;
 
@@ -130,8 +130,8 @@ public final class ShapeRenderer {
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
-                    dxIn = dxOut = 0;
-                    dyIn = dyOut = 0;
+                    dxIn = 0;
+                    dyIn = 0;
                     x = xStart = args[0];
                     y = yStart = args[1];
                     if (shouldPaintStartEndMarkersInMiddle || markerToPaint == null) {
@@ -178,6 +178,8 @@ public final class ShapeRenderer {
                         nextMarkerType = MarkerOrientation.MarkerType.END;
                     }
                     break;
+                default:
+                    throw new IllegalStateException();
             }
 
             paintSingleMarker(shapeNode, context, g, markerToPaintType, markerToPaint,

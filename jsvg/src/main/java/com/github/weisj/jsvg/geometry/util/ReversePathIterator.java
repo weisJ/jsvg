@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -120,11 +120,9 @@ public class ReversePathIterator implements PathIterator {
                         }
                         segmentTypes[sr++] = SEG_MOVETO;
                         break;
-
                     case SEG_CLOSE:
                         pendingClose = true;
                         break;
-
                     default:
                         segmentTypes[sr++] = segTypes[s];
                         break;
@@ -159,14 +157,13 @@ public class ReversePathIterator implements PathIterator {
             case SEG_MOVETO:
             case SEG_LINETO:
                 return 2;
-
             case SEG_QUADTO:
                 return 4;
-
             case SEG_CUBICTO:
                 return 6;
+            default:
+                return 0;
         }
-        return 0;
     }
 
     /**
