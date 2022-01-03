@@ -40,6 +40,13 @@ public interface Container<E> {
     @ApiStatus.Internal
     void addChild(@Nullable String id, @NotNull SVGNode node);
 
+    /**
+     * Return all children of this container.
+     * Note that the return type of this function internationally contains a wild card
+     * to make it a compilation error trying to modify it.
+     *
+     * @return the list of children.
+     */
     List<? extends @NotNull E> children();
 
     default <T extends E> List<@NotNull T> childrenOfType(Class<T> type) {
