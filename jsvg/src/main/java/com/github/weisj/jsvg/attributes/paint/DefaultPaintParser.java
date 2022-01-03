@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +36,7 @@ import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
 public class DefaultPaintParser implements PaintParser {
+    private static final Logger LOGGER = Logger.getLogger(DefaultPaintParser.class.getName());
 
     // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
     @Override
@@ -88,7 +91,7 @@ public class DefaultPaintParser implements PaintParser {
             }
             return ColorLookup.colorMap().get(value.toLowerCase(Locale.ENGLISH));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.INFO, e.getMessage(), e);
             return null;
         }
     }

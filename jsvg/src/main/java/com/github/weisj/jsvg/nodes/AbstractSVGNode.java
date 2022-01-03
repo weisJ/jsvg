@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes;
 
+import java.util.logging.Logger;
+
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
 public abstract class AbstractSVGNode implements SVGNode {
-
+    protected static final Logger LOGGER = Logger.getLogger(SVGNode.class.getName());
     private @Nullable String id;
 
     @Override

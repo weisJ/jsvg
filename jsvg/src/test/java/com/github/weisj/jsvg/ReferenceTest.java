@@ -193,8 +193,7 @@ final class ReferenceTest {
             t.setTranscodingHints(transcoderHints);
             t.transcode(input, null);
         } catch (TranscoderException ex) {
-            ex.printStackTrace();
-            throw new IOException("Couldn't convert image");
+            throw new IOException("Couldn't convert image", ex);
         }
         return imagePointer[0];
     }
