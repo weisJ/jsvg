@@ -47,7 +47,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
         implements TextSegment.RenderableSegment, HasShape {
-    private final List<TextSegment> segments = new ArrayList<>();
+    private final List<@NotNull TextSegment> segments = new ArrayList<>();
 
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
