@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -40,7 +40,7 @@ final class MeshBuilder {
         Point2D.Float start = origin;
 
         int patchCount = -1;
-        List<@NotNull ? extends SVGNode> rows = meshGradient.children();
+        List<? extends @NotNull SVGNode> rows = meshGradient.children();
 
         for (int rowIndex = 0, rowCount = rows.size(); rowIndex < rowCount; rowIndex++) {
             SVGNode child = rows.get(rowIndex);
@@ -50,12 +50,12 @@ final class MeshBuilder {
             if (rowPatchCount != patchCount) {
                 throw new IllegalStateException("Every mesh row needs to specify the same amount of patched");
             }
-            List<@NotNull ? extends SVGNode> patchesInRow = row.children();
+            List<? extends @NotNull SVGNode> patchesInRow = row.children();
             for (int patchIndex = 0; patchIndex < rowPatchCount; patchIndex++) {
                 SVGNode node = patchesInRow.get(patchIndex);
                 MeshPatch patch = (MeshPatch) node;
 
-                List<@NotNull ? extends SVGNode> stops = patch.children();
+                List<? extends @NotNull SVGNode> stops = patch.children();
                 int stopCount = stops.size();
                 int requiredStops = stopsForPatchPosition(rowIndex, patchIndex);
                 if (stopCount < requiredStops) {
