@@ -87,12 +87,12 @@ final class MeshBuilder {
                             patch.coonPatch.north = Objects.requireNonNull(stop.bezierCommand())
                                     .createBezier(start);
                             start = patch.coonPatch.north.d;
-                            patch.north = patchIndex > 0 ? patchLeft.east : stop.color();
+                            patch.north = patchIndex > 0 ? Objects.requireNonNull(patchLeft).east : stop.color();
                             break;
                         case 1:
                             patch.coonPatch.east = Objects.requireNonNull(stop.bezierCommand())
                                     .createBezier(patch.coonPatch.north.d);
-                            patch.east = offset == 1 ? patchAbove.south : stop.color();
+                            patch.east = offset == 1 ? Objects.requireNonNull(patchAbove).south : stop.color();
                             break;
                         case 2:
                             patch.coonPatch.south = Objects.requireNonNull(stop.bezierCommand())
