@@ -25,6 +25,7 @@ import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
@@ -32,10 +33,10 @@ import org.junit.jupiter.api.condition.JRE;
 class FilterTest {
 
     @Test
+    @Disabled("FIXME: Colors aren't accurate")
     void testGaussianBlur() {
-        // FIXME: Colors aren't accurate
-        // filter/blur.svg
-        // filter/blur2.svg
+        assertEquals(SUCCESS, compareImages("filter/blur.svg"));
+        assertEquals(SUCCESS, compareImages("filter/blur2.svg"));
     }
 
     @Test
