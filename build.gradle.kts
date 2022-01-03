@@ -10,6 +10,7 @@ import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     idea
+    id("org.sonarqube")
     id("com.diffplug.spotless")
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.gradle-extensions")
