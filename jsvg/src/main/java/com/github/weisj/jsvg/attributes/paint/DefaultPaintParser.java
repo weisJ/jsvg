@@ -74,6 +74,8 @@ public class DefaultPaintParser implements PaintParser {
                         // Long rgba
                         rgba = parseHex(value.substring(1).toCharArray());
                         break;
+                    default:
+                        break;
                 }
                 return new Color(rgba, true);
             } else if (value.length() > 3 && value.substring(0, 3).equalsIgnoreCase("rgb")) {
