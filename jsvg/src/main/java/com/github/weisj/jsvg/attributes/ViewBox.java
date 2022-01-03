@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -85,7 +85,7 @@ public final class ViewBox extends Rectangle2D.Float {
         return "ViewBox[" + x + "," + y + "," + width + "," + height + "]";
     }
 
-    public final float normedDiagonalLength() {
+    public float normedDiagonalLength() {
         // Per spec to be computed as: sqrt((width)**2 + (height)**2)/sqrt(2)
         // Dividing by 2 inside the sqrt is more efficient.
         return (float) Math.sqrt((width * width + height * height) / 2);
