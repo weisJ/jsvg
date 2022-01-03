@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -46,11 +46,12 @@ public final class FontParser {
     }
 
     public static @Nullable FontWeight parseWeight(@NotNull AttributeNode node) {
-        FontWeight weight = node.getEnum("font-weight", PredefinedFontWeight.Number);
+        final String fontWeightKey = "font-weight";
+        FontWeight weight = node.getEnum(fontWeightKey, PredefinedFontWeight.Number);
         if (weight == PredefinedFontWeight.Number) {
-            if (node.hasAttribute("font-weight")) {
+            if (node.hasAttribute(fontWeightKey)) {
                 weight = new NumberFontWeight(
-                        Math.max(1, Math.min(1000, node.getFloat("font-weight",
+                        Math.max(1, Math.min(1000, node.getFloat(fontWeightKey,
                                 PredefinedFontWeight.NORMAL_WEIGHT))));
             } else {
                 weight = null;
