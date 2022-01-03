@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -31,9 +31,9 @@ public abstract class MarkerOrientation {
     private MarkerOrientation() {}
 
     public enum MarkerType {
-        Start,
-        Mid,
-        End
+        START,
+        MID,
+        END
     }
 
     public static @NotNull MarkerOrientation parse(@Nullable String value, @NotNull AttributeParser parser) {
@@ -55,11 +55,11 @@ public abstract class MarkerOrientation {
         public @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
                 float dyOut) {
             switch (type) {
-                case Start:
+                case START:
                     return (float) Math.atan2(dyOut, dxOut);
-                case End:
+                case END:
                     return (float) Math.atan2(dyIn, dxIn);
-                case Mid:
+                case MID:
                     return (float) Math.atan2((dyIn + dyOut) / 2f, (dxIn + dxOut) / 2f);
                 default:
                     throw new IllegalStateException();
@@ -74,11 +74,11 @@ public abstract class MarkerOrientation {
         public @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
                 float dyOut) {
             switch (type) {
-                case Start:
+                case START:
                     return (float) Math.atan2(-dyOut, -dxOut);
-                case End:
+                case END:
                     return (float) Math.atan2(dyIn, dxIn);
-                case Mid:
+                case MID:
                     return (float) Math.atan2((dyIn + dyOut) / 2f, (dxIn + dxOut) / 2f);
                 default:
                     throw new IllegalStateException();

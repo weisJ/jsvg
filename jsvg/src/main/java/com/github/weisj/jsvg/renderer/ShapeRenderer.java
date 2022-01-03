@@ -120,8 +120,8 @@ public final class ShapeRenderer {
                     ? end
                     : mid;
             MarkerOrientation.MarkerType nextMarkerType = iterator.isDone()
-                    ? MarkerOrientation.MarkerType.End
-                    : MarkerOrientation.MarkerType.Mid;
+                    ? MarkerOrientation.MarkerType.END
+                    : MarkerOrientation.MarkerType.MID;
 
             float xPaint = x;
             float yPaint = y;
@@ -136,7 +136,7 @@ public final class ShapeRenderer {
                     y = yStart = args[1];
                     if (shouldPaintStartEndMarkersInMiddle || markerToPaint == null) {
                         nextMarker = start;
-                        nextMarkerType = MarkerOrientation.MarkerType.Start;
+                        nextMarkerType = MarkerOrientation.MarkerType.START;
                     }
                     if (markerToPaint != null) {
                         paintSingleMarker(shapeNode, context, g, markerToPaintType, markerToPaint,
@@ -175,7 +175,7 @@ public final class ShapeRenderer {
                     y = yStart;
                     if (shouldPaintStartEndMarkersInMiddle) {
                         nextMarker = end;
-                        nextMarkerType = MarkerOrientation.MarkerType.End;
+                        nextMarkerType = MarkerOrientation.MarkerType.END;
                     }
                     break;
             }
