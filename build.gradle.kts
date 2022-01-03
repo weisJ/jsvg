@@ -66,6 +66,17 @@ println("Building: JSVG $buildVersion")
 println("     JDK: " + System.getProperty("java.home"))
 println("  Gradle: " + gradle.gradleVersion)
 
+sonarqube {
+    properties {
+        properties["sonar.issue.ignore.multicriteria"] = "e1"
+
+        // Disable checking of constants names: We follow the nomenclature of the standard which
+        // results in enums being camel case instead of upper snake case
+        properties["sonar.issue.ignore.multicriteria.e1.ruleKey"] = "java:S115"
+        properties["sonar.issue.ignore.multicriteria.e1.resourceKey"] = "**/*.java"
+    }
+}
+
 allprojects {
     group = "com.github.weisj"
     version = buildVersion
