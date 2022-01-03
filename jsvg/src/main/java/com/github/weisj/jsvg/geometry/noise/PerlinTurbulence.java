@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -86,8 +86,8 @@ public final class PerlinTurbulence {
             for (i = 0; i < BSize; i++) {
                 double u, v;
                 do {
-                    u = ((lSeed = random(lSeed)) % (BSize + BSize)) - BSize;
-                    v = ((lSeed = random(lSeed)) % (BSize + BSize)) - BSize;
+                    u = ((lSeed = random(lSeed)) % (BSize + BSize)) - (double) BSize;
+                    v = ((lSeed = random(lSeed)) % (BSize + BSize)) - (double) BSize;
                 } while (u == 0 && v == 0);
 
                 double s = Math.sqrt(u * u + v * v);
