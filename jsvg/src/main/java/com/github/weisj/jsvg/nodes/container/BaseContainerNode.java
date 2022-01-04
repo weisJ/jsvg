@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -54,7 +54,7 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
         PermittedContent allowedNodes = getClass().getAnnotation(PermittedContent.class);
         if (allowedNodes == null) {
             throw new IllegalStateException(
-                    "Element <" + tagName() + "> doesn't specify permitted content information");
+                    String.format("Element <%s> doesn't specify permitted content information", tagName()));
         }
         if (allowedNodes.any()) return true;
 
@@ -70,7 +70,8 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
             if (type.isAssignableFrom(nodeType)) return true;
         }
         if (EXHAUSTIVE_CHECK && result != CategoryCheckResult.Excluded) {
-            LOGGER.warning("Element <" + node.tagName() + "> not allowed in <" + tagName() + "> (or not implemented)");
+            LOGGER.warning(() -> String.format("Element <%s> not allowed in <%s> (or not implemented)",
+                    node.tagName(), tagName()));
         }
         return false;
     }
