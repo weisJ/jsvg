@@ -2,6 +2,7 @@ plugins {
     `java-library`
     `module-info-compile`
     id("me.champeau.jmh")
+    jacoco
 }
 
 dependencies {

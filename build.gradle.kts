@@ -125,6 +125,16 @@ allprojects {
         }
     }
 
+    plugins.withType<JacocoPlugin> {
+        the<JacocoPluginExtension>().toolVersion = "jacoco".v
+        tasks.withType<JacocoReport>().configureEach {
+            reports {
+                xml.required.set(true)
+                html.required.set(true)
+            }
+        }
+    }
+
     tasks.withType<AbstractArchiveTask>().configureEach {
         // Ensure builds are reproducible
         isPreserveFileTimestamps = false
