@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,6 +39,7 @@ import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
 
+@SuppressWarnings("java:S119") // Generic name Self is intentional
 abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends ContainerNode implements SVGPaint {
     protected AffineTransform gradientTransform;
     protected UnitType gradientUnits;
@@ -72,7 +73,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
 
 
         List<Stop> stops = childrenOfType(Stop.class);
-        if (stops.size() == 0 && template != null) {
+        if (stops.isEmpty() && template != null) {
             colors = template.colors();
             offsets = template.offsets();
         } else {
