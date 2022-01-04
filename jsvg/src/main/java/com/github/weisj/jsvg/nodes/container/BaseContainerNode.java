@@ -46,6 +46,15 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
 
     protected abstract void doAdd(@NotNull SVGNode node);
 
+    /**
+     * Determine whether the container accepts this {@link SVGNode} as a child.
+     * By default, this will always report true but subclasses may choose to reject certain
+     * types of nodes.
+     *
+     * @param id the id of the node
+     * @param node the node itself
+     * @return whether the node can be inserted as a child.
+     */
     protected boolean acceptChild(@Nullable String id, @NotNull SVGNode node) {
         return true;
     }
