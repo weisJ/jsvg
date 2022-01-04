@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,8 +21,11 @@
  */
 package com.github.weisj.jsvg.nodes.container;
 
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -32,15 +35,19 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.HasFilter;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
-public abstract class CommonRenderableContainerNode<E> extends BaseRenderableContainerNode<E>
+public abstract class CommonRenderableContainerNode extends BaseRenderableContainerNode<SVGNode>
         implements Renderable, Transformable, HasClip, HasFilter {
+    private final List<@NotNull SVGNode> children = new ArrayList<>();
 
     private AffineTransform transform;
     private Length transformOriginX;
@@ -88,5 +95,22 @@ public abstract class CommonRenderableContainerNode<E> extends BaseRenderableCon
     @Override
     public @Nullable Filter filter() {
         return filter;
+    }
+
+    @Override
+    protected void doAdd(@NotNull SVGNode node) {
+        children.add(node);
+    }
+
+    @Override
+    public List<? extends @NotNull SVGNode> children() {
+        return children;
+    }
+
+    @Override
+    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+        for (SVGNode child : children()) {
+            NodeRenderer.renderNode(child, context, g);
+        }
     }
 }
