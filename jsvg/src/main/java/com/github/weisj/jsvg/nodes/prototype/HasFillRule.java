@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,7 +24,6 @@ package com.github.weisj.jsvg.nodes.prototype;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.parser.AttributeNode;
 
 /**
  * Informs the renderer that an element provides styling information which can be inherited by its children.
@@ -33,8 +32,4 @@ public interface HasFillRule {
 
     @NotNull
     FillRule fillRule();
-
-    default @NotNull FillRule parseFillRule(@NotNull AttributeNode attributeNode) {
-        return attributeNode.getEnum("fill-rule", FillRule.Inherit);
-    }
 }

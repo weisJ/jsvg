@@ -31,70 +31,62 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.attributes.FillRule;
+import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
-import com.github.weisj.jsvg.nodes.prototype.HasClip;
-import com.github.weisj.jsvg.nodes.prototype.HasFilter;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
-import com.github.weisj.jsvg.nodes.prototype.Transformable;
+import com.github.weisj.jsvg.nodes.prototype.*;
+import com.github.weisj.jsvg.nodes.prototype.impl.GeometryContextImpl;
+import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
+import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public abstract class CommonRenderableContainerNode extends BaseRenderableContainerNode<SVGNode>
-        implements Renderable, Transformable, HasClip, HasFilter {
+public abstract class CommonRenderableContainerNode extends BaseContainerNode<SVGNode>
+        implements Renderable, Transformable, HasClip, HasFilter, HasContext {
     private final List<@NotNull SVGNode> children = new ArrayList<>();
 
-    private AffineTransform transform;
-    private Length transformOriginX;
-    private Length transformOriginY;
-
-    private @Nullable ClipPath clipPath;
-    private @Nullable Mask mask;
-    private @Nullable Filter filter;
+    private boolean isVisible;
+    private GeometryContextImpl geometryContext;
+    private HasContext context;
 
     @Override
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        transform = attributeNode.parseTransform("transform");
-        Length[] transformOrigin = attributeNode.getLengthList("transform-origin");
-        transformOriginX = transformOrigin.length > 0 ? transformOrigin[0] : Length.ZERO;
-        transformOriginY = transformOrigin.length > 1 ? transformOrigin[1] : Length.ZERO;
-        clipPath = attributeNode.getClipPath();
-        mask = attributeNode.getMask();
-        filter = attributeNode.getFilter();
+        isVisible = parseIsVisible(attributeNode);
+        geometryContext = GeometryContextImpl.parse(attributeNode);
+        context = HasContextImpl.parse(attributeNode);
     }
 
     @Override
     public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
-        return new Point2D.Float(
-                transformOriginX.resolveWidth(context),
-                transformOriginY.resolveHeight(context));
+        return geometryContext.transformOrigin(context);
     }
 
     @Override
     public final @Nullable AffineTransform transform() {
-        return transform;
+        return geometryContext.transform();
     }
 
     @Override
     public @Nullable ClipPath clipPath() {
-        return clipPath;
+        return geometryContext.clipPath();
     }
 
     @Override
     public @Nullable Mask mask() {
-        return mask;
+        return geometryContext.mask();
     }
 
     @Override
     public @Nullable Filter filter() {
-        return filter;
+        return geometryContext.filter();
     }
 
     @Override
@@ -112,5 +104,30 @@ public abstract class CommonRenderableContainerNode extends BaseRenderableContai
         for (SVGNode child : children()) {
             NodeRenderer.renderNode(child, context, g);
         }
+    }
+
+    @Override
+    public final boolean isVisible(@NotNull RenderContext context) {
+        return isVisible;
+    }
+
+    @Override
+    public final @NotNull Mutator<PaintContext> paintContext() {
+        return context.paintContext();
+    }
+
+    @Override
+    public final @NotNull FontRenderContext fontRenderContext() {
+        return context.fontRenderContext();
+    }
+
+    @Override
+    public final @NotNull Mutator<MeasurableFontSpec> fontSpec() {
+        return context.fontSpec();
+    }
+
+    @Override
+    public final @NotNull FillRule fillRule() {
+        return context.fillRule();
     }
 }

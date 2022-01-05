@@ -31,27 +31,35 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
+import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.nodes.container.BaseRenderableContainerNode;
+import com.github.weisj.jsvg.nodes.container.BaseContainerNode;
+import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.*;
+import com.github.weisj.jsvg.renderer.PaintContext;
 
-abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
-        implements TextSegment.RenderableSegment, HasShape {
+abstract class TextContainer extends BaseContainerNode<TextSegment>
+        implements TextSegment.RenderableSegment, HasShape, HasContext, Renderable {
     private final List<@NotNull TextSegment> segments = new ArrayList<>();
 
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
     protected @NotImplemented Length textLength;
+
+    private boolean isVisible;
+    private HasContext context;
 
     @Override
     @MustBeInvokedByOverriders
@@ -60,6 +68,9 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
+
+        isVisible = parseIsVisible(attributeNode);
+        context = HasContextImpl.parse(attributeNode);
     }
 
     @Override
@@ -182,5 +193,30 @@ abstract class TextContainer extends BaseRenderableContainerNode<TextSegment>
     @Override
     public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context) {
         return untransformedElementShape(context).getBounds2D();
+    }
+
+    @Override
+    public final boolean isVisible(@NotNull RenderContext context) {
+        return isVisible;
+    }
+
+    @Override
+    public final @NotNull Mutator<PaintContext> paintContext() {
+        return context.paintContext();
+    }
+
+    @Override
+    public final @NotNull FontRenderContext fontRenderContext() {
+        return context.fontRenderContext();
+    }
+
+    @Override
+    public final @NotNull Mutator<MeasurableFontSpec> fontSpec() {
+        return context.fontSpec();
+    }
+
+    @Override
+    public final @NotNull FillRule fillRule() {
+        return context.fillRule();
     }
 }

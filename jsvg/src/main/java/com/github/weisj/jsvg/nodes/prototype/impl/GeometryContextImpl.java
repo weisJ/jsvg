@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,66 +19,81 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.nodes.prototype.impl;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.HasFilter;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
-import com.github.weisj.jsvg.nodes.prototype.impl.GeometryContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
-public abstract class RenderableSVGNode extends AbstractSVGNode
-        implements Renderable, Transformable, HasClip, HasFilter {
+public final class GeometryContextImpl implements Transformable, HasClip, HasFilter {
 
-    private boolean isVisible;
-    private GeometryContextImpl geometryContext;
+    private final @Nullable AffineTransform transform;
+    private final @NotNull Length transformOriginX;
+    private final @NotNull Length transformOriginY;
+
+    private final @Nullable ClipPath clipPath;
+    private final @Nullable Mask mask;
+    private final @Nullable Filter filter;
+
+
+    private GeometryContextImpl(@Nullable AffineTransform transform, @NotNull Length transformOriginX,
+            @NotNull Length transformOriginY, @Nullable ClipPath clipPath, @Nullable Mask mask,
+            @Nullable Filter filter) {
+        this.transform = transform;
+        this.transformOriginX = transformOriginX;
+        this.transformOriginY = transformOriginY;
+        this.clipPath = clipPath;
+        this.mask = mask;
+        this.filter = filter;
+    }
+
+    public static @NotNull GeometryContextImpl parse(@NotNull AttributeNode attributeNode) {
+        Length[] transformOrigin = attributeNode.getLengthList("transform-origin");
+        return new GeometryContextImpl(
+                attributeNode.parseTransform("transform"),
+                transformOrigin.length > 0 ? transformOrigin[0] : Length.ZERO,
+                transformOrigin.length > 1 ? transformOrigin[1] : Length.ZERO,
+                attributeNode.getClipPath(),
+                attributeNode.getMask(),
+                attributeNode.getFilter());
+    }
 
     @Override
     public @Nullable ClipPath clipPath() {
-        return geometryContext.clipPath();
+        return clipPath;
     }
 
     @Override
     public @Nullable Mask mask() {
-        return geometryContext.mask();
+        return mask;
     }
 
     @Override
     public @Nullable Filter filter() {
-        return geometryContext.filter();
-    }
-
-    @Override
-    public boolean isVisible(@NotNull RenderContext context) {
-        return isVisible && (context.rawOpacity() > 0);
+        return filter;
     }
 
     @Override
     public @Nullable AffineTransform transform() {
-        return geometryContext.transform();
+        return transform;
     }
 
     @Override
     public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
-        return geometryContext.transformOrigin(context);
-    }
-
-    @Override
-    @MustBeInvokedByOverriders
-    public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
-        isVisible = parseIsVisible(attributeNode);
-        geometryContext = GeometryContextImpl.parse(attributeNode);
+        return new Point2D.Float(
+                transformOriginX.resolveWidth(context),
+                transformOriginY.resolveHeight(context));
     }
 }
