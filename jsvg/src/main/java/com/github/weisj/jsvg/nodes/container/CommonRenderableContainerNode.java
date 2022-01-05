@@ -28,20 +28,18 @@ import java.util.List;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.nodes.prototype.*;
+import com.github.weisj.jsvg.nodes.prototype.HasContext;
+import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
-import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class CommonRenderableContainerNode extends BaseContainerNode<SVGNode>
-        implements Renderable, HasGeometryContext.ByDelegate, HasContext {
+        implements Renderable, HasGeometryContext.ByDelegate, HasContext.ByDelegate {
     private final List<@NotNull SVGNode> children = new ArrayList<>();
 
     private boolean isVisible;
@@ -60,6 +58,11 @@ public abstract class CommonRenderableContainerNode extends BaseContainerNode<SV
     @Override
     public @NotNull HasGeometryContext geometryContextDelegate() {
         return geometryContext;
+    }
+
+    @Override
+    public @NotNull HasContext contextDelegate() {
+        return context;
     }
 
     @Override
@@ -82,25 +85,5 @@ public abstract class CommonRenderableContainerNode extends BaseContainerNode<SV
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
         return isVisible;
-    }
-
-    @Override
-    public final @NotNull Mutator<PaintContext> paintContext() {
-        return context.paintContext();
-    }
-
-    @Override
-    public final @NotNull FontRenderContext fontRenderContext() {
-        return context.fontRenderContext();
-    }
-
-    @Override
-    public final @NotNull Mutator<MeasurableFontSpec> fontSpec() {
-        return context.fontSpec();
-    }
-
-    @Override
-    public final @NotNull FillRule fillRule() {
-        return context.fillRule();
     }
 }
