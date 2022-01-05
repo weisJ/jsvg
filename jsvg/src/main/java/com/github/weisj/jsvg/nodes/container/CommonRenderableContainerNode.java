@@ -22,22 +22,15 @@
 package com.github.weisj.jsvg.nodes.container;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.ClipPath;
-import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
@@ -48,7 +41,7 @@ import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class CommonRenderableContainerNode extends BaseContainerNode<SVGNode>
-        implements Renderable, Transformable, HasClip, HasFilter, HasContext {
+        implements Renderable, HasGeometryContext.ByDelegate, HasContext {
     private final List<@NotNull SVGNode> children = new ArrayList<>();
 
     private boolean isVisible;
@@ -65,28 +58,8 @@ public abstract class CommonRenderableContainerNode extends BaseContainerNode<SV
     }
 
     @Override
-    public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
-        return geometryContext.transformOrigin(context);
-    }
-
-    @Override
-    public final @Nullable AffineTransform transform() {
-        return geometryContext.transform();
-    }
-
-    @Override
-    public @Nullable ClipPath clipPath() {
-        return geometryContext.clipPath();
-    }
-
-    @Override
-    public @Nullable Mask mask() {
-        return geometryContext.mask();
-    }
-
-    @Override
-    public @Nullable Filter filter() {
-        return geometryContext.filter();
+    public @NotNull HasGeometryContext geometryContextDelegate() {
+        return geometryContext;
     }
 
     @Override

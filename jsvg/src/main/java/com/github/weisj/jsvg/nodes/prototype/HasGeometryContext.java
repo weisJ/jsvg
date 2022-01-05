@@ -21,5 +21,47 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.filter.Filter;
+
 public interface HasGeometryContext extends Transformable, HasClip, HasFilter {
+
+    interface ByDelegate extends HasGeometryContext {
+
+        @NotNull
+        HasGeometryContext geometryContextDelegate();
+
+        @Override
+        default @Nullable ClipPath clipPath() {
+            return geometryContextDelegate().clipPath();
+        }
+
+        @Override
+        default @Nullable Mask mask() {
+            return geometryContextDelegate().mask();
+        }
+
+        @Override
+        default @Nullable Filter filter() {
+            return geometryContextDelegate().filter();
+        }
+
+        @Override
+        default @Nullable AffineTransform transform() {
+            return geometryContextDelegate().transform();
+        }
+
+        @Override
+        default @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
+            return geometryContextDelegate().transformOrigin(context);
+        }
+    }
 }

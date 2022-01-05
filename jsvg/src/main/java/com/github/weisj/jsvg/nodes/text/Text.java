@@ -21,21 +21,11 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.Anchor;
-import com.github.weisj.jsvg.nodes.ClipPath;
-import com.github.weisj.jsvg.nodes.Mask;
-import com.github.weisj.jsvg.nodes.filter.Filter;
-import com.github.weisj.jsvg.nodes.prototype.HasClip;
-import com.github.weisj.jsvg.nodes.prototype.HasFilter;
 import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
-import com.github.weisj.jsvg.nodes.prototype.Transformable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -48,7 +38,7 @@ import com.github.weisj.jsvg.parser.AttributeNode;
     anyOf = Anchor.class,
     charData = true
 )
-public final class Text extends LinearTextContainer implements Transformable, HasClip, HasFilter {
+public final class Text extends LinearTextContainer implements HasGeometryContext.ByDelegate {
     public static final String TAG = "text";
 
     private HasGeometryContext geometryContext;
@@ -65,27 +55,7 @@ public final class Text extends LinearTextContainer implements Transformable, Ha
     }
 
     @Override
-    public @Nullable ClipPath clipPath() {
-        return geometryContext.clipPath();
-    }
-
-    @Override
-    public @Nullable Mask mask() {
-        return geometryContext.mask();
-    }
-
-    @Override
-    public @Nullable Filter filter() {
-        return geometryContext.filter();
-    }
-
-    @Override
-    public @Nullable AffineTransform transform() {
-        return geometryContext.transform();
-    }
-
-    @Override
-    public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
-        return geometryContext.transformOrigin(context);
+    public @NotNull HasGeometryContext geometryContextDelegate() {
+        return geometryContext;
     }
 }

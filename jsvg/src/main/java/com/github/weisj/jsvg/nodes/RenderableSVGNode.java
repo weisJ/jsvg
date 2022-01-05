@@ -21,40 +21,20 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.filter.Filter;
-import com.github.weisj.jsvg.nodes.prototype.*;
+import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class RenderableSVGNode extends AbstractSVGNode
-        implements Renderable, Transformable, HasClip, HasFilter {
+        implements Renderable, HasGeometryContext.ByDelegate {
 
     private boolean isVisible;
     private HasGeometryContext geometryContext;
-
-    @Override
-    public @Nullable ClipPath clipPath() {
-        return geometryContext.clipPath();
-    }
-
-    @Override
-    public @Nullable Mask mask() {
-        return geometryContext.mask();
-    }
-
-    @Override
-    public @Nullable Filter filter() {
-        return geometryContext.filter();
-    }
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
@@ -62,13 +42,8 @@ public abstract class RenderableSVGNode extends AbstractSVGNode
     }
 
     @Override
-    public @Nullable AffineTransform transform() {
-        return geometryContext.transform();
-    }
-
-    @Override
-    public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
-        return geometryContext.transformOrigin(context);
+    public @NotNull HasGeometryContext geometryContextDelegate() {
+        return geometryContext;
     }
 
     @Override
