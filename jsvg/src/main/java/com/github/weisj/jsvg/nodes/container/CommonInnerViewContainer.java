@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,7 +48,7 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
 
     @Override
     protected @Nullable Point2D anchorLocation(@NotNull MeasureContext context) {
-        // By default we aren't anchored.
+        // By default, we aren't anchored.
         return null;
     }
 

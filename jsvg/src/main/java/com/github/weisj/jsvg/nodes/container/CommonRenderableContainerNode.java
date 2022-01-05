@@ -107,7 +107,7 @@ public abstract class CommonRenderableContainerNode extends BaseContainerNode<SV
     }
 
     @Override
-    public final boolean isVisible(@NotNull RenderContext context) {
+    public boolean isVisible(@NotNull RenderContext context) {
         return isVisible;
     }
 
