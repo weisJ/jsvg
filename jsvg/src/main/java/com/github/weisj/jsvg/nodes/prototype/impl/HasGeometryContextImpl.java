@@ -32,12 +32,10 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
-import com.github.weisj.jsvg.nodes.prototype.HasClip;
-import com.github.weisj.jsvg.nodes.prototype.HasFilter;
-import com.github.weisj.jsvg.nodes.prototype.Transformable;
+import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
-public final class GeometryContextImpl implements Transformable, HasClip, HasFilter {
+public final class HasGeometryContextImpl implements HasGeometryContext {
 
     private final @Nullable AffineTransform transform;
     private final @NotNull Length transformOriginX;
@@ -48,7 +46,7 @@ public final class GeometryContextImpl implements Transformable, HasClip, HasFil
     private final @Nullable Filter filter;
 
 
-    private GeometryContextImpl(@Nullable AffineTransform transform, @NotNull Length transformOriginX,
+    private HasGeometryContextImpl(@Nullable AffineTransform transform, @NotNull Length transformOriginX,
             @NotNull Length transformOriginY, @Nullable ClipPath clipPath, @Nullable Mask mask,
             @Nullable Filter filter) {
         this.transform = transform;
@@ -59,9 +57,9 @@ public final class GeometryContextImpl implements Transformable, HasClip, HasFil
         this.filter = filter;
     }
 
-    public static @NotNull GeometryContextImpl parse(@NotNull AttributeNode attributeNode) {
+    public static @NotNull HasGeometryContext parse(@NotNull AttributeNode attributeNode) {
         Length[] transformOrigin = attributeNode.getLengthList("transform-origin");
-        return new GeometryContextImpl(
+        return new HasGeometryContextImpl(
                 attributeNode.parseTransform("transform"),
                 transformOrigin.length > 0 ? transformOrigin[0] : Length.ZERO,
                 transformOrigin.length > 1 ? transformOrigin[1] : Length.ZERO,

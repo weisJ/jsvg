@@ -39,8 +39,8 @@ import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.*;
-import com.github.weisj.jsvg.nodes.prototype.impl.GeometryContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
+import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
@@ -52,7 +52,7 @@ public abstract class CommonRenderableContainerNode extends BaseContainerNode<SV
     private final List<@NotNull SVGNode> children = new ArrayList<>();
 
     private boolean isVisible;
-    private GeometryContextImpl geometryContext;
+    private HasGeometryContext geometryContext;
     private HasContext context;
 
     @Override
@@ -60,7 +60,7 @@ public abstract class CommonRenderableContainerNode extends BaseContainerNode<SV
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         isVisible = parseIsVisible(attributeNode);
-        geometryContext = GeometryContextImpl.parse(attributeNode);
+        geometryContext = HasGeometryContextImpl.parse(attributeNode);
         context = HasContextImpl.parse(attributeNode);
     }
 

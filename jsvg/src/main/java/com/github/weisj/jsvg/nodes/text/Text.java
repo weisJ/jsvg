@@ -34,8 +34,9 @@ import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasClip;
 import com.github.weisj.jsvg.nodes.prototype.HasFilter;
+import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
 import com.github.weisj.jsvg.nodes.prototype.Transformable;
-import com.github.weisj.jsvg.nodes.prototype.impl.GeometryContextImpl;
+import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -50,7 +51,7 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 public final class Text extends LinearTextContainer implements Transformable, HasClip, HasFilter {
     public static final String TAG = "text";
 
-    private GeometryContextImpl geometryContext;
+    private HasGeometryContext geometryContext;
 
     @Override
     public @NotNull String tagName() {
@@ -60,7 +61,7 @@ public final class Text extends LinearTextContainer implements Transformable, Ha
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        geometryContext = GeometryContextImpl.parse(attributeNode);
+        geometryContext = HasGeometryContextImpl.parse(attributeNode);
     }
 
     @Override

@@ -30,11 +30,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.filter.Filter;
-import com.github.weisj.jsvg.nodes.prototype.HasClip;
-import com.github.weisj.jsvg.nodes.prototype.HasFilter;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
-import com.github.weisj.jsvg.nodes.prototype.Transformable;
-import com.github.weisj.jsvg.nodes.prototype.impl.GeometryContextImpl;
+import com.github.weisj.jsvg.nodes.prototype.*;
+import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -42,7 +39,7 @@ public abstract class RenderableSVGNode extends AbstractSVGNode
         implements Renderable, Transformable, HasClip, HasFilter {
 
     private boolean isVisible;
-    private GeometryContextImpl geometryContext;
+    private HasGeometryContext geometryContext;
 
     @Override
     public @Nullable ClipPath clipPath() {
@@ -79,6 +76,6 @@ public abstract class RenderableSVGNode extends AbstractSVGNode
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         isVisible = parseIsVisible(attributeNode);
-        geometryContext = GeometryContextImpl.parse(attributeNode);
+        geometryContext = HasGeometryContextImpl.parse(attributeNode);
     }
 }
