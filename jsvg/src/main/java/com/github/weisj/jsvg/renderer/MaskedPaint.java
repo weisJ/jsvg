@@ -99,7 +99,6 @@ public class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint {
         public Raster getRaster(int x, int y, int w, int h) {
             Raster parentRaster = parentContext.getRaster(x, y, w, h);
 
-            // getRaster can return the raster with origin (0,0) even if we applied for (x,y)
             int parentMinX = parentRaster.getMinX();
             int parentMinY = parentRaster.getMinY();
 

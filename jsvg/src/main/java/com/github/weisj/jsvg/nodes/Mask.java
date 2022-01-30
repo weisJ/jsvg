@@ -106,6 +106,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
                 effectiveMaskBounds.getWidth(), effectiveMaskBounds.getHeight());
         Graphics2D imgGraphics = (Graphics2D) img.getGraphics();
         imgGraphics.setRenderingHints(g.getRenderingHints());
+
         if (maskContentUnits == UnitType.UserSpaceOnUse) {
             imgGraphics.scale(img.getWidth() / effectiveMaskBounds.getWidth(),
                     img.getHeight() / effectiveMaskBounds.getHeight());
@@ -131,7 +132,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
             gg.dispose();
         }
 
-        Point2D offset = new Point2D.Float((float) effectiveMaskBounds.getX(), (float) effectiveMaskBounds.getY());
+        Point2D offset = new Point2D.Double(effectiveMaskBounds.getX(), effectiveMaskBounds.getY());
         g.getTransform().transform(offset, offset);
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, img.getRaster(), offset);
     }
