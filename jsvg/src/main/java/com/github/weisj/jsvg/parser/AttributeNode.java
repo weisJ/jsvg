@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -68,11 +68,16 @@ public class AttributeNode {
         return namedElements;
     }
 
+    private static boolean isBlank(@NotNull String s) {
+        return s.trim().isEmpty();
+    }
+
     private static @NotNull Map<String, String> preprocessAttributes(@NotNull Map<String, String> attributes) {
         String styleStr = attributes.get("style");
-        if (styleStr != null) {
+        if (styleStr != null && !isBlank(styleStr)) {
             String[] styles = styleStr.split(";");
             for (String style : styles) {
+                if (isBlank(style)) continue;
                 String[] styleDef = style.split(":", 2);
                 attributes.put(styleDef[0].trim().toLowerCase(Locale.ENGLISH), styleDef[1].trim());
             }
