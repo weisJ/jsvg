@@ -68,12 +68,6 @@ final class ReferenceTest {
         }
     }
 
-    static String wrapTag(int width, int height, @NotNull String tag) {
-        return "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' " +
-                "width='" + width + "' height='" + height + "' viewBox='0 0 " + width + " " + height + "'>" + tag
-                + "</svg>";
-    }
-
     static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName) {
         return compareImages(fileName, DEFAULT_TOLERANCE);
     }
@@ -165,7 +159,6 @@ final class ReferenceTest {
         g.dispose();
         return image;
     }
-
 
     private static BufferedImage renderReference(@NotNull InputStream inputStream) throws IOException {
         final BufferedImage[] imagePointer = new BufferedImage[1];
