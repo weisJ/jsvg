@@ -34,12 +34,22 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 public final class FontResolver {
     private FontResolver() {}
 
+    public static void clearFontCache() {
+        FontCache.INSTANCE.cache.clear();
+    }
+
     public static @NotNull SVGFont resolve(@NotNull MeasurableFontSpec fontSpec,
             @NotNull MeasureContext measureContext) {
         FontCache.CacheKey key = new FontCache.CacheKey(fontSpec, measureContext);
         SVGFont cachedFont = FontCache.INSTANCE.cache.get(key);
         if (cachedFont != null) return cachedFont;
+        SVGFont resolvedFont = resolveWithoutCache(fontSpec, measureContext);
+        FontCache.INSTANCE.cache.put(key, resolvedFont);
+        return resolvedFont;
+    }
 
+    public static @NotNull SVGFont resolveWithoutCache(@NotNull MeasurableFontSpec fontSpec,
+            @NotNull MeasureContext measureContext) {
         String family = findSupportedFontFamily(fontSpec);
 
         FontStyle style = fontSpec.style();
@@ -74,13 +84,11 @@ public final class FontResolver {
         }
 
         Font font = new Font(attributes);
-        SVGFont resolvedFont = new AWTSVGFont(font, stretch);
-        FontCache.INSTANCE.cache.put(key, resolvedFont);
-        return resolvedFont;
+        return new AWTSVGFont(font, stretch);
     }
 
     private static @NotNull String findSupportedFontFamily(@NotNull MeasurableFontSpec fontSpec) {
-        String[] families = fontSpec.families;
+        String[] families = fontSpec.families();
         for (String family : families) {
             if (FontFamiliesCache.INSTANCE.isSupportedFontFamily(family)) return family;
         }
