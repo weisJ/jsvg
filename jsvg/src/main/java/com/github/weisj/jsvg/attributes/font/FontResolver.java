@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,11 +37,10 @@ public final class FontResolver {
     public static @NotNull SVGFont resolve(@NotNull MeasurableFontSpec fontSpec,
             @NotNull MeasureContext measureContext) {
         FontCache.CacheKey key = new FontCache.CacheKey(fontSpec, measureContext);
-        SVGFont cachedFont = FontCache.cache.get(key);
+        SVGFont cachedFont = FontCache.INSTANCE.cache.get(key);
         if (cachedFont != null) return cachedFont;
 
-        // Todo: Check family before caching.
-        String[] families = fontSpec.families();
+        String family = findSupportedFontFamily(fontSpec);
 
         FontStyle style = fontSpec.style();
         int normalWeight = PredefinedFontWeight.NORMAL_WEIGHT;
@@ -60,9 +59,8 @@ public final class FontResolver {
         float stretch = fontSpec.stretch();
 
         // Todo: Convert css weights to awt weights.
-
         Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<>(4, 1f);
-        attributes.put(TextAttribute.FAMILY, families[0]);
+        attributes.put(TextAttribute.FAMILY, family);
         attributes.put(TextAttribute.SIZE, size);
         attributes.put(TextAttribute.WEIGHT, weight);
 
@@ -77,12 +75,39 @@ public final class FontResolver {
 
         Font font = new Font(attributes);
         SVGFont resolvedFont = new AWTSVGFont(font, stretch);
-        FontCache.cache.put(key, resolvedFont);
+        FontCache.INSTANCE.cache.put(key, resolvedFont);
         return resolvedFont;
     }
 
-    private static final class FontCache {
-        private static final HashMap<CacheKey, SVGFont> cache = new HashMap<>();
+    private static @NotNull String findSupportedFontFamily(@NotNull MeasurableFontSpec fontSpec) {
+        String[] families = fontSpec.families;
+        for (String family : families) {
+            if (FontFamiliesCache.INSTANCE.isSupportedFontFamily(family)) return family;
+        }
+        return MeasurableFontSpec.DEFAULT_FONT_FAMILY_NAME;
+    }
+
+    private enum FontFamiliesCache {
+        INSTANCE;
+
+        private final @NotNull String[] supportedFonts;
+
+        FontFamiliesCache() {
+            supportedFonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+        }
+
+        boolean isSupportedFontFamily(final @NotNull String fontName) {
+            for (String supportedFont : supportedFonts) {
+                if (supportedFont.equals(fontName)) return true;
+            }
+            return false;
+        }
+    }
+
+    private enum FontCache {
+        INSTANCE;
+
+        private final HashMap<CacheKey, SVGFont> cache = new HashMap<>();
 
         private static final class CacheKey {
             private final @NotNull MeasurableFontSpec spec;
