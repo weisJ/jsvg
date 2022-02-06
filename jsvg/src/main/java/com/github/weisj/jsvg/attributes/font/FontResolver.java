@@ -26,6 +26,7 @@ import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.text.AttributedCharacterIterator;
 import java.util.*;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -93,6 +94,10 @@ public final class FontResolver {
             if (FontFamiliesCache.INSTANCE.isSupportedFontFamily(family)) return family;
         }
         return MeasurableFontSpec.DEFAULT_FONT_FAMILY_NAME;
+    }
+
+    public static @NotNull List<@NotNull String> supportedFonts() {
+        return Collections.unmodifiableList(Arrays.asList(FontFamiliesCache.INSTANCE.supportedFonts));
     }
 
     private enum FontFamiliesCache {
