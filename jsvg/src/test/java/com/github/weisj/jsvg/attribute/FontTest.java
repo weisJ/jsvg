@@ -60,14 +60,14 @@ class FontTest {
 
     @Test
     void checkFontParsing() {
+        String fontName = FontResolver.supportedFonts().get(0);
         MeasurableFontSpec fontSpec = createFontSpec(
-                entry("font-family", "Verdana"),
+                entry("font-family", fontName),
                 entry("font-size", "3em"));
         SVGFont font = FontResolver.resolveWithoutCache(fontSpec, MEASURE_CONTEXT);
-        Assertions.assertEquals("Verdana", font.family());
+        Assertions.assertEquals(fontName, font.family());
         Assertions.assertEquals(3 * MEASURE_CONTEXT.em(), font.size());
     }
-
 
     private static @NotNull MeasurableFontSpec createFontSpec(@NotNull AttributeEntry... attributes) {
         Map<String, String> attrs = new HashMap<>();
