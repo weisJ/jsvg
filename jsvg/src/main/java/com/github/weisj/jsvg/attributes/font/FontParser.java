@@ -33,7 +33,7 @@ public final class FontParser {
 
     // Todo: font-variant
     public static @NotNull AttributeFontSpec parseFontSpec(@NotNull AttributeNode node) {
-        String[] fontFamilies = node.getStringList("font-family");
+        String[] fontFamilies = node.getStringList("font-family", true);
 
         // Todo: https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#fallback_weights
         @Nullable FontWeight weight = parseWeight(node);
