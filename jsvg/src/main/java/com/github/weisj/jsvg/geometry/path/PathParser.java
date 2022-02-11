@@ -123,6 +123,20 @@ public class PathParser {
         }
     }
 
+    private boolean nextFlag() {
+        char c = peek();
+        consume();
+        consumeWhiteSpaceOrSeparator();
+        if (c == '1') {
+            return true;
+        } else if (c == '0') {
+            return false;
+        } else {
+            throw new IllegalStateException(
+                    "Invalid flag value '" + c + "' " + " (index=" + index + " in input=" + input + ")");
+        }
+    }
+
     public @Nullable BezierPathCommand parseMeshCommand() {
         if (input == null) return null;
         char peekChar = peek();
@@ -149,7 +163,7 @@ public class PathParser {
     }
 
     public PathCommand[] parsePathCommand() {
-        if (input == null) return new PathCommand[0];
+        if (input == null || "none".equals(input)) return new PathCommand[0];
         List<PathCommand> commands = new ArrayList<>();
 
         currentCommand = 'Z';
@@ -190,16 +204,12 @@ public class PathParser {
                     cmd = new Vertical(true, nextFloat());
                     break;
                 case 'A':
-                    cmd = new Arc(false, nextFloat(), nextFloat(),
-                            nextFloat(),
-                            nextFloat() == 1f, nextFloat() == 1f,
-                            nextFloat(), nextFloat());
+                    cmd = new Arc(false, nextFloat(), nextFloat(), nextFloat(),
+                            nextFlag(), nextFlag(), nextFloat(), nextFloat());
                     break;
                 case 'a':
-                    cmd = new Arc(true, nextFloat(), nextFloat(),
-                            nextFloat(),
-                            nextFloat() == 1f, nextFloat() == 1f,
-                            nextFloat(), nextFloat());
+                    cmd = new Arc(true, nextFloat(), nextFloat(), nextFloat(),
+                            nextFlag(), nextFlag(), nextFloat(), nextFloat());
                     break;
                 case 'Q':
                     cmd = new Quadratic(false, nextFloat(), nextFloat(),
