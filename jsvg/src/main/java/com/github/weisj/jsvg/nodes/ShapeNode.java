@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontSize;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
@@ -41,13 +42,15 @@ import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
 public abstract class ShapeNode extends RenderableSVGNode
         implements HasShape, HasPaintContext, HasFontContext, Instantiator {
+
+    private PaintOrder paintOrder;
+
     private PaintContext paintContext;
     private FontSize fontSize;
     private Length fontSizeAdjust;
 
     private Length pathLength;
     private MeasurableShape shape;
-
 
     private Marker markerStart;
     private Marker markerMid;
@@ -70,6 +73,7 @@ public abstract class ShapeNode extends RenderableSVGNode
     @Override
     public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
+        paintOrder = PaintOrder.parse(attributeNode);
         paintContext = PaintContext.parse(attributeNode);
 
         fontSize = FontParser.parseFontSize(attributeNode);
@@ -127,10 +131,21 @@ public abstract class ShapeNode extends RenderableSVGNode
             double actualLength = shape.pathLength(measureContext);
             pathLengthFactor = (float) (actualLength / effectiveLength);
         }
-        ShapeRenderer.renderShape(context, g, paintShape, bounds,
-                shape.canBeFilled(), true, pathLengthFactor);
 
-        renderMarkers(context, paintShape, g);
+        for (PaintOrder.Phase phase : paintOrder.phases()) {
+            switch (phase) {
+                case FILL:
+                    ShapeRenderer.renderShapeFill(context, g, paintShape, bounds);
+                    break;
+                case STROKE:
+                    Stroke effectiveStroke = context.stroke(pathLengthFactor);
+                    ShapeRenderer.renderShapeStroke(context, g, paintShape, bounds, effectiveStroke);
+                    break;
+                case MARKERS:
+                    renderMarkers(context, paintShape, g);
+                    break;
+            }
+        }
     }
 
     private void renderMarkers(@NotNull RenderContext context, @NotNull Shape shape, @NotNull Graphics2D g) {

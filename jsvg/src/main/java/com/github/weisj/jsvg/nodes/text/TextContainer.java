@@ -31,6 +31,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
@@ -50,6 +51,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         implements TextSegment.RenderableSegment, HasShape, HasContext.ByDelegate, Renderable {
     private final List<@NotNull TextSegment> segments = new ArrayList<>();
 
+    private PaintOrder paintOrder;
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
     protected @NotImplemented Length textLength;
@@ -61,6 +63,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
+        paintOrder = PaintOrder.parse(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
@@ -131,7 +134,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
-                GlyphRenderer.renderGlyphRun((StringTextSegment) segment, cursor.completeGlyphRunBounds, g);
+                GlyphRenderer.renderGlyphRun(paintOrder, (StringTextSegment) segment, cursor.completeGlyphRunBounds, g);
             } else if (segment instanceof RenderableSegment) {
                 ((RenderableSegment) segment).renderSegmentWithoutLayout(cursor, currentContext, g);
             } else {

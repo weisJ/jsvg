@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,6 +28,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -57,7 +58,8 @@ final class GlyphRenderer {
         segment.currentRenderContext = context;
     }
 
-    static void renderGlyphRun(@NotNull StringTextSegment segment, @NotNull Rectangle2D completeGlyphRunBounds,
+    static void renderGlyphRun(@NotNull PaintOrder paintOrder, @NotNull StringTextSegment segment,
+            @NotNull Rectangle2D completeGlyphRunBounds,
             @NotNull Graphics2D g) {
         RenderContext context = segment.currentRenderContext;
         assert context != null;
@@ -69,7 +71,18 @@ final class GlyphRenderer {
         // Otherwise we would have to do expensive computations for the length of a text outline.
         Stroke stroke = context.stroke(1f);
 
-        ShapeRenderer.renderShape(context, g, glyphRun, completeGlyphRunBounds, stroke, true, true);
+        for (PaintOrder.Phase phase : paintOrder.phases()) {
+            switch (phase) {
+                case FILL:
+                    ShapeRenderer.renderShapeFill(context, g, glyphRun, completeGlyphRunBounds);
+                    break;
+                case STROKE:
+                    ShapeRenderer.renderShapeStroke(context, g, glyphRun, completeGlyphRunBounds, stroke);
+                    break;
+                case MARKERS:
+                    break;
+            }
+        }
 
         // Invalidate the glyphRun. Avoids holding onto the RenderContext, which may reference a JComponent.
         segment.currentRenderContext = null;

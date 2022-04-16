@@ -35,61 +35,53 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.nodes.Marker;
 import com.github.weisj.jsvg.nodes.ShapeNode;
+import com.google.errorprone.annotations.Immutable;
 
 public final class ShapeRenderer {
     private static final boolean DEBUG_MARKERS = false;
 
     private ShapeRenderer() {}
 
-    public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @Nullable Rectangle2D bounds,
-            boolean allowFill, boolean allowOutline, float pathLengthFactor) {
-        float fOpacity = context.fillOpacity();
-        SVGPaint fPaint = context.fillPaint();
+    @Immutable
+    private static class PaintWithOpacity {
+        private final @NotNull SVGPaint paint;
+        private final float opacity;
 
-        float sOpacity = context.strokeOpacity();
-        SVGPaint sPaint = context.strokePaint();
-
-        Stroke stroke = allowOutline ? context.stroke(pathLengthFactor) : null;
-
-        doRenderShape(context, g, shape, bounds, allowFill, allowOutline,
-                fOpacity, fPaint, sOpacity, sPaint, stroke);
-    }
-
-    public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @Nullable Rectangle2D bounds, @Nullable Stroke stroke,
-            boolean allowFill, boolean allowOutline) {
-        float fOpacity = context.fillOpacity();
-        SVGPaint fPaint = context.fillPaint();
-
-        float sOpacity = context.strokeOpacity();
-        SVGPaint sPaint = context.strokePaint();
-
-        doRenderShape(context, g, shape, bounds, allowFill, allowOutline,
-                fOpacity, fPaint, sOpacity, sPaint, stroke);
-    }
-
-    private static void doRenderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @Nullable Rectangle2D bounds,
-            boolean allowFill, boolean allowOutline,
-            float fOpacity, @NotNull SVGPaint fPaint,
-            float sOpacity, @NotNull SVGPaint sPaint, @Nullable Stroke stroke) {
-        boolean doFill = allowFill && fOpacity > 0 && fPaint.isVisible();
-        boolean doOutline = allowOutline && sOpacity > 0 && sPaint.isVisible();
-
-        if (doFill || doOutline) {
-            Composite composite = g.getComposite();
-            if (doFill) {
-                g.setComposite(AlphaComposite.SrcOver.derive(fOpacity));
-                fPaint.fillShape(g, context.measureContext(), shape, bounds);
-            }
-            if (doOutline && stroke != null) {
-                g.setComposite(AlphaComposite.SrcOver.derive(sOpacity));
-                g.setStroke(stroke);
-                sPaint.drawShape(g, context.measureContext(), shape, bounds);
-            }
-            g.setComposite(composite);
+        private PaintWithOpacity(@NotNull SVGPaint paint, float opacity) {
+            this.paint = paint;
+            this.opacity = opacity;
         }
+
+        boolean isVisible() {
+            return opacity > 0 && paint.isVisible();
+        }
+    }
+
+    public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull Shape shape, @Nullable Rectangle2D bounds, @Nullable Stroke stroke) {
+        renderShapeFill(context, g, shape, bounds);
+        renderShapeStroke(context, g, shape, bounds, stroke);
+    }
+
+    public static void renderShapeStroke(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull Shape shape, @Nullable Rectangle2D bounds, @Nullable Stroke stroke) {
+        PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
+        if (!(stroke != null && paintWithOpacity.isVisible())) return;
+        Composite composite = g.getComposite();
+        g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
+        g.setStroke(stroke);
+        paintWithOpacity.paint.drawShape(g, context.measureContext(), shape, bounds);
+        g.setComposite(composite);
+    }
+
+    public static void renderShapeFill(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull Shape shape, @Nullable Rectangle2D bounds) {
+        PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.fillPaint(), context.fillOpacity());
+        if (!paintWithOpacity.isVisible()) return;
+        Composite composite = g.getComposite();
+        g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
+        paintWithOpacity.paint.fillShape(g, context.measureContext(), shape, bounds);
+        g.setComposite(composite);
     }
 
     public static void renderMarkers(@NotNull ShapeNode shapeNode, @NotNull RenderContext context,
