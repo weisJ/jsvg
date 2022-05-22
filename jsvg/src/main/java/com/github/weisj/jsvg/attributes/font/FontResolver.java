@@ -111,7 +111,7 @@ public final class FontResolver {
 
         boolean isSupportedFontFamily(final @NotNull String fontName) {
             for (String supportedFont : supportedFonts) {
-                if (supportedFont.equals(fontName)) return true;
+                if (supportedFont.equalsIgnoreCase(fontName)) return true;
             }
             return false;
         }
