@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,11 +29,15 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 interface TextSegment {
+
     interface RenderableSegment extends TextSegment {
         void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context);
 
         void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
                 @NotNull Graphics2D g);
+
+        @NotNull
+        TextMetrics computeTextMetrics(@NotNull RenderContext context);
 
         void appendTextShape(@NotNull GlyphCursor cursor, @NotNull Path2D textShape, @NotNull RenderContext context);
     }

@@ -1,0 +1,29 @@
+<svg viewBox="0 0 300 180" width="300" height="180"
+	xmlns="http://www.w3.org/2000/svg">
+	<g font-family="sans-serif">
+		<text x="0" y="20" textLength="300" lengthAdjust="spacing">
+			Stretched using
+			spacing only.
+		</text>
+		<text x="0" y="50" textLength="300"
+			lengthAdjust="spacingAndGlyphs">
+			Stretched using spacing and glyphs.
+		</text>
+		<text x="0" y="80" textLength="100" lengthAdjust="spacing">
+			Shrunk using
+			spacing only.
+		</text>
+		<text x="0" y="110" textLength="100"
+			lengthAdjust="spacingAndGlyphs">
+			Shrunk using spacing and glyphs.
+		</text>
+		<text x="0" y="140" textLength="20" lengthAdjust="spacing">
+			Very shrunk
+			using spacing only.
+		</text>
+		<text x="0" y="170" textLength="20"
+			lengthAdjust="spacingAndGlyphs">
+			Very shrunk using spacing and glyphs.
+		</text>
+	</g>
+</svg>

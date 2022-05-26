@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,12 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.text;
+package com.github.weisj.jsvg.nodes.text;
 
-import com.github.weisj.jsvg.attributes.Default;
+public class TextMetrics {
+    private final double whiteSpaceLength;
+    private final double glyphLength;
+    private final int glyphCount;
 
-public enum LengthAdjust {
-    @Default
-    Spacing,
-    SpacingAndGlyphs
+    public TextMetrics(double whiteSpaceLength, double visibleCodepointLength, int glyphCount) {
+        this.whiteSpaceLength = whiteSpaceLength;
+        this.glyphLength = visibleCodepointLength;
+        this.glyphCount = glyphCount;
+    }
+
+    public double whiteSpaceLength() {
+        return whiteSpaceLength;
+    }
+
+    public double glyphLength() {
+        return glyphLength;
+    }
+
+    public double totalLength() {
+        return glyphLength() + whiteSpaceLength();
+    }
+
+    public int glyphCount() {
+        return glyphCount;
+    }
+
+    @Override
+    public String toString() {
+        return "TextMetrics{" +
+                "whiteSpaceLength=" + whiteSpaceLength +
+                ", glyphLength=" + glyphLength +
+                ", glyphCount=" + glyphCount +
+                '}';
+    }
 }

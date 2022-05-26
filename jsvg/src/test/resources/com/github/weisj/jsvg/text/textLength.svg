@@ -1,0 +1,8 @@
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+	<text y="0">Small text length</text>
+	<text y="20" textLength="6em">Small text length</text>
+	<rect y="20" x="0" width="6em" height="1" fill="red" />
+
+	<text y="40" textLength="120%">Big text length</text>
+	<rect y="40" x="0" width="120%" height="1" fill="red" />
+</svg>

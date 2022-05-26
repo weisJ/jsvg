@@ -26,6 +26,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +44,6 @@ import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
-import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.*;
 
@@ -54,7 +54,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     private PaintOrder paintOrder;
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
-    protected @NotImplemented Length textLength;
+    protected Length textLength;
 
     private boolean isVisible;
     private HasContext context;
@@ -67,6 +67,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
+        if (textLength.raw() < 0) textLength = Length.UNSPECIFIED;
 
         isVisible = parseIsVisible(attributeNode);
         context = HasContextImpl.parse(attributeNode);
@@ -124,9 +125,9 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         renderSegmentWithoutLayout(cursor, context, g);
     }
 
-    @Override
-    public void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
-            @NotNull Graphics2D g) {
+    private void forEachSegment(@NotNull RenderContext context,
+            @NotNull BiConsumer<StringTextSegment, RenderContext> onStringTextSegment,
+            @NotNull BiConsumer<RenderableSegment, RenderContext> onRenderableSegment) {
         for (TextSegment segment : children()) {
             RenderContext currentContext = context;
             if (segment instanceof Renderable) {
@@ -134,22 +135,23 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
-                GlyphRenderer.renderGlyphRun(paintOrder, (StringTextSegment) segment, cursor.completeGlyphRunBounds, g);
+                onStringTextSegment.accept((StringTextSegment) segment, currentContext);
             } else if (segment instanceof RenderableSegment) {
-                ((RenderableSegment) segment).renderSegmentWithoutLayout(cursor, currentContext, g);
+                onRenderableSegment.accept((RenderableSegment) segment, currentContext);
             } else {
-                throw new IllegalStateException("Can't render segment " + segment);
+                throw new IllegalStateException("Unexpected segment " + segment);
             }
         }
     }
 
     @Override
-    public void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context) {
-        // Todo: textLength should be taken into consideration.
+    public @NotNull TextMetrics computeTextMetrics(@NotNull RenderContext context) {
         SVGFont font = context.font();
+        float letterSpacing = context.fontRenderContext().letterSpacing().resolveLength(context.measureContext());
 
-        GlyphCursor localCursor = createLocalCursor(context, cursor);
-
+        double whiteSpaceLength = 0;
+        double glyphLength = 0;
+        int glyphCount = 0;
         for (TextSegment segment : children()) {
             RenderContext currentContext = context;
             if (segment instanceof Renderable) {
@@ -157,13 +159,45 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
-                GlyphRenderer.prepareGlyphRun((StringTextSegment) segment, localCursor, font, currentContext);
+                glyphCount += ((StringTextSegment) segment).codepoints().length;
+                if (glyphCount > 0) whiteSpaceLength += (glyphCount - 1) * letterSpacing;
+                for (char codepoint : ((StringTextSegment) segment).codepoints()) {
+                    glyphLength += font.codepointGlyph(codepoint).advance();
+                }
             } else if (segment instanceof RenderableSegment) {
-                ((RenderableSegment) segment).prepareSegmentForRendering(localCursor, currentContext);
+                TextMetrics textMetrics = ((RenderableSegment) segment).computeTextMetrics(currentContext);
+                whiteSpaceLength += textMetrics.whiteSpaceLength();
+                glyphLength += textMetrics.glyphLength();
+                glyphCount += textMetrics.glyphCount();
             } else {
-                throw new IllegalStateException("Can't render segment " + segment);
+                throw new IllegalStateException("Unexpected segment " + segment);
             }
         }
+        return new TextMetrics(whiteSpaceLength, glyphLength, glyphCount);
+    }
+
+    @Override
+    public void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
+            @NotNull Graphics2D g) {
+        forEachSegment(context,
+                (segment, ctx) -> GlyphRenderer.renderGlyphRun(paintOrder, segment, cursor.completeGlyphRunBounds, g),
+                (segment, ctx) -> segment.renderSegmentWithoutLayout(cursor, ctx, g));
+    }
+
+    @Override
+    public void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context) {
+        SVGFont font = context.font();
+
+        GlyphCursor localCursor = createLocalCursor(context, cursor);
+
+        localCursor.advancement = textLength.isSpecified()
+                ? new GlyphAdvancement(computeTextMetrics(context),
+                        textLength.resolveWidth(context.measureContext()), lengthAdjust)
+                : GlyphAdvancement.defaultAdvancement();
+
+        forEachSegment(context,
+                (segment, ctx) -> GlyphRenderer.prepareGlyphRun(segment, localCursor, font, ctx),
+                (segment, ctx) -> segment.prepareSegmentForRendering(localCursor, ctx));
 
         cleanUpLocalCursor(cursor, localCursor);
     }
@@ -174,22 +208,10 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         SVGFont font = context.font();
         GlyphCursor localCursor = createLocalCursor(context, cursor);
 
-        for (TextSegment segment : children()) {
-            RenderContext currentContext = context;
-            if (segment instanceof Renderable) {
-                if (!((Renderable) segment).isVisible(context)) continue;
-                currentContext = NodeRenderer.setupRenderContext(segment, context);
-            }
-            if (segment instanceof StringTextSegment) {
-                Shape glyphRun = GlyphRenderer.layoutGlyphRun((StringTextSegment) segment, localCursor, font,
-                        currentContext.measureContext(), currentContext.fontRenderContext());
-                textShape.append(glyphRun, false);
-            } else if (segment instanceof RenderableSegment) {
-                ((RenderableSegment) segment).appendTextShape(localCursor, textShape, currentContext);
-            } else {
-                throw new IllegalStateException("Can't compute shape of segment " + segment);
-            }
-        }
+        forEachSegment(context,
+                (segment, ctx) -> textShape.append(GlyphRenderer.layoutGlyphRun(segment, localCursor, font,
+                        ctx.measureContext(), ctx.fontRenderContext()), false),
+                (segment, ctx) -> segment.appendTextShape(localCursor, textShape, ctx));
 
         cleanUpLocalCursor(cursor, localCursor);
     }

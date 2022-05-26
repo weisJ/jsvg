@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -31,27 +31,28 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 class GlyphCursor {
-    final Rectangle2D completeGlyphRunBounds;
+    protected final Rectangle2D completeGlyphRunBounds;
+    protected @NotNull GlyphAdvancement advancement = GlyphAdvancement.defaultAdvancement();
 
-    float x;
-    float y;
-    int glyphOffset;
-    final AffineTransform transform;
+    protected float x;
+    protected float y;
+    protected int glyphOffset;
+    protected final AffineTransform transform;
 
-    Length[] xLocations;
-    int xOff;
+    protected Length[] xLocations;
+    protected int xOff;
 
-    Length[] xDeltas;
-    int dxOff;
+    protected Length[] xDeltas;
+    protected int dxOff;
 
-    Length[] yLocations;
-    int yOff;
+    protected Length[] yLocations;
+    protected int yOff;
 
-    Length[] yDeltas;
-    int dyOff;
+    protected Length[] yDeltas;
+    protected int dyOff;
 
-    float[] rotations;
-    int rotOff;
+    protected float[] rotations;
+    protected int rotOff;
 
     GlyphCursor(float x, float y, @NotNull AffineTransform transform) {
         this(x, y, transform, new Rectangle2D.Float(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, 0, 0));
@@ -67,6 +68,7 @@ class GlyphCursor {
 
     GlyphCursor(@NotNull GlyphCursor c) {
         this(c.x, c.y, c.transform, c.completeGlyphRunBounds);
+        this.advancement = c.advancement;
         this.glyphOffset = 0;
         this.xLocations = c.xLocations;
         this.xOff = c.xOff;
@@ -111,9 +113,9 @@ class GlyphCursor {
 
         // Todo: Also handle non-horizontal and bidi text
         // This assumes a horizontal baseline
-        x += glyph.advance() + letterSpacing;
+        x += advancement.advancement(glyph, letterSpacing);
 
-        return transform;
+        return advancement.glyphTransform(transform);
     }
 
     protected float nextX(@NotNull MeasureContext measure) {
