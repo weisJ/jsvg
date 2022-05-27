@@ -60,12 +60,14 @@ public class FontRenderContext {
         if (this == o) return true;
         if (!(o instanceof FontRenderContext)) return false;
         FontRenderContext that = (FontRenderContext) o;
-        return Objects.equals(letterSpacing, that.letterSpacing) && baselineAlignment == that.baselineAlignment;
+        return Objects.equals(letterSpacing, that.letterSpacing)
+            && baselineAlignment == that.baselineAlignment
+            && textAnchor == that.textAnchor;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(letterSpacing, baselineAlignment);
+        return Objects.hash(letterSpacing, baselineAlignment, textAnchor);
     }
 
     public static @NotNull FontRenderContext createDefault() {
