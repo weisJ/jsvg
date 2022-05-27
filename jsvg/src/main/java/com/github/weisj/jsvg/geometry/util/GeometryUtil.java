@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,9 @@
  */
 package com.github.weisj.jsvg.geometry.util;
 
+import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -66,5 +68,21 @@ public final class GeometryUtil {
         double dx = x2 - x1;
         double dy = y2 - y1;
         return dx * dx + dy * dy;
+    }
+
+    public static double pathLength(@NotNull Shape shape) {
+        PathLengthCalculator pathLengthCalculator = new PathLengthCalculator();
+        PathIterator pathIterator = shape.getPathIterator(null);
+        double length = 0;
+        double[] args = new double[6];
+        while (!pathIterator.isDone()) {
+            length += pathLengthCalculator.segmentLength(pathIterator.currentSegment(args), args);
+            pathIterator.next();
+        }
+        return length;
+    }
+
+    public static double lineLength(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(GeometryUtil.distanceSquared(x1, y1, x2, y2));
     }
 }
