@@ -76,7 +76,7 @@ public class FontRenderContext {
 
     public static @NotNull FontRenderContext parse(@NotNull AttributeNode attributeNode) {
         return new FontRenderContext(
-                attributeNode.getLength("latter-spacing"),
+                attributeNode.getLength("letter-spacing"),
                 attributeNode.getEnum("baseline-alignment", BaselineAlignment.Auto),
                 attributeNode.getEnumNullable("text-anchor", TextAnchor.class));
     }
