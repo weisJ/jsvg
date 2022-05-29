@@ -26,7 +26,6 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.text.BaselineAlignment;
 import com.github.weisj.jsvg.attributes.text.DominantBaseline;
 import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -40,14 +39,12 @@ public class FontRenderContext {
     // Note: An unspecified value is different from 0.
     // Unlike 0 it allows us to use spacing different from 0 if needed.
     private final @Nullable Length letterSpacing;
-    private final @Nullable BaselineAlignment baselineAlignment;
     private final @Nullable DominantBaseline dominantBaseline;
     private final @Nullable TextAnchor textAnchor;
 
-    public FontRenderContext(@Nullable Length letterSpacing, @Nullable BaselineAlignment baselineAlignment,
-            @Nullable DominantBaseline dominantBaseline, @Nullable TextAnchor textAnchor) {
+    public FontRenderContext(@Nullable Length letterSpacing, @Nullable DominantBaseline dominantBaseline,
+            @Nullable TextAnchor textAnchor) {
         this.letterSpacing = letterSpacing;
-        this.baselineAlignment = baselineAlignment;
         this.dominantBaseline = dominantBaseline;
         this.textAnchor = textAnchor;
     }
@@ -64,28 +61,23 @@ public class FontRenderContext {
         return dominantBaseline != null ? dominantBaseline : DominantBaseline.Auto;
     }
 
-    public @NotNull BaselineAlignment baselineAlignment() {
-        return baselineAlignment != null ? baselineAlignment : BaselineAlignment.Auto;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof FontRenderContext)) return false;
         FontRenderContext that = (FontRenderContext) o;
         return Objects.equals(letterSpacing, that.letterSpacing)
-                && baselineAlignment == that.baselineAlignment
                 && dominantBaseline == that.dominantBaseline
                 && textAnchor == that.textAnchor;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(letterSpacing, baselineAlignment, dominantBaseline, textAnchor);
+        return Objects.hash(letterSpacing, dominantBaseline, textAnchor);
     }
 
     public static @NotNull FontRenderContext createDefault() {
-        return new FontRenderContext(null, null, null, null);
+        return new FontRenderContext(null, null, null);
     }
 
     public static @NotNull FontRenderContext parse(@NotNull AttributeNode attributeNode) {
@@ -97,7 +89,6 @@ public class FontRenderContext {
         }
         return new FontRenderContext(
                 attributeNode.getLength("letter-spacing"),
-                attributeNode.getEnum("baseline-alignment", BaselineAlignment.Auto),
                 dominantBaseline,
                 attributeNode.getEnumNullable("text-anchor", TextAnchor.class));
     }
@@ -106,7 +97,6 @@ public class FontRenderContext {
         if (frc == null || frc.equals(this)) return this;
         return new FontRenderContext(
                 frc.letterSpacing != null ? frc.letterSpacing : letterSpacing,
-                frc.baselineAlignment != null ? frc.baselineAlignment : baselineAlignment,
                 frc.dominantBaseline != null ? frc.dominantBaseline : dominantBaseline,
                 frc.textAnchor != null ? frc.textAnchor : textAnchor);
     }
