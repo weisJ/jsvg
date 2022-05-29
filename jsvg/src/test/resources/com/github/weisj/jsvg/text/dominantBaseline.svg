@@ -1,0 +1,40 @@
+<svg width="400" height="300" viewBox="0 0 400 300"
+	xmlns="http://www.w3.org/2000/svg">
+	<g transform="translate(0 10)">
+		<!-- Materialization of anchors -->
+		<path
+			d="M60,20 L60,270
+           M30,20 L400,20
+           M30,70 L400,70
+           M30,120 L400,120
+           M30,170 L400,170
+           M30,220 L400,220
+           M30,270 L400,270"
+			stroke="grey" />
+
+		<!-- Anchors in action -->
+		<g font-weight="bold" font-size="30px"
+			font-family="Verdana, Helvetica, Arial, sans-serif">
+			<text dominant-baseline="auto" x="70" y="20">ÜAx- auto</text>
+			<text dominant-baseline="middle" x="70" y="70">ÜAx- middle</text>
+			<text dominant-baseline="mathematical" x="70" y="120">ÜAx-
+				mathematical</text>
+			<text dominant-baseline="hanging" x="70" y="170">ÜAx- hanging</text>
+			<text dominant-baseline="text-top" x="70" y="220">ÜAx- text-top </text>
+
+			<text x="10" y="20">Ax</text>
+			<text x="10" y="70">Ax</text>
+			<text x="10" y="120">Ax</text>
+			<text x="10" y="170">Ax</text>
+			<text x="10" y="220">Ax</text>
+		</g>
+
+		<!-- Materialization of anchors -->
+		<circle cx="60" cy="20" r="3" fill="red" />
+		<circle cx="60" cy="70" r="3" fill="red" />
+		<circle cx="60" cy="120" r="3" fill="red" />
+		<circle cx="60" cy="170" r="3" fill="red" />
+		<circle cx="60" cy="220" r="3" fill="red" />
+		<circle cx="60" cy="270" r="3" fill="red" />
+	</g>
+</svg>

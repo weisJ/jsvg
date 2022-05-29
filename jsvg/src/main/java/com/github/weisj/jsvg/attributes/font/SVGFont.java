@@ -47,4 +47,22 @@ public interface SVGFont {
     String family();
 
     int size();
+
+    float effectiveExHeight();
+
+    float effectiveEmHeight();
+
+    float mathematicalBaseline();
+
+    float hangingBaseline();
+
+    float romanBaseline();
+
+    float centerBaseline();
+
+    float middleBaseline();
+
+    float textUnderBaseline();
+
+    float textOverBaseline();
 }

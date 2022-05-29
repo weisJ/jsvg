@@ -102,6 +102,10 @@ final class GlyphRenderer {
             if (glyphTransform == null) break;
             if (!glyph.isRendered()) continue;
             Shape glyphOutline = glyph.glyphOutline();
+
+            float baselineOffset = computeBaselineOffset(font, fontRenderContext);
+            glyphTransform.translate(0, -baselineOffset);
+
             Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
             glyphPath.append(renderPath, false);
             if (DEBUG) {
@@ -110,5 +114,30 @@ final class GlyphRenderer {
         }
 
         return glyphPath;
+    }
+
+    private static float computeBaselineOffset(@NotNull SVGFont font, @NotNull FontRenderContext fontRenderContext) {
+        switch (fontRenderContext.dominantBaseline()) {
+            default:
+            case Auto:
+                // TODO: If text is in vertical mode this should be 'central'
+            case Alphabetic:
+                return font.romanBaseline();
+            case Hanging:
+                return font.hangingBaseline();
+            case Central:
+                return font.centerBaseline();
+            case Middle:
+                return font.middleBaseline();
+            case Mathematical:
+                return font.mathematicalBaseline();
+            case Ideographic:
+            case TextAfterEdge:
+            case TextBottom:
+                return font.textUnderBaseline();
+            case TextBeforeEdge:
+            case TextTop:
+                return font.textOverBaseline();
+        }
     }
 }

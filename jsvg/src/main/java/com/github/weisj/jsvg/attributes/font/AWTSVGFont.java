@@ -25,11 +25,14 @@ import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphMetrics;
 import java.awt.font.GlyphVector;
+import java.awt.font.LineMetrics;
 import java.util.HashMap;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Percentage;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.nodes.text.Glyph;
 
@@ -38,6 +41,11 @@ public class AWTSVGFont implements SVGFont {
     private final @NotImplemented @Percentage float stretch;
     private final FontRenderContext frc = new FontRenderContext(null, true, true);
     private final HashMap<Character, Glyph> glyphCache;
+
+    private @Nullable LineMetrics lineMetrics;
+    private float[] baselineOffsets;
+    private float exHeight = Length.UNSPECIFIED_RAW;
+    private float mathBaseline = Length.UNSPECIFIED_RAW;
 
     public AWTSVGFont(@NotNull Font font, @Percentage float stretch) {
         this.font = font;
@@ -66,6 +74,69 @@ public class AWTSVGFont implements SVGFont {
     @Override
     public int size() {
         return font.getSize();
+    }
+
+    private @NotNull LineMetrics lineMetrics() {
+        if (lineMetrics == null) {
+            lineMetrics = font.getLineMetrics("Ax-", 0, 1, frc);
+        }
+        return lineMetrics;
+    }
+
+    @Override
+    public float effectiveExHeight() {
+        if (Length.isUnspecified(exHeight)) {
+            exHeight = (float) codepointGlyph('x').glyphOutline().getBounds2D().getHeight();
+        }
+        return exHeight;
+    }
+
+    @Override
+    public float effectiveEmHeight() {
+        return font.getSize2D();
+    }
+
+    @Override
+    public float mathematicalBaseline() {
+        if (Length.isUnspecified(mathBaseline)) {
+            mathBaseline = -effectiveExHeight() / 2;
+        }
+        return mathBaseline;
+    }
+
+    private float[] baselineOffsets() {
+        if (baselineOffsets == null) baselineOffsets = lineMetrics().getBaselineOffsets();
+        return baselineOffsets;
+    }
+
+    @Override
+    public float hangingBaseline() {
+        return baselineOffsets()[Font.HANGING_BASELINE];
+    }
+
+    @Override
+    public float romanBaseline() {
+        return baselineOffsets()[Font.ROMAN_BASELINE];
+    }
+
+    @Override
+    public float centerBaseline() {
+        return baselineOffsets()[Font.CENTER_BASELINE];
+    }
+
+    @Override
+    public float middleBaseline() {
+        return (romanBaseline() - effectiveExHeight()) / 2;
+    }
+
+    @Override
+    public float textUnderBaseline() {
+        return lineMetrics().getUnderlineOffset();
+    }
+
+    @Override
+    public float textOverBaseline() {
+        return textUnderBaseline() - effectiveEmHeight();
     }
 
     @NotNull

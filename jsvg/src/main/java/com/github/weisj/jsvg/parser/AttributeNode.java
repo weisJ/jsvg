@@ -121,6 +121,13 @@ public class AttributeNode {
         return tagName;
     }
 
+    public boolean tagIsOneOf(@NotNull String... tags) {
+        for (String tag : tags) {
+            if (tagName.equals(tag)) return true;
+        }
+        return false;
+    }
+
     public @Nullable AttributeNode parent() {
         return parent;
     }
