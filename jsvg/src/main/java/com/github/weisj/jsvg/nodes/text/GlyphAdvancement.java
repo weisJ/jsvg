@@ -62,6 +62,10 @@ class GlyphAdvancement {
         return glyphAdvancement(glyph) + spacingAdvancement(letterSpacing);
     }
 
+    public float maxLookBehind() {
+        return -Math.min(0, absoluteSpacingAdjustment);
+    }
+
     float spacingAdvancement(float letterSpacing) {
         return letterSpacing * spacingAdjustment + absoluteSpacingAdjustment;
     }

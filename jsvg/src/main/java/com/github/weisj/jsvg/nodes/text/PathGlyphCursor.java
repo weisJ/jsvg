@@ -28,43 +28,47 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.util.SegmentIteratorWithLookBehind;
 
 class PathGlyphCursor extends GlyphCursor {
 
     private static final float EPS = 0.0001f;
 
-    private float xStart;
-    private float yStart;
+    private float remainingSegmentLength;
     private float segmentLength;
+    private SegmentIteratorWithLookBehind.Segment currentSegment;
 
-    private final float[] cords;
-    private final @NotNull PathIterator pathIterator;
+    private final @NotNull SegmentIteratorWithLookBehind segmentIterator;
 
     PathGlyphCursor(@NotNull PathIterator pathIterator, float startOffset) {
         super(0, 0, new AffineTransform());
-        this.pathIterator = pathIterator;
-        this.cords = new float[2];
-        setupIterator(pathIterator);
+        this.segmentIterator = new SegmentIteratorWithLookBehind(pathIterator, 0);
+        setupInitialData();
         advance(startOffset);
     }
 
     PathGlyphCursor(@NotNull GlyphCursor cursor, float startOffset, @NotNull PathIterator pathIterator) {
         super(cursor);
-        this.pathIterator = pathIterator;
-        this.cords = new float[2];
-        setupIterator(pathIterator);
+        this.segmentIterator = new SegmentIteratorWithLookBehind(pathIterator, 0);
+        setupInitialData();
         advance(startOffset);
+    }
+
+    private void setupInitialData() {
+        this.currentSegment = segmentIterator.currentSegment();
+        this.segmentLength = this.remainingSegmentLength = (float) currentSegment.length();
+        this.x = currentSegment.xStart;
+        this.y = currentSegment.yStart;
     }
 
     private PathGlyphCursor(@NotNull PathGlyphCursor pathCursor) {
         super(pathCursor);
         // We only ever transition one into a PathGlyphCursor (from a linear one)
-        // hence we can share all out state without the problem of overwriting it.
-        this.pathIterator = pathCursor.pathIterator;
-        this.xStart = pathCursor.xStart;
-        this.yStart = pathCursor.yStart;
+        // hence we can share all our state without the problem of overwriting it.
+        this.segmentIterator = pathCursor.segmentIterator;
+        this.remainingSegmentLength = pathCursor.remainingSegmentLength;
         this.segmentLength = pathCursor.segmentLength;
-        this.cords = pathCursor.cords;
+        this.currentSegment = pathCursor.currentSegment;
     }
 
     @Override
@@ -77,60 +81,52 @@ class PathGlyphCursor extends GlyphCursor {
         super.updateFrom(local);
         assert local instanceof PathGlyphCursor;
         PathGlyphCursor glyphCursor = (PathGlyphCursor) local;
-        xStart = glyphCursor.xStart;
-        yStart = glyphCursor.yStart;
+        remainingSegmentLength = glyphCursor.remainingSegmentLength;
         segmentLength = glyphCursor.segmentLength;
+        currentSegment = glyphCursor.currentSegment;
     }
 
-    private void setupIterator(@NotNull PathIterator pathIterator) {
-        if (!pathIterator.isDone()) {
-            if (pathIterator.currentSegment(cords) != PathIterator.SEG_MOVETO) {
-                throw new IllegalStateException("Path iterator didn't establish starting position");
-            }
-            xStart = cords[0];
-            yStart = cords[1];
-            x = xStart;
-            y = yStart;
-        } else {
-            xStart = x;
-            yStart = y;
-        }
+    @Override
+    public void setAdvancement(@NotNull GlyphAdvancement advancement) {
+        super.setAdvancement(advancement);
+        segmentIterator.setMaxLookBehindLength(advancement.maxLookBehind());
     }
 
     @Override
     @Nullable
     AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull Glyph glyph, float letterSpacing) {
         // Todo: Absolute x positions require arbitrary moves along the path
-        if (pathIterator.isDone() && segmentLength < EPS) return null;
+        // dx can be done by using the look behind iterator.
+        // Absolute x can use a look up table for the segment/state.
+        if (segmentIterator.isDone() && remainingSegmentLength < EPS) return null;
 
         float deltaX = nextDeltaX(measure);
         if (deltaX != 0) advance(deltaX);
 
-        // Safe starting location of glyph
-        float curX = x;
-        float curY = y;
         // Move the advance of the glyph
         float advanceDist = advancement.glyphAdvancement(glyph);
-        if (segmentLength > advanceDist / 2f) {
-            // The midpoint of the glyph is guaranteed to be inside the path.
-            advance(advanceDist);
-        } else {
-            // To ensure the midpoint of the glyph is still on the path first
-            // move the first half. Then check if we overshot. If not move the remaining half.
-            advance(advanceDist / 2f);
-            if (pathIterator.isDone() && segmentLength < EPS) return null;
-            advance(advanceDist / 2f);
-        }
+        float halfAdvance = advanceDist / 2f;
 
-        transform.setToTranslation(curX, curY);
-        float charRotation = calculateSegmentRotation(curX, curY, x, y);
+        advance(halfAdvance);
+        float walkedFraction = halfAdvance / segmentLength;
+        float slopeX = walkedFraction * (currentSegment.xEnd - currentSegment.xStart);
+        float slopeY = walkedFraction * (currentSegment.yEnd - currentSegment.yStart);
+        float anchorX = x - slopeX;
+        float anchorY = y - slopeY;
+
+        // The glyph midpoint is outside the path and should not be made visible. Abort
+        if (segmentIterator.isDone() && remainingSegmentLength < EPS) return null;
+        advance(halfAdvance);
+
+        transform.setToTranslation(anchorX, anchorY);
+        float charRotation = calculateSegmentRotation(anchorX, anchorY, x + slopeX, y + slopeY);
         transform.rotate(charRotation, 0, 0);
 
         float deltaY = nextDeltaY(measure);
         if (deltaY != 0) {
             // Adjust the location along the paths normal vector.
-            float nx = -(y - curY);
-            float ny = (x - curX);
+            float nx = -(y - anchorX);
+            float ny = (x - anchorY);
             float nn = deltaY / norm(nx, ny);
             transform.translate(nx * nn, ny * nn);
         }
@@ -140,64 +136,61 @@ class PathGlyphCursor extends GlyphCursor {
     }
 
     private void advance(float distance) {
-        // Todo: Implement advancing backwards
-        advanceInsideSegment(advanceIntoSegment(distance));
+        if (distance >= 0) {
+            advanceInsideSegment(advanceIntoSegment(distance));
+        } else {
+            advanceInsideSegment(-reverseIntoSegment(-distance));
+        }
     }
+
+    private float travelledSegmentLength() {
+        return segmentLength - remainingSegmentLength;
+    }
+
 
     private float advanceIntoSegment(float distance) {
         if (distance < EPS) return 0;
-        // Fixme: This gets weird if we are on a vertex.
-        while (!pathIterator.isDone() && segmentLength < distance) {
-            distance -= segmentLength;
-            iterateToNextSegment();
-            segmentLength = calculateSegmentLength();
+        while (segmentIterator.hasNext() && remainingSegmentLength < distance) {
+            distance -= remainingSegmentLength;
+            segmentIterator.moveToNext();
+            currentSegment = segmentIterator.currentSegment();
+            x = currentSegment.xStart;
+            y = currentSegment.yStart;
+            segmentLength = (float) currentSegment.length();
+            remainingSegmentLength = segmentLength;
         }
         return distance;
     }
 
-    private void advanceInsideSegment(float distance) {
-        if (distance < EPS) return;
-        float xStep = cords[0] - x;
-        float yStep = cords[1] - y;
-        float fraction = distance / segmentLength;
-        x += xStep * fraction;
-        y += yStep * fraction;
-        segmentLength -= distance;
+    private float reverseIntoSegment(float distance) {
+        if (distance < EPS) return 0;
+        while (segmentIterator.hasPrevious() && travelledSegmentLength() < distance) {
+            distance -= travelledSegmentLength();
+            segmentIterator.moveToPrevious();
+            currentSegment = segmentIterator.currentSegment();
+            x = currentSegment.xEnd;
+            y = currentSegment.yEnd;
+            segmentLength = (float) currentSegment.length();
+            remainingSegmentLength = 0;
+        }
+        if (travelledSegmentLength() < distance) throw new IllegalStateException("Not enough buffer");
+        return distance;
     }
 
-    private void iterateToNextSegment() {
-        assert !pathIterator.isDone();
-        do {
-            x = cords[0];
-            y = cords[1];
-            switch (pathIterator.currentSegment(cords)) {
-                case PathIterator.SEG_CLOSE:
-                    // We are closing the path. Restore cords to last moved-to location.
-                    cords[0] = xStart;
-                    cords[1] = yStart;
-                    return;
-                case PathIterator.SEG_LINETO:
-                    // The coordinates of the segment end are in cords.
-                    pathIterator.next();
-                    return;
-                case PathIterator.SEG_MOVETO:
-                    // Moving doesn't advance into a new line segment.
-                    xStart = x;
-                    yStart = y;
-                    break;
-                default:
-                    throw new IllegalStateException();
-            }
-            pathIterator.next();
-        } while (!pathIterator.isDone());
+    private void advanceInsideSegment(float distance) {
+        if (Math.abs(distance) < EPS) return;
+        if (distance < 0 && -distance > travelledSegmentLength()) {
+            throw new IllegalStateException(
+                    "Distance too large " + distance + " of maximum " + travelledSegmentLength());
+        }
+        float fractionWalked = distance / segmentLength;
+        x += (currentSegment.xEnd - currentSegment.xStart) * fractionWalked;
+        y += (currentSegment.yEnd - currentSegment.yStart) * fractionWalked;
+        remainingSegmentLength -= distance;
     }
 
     private float calculateSegmentRotation(float x1, float y1, float x2, float y2) {
         return (float) Math.atan2(y2 - y1, x2 - x1);
-    }
-
-    private float calculateSegmentLength() {
-        return norm(cords[0] - x, cords[1] - y);
     }
 
     private float norm(float a, float b) {
