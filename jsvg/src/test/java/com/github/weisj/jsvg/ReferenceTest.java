@@ -149,6 +149,14 @@ final class ReferenceTest {
         });
     }
 
+    public static BufferedImage render(@NotNull String path) {
+        try {
+            return render(Objects.requireNonNull(ReferenceTest.class.getResource(path)).openStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static BufferedImage render(@NotNull InputStream inputStream) {
         SVGDocument document = Objects.requireNonNull(new SVGLoader().load(inputStream));
         FloatSize size = document.size();

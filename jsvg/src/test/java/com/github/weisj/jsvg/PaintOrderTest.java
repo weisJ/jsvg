@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ReferenceTest.render;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
@@ -31,6 +31,6 @@ class PaintOrderTest {
     @Test
     void paintOrderRefTest() {
         // Batik doesn't support 'paint-order', so we can't do a proper reference test.
-        assertDoesNotThrow(() -> compareImages("paintOrder.svg"));
+        assertDoesNotThrow(() -> render("paintOrder.svg"));
     }
 }

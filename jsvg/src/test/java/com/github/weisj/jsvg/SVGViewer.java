@@ -41,11 +41,11 @@ public class SVGViewer {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            LafManager.install();
+            LafManager.installTheme(LafManager.getPreferredThemeStyle());
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("filter/colormatrix.svg");
+            iconBox.setSelectedItem("tempTestFile.svg");
 
             SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
             svgPanel.setPreferredSize(new Dimension(1000, 600));

@@ -23,6 +23,8 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ReferenceTest.render;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -35,9 +37,31 @@ class TextTest {
         assertEquals(SUCCESS, compareImages("text/text2.svg"));
         assertEquals(SUCCESS, compareImages("text/text5.svg"));
         // Batik doesn't correctly implement rotation.
-        // assertEquals(SUCCESS, compareImages("text/text3.svg"));
+        assertDoesNotThrow(() -> render("text/text3.svg"));
         // textPath has to be checked manually.
-        // assertEquals(SUCCESS, compareImages("text/text4.svg"));
-        // assertEquals(SUCCESS, compareImages("text/text6.svg"));
+        assertDoesNotThrow(() -> render("text/text4.svg"));
+        assertDoesNotThrow(() -> render("text/text6.svg"));
+    }
+
+    @Test
+    void textLengthTest() {
+        assertEquals(SUCCESS, compareImages("text/textLength.svg"));
+        // Batik doesn't implement this correctly. But our implementation isn't 100% correct too.
+        assertDoesNotThrow(() -> render("text/textLengthPath.svg"));
+    }
+
+    @Test
+    void lengthAdjustTest() {
+        assertEquals(SUCCESS, compareImages("text/lengthAdjust.svg"));
+    }
+
+    @Test
+    void dominantBaselineTest() {
+        assertDoesNotThrow(() -> render("text/dominantBaseline.svg"));
+    }
+
+    @Test
+    void textAnchorTest() {
+        assertEquals(SUCCESS, compareImages("text/textAnchor.svg"));
     }
 }
