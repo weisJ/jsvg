@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
+import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseContainerNode;
@@ -107,22 +108,22 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
             @NotNull Graphics2D g) {
         prepareSegmentForRendering(cursor, context);
 
-        double offset;
-        switch (context.fontRenderContext().textAnchor()) {
-            default:
-            case Start:
-                offset = 0;
-                break;
-            case Middle:
-                offset = cursor.completeGlyphRunBounds.getWidth() / 2f;
-                break;
-            case End:
-                offset = cursor.completeGlyphRunBounds.getWidth();
-                break;
-        }
+        double offset = textAnchorOffset(context.fontRenderContext().textAnchor(), cursor);
         g.translate(-offset, 0);
 
         renderSegmentWithoutLayout(cursor, context, g);
+    }
+
+    private double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull GlyphCursor glyphCursor) {
+        switch (textAnchor) {
+            default:
+            case Start:
+                return 0;
+            case Middle:
+                return glyphCursor.completeGlyphRunBounds.getWidth() / 2f;
+            case End:
+                return glyphCursor.completeGlyphRunBounds.getWidth();
+        }
     }
 
     private void forEachSegment(@NotNull RenderContext context,
