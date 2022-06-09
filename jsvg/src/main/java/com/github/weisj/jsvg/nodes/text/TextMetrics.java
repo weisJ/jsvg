@@ -24,12 +24,15 @@ package com.github.weisj.jsvg.nodes.text;
 public class TextMetrics {
     private final double whiteSpaceLength;
     private final double glyphLength;
+    private final double fixedGlyphLength;
     private final int glyphCount;
 
-    public TextMetrics(double whiteSpaceLength, double visibleCodepointLength, int glyphCount) {
+    public TextMetrics(double whiteSpaceLength, double visibleCodepointLength, int glyphCount,
+            double fixedGlyphLength) {
         this.whiteSpaceLength = whiteSpaceLength;
         this.glyphLength = visibleCodepointLength;
         this.glyphCount = glyphCount;
+        this.fixedGlyphLength = fixedGlyphLength;
     }
 
     public double whiteSpaceLength() {
@@ -40,7 +43,11 @@ public class TextMetrics {
         return glyphLength;
     }
 
-    public double totalLength() {
+    public double fixedGlyphLength() {
+        return fixedGlyphLength;
+    }
+
+    public double totalAdjustableLength() {
         return glyphLength() + whiteSpaceLength();
     }
 
@@ -54,6 +61,7 @@ public class TextMetrics {
                 "whiteSpaceLength=" + whiteSpaceLength +
                 ", glyphLength=" + glyphLength +
                 ", glyphCount=" + glyphCount +
+                ", fixedGlyphLength=" + fixedGlyphLength +
                 '}';
     }
 }

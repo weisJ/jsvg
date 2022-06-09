@@ -29,6 +29,8 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 public final class GeometryUtil {
+    public static final float EPS = 0.0001f;
+
     private GeometryUtil() {}
 
     public static double scaleXOfTransform(@NotNull AffineTransform at) {

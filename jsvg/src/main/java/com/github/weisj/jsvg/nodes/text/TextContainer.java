@@ -75,6 +75,11 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     }
 
     @Override
+    public @NotNull Length textLength() {
+        return textLength;
+    }
+
+    @Override
     public @NotNull HasContext contextDelegate() {
         return context;
     }
@@ -132,7 +137,6 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         for (TextSegment segment : children()) {
             RenderContext currentContext = context;
             if (segment instanceof Renderable) {
-                if (!((Renderable) segment).isVisible(context)) continue;
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
@@ -146,17 +150,18 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     }
 
     @Override
-    public @NotNull TextMetrics computeTextMetrics(@NotNull RenderContext context) {
+    public @NotNull TextMetrics computeTextMetrics(@NotNull RenderContext context,
+            @NotNull UseTextLengthForCalculation flag) {
         SVGFont font = context.font();
         float letterSpacing = context.fontRenderContext().letterSpacing().resolveLength(context.measureContext());
 
         double whiteSpaceLength = 0;
         double glyphLength = 0;
         int glyphCount = 0;
+        double fixedGlyphLength = 0;
         for (TextSegment segment : children()) {
             RenderContext currentContext = context;
             if (segment instanceof Renderable) {
-                if (!((Renderable) segment).isVisible(context)) continue;
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
@@ -166,22 +171,33 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
                     glyphLength += font.codepointGlyph(codepoint).advance();
                 }
             } else if (segment instanceof RenderableSegment) {
-                TextMetrics textMetrics = ((RenderableSegment) segment).computeTextMetrics(currentContext);
-                whiteSpaceLength += textMetrics.whiteSpaceLength();
-                glyphLength += textMetrics.glyphLength();
-                glyphCount += textMetrics.glyphCount();
+                Length segmentLength = ((RenderableSegment) segment).textLength();
+                if (flag == UseTextLengthForCalculation.NO || segmentLength.isUnspecified()) {
+                    TextMetrics textMetrics = ((RenderableSegment) segment).computeTextMetrics(
+                            currentContext, UseTextLengthForCalculation.YES);
+                    whiteSpaceLength += textMetrics.whiteSpaceLength();
+                    glyphLength += textMetrics.glyphLength();
+                    glyphCount += textMetrics.glyphCount();
+                    fixedGlyphLength += textMetrics.fixedGlyphLength();
+                } else {
+                    fixedGlyphLength += segmentLength.resolveLength(context.measureContext());
+                }
             } else {
                 throw new IllegalStateException("Unexpected segment " + segment);
             }
         }
-        return new TextMetrics(whiteSpaceLength, glyphLength, glyphCount);
+        return new TextMetrics(whiteSpaceLength, glyphLength, glyphCount, fixedGlyphLength);
     }
 
     @Override
     public void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
             @NotNull Graphics2D g) {
         forEachSegment(context,
-                (segment, ctx) -> GlyphRenderer.renderGlyphRun(paintOrder, segment, cursor.completeGlyphRunBounds, g),
+                (segment, ctx) -> {
+                    if (isVisible(ctx)) {
+                        GlyphRenderer.renderGlyphRun(paintOrder, segment, cursor.completeGlyphRunBounds, g);
+                    }
+                },
                 (segment, ctx) -> segment.renderSegmentWithoutLayout(cursor, ctx, g));
     }
 
@@ -192,7 +208,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         GlyphCursor localCursor = createLocalCursor(context, cursor);
 
         localCursor.setAdvancement(textLength.isSpecified()
-                ? new GlyphAdvancement(computeTextMetrics(context),
+                ? new GlyphAdvancement(computeTextMetrics(context, UseTextLengthForCalculation.NO),
                         textLength.resolveWidth(context.measureContext()), lengthAdjust)
                 : cursor.advancement());
 

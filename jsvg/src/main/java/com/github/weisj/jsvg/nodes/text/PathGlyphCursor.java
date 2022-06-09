@@ -28,11 +28,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.geometry.util.SegmentIteratorWithLookBehind;
 
 class PathGlyphCursor extends GlyphCursor {
-
-    private static final float EPS = 0.0001f;
 
     private float remainingSegmentLength;
     private float segmentLength;
@@ -89,7 +88,10 @@ class PathGlyphCursor extends GlyphCursor {
     @Override
     public void setAdvancement(@NotNull GlyphAdvancement advancement) {
         super.setAdvancement(advancement);
-        segmentIterator.setMaxLookBehindLength(advancement.maxLookBehind());
+        // We don't want to reduce the lookbehind for future segments hence coercion to the bigger value is
+        // needed.
+        segmentIterator.setMaxLookBehindLength(
+                Math.max(advancement.maxLookBehind(), segmentIterator.maxLookBehindLength()));
     }
 
     @Override
@@ -98,7 +100,7 @@ class PathGlyphCursor extends GlyphCursor {
         // Todo: Absolute x positions require arbitrary moves along the path
         // dx can be done by using the look behind iterator.
         // Absolute x can use a look up table for the segment/state.
-        if (segmentIterator.isDone() && remainingSegmentLength < EPS) return null;
+        if (segmentIterator.isDone() && remainingSegmentLength < GeometryUtil.EPS) return null;
 
         float deltaX = nextDeltaX(measure);
         if (deltaX != 0) advance(deltaX);
@@ -115,7 +117,7 @@ class PathGlyphCursor extends GlyphCursor {
         float anchorY = y - slopeY;
 
         // The glyph midpoint is outside the path and should not be made visible. Abort
-        if (segmentIterator.isDone() && remainingSegmentLength < EPS) return null;
+        if (segmentIterator.isDone() && remainingSegmentLength < GeometryUtil.EPS) return null;
         advance(halfAdvance);
 
         transform.setToTranslation(anchorX, anchorY);
@@ -149,7 +151,7 @@ class PathGlyphCursor extends GlyphCursor {
 
 
     private float advanceIntoSegment(float distance) {
-        if (distance < EPS) return 0;
+        if (distance < GeometryUtil.EPS) return 0;
         while (segmentIterator.hasNext() && remainingSegmentLength < distance) {
             distance -= remainingSegmentLength;
             segmentIterator.moveToNext();
@@ -163,7 +165,7 @@ class PathGlyphCursor extends GlyphCursor {
     }
 
     private float reverseIntoSegment(float distance) {
-        if (distance < EPS) return 0;
+        if (distance < GeometryUtil.EPS) return 0;
         while (segmentIterator.hasPrevious() && travelledSegmentLength() < distance) {
             distance -= travelledSegmentLength();
             segmentIterator.moveToPrevious();
@@ -173,12 +175,14 @@ class PathGlyphCursor extends GlyphCursor {
             segmentLength = (float) currentSegment.length();
             remainingSegmentLength = 0;
         }
-        if (travelledSegmentLength() < distance) throw new IllegalStateException("Not enough buffer");
+        if (distance - travelledSegmentLength() > GeometryUtil.EPS) {
+            throw new IllegalStateException("Not enough buffer " + distance + " > " + travelledSegmentLength());
+        }
         return distance;
     }
 
     private void advanceInsideSegment(float distance) {
-        if (Math.abs(distance) < EPS) return;
+        if (Math.abs(distance) < GeometryUtil.EPS) return;
         if (distance < 0 && -distance > travelledSegmentLength()) {
             throw new IllegalStateException(
                     "Distance too large " + distance + " of maximum " + travelledSegmentLength());

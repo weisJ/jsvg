@@ -37,18 +37,22 @@ class GlyphAdvancement {
     private GlyphAdvancement() {}
 
     GlyphAdvancement(@NotNull TextMetrics textMetrics, float desiredLength, @NotNull LengthAdjust lengthAdjust) {
+        double totalSpace = desiredLength - textMetrics.fixedGlyphLength();
         switch (lengthAdjust) {
             default:
             case Spacing:
-                if (textMetrics.glyphCount() == 1) {
+                if (textMetrics.glyphCount() == 0) {
                     absoluteSpacingAdjustment = 0;
                 } else {
+                    // FIXME: This doesn't properly respect spacings between segments.
+                    // The adjustment should only be compensated using spaces inside the segment,
+                    // but the way it works currently also the last space is used as well.
                     absoluteSpacingAdjustment =
-                            (float) ((desiredLength - textMetrics.glyphLength()) / (textMetrics.glyphCount() - 1));
+                            (float) (totalSpace - textMetrics.glyphLength()) / textMetrics.glyphCount();
                 }
                 break;
             case SpacingAndGlyphs:
-                spacingAdjustment = (float) (desiredLength / textMetrics.totalLength());
+                spacingAdjustment = (float) (totalSpace / textMetrics.totalAdjustableLength());
                 glyphAdjustment = spacingAdjustment;
                 break;
         }

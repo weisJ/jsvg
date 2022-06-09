@@ -26,6 +26,7 @@ import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 interface TextSegment {
@@ -36,8 +37,16 @@ interface TextSegment {
         void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
                 @NotNull Graphics2D g);
 
+        enum UseTextLengthForCalculation {
+            YES,
+            NO
+        }
+
         @NotNull
-        TextMetrics computeTextMetrics(@NotNull RenderContext context);
+        TextMetrics computeTextMetrics(@NotNull RenderContext context, @NotNull UseTextLengthForCalculation flag);
+
+        @NotNull
+        Length textLength();
 
         void appendTextShape(@NotNull GlyphCursor cursor, @NotNull Path2D textShape, @NotNull RenderContext context);
     }
