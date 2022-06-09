@@ -91,6 +91,14 @@ class GlyphCursor {
         y = local.y;
     }
 
+    public void setAdvancement(@NotNull GlyphAdvancement advancement) {
+        this.advancement = advancement;
+    }
+
+    public GlyphAdvancement advancement() {
+        return advancement;
+    }
+
     /*
      * Return a null value indicates that the iteration should stop.
      */

@@ -190,10 +190,10 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
 
         GlyphCursor localCursor = createLocalCursor(context, cursor);
 
-        localCursor.advancement = textLength.isSpecified()
+        localCursor.setAdvancement(textLength.isSpecified()
                 ? new GlyphAdvancement(computeTextMetrics(context),
                         textLength.resolveWidth(context.measureContext()), lengthAdjust)
-                : GlyphAdvancement.defaultAdvancement();
+                : cursor.advancement());
 
         forEachSegment(context,
                 (segment, ctx) -> GlyphRenderer.prepareGlyphRun(segment, localCursor, font, ctx),
