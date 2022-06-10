@@ -40,7 +40,7 @@ class Horizontal extends PathCommand {
 
     @Override
     public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
-        float xOff = isRelative ? hist.lastPoint.x : 0f;
+        float xOff = isRelative() ? hist.lastPoint.x : 0f;
         float yOff = hist.lastPoint.y;
 
         path.lineTo(x + xOff, yOff);

@@ -41,7 +41,7 @@ class Vertical extends PathCommand {
     @Override
     public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
         float xOff = hist.lastPoint.x;
-        float yOff = isRelative ? hist.lastPoint.y : 0f;
+        float yOff = isRelative() ? hist.lastPoint.y : 0f;
 
         path.lineTo(xOff, y + yOff);
         hist.setLastPoint(path.getCurrentPoint());

@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class PathCommand {
 
-    public boolean isRelative;
+    private final boolean isRelative;
     private final int nodeCount;
 
     protected PathCommand(int nodeCount) {
@@ -41,9 +41,11 @@ public abstract class PathCommand {
     }
 
     protected Point2D.Float offset(@NotNull BuildHistory hist) {
-        float xOff = isRelative ? hist.lastPoint.x : 0f;
-        float yOff = isRelative ? hist.lastPoint.y : 0f;
-        return new Point2D.Float(xOff, yOff);
+        if (isRelative()) {
+            return hist.lastPoint;
+        } else {
+            return new Point2D.Float(0, 0);
+        }
     }
 
     protected Point2D.Float lastKnotReflection(@NotNull BuildHistory hist) {
@@ -56,6 +58,10 @@ public abstract class PathCommand {
         float kx = oldX * 2f - oldKx;
         float ky = oldY * 2f - oldKy;
         return new Point2D.Float(kx, ky);
+    }
+
+    public boolean isRelative() {
+        return isRelative;
     }
 
     abstract public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist);
