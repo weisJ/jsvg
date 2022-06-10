@@ -64,4 +64,9 @@ class TextTest {
     void textAnchorTest() {
         assertEquals(SUCCESS, compareImages("text/textAnchor.svg"));
     }
+
+    @Test
+    void letterSpacingTest() {
+        assertEquals(SUCCESS, compareImages("text/letterSpacing.svg"));
+    }
 }
