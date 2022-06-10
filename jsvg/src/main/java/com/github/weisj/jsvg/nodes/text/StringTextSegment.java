@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,23 +23,33 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 class StringTextSegment implements TextSegment {
     private final char[] codepoints;
+    private final TextContainer parent;
+    private final int index;
+
     @Nullable
     Shape currentGlyphRun = null;
     @Nullable
     RenderContext currentRenderContext = null;
 
-    public StringTextSegment(char[] codepoints) {
+    public StringTextSegment(@NotNull TextContainer parent, int index, char[] codepoints) {
+        this.parent = parent;
+        this.index = index;
         assert codepoints.length != 0;
         this.codepoints = codepoints;
     }
 
     public char[] codepoints() {
         return codepoints;
+    }
+
+    public boolean isLastSegmentInParent() {
+        return index == parent.children().size() - 1;
     }
 }

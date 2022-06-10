@@ -22,21 +22,23 @@
 package com.github.weisj.jsvg.nodes.text;
 
 public class TextMetrics {
-    private final double whiteSpaceLength;
+    private final double letterSpacingLength;
     private final double glyphLength;
     private final double fixedGlyphLength;
     private final int glyphCount;
+    private final int controllableLetterSpacingCount;
 
-    public TextMetrics(double whiteSpaceLength, double visibleCodepointLength, int glyphCount,
-            double fixedGlyphLength) {
-        this.whiteSpaceLength = whiteSpaceLength;
+    public TextMetrics(double letterSpacingLength, double visibleCodepointLength, int glyphCount,
+            double fixedGlyphLength, int controllableLetterSpacingCount) {
+        this.letterSpacingLength = letterSpacingLength;
         this.glyphLength = visibleCodepointLength;
         this.glyphCount = glyphCount;
         this.fixedGlyphLength = fixedGlyphLength;
+        this.controllableLetterSpacingCount = controllableLetterSpacingCount;
     }
 
-    public double whiteSpaceLength() {
-        return whiteSpaceLength;
+    public double letterSpacingLength() {
+        return letterSpacingLength;
     }
 
     public double glyphLength() {
@@ -48,17 +50,21 @@ public class TextMetrics {
     }
 
     public double totalAdjustableLength() {
-        return glyphLength() + whiteSpaceLength();
+        return glyphLength() + letterSpacingLength();
     }
 
     public int glyphCount() {
         return glyphCount;
     }
 
+    public int controllableLetterSpacingCount() {
+        return controllableLetterSpacingCount;
+    }
+
     @Override
     public String toString() {
         return "TextMetrics{" +
-                "whiteSpaceLength=" + whiteSpaceLength +
+                "whiteSpaceLength=" + letterSpacingLength +
                 ", glyphLength=" + glyphLength +
                 ", glyphCount=" + glyphCount +
                 ", fixedGlyphLength=" + fixedGlyphLength +

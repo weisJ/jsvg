@@ -75,11 +75,6 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     }
 
     @Override
-    public @NotNull Length textLength() {
-        return textLength;
-    }
-
-    @Override
     public @NotNull HasContext contextDelegate() {
         return context;
     }
@@ -97,7 +92,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     @Override
     public final void addContent(char[] content) {
         if (content.length == 0) return;
-        segments.add(new StringTextSegment(content));
+        segments.add(new StringTextSegment(this, segments.size(), content));
     }
 
     @Override
@@ -107,6 +102,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
 
     protected abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);
 
+    // Update necessary information from the local cursor to the parent cursor e.g. the current x/y
+    // position.
     protected abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
 
     protected final void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
@@ -149,44 +146,77 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         }
     }
 
+    private static class IntermediateTextMetrics {
+        double letterSpacingLength = 0;
+        double glyphLength = 0;
+        double fixedGlyphLength = 0;
+
+        int glyphCount = 0;
+        int controllableLetterSpacingCount = 0;
+    }
+
     @Override
     public @NotNull TextMetrics computeTextMetrics(@NotNull RenderContext context,
             @NotNull UseTextLengthForCalculation flag) {
+        if (flag == UseTextLengthForCalculation.YES && hasFixedLength()) {
+            return new TextMetrics(0, 0, 0,
+                    textLength.resolveLength(context.measureContext()), 0);
+        }
+
         SVGFont font = context.font();
         float letterSpacing = context.fontRenderContext().letterSpacing().resolveLength(context.measureContext());
 
-        double whiteSpaceLength = 0;
-        double glyphLength = 0;
-        int glyphCount = 0;
-        double fixedGlyphLength = 0;
+        IntermediateTextMetrics metrics = new IntermediateTextMetrics();
+
+        int index = 0;
         for (TextSegment segment : children()) {
             RenderContext currentContext = context;
             if (segment instanceof Renderable) {
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {
-                glyphCount += ((StringTextSegment) segment).codepoints().length;
-                if (glyphCount > 0) whiteSpaceLength += (glyphCount - 1) * letterSpacing;
-                for (char codepoint : ((StringTextSegment) segment).codepoints()) {
-                    glyphLength += font.codepointGlyph(codepoint).advance();
-                }
+                StringTextSegment stringTextSegment = (StringTextSegment) segment;
+                accumulateSegmentMetrics(metrics, stringTextSegment, font, letterSpacing, index);
             } else if (segment instanceof RenderableSegment) {
-                Length segmentLength = ((RenderableSegment) segment).textLength();
-                if (flag == UseTextLengthForCalculation.NO || segmentLength.isUnspecified()) {
-                    TextMetrics textMetrics = ((RenderableSegment) segment).computeTextMetrics(
-                            currentContext, UseTextLengthForCalculation.YES);
-                    whiteSpaceLength += textMetrics.whiteSpaceLength();
-                    glyphLength += textMetrics.glyphLength();
-                    glyphCount += textMetrics.glyphCount();
-                    fixedGlyphLength += textMetrics.fixedGlyphLength();
-                } else {
-                    fixedGlyphLength += segmentLength.resolveLength(context.measureContext());
-                }
+                accumulateRenderableSegmentMetrics((RenderableSegment) segment, metrics, currentContext);
             } else {
                 throw new IllegalStateException("Unexpected segment " + segment);
             }
+            index++;
         }
-        return new TextMetrics(whiteSpaceLength, glyphLength, glyphCount, fixedGlyphLength);
+        return new TextMetrics(metrics.letterSpacingLength, metrics.glyphLength, metrics.glyphCount,
+                metrics.fixedGlyphLength, metrics.controllableLetterSpacingCount);
+    }
+
+    private void accumulateRenderableSegmentMetrics(@NotNull RenderableSegment segment,
+            @NotNull IntermediateTextMetrics metrics, @NotNull RenderContext currentContext) {
+        TextMetrics textMetrics = segment.computeTextMetrics(currentContext, UseTextLengthForCalculation.YES);
+        metrics.letterSpacingLength += textMetrics.letterSpacingLength();
+        metrics.glyphLength += textMetrics.glyphLength();
+        metrics.glyphCount += textMetrics.glyphCount();
+        metrics.fixedGlyphLength += textMetrics.fixedGlyphLength();
+        metrics.controllableLetterSpacingCount += textMetrics.controllableLetterSpacingCount();
+    }
+
+    private void accumulateSegmentMetrics(@NotNull IntermediateTextMetrics metrics, @NotNull StringTextSegment segment,
+            @NotNull SVGFont font, float letterSpacing, int index) {
+        int glyphCount = segment.codepoints().length;
+
+        boolean lastSegment = index == children().size() - 1;
+        int whiteSpaceCount = lastSegment ? (glyphCount - 1) : glyphCount;
+
+        metrics.glyphCount += glyphCount;
+        metrics.letterSpacingLength += whiteSpaceCount * letterSpacing;
+        metrics.controllableLetterSpacingCount += whiteSpaceCount;
+
+        for (char codepoint : segment.codepoints()) {
+            metrics.glyphLength += font.codepointGlyph(codepoint).advance();
+        }
+    }
+
+    @Override
+    public boolean hasFixedLength() {
+        return textLength.isSpecified();
     }
 
     @Override
@@ -206,11 +236,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         SVGFont font = context.font();
 
         GlyphCursor localCursor = createLocalCursor(context, cursor);
-
-        localCursor.setAdvancement(textLength.isSpecified()
-                ? new GlyphAdvancement(computeTextMetrics(context, UseTextLengthForCalculation.NO),
-                        textLength.resolveWidth(context.measureContext()), lengthAdjust)
-                : cursor.advancement());
+        localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
 
         forEachSegment(context,
                 (segment, ctx) -> GlyphRenderer.prepareGlyphRun(segment, localCursor, font, ctx),
@@ -224,6 +250,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
             @NotNull RenderContext context) {
         SVGFont font = context.font();
         GlyphCursor localCursor = createLocalCursor(context, cursor);
+        localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
 
         forEachSegment(context,
                 (segment, ctx) -> textShape.append(GlyphRenderer.layoutGlyphRun(segment, localCursor, font,
@@ -231,6 +258,16 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
                 (segment, ctx) -> segment.appendTextShape(localCursor, textShape, ctx));
 
         cleanUpLocalCursor(cursor, localCursor);
+    }
+
+    private @NotNull GlyphAdvancement localGlyphAdvancement(@NotNull RenderContext context,
+            @NotNull GlyphCursor cursor) {
+        if (hasFixedLength()) {
+            return new GlyphAdvancement(
+                    computeTextMetrics(context, UseTextLengthForCalculation.NO),
+                    textLength.resolveWidth(context.measureContext()), lengthAdjust);
+        }
+        return cursor.advancement();
     }
 
     @Override

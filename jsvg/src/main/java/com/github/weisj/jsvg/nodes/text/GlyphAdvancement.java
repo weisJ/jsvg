@@ -34,6 +34,8 @@ class GlyphAdvancement {
     private float absoluteSpacingAdjustment = 0;
     private float glyphAdjustment = 1;
 
+    private boolean needsLastSpacing = false;
+
     private GlyphAdvancement() {}
 
     GlyphAdvancement(@NotNull TextMetrics textMetrics, float desiredLength, @NotNull LengthAdjust lengthAdjust) {
@@ -44,11 +46,14 @@ class GlyphAdvancement {
                 if (textMetrics.glyphCount() == 0) {
                     absoluteSpacingAdjustment = 0;
                 } else {
-                    // FIXME: This doesn't properly respect spacings between segments.
-                    // The adjustment should only be compensated using spaces inside the segment,
-                    // but the way it works currently also the last space is used as well.
-                    absoluteSpacingAdjustment =
-                            (float) (totalSpace - textMetrics.glyphLength()) / textMetrics.glyphCount();
+                    float adjustableSpace = (float) (totalSpace - textMetrics.glyphLength());
+                    int spacingCount = textMetrics.controllableLetterSpacingCount();
+                    if (spacingCount == 0) {
+                        absoluteSpacingAdjustment = adjustableSpace;
+                        needsLastSpacing = true;
+                    } else {
+                        absoluteSpacingAdjustment = adjustableSpace / spacingCount;
+                    }
                 }
                 break;
             case SpacingAndGlyphs:
@@ -62,10 +67,6 @@ class GlyphAdvancement {
         return new GlyphAdvancement();
     }
 
-    float advancement(@NotNull Glyph glyph, float letterSpacing) {
-        return glyphAdvancement(glyph) + spacingAdvancement(letterSpacing);
-    }
-
     public float maxLookBehind() {
         return -Math.min(0, absoluteSpacingAdjustment);
     }
@@ -76,6 +77,11 @@ class GlyphAdvancement {
 
     float glyphAdvancement(@NotNull Glyph glyph) {
         return glyph.advance() * glyphAdjustment;
+    }
+
+    boolean shouldSkipLastSpacing() {
+        if (needsLastSpacing) return false;
+        return absoluteSpacingAdjustment != 0 || spacingAdjustment != 1 || glyphAdjustment != 1;
     }
 
     @NotNull
@@ -92,6 +98,7 @@ class GlyphAdvancement {
                 "spacingAdjustment=" + spacingAdjustment +
                 ", absoluteSpacingAdjustment=" + absoluteSpacingAdjustment +
                 ", glyphAdjustment=" + glyphAdjustment +
+                ", needsLastSpacing=" + needsLastSpacing +
                 '}';
     }
 }

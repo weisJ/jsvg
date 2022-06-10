@@ -95,9 +95,21 @@ final class GlyphRenderer {
 
         Path2D glyphPath = new Path2D.Float();
 
-        for (char codepoint : segment.codepoints()) {
+        boolean isLastSegment = segment.isLastSegmentInParent();
+        boolean shouldSkipLastSpacing = isLastSegment && cursor.advancement().shouldSkipLastSpacing();
+
+        char[] codepoints = segment.codepoints();
+        for (int i = 0, count = codepoints.length; i < count; i++) {
+            char codepoint = codepoints[i];
+
+            boolean lastCodepoint = i == count - 1;
+
             Glyph glyph = font.codepointGlyph(codepoint);
-            AffineTransform glyphTransform = cursor.advance(codepoint, measure, glyph, letterSpacing);
+            AffineTransform glyphTransform = cursor.advance(measure, glyph);
+
+            boolean skipSpacing = lastCodepoint && shouldSkipLastSpacing;
+            if (!skipSpacing) cursor.advanceSpacing(letterSpacing);
+
             // If null no more characters should be processed.
             if (glyphTransform == null) break;
             if (!glyph.isRendered()) continue;

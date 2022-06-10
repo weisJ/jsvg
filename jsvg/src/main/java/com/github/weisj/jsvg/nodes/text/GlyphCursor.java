@@ -103,7 +103,7 @@ class GlyphCursor {
      * Return a null value indicates that the iteration should stop.
      */
     @Nullable
-    AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull Glyph glyph, float letterSpacing) {
+    AffineTransform advance(@NotNull MeasureContext measure, @NotNull Glyph glyph) {
         x = nextX(measure);
         x += nextDeltaX(measure);
 
@@ -121,9 +121,13 @@ class GlyphCursor {
 
         // Todo: Also handle non-horizontal and bidi text
         // This assumes a horizontal baseline
-        x += advancement.advancement(glyph, letterSpacing);
+        x += advancement.glyphAdvancement(glyph);
 
         return advancement.glyphTransform(transform);
+    }
+
+    void advanceSpacing(float letterSpacing) {
+        x += advancement.spacingAdvancement(letterSpacing);
     }
 
     protected float nextX(@NotNull MeasureContext measure) {

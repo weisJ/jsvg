@@ -96,7 +96,7 @@ class PathGlyphCursor extends GlyphCursor {
 
     @Override
     @Nullable
-    AffineTransform advance(char c, @NotNull MeasureContext measure, @NotNull Glyph glyph, float letterSpacing) {
+    AffineTransform advance(@NotNull MeasureContext measure, @NotNull Glyph glyph) {
         // Todo: Absolute x positions require arbitrary moves along the path
         // dx can be done by using the look behind iterator.
         // Absolute x can use a look up table for the segment/state.
@@ -133,8 +133,12 @@ class PathGlyphCursor extends GlyphCursor {
             transform.translate(nx * nn, ny * nn);
         }
 
-        advance(advancement.spacingAdvancement(letterSpacing));
         return advancement.glyphTransform(transform);
+    }
+
+    @Override
+    void advanceSpacing(float letterSpacing) {
+        advance(advancement.spacingAdvancement(letterSpacing));
     }
 
     private void advance(float distance) {
