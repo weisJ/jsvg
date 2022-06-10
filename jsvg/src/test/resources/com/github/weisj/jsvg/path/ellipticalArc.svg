@@ -1,0 +1,20 @@
+<svg viewBox="0 0 20 20" width="400" height="400"
+	xmlns="http://www.w3.org/2000/svg">
+
+	<!-- The influence of the arc flags with which the arc is drawn -->
+	<path fill="none" stroke="red"
+		d="M 6,10
+           A 6 4 10 1 0 14,10" />
+
+	<path fill="none" stroke="lime"
+		d="M 6,10
+           A 6 4 10 1 1 14,10" />
+
+	<path fill="none" stroke="purple"
+		d="M 6,10
+           A 6 4 10 0 1 14,10" />
+
+	<path fill="none" stroke="pink"
+		d="M 6,10
+           A 6 4 10 0 0 14,10" />
+</svg>
