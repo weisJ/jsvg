@@ -22,8 +22,12 @@
 package com.github.weisj.jsvg.util;
 
 import java.awt.geom.Path2D;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
@@ -33,6 +37,19 @@ import com.github.weisj.jsvg.geometry.path.PathCommand;
 import com.github.weisj.jsvg.geometry.path.PathParser;
 
 public final class PathUtil {
+
+    private static final @Nullable MethodHandle trimPathHandle = lookupTrimPathMethod();
+
+    // Only available in Java 10 or later
+    private static @Nullable MethodHandle lookupTrimPathMethod() {
+        try {
+            MethodType methodType = MethodType.methodType(void.class);
+            return MethodHandles.lookup().findVirtual(Path2D.class, "trimToSize", methodType);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            return null;
+        }
+    }
+
     private PathUtil() {}
 
     public static @NotNull MeasurableShape parseFromPathData(@NotNull String data, @NotNull FillRule fillRule) {
@@ -50,6 +67,18 @@ public final class PathUtil {
             pathCommand.appendPath(path, hist);
         }
 
+        trimPathToSize(path);
+
         return new FillRuleAwareAWTSVGShape(path);
+    }
+
+    public static void trimPathToSize(@NotNull Path2D path) {
+        if (trimPathHandle != null) {
+            try {
+                trimPathHandle.invokeExact(path);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
