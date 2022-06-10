@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -52,7 +53,7 @@ class Arc extends PathCommand {
             float xAxisRot,
             boolean largeArc, boolean sweep,
             float x, float y) {
-        super(isRelative);
+        super(isRelative, 6);
         this.rx = rx;
         this.ry = ry;
         this.xAxisRot = xAxisRot;
@@ -64,19 +65,13 @@ class Arc extends PathCommand {
 
     @Override
     public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
-        float xOff = isRelative ? hist.lastPoint.x : 0f;
-        float yOff = isRelative ? hist.lastPoint.y : 0f;
+        Point2D.Float offset = offset(hist);
 
         arcTo(path, rx, ry, xAxisRot, largeArc, sweep,
-                x + xOff, y + yOff,
+                x + offset.x, y + offset.y,
                 hist.lastPoint.x, hist.lastPoint.y);
-        hist.setLastPoint(x + xOff, y + yOff);
-        hist.setLastKnot(x + xOff, y + yOff);
-    }
-
-    @Override
-    public int getInnerNodes() {
-        return 6;
+        hist.setLastPoint(path.getCurrentPoint());
+        hist.setLastKnot(path.getCurrentPoint());
     }
 
     /**

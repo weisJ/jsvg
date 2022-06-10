@@ -22,20 +22,45 @@
 package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
 public abstract class PathCommand {
 
-    public boolean isRelative = false;
+    public boolean isRelative;
+    private final int nodeCount;
 
-    protected PathCommand() {}
+    protected PathCommand(int nodeCount) {
+        this(false, nodeCount);
+    }
 
-    protected PathCommand(boolean isRelative) {
+    protected PathCommand(boolean isRelative, int nodeCount) {
         this.isRelative = isRelative;
+        this.nodeCount = nodeCount;
+    }
+
+    protected Point2D.Float offset(@NotNull BuildHistory hist) {
+        float xOff = isRelative ? hist.lastPoint.x : 0f;
+        float yOff = isRelative ? hist.lastPoint.y : 0f;
+        return new Point2D.Float(xOff, yOff);
+    }
+
+    protected Point2D.Float lastKnotReflection(@NotNull BuildHistory hist) {
+        float oldKx = hist.lastKnot.x;
+        float oldKy = hist.lastKnot.y;
+        float oldX = hist.lastPoint.x;
+        float oldY = hist.lastPoint.y;
+
+        // Calc knot as reflection of old knot
+        float kx = oldX * 2f - oldKx;
+        float ky = oldY * 2f - oldKy;
+        return new Point2D.Float(kx, ky);
     }
 
     abstract public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist);
 
-    abstract public int getInnerNodes();
+    public int nodeCount() {
+        return nodeCount;
+    }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -31,33 +32,19 @@ class QuadraticSmooth extends PathCommand {
     private final float y;
 
     public QuadraticSmooth(boolean isRelative, float x, float y) {
-        super(isRelative);
+        super(isRelative, 4);
         this.x = x;
         this.y = y;
     }
 
     @Override
     public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
-        float xOff = isRelative ? hist.lastPoint.x : 0f;
-        float yOff = isRelative ? hist.lastPoint.y : 0f;
+        Point2D.Float offset = offset(hist);
+        Point2D.Float knot = lastKnotReflection(hist);
 
-        float oldKx = hist.lastKnot.x;
-        float oldKy = hist.lastKnot.y;
-        float oldX = hist.lastPoint.x;
-        float oldY = hist.lastPoint.y;
-
-        // Calc knot as reflection of old knot
-        float kx = oldX * 2f - oldKx;
-        float ky = oldY * 2f - oldKy;
-
-        path.quadTo(kx, ky, x + xOff, y + yOff);
-        hist.setLastPoint(x + xOff, y + yOff);
-        hist.setLastKnot(kx, ky);
-    }
-
-    @Override
-    public int getInnerNodes() {
-        return 4;
+        path.quadTo(knot.x, knot.y, x + offset.x, y + offset.y);
+        hist.setLastPoint(path.getCurrentPoint());
+        hist.setLastKnot(knot);
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.geometry.path;
 
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +40,7 @@ class Cubic extends PathCommand {
     private final float y;
 
     public Cubic(boolean isRelative, float k1x, float k1y, float k2x, float k2y, float x, float y) {
-        super(isRelative);
+        super(isRelative, 6);
         this.k1x = k1x;
         this.k1y = k1y;
         this.k2x = k2x;
@@ -50,19 +51,13 @@ class Cubic extends PathCommand {
 
     @Override
     public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
-        float xOff = isRelative ? hist.lastPoint.x : 0f;
-        float yOff = isRelative ? hist.lastPoint.y : 0f;
+        Point2D.Float offset = offset(hist);
 
-        path.curveTo(k1x + xOff, k1y + yOff,
-                k2x + xOff, k2y + yOff,
-                x + xOff, y + yOff);
-        hist.setLastPoint(x + xOff, y + yOff);
-        hist.setLastKnot(k2x + xOff, k2y + yOff);
-    }
-
-    @Override
-    public int getInnerNodes() {
-        return 6;
+        path.curveTo(k1x + offset.x, k1y + offset.y,
+                k2x + offset.x, k2y + offset.y,
+                x + offset.x, y + offset.y);
+        hist.setLastPoint(path.getCurrentPoint());
+        hist.setLastKnot(k2x + offset.x, k2y + offset.y);
     }
 
     @Override

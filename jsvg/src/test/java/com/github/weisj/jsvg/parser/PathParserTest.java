@@ -33,14 +33,14 @@ class PathParserTest {
     void testAdjacentFlags() {
         PathCommand[] cmds = new PathParser("a1 2 3 10 6 7").parsePathCommand();
         Assertions.assertEquals(1, cmds.length);
-        Assertions.assertEquals(6, cmds[0].getInnerNodes());
+        Assertions.assertEquals(6, cmds[0].nodeCount());
     }
 
     @Test
     void testRepeatedArcs() {
         PathCommand[] cmds = new PathParser("a1 2 3 10 6 7 1 2 3 10 6 7 1 2 3 10 6 7 1 2 3 10 6 7").parsePathCommand();
         Assertions.assertEquals(4, cmds.length);
-        Assertions.assertEquals(6, cmds[0].getInnerNodes());
+        Assertions.assertEquals(6, cmds[0].nodeCount());
     }
 
     @Test

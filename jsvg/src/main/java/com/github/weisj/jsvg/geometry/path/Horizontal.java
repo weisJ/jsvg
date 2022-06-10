@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,7 +34,7 @@ class Horizontal extends PathCommand {
     private final float x;
 
     public Horizontal(boolean isRelative, float x) {
-        super(isRelative);
+        super(isRelative, 2);
         this.x = x;
     }
 
@@ -44,13 +44,8 @@ class Horizontal extends PathCommand {
         float yOff = hist.lastPoint.y;
 
         path.lineTo(x + xOff, yOff);
-        hist.setLastPoint(x + xOff, yOff);
-        hist.setLastKnot(x + xOff, yOff);
-    }
-
-    @Override
-    public int getInnerNodes() {
-        return 2;
+        hist.setLastPoint(path.getCurrentPoint());
+        hist.setLastKnot(path.getCurrentPoint());
     }
 
     @Override

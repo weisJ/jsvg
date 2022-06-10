@@ -39,15 +39,19 @@ public class BuildHistory {
     final @NotNull Point2D.Float lastPoint = new Point2D.Float();
     final @NotNull Point2D.Float lastKnot = new Point2D.Float();
 
-    public void setStartPoint(float x, float y) {
-        startPoint.setLocation(x, y);
+    public void setStartPoint(@NotNull Point2D point) {
+        startPoint.setLocation(point);
     }
 
-    public void setLastPoint(float x, float y) {
-        lastPoint.setLocation(x, y);
+    public void setLastPoint(@NotNull Point2D point) {
+        lastPoint.setLocation(point);
     }
 
     public void setLastKnot(float x, float y) {
         lastKnot.setLocation(x, y);
+    }
+
+    public void setLastKnot(@NotNull Point2D point) {
+        lastKnot.setLocation(point);
     }
 }

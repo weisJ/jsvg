@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -40,7 +40,7 @@ public final class PathUtil {
 
         int nodeCount = 2;
         for (PathCommand pathCommand : pathCommands) {
-            nodeCount += pathCommand.getInnerNodes();
+            nodeCount += pathCommand.nodeCount() - 1;
         }
 
         Path2D path = new Path2D.Float(fillRule.awtWindingRule, nodeCount);
