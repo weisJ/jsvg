@@ -30,21 +30,29 @@ import com.google.errorprone.annotations.Immutable;
 
 @Immutable
 class GlyphAdvancement {
-    private float spacingAdjustment = 1;
-    private float absoluteSpacingAdjustment = 0;
-    private float glyphAdjustment = 1;
+    private final float spacingAdjustment;
+    private final float absoluteSpacingAdjustment;
+    private final float glyphAdjustment;
 
-    private boolean needsLastSpacing = false;
+    private final boolean needsLastSpacing;
 
-    private GlyphAdvancement() {}
+    private GlyphAdvancement() {
+        spacingAdjustment = 1;
+        absoluteSpacingAdjustment = 0;
+        glyphAdjustment = 1;
+        needsLastSpacing = false;
+    }
 
     GlyphAdvancement(@NotNull TextMetrics textMetrics, float desiredLength, @NotNull LengthAdjust lengthAdjust) {
         double totalSpace = desiredLength - textMetrics.fixedGlyphLength();
         switch (lengthAdjust) {
             default:
             case Spacing:
+                spacingAdjustment = 1;
+                glyphAdjustment = 1;
                 if (textMetrics.glyphCount() == 0) {
                     absoluteSpacingAdjustment = 0;
+                    needsLastSpacing = false;
                 } else {
                     float adjustableSpace = (float) (totalSpace - textMetrics.glyphLength());
                     int spacingCount = textMetrics.controllableLetterSpacingCount();
@@ -53,10 +61,13 @@ class GlyphAdvancement {
                         needsLastSpacing = true;
                     } else {
                         absoluteSpacingAdjustment = adjustableSpace / spacingCount;
+                        needsLastSpacing = false;
                     }
                 }
                 break;
             case SpacingAndGlyphs:
+                absoluteSpacingAdjustment = 0;
+                needsLastSpacing = false;
                 spacingAdjustment = (float) (totalSpace / textMetrics.totalAdjustableLength());
                 glyphAdjustment = spacingAdjustment;
                 break;
