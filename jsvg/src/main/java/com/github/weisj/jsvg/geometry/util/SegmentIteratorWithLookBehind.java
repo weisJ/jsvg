@@ -134,7 +134,7 @@ public class SegmentIteratorWithLookBehind {
 
         if (maxLookBehindLength > 0) {
             lookBehind.add(currentSegment);
-            currentLookBehindLength += currentSegment.length();
+            currentLookBehindLength += (float) currentSegment.length();
 
             trimLookBehindIfNecessary();
         }
@@ -146,7 +146,7 @@ public class SegmentIteratorWithLookBehind {
             Segment segment = lookBehind.get(0);
             double segmentLength = segment.length();
             if (this.currentLookBehindLength - segmentLength < maxLookBehindLength) break;
-            this.currentLookBehindLength -= segmentLength;
+            this.currentLookBehindLength -= (float) segmentLength;
             lookBehind.remove(0);
         }
     }
