@@ -35,14 +35,12 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.nodes.Marker;
 import com.github.weisj.jsvg.nodes.ShapeNode;
-import com.google.errorprone.annotations.Immutable;
 
 public final class ShapeRenderer {
     private static final boolean DEBUG_MARKERS = false;
 
     private ShapeRenderer() {}
 
-    @Immutable
     private static class PaintWithOpacity {
         private final @NotNull SVGPaint paint;
         private final float opacity;
