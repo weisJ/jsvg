@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     `java-library`
     `module-info-compile`
@@ -27,4 +29,10 @@ tasks.test {
         workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
     }
     useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+        showExceptions = true
+        showStackTraces = true
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 }
