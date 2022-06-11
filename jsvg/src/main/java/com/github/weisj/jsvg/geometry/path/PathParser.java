@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.geometry.path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -42,6 +43,10 @@ public class PathParser {
     public PathParser(@Nullable String input) {
         this.input = input;
         this.inputLength = input != null ? input.length() : 0;
+    }
+
+    private @NotNull String currentLocation() {
+        return "(index=" + index + " in input=" + input + ")";
     }
 
     private boolean isCommandChar(char c) {
@@ -118,7 +123,7 @@ public class PathParser {
             String msg = "Unexpected element while parsing cmd '" + currentCommand
                     + "' encountered token '" + token + "' rest="
                     + input.substring(start, Math.min(input.length(), start + 10))
-                    + " (index=" + index + " in input=" + input + ")";
+                    + currentLocation();
             throw new IllegalStateException(msg, e);
         }
     }
@@ -132,8 +137,7 @@ public class PathParser {
         } else if (c == '0') {
             return false;
         } else {
-            throw new IllegalStateException(
-                    "Invalid flag value '" + c + "' " + " (index=" + index + " in input=" + input + ")");
+            throw new IllegalStateException("Invalid flag value '" + c + "' " + currentLocation());
         }
     }
 
@@ -248,8 +252,7 @@ public class PathParser {
                     cmd = new Terminal();
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid path element "
-                            + currentCommand + "(at index=" + index + " in input=" + input + ")");
+                    throw new IllegalArgumentException("Invalid path element " + currentCommand + currentLocation());
             }
             commands.add(cmd);
         }
