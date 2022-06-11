@@ -41,6 +41,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 )
 public final class FeColorMatrix extends FilterPrimitive {
     public static final String TAG = "fecolormatrix";
+    private static final String KEY_VALUES = "values";
 
     private ImageFilter filter;
 
@@ -57,7 +58,7 @@ public final class FeColorMatrix extends FilterPrimitive {
         filter = null;
         switch (type.toLowerCase(Locale.ENGLISH)) {
             case "matrix":
-                double[] colorTransform = attributeNode.getDoubleList("values");
+                double[] colorTransform = attributeNode.getDoubleList(KEY_VALUES);
                 if (colorTransform.length == 20) {
                     boolean isIdentity = Arrays.equals(colorTransform,
                             new double[] {
@@ -69,7 +70,7 @@ public final class FeColorMatrix extends FilterPrimitive {
                 }
                 break;
             case "saturate":
-                float s = attributeNode.getFloat("values", 1);
+                float s = attributeNode.getFloat(KEY_VALUES, 1);
                 if (s != 1) {
                     filter = new LinearRGBFilter(
                             0.213 + 0.787 * s, 0.715 * (1 - s), 0.072 * (1 - s),
@@ -78,7 +79,7 @@ public final class FeColorMatrix extends FilterPrimitive {
                 }
                 break;
             case "huerotate":
-                float hueRotate = attributeNode.getFloat("values", 0);
+                float hueRotate = attributeNode.getFloat(KEY_VALUES, 0);
                 if (hueRotate != 1) {
                     double radians = Math.toRadians(hueRotate);
                     double sin = Math.sin(radians);
