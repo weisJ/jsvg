@@ -31,6 +31,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.google.errorprone.annotations.Immutable;
 
 public final class FontResolver {
     private FontResolver() {}
@@ -124,6 +125,7 @@ public final class FontResolver {
 
         private final HashMap<CacheKey, SVGFont> cache = new HashMap<>();
 
+        @Immutable
         private static final class CacheKey {
             private final @NotNull MeasurableFontSpec spec;
             private final @NotNull MeasureContext context;
