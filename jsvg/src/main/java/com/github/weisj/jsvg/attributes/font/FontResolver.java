@@ -100,6 +100,7 @@ public final class FontResolver {
         return Collections.unmodifiableList(Arrays.asList(FontFamiliesCache.INSTANCE.supportedFonts));
     }
 
+    @SuppressWarnings("ImmutableEnumChecker")
     private enum FontFamiliesCache {
         INSTANCE;
 
@@ -117,6 +118,7 @@ public final class FontResolver {
         }
     }
 
+    @SuppressWarnings("ImmutableEnumChecker")
     private enum FontCache {
         INSTANCE;
 
