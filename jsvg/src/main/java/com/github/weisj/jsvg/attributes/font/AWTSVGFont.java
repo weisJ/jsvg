@@ -31,15 +31,11 @@ import java.util.HashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.nodes.text.Glyph;
 
 public class AWTSVGFont implements SVGFont {
     private final @NotNull Font font;
-    @SuppressWarnings("UnusedVariable")
-    private final @NotImplemented @Percentage float stretch;
     private final FontRenderContext frc = new FontRenderContext(null, true, true);
     private final HashMap<Character, Glyph> glyphCache;
 
@@ -48,9 +44,8 @@ public class AWTSVGFont implements SVGFont {
     private float exHeight = Length.UNSPECIFIED_RAW;
     private float mathBaseline = Length.UNSPECIFIED_RAW;
 
-    public AWTSVGFont(@NotNull Font font, @Percentage float stretch) {
+    public AWTSVGFont(@NotNull Font font) {
         this.font = font;
-        this.stretch = stretch;
         this.glyphCache = new HashMap<>();
     }
 

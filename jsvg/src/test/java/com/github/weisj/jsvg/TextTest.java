@@ -69,4 +69,12 @@ class TextTest {
     void letterSpacingTest() {
         assertEquals(SUCCESS, compareImages("text/letterSpacing.svg"));
     }
+
+    @Test
+    void fontStretchTest() {
+        // Batik resolves font-stretch differently as we do, hence this will always fail.
+        // Precisely AWT will happily synthesise a stretched font for us in all cases, but batik doesn't.
+        assertDoesNotThrow(() -> render("text/fontStretch.svg"));
+
+    }
 }

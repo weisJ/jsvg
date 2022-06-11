@@ -55,26 +55,17 @@ public final class FontResolver {
         String family = findSupportedFontFamily(fontSpec);
 
         FontStyle style = fontSpec.style();
-        int normalWeight = PredefinedFontWeight.NORMAL_WEIGHT;
-        float currentWeight = fontSpec.currentWeight();
-        if (currentWeight > normalWeight) {
-            // The bold weight for css and awt differ. We compensate for this difference to ensure
-            // that bold css fonts correspond to bold awt fonts, as this is the most commonly supported
-            // font variation.
-            float awtWeightCompensationFactor =
-                    (TextAttribute.WEIGHT_BOLD * normalWeight) / PredefinedFontWeight.BOLD_WEIGHT;
-            currentWeight *= awtWeightCompensationFactor;
-        }
 
-        float weight = currentWeight / normalWeight;
+        float weight = cssWeightToAwtWeight(fontSpec.currentWeight());
         float size = fontSpec.effectiveSize(measureContext);
         float stretch = fontSpec.stretch();
 
-        // Todo: Convert css weights to awt weights.
-        Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<>(4, 1f);
+        Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<>(5, 1f);
         attributes.put(TextAttribute.FAMILY, family);
         attributes.put(TextAttribute.SIZE, size);
         attributes.put(TextAttribute.WEIGHT, weight);
+        attributes.put(TextAttribute.WIDTH, stretch);
+
 
         if (style instanceof FontStyle.Normal) {
             attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
@@ -86,7 +77,21 @@ public final class FontResolver {
         }
 
         Font font = new Font(attributes);
-        return new AWTSVGFont(font, stretch);
+        return new AWTSVGFont(font);
+    }
+
+    private static float cssWeightToAwtWeight(float weight) {
+        int normalWeight = PredefinedFontWeight.NORMAL_WEIGHT;
+        float currentWeight = weight;
+        if (currentWeight > normalWeight) {
+            // The bold weight for css and awt differ. We compensate for this difference to ensure
+            // that bold css fonts correspond to bold awt fonts, as this is the most commonly supported
+            // font variation.
+            float awtWeightCompensationFactor =
+                    (TextAttribute.WEIGHT_BOLD * normalWeight) / PredefinedFontWeight.BOLD_WEIGHT;
+            currentWeight *= awtWeightCompensationFactor;
+        }
+        return currentWeight / normalWeight;
     }
 
     private static @NotNull String findSupportedFontFamily(@NotNull MeasurableFontSpec fontSpec) {
