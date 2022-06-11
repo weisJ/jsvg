@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.nodes.text.Glyph;
 
 public class AWTSVGFont implements SVGFont {
     private final @NotNull Font font;
+    @SuppressWarnings("UnusedVariable")
     private final @NotImplemented @Percentage float stretch;
     private final FontRenderContext frc = new FontRenderContext(null, true, true);
     private final HashMap<Character, Glyph> glyphCache;

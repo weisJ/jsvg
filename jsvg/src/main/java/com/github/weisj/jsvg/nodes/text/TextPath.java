@@ -58,7 +58,9 @@ public final class TextPath extends TextContainer {
 
     private SVGShape pathShape;
 
+    @SuppressWarnings("UnusedVariable")
     private @NotImplemented Spacing spacing;
+    @SuppressWarnings("UnusedVariable")
     private @NotImplemented GlyphRenderMethod renderMethod;
     private Side side;
 
