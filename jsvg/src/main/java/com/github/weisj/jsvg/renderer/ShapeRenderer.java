@@ -57,12 +57,6 @@ public final class ShapeRenderer {
         }
     }
 
-    public static void renderShape(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @Nullable Rectangle2D bounds, @Nullable Stroke stroke) {
-        renderShapeFill(context, g, shape, bounds);
-        renderShapeStroke(context, g, shape, bounds, stroke);
-    }
-
     public static void renderShapeStroke(@NotNull RenderContext context, @NotNull Graphics2D g,
             @NotNull Shape shape, @Nullable Rectangle2D bounds, @Nullable Stroke stroke) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
