@@ -25,14 +25,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.google.errorprone.annotations.Immutable;
 
-@Immutable
 public class PaintOrder {
 
     public static final PaintOrder NORMAL = new PaintOrder(Phase.FILL, Phase.STROKE, Phase.MARKERS);
 
-    @Immutable
     public enum Phase {
         FILL,
         STROKE,
