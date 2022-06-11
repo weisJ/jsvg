@@ -42,7 +42,7 @@ public abstract class PathCommand {
 
     protected Point2D.Float offset(@NotNull BuildHistory hist) {
         if (isRelative()) {
-            return hist.lastPoint;
+            return new Point2D.Float(hist.lastPoint.x, hist.lastPoint.y);
         } else {
             return new Point2D.Float(0, 0);
         }
