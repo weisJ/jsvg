@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,25 +21,25 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import org.jetbrains.annotations.NotNull;
+import javax.swing.*;
+
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
+public final class ValueUIFuture<T> implements UIFuture<T> {
 
-public class DefaultParserProvider implements ParserProvider {
-    @Override
-    public @NotNull PaintParser createPaintParser() {
-        return new DefaultPaintParser();
+    private final T value;
+
+    public ValueUIFuture(T value) {
+        this.value = value;
     }
 
     @Override
-    public @Nullable DomProcessor createPreProcessor() {
-        return null;
+    public boolean checkIfReady(@Nullable JComponent component) {
+        return true;
     }
 
     @Override
-    public @Nullable DomProcessor createPostProcessor() {
-        return null;
+    public T get() {
+        return value;
     }
 }

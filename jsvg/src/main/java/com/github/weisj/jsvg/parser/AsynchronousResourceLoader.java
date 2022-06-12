@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,25 +21,28 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
 
-public class DefaultParserProvider implements ParserProvider {
-    @Override
-    public @NotNull PaintParser createPaintParser() {
-        return new DefaultPaintParser();
-    }
+public class AsynchronousResourceLoader implements ResourceLoader {
+    private static final Logger LOGGER = Logger.getLogger(AsynchronousResourceLoader.class.getName());
 
     @Override
-    public @Nullable DomProcessor createPreProcessor() {
-        return null;
-    }
-
-    @Override
-    public @Nullable DomProcessor createPostProcessor() {
-        return null;
+    public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URL url) {
+        return new SwingUIFuture<>(() -> {
+            try {
+                return SynchronousResourceLoader.doLoad(url);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                return null;
+            }
+        });
     }
 }

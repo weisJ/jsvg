@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,25 +21,32 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
 
-public class DefaultParserProvider implements ParserProvider {
-    @Override
-    public @NotNull PaintParser createPaintParser() {
-        return new DefaultPaintParser();
-    }
+public final class ParserTestUtil {
 
-    @Override
-    public @Nullable DomProcessor createPreProcessor() {
-        return null;
-    }
+    private static final AttributeParser ATTRIBUTE_PARSER = new AttributeParser(new DefaultPaintParser());
+    private static final SVGLoader.LoadHelper LOAD_HELPER = new SVGLoader.LoadHelper() {
+        @Override
+        public @NotNull AttributeParser attributeParser() {
+            return ATTRIBUTE_PARSER;
+        }
 
-    @Override
-    public @Nullable DomProcessor createPostProcessor() {
-        return null;
+        @Override
+        public @NotNull ResourceLoader resourceLoader() {
+            return new SynchronousResourceLoader();
+        }
+    };
+
+    private ParserTestUtil() {}
+
+    public static @NotNull AttributeNode createDummyAttributeNode(@NotNull Map<String, String> attrs) {
+        return new AttributeNode("dummy", attrs, null, Collections.emptyMap(), LOAD_HELPER);
     }
 }

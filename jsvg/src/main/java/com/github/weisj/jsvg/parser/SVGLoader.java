@@ -118,6 +118,13 @@ public class SVGLoader {
     }
 
     public @Nullable SVGDocument load(@NotNull InputStream inputStream, @NotNull ParserProvider parserProvider) {
+        return load(inputStream, parserProvider, new SynchronousResourceLoader());
+    }
+
+
+    public @Nullable SVGDocument load(@NotNull InputStream inputStream,
+            @NotNull ParserProvider parserProvider,
+            @NotNull ResourceLoader resourceLoader) {
         try {
             SAXParser saxParser = saxParserFactory.newSAXParser();
             XMLReader xmlReader = saxParser.getXMLReader();
@@ -126,7 +133,7 @@ public class SVGLoader {
                         // Ignore all DTDs
                         return new InputSource(new ByteArrayInputStream(new byte[0]));
                     });
-            SVGLoadHandler handler = new SVGLoadHandler(parserProvider);
+            SVGLoadHandler handler = new SVGLoadHandler(parserProvider, resourceLoader);
             xmlReader.setContentHandler(handler);
             xmlReader.parse(new InputSource(createDocumentInputStream(inputStream)));
             return handler.getDocument();
@@ -154,7 +161,15 @@ public class SVGLoader {
         }
     }
 
-    private class SVGLoadHandler extends DefaultHandler {
+    interface LoadHelper {
+        @NotNull
+        AttributeParser attributeParser();
+
+        @NotNull
+        ResourceLoader resourceLoader();
+    }
+
+    private class SVGLoadHandler extends DefaultHandler implements LoadHelper {
 
         private static final boolean DEBUG_PRINT = false;
         private final PrintStream printer = System.out;
@@ -167,11 +182,23 @@ public class SVGLoader {
         private ParsedElement rootNode;
 
         private final @NotNull AttributeParser attributeParser;
+        private final @NotNull ResourceLoader resourceLoader;
         private final @NotNull ParserProvider parserProvider;
 
-        private SVGLoadHandler(@NotNull ParserProvider parserProvider) {
+        private SVGLoadHandler(@NotNull ParserProvider parserProvider, @NotNull ResourceLoader resourceLoader) {
             this.attributeParser = new AttributeParser(parserProvider.createPaintParser());
+            this.resourceLoader = resourceLoader;
             this.parserProvider = parserProvider;
+        }
+
+        @Override
+        public @NotNull AttributeParser attributeParser() {
+            return attributeParser;
+        }
+
+        @Override
+        public @NotNull ResourceLoader resourceLoader() {
+            return resourceLoader;
         }
 
         private void setIdent(int level) {
@@ -224,7 +251,7 @@ public class SVGLoader {
                         attributes.getValue("id"),
                         new AttributeNode(qName, attrs, lastParsedElement != null
                                 ? lastParsedElement.attributeNode()
-                                : null, namedElements, attributeParser),
+                                : null, namedElements, this),
                         newNode);
 
                 if (lastParsedElement != null) {

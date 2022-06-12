@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.attribute;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -31,16 +30,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.attributes.font.*;
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.ParserTestUtil;
 
 class FontTest {
 
-    private static final AttributeParser ATTRIBUTE_PARSER = new AttributeParser(new DefaultPaintParser());
     private static final MeasureContext MEASURE_CONTEXT = MeasureContext.createInitial(new FloatSize(100, 100), 12, 6);
 
     @BeforeEach
@@ -75,7 +71,7 @@ class FontTest {
             attrs.put(attribute.key, attribute.value);
         }
         return MeasurableFontSpec.createDefault().derive(FontParser.parseFontSpec(
-                new AttributeNode("dummy", attrs, null, Collections.emptyMap(), ATTRIBUTE_PARSER)));
+                ParserTestUtil.createDummyAttributeNode(attrs)));
     }
 
     private static AttributeEntry entry(@NotNull String key, @NotNull String value) {

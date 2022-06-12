@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,25 +21,49 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
+import javax.swing.*;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
+public class SwingUIFuture<T> implements UIFuture<T> {
 
-public class DefaultParserProvider implements ParserProvider {
-    @Override
-    public @NotNull PaintParser createPaintParser() {
-        return new DefaultPaintParser();
+    private final @NotNull AtomicReference<SwingWorker<Void, Void>> swingWorker;
+    private @Nullable T value;
+
+    public SwingUIFuture(@NotNull Supplier<T> supplier) {
+        swingWorker = new AtomicReference<>(new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                value = supplier.get();
+                synchronized (SwingUIFuture.this) {
+                    swingWorker.set(null);
+                }
+                return null;
+            }
+        });
+        swingWorker.get().execute();
     }
 
     @Override
-    public @Nullable DomProcessor createPreProcessor() {
-        return null;
+    public boolean checkIfReady(@Nullable JComponent component) {
+        SwingWorker<?, ?> worker = swingWorker.get();
+        if (worker == null || worker.isDone()) return true;
+        if (component != null) {
+            synchronized (SwingUIFuture.this) {
+                worker.addPropertyChangeListener(e -> {
+                    if (worker.isDone()) component.repaint();
+                });
+            }
+        }
+        return false;
     }
 
     @Override
-    public @Nullable DomProcessor createPostProcessor() {
-        return null;
+    public T get() {
+        return value;
     }
 }
