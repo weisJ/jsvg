@@ -29,9 +29,8 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGRenderingHints;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
@@ -43,6 +42,8 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.UIFuture;
+import com.github.weisj.jsvg.parser.ValueUIFuture;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -60,7 +61,7 @@ public final class Image extends RenderableSVGNode {
     private Length height;
     private PreserveAspectRatio preserveAspectRatio;
 
-    private BufferedImage img;
+    private UIFuture<BufferedImage> imgResource;
 
     @Override
     public @NotNull String tagName() {
@@ -69,7 +70,7 @@ public final class Image extends RenderableSVGNode {
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return img != null && super.isVisible(context);
+        return imgResource != null && super.isVisible(context);
     }
 
     @Override
@@ -84,18 +85,28 @@ public final class Image extends RenderableSVGNode {
         String url = attributeNode.parser().parseUrl(attributeNode.getHref());
         if (url != null) {
             try {
-                URL parsedUrl = new URL(url);
-                // Todo: register custom plugin to parse svg images (as a BufferedImage)
-                img = ImageIO.read(parsedUrl);
+                imgResource = attributeNode.resourceLoader().loadImage(new URL(url));
             } catch (IOException e) {
                 LOGGER.log(Level.INFO, e.getMessage(), e);
-                img = null; // Image didn't load. Maybe we should show a missing image instead.
+                imgResource = null; // Image didn't load. Maybe we should show a missing image instead.
             }
         }
     }
 
+    private @Nullable BufferedImage fetchImage(@NotNull RenderContext context) {
+        if (imgResource == null) return null;
+        if (imgResource instanceof ValueUIFuture) return imgResource.get();
+        if (!imgResource.checkIfReady(context.targetComponent())) return null;
+        BufferedImage img = imgResource.get();
+        if (img != null) imgResource = new ValueUIFuture<>(img);
+        return img;
+    }
+
     @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+        BufferedImage img = fetchImage(context);
+        if (img == null) return;
+
         MeasureContext measure = context.measureContext();
         int imgWidth = img.getWidth(context.targetComponent());
         int imgHeight = img.getWidth(context.targetComponent());
@@ -114,7 +125,7 @@ public final class Image extends RenderableSVGNode {
         } else {
             g.transform(imgTransform);
             Rectangle imgRect = new Rectangle(0, 0, imgWidth, imgHeight);
-            // Painting using a TexturePaint allows for antialiased edges with a nontrivial transform
+            // Painting using a TexturePaint allows for anti-aliased edges with a nontrivial transform
             GraphicsUtil.safelySetPaint(g, new TexturePaint(img, imgRect));
             g.fill(imgRect);
         }
