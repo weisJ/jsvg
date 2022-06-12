@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -52,7 +53,7 @@ public class SVGLoader {
 
     static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
     private final @NotNull Map<String, Supplier<SVGNode>> nodeMap;
-    private final @NotNull SAXParserFactory saxParserFactory;
+    private final @NotNull ThreadLocal<@NotNull SAXParser> saxParserThreadLocal;
 
     public SVGLoader() {
         nodeMap = new HashMap<>();
@@ -95,8 +96,17 @@ public class SVGLoader {
         nodeMap.put(Use.TAG, Use::new);
         nodeMap.put(View.TAG, View::new);
 
-        saxParserFactory = SAXParserFactory.newInstance();
+        saxParserThreadLocal = ThreadLocal.withInitial(SVGLoader::createSaxParser);
+    }
+
+    private static @NotNull SAXParser createSaxParser() {
+        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         saxParserFactory.setNamespaceAware(true);
+        try {
+            return saxParserFactory.newSAXParser();
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {
@@ -126,7 +136,7 @@ public class SVGLoader {
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader) {
         try {
-            SAXParser saxParser = saxParserFactory.newSAXParser();
+            SAXParser saxParser = saxParserThreadLocal.get();
             XMLReader xmlReader = saxParser.getXMLReader();
             xmlReader.setEntityResolver(
                     (publicId, systemId) -> {
