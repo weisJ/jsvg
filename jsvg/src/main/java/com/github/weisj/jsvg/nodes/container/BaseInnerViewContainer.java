@@ -29,6 +29,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -42,12 +43,15 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
     protected ViewBox viewBox;
     protected PreserveAspectRatio preserveAspectRatio;
+    private Overflow overflow;
 
     protected abstract @NotNull Point2D outerLocation(@NotNull MeasureContext context);
 
     protected abstract @Nullable Point2D anchorLocation(@NotNull MeasureContext context);
 
     public abstract @NotNull FloatSize size(@NotNull RenderContext context);
+
+    protected abstract @NotNull Overflow defaultOverflow();
 
     public @Nullable ViewBox viewBox() {
         return viewBox;
@@ -60,6 +64,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         viewBox = attributeNode.getViewBox();
         preserveAspectRatio = PreserveAspectRatio.parse(
                 attributeNode.getValue("preserveAspectRatio"), attributeNode.parser());
+        overflow = attributeNode.getEnum("overflow", defaultOverflow());
     }
 
     @Override
@@ -113,9 +118,18 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
             g.translate(anchorPos.getX(), anchorPos.getY());
         }
 
-        // Todo: This should be determined by the overflow parameter
-        g.clip(new ViewBox(useSiteSize));
-        if (viewTransform != null) g.transform(viewTransform);
+        boolean shouldClip = overflow.establishesClip();
+
+        // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
+        if (shouldClip) g.clip(new ViewBox(useSiteSize));
+
+        if (viewTransform != null) {
+            g.transform(viewTransform);
+
+            // If this element itself specifies a viewbox we have to respect its clipping rules.
+            if (shouldClip) g.clip(view);
+        }
+
 
         super.render(innerContext, g);
     }

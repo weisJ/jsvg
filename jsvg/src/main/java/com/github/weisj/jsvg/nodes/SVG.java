@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -63,8 +64,8 @@ public final class SVG extends CommonInnerViewContainer {
 
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
         isTopLevel = attributeNode.parent() == null;
+        super.build(attributeNode);
     }
 
     @Override
@@ -73,6 +74,11 @@ public final class SVG extends CommonInnerViewContainer {
         return new Point2D.Float(
                 TOP_LEVEL_TRANSFORM_ORIGIN.resolveWidth(context),
                 TOP_LEVEL_TRANSFORM_ORIGIN.resolveHeight(context));
+    }
+
+    @Override
+    protected @NotNull Overflow defaultOverflow() {
+        return isTopLevel ? Overflow.Visible : Overflow.Hidden;
     }
 
     public @NotNull FloatSize sizeForTopLevel(float em, float ex) {

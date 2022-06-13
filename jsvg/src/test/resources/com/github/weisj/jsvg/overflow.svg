@@ -1,0 +1,39 @@
+<svg viewBox="0 0 35 35" width="400" height="400"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns="http://www.w3.org/2000/svg">
+
+	<defs>
+		<symbol id="symbolVisible" width="10" height="10"
+			viewBox="0 0 2 2" overflow="visible">
+			<circle cx="1" cy="1" r="1.2" />
+		</symbol>
+
+		<symbol id="symbolHidden" width="10" height="10"
+			viewBox="0 0 2 2" overflow="hidden">
+			<circle cx="1" cy="1" r="1.2" />
+		</symbol>
+
+		<marker id="markerVisible" viewBox="0 0 2 2" refX="0" refY="0"
+			markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10"
+			orient="auto" overflow="visible">
+			<circle cx="1" cy="1" r="1.2" />
+		</marker>
+		<marker id="markerHidden" viewBox="0 0 2 2" refX="0" refY="0"
+			markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10"
+			orient="auto" overflow="hidden">
+			<circle cx="1" cy="1" r="1.2" />
+		</marker>
+	</defs>
+
+	<rect x="5" y="5" width="10" height="10" fill="none" stroke="red" />
+	<use xlink:href="#symbolVisible" x="5" y="5" opacity="1" />
+	<rect x="20" y="5" width="10" height="10" fill="none" stroke="red" />
+	<use xlink:href="#symbolHidden" x="20" y="5" opacity="1" />
+
+	<rect x="5" y="20" width="10" height="10" fill="none" stroke="red" />
+	<path d="M5 20" marker-start="url(#markerVisible)" stroke="red" />
+	<rect x="20" y="20" width="10" height="10" fill="none"
+		stroke="red" />
+	<path d="M20 20" marker-start="url(#markerHidden)" stroke="red" />
+
+</svg>

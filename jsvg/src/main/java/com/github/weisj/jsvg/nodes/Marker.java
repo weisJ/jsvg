@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.MarkerOrientation;
 import com.github.weisj.jsvg.attributes.MarkerUnitType;
+import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -80,6 +81,11 @@ public final class Marker extends BaseInnerViewContainer {
     @Override
     protected @NotNull Point2D anchorLocation(@NotNull MeasureContext context) {
         return new Point2D.Float(-refX.resolveWidth(context), -refY.resolveHeight(context));
+    }
+
+    @Override
+    protected @NotNull Overflow defaultOverflow() {
+        return Overflow.Hidden;
     }
 
     @Override

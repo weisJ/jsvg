@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGRenderingHints;
+import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -60,8 +61,10 @@ public final class Image extends RenderableSVGNode {
     private Length width;
     private Length height;
     private PreserveAspectRatio preserveAspectRatio;
+    private Overflow overflow;
 
     private UIFuture<BufferedImage> imgResource;
+
 
     @Override
     public @NotNull String tagName() {
@@ -82,6 +85,8 @@ public final class Image extends RenderableSVGNode {
         height = attributeNode.getLength("height", Length.UNSPECIFIED);
         preserveAspectRatio = PreserveAspectRatio.parse(
                 attributeNode.getValue("preserveAspectRatio"), attributeNode.parser());
+        overflow = attributeNode.getEnum("overflow", Overflow.Hidden);
+
         String url = attributeNode.parser().parseUrl(attributeNode.getHref());
         if (url != null) {
             try {
@@ -117,6 +122,9 @@ public final class Image extends RenderableSVGNode {
         ViewBox viewBox = new ViewBox(imgWidth, imgHeight);
 
         g.translate(x.resolveWidth(measure), y.resolveHeight(measure));
+
+        if (overflow.establishesClip()) g.clip(new ViewBox(viewWidth, viewHeight));
+
         AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(
                 new FloatSize(viewWidth, viewHeight), viewBox);
         Object imageAntialiasing = g.getRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING);
