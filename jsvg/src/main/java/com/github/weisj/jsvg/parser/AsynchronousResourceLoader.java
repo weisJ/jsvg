@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,10 +35,10 @@ public class AsynchronousResourceLoader implements ResourceLoader {
     private static final Logger LOGGER = Logger.getLogger(AsynchronousResourceLoader.class.getName());
 
     @Override
-    public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URL url) {
+    public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URI uri) {
         return new SwingUIFuture<>(() -> {
             try {
-                return SynchronousResourceLoader.doLoad(url);
+                return SynchronousResourceLoader.doLoad(uri);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 return null;

@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 import javax.imageio.ImageIO;
 
@@ -32,11 +32,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class SynchronousResourceLoader implements ResourceLoader {
     @Override
-    public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URL url) throws IOException {
-        return new ValueUIFuture<>(doLoad(url));
+    public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URI uri) throws IOException {
+        return new ValueUIFuture<>(doLoad(uri));
     }
 
-    static BufferedImage doLoad(@NotNull URL url) throws IOException {
-        return ImageIO.read(url);
+    static BufferedImage doLoad(@NotNull URI uri) throws IOException {
+        return ImageIO.read(uri.toURL());
     }
 }

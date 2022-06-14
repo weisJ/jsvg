@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,5 +31,5 @@ import org.jetbrains.annotations.Nullable;
 public interface ResourceLoader {
 
     @Nullable
-    UIFuture<BufferedImage> loadImage(@NotNull URL url) throws IOException;
+    UIFuture<BufferedImage> loadImage(@NotNull URI uri) throws IOException;
 }

@@ -25,7 +25,8 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -90,8 +91,8 @@ public final class Image extends RenderableSVGNode {
         String url = attributeNode.parser().parseUrl(attributeNode.getHref());
         if (url != null) {
             try {
-                imgResource = attributeNode.resourceLoader().loadImage(new URL(url));
-            } catch (IOException e) {
+                imgResource = attributeNode.resourceLoader().loadImage(new URI(url));
+            } catch (IOException | URISyntaxException e) {
                 LOGGER.log(Level.INFO, e.getMessage(), e);
                 imgResource = null; // Image didn't load. Maybe we should show a missing image instead.
             }
