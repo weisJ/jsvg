@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -52,7 +52,10 @@ public class SVGDocument {
         render(component, g, null);
     }
 
-    public void render(@Nullable JComponent component, @NotNull Graphics2D g, @Nullable ViewBox bounds) {
+    public void render(@Nullable JComponent component, @NotNull Graphics2D graphics2D, @Nullable ViewBox bounds) {
+        Graphics2D g = (Graphics2D) graphics2D.create();
+        setupSVGRenderingHints(g);
+
         Font f = g.getFont();
         if (f == null && component != null) f = component.getFont();
         float defaultEm = f != null ? f.getSize2D() : SVGFont.defaultFontSize();
@@ -78,5 +81,22 @@ public class SVGDocument {
         g.translate(bounds.x, bounds.y);
 
         root.renderWithSize(bounds.size(), root.viewBox(), context, g);
+
+        g.dispose();
+    }
+
+    private void setupSVGRenderingHints(@NotNull Graphics2D g) {
+        Object aaHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        if (aaHint != RenderingHints.VALUE_ANTIALIAS_DEFAULT) setSVGRenderingHint(g,
+                SVGRenderingHints.KEY_IMAGE_ANTIALIASING,
+                aaHint == RenderingHints.VALUE_ANTIALIAS_ON
+                        ? SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON
+                        : SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF);
+    }
+
+    private void setSVGRenderingHint(@NotNull Graphics2D g, @NotNull RenderingHints.Key key, @NotNull Object o) {
+        if (g.getRenderingHint(key) == null) {
+            g.setRenderingHint(key, o);
+        }
     }
 }
