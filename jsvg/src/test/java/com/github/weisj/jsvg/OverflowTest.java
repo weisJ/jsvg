@@ -23,7 +23,11 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ReferenceTest.render;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,5 +36,15 @@ class OverflowTest {
     @Test
     void overflowTest() {
         assertEquals(SUCCESS, compareImages("overflow.svg"));
+    }
+
+    @Test
+    void imageOverflowTest() {
+        BufferedImage img = render("overflowImage.svg");
+        assertEquals(Color.RED, new Color(img.getRGB(100, 200)));
+        assertEquals(new Color(0, 0, 0, 0), new Color(img.getRGB(300, 200), true));
+
+        assertEquals(Color.RED, new Color(img.getRGB(100, 600)));
+        assertEquals(Color.RED, new Color(img.getRGB(300, 600)));
     }
 }
