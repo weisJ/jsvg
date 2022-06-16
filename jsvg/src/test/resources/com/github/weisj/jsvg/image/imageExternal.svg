@@ -1,0 +1,7 @@
+<svg width="400" height="400" viewBox="0 0 200 200"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink">
+	<image
+		xlink:href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image/mdn_logo_only_color.png"
+		height="200" width="200" />
+</svg>

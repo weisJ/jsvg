@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -205,10 +205,16 @@ public final class AttributeParser {
         return null;
     }
 
+    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
+
+    private @NotNull String removeWhiteSpace(@NotNull String value) {
+        return WHITESPACE_PATTERN.matcher(value).replaceAll("");
+    }
+
     public @Nullable String parseUrl(@Nullable String value) {
         if (value == null) return null;
-        if (!value.startsWith("url(") || !value.endsWith(")")) return value;
-        return value.substring(4, value.length() - 1);
+        if (!value.startsWith("url(") || !value.endsWith(")")) return removeWhiteSpace(value);
+        return removeWhiteSpace(value.substring(4, value.length() - 1));
     }
 
     private static final Pattern TRANSFORM_PATTERN = Pattern.compile("\\w+\\([^)]*\\)");

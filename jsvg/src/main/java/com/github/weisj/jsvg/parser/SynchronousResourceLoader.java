@@ -25,18 +25,14 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 
-import javax.imageio.ImageIO;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.util.ResourceUtil;
 
 public class SynchronousResourceLoader implements ResourceLoader {
     @Override
     public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URI uri) throws IOException {
-        return new ValueUIFuture<>(doLoad(uri));
-    }
-
-    static BufferedImage doLoad(@NotNull URI uri) throws IOException {
-        return ImageIO.read(uri.toURL());
+        return new ValueUIFuture<>(ResourceUtil.loadImage(uri));
     }
 }

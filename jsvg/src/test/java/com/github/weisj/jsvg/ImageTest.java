@@ -19,32 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser;
+package com.github.weisj.jsvg;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ReferenceTest.render;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.util.ResourceUtil;
+class ImageTest {
 
+    @Test
+    void externalImageTest() {
+        assertEquals(SUCCESS, compareImages("image/imageExternal.svg"));
+    }
 
-public class AsynchronousResourceLoader implements ResourceLoader {
-    private static final Logger LOGGER = Logger.getLogger(AsynchronousResourceLoader.class.getName());
-
-    @Override
-    public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URI uri) {
-        return new SwingUIFuture<>(() -> {
-            try {
-                return ResourceUtil.loadImage(uri);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                return null;
-            }
-        });
+    @Test
+    void embeddedImageTest() {
+        // Batik doesn't support data uris
+        assertDoesNotThrow(() -> render("image/imageBase64.svg"));
     }
 }
