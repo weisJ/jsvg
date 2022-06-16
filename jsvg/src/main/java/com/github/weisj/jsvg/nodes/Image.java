@@ -115,7 +115,7 @@ public final class Image extends RenderableSVGNode {
 
         MeasureContext measure = context.measureContext();
         int imgWidth = img.getWidth(context.targetComponent());
-        int imgHeight = img.getWidth(context.targetComponent());
+        int imgHeight = img.getHeight(context.targetComponent());
         if (imgWidth == 0 || imgHeight == 0) return;
 
         float viewWidth = width.orElseIfUnspecified(imgWidth).resolveWidth(measure);
