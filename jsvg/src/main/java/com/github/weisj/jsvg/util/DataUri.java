@@ -33,18 +33,30 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A data URI parser
+ * Copyright (c) 2013 ooxi
+ *     https://github.com/ooxi/jdatauri
  *
- * @see <a href="https://tools.ietf.org/html/rfc2397">tools.ietf.org/html/rfc2397</a>
- * @see <a href="http://shadow2531.com/opera/testcases/datauri/data_uri_rules.html">shadow2531.com/opera/testcases/datauri/data_uri_rules.html</a>
- * @see <a href="https://en.wikipedia.org/wiki/Data_URI_scheme">en.wikipedia.org/wiki/Data_URI_scheme</a>
+ * This software is provided 'as-is', without any express or implied warranty.
+ * In no event will the authors be held liable for any damages arising from the
+ * use of this software.
  *
- * @author ooxi
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
  *
- * This class was modified for the JSVG project.
+ *  1. The origin of this software must not be misrepresented; you must not
+ *     claim that you wrote the original software. If you use this software in a
+ *     product, an acknowledgment in the product documentation would be
+ *     appreciated but is not required.
+ *
+ *  2. Altered source versions must be plainly marked as such, and must not be
+ *     misrepresented as being the original software.
+ *
+ *  3. This notice may not be removed or altered from any source distribution.
+ *
+ *  Note: This file has been modified for usage in the JSVG project.
  */
 class DataUri {
-
     private static final String CHARSET_OPTION_NAME = "charset";
     private static final String FILENAME_OPTION_NAME = "filename";
     private static final String CONTENT_DISPOSITION_OPTION_NAME = "content-disposition";
@@ -72,8 +84,20 @@ class DataUri {
         return mime;
     }
 
-    public byte[] data() {
+    public byte @NotNull [] data() {
         return data;
+    }
+
+    public @Nullable Charset charset() {
+        return charset;
+    }
+
+    public @Nullable String contentDisposition() {
+        return contentDisposition;
+    }
+
+    public @Nullable String filename() {
+        return filename;
     }
 
     @Override
@@ -281,7 +305,7 @@ class DataUri {
         // contentEncoding, data and supportedValues objects.
         final String finalMimeType = mimeType;
         final Charset finalCharset = supportedValues.get(CHARSET_OPTION_NAME).isEmpty()
-                ? StandardCharsets.US_ASCII
+                ? null
                 : Charset.forName(supportedValues.get(CHARSET_OPTION_NAME));
         final String finalFilename = supportedValues.get(FILENAME_OPTION_NAME).isEmpty()
                 ? null
@@ -318,12 +342,12 @@ class DataUri {
             s.append(CONTENT_DISPOSITION_OPTION_NAME + "=").append(this.contentDisposition).append(";");
         if (this.filename != null) s.append(FILENAME_OPTION_NAME + "=").append(this.filename).append(";");
 
-        s.append("base64,").append(new String(Base64.getEncoder().encode(this.data())));
+        s.append("base64,").append(new String(Base64.getEncoder().encode(this.data()), StandardCharsets.UTF_8));
 
         return s.toString();
     }
 
-    private static final Pattern PLUS = Pattern.compile("\\+", Pattern.LITERAL);
+    private static final Pattern PLUS = Pattern.compile("+", Pattern.LITERAL);
 
     private static String percentDecode(String s, Charset cs) {
         try {
