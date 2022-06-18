@@ -49,54 +49,58 @@ import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
 
+/**
+ * Class for loading svg files as an {@link SVGDocument}.
+ * Note that this class isn't guaranteed to be thread safe and hence shouldn't be used across multiple threads.
+ */
 public class SVGLoader {
 
     static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
-    private final @NotNull Map<String, Supplier<SVGNode>> nodeMap;
-    private final @NotNull ThreadLocal<@NotNull SAXParser> saxParserThreadLocal;
+    private static final @NotNull Map<String, Supplier<SVGNode>> NODE_CONSTRUCTOR_MAP = createNodeConstructorMap();
 
-    public SVGLoader() {
-        nodeMap = new HashMap<>();
-        nodeMap.put(Anchor.TAG, Anchor::new);
-        nodeMap.put(Circle.TAG, Circle::new);
-        nodeMap.put(ClipPath.TAG, ClipPath::new);
-        nodeMap.put(Defs.TAG, Defs::new);
-        nodeMap.put(Desc.TAG, Desc::new);
-        nodeMap.put(Ellipse.TAG, Ellipse::new);
-        nodeMap.put(FeColorMatrix.TAG, FeColorMatrix::new);
-        nodeMap.put(FeDisplacementMap.TAG, FeDisplacementMap::new);
-        nodeMap.put(FeGaussianBlur.TAG, FeGaussianBlur::new);
-        nodeMap.put(FeTurbulence.TAG, FeTurbulence::new);
-        nodeMap.put(Filter.TAG, Filter::new);
-        nodeMap.put(Group.TAG, Group::new);
-        nodeMap.put(Image.TAG, Image::new);
-        nodeMap.put(Line.TAG, Line::new);
-        nodeMap.put(LinearGradient.TAG, LinearGradient::new);
-        nodeMap.put(Marker.TAG, Marker::new);
-        nodeMap.put(Mask.TAG, Mask::new);
-        nodeMap.put(MeshGradient.TAG, MeshGradient::new);
-        nodeMap.put(MeshPatch.TAG, MeshPatch::new);
-        nodeMap.put(MeshRow.TAG, MeshRow::new);
-        nodeMap.put(Metadata.TAG, Metadata::new);
-        nodeMap.put(Path.TAG, Path::new);
-        nodeMap.put(Pattern.TAG, Pattern::new);
-        nodeMap.put(Polygon.TAG, Polygon::new);
-        nodeMap.put(Polyline.TAG, Polyline::new);
-        nodeMap.put(RadialGradient.TAG, RadialGradient::new);
-        nodeMap.put(Rect.TAG, Rect::new);
-        nodeMap.put(SVG.TAG, SVG::new);
-        nodeMap.put(SolidColor.TAG, SolidColor::new);
-        nodeMap.put(Stop.TAG, Stop::new);
-        nodeMap.put(Style.TAG, Style::new);
-        nodeMap.put(Symbol.TAG, Symbol::new);
-        nodeMap.put(Text.TAG, Text::new);
-        nodeMap.put(TextPath.TAG, TextPath::new);
-        nodeMap.put(TextSpan.TAG, TextSpan::new);
-        nodeMap.put(Title.TAG, Title::new);
-        nodeMap.put(Use.TAG, Use::new);
-        nodeMap.put(View.TAG, View::new);
+    private final @NotNull SAXParser saxParser = createSaxParser();
 
-        saxParserThreadLocal = ThreadLocal.withInitial(SVGLoader::createSaxParser);
+    private static @NotNull Map<String, Supplier<SVGNode>> createNodeConstructorMap() {
+        Map<String, Supplier<SVGNode>> map = new HashMap<>();
+        map.put(Anchor.TAG, Anchor::new);
+        map.put(Circle.TAG, Circle::new);
+        map.put(ClipPath.TAG, ClipPath::new);
+        map.put(Defs.TAG, Defs::new);
+        map.put(Desc.TAG, Desc::new);
+        map.put(Ellipse.TAG, Ellipse::new);
+        map.put(FeColorMatrix.TAG, FeColorMatrix::new);
+        map.put(FeDisplacementMap.TAG, FeDisplacementMap::new);
+        map.put(FeGaussianBlur.TAG, FeGaussianBlur::new);
+        map.put(FeTurbulence.TAG, FeTurbulence::new);
+        map.put(Filter.TAG, Filter::new);
+        map.put(Group.TAG, Group::new);
+        map.put(Image.TAG, Image::new);
+        map.put(Line.TAG, Line::new);
+        map.put(LinearGradient.TAG, LinearGradient::new);
+        map.put(Marker.TAG, Marker::new);
+        map.put(Mask.TAG, Mask::new);
+        map.put(MeshGradient.TAG, MeshGradient::new);
+        map.put(MeshPatch.TAG, MeshPatch::new);
+        map.put(MeshRow.TAG, MeshRow::new);
+        map.put(Metadata.TAG, Metadata::new);
+        map.put(Path.TAG, Path::new);
+        map.put(Pattern.TAG, Pattern::new);
+        map.put(Polygon.TAG, Polygon::new);
+        map.put(Polyline.TAG, Polyline::new);
+        map.put(RadialGradient.TAG, RadialGradient::new);
+        map.put(Rect.TAG, Rect::new);
+        map.put(SVG.TAG, SVG::new);
+        map.put(SolidColor.TAG, SolidColor::new);
+        map.put(Stop.TAG, Stop::new);
+        map.put(Style.TAG, Style::new);
+        map.put(Symbol.TAG, Symbol::new);
+        map.put(Text.TAG, Text::new);
+        map.put(TextPath.TAG, TextPath::new);
+        map.put(TextSpan.TAG, TextSpan::new);
+        map.put(Title.TAG, Title::new);
+        map.put(Use.TAG, Use::new);
+        map.put(View.TAG, View::new);
+        return map;
     }
 
     private static @NotNull SAXParser createSaxParser() {
@@ -136,7 +140,6 @@ public class SVGLoader {
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader) {
         try {
-            SAXParser saxParser = saxParserThreadLocal.get();
             XMLReader xmlReader = saxParser.getXMLReader();
             xmlReader.setEntityResolver(
                     (publicId, systemId) -> {
@@ -179,7 +182,7 @@ public class SVGLoader {
         ResourceLoader resourceLoader();
     }
 
-    private class SVGLoadHandler extends DefaultHandler implements LoadHelper {
+    private static class SVGLoadHandler extends DefaultHandler implements LoadHelper {
 
         private static final boolean DEBUG_PRINT = false;
         private final PrintStream printer = System.out;
@@ -248,7 +251,7 @@ public class SVGLoader {
 
             if (lastParsedElement != null) flushText(lastParsedElement, true);
 
-            Supplier<SVGNode> nodeSupplier = nodeMap.get(localName.toLowerCase(Locale.ENGLISH));
+            Supplier<SVGNode> nodeSupplier = NODE_CONSTRUCTOR_MAP.get(localName.toLowerCase(Locale.ENGLISH));
             if (nodeSupplier != null) {
                 SVGNode newNode = nodeSupplier.get();
 
