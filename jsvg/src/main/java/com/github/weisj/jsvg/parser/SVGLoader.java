@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -107,7 +108,10 @@ public class SVGLoader {
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         saxParserFactory.setNamespaceAware(true);
         try {
-            return saxParserFactory.newSAXParser();
+            SAXParser parser = saxParserFactory.newSAXParser();
+            parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            return parser;
         } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
