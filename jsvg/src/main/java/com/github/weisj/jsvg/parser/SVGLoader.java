@@ -59,7 +59,15 @@ public class SVGLoader {
     static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
     private static final @NotNull Map<String, Supplier<SVGNode>> NODE_CONSTRUCTOR_MAP = createNodeConstructorMap();
 
-    private final @NotNull SAXParser saxParser = createSaxParser();
+    private final @NotNull SAXParser saxParser;
+
+    public SVGLoader() {
+        this(createSaxParser());
+    }
+
+    public SVGLoader(@NotNull SAXParser saxParser) {
+        this.saxParser = saxParser;
+    }
 
     private static @NotNull Map<String, Supplier<SVGNode>> createNodeConstructorMap() {
         Map<String, Supplier<SVGNode>> map = new HashMap<>();
