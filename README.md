@@ -1,5 +1,7 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.weisj%3Ajsvg&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=com.github.weisj%3Ajsvg)
 [![Code Style](https://github.com/weisJ/jsvg/actions/workflows/spotless.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/spotless.yml)
 [![CI](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.weisj/jsvg?label=Maven%20Central)](https://search.maven.org/artifact/com.github.weisj/jsvg)
 # JSVG - A Java SVG implementation
 
 <p align="center">
@@ -16,9 +18,13 @@ it decidedly won't support at all. This implementation only tries to be a static
 scripting languages or interaction. Animations aren't currently implemented but are planned to be supported.
 
 ## How to use
+The library is available on maven central:
+````kotlin
+dependencies {
+    implementation("com.github.weisj:jsvg:0.0.3"}
+````
 
-There currently isn't any stable version of the library as the api is still evolving.
-However, snapshot builds will be release to maven:
+Also nightly snapshot builds will be release to maven:
 ````kotlin
 repositories {
     maven {
@@ -34,7 +40,7 @@ dependencies {
     implementation("com.github.weisj:jsvg:latest.integration")
 }
 ````
-To load an svg icon you can use the [`SVGLoader`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/SVGLoader.java)
+To load an svg icon you can use the [`SVGLoader`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/parser/SVGLoader.java)
 class. It will produce an [`SVGDocument`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/SVGDocument.java) which
 can be rendered to any `Graphics2D` object you like (e.g. a `BufferedImage` or a swing component).
 
