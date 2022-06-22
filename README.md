@@ -21,7 +21,8 @@ scripting languages or interaction. Animations aren't currently implemented but 
 The library is available on maven central:
 ````kotlin
 dependencies {
-    implementation("com.github.weisj:jsvg:0.0.3"}
+    implementation("com.github.weisj:jsvg:0.0.3")
+}
 ````
 
 Also nightly snapshot builds will be release to maven:
