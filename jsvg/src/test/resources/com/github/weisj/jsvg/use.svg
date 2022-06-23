@@ -1,0 +1,15 @@
+<svg viewBox="0 0 40 10" width="400" height="100"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink">
+	<circle id="myCircle" cx="5" cy="5" r="4" stroke="blue" />
+	<defs>
+		<circle id="myCircle2" cx="5" cy="5" r="4" />
+	</defs>
+	<use xlink:href="#myCircle" x="10" fill="blue" />
+	<use xlink:href="#myCircle" x="20" fill="white" stroke="red" />
+	<use xlink:href="#myCircle2" x="30" fill="white" stroke="red" />
+	<!-- stroke="red" will be ignored here, as stroke was already set on myCircle. 
+		Most attributes (except for x, y, width, height and (xlink:)href) do not 
+		override those set in the ancestor. That's why the circles have different 
+		x positions, but the same stroke value. -->
+</svg>
