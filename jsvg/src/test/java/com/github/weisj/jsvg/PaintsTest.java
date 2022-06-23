@@ -31,6 +31,8 @@ import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
+
 class PaintsTest {
 
     @Test
@@ -45,5 +47,10 @@ class PaintsTest {
         assertEquals(new Color(255, 0, 0), new Color(img.getRGB(125, 25)));
         assertEquals(new Color(0, 0, 255), new Color(img.getRGB(225, 25)));
         assertEquals(new Color(255, 255, 0), new Color(img.getRGB(325, 25)));
+    }
+
+    @Test
+    void testStringRepresentation() {
+        assertEquals("AwtSVGPaint{paint=Color{r=0,g=0,b=0,a=255}}", new AwtSVGPaint(Color.BLACK).toString());
     }
 }
