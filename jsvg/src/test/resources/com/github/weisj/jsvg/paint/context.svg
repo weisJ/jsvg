@@ -1,0 +1,30 @@
+<svg viewBox="0 0 400 100" width="400" height="100"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink">
+	<defs>
+		<g color="#0F0" id="group_1">
+			<rect width="50" height="50" fill="currentcolor" />
+			<circle r="25" cx="70" cy="70" stroke="currentcolor"
+				fill="none" stroke-width="5" />
+		</g>
+		<g id="group_2" stroke="none">
+			<rect width="50" height="50" fill="context-stroke" />
+			<circle r="25" cx="70" cy="70" stroke="context-stroke"
+				fill="none" stroke-width="5" />
+		</g>
+		<g id="group_3" fill="none">
+			<rect width="50" height="50" fill="context-fill" />
+			<circle r="25" cx="70" cy="70" stroke="context-fill"
+				fill="none" stroke-width="5" />
+		</g>
+		<g id="group_4">
+			<rect width="50" height="50" fill="currentcolor" />
+			<circle r="25" cx="70" cy="70" stroke="currentcolor"
+				fill="none" stroke-width="5" />
+		</g>
+	</defs>
+	<use x="0" xlink:href="#group_1" />
+	<use x="100" xlink:href="#group_2" stroke="#F00" />
+	<use x="200" xlink:href="#group_3" fill="#00F" />
+	<use x="300" xlink:href="#group_4" color="#FF0" />
+</svg>
