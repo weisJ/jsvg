@@ -56,7 +56,19 @@ public class AwtSVGPaint implements SimplePaintSVGPaint {
     @Override
     public String toString() {
         return "AwtSVGPaint{" +
-                "paint=" + paint +
+                "paint=" + formatPaint() +
                 '}';
+    }
+
+    private @NotNull String formatPaint() {
+        if (paint instanceof Color) {
+            Color c = (Color) paint;
+            return "java.awt.Color{"
+                    + "r=" + c.getRed()
+                    + ",g=" + c.getGreen()
+                    + ",b=" + c.getBlue()
+                    + ",a=" + c.getAlpha() + "}";
+        }
+        return paint.toString();
     }
 }
