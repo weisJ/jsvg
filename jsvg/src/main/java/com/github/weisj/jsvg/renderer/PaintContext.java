@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,8 @@
 package com.github.weisj.jsvg.renderer;
 
 
+import java.awt.*;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,9 +35,9 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 
 public class PaintContext implements Mutator<PaintContext> {
 
-    public final AwtSVGPaint color;
-    public final SVGPaint fillPaint;
-    public final SVGPaint strokePaint;
+    public final @Nullable AwtSVGPaint color;
+    public final @Nullable SVGPaint fillPaint;
+    public final @Nullable SVGPaint strokePaint;
 
     public final @Percentage float opacity;
     public final @Percentage float fillOpacity;
@@ -43,8 +45,8 @@ public class PaintContext implements Mutator<PaintContext> {
 
     public final @Nullable StrokeContext strokeContext;
 
-    public PaintContext(AwtSVGPaint color, SVGPaint fillPaint, float fillOpacity,
-            SVGPaint strokePaint, float strokeOpacity, float opacity,
+    public PaintContext(@Nullable AwtSVGPaint color, @Nullable SVGPaint fillPaint, float fillOpacity,
+            @Nullable SVGPaint strokePaint, float strokeOpacity, float opacity,
             @Nullable StrokeContext strokeContext) {
         this.color = color;
         this.fillPaint = fillPaint;
@@ -66,14 +68,19 @@ public class PaintContext implements Mutator<PaintContext> {
 
     public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
         return new PaintContext(
-                // Note: this may be current-color again, but treating it as null will make no difference at all.
-                new AwtSVGPaint(attributeNode.getColor("color")),
+                parseColorAttribute(attributeNode),
                 attributeNode.getPaint("fill"),
                 attributeNode.getPercentage("fill-opacity", 1),
                 attributeNode.getPaint("stroke"),
                 attributeNode.getPercentage("stroke-opacity", 1),
                 attributeNode.getPercentage("opacity", 1),
                 StrokeContext.parse(attributeNode));
+    }
+
+    private static @Nullable AwtSVGPaint parseColorAttribute(@NotNull AttributeNode attributeNode) {
+        Color c = attributeNode.getColor("color", null);
+        if (c == null) return null;
+        return new AwtSVGPaint(c);
     }
 
     public @NotNull PaintContext derive(@NotNull PaintContext context) {

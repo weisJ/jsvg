@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -143,17 +143,26 @@ public class RenderContext {
         return resolvePaint(paintContext.fillPaint);
     }
 
-    private @NotNull SVGPaint resolvePaint(@NotNull SVGPaint p) {
-        if (p == SVGPaint.DEFAULT_PAINT) return paintContext.color;
+    private @NotNull SVGPaint resolvePaint(@Nullable SVGPaint p) {
+        if (p == SVGPaint.DEFAULT_PAINT || p == SVGPaint.CURRENT_COLOR) {
+            // color can only hold resolved values being declared as literals
+            return coerceNonNull(paintContext.color);
+        }
         if (p == SVGPaint.CONTEXT_STROKE) {
+            // value is already absolute hence needs no special treatment.
             if (contextElementAttributes == null) return SVGPaint.NONE;
             return contextElementAttributes.strokePaint;
         }
         if (p == SVGPaint.CONTEXT_FILL) {
+            // value is already absolute hence needs no special treatment.
             if (contextElementAttributes == null) return SVGPaint.NONE;
             return contextElementAttributes.fillPaint;
         }
-        return p;
+        return coerceNonNull(p);
+    }
+
+    private @NotNull SVGPaint coerceNonNull(@Nullable SVGPaint p) {
+        return p != null ? p : SVGPaint.DEFAULT_PAINT;
     }
 
     public @Percentage float rawOpacity() {
