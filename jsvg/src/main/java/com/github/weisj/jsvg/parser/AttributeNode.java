@@ -138,10 +138,15 @@ public class AttributeNode {
     }
 
     public @NotNull Color getColor(@NotNull String key) {
+        return getColor(key, PaintParser.DEFAULT_COLOR);
+    }
+
+    @Contract("_,!null -> !null")
+    public @Nullable Color getColor(@NotNull String key, @Nullable Color fallback) {
         String value = getValue(key);
-        if (value == null) return PaintParser.DEFAULT_COLOR;
+        if (value == null) return fallback;
         Color c = loadHelper.attributeParser().paintParser().parseColor(value.toLowerCase(Locale.ENGLISH), this);
-        return c != null ? c : PaintParser.DEFAULT_COLOR;
+        return c != null ? c : fallback;
     }
 
     public @Nullable SVGPaint getPaint(@NotNull String key) {
