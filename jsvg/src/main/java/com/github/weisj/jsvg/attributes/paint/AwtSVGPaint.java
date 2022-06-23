@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.attributes.paint;
 
 import java.awt.*;
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +38,19 @@ public class AwtSVGPaint implements SimplePaintSVGPaint {
     @Override
     public @NotNull Paint paint() {
         return paint;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AwtSVGPaint)) return false;
+        AwtSVGPaint that = (AwtSVGPaint) o;
+        return paint.equals(that.paint);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paint);
     }
 
     @Override
