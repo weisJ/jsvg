@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,6 +27,10 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 
+/**
+ * Holds values provided by the current context element.
+ * Note that values here must always be absolute and can't refer themselves to any context element values.
+ */
 public class ContextElementAttributes {
     public final @NotNull SVGPaint fillPaint;
     public final @NotNull SVGPaint strokePaint;
