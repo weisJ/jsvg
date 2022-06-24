@@ -17,6 +17,9 @@ This library is under active development and doesn't yet support all features of
 it decidedly won't support at all. This implementation only tries to be a static user agent meaning it won't support any
 scripting languages or interaction. Animations aren't currently implemented but are planned to be supported.
 
+This library aims to be as lightweight as possible. Generally JSVG uses ~50% less memory than svgSalamander and
+~98% less than Batik.
+
 ## How to use
 The library is available on maven central:
 ````kotlin
