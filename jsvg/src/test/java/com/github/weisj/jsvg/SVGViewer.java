@@ -30,6 +30,7 @@ import java.util.Objects;
 
 import javax.swing.*;
 
+import org.apache.batik.swing.JSVGCanvas;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.darklaf.LafManager;
@@ -45,7 +46,7 @@ public class SVGViewer {
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("tempTestFile.svg");
+            iconBox.setSelectedItem("paint/currentColor.svg");
 
             SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
             svgPanel.setPreferredSize(new Dimension(1000, 600));
@@ -65,12 +66,17 @@ public class SVGViewer {
             jsvg.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.JSVG));
             JRadioButton svgSalamander = new JRadioButton(RenderingMode.SVG_SALAMANDER.name());
             svgSalamander.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.SVG_SALAMANDER));
+            JRadioButton batik = new JRadioButton(RenderingMode.BATIK.name());
+            batik.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.BATIK));
+
 
             ButtonGroup bg = new ButtonGroup();
             bg.add(jsvg);
             bg.add(svgSalamander);
+            bg.add(batik);
             renderingMode.add(jsvg);
             renderingMode.add(svgSalamander);
+            renderingMode.add(batik);
             renderingMode.add(Box.createHorizontalGlue());
             frame.add(renderingMode, BorderLayout.SOUTH);
 
@@ -92,7 +98,8 @@ public class SVGViewer {
 
     private enum RenderingMode {
         JSVG,
-        SVG_SALAMANDER
+        SVG_SALAMANDER,
+        BATIK
     }
 
     private static class SVGPanel extends JPanel {
@@ -111,6 +118,7 @@ public class SVGViewer {
                 return SVGPanel.this.getWidth();
             }
         };
+        private final JSVGCanvas jsvgCanvas = new JSVGCanvas();
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
@@ -119,21 +127,40 @@ public class SVGViewer {
         }
 
         private void selectIcon(@NotNull String name) {
-            if (mode == RenderingMode.JSVG) {
-                document = iconCache.computeIfAbsent(name, n -> {
-                    URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
-                    SVGLoader loader = new SVGLoader();
-                    return loader.load(url);
-                });
-            } else {
-                try {
-                    icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
-                } catch (URISyntaxException e) {
-                    throw new IllegalStateException(e);
-                }
+            remove(jsvgCanvas);
+            switch (mode) {
+                case JSVG:
+                    document = iconCache.computeIfAbsent(name, n -> {
+                        URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
+                        SVGLoader loader = new SVGLoader();
+                        return loader.load(url);
+                    });
+                    break;
+                case SVG_SALAMANDER:
+                    try {
+                        icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
+                    } catch (URISyntaxException e) {
+                        throw new IllegalStateException(e);
+                    }
+                    break;
+                case BATIK:
+                    add(jsvgCanvas);
+                    try {
+                        jsvgCanvas.setURI(
+                                Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI().toASCIIString());
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
             }
             this.selectedIconName = name;
             repaint();
+        }
+
+        @Override
+        public void doLayout() {
+            super.doLayout();
+            jsvgCanvas.setBounds(0, 0, getWidth(), getHeight());
         }
 
         private void setRenderingMode(@NotNull RenderingMode mode) {
@@ -149,10 +176,15 @@ public class SVGViewer {
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                     RenderingHints.VALUE_STROKE_PURE);
             System.out.println("======");
-            if (mode == RenderingMode.JSVG) {
-                document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
-            } else {
-                icon.paintIcon(this, g, 0, 0);
+            switch (mode) {
+                case JSVG:
+                    document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
+                    break;
+                case SVG_SALAMANDER:
+                    icon.paintIcon(this, g, 0, 0);
+                    break;
+                case BATIK:
+                    break;
             }
         }
     }
