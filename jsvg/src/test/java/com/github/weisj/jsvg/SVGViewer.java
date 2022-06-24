@@ -31,6 +31,7 @@ import java.util.Objects;
 import javax.swing.*;
 
 import org.apache.batik.swing.JSVGCanvas;
+import org.ehcache.sizeof.SizeOf;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.darklaf.LafManager;
@@ -78,6 +79,11 @@ public class SVGViewer {
             renderingMode.add(svgSalamander);
             renderingMode.add(batik);
             renderingMode.add(Box.createHorizontalGlue());
+
+            JButton resourceInfo = new JButton("Print Memory");
+            resourceInfo.addActionListener(e -> svgPanel.printMemory());
+            renderingMode.add(resourceInfo);
+
             frame.add(renderingMode, BorderLayout.SOUTH);
 
             frame.pack();
@@ -124,6 +130,23 @@ public class SVGViewer {
             selectIcon(iconName);
             icon.setAutosize(SVGIcon.AUTOSIZE_BESTFIT);
             icon.setAntiAlias(true);
+        }
+
+        private void printMemory() {
+            switch (mode) {
+                case JSVG:
+                    System.out.println(mode + " Memory: "
+                            + SizeOf.newInstance().deepSizeOf(document));
+                    break;
+                case SVG_SALAMANDER:
+                    System.out.println(mode + " Memory: "
+                            + SizeOf.newInstance().deepSizeOf(icon.getSvgUniverse().getDiagram(icon.getSvgURI())));
+                    break;
+                case BATIK:
+                    System.out.println(mode + " Memory: "
+                            + SizeOf.newInstance().deepSizeOf(jsvgCanvas.getSVGDocument()));
+                    break;
+            }
         }
 
         private void selectIcon(@NotNull String name) {

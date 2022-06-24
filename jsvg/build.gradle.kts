@@ -19,6 +19,7 @@ dependencies {
     testImplementation(testLibs.svgSalamander)
     testImplementation(testLibs.batik)
     testImplementation(testLibs.imageCompare)
+    testImplementation(testLibs.sizeof)
 
     jmh(testLibs.svgSalamander)
     jmh(testLibs.batik)
