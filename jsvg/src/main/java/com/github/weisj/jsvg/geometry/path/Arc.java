@@ -129,7 +129,7 @@ class Arc extends PathCommand {
 
 
     /**
-     * This constructs an unrotated Arc2D from the SVG specification of an
+      * This constructs a non-rotated Arc2D from the SVG specification of an
      * Elliptical arc.  To get the final arc you need to apply a rotation
      * transform such as:
      *
@@ -194,9 +194,9 @@ class Arc extends PathCommand {
         double sign = (largeArcFlag == sweepFlag) ? -1 : 1;
         double sq = ((Prx * Pry) - (Prx * Py1) - (Pry * Px1)) / ((Prx * Py1) + (Pry * Px1));
         sq = (sq < 0) ? 0 : sq;
-        double coef = (sign * Math.sqrt(sq));
-        double cx1 = coef * ((rx * y1) / ry);
-        double cy1 = coef * -((ry * x1) / rx);
+        double coefficient = (sign * Math.sqrt(sq));
+        double cx1 = coefficient * ((rx * y1) / ry);
+        double cy1 = coefficient * -((ry * x1) / rx);
 
         //
         // Step 3 : Compute (cx, cy) from (cx1, cy1)
