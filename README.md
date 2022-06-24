@@ -58,113 +58,113 @@ For supported elements most of the attributes which apply to them are implemente
 
 
 ## Shape and container elements
-|Element|Status|
-|-------|------|
-|a|:white_check_mark:|
-|circle|:white_check_mark:|
-|clipPath|:white_check_mark:|
-|defs|:white_check_mark:|
-|ellipse|:white_check_mark:|
-|foreignObject|:x:|
-|g|:white_check_mark:|
-|image|:white_check_mark:|
-|line|:white_check_mark:|
-|marker|:white_check_mark:|
-|mask|:white_check_mark:|
-|path|:white_check_mark:|
-|polygon|:white_check_mark:|
-|polyline|:white_check_mark:|
-|rect|:white_check_mark:|
-|svg|:white_check_mark:|
-|symbol|:white_check_mark:|
-|use|:white_check_mark:|
-|view|(:white_check_mark:)|
+| Element       | Status               |
+|---------------|----------------------|
+| a             | :white_check_mark:   |
+| circle        | :white_check_mark:   |
+| clipPath      | :white_check_mark:   |
+| defs          | :white_check_mark:   |
+| ellipse       | :white_check_mark:   |
+| foreignObject | :x:                  |
+| g             | :white_check_mark:   |
+| image         | :white_check_mark:   |
+| line          | :white_check_mark:   |
+| marker        | :white_check_mark:   |
+| mask          | :white_check_mark:   |
+| path          | :white_check_mark:   |
+| polygon       | :white_check_mark:   |
+| polyline      | :white_check_mark:   |
+| rect          | :white_check_mark:   |
+| svg           | :white_check_mark:   |
+| symbol        | :white_check_mark:   |
+| use           | :white_check_mark:   |
+| view          | (:white_check_mark:) |
 
 ## Paint server elements
-|Element|Status|
-|-------|------|
-|linearGradient|:white_check_mark:|
-|:test_tube:meshgradient|:white_check_mark:|
-|:test_tube:meshrow|:white_check_mark:|
-|:test_tube:meshpatch|:white_check_mark:|
-|pattern|:white_check_mark:|
-|radialGradient|:white_check_mark:|
-|solidColor|:white_check_mark:|
-|stop|:white_check_mark:|
+| Element                 | Status             |
+|-------------------------|--------------------|
+| linearGradient          | :white_check_mark: |
+| :test_tube:meshgradient | :white_check_mark: |
+| :test_tube:meshrow      | :white_check_mark: |
+| :test_tube:meshpatch    | :white_check_mark: |
+| pattern                 | :white_check_mark: |
+| radialGradient          | :white_check_mark: |
+| solidColor              | :white_check_mark: |
+| stop                    | :white_check_mark: |
 
 ## Text elements
-|Element|Status|
-|-------|------|
-|text|:white_check_mark:|
-|textPath|:white_check_mark:|
-|:warning:tref|:x:|
-|tspan|:white_check_mark:|
+| Element       | Status             |
+|---------------|--------------------|
+| text          | :white_check_mark: |
+| textPath      | :white_check_mark: |
+| :warning:tref | :x:                |
+| tspan         | :white_check_mark: |
 
 ## Animation elements
-|Element|Status|
-|-------|------|
-|animate|:x:|
-|:warning:animateColor|:x:|
-|animateMotion|:x:|
-|animateTransform|:x:|
-|mpath|:x:|
-|set|:x:|
-|switch|:x:|
+| Element               | Status |
+|-----------------------|--------|
+| animate               | :x:    |
+| :warning:animateColor | :x:    |
+| animateMotion         | :x:    |
+| animateTransform      | :x:    |
+| mpath                 | :x:    |
+| set                   | :x:    |
+| switch                | :x:    |
 
 ## Filter elements
-|Element|Status|
-|-------|------|
-|feBlend|:x:|
-|feColorMatrix|:white_check_mark:|
-|feComponentTransfer|:x:|
-|feComposite|:x:|
-|feConvolveMatrix|:x:|
-|feDiffuseLighting|:x:|
-|feDisplacementMap|:white_check_mark:|
-|feDistantLight|:x:|
-|feFlood|:x:|
-|feFuncA|:x:|
-|feFuncB|:x:|
-|feFuncG|:x:|
-|feFuncR|:x:|
-|feGaussianBlur|:white_check_mark:|
-|feImage|:x:|
-|feMerge|:x:|
-|feMergeNode|:x:|
-|feMorphology|:x:|
-|feOffset|:x:|
-|fePointLight|:x:|
-|feSpecularLighting|:x:|
-|feSpotLight|:x:|
-|feTile|:x:|
-|feTurbulence|:white_check_mark:|
-|filter|:ballot_box_with_check:|
+| Element             | Status                  |
+|---------------------|-------------------------|
+| feBlend             | :x:                     |
+| feColorMatrix       | :white_check_mark:      |
+| feComponentTransfer | :x:                     |
+| feComposite         | :x:                     |
+| feConvolveMatrix    | :x:                     |
+| feDiffuseLighting   | :x:                     |
+| feDisplacementMap   | :white_check_mark:      |
+| feDistantLight      | :x:                     |
+| feFlood             | :x:                     |
+| feFuncA             | :x:                     |
+| feFuncB             | :x:                     |
+| feFuncG             | :x:                     |
+| feFuncR             | :x:                     |
+| feGaussianBlur      | :white_check_mark:      |
+| feImage             | :x:                     |
+| feMerge             | :x:                     |
+| feMergeNode         | :x:                     |
+| feMorphology        | :x:                     |
+| feOffset            | :x:                     |
+| fePointLight        | :x:                     |
+| feSpecularLighting  | :x:                     |
+| feSpotLight         | :x:                     |
+| feTile              | :x:                     |
+| feTurbulence        | :white_check_mark:      |
+| filter              | :ballot_box_with_check: |
 
 ### Font elements
-|Element|Status|
-|-------|------|
-|:warning:altGlyph|:x:|
-|:warning:altGlyphDef|:x:|
-|:warning:altGlyphItem|:x:|
-|:warning:font|:x:|
-|:warning:font-face|:x:|
-|:warning:font-face-format|:x:|
-|:warning:font-face-name|:x:|
-|:warning:font-face-src|:x:|
-|:warning:font-face-uri|:x:|
-|:warning:glyph|:x:|
-|:warning:glyphRef|:x:|
-|:warning:hkern|:x:|
-|:warning:missing-glyph|:x:|
-|:warning:vkern|:x:|
+| Element                   | Status |
+|---------------------------|--------|
+| :warning:altGlyph         | :x:    |
+| :warning:altGlyphDef      | :x:    |
+| :warning:altGlyphItem     | :x:    |
+| :warning:font             | :x:    |
+| :warning:font-face        | :x:    |
+| :warning:font-face-format | :x:    |
+| :warning:font-face-name   | :x:    |
+| :warning:font-face-src    | :x:    |
+| :warning:font-face-uri    | :x:    |
+| :warning:glyph            | :x:    |
+| :warning:glyphRef         | :x:    |
+| :warning:hkern            | :x:    |
+| :warning:missing-glyph    | :x:    |
+| :warning:vkern            | :x:    |
 
 ## Other elements
-|Element|Status|
-|-------|------|
-|desc|(:white_check_mark:)|
-|title|(:white_check_mark:)|
-|metadata|(:white_check_mark:)|
-|color-profile|:x:|
-|:warning:cursor|:x:|
-|script|:x:|
-|style|:x:|
+| Element         | Status               |
+|-----------------|----------------------|
+| desc            | (:white_check_mark:) |
+| title           | (:white_check_mark:) |
+| metadata        | (:white_check_mark:) |
+| color-profile   | :x:                  |
+| :warning:cursor | :x:                  |
+| script          | :x:                  |
+| style           | :x:                  |
