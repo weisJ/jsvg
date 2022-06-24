@@ -81,6 +81,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         }
 
         buildGradient(attributeNode, template);
+        children().clear();
     }
 
     private void parseStops(@NotNull List<Stop> stops) {
