@@ -113,8 +113,7 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
          */
         Denied,
         /**
-         * The element is allowed but excluded due by the library
-         * due to some other reason.
+         * The element is allowed but excluded due to some other reason.
          */
         Excluded
     }
