@@ -102,7 +102,7 @@ final class MeshBuilder {
                         case 3:
                             patch.coonPatch.west = Objects.requireNonNull(stop.bezierCommand())
                                     .createBezier(patch.coonPatch.south.d);
-                            patch.coonPatch.west.d = patch.coonPatch.north.a;
+                            patch.coonPatch.west.d.setLocation(patch.coonPatch.north.a);
                             patch.west = stop.color();
                             break;
                         default:
@@ -112,7 +112,7 @@ final class MeshBuilder {
                 }
                 if (offset + stopCount < 4) {
                     assert patchLeft != null;
-                    patch.coonPatch.south.d = patchLeft.coonPatch.east.d;
+                    patch.coonPatch.south.d.setLocation(patchLeft.coonPatch.east.d);
                 }
 
                 try {
