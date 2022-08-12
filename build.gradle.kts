@@ -292,7 +292,7 @@ allprojects {
 
                         description.set(
                             project.description
-                                ?: "A themeable Look and Feel for java swing"
+                                ?: "A lightweight Java2D SVG renderer"
                         )
                         name.set(
                             (project.findProperty("artifact.name") as? String)
