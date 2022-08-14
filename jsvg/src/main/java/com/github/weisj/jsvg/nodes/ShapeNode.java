@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.EnumSet;
+import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +76,7 @@ public abstract class ShapeNode extends RenderableSVGNode
     }
 
     @Override
-    public @NotNull EnumSet<VectorEffect> vectorEffects() {
+    public @NotNull Set<VectorEffect> vectorEffects() {
         return vectorEffects;
     }
 

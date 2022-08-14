@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
-import java.util.EnumSet;
+import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.attributes.VectorEffect;
 
 public interface HasVectorEffects {
     @NotNull
-    EnumSet<VectorEffect> vectorEffects();
+    Set<VectorEffect> vectorEffects();
 
     default boolean hasEffect(@NotNull VectorEffect e) {
         return vectorEffects().contains(e);

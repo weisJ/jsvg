@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.attributes;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.util.EnumSet;
+import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,7 +58,7 @@ public enum VectorEffect implements HasMatchName {
         return matchName;
     }
 
-    private static int flags(@NotNull EnumSet<VectorEffect> effects) {
+    private static int flags(@NotNull Set<VectorEffect> effects) {
         int flag = 0;
         for (VectorEffect effect : effects) {
             flag |= effect.flag;
@@ -66,7 +66,7 @@ public enum VectorEffect implements HasMatchName {
         return flag;
     }
 
-    public static void applyEffects(@NotNull EnumSet<VectorEffect> effects, @NotNull Graphics2D g,
+    public static void applyEffects(@NotNull Set<VectorEffect> effects, @NotNull Graphics2D g,
             @NotNull RenderContext context, @Nullable AffineTransform elementTransform) {
         int flags = flags(effects);
         if (flags == 0) return;
