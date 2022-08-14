@@ -29,9 +29,25 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 
 public final class GeometryUtil {
-    public static final float EPS = 0.0001f;
+    private static final float EPS = 0.0001f;
 
     private GeometryUtil() {}
+
+    public static boolean approximatelyEqual(double a, double b) {
+        return Math.abs(a - b) < EPS;
+    }
+
+    public static boolean approximatelyZero(double a) {
+        return approximatelyEqual(a, 0);
+    }
+
+    public static boolean notablyGreater(double a, double b) {
+        return a - b > EPS;
+    }
+
+    public static boolean approximatelyNegative(double a) {
+        return a < EPS;
+    }
 
     public static double scaleXOfTransform(@NotNull AffineTransform at) {
         double sx = at.getScaleX();

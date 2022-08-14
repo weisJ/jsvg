@@ -142,7 +142,7 @@ public class SegmentIteratorWithLookBehind {
     }
 
     private void trimLookBehindIfNecessary() {
-        while (currentLookBehindLength - maxLookBehindLength > GeometryUtil.EPS) {
+        while (GeometryUtil.notablyGreater(currentLookBehindLength, maxLookBehindLength)) {
             Segment segment = lookBehind.get(0);
             double segmentLength = segment.length();
             if (this.currentLookBehindLength - segmentLength < maxLookBehindLength) break;

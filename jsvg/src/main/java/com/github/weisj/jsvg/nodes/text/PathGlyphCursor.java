@@ -100,7 +100,7 @@ class PathGlyphCursor extends GlyphCursor {
         // Todo: Absolute x positions require arbitrary moves along the path
         // dx can be done by using the look behind iterator.
         // Absolute x can use a look up table for the segment/state.
-        if (segmentIterator.isDone() && remainingSegmentLength < GeometryUtil.EPS) return null;
+        if (segmentIterator.isDone() && GeometryUtil.approximatelyNegative(remainingSegmentLength)) return null;
 
         float deltaX = nextDeltaX(measure);
         if (deltaX != 0) advance(deltaX);
@@ -117,7 +117,7 @@ class PathGlyphCursor extends GlyphCursor {
         float anchorY = y - slopeY;
 
         // The glyph midpoint is outside the path and should not be made visible. Abort
-        if (segmentIterator.isDone() && remainingSegmentLength < GeometryUtil.EPS) return null;
+        if (segmentIterator.isDone() && GeometryUtil.approximatelyNegative(remainingSegmentLength)) return null;
         advance(halfAdvance);
 
         transform.setToTranslation(anchorX, anchorY);
@@ -155,7 +155,7 @@ class PathGlyphCursor extends GlyphCursor {
 
 
     private float advanceIntoSegment(float distance) {
-        if (distance < GeometryUtil.EPS) return 0;
+        if (GeometryUtil.approximatelyNegative(distance)) return 0;
         while (segmentIterator.hasNext() && remainingSegmentLength < distance) {
             distance -= remainingSegmentLength;
             segmentIterator.moveToNext();
@@ -169,7 +169,7 @@ class PathGlyphCursor extends GlyphCursor {
     }
 
     private float reverseIntoSegment(float distance) {
-        if (distance < GeometryUtil.EPS) return 0;
+        if (GeometryUtil.approximatelyNegative(distance)) return 0;
         while (segmentIterator.hasPrevious() && travelledSegmentLength() < distance) {
             distance -= travelledSegmentLength();
             segmentIterator.moveToPrevious();
@@ -179,14 +179,14 @@ class PathGlyphCursor extends GlyphCursor {
             segmentLength = (float) currentSegment.length();
             remainingSegmentLength = 0;
         }
-        if (distance - travelledSegmentLength() > GeometryUtil.EPS) {
+        if (GeometryUtil.notablyGreater(distance, travelledSegmentLength())) {
             throw new IllegalStateException("Not enough buffer " + distance + " > " + travelledSegmentLength());
         }
         return distance;
     }
 
     private void advanceInsideSegment(float distance) {
-        if (Math.abs(distance) < GeometryUtil.EPS) return;
+        if (GeometryUtil.approximatelyZero(distance)) return;
         if (distance < 0 && -distance > travelledSegmentLength()) {
             throw new IllegalStateException(
                     "Distance too large " + distance + " of maximum " + travelledSegmentLength());
