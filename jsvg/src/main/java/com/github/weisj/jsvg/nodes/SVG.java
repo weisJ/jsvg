@@ -62,6 +62,10 @@ public final class SVG extends CommonInnerViewContainer {
         return TAG;
     }
 
+    public boolean isTopLevel() {
+        return isTopLevel;
+    }
+
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         isTopLevel = attributeNode.parent() == null;

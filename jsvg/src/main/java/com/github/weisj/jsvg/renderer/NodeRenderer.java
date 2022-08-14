@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -204,6 +205,7 @@ public final class NodeRenderer {
                     Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
             return new RenderContext(
                     context.targetComponent(),
+                    new AffineTransform(),
                     PaintContext.createDefault(),
                     newMeasure,
                     FontRenderContext.createDefault(),

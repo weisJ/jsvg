@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.ImageProducer;
 
 import javax.swing.*;
@@ -53,10 +54,13 @@ public class RenderContext {
 
     private final @Nullable ContextElementAttributes contextElementAttributes;
 
+    private final @NotNull AffineTransform rootTransform;
+
 
     public static @NotNull RenderContext createInitial(@Nullable JComponent targetComponent,
             @NotNull MeasureContext measureContext) {
         return new RenderContext(targetComponent,
+                new AffineTransform(),
                 PaintContext.createDefault(),
                 measureContext,
                 FontRenderContext.createDefault(),
@@ -66,6 +70,7 @@ public class RenderContext {
     }
 
     RenderContext(@Nullable JComponent targetComponent,
+            @NotNull AffineTransform rootTransform,
             @NotNull PaintContext paintContext,
             @NotNull MeasureContext measureContext,
             @NotNull FontRenderContext fontRenderContext,
@@ -73,6 +78,7 @@ public class RenderContext {
             @NotNull FillRule fillRule,
             @Nullable ContextElementAttributes contextElementAttributes) {
         this.targetComponent = targetComponent;
+        this.rootTransform = rootTransform;
         this.paintContext = paintContext;
         this.measureContext = measureContext;
         this.fontRenderContext = fontRenderContext;
@@ -103,8 +109,8 @@ public class RenderContext {
 
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
 
-        return new RenderContext(targetComponent, newPaintContext, newMeasureContext, effectiveFrc, newFontSpec,
-                newFillRule, newContextAttributes);
+        return new RenderContext(targetComponent, rootTransform, newPaintContext, newMeasureContext,
+                effectiveFrc, newFontSpec, newFillRule, newContextAttributes);
     }
 
     public @NotNull StrokeContext strokeContext() {
@@ -117,6 +123,10 @@ public class RenderContext {
     @Nullable
     ContextElementAttributes contextElementAttributes() {
         return contextElementAttributes;
+    }
+
+    public @NotNull AffineTransform rootTransform() {
+        return rootTransform;
     }
 
     public @Nullable JComponent targetComponent() {
@@ -189,11 +199,12 @@ public class RenderContext {
     public String toString() {
         return "RenderContext{" +
                 "\n  measureContext=" + measureContext +
-                ",\n  paintContext=" + paintContext +
-                ",\n  fontSpec=" + fontSpec +
-                ",\n  targetComponent=" + targetComponent +
-                ",\n  contextElementAttributes=" + contextElementAttributes +
+                ",\n paintContext=" + paintContext +
+                ",\n fontSpec=" + fontSpec +
+                ",\n targetComponent=" + targetComponent +
+                ",\n contextElementAttributes=" + contextElementAttributes +
                 ",\n fillRule=" + fillRule +
+                ",\n baseTransform=" + rootTransform +
                 "\n}";
     }
 

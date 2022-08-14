@@ -100,7 +100,8 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         Rectangle2D effectiveMaskBounds = maskBounds.createIntersection(objectBounds);
         if (isInvalidMaskingArea(effectiveMaskBounds)) return PaintParser.DEFAULT_COLOR;
 
-        RenderContext maskContext = RenderContext.createInitial(null, maskContentUnits.deriveMeasure(measure));
+        RenderContext maskContext =
+                RenderContext.createInitial(context.targetComponent(), maskContentUnits.deriveMeasure(measure));
 
         BufferedImage img = ImageUtil.createLuminosityBuffer(g,
                 effectiveMaskBounds.getWidth(), effectiveMaskBounds.getHeight());
