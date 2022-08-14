@@ -126,6 +126,8 @@ public final class Image extends RenderableSVGNode {
 
         if (overflow.establishesClip()) g.clip(new ViewBox(viewWidth, viewHeight));
 
+        // Todo: Vector Effects
+
         AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(
                 new FloatSize(viewWidth, viewHeight), viewBox);
         Object imageAntialiasing = g.getRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING);

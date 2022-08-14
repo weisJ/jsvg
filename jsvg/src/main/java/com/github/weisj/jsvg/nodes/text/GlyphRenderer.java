@@ -71,6 +71,8 @@ final class GlyphRenderer {
         // Otherwise we would have to do expensive computations for the length of a text outline.
         Stroke stroke = context.stroke(1f);
 
+        // Todo: Vector-Effects
+
         for (PaintOrder.Phase phase : paintOrder.phases()) {
             switch (phase) {
                 case FILL:

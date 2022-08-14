@@ -23,11 +23,13 @@ package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.util.EnumSet;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.PaintOrder;
+import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontSize;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
@@ -41,7 +43,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
 public abstract class ShapeNode extends RenderableSVGNode
-        implements HasShape, HasPaintContext, HasFontContext, Instantiator {
+        implements HasShape, HasPaintContext, HasFontContext, HasVectorEffects, Instantiator {
 
     private PaintOrder paintOrder;
 
@@ -56,6 +58,8 @@ public abstract class ShapeNode extends RenderableSVGNode
     private Marker markerMid;
     private Marker markerEnd;
 
+    private EnumSet<VectorEffect> vectorEffects;
+
     @Override
     public @NotNull PaintContext paintContext() {
         return paintContext;
@@ -68,6 +72,11 @@ public abstract class ShapeNode extends RenderableSVGNode
 
     public @NotNull MeasurableShape shape() {
         return shape;
+    }
+
+    @Override
+    public @NotNull EnumSet<VectorEffect> vectorEffects() {
+        return vectorEffects;
     }
 
     @Override
@@ -94,6 +103,12 @@ public abstract class ShapeNode extends RenderableSVGNode
 
         markerEnd = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-end"));
         if (markerEnd == null) markerEnd = template;
+
+        @NotNull String[] vectorEffectsRaw = attributeNode.getStringList("vector-effect");
+        vectorEffects = EnumSet.noneOf(VectorEffect.class);
+        for (String effect : vectorEffectsRaw) {
+            vectorEffects.add(attributeNode.parser().parseEnum(effect, VectorEffect.None));
+        }
     }
 
     protected abstract @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode);
@@ -132,19 +147,27 @@ public abstract class ShapeNode extends RenderableSVGNode
             pathLengthFactor = (float) (actualLength / effectiveLength);
         }
 
+        VectorEffect.applyEffects(vectorEffects(), g, context, transform());
+
         for (PaintOrder.Phase phase : paintOrder.phases()) {
+            Graphics2D phaseGraphics = (Graphics2D) g.create();
             switch (phase) {
                 case FILL:
-                    ShapeRenderer.renderShapeFill(context, g, paintShape, bounds);
+                    ShapeRenderer.renderShapeFill(context, phaseGraphics, paintShape, bounds);
                     break;
                 case STROKE:
+                    Shape strokeShape = paintShape;
+                    if (hasEffect(VectorEffect.NonScalingStroke) && !hasEffect(VectorEffect.NonScalingSize)) {
+                        strokeShape = VectorEffect.applyNonScalingStroke(phaseGraphics, context, strokeShape);
+                    }
                     Stroke effectiveStroke = context.stroke(pathLengthFactor);
-                    ShapeRenderer.renderShapeStroke(context, g, paintShape, bounds, effectiveStroke);
+                    ShapeRenderer.renderShapeStroke(context, phaseGraphics, strokeShape, bounds, effectiveStroke);
                     break;
                 case MARKERS:
-                    renderMarkers(context, paintShape, g);
+                    renderMarkers(context, paintShape, phaseGraphics);
                     break;
             }
+            phaseGraphics.dispose();
         }
     }
 

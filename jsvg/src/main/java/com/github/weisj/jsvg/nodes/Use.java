@@ -144,6 +144,8 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
             MeasureContext measureContext = context.measureContext();
             g.translate(x.resolveWidth(measureContext), y.resolveHeight(measureContext));
 
+            // Todo: Vector Effects
+
             try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, g, this)) {
                 if (info == null) return;
                 if (referencedNode instanceof CommonInnerViewContainer) {
