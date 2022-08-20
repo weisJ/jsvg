@@ -26,6 +26,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.PaintOrder;
+import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
@@ -43,13 +45,14 @@ import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.HasContext;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.nodes.prototype.HasVectorEffects;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.*;
 
 abstract class TextContainer extends BaseContainerNode<TextSegment>
-        implements TextSegment.RenderableSegment, HasShape, HasContext.ByDelegate, Renderable {
+        implements TextSegment.RenderableSegment, HasShape, HasContext.ByDelegate, HasVectorEffects, Renderable {
     private final List<@NotNull TextSegment> segments = new ArrayList<>();
 
     private PaintOrder paintOrder;
@@ -59,6 +62,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
 
     private boolean isVisible;
     private HasContext context;
+
+    private Set<VectorEffect> vectorEffects;
 
     @Override
     @MustBeInvokedByOverriders
@@ -72,6 +77,14 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
 
         isVisible = parseIsVisible(attributeNode);
         context = HasContextImpl.parse(attributeNode);
+
+        // Todo: Current vector effect pipeline doesn't allow them to be defined on 'tspan' and 'text-path'.
+        vectorEffects = VectorEffect.parse(attributeNode);
+    }
+
+    @Override
+    public @NotNull Set<VectorEffect> vectorEffects() {
+        return vectorEffects;
     }
 
     @Override
@@ -225,7 +238,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         forEachSegment(context,
                 (segment, ctx) -> {
                     if (isVisible(ctx)) {
-                        GlyphRenderer.renderGlyphRun(paintOrder, segment, cursor.completeGlyphRunBounds, g);
+                        GlyphRenderer.renderGlyphRun(g, paintOrder, vectorEffects(), segment,
+                                cursor.completeGlyphRunBounds);
                     }
                 },
                 (segment, ctx) -> segment.renderSegmentWithoutLayout(cursor, ctx, g));

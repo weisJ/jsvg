@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.EnumSet;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
@@ -59,7 +58,7 @@ public abstract class ShapeNode extends RenderableSVGNode
     private Marker markerMid;
     private Marker markerEnd;
 
-    private EnumSet<VectorEffect> vectorEffects;
+    private Set<VectorEffect> vectorEffects;
 
     @Override
     public @NotNull PaintContext paintContext() {
@@ -105,11 +104,7 @@ public abstract class ShapeNode extends RenderableSVGNode
         markerEnd = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-end"));
         if (markerEnd == null) markerEnd = template;
 
-        @NotNull String[] vectorEffectsRaw = attributeNode.getStringList("vector-effect");
-        vectorEffects = EnumSet.noneOf(VectorEffect.class);
-        for (String effect : vectorEffectsRaw) {
-            vectorEffects.add(attributeNode.parser().parseEnum(effect, VectorEffect.None));
-        }
+        vectorEffects = VectorEffect.parse(attributeNode);
     }
 
     protected abstract @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode);
@@ -148,34 +143,12 @@ public abstract class ShapeNode extends RenderableSVGNode
             pathLengthFactor = (float) (actualLength / effectiveLength);
         }
 
-        VectorEffect.applyEffects(vectorEffects(), g, context, transform());
-
-        for (PaintOrder.Phase phase : paintOrder.phases()) {
-            Graphics2D phaseGraphics = (Graphics2D) g.create();
-            switch (phase) {
-                case FILL:
-                    ShapeRenderer.renderShapeFill(context, phaseGraphics, paintShape, bounds);
-                    break;
-                case STROKE:
-                    Shape strokeShape = paintShape;
-                    if (hasEffect(VectorEffect.NonScalingStroke) && !hasEffect(VectorEffect.NonScalingSize)) {
-                        strokeShape = VectorEffect.applyNonScalingStroke(phaseGraphics, context, strokeShape);
-                    }
-                    Stroke effectiveStroke = context.stroke(pathLengthFactor);
-                    ShapeRenderer.renderShapeStroke(context, phaseGraphics, strokeShape, bounds, effectiveStroke);
-                    break;
-                case MARKERS:
-                    renderMarkers(context, paintShape, phaseGraphics);
-                    break;
-            }
-            phaseGraphics.dispose();
-        }
-    }
-
-    private void renderMarkers(@NotNull RenderContext context, @NotNull Shape shape, @NotNull Graphics2D g) {
-        if (markerStart == null && markerMid == null && markerEnd == null) return;
-        ShapeRenderer.renderMarkers(this, context, g, shape.getPathIterator(null),
-                shouldPaintStartEndMarkersInMiddle(), markerStart, markerMid, markerEnd);
+        Stroke effectiveStroke = context.stroke(pathLengthFactor);
+        ShapeRenderer.renderWithPaintOrder(g, paintOrder,
+                new ShapeRenderer.ShapePaintContext(context, vectorEffects(), effectiveStroke, transform()),
+                new ShapeRenderer.PaintShape(paintShape, bounds),
+                new ShapeRenderer.ShapeMarkerInfo(this, markerStart, markerMid, markerEnd,
+                        shouldPaintStartEndMarkersInMiddle()));
     }
 
     protected boolean shouldPaintStartEndMarkersInMiddle() {

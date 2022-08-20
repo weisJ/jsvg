@@ -22,15 +22,19 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
+import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.MarkerOrientation;
+import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.Radian;
+import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.nodes.Marker;
@@ -55,30 +59,107 @@ public final class ShapeRenderer {
         }
     }
 
-    public static void renderShapeStroke(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @Nullable Rectangle2D bounds, @Nullable Stroke stroke) {
+    public static class PaintShape {
+        private final @NotNull Shape shape;
+        private final @Nullable Rectangle2D bounds;
+
+        public PaintShape(@NotNull Shape shape, @Nullable Rectangle2D bounds) {
+            this.shape = shape;
+            this.bounds = bounds;
+        }
+    }
+
+    public static class ShapePaintContext {
+        private final @NotNull RenderContext context;
+        private final @NotNull Set<VectorEffect> vectorEffects;
+        private final @NotNull Stroke stroke;
+        private final @Nullable AffineTransform transform;
+
+        public ShapePaintContext(@NotNull RenderContext context, @NotNull Set<VectorEffect> vectorEffects,
+                @NotNull Stroke stroke, @Nullable AffineTransform transform) {
+            this.context = context;
+            this.vectorEffects = vectorEffects;
+            this.stroke = stroke;
+            this.transform = transform;
+        }
+    }
+
+    public static class ShapeMarkerInfo {
+        private final @NotNull ShapeNode node;
+        private final @Nullable Marker markerStart;
+        private final @Nullable Marker markerMid;
+        private final @Nullable Marker markerEnd;
+        private final boolean shouldPaintStartEndMarkersInMiddle;
+
+        public ShapeMarkerInfo(@NotNull ShapeNode node, @Nullable Marker markerStart, @Nullable Marker markerMid,
+                @Nullable Marker markerEnd, boolean shouldPaintStartEndMarkersInMiddle) {
+            this.node = node;
+            this.markerStart = markerStart;
+            this.markerMid = markerMid;
+            this.markerEnd = markerEnd;
+            this.shouldPaintStartEndMarkersInMiddle = shouldPaintStartEndMarkersInMiddle;
+        }
+    }
+
+    public static void renderWithPaintOrder(@NotNull Graphics2D g, @NotNull PaintOrder paintOrder,
+            @NotNull ShapePaintContext shapePaintContext, @NotNull PaintShape paintShape,
+            @Nullable ShapeMarkerInfo markerInfo) {
+        RenderContext context = shapePaintContext.context;
+        Set<VectorEffect> vectorEffects = shapePaintContext.vectorEffects;
+        VectorEffect.applyEffects(shapePaintContext.vectorEffects, g, context, shapePaintContext.transform);
+
+        for (PaintOrder.Phase phase : paintOrder.phases()) {
+            Graphics2D phaseGraphics = (Graphics2D) g.create();
+            switch (phase) {
+                case FILL:
+                    ShapeRenderer.renderShapeFill(context, phaseGraphics, paintShape);
+                    break;
+                case STROKE:
+                    Shape strokeShape = paintShape.shape;
+                    if (vectorEffects.contains(VectorEffect.NonScalingStroke)
+                            && !vectorEffects.contains(VectorEffect.NonScalingSize)) {
+                        strokeShape = VectorEffect.applyNonScalingStroke(phaseGraphics, context, strokeShape);
+                    }
+                    ShapeRenderer.renderShapeStroke(context, phaseGraphics,
+                            new PaintShape(strokeShape, paintShape.bounds), shapePaintContext.stroke);
+                    break;
+                case MARKERS:
+                    if (markerInfo != null) renderMarkers(phaseGraphics, shapePaintContext, paintShape, markerInfo);
+                    break;
+            }
+            phaseGraphics.dispose();
+        }
+    }
+
+    private static void renderMarkers(@NotNull Graphics2D g, @NotNull ShapePaintContext shapePaintContext,
+            @NotNull PaintShape paintShape, @NotNull ShapeMarkerInfo markerInfo) {
+        if (markerInfo.markerStart == null && markerInfo.markerMid == null && markerInfo.markerEnd == null) return;
+        renderMarkersImpl(g, shapePaintContext.context, paintShape.shape.getPathIterator(null), markerInfo);
+    }
+
+    private static void renderShapeStroke(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull PaintShape paintShape, @Nullable Stroke stroke) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
         if (!(stroke != null && paintWithOpacity.isVisible())) return;
         Composite composite = g.getComposite();
         g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
         g.setStroke(stroke);
-        paintWithOpacity.paint.drawShape(g, context.measureContext(), shape, bounds);
+        paintWithOpacity.paint.drawShape(g, context.measureContext(), paintShape.shape, paintShape.bounds);
         g.setComposite(composite);
     }
 
-    public static void renderShapeFill(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Shape shape, @Nullable Rectangle2D bounds) {
+    private static void renderShapeFill(@NotNull RenderContext context, @NotNull Graphics2D g,
+            @NotNull PaintShape paintShape) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.fillPaint(), context.fillOpacity());
         if (!paintWithOpacity.isVisible()) return;
         Composite composite = g.getComposite();
         g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
-        paintWithOpacity.paint.fillShape(g, context.measureContext(), shape, bounds);
+        paintWithOpacity.paint.fillShape(g, context.measureContext(), paintShape.shape, paintShape.bounds);
         g.setComposite(composite);
     }
 
-    public static void renderMarkers(@NotNull ShapeNode shapeNode, @NotNull RenderContext context,
-            @NotNull Graphics2D g, @NotNull PathIterator iterator, boolean shouldPaintStartEndMarkersInMiddle,
-            @Nullable Marker start, @Nullable Marker mid, @Nullable Marker end) {
+    private static void renderMarkersImpl(@NotNull Graphics2D g, @NotNull RenderContext context,
+            @NotNull PathIterator iterator, @NotNull ShapeMarkerInfo markerInfo) {
         float[] args = new float[6];
 
         float x = 0;
@@ -90,6 +171,10 @@ public final class ShapeRenderer {
         float dyIn = 0;
         float dxOut;
         float dyOut;
+
+        Marker start = markerInfo.markerStart;
+        Marker mid = markerInfo.markerMid;
+        Marker end = markerInfo.markerEnd;
 
         boolean onlyFirst = mid == null && end == null;
 
@@ -118,12 +203,12 @@ public final class ShapeRenderer {
                     dyIn = 0;
                     x = xStart = args[0];
                     y = yStart = args[1];
-                    if (shouldPaintStartEndMarkersInMiddle || markerToPaint == null) {
+                    if (markerInfo.shouldPaintStartEndMarkersInMiddle || markerToPaint == null) {
                         nextMarker = start;
                         nextMarkerType = MarkerOrientation.MarkerType.START;
                     }
                     if (markerToPaint != null) {
-                        paintSingleMarker(shapeNode, context, g, markerToPaintType, markerToPaint,
+                        paintSingleMarker(markerInfo.node, context, g, markerToPaintType, markerToPaint,
                                 xPaint, yPaint, 0, 0, dx, dy);
                         if (onlyFirst) return;
                     }
@@ -157,7 +242,7 @@ public final class ShapeRenderer {
                     dyOut = dyIn = yStart - y;
                     x = xStart;
                     y = yStart;
-                    if (shouldPaintStartEndMarkersInMiddle) {
+                    if (markerInfo.shouldPaintStartEndMarkersInMiddle) {
                         nextMarker = end;
                         nextMarkerType = MarkerOrientation.MarkerType.END;
                     }
@@ -166,20 +251,19 @@ public final class ShapeRenderer {
                     throw new IllegalStateException();
             }
 
-            paintSingleMarker(shapeNode, context, g, markerToPaintType, markerToPaint,
+            paintSingleMarker(markerInfo.node, context, g, markerToPaintType, markerToPaint,
                     xPaint, yPaint, dx, dy, dxOut, dyOut);
             if (onlyFirst) return;
 
             markerToPaint = nextMarker;
             markerToPaintType = nextMarkerType;
         }
-        paintSingleMarker(shapeNode, context, g, markerToPaintType, markerToPaint,
+        paintSingleMarker(markerInfo.node, context, g, markerToPaintType, markerToPaint,
                 x, y, dxIn, dyIn, 0, 0);
     }
 
     public static void paintSingleMarker(@NotNull ShapeNode shapeNode, @NotNull RenderContext context,
-            @NotNull Graphics2D g,
-            @Nullable MarkerOrientation.MarkerType type, @Nullable Marker marker,
+            @NotNull Graphics2D g, @Nullable MarkerOrientation.MarkerType type, @Nullable Marker marker,
             float x, float y, float dxIn, float dyIn, float dxOut, float dyOut) {
         if (marker == null) return;
         assert type != null;

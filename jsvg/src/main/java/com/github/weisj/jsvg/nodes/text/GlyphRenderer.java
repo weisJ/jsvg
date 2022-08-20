@@ -25,10 +25,12 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.PaintOrder;
+import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -58,9 +60,9 @@ final class GlyphRenderer {
         segment.currentRenderContext = context;
     }
 
-    static void renderGlyphRun(@NotNull PaintOrder paintOrder, @NotNull StringTextSegment segment,
-            @NotNull Rectangle2D completeGlyphRunBounds,
-            @NotNull Graphics2D g) {
+    static void renderGlyphRun(@NotNull Graphics2D g, @NotNull PaintOrder paintOrder,
+            @NotNull Set<VectorEffect> vectorEffects, @NotNull StringTextSegment segment,
+            @NotNull Rectangle2D completeGlyphRunBounds) {
         RenderContext context = segment.currentRenderContext;
         assert context != null;
 
@@ -72,19 +74,10 @@ final class GlyphRenderer {
         Stroke stroke = context.stroke(1f);
 
         // Todo: Vector-Effects
-
-        for (PaintOrder.Phase phase : paintOrder.phases()) {
-            switch (phase) {
-                case FILL:
-                    ShapeRenderer.renderShapeFill(context, g, glyphRun, completeGlyphRunBounds);
-                    break;
-                case STROKE:
-                    ShapeRenderer.renderShapeStroke(context, g, glyphRun, completeGlyphRunBounds, stroke);
-                    break;
-                case MARKERS:
-                    break;
-            }
-        }
+        ShapeRenderer.renderWithPaintOrder(g, paintOrder,
+                new ShapeRenderer.ShapePaintContext(context, vectorEffects, stroke, null),
+                new ShapeRenderer.PaintShape(glyphRun, completeGlyphRunBounds),
+                null);
 
         // Invalidate the glyphRun. Avoids holding onto the RenderContext, which may reference a JComponent.
         segment.currentRenderContext = null;

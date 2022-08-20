@@ -23,11 +23,13 @@ package com.github.weisj.jsvg.attributes;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.EnumSet;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -51,6 +53,15 @@ public enum VectorEffect implements HasMatchName {
     VectorEffect(@NotNull String matchName, int flag) {
         this.matchName = matchName;
         this.flag = flag;
+    }
+
+    public static @NotNull Set<VectorEffect> parse(@NotNull AttributeNode attributeNode) {
+        @NotNull String[] vectorEffectsRaw = attributeNode.getStringList("vector-effect");
+        EnumSet<VectorEffect> vectorEffects = EnumSet.noneOf(VectorEffect.class);
+        for (String effect : vectorEffectsRaw) {
+            vectorEffects.add(attributeNode.parser().parseEnum(effect, VectorEffect.None));
+        }
+        return vectorEffects;
     }
 
     @Override
