@@ -117,11 +117,19 @@ public class SVGLoader {
         saxParserFactory.setNamespaceAware(true);
         try {
             SAXParser parser = saxParserFactory.newSAXParser();
-            parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            setParserProperty(parser, XMLConstants.ACCESS_EXTERNAL_DTD);
+            setParserProperty(parser, XMLConstants.ACCESS_EXTERNAL_SCHEMA);
             return parser;
         } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static void setParserProperty(@NotNull SAXParser parser, @NotNull String property) {
+        try {
+            parser.setProperty(property, "");
+        } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
+            // We don't care if when the properties aren't recognized or supported.
         }
     }
 
