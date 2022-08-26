@@ -131,10 +131,13 @@ public final class AttributeParser {
     }
 
     public Length[] parseLengthList(@Nullable String value) {
+        if (value != null && value.equalsIgnoreCase("none")) return new Length[0];
         String[] values = parseStringList(value, false);
         Length[] ret = new Length[values.length];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = parseLength(values[i], Unit.Raw.valueOf(0));
+            Length length = parseLength(values[i], null);
+            if (length == null) return new Length[0];
+            ret[i] = length;
         }
         return ret;
     }
