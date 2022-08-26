@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -42,13 +42,26 @@ public class StrokeContext {
     public final @Nullable Length dashOffset;
 
     public StrokeContext(@Nullable Length strokeWidth, @Nullable LineCap lineCap, @Nullable LineJoin lineJoin,
-            float miterLimit, Length[] dashPattern, @Nullable Length dashOffset) {
+            float miterLimit, @NotNull Length[] dashPattern, @Nullable Length dashOffset) {
         this.strokeWidth = strokeWidth;
         this.lineCap = lineCap;
         this.lineJoin = lineJoin;
         this.miterLimit = miterLimit;
-        this.dashPattern = dashPattern;
+        this.dashPattern = validateDashPattern(dashPattern);
         this.dashOffset = dashOffset;
+    }
+
+    private static Length[] validateDashPattern(@NotNull Length[] pattern) {
+        if (pattern.length == 0) return pattern;
+        for (Length length : pattern) {
+            if (length.raw() < 0) {
+                // Dash length is negative. Bail
+                return new Length[0];
+            }
+            if (!length.isZero()) return pattern;
+        }
+        // All values are zero. Bail.
+        return new Length[0];
     }
 
     public @NotNull StrokeContext derive(@Nullable StrokeContext context) {
