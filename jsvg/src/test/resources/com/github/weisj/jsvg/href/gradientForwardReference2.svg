@@ -1,0 +1,22 @@
+<svg width="400" height="800" viewBox="0 0 400 800" version="1.1"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink">
+
+	<rect id="rect1" x="10%" y="55%" rx="15" ry="15" width="80%"
+		height="320" fill="url(#Gradient2)" />
+
+	<defs>
+		<linearGradient id="Gradient2" xlink:href="#Gradient1" />
+	</defs>
+
+	<rect id="rect1" x="10%" y="10%" rx="15" ry="15" width="80%"
+		height="320" fill="url(#Gradient2)" />
+
+	<defs>
+		<linearGradient id="Gradient1">
+			<stop offset="0%" stop-color="red" />
+			<stop offset="50%" stop-color="black" stop-opacity="0" />
+			<stop offset="100%" stop-color="blue" />
+		</linearGradient>
+	</defs>
+</svg>
