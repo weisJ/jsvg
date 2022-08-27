@@ -298,7 +298,7 @@ public class SVGLoader {
                     namedElements.put(id, parsedElement);
                 }
             } else {
-                LOGGER.warning("No node registered for tag " + localName);
+                LOGGER.fine("No node registered for tag " + localName);
             }
         }
 
