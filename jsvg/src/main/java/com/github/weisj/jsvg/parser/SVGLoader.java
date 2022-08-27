@@ -295,7 +295,7 @@ public class SVGLoader {
                 currentNodeStack.push(parsedElement);
                 String id = parsedElement.id();
                 if (id != null && !namedElements.containsKey(id)) {
-                    namedElements.put(id, parsedElement.node());
+                    namedElements.put(id, parsedElement);
                 }
             } else {
                 LOGGER.warning("No node registered for tag " + localName);

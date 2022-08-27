@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -32,11 +32,19 @@ import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 public class ParsedElement {
+
+    private enum BuildStatus {
+        NO,
+        BUILDING,
+        YES
+    }
+
     private final @Nullable String id;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
     final CharacterDataParser characterDataParser;
+    private @NotNull BuildStatus buildStatus = BuildStatus.NO;
 
     ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
         this.id = id;
@@ -69,6 +77,15 @@ public class ParsedElement {
         return node;
     }
 
+    public @NotNull SVGNode nodeEnsuringBuildStatus() {
+        if (buildStatus == BuildStatus.BUILDING) {
+            warnAboutCyclicDependency();
+        } else if (buildStatus == BuildStatus.NO) {
+            build();
+        }
+        return node;
+    }
+
     public @NotNull AttributeNode attributeNode() {
         return attributeNode;
     }
@@ -81,16 +98,27 @@ public class ParsedElement {
     }
 
     void build() {
+        if (buildStatus == BuildStatus.YES) return;
+        if (buildStatus == BuildStatus.BUILDING) {
+            warnAboutCyclicDependency();
+            return;
+        }
+        buildStatus = BuildStatus.BUILDING;
         // Build depth first to ensure child nodes are processed first.
         // e.g. LinearGradient depends on its stops to be build first.
         for (ParsedElement child : children) {
             child.build();
         }
         node.build(attributeNode);
+        buildStatus = BuildStatus.YES;
     }
 
     @Override
     public String toString() {
         return "ParsedElement{" + "node=" + node + '}';
+    }
+
+    private void warnAboutCyclicDependency() {
+        SVGLoader.LOGGER.warning("Cyclic dependency involving node " + id + " detected.");
     }
 }

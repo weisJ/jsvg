@@ -89,6 +89,9 @@ public class AttributeNode {
         if (id == null) return null;
         // Todo: Look up in spec how elements should be resolved if multiple elements have the same id.
         Object node = namedElements.get(id);
+        if (node instanceof ParsedElement) {
+            node = ((ParsedElement) node).nodeEnsuringBuildStatus();
+        }
         return type.isInstance(node) ? type.cast(node) : null;
     }
 
