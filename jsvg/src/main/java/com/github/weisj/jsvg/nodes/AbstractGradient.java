@@ -60,7 +60,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
 
-        Self template = parseTemplate(attributeNode);
+        AbstractGradient<?> template = parseTemplate(attributeNode);
 
         gradientUnits = attributeNode.getEnum("gradientUnits",
                 template != null ? template.gradientUnits : UnitType.ObjectBoundingBox);
@@ -80,7 +80,10 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             parseStops(stops);
         }
 
-        buildGradient(attributeNode, template);
+        if (getClass().isInstance(template)) {
+            // noinspection unchecked
+            buildGradient(attributeNode, (Self) template);
+        }
         children().clear();
     }
 
@@ -120,9 +123,8 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private @Nullable Self parseTemplate(@NotNull AttributeNode attributeNode) {
-        Self template = (Self) attributeNode.getElementByHref(getClass(), attributeNode.getHref());
+    private @Nullable AbstractGradient<?> parseTemplate(@NotNull AttributeNode attributeNode) {
+        AbstractGradient<?> template = attributeNode.getElementByHref(AbstractGradient.class, attributeNode.getHref());
         return template != this ? template : null;
     }
 
