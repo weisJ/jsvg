@@ -41,6 +41,7 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
     protected Length width;
     protected Length height;
 
+
     @Override
     protected @NotNull Point2D outerLocation(@NotNull MeasureContext context) {
         return new Point2D.Float(x.resolveWidth(context), y.resolveHeight(context));

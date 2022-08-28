@@ -80,7 +80,7 @@ public class SVGDocument {
         g.clip(bounds);
         g.translate(bounds.x, bounds.y);
 
-        root.renderWithSize(bounds.size(), root.viewBox(), context, g);
+        root.renderWithSize(bounds.size(), root.viewBox(context), context, g);
 
         g.dispose();
     }

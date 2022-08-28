@@ -54,8 +54,8 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
     protected abstract @NotNull Overflow defaultOverflow();
 
-    public @Nullable ViewBox viewBox() {
-        return viewBox;
+    public @Nullable ViewBox viewBox(@NotNull RenderContext context) {
+        return viewBox != null ? viewBox : new ViewBox(size(context));
     }
 
     @Override
@@ -70,7 +70,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
     @Override
     public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderWithSize(size(context), viewBox(), null, context, g);
+        renderWithSize(size(context), viewBox(context), null, context, g);
     }
 
     protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
