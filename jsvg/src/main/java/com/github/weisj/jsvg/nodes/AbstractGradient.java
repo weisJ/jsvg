@@ -80,10 +80,9 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             parseStops(stops);
         }
 
-        if (getClass().isInstance(template)) {
-            // noinspection unchecked
-            buildGradient(attributeNode, (Self) template);
-        }
+        // noinspection unchecked
+        Self selfTemplate = getClass().isInstance(template) ? (Self) template : null;
+        buildGradient(attributeNode, selfTemplate);
         children().clear();
     }
 
