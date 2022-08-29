@@ -70,7 +70,7 @@ public class SVGLoader {
     }
 
     private static @NotNull Map<String, Supplier<SVGNode>> createNodeConstructorMap() {
-        Map<String, Supplier<SVGNode>> map = new HashMap<>();
+        Map<String, Supplier<SVGNode>> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         map.put(Anchor.TAG, Anchor::new);
         map.put(Circle.TAG, Circle::new);
         map.put(ClipPath.TAG, ClipPath::new);
@@ -109,6 +109,27 @@ public class SVGLoader {
         map.put(Title.TAG, Title::new);
         map.put(Use.TAG, Use::new);
         map.put(View.TAG, View::new);
+
+        map.put(FeBlend.TAG, FeBlend::new);
+
+        map.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
+        map.put("feComposite", () -> new DummyFilterPrimitive("feComposite"));
+        map.put("feConvolveMatrix", () -> new DummyFilterPrimitive("feConvolveMatrix"));
+        map.put("feDiffuseLightning", () -> new DummyFilterPrimitive("feDiffuseLightning"));
+        map.put("feDisplacementMap", () -> new DummyFilterPrimitive("feDisplacementMap"));
+        map.put("feDropShadow", () -> new DummyFilterPrimitive("feDropShadow"));
+        map.put("feFlood", () -> new DummyFilterPrimitive("feFlood"));
+        map.put("feFuncA", () -> new DummyFilterPrimitive("feFuncA"));
+        map.put("feFuncB", () -> new DummyFilterPrimitive("feFuncB"));
+        map.put("feFuncG", () -> new DummyFilterPrimitive("feFuncG"));
+        map.put("feFuncR", () -> new DummyFilterPrimitive("feFuncR"));
+        map.put("feImage", () -> new DummyFilterPrimitive("feImage"));
+        map.put("feMerge", () -> new DummyFilterPrimitive("feMerge"));
+        map.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
+        map.put("feOffset", () -> new DummyFilterPrimitive("feOffset"));
+        map.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));
+        map.put("feTile", () -> new DummyFilterPrimitive("feTile"));
+
         return map;
     }
 
@@ -298,7 +319,7 @@ public class SVGLoader {
                     namedElements.put(id, parsedElement);
                 }
             } else {
-                LOGGER.fine("No node registered for tag " + localName);
+                LOGGER.warning("No node registered for tag " + localName);
             }
         }
 
