@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -106,8 +106,7 @@ public final class FeTurbulence extends FilterPrimitive {
             this.perlinTurbulence = new PerlinTurbulence((int) seed, octaves, xFrequency, yFrequency);
         }
 
-        @Override
-        public @NotNull ImageProducer producer() {
+        private @NotNull BufferedImage ensureImageBackingStore() {
             if (bufferedImage == null) {
                 ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_LINEAR_RGB);
                 ColorModel cm = new DirectColorModel(cs, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
@@ -142,7 +141,20 @@ public final class FeTurbulence extends FilterPrimitive {
                     dp += dstAdjust;
                 }
             }
-            return bufferedImage.getSource();
+            return bufferedImage;
+        }
+
+        @Override
+        public @NotNull ImageProducer producer() {
+            return ensureImageBackingStore().getSource();
+        }
+
+        @Override
+        public @NotNull BufferedImage toBufferedImageNonAliased(@NotNull RenderContext context) {
+            BufferedImage img = ensureImageBackingStore();
+            ColorModel cm = img.getColorModel();
+            WritableRaster raster = img.copyData(null);
+            return new BufferedImage(cm, raster, cm.isAlphaPremultiplied(), null);
         }
 
         @Override

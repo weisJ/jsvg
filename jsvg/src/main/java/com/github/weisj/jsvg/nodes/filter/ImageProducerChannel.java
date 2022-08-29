@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
@@ -50,14 +49,7 @@ public class ImageProducerChannel implements Channel, PixelProvider {
     @Override
     public @NotNull PixelProvider pixels(@NotNull RenderContext context) {
         if (raster == null) {
-            Image img = context.createImage(producer);
-            BufferedImage bufferedImage = new BufferedImage(
-                    img.getWidth(context.targetComponent()),
-                    img.getHeight(context.targetComponent()),
-                    BufferedImage.TYPE_INT_ARGB);
-            Graphics imageGraphics = bufferedImage.getGraphics();
-            imageGraphics.drawImage(img, 0, 0, context.targetComponent());
-            imageGraphics.dispose();
+            BufferedImage bufferedImage = toBufferedImageNonAliased(context);
             raster = bufferedImage.getRaster();
         }
         return this;
