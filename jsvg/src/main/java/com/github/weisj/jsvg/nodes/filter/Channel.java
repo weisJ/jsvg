@@ -38,11 +38,11 @@ public interface Channel {
     default @NotNull BufferedImage toBufferedImageNonAliased(@NotNull RenderContext context) {
         Image img = context.createImage(producer());
         BufferedImage bufferedImage = new BufferedImage(
-                img.getWidth(context.targetComponent()),
-                img.getHeight(context.targetComponent()),
+                img.getWidth(null),
+                img.getHeight(null),
                 BufferedImage.TYPE_INT_ARGB);
         Graphics imageGraphics = bufferedImage.getGraphics();
-        imageGraphics.drawImage(img, 0, 0, context.targetComponent());
+        imageGraphics.drawImage(img, 0, 0, null);
         imageGraphics.dispose();
         return bufferedImage;
     }
