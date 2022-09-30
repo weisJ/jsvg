@@ -61,6 +61,18 @@ class FilterTest {
     }
 
     @Test
+    void testFlood() {
+        // TODO: Filter region not applied correctly.
+        assertDoesNotThrow(() -> render("filter/flood.svg"));
+    }
+
+    @Test
+    void testBlend() {
+        // Filter region not applied correctly.
+        assertDoesNotThrow(() -> render("filter/blend.svg"));
+    }
+
+    @Test
     void testDisplacementMap() {
         assertEquals(SUCCESS, compareImages("filter/displacement.svg"));
     }
