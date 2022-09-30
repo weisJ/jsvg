@@ -111,6 +111,7 @@ public class SVGLoader {
         map.put(View.TAG, View::new);
 
         map.put(FeBlend.TAG, FeBlend::new);
+        map.put(FeFlood.TAG, FeFlood::new);
 
         map.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
         map.put("feComposite", () -> new DummyFilterPrimitive("feComposite"));
@@ -118,7 +119,6 @@ public class SVGLoader {
         map.put("feDiffuseLightning", () -> new DummyFilterPrimitive("feDiffuseLightning"));
         map.put("feDisplacementMap", () -> new DummyFilterPrimitive("feDisplacementMap"));
         map.put("feDropShadow", () -> new DummyFilterPrimitive("feDropShadow"));
-        map.put("feFlood", () -> new DummyFilterPrimitive("feFlood"));
         map.put("feFuncA", () -> new DummyFilterPrimitive("feFuncA"));
         map.put("feFuncB", () -> new DummyFilterPrimitive("feFuncB"));
         map.put("feFuncG", () -> new DummyFilterPrimitive("feFuncG"));
@@ -292,7 +292,7 @@ public class SVGLoader {
 
             if (lastParsedElement != null) flushText(lastParsedElement, true);
 
-            Supplier<SVGNode> nodeSupplier = NODE_CONSTRUCTOR_MAP.get(localName.toLowerCase(Locale.ENGLISH));
+            Supplier<SVGNode> nodeSupplier = NODE_CONSTRUCTOR_MAP.get(localName);
             if (nodeSupplier != null) {
                 SVGNode newNode = nodeSupplier.get();
 
