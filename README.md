@@ -24,7 +24,7 @@ This library aims to be as lightweight as possible. Generally JSVG uses ~50% les
 The library is available on maven central:
 ````kotlin
 dependencies {
-    implementation("com.github.weisj:jsvg:0.0.3")
+    implementation("com.github.weisj:jsvg:0.0.9")
 }
 ````
 
@@ -117,7 +117,7 @@ For supported elements most of the attributes which apply to them are implemente
 ## Filter elements
 | Element             | Status                  |
 |---------------------|-------------------------|
-| feBlend             | :x:                     |
+| feBlend             | :white_check_mark:      |
 | feColorMatrix       | :white_check_mark:      |
 | feComponentTransfer | :x:                     |
 | feComposite         | :x:                     |
@@ -125,7 +125,7 @@ For supported elements most of the attributes which apply to them are implemente
 | feDiffuseLighting   | :x:                     |
 | feDisplacementMap   | :white_check_mark:      |
 | feDistantLight      | :x:                     |
-| feFlood             | :x:                     |
+| feFlood             | :white_check_mark:      |
 | feFuncA             | :x:                     |
 | feFuncB             | :x:                     |
 | feFuncG             | :x:                     |
