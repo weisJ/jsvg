@@ -94,7 +94,7 @@ public final class Image extends RenderableSVGNode {
                 imgResource = attributeNode.resourceLoader().loadImage(new URI(url));
             } catch (IOException | URISyntaxException e) {
                 LOGGER.log(Level.INFO, e.getMessage(), e);
-                imgResource = null; // Image didn't load. Maybe we should show a missing image instead.
+                imgResource = null; // Image didn't load. TODO: Maybe we should show a missing image instead.
             }
         }
     }
