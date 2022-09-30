@@ -112,13 +112,13 @@ public final class BlendComposite implements Composite {
     }
 
     private static boolean isColorModelInvalid(ColorModel cm) {
-        if (cm instanceof DirectColorModel && cm.getTransferType() == DataBuffer.TYPE_INT) {
+        if ((cm instanceof DirectColorModel) && (cm.getTransferType() == DataBuffer.TYPE_INT)) {
             DirectColorModel directCM = (DirectColorModel) cm;
 
-            return !(directCM.getRedMask() == 0x00FF0000
-                    && directCM.getGreenMask() == 0x0000FF00
-                    && directCM.getBlueMask() == 0x000000FF
-                    && (directCM.getNumComponents() != 4 || directCM.getAlphaMask() == 0xFF000000));
+            return !((directCM.getRedMask() == 0x00FF0000)
+                    && (directCM.getGreenMask() == 0x0000FF00)
+                    && (directCM.getBlueMask() == 0x000000FF)
+                    && ((directCM.getNumComponents() != 4) || (directCM.getAlphaMask() == 0xFF000000)));
         }
         return true;
     }
@@ -138,8 +138,10 @@ public final class BlendComposite implements Composite {
             this.blender = Blender.forBlendMode(blendMode);
         }
 
+        @Override
         public void dispose() {}
 
+        @Override
         public void compose(@NotNull Raster src, @NotNull Raster dstIn, @NotNull WritableRaster dstOut) {
             int width = Math.min(src.getWidth(), dstIn.getWidth());
             int height = Math.min(src.getHeight(), dstIn.getHeight());
@@ -160,13 +162,13 @@ public final class BlendComposite implements Composite {
                     int pixel = srcPixels[x];
                     srcPixel[0] = (pixel >> 16) & 0xFF;
                     srcPixel[1] = (pixel >> 8) & 0xFF;
-                    srcPixel[2] = (pixel) & 0xFF;
+                    srcPixel[2] = pixel & 0xFF;
                     srcPixel[3] = (pixel >> 24) & 0xFF;
 
                     pixel = dstPixels[x];
                     dstPixel[0] = (pixel >> 16) & 0xFF;
                     dstPixel[1] = (pixel >> 8) & 0xFF;
-                    dstPixel[2] = (pixel) & 0xFF;
+                    dstPixel[2] = pixel & 0xFF;
                     dstPixel[3] = (pixel >> 24) & 0xFF;
 
                     blender.blend(srcPixel, dstPixel, result);
@@ -218,24 +220,28 @@ public final class BlendComposite implements Composite {
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] = 255 - ((255 - src[0]) * (255 - dst[0]) >> 8);
-                            result[1] = 255 - ((255 - src[1]) * (255 - dst[1]) >> 8);
-                            result[2] = 255 - ((255 - src[2]) * (255 - dst[2]) >> 8);
-                            result[3] = 255 - ((255 - src[3]) * (255 - dst[3]) >> 8);
+                            result[0] = 255 - (((255 - src[0]) * (255 - dst[0])) >> 8);
+                            result[1] = 255 - (((255 - src[1]) * (255 - dst[1])) >> 8);
+                            result[2] = 255 - (((255 - src[2]) * (255 - dst[2])) >> 8);
+                            result[3] = 255 - (((255 - src[3]) * (255 - dst[3])) >> 8);
                         }
                     };
                 case Overlay:
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] =
-                                    dst[0] < 128 ? dst[0] * src[0] >> 7 : 255 - ((255 - dst[0]) * (255 - src[0]) >> 7);
-                            result[1] =
-                                    dst[1] < 128 ? dst[1] * src[1] >> 7 : 255 - ((255 - dst[1]) * (255 - src[1]) >> 7);
-                            result[2] =
-                                    dst[2] < 128 ? dst[2] * src[2] >> 7 : 255 - ((255 - dst[2]) * (255 - src[2]) >> 7);
-                            result[3] =
-                                    dst[3] < 128 ? dst[3] * src[3] >> 7 : 255 - ((255 - dst[3]) * (255 - src[3]) >> 7);
+                            result[0] = (dst[0] < 128)
+                                    ? ((dst[0] * src[0]) >> 7)
+                                    : (255 - (((255 - dst[0]) * (255 - src[0])) >> 7));
+                            result[1] = (dst[1] < 128)
+                                    ? ((dst[1] * src[1]) >> 7)
+                                    : (255 - (((255 - dst[1]) * (255 - src[1])) >> 7));
+                            result[2] = (dst[2] < 128)
+                                    ? ((dst[2] * src[2]) >> 7)
+                                    : (255 - (((255 - dst[2]) * (255 - src[2])) >> 7));
+                            result[3] = (dst[3] < 128)
+                                    ? ((dst[3] * src[3]) >> 7)
+                                    : (255 - (((255 - dst[3]) * (255 - src[3])) >> 7));
                         }
                     };
                 case Darken:
@@ -245,7 +251,7 @@ public final class BlendComposite implements Composite {
                             result[0] = Math.min(src[0], dst[0]);
                             result[1] = Math.min(src[1], dst[1]);
                             result[2] = Math.min(src[2], dst[2]);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case Lighten:
@@ -255,55 +261,61 @@ public final class BlendComposite implements Composite {
                             result[0] = Math.max(src[0], dst[0]);
                             result[1] = Math.max(src[1], dst[1]);
                             result[2] = Math.max(src[2], dst[2]);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case ColorDodge:
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] = src[0] == 255 ? 255 : Math.min((dst[0] << 8) / (255 - src[0]), 255);
-                            result[1] = src[1] == 255 ? 255 : Math.min((dst[1] << 8) / (255 - src[1]), 255);
-                            result[2] = src[2] == 255 ? 255 : Math.min((dst[2] << 8) / (255 - src[2]), 255);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[0] = (src[0] == 255) ? 255 : Math.min((dst[0] << 8) / (255 - src[0]), 255);
+                            result[1] = (src[1] == 255) ? 255 : Math.min((dst[1] << 8) / (255 - src[1]), 255);
+                            result[2] = (src[2] == 255) ? 255 : Math.min((dst[2] << 8) / (255 - src[2]), 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case ColorBurn:
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] = src[0] == 0 ? 0 : Math.max(0, 255 - (((255 - dst[0]) << 8) / src[0]));
-                            result[1] = src[1] == 0 ? 0 : Math.max(0, 255 - (((255 - dst[1]) << 8) / src[1]));
-                            result[2] = src[2] == 0 ? 0 : Math.max(0, 255 - (((255 - dst[2]) << 8) / src[2]));
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[0] = (src[0] == 0) ? 0 : Math.max(0, 255 - (((255 - dst[0]) << 8) / src[0]));
+                            result[1] = (src[1] == 0) ? 0 : Math.max(0, 255 - (((255 - dst[1]) << 8) / src[1]));
+                            result[2] = (src[2] == 0) ? 0 : Math.max(0, 255 - (((255 - dst[2]) << 8) / src[2]));
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case HardLight:
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] =
-                                    src[0] < 128 ? dst[0] * src[0] >> 7 : 255 - ((255 - src[0]) * (255 - dst[0]) >> 7);
-                            result[1] =
-                                    src[1] < 128 ? dst[1] * src[1] >> 7 : 255 - ((255 - src[1]) * (255 - dst[1]) >> 7);
-                            result[2] =
-                                    src[2] < 128 ? dst[2] * src[2] >> 7 : 255 - ((255 - src[2]) * (255 - dst[2]) >> 7);
-                            result[3] =
-                                    src[3] < 128 ? dst[3] * src[3] >> 7 : 255 - ((255 - src[3]) * (255 - dst[3]) >> 7);
+                            result[0] = (src[0] < 128)
+                                    ? ((dst[0] * src[0]) >> 7)
+                                    : (255 - (((255 - src[0]) * (255 - dst[0])) >> 7));
+                            result[1] = (src[1] < 128)
+                                    ? ((dst[1] * src[1]) >> 7)
+                                    : (255 - (((255 - src[1]) * (255 - dst[1])) >> 7));
+                            result[2] = (src[2] < 128)
+                                    ? ((dst[2] * src[2]) >> 7)
+                                    : (255 - (((255 - src[2]) * (255 - dst[2])) >> 7));
+                            result[3] = (src[3] < 128)
+                                    ? ((dst[3] * src[3]) >> 7)
+                                    : (255 - (((255 - src[3]) * (255 - dst[3])) >> 7));
                         }
                     };
                 case SoftLight:
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            int mRed = src[0] * dst[0] / 255;
-                            int mGreen = src[1] * dst[1] / 255;
-                            int mBlue = src[2] * dst[2] / 255;
-                            result[0] = mRed + src[0] * (255 - ((255 - src[0]) * (255 - dst[0]) / 255) - mRed) / 255;
-                            result[1] =
-                                    mGreen + src[1] * (255 - ((255 - src[1]) * (255 - dst[1]) / 255) - mGreen) / 255;
-                            result[2] = mBlue + src[2] * (255 - ((255 - src[2]) * (255 - dst[2]) / 255) - mBlue) / 255;
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            int mRed = (src[0] * dst[0]) / 255;
+                            int mGreen = (src[1] * dst[1]) / 255;
+                            int mBlue = (src[2] * dst[2]) / 255;
+                            result[0] = mRed
+                                    + ((src[0] * (255 - (((255 - src[0]) * (255 - dst[0])) / 255) - mRed)) / 255);
+                            result[1] = mGreen
+                                    + ((src[1] * (255 - (((255 - src[1]) * (255 - dst[1])) / 255) - mGreen)) / 255);
+                            result[2] = mBlue
+                                    + ((src[2] * (255 - (((255 - src[2]) * (255 - dst[2])) / 255) - mBlue)) / 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case Difference:
@@ -313,17 +325,17 @@ public final class BlendComposite implements Composite {
                             result[0] = Math.abs(dst[0] - src[0]);
                             result[1] = Math.abs(dst[1] - src[1]);
                             result[2] = Math.abs(dst[2] - src[2]);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case Exclusion:
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] = dst[0] + src[0] - (dst[0] * src[0] >> 7);
-                            result[1] = dst[1] + src[1] - (dst[1] * src[1] >> 7);
-                            result[2] = dst[2] + src[2] - (dst[2] * src[2] >> 7);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[0] = (dst[0] + src[0]) - ((dst[0] * src[0]) >> 7);
+                            result[1] = (dst[1] + src[1]) - ((dst[1] * src[1]) >> 7);
+                            result[2] = (dst[2] + src[2]) - ((dst[2] * src[2]) >> 7);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case Hue:
@@ -336,7 +348,7 @@ public final class BlendComposite implements Composite {
                             ColorUtil.RGBtoHSL(dst[0], dst[1], dst[2], dstHSL);
 
                             ColorUtil.HSLtoRGB(srcHSL[0], dstHSL[1], dstHSL[2], result);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case Saturation:
@@ -349,7 +361,7 @@ public final class BlendComposite implements Composite {
                             ColorUtil.RGBtoHSL(dst[0], dst[1], dst[2], dstHSL);
 
                             ColorUtil.HSLtoRGB(dstHSL[0], srcHSL[1], dstHSL[2], result);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case Color:
@@ -362,7 +374,7 @@ public final class BlendComposite implements Composite {
                             ColorUtil.RGBtoHSL(dst[0], dst[1], dst[2], dstHSL);
 
                             ColorUtil.HSLtoRGB(srcHSL[0], srcHSL[1], dstHSL[2], result);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
                 case Luminosity:
@@ -375,7 +387,7 @@ public final class BlendComposite implements Composite {
                             ColorUtil.RGBtoHSL(dst[0], dst[1], dst[2], dstHSL);
 
                             ColorUtil.HSLtoRGB(dstHSL[0], dstHSL[1], srcHSL[2], result);
-                            result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
+                            result[3] = Math.min(255, (src[3] + dst[3]) - ((src[3] * dst[3]) / 255));
                         }
                     };
             }
