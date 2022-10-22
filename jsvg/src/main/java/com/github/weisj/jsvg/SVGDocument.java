@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
+import java.util.Objects;
 
 import javax.swing.*;
 
@@ -33,6 +34,7 @@ import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGDocument {
@@ -80,7 +82,10 @@ public class SVGDocument {
         g.clip(bounds);
         g.translate(bounds.x, bounds.y);
 
-        root.renderWithSize(bounds.size(), root.viewBox(context), context, g);
+        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(root, context, g, null)) {
+            Objects.requireNonNull(info);
+            root.renderWithSize(bounds.size(), root.viewBox(context), info.context, info.g);
+        }
 
         g.dispose();
     }

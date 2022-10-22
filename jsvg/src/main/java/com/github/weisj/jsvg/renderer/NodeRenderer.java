@@ -47,7 +47,7 @@ public final class NodeRenderer {
     public static class Info implements AutoCloseable {
         public final @NotNull Renderable renderable;
         public final @NotNull RenderContext context;
-        protected final @NotNull Graphics2D g;
+        public final @NotNull Graphics2D g;
 
         Info(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Graphics2D g) {
             this.renderable = renderable;
@@ -113,7 +113,7 @@ public final class NodeRenderer {
 
         Graphics2D childGraphics = (Graphics2D) g.create();
 
-        if (renderable instanceof Transformable) {
+        if (renderable instanceof Transformable && ((Transformable) renderable).shouldTransform()) {
             ((Transformable) renderable).applyTransform(childGraphics, childContext.measureContext());
         }
 
