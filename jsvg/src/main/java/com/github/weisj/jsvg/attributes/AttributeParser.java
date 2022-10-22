@@ -282,10 +282,10 @@ public final class AttributeParser {
                 }
                 break;
             case "skewx":
-                tx.shear(Math.toRadians(values[0]), 0);
+                tx.shear(Math.tan(Math.toRadians(values[0])), 0);
                 break;
             case "skewy":
-                tx.shear(0, Math.toRadians(values[0]));
+                tx.shear(0, Math.tan(Math.toRadians(values[0])));
                 break;
             default:
                 throw new IllegalArgumentException("Unknown transform type: " + command);
