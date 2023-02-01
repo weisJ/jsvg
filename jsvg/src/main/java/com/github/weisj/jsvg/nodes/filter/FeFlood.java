@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -51,7 +52,7 @@ public class FeFlood extends FilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        floodColor = attributeNode.getPaint("flood-color");
+        floodColor = attributeNode.getPaint("flood-color", new AwtSVGPaint(Color.BLACK));
         floodOpacity = attributeNode.getPercentage("flood-opacity", 1);
     }
 
@@ -62,11 +63,13 @@ public class FeFlood extends FilterPrimitive {
         // and even then filters like feBlend could benefit from knowing that this is a constant color.
         Filter.FilterInfo info = filterContext.info();
         BufferedImage img = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics = (Graphics2D) img.getGraphics();
-        graphics.setComposite(AlphaComposite.Src.derive(floodOpacity));
-        Rectangle rect = new Rectangle(0, 0, img.getWidth(), img.getHeight());
-        floodColor.fillShape(graphics, context.measureContext(), rect, rect);
-        graphics.dispose();
+        if (floodOpacity != 0) {
+            Graphics2D graphics = (Graphics2D) img.getGraphics();
+            graphics.setComposite(AlphaComposite.Src.derive(floodOpacity));
+            Rectangle rect = new Rectangle(0, 0, img.getWidth(), img.getHeight());
+            floodColor.fillShape(graphics, context.measureContext(), rect, rect);
+            graphics.dispose();
+        }
         saveResult(new ImageProducerChannel(img.getSource()), filterContext);
     }
 
