@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -103,17 +103,27 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
                 realGradient = realGradient
                         || stopOffset > stops.get(i - 1).offset()
                         || !stopColor.equals(colors[i - 1]);
-            }
 
-            if (i > 0 && stopOffset <= offsets[i - 1]) {
-                // The awt gradient implementations really don't like it if
-                // two offsets are equal. Hence we use the next possible float value instead as it will produce
-                // the same effect as if the equal values were used.
-                stopOffset = Math.nextAfter(stopOffset, Double.MAX_VALUE);
+                if (stopOffset <= offsets[i - 1]) {
+                    // The awt gradient implementations really don't like it if
+                    // two offsets are equal. Hence, we use the next possible float value instead as it will produce
+                    // the same effect as if the equal values were used.
+                    stopOffset = Math.nextAfter(offsets[i - 1], Double.MAX_VALUE);
+                }
             }
 
             offsets[i] = stopOffset;
             colors[i] = stopColor;
+        }
+
+        // Rebalance if nextAfter pushed us out of range.
+        if (offsets[offsets.length - 1] > 1f) {
+            float diff = offsets[offsets.length - 1] - 1f;
+            offsets[offsets.length - 1] = 1f;
+            int i = offsets.length - 2;
+            while (i >= 0 && offsets[i] >= offsets[i + 1]) {
+                offsets[i] -= diff;
+            }
         }
 
         if (!realGradient && colors.length > 0) {
