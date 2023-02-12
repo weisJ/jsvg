@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -64,6 +64,7 @@ class FilterTest {
     void testFlood() {
         // TODO: Filter region not applied correctly.
         assertDoesNotThrow(() -> render("filter/flood.svg"));
+        assertDoesNotThrow(() -> render("filter/floodColor_bug29.svg"));
     }
 
     @Test
@@ -76,4 +77,5 @@ class FilterTest {
     void testDisplacementMap() {
         assertEquals(SUCCESS, compareImages("filter/displacement.svg"));
     }
+
 }

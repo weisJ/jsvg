@@ -1,0 +1,10 @@
+<svg viewBox="0 0 420 200" width="420" height="200"
+	xmlns="http://www.w3.org/2000/svg">
+	<filter id="flood1">
+		<feFlood flood-opacity="1" x="0" y="0" width="200"
+			height="200" />
+	</filter>
+
+	<rect x="0" y="0" width="200" height="200"
+		style="filter: url(#flood1);" />
+</svg>
