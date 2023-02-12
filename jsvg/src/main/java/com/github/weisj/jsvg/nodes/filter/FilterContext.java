@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,15 +23,19 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.util.ConstantProvider;
+import com.github.weisj.jsvg.util.LazyProvider;
+import com.github.weisj.jsvg.util.Provider;
 
 public class FilterContext {
 
-    private final @NotNull Map<@NotNull Object, @NotNull Channel> resultChannels = new HashMap<>();
+    private final @NotNull Map<@NotNull Object, @NotNull Provider<Channel>> resultChannels = new HashMap<>();
     private final Filter.FilterInfo info;
 
     public FilterContext(@NotNull Filter.FilterInfo info) {
@@ -42,16 +46,24 @@ public class FilterContext {
         return info;
     }
 
+    public void addResult(@NotNull Object key, @NotNull Supplier<Channel> channel) {
+        resultChannels.put(key.toString(), new LazyProvider<>(channel));
+    }
+
     public void addResult(@NotNull Object key, @NotNull Channel channel) {
-        resultChannels.put(key.toString(), channel);
+        resultChannels.put(key.toString(), new ConstantProvider<>(channel));
+    }
+
+    public void addResult(@NotNull DefaultFilterChannel key, @NotNull Supplier<Channel> channel) {
+        resultChannels.put(key.toString(), new LazyProvider<>(channel));
     }
 
     public void addResult(@NotNull DefaultFilterChannel key, @NotNull Channel channel) {
-        resultChannels.put(key.toString(), channel);
+        resultChannels.put(key.toString(), new ConstantProvider<>(channel));
     }
 
     public @Nullable Channel getChannel(@NotNull Object kex) {
-        return resultChannels.get(kex.toString());
+        return resultChannels.get(kex.toString()).get();
     }
 
 }
