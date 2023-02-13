@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,11 +22,38 @@
 package com.github.weisj.jsvg.attributes.filter;
 
 public enum DefaultFilterChannel {
+    /**
+     * This keyword represents the graphics elements that were the original input into the <filter> element.
+     */
     SourceGraphic,
+    /**
+     * This keyword represents the graphics elements that were the original input into the <filter> element.
+     * SourceAlpha has all the same rules as SourceGraphic except that only the alpha channel is used.
+     */
     SourceAlpha,
+    /**
+     * This keyword represents an image snapshot of the SVG document under the filter region at the time that the
+     * <filter> element was invoked.
+     */
     BackgroundImage,
+    /**
+     * Same as BackgroundImage except only the alpha channel is used.
+     */
     BackgroundAlpha,
+    /**
+     * This keyword represents the value of the fill property on the target element for the filter effect.
+     * In many cases, the FillPaint is opaque everywhere, but that might not be the case if a shape is painted with a
+     * gradient or pattern which itself includes transparent or semi-transparent parts.
+     */
     FillPaint,
+    /**
+     * This keyword represents the value of the stroke property on the target element for the filter effect.
+     * In many cases, the StrokePaint is opaque everywhere, but that might not be the case if a shape is painted with a
+     * gradient or pattern which itself includes transparent or semi-transparent parts.
+     */
     StrokePaint,
+    /**
+     * Uses the result of the preceding filter or SourceGraphic if this is the first filter.
+     */
     LastResult
 }
