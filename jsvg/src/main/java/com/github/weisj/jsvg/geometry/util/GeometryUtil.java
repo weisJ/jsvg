@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -102,5 +103,19 @@ public final class GeometryUtil {
 
     public static double lineLength(double x1, double y1, double x2, double y2) {
         return Math.sqrt(GeometryUtil.distanceSquared(x1, y1, x2, y2));
+    }
+
+    public static @NotNull Rectangle2D containingBoundsAfterTransform(@NotNull AffineTransform transform,
+            @NotNull Rectangle2D rect) {
+        Point2D.Double p1 = new Point2D.Double(rect.getX(), rect.getY());
+        Point2D.Double p2 = new Point2D.Double(rect.getX() + rect.getWidth(), rect.getY());
+        Point2D.Double p3 = new Point2D.Double(rect.getX(), rect.getY() + rect.getHeight());
+        Point2D.Double p4 = new Point2D.Double(rect.getX() + rect.getWidth(), rect.getY() + rect.getHeight());
+        Rectangle2D r1 = rect.getBounds2D();
+        r1.setFrameFromDiagonal(transform.transform(p1, p1), transform.transform(p2, p2));
+        Rectangle2D r2 = rect.getBounds2D();
+        r2.setFrameFromDiagonal(transform.transform(p3, p3), transform.transform(p4, p4));
+        Rectangle2D.union(r1, r2, r1);
+        return r1;
     }
 }
