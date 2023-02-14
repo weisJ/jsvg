@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -114,7 +114,7 @@ public final class NodeRenderer {
         Graphics2D childGraphics = (Graphics2D) g.create();
 
         if (renderable instanceof Transformable && ((Transformable) renderable).shouldTransform()) {
-            ((Transformable) renderable).applyTransform(childGraphics, childContext.measureContext());
+            ((Transformable) renderable).applyTransform(childGraphics, childContext);
         }
 
         Rectangle2D elementBounds = null;
@@ -205,6 +205,7 @@ public final class NodeRenderer {
                     Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
             return new RenderContext(
                     context.targetComponent(),
+                    new AffineTransform(),
                     new AffineTransform(),
                     PaintContext.createDefault(),
                     newMeasure,

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -55,11 +55,13 @@ public class RenderContext {
     private final @Nullable ContextElementAttributes contextElementAttributes;
 
     private final @NotNull AffineTransform rootTransform;
+    private final @NotNull AffineTransform userSpaceTransform;
 
 
     public static @NotNull RenderContext createInitial(@Nullable JComponent targetComponent,
             @NotNull MeasureContext measureContext) {
         return new RenderContext(targetComponent,
+                new AffineTransform(),
                 new AffineTransform(),
                 PaintContext.createDefault(),
                 measureContext,
@@ -71,6 +73,7 @@ public class RenderContext {
 
     RenderContext(@Nullable JComponent targetComponent,
             @NotNull AffineTransform rootTransform,
+            @NotNull AffineTransform userSpaceTransform,
             @NotNull PaintContext paintContext,
             @NotNull MeasureContext measureContext,
             @NotNull FontRenderContext fontRenderContext,
@@ -79,6 +82,7 @@ public class RenderContext {
             @Nullable ContextElementAttributes contextElementAttributes) {
         this.targetComponent = targetComponent;
         this.rootTransform = rootTransform;
+        this.userSpaceTransform = userSpaceTransform;
         this.paintContext = paintContext;
         this.measureContext = measureContext;
         this.fontRenderContext = fontRenderContext;
@@ -109,8 +113,8 @@ public class RenderContext {
 
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
 
-        return new RenderContext(targetComponent, rootTransform, newPaintContext, newMeasureContext,
-                effectiveFrc, newFontSpec, newFillRule, newContextAttributes);
+        return new RenderContext(targetComponent, rootTransform, new AffineTransform(userSpaceTransform),
+                newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newFillRule, newContextAttributes);
     }
 
     public @NotNull StrokeContext strokeContext() {
@@ -127,6 +131,10 @@ public class RenderContext {
 
     public @NotNull AffineTransform rootTransform() {
         return rootTransform;
+    }
+
+    public @NotNull AffineTransform userSpaceTransform() {
+        return userSpaceTransform;
     }
 
     public @Nullable JComponent targetComponent() {
@@ -205,6 +213,7 @@ public class RenderContext {
                 ",\n contextElementAttributes=" + contextElementAttributes +
                 ",\n fillRule=" + fillRule +
                 ",\n baseTransform=" + rootTransform +
+                ",\n userSpaceTransform=" + userSpaceTransform +
                 "\n}";
     }
 
