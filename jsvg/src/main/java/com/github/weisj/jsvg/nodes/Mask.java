@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -33,6 +34,7 @@ import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.container.CommonRenderableContainerNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
@@ -97,25 +99,33 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
             maskBounds.y += objectBounds.getY();
         }
 
-        Rectangle2D effectiveMaskBounds = maskBounds.createIntersection(objectBounds);
-        if (isInvalidMaskingArea(effectiveMaskBounds)) return PaintParser.DEFAULT_COLOR;
+        AffineTransform userSpaceTransform = context.userSpaceTransform();
+        Rectangle2D maskBoundsInUserSpace = new Rectangle2D.Float();
+        Rectangle2D.intersect(
+                GeometryUtil.containingBoundsAfterTransform(userSpaceTransform, maskBounds),
+                GeometryUtil.containingBoundsAfterTransform(userSpaceTransform, objectBounds),
+                maskBoundsInUserSpace);
+
+        if (isInvalidMaskingArea(maskBoundsInUserSpace)) return PaintParser.DEFAULT_COLOR;
 
         RenderContext maskContext =
                 RenderContext.createInitial(context.targetComponent(), maskContentUnits.deriveMeasure(measure));
 
-        BufferedImage img = ImageUtil.createLuminosityBuffer(g,
-                effectiveMaskBounds.getWidth(), effectiveMaskBounds.getHeight());
+        BufferedImage img = ImageUtil.createLuminosityBuffer(context.rootTransform(),
+                maskBoundsInUserSpace.getWidth(), maskBoundsInUserSpace.getHeight());
         Graphics2D imgGraphics = (Graphics2D) img.getGraphics();
         imgGraphics.setRenderingHints(g.getRenderingHints());
 
-        if (maskContentUnits == UnitType.UserSpaceOnUse) {
-            imgGraphics.scale(img.getWidth() / effectiveMaskBounds.getWidth(),
-                    img.getHeight() / effectiveMaskBounds.getHeight());
-            imgGraphics.translate(-effectiveMaskBounds.getX(), -effectiveMaskBounds.getY());
+        if (maskContentUnits == UnitType.ObjectBoundingBox) {
+            imgGraphics.scale(
+                    objectBounds.getWidth() * img.getWidth() / maskBoundsInUserSpace.getWidth(),
+                    objectBounds.getWidth() * img.getHeight() / maskBoundsInUserSpace.getHeight());
         } else {
             imgGraphics.scale(
-                    objectBounds.getWidth() * img.getWidth() / effectiveMaskBounds.getWidth(),
-                    objectBounds.getWidth() * img.getHeight() / effectiveMaskBounds.getHeight());
+                    img.getWidth() / maskBoundsInUserSpace.getWidth(),
+                    img.getHeight() / maskBoundsInUserSpace.getHeight());
+            imgGraphics.translate(-maskBoundsInUserSpace.getX(), -maskBoundsInUserSpace.getY());
+            imgGraphics.transform(userSpaceTransform);
         }
 
         try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(this, maskContext, imgGraphics, this)) {
@@ -125,16 +135,20 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
 
         if (DEBUG) {
             Graphics2D gg = (Graphics2D) g.create();
-            gg.translate(effectiveMaskBounds.getX(), effectiveMaskBounds.getY());
-            gg.scale(effectiveMaskBounds.getWidth() / img.getWidth(),
-                    effectiveMaskBounds.getHeight() / img.getHeight());
+            gg.setTransform(context.rootTransform());
+            gg.translate(maskBoundsInUserSpace.getX(), maskBoundsInUserSpace.getY());
+            gg.scale(
+                    maskBoundsInUserSpace.getWidth() / img.getWidth(),
+                    maskBoundsInUserSpace.getHeight() / img.getHeight());
+
             gg.setComposite(AlphaComposite.SrcOver.derive(0.5f));
             gg.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), null, null);
+
             gg.dispose();
         }
 
-        Point2D offset = new Point2D.Double(effectiveMaskBounds.getX(), effectiveMaskBounds.getY());
-        g.getTransform().transform(offset, offset);
+        Point2D offset = new Point2D.Double(maskBoundsInUserSpace.getX(), maskBoundsInUserSpace.getY());
+        context.rootTransform().transform(offset, offset);
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, img.getRaster(), offset);
     }
 

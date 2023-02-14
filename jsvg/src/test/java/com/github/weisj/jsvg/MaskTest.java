@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -57,5 +57,6 @@ class MaskTest {
         assertEquals(SUCCESS, compareImages("mask/mask2.svg"));
         // [Note: Flaky] assertEquals(SUCCESS, compareImages("mask/chromeLogo.svg"));
         assertEquals(SUCCESS, compareImages("mask/classIcon.svg"));
+        assertEquals(SUCCESS, compareImages("mask/complexTransform_bug32.svg"));
     }
 }

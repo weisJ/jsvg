@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"
+	viewBox="0 0 100 100">
+	<defs>
+		<mask id="tmask" fill="#fff" maskUnits="userSpaceOnUse">
+			<rect x="0" y="0" width="25%" height="25%" />
+		</mask>
+	</defs>
+
+
+	<g transform="translate(50,50) rotate(45)">
+		<rect x="-25%" y="-25%" width="50%" height="50%" fill="pink"
+			opacity="0.5" />
+		<rect x="-10%" y="-10%" width="120%" height="120%" fill="none"
+			stroke="red" />
+		<rect x="-25%" y="-25%" width="50%" height="50%"
+			mask="url(#tmask)" />
+	</g>
+</svg>
