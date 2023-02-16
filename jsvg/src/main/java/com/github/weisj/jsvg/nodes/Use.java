@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -142,7 +142,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
         if (referencedNode != null) {
             MeasureContext measureContext = context.measureContext();
-            g.translate(x.resolveWidth(measureContext), y.resolveHeight(measureContext));
+            context.translate(g, x.resolveWidth(measureContext), y.resolveHeight(measureContext));
 
             // Todo: Vector Effects
 

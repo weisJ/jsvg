@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.ImageProducer;
 
 import javax.swing.*;
@@ -135,6 +136,31 @@ public class RenderContext {
 
     public @NotNull AffineTransform userSpaceTransform() {
         return userSpaceTransform;
+    }
+
+    public void setRootTransform(@NotNull AffineTransform rootTransform) {
+        this.rootTransform.setTransform(rootTransform);
+        this.userSpaceTransform.setToIdentity();
+    }
+
+    public void translate(@NotNull Graphics2D g, @NotNull Point2D dp) {
+        translate(g, dp.getX(), dp.getY());
+    }
+
+    public void translate(@NotNull Graphics2D g, double dx, double dy) {
+        // TODO: Do this for remaining calls to translate/transform/scale etc.
+        g.translate(dx, dy);
+        userSpaceTransform.translate(dx, dy);
+    }
+
+    public void scale(@NotNull Graphics2D g, double sx, double sy) {
+        g.scale(sx, sy);
+        userSpaceTransform.scale(sx, sy);
+    }
+
+    public void transform(@NotNull Graphics2D g, @NotNull AffineTransform at) {
+        g.transform(at);
+        userSpaceTransform.concatenate(at);
     }
 
     public @Nullable JComponent targetComponent() {

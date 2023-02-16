@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -96,7 +96,6 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         }
         if (preserveAspectRatio == null) preserveAspectRatio = this.preserveAspectRatio;
 
-        g.translate(outerPos.getX(), outerPos.getY());
 
         AffineTransform viewTransform = view != null
                 ? preserveAspectRatio.computeViewPortTransform(useSiteSize, view)
@@ -108,6 +107,8 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
         MeasureContext innerMeasure = innerContext.measureContext();
 
+        innerContext.translate(g, outerPos);
+
         Point2D anchorPos = anchorLocation(innerMeasure);
         if (anchorPos != null) {
             if (viewTransform != null) {
@@ -116,7 +117,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
                         anchorPos.getX() * viewTransform.getScaleX() - viewTransform.getTranslateX(),
                         anchorPos.getY() * viewTransform.getScaleY() - viewTransform.getTranslateY());
             }
-            g.translate(anchorPos.getX(), anchorPos.getY());
+            innerContext.translate(g, anchorPos);
         }
 
         boolean shouldClip = overflow.establishesClip();
@@ -125,7 +126,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         if (shouldClip) g.clip(new ViewBox(useSiteSize));
 
         if (viewTransform != null) {
-            g.transform(viewTransform);
+            innerContext.transform(g, viewTransform);
 
             // If this element itself specifies a viewbox we have to respect its clipping rules.
             if (shouldClip) g.clip(view);
@@ -133,7 +134,8 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
         if (this instanceof SVG && ((SVG) this).isTopLevel()) {
             // Needed for vector-effects to work properly.
-            context.rootTransform().setTransform(g.getTransform());
+            context.setRootTransform(g.getTransform());
+            innerContext.setRootTransform(g.getTransform());
         }
 
         super.render(innerContext, g);
