@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 
@@ -82,18 +82,16 @@ public enum VectorEffect implements HasMatchName {
         int flags = flags(effects);
         if (flags == 0) return;
 
-        AffineTransform baseTransform = context.rootTransform();
-        AffineTransform shapeTransform = GraphicsUtil.tryCreateInverse(baseTransform);
-        if (shapeTransform == null) return;
+        NodeRenderer.checkTransformConsistency(g, context);
 
-        shapeTransform.concatenate(g.getTransform());
+        AffineTransform shapeTransform = new AffineTransform(context.userSpaceTransform());
 
         double x0 = elementTransform != null ? elementTransform.getTranslateX() : 0;
         double y0 = elementTransform != null ? elementTransform.getTranslateY() : 0;
 
         updateTransformForFlags(flags, shapeTransform, x0, y0);
 
-        g.setTransform(baseTransform);
+        g.setTransform(context.rootTransform());
         g.transform(shapeTransform);
     }
 
@@ -101,13 +99,8 @@ public enum VectorEffect implements HasMatchName {
             @NotNull Shape shape) {
         // For the stroke not to be scaled we have to pre-multiply the shape by the transform and then paint
         // in the non-transformed coordinate system.
-        AffineTransform baseTransform = context.rootTransform();
-        AffineTransform shapeTransform = GraphicsUtil.tryCreateInverse(baseTransform);
-        if (shapeTransform == null) return shape;
-
-        shapeTransform.concatenate(g.getTransform());
-        g.setTransform(baseTransform);
-        return shapeTransform.createTransformedShape(shape);
+        g.setTransform(context.rootTransform());
+        return context.userSpaceTransform().createTransformedShape(shape);
     }
 
     private static void updateTransformForFlags(int flags, @NotNull AffineTransform transform, double x0, double y0) {
