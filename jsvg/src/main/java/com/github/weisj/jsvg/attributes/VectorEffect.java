@@ -30,7 +30,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 
@@ -81,8 +80,6 @@ public enum VectorEffect implements HasMatchName {
             @NotNull RenderContext context, @Nullable AffineTransform elementTransform) {
         int flags = flags(effects);
         if (flags == 0) return;
-
-        NodeRenderer.checkTransformConsistency(g, context);
 
         AffineTransform shapeTransform = new AffineTransform(context.userSpaceTransform());
 

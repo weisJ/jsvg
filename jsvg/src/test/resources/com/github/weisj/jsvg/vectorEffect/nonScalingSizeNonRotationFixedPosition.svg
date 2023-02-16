@@ -49,7 +49,7 @@
 			<!-- A thick red right arrow and small rectangle on this figure's nested 
 				user coordinate system origin -->
 			<path id="ve"
-				vector-effect="non-scaling-size on-rotation fixed-position"
+				vector-effect="non-scaling-size non-rotation fixed-position"
 				stroke="red" stroke-width="3" fill="none"
 				transform="matrix(1,0,0,1,150,150)"
 				d="M-50,-50 L50,-50 50,-100 150,0 50,100 50,50 -50,50 -50,-50z M5 0 L0 -5 -5 0 0 5z" />
