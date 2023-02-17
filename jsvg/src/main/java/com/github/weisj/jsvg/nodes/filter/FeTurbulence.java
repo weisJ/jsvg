@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -82,7 +82,7 @@ public final class FeTurbulence extends FilterPrimitive {
             @NotNull FilterContext filterContext) {
         Filter.FilterInfo info = filterContext.info();
         Channel turbulenceChannel =
-                new TurbulenceChannel(info.imageBounds, info.imageWidth, info.imageHeight, seed, numOctaves,
+                new TurbulenceChannel(info.imageBounds(), info.imageWidth, info.imageHeight, seed, numOctaves,
                         baseFrequency[0], baseFrequency.length > 1 ? baseFrequency[1] : baseFrequency[0], type);
         saveResult(turbulenceChannel, filterContext);
     }

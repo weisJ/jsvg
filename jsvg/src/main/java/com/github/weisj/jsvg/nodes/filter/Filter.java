@@ -32,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
@@ -42,6 +41,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories({/* None */})
@@ -87,27 +87,18 @@ public final class Filter extends ContainerNode {
 
     public @NotNull FilterInfo createFilterInfo(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull Rectangle2D elementBounds) {
+        Rectangle2D.Double imageBounds = filterUnits.computeViewBounds(
+                context.measureContext(), elementBounds, x, y, width, height);
 
-        MeasureContext measure = context.measureContext();
-        Rectangle2D.Double imageBounds = filterUnits.computeViewBounds(measure, elementBounds, x, y, width, height);
+        BlittableImage blitImage = BlittableImage.create(
+                ImageUtil::createCompatibleTransparentImage, context,
+                imageBounds, elementBounds, UnitType.UserSpaceOnUse);
 
-        if (filterUnits == UnitType.ObjectBoundingBox) {
-            imageBounds.x += elementBounds.getX();
-            imageBounds.y += elementBounds.getY();
-        }
-
-        BufferedImage image = ImageUtil.createCompatibleTransparentImage(g,
-                imageBounds.getWidth(), imageBounds.getHeight());
-
-        Rectangle2D filterRegion = new Rectangle2D.Double(
-                -imageBounds.getX(), -imageBounds.getY(),
-                elementBounds.getWidth(), elementBounds.getHeight());
-
-        return new FilterInfo(g, image, imageBounds, filterRegion, elementBounds);
+        return new FilterInfo(g, blitImage, elementBounds);
     }
 
     public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
-        ImageProducer producer = filterInfo.image.getSource();
+        ImageProducer producer = filterInfo.blittableImage.image().getSource();
 
         FilterContext filterContext = new FilterContext(filterInfo);
 
@@ -123,14 +114,8 @@ public final class Filter extends ContainerNode {
                     context.measureContext(), filterInfo.elementBounds,
                     filterPrimitive.x, filterPrimitive.y, filterPrimitive.width, filterPrimitive.height);
 
-            filterInfo.imageGraphics.dispose();
-
-            if (filterPrimitiveUnits == UnitType.ObjectBoundingBox) {
-                filterPrimitiveRegion.x += filterInfo.elementBounds.getX();
-                filterPrimitiveRegion.y += filterInfo.elementBounds.getY();
-            }
-
-            Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.imageBounds, filterPrimitiveRegion);
+            Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.blittableImage.boundsInUserSpace(),
+                    filterPrimitiveRegion);
 
             filterPrimitive.applyFilter(g, context, filterContext);
 
@@ -147,31 +132,31 @@ public final class Filter extends ContainerNode {
     }
 
     public static class FilterInfo {
-        public final @NotNull Rectangle2D imageBounds;
         public final int imageWidth;
         public final int imageHeight;
 
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Graphics2D imageGraphics;
-        private final @NotNull BufferedImage image;
+        private final @NotNull BlittableImage blittableImage;
 
         private ImageProducer producer;
 
-        private FilterInfo(@NotNull Graphics2D g, @NotNull BufferedImage image, @NotNull Rectangle2D imageBounds,
-                @NotNull Rectangle2D filterRegion, @NotNull Rectangle2D elementBounds) {
-            this.image = image;
-            this.imageBounds = imageBounds;
+        private FilterInfo(@NotNull Graphics2D g, @NotNull BlittableImage blittableImage,
+                @NotNull Rectangle2D elementBounds) {
+            this.blittableImage = blittableImage;
             this.elementBounds = elementBounds;
+
+            BufferedImage image = blittableImage.image();
 
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();
 
-            this.imageGraphics = image.createGraphics();
+            this.imageGraphics = blittableImage.createGraphics();
             this.imageGraphics.setRenderingHints(g.getRenderingHints());
-            this.imageGraphics.scale(
-                    image.getWidth() / imageBounds.getWidth(),
-                    image.getHeight() / imageBounds.getHeight());
-            this.imageGraphics.translate(filterRegion.getX(), filterRegion.getY());
+        }
+
+        public @NotNull Rectangle2D imageBounds() {
+            return blittableImage.boundsInUserSpace();
         }
 
         public @NotNull Graphics2D graphics() {
@@ -179,6 +164,7 @@ public final class Filter extends ContainerNode {
         }
 
         public @NotNull Rectangle2D tile() {
+            Rectangle2D imageBounds = imageBounds();
             return new Rectangle2D.Double(
                     imageBounds.getX() - elementBounds.getX(),
                     imageBounds.getY() - elementBounds.getY(),
@@ -187,15 +173,19 @@ public final class Filter extends ContainerNode {
         }
 
         public void blitImage(@NotNull Graphics2D g, @NotNull RenderContext context) {
+            Rectangle2D imageBounds = imageBounds();
+
             if (DEBUG) {
                 GraphicsUtil.safelySetPaint(g, Color.RED);
                 g.draw(imageBounds);
             }
-            g.translate(imageBounds.getX(), imageBounds.getY());
-            g.scale(imageBounds.getWidth() / image.getWidth(), imageBounds.getHeight() / image.getHeight());
 
-            Image image = context.createImage(producer);
-            g.drawImage(image, 0, 0, context.targetComponent());
+            blittableImage.prepareForBlitting(g, context);
+            g.drawImage(context.createImage(producer), 0, 0, context.targetComponent());
+        }
+
+        public void close() {
+            imageGraphics.dispose();
         }
     }
 
