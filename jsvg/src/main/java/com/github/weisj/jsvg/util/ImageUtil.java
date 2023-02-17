@@ -37,7 +37,11 @@ public final class ImageUtil {
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(@NotNull Graphics2D g, double width,
             double height) {
-        AffineTransform at = g.getTransform();
+        return createCompatibleTransparentImage(g.getTransform(), width, height);
+    }
+
+    public static @NotNull BufferedImage createCompatibleTransparentImage(@NotNull AffineTransform at, double width,
+            double height) {
         return new BufferedImage(
                 (int) Math.ceil(GeometryUtil.scaleXOfTransform(at) * width),
                 (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), BufferedImage.TYPE_INT_ARGB_PRE);
