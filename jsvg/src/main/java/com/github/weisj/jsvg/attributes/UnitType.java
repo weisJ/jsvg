@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -57,11 +57,17 @@ public enum UnitType {
         }
     }
 
-    public @NotNull Rectangle2D.Double computeViewBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
+    public @NotNull Rectangle2D.Double computeViewBounds(
+            @NotNull MeasureContext measure, @NotNull Rectangle2D elementBounds,
             @NotNull Length x, @NotNull Length y, @NotNull Length width, @NotNull Length height) {
-        MeasureContext patternMeasure = deriveMeasure(measure, bounds.getWidth(), bounds.getHeight());
-        return new Rectangle2D.Double(
+        MeasureContext patternMeasure = deriveMeasure(measure, elementBounds.getWidth(), elementBounds.getHeight());
+        Rectangle2D.Double viewBounds = new Rectangle2D.Double(
                 x.resolveWidth(patternMeasure), y.resolveHeight(patternMeasure),
                 width.resolveWidth(patternMeasure), height.resolveHeight(patternMeasure));
+        if (this == ObjectBoundingBox) {
+            viewBounds.x += elementBounds.getX();
+            viewBounds.y += elementBounds.getY();
+        }
+        return viewBounds;
     }
 }
