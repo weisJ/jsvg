@@ -141,24 +141,25 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     }
 
     @Override
-    public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+    public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        GraphicsUtil.safelySetPaint(g, paintForBounds(g, measure, b));
+        GraphicsUtil.safelySetPaint(g, paintForBounds(g, context, b));
         g.fill(shape);
     }
 
     @Override
-    public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+    public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        GraphicsUtil.safelySetPaint(g, paintForBounds(g, measure, b));
-        g.setPaint(paintForBounds(g, measure, b));
+        GraphicsUtil.safelySetPaint(g, paintForBounds(g, context, b));
+        g.setPaint(paintForBounds(g, context, b));
         g.draw(shape);
     }
 
-    private @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull MeasureContext measure,
+    private @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull Rectangle2D bounds) {
+        MeasureContext measure = context.measureContext();
         Rectangle2D.Double patternBounds = patternUnits.computeViewBounds(measure, bounds, x, y, width, height);
 
         // TODO: With overflow = visible this does not result in the correct behaviour

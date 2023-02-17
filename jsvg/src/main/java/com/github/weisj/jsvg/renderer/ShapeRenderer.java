@@ -145,7 +145,7 @@ public final class ShapeRenderer {
         Composite composite = g.getComposite();
         g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
         g.setStroke(stroke);
-        paintWithOpacity.paint.drawShape(g, context.measureContext(), paintShape.shape, paintShape.bounds);
+        paintWithOpacity.paint.drawShape(g, context, paintShape.shape, paintShape.bounds);
         g.setComposite(composite);
     }
 
@@ -155,7 +155,7 @@ public final class ShapeRenderer {
         if (!paintWithOpacity.isVisible()) return;
         Composite composite = g.getComposite();
         g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
-        paintWithOpacity.paint.fillShape(g, context.measureContext(), paintShape.shape, paintShape.bounds);
+        paintWithOpacity.paint.fillShape(g, context, paintShape.shape, paintShape.bounds);
         g.setComposite(composite);
     }
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,17 +27,17 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface SVGPaint {
     AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
     SVGPaint NONE = new SVGPaint() {
         @Override
-        public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+        public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
                 @Nullable Rectangle2D bounds) { /* NONE shouldn't fill anything */ }
 
         @Override
-        public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+        public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
                 @Nullable Rectangle2D bounds) { /* NONE shouldn't draw anything */ }
 
         @Override
@@ -47,13 +47,13 @@ public interface SVGPaint {
     };
     SVGPaint CURRENT_COLOR = new SVGPaint() {
         @Override
-        public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+        public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
                 @Nullable Rectangle2D bounds) {
             throw new IllegalStateException("Sentinel color CURRENT_COLOR shouldn't be used for painting directly");
         }
 
         @Override
-        public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+        public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
                 @Nullable Rectangle2D bounds) {
             throw new IllegalStateException("Sentinel color CURRENT_COLOR shouldn't be used for painting directly");
         }
@@ -65,13 +65,13 @@ public interface SVGPaint {
     };
     SVGPaint CONTEXT_FILL = new SVGPaint() {
         @Override
-        public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+        public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
                 @Nullable Rectangle2D bounds) {
             throw new IllegalStateException("Sentinel color CONTEXT_FILL shouldn't be used for painting directly");
         }
 
         @Override
-        public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+        public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
                 @Nullable Rectangle2D bounds) {
             throw new IllegalStateException("Sentinel color CONTEXT_FILL shouldn't be used for painting directly");
         }
@@ -83,13 +83,13 @@ public interface SVGPaint {
     };
     SVGPaint CONTEXT_STROKE = new SVGPaint() {
         @Override
-        public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+        public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
                 @Nullable Rectangle2D bounds) {
             throw new IllegalStateException("Sentinel color CONTEXT_STROKE shouldn't be used for painting directly");
         }
 
         @Override
-        public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+        public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
                 @Nullable Rectangle2D bounds) {
             throw new IllegalStateException("Sentinel color CONTEXT_STROKE shouldn't be used for painting directly");
         }
@@ -100,10 +100,10 @@ public interface SVGPaint {
         }
     };
 
-    void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+    void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds);
 
-    void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+    void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds);
 
     default boolean isVisible() {

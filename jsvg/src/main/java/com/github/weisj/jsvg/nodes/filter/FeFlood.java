@@ -67,7 +67,7 @@ public class FeFlood extends FilterPrimitive {
             Graphics2D graphics = (Graphics2D) img.getGraphics();
             graphics.setComposite(AlphaComposite.Src.derive(floodOpacity));
             Rectangle rect = new Rectangle(0, 0, img.getWidth(), img.getHeight());
-            floodColor.fillShape(graphics, context.measureContext(), rect, rect);
+            floodColor.fillShape(graphics, context, rect, rect);
             graphics.dispose();
         }
         saveResult(new ImageProducerChannel(img.getSource()), filterContext);

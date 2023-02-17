@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 @SuppressWarnings("java:S119") // Generic name Self is intentional
 abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends ContainerNode implements SVGPaint {
@@ -140,18 +141,18 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     protected abstract void buildGradient(@NotNull AttributeNode attributeNode, @Nullable Self template);
 
     @Override
-    public void fillShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+    public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        GraphicsUtil.safelySetPaint(g, paintForBounds(measure, b));
+        GraphicsUtil.safelySetPaint(g, paintForBounds(context.measureContext(), b));
         g.fill(shape);
     }
 
     @Override
-    public void drawShape(@NotNull Graphics2D g, @NotNull MeasureContext measure, @NotNull Shape shape,
+    public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        GraphicsUtil.safelySetPaint(g, paintForBounds(measure, b));
+        GraphicsUtil.safelySetPaint(g, paintForBounds(context.measureContext(), b));
         g.draw(shape);
     }
 
