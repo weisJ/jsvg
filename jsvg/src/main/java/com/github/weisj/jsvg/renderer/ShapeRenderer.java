@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -104,37 +104,38 @@ public final class ShapeRenderer {
     public static void renderWithPaintOrder(@NotNull Graphics2D g, @NotNull PaintOrder paintOrder,
             @NotNull ShapePaintContext shapePaintContext, @NotNull PaintShape paintShape,
             @Nullable ShapeMarkerInfo markerInfo) {
-        RenderContext context = shapePaintContext.context;
         Set<VectorEffect> vectorEffects = shapePaintContext.vectorEffects;
-        VectorEffect.applyEffects(shapePaintContext.vectorEffects, g, context, shapePaintContext.transform);
+        VectorEffect.applyEffects(shapePaintContext.vectorEffects, g,
+                shapePaintContext.context, shapePaintContext.transform);
 
         for (PaintOrder.Phase phase : paintOrder.phases()) {
             Graphics2D phaseGraphics = (Graphics2D) g.create();
+            RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
             switch (phase) {
                 case FILL:
-                    ShapeRenderer.renderShapeFill(context, phaseGraphics, paintShape);
+                    ShapeRenderer.renderShapeFill(phaseContext, phaseGraphics, paintShape);
                     break;
                 case STROKE:
                     Shape strokeShape = paintShape.shape;
                     if (vectorEffects.contains(VectorEffect.NonScalingStroke)
                             && !vectorEffects.contains(VectorEffect.NonScalingSize)) {
-                        strokeShape = VectorEffect.applyNonScalingStroke(phaseGraphics, context, strokeShape);
+                        strokeShape = VectorEffect.applyNonScalingStroke(phaseGraphics, phaseContext, strokeShape);
                     }
-                    ShapeRenderer.renderShapeStroke(context, phaseGraphics,
+                    ShapeRenderer.renderShapeStroke(phaseContext, phaseGraphics,
                             new PaintShape(strokeShape, paintShape.bounds), shapePaintContext.stroke);
                     break;
                 case MARKERS:
-                    if (markerInfo != null) renderMarkers(phaseGraphics, shapePaintContext, paintShape, markerInfo);
+                    if (markerInfo != null) renderMarkers(phaseGraphics, phaseContext, paintShape, markerInfo);
                     break;
             }
             phaseGraphics.dispose();
         }
     }
 
-    private static void renderMarkers(@NotNull Graphics2D g, @NotNull ShapePaintContext shapePaintContext,
+    private static void renderMarkers(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull PaintShape paintShape, @NotNull ShapeMarkerInfo markerInfo) {
         if (markerInfo.markerStart == null && markerInfo.markerMid == null && markerInfo.markerEnd == null) return;
-        renderMarkersImpl(g, shapePaintContext.context, paintShape.shape.getPathIterator(null), markerInfo);
+        renderMarkersImpl(g, context, paintShape.shape.getPathIterator(null), markerInfo);
     }
 
     private static void renderShapeStroke(@NotNull RenderContext context, @NotNull Graphics2D g,
@@ -161,6 +162,8 @@ public final class ShapeRenderer {
     private static void renderMarkersImpl(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull PathIterator iterator, @NotNull ShapeMarkerInfo markerInfo) {
         float[] args = new float[6];
+
+        NodeRenderer.checkTransformConsistency(g, context);
 
         float x = 0;
         float y = 0;
@@ -272,16 +275,18 @@ public final class ShapeRenderer {
         @Radian float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
 
         Graphics2D markerGraphics = (Graphics2D) g.create();
-        markerGraphics.translate(x, y);
+        RenderContext markerContext = context.deriveForChildGraphics();
+
+        markerContext.translate(markerGraphics, x, y);
 
         if (DEBUG_MARKERS) {
             Graphics2D debugGraphics = (Graphics2D) markerGraphics.create();
-            paintDebugMarker(context, debugGraphics, marker, rotation);
+            paintDebugMarker(markerContext, debugGraphics, marker, rotation);
             debugGraphics.dispose();
         }
-        markerGraphics.rotate(rotation);
+        markerContext.rotate(markerGraphics, rotation);
 
-        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, context, markerGraphics, shapeNode)) {
+        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, markerContext, markerGraphics, shapeNode)) {
             if (info != null) info.renderable.render(info.context, info.graphics());
         }
 

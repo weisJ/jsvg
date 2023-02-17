@@ -118,6 +118,11 @@ public class RenderContext {
                 newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newFillRule, newContextAttributes);
     }
 
+    public @NotNull RenderContext deriveForChildGraphics() {
+        // Pass non-trivial context mutator to ensure userSpaceTransform gets created a different copy.
+        return derive((t) -> t, null, null, null, null, null);
+    }
+
     public @NotNull StrokeContext strokeContext() {
         // This will never be null for a RenderContext.
         // Our deriving mechanism together with non-null initial values prohibits this.
@@ -143,6 +148,11 @@ public class RenderContext {
         this.userSpaceTransform.setToIdentity();
     }
 
+    public void setRootTransform(@NotNull AffineTransform rootTransform, @NotNull AffineTransform userSpaceTransform) {
+        this.rootTransform.setTransform(rootTransform);
+        this.userSpaceTransform.setTransform(userSpaceTransform);
+    }
+
     public void translate(@NotNull Graphics2D g, @NotNull Point2D dp) {
         translate(g, dp.getX(), dp.getY());
     }
@@ -156,6 +166,11 @@ public class RenderContext {
     public void scale(@NotNull Graphics2D g, double sx, double sy) {
         g.scale(sx, sy);
         userSpaceTransform.scale(sx, sy);
+    }
+
+    public void rotate(@NotNull Graphics2D g, double angle) {
+        g.rotate(angle);
+        userSpaceTransform.rotate(angle);
     }
 
     public void transform(@NotNull Graphics2D g, @NotNull AffineTransform at) {
