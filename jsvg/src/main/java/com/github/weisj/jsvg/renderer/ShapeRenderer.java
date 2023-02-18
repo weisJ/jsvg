@@ -142,21 +142,17 @@ public final class ShapeRenderer {
             @NotNull PaintShape paintShape, @Nullable Stroke stroke) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
         if (!(stroke != null && paintWithOpacity.isVisible())) return;
-        Composite composite = g.getComposite();
         g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
         g.setStroke(stroke);
         paintWithOpacity.paint.drawShape(g, context, paintShape.shape, paintShape.bounds);
-        g.setComposite(composite);
     }
 
     private static void renderShapeFill(@NotNull RenderContext context, @NotNull Graphics2D g,
             @NotNull PaintShape paintShape) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.fillPaint(), context.fillOpacity());
         if (!paintWithOpacity.isVisible()) return;
-        Composite composite = g.getComposite();
         g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
         paintWithOpacity.paint.fillShape(g, context, paintShape.shape, paintShape.bounds);
-        g.setComposite(composite);
     }
 
     private static void renderMarkersImpl(@NotNull Graphics2D g, @NotNull RenderContext context,
