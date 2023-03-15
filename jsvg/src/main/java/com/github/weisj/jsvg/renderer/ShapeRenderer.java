@@ -159,8 +159,6 @@ public final class ShapeRenderer {
             @NotNull PathIterator iterator, @NotNull ShapeMarkerInfo markerInfo) {
         float[] args = new float[6];
 
-        NodeRenderer.checkTransformConsistency(g, context);
-
         float x = 0;
         float y = 0;
         float xStart = 0;
