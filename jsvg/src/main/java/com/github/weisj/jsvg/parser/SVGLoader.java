@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -77,11 +77,6 @@ public class SVGLoader {
         map.put(Defs.TAG, Defs::new);
         map.put(Desc.TAG, Desc::new);
         map.put(Ellipse.TAG, Ellipse::new);
-        map.put(FeColorMatrix.TAG, FeColorMatrix::new);
-        map.put(FeDisplacementMap.TAG, FeDisplacementMap::new);
-        map.put(FeGaussianBlur.TAG, FeGaussianBlur::new);
-        map.put(FeTurbulence.TAG, FeTurbulence::new);
-        map.put(Filter.TAG, Filter::new);
         map.put(Group.TAG, Group::new);
         map.put(Image.TAG, Image::new);
         map.put(Line.TAG, Line::new);
@@ -110,8 +105,15 @@ public class SVGLoader {
         map.put(Use.TAG, Use::new);
         map.put(View.TAG, View::new);
 
+        map.put(Filter.TAG, Filter::new);
         map.put(FeBlend.TAG, FeBlend::new);
+        map.put(FeColorMatrix.TAG, FeColorMatrix::new);
+        map.put(FeDisplacementMap.TAG, FeDisplacementMap::new);
         map.put(FeFlood.TAG, FeFlood::new);
+        map.put(FeGaussianBlur.TAG, FeGaussianBlur::new);
+        map.put(FeMerge.TAG, FeMerge::new);
+        map.put(FeMergeNode.TAG, FeMergeNode::new);
+        map.put(FeTurbulence.TAG, FeTurbulence::new);
 
         map.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
         map.put("feComposite", () -> new DummyFilterPrimitive("feComposite"));
@@ -124,7 +126,6 @@ public class SVGLoader {
         map.put("feFuncG", () -> new DummyFilterPrimitive("feFuncG"));
         map.put("feFuncR", () -> new DummyFilterPrimitive("feFuncR"));
         map.put("feImage", () -> new DummyFilterPrimitive("feImage"));
-        map.put("feMerge", () -> new DummyFilterPrimitive("feMerge"));
         map.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
         map.put("feOffset", () -> new DummyFilterPrimitive("feOffset"));
         map.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));
