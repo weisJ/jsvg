@@ -38,7 +38,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 @PermittedContent(
     anyOf = { /* <animate>, <set> */ }
 )
-public class FeFlood extends FilterPrimitive {
+public class FeFlood extends AbstractFilterPrimitive {
     public static final String TAG = "feflood";
 
     private SVGPaint floodColor;
@@ -70,7 +70,7 @@ public class FeFlood extends FilterPrimitive {
             floodColor.fillShape(graphics, context, rect, rect);
             graphics.dispose();
         }
-        saveResult(new ImageProducerChannel(img.getSource()), filterContext);
+        impl().saveResult(new ImageProducerChannel(img.getSource()), filterContext);
     }
 
 }

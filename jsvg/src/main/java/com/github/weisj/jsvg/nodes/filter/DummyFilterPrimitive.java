@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 @PermittedContent(
     anyOf = { /* <animate>, <set> */ }
 )
-public final class DummyFilterPrimitive extends FilterPrimitive {
+public final class DummyFilterPrimitive extends AbstractFilterPrimitive {
 
     private final @NotNull String tag;
 
@@ -50,6 +50,6 @@ public final class DummyFilterPrimitive extends FilterPrimitive {
     @Override
     public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull FilterContext filterContext) {
-        saveResult(inputChannel(filterContext), filterContext);
+        impl().saveResult(impl().inputChannel(filterContext), filterContext);
     }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 @PermittedContent(
     anyOf = { /* <animate>, <set> */ }
 )
-public final class FeColorMatrix extends FilterPrimitive {
+public final class FeColorMatrix extends AbstractFilterPrimitive {
     public static final String TAG = "fecolormatrix";
     private static final String KEY_VALUES = "values";
 
@@ -104,7 +104,7 @@ public final class FeColorMatrix extends FilterPrimitive {
     public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull FilterContext filterContext) {
         if (filter == null) return;
-        saveResult(inputChannel(filterContext).applyFilter(filter), filterContext);
+        impl().saveResult(impl().inputChannel(filterContext).applyFilter(filter), filterContext);
     }
 
     private static int toRgbRange(double value) {

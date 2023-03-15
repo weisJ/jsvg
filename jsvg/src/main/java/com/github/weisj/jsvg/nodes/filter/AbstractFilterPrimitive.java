@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,28 +23,41 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
 
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.nodes.AbstractSVGNode;
+import com.github.weisj.jsvg.parser.AttributeNode;
 
-public interface FilterPrimitive {
+public abstract class AbstractFilterPrimitive extends AbstractSVGNode implements FilterPrimitive {
 
-    @NotNull
-    Length y();
+    private FilterPrimitiveBase filterPrimitiveBase;
 
-    @NotNull
-    Length x();
-
-    @NotNull
-    Length width();
-
-    @NotNull
-    Length height();
-
-    default boolean isValid() {
-        return true;
+    @Override
+    @MustBeInvokedByOverriders
+    public void build(@NotNull AttributeNode attributeNode) {
+        super.build(attributeNode);
+        filterPrimitiveBase = new FilterPrimitiveBase(attributeNode);
     }
 
-    void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterContext filterContext);
+    protected @NotNull FilterPrimitiveBase impl() {
+        return filterPrimitiveBase;
+    }
+
+    public @NotNull Length x() {
+        return impl().x;
+    }
+
+    public @NotNull Length y() {
+        return impl().y;
+    }
+
+    public @NotNull Length width() {
+        return impl().width;
+    }
+
+    public @NotNull Length height() {
+        return impl().height;
+    }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -40,7 +40,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 @PermittedContent(
     anyOf = { /* <animate>, <set> */ }
 )
-public final class FeGaussianBlur extends FilterPrimitive {
+public final class FeGaussianBlur extends AbstractFilterPrimitive {
     public static final String TAG = "fegaussianblur";
 
     private float[] stdDeviation;
@@ -76,7 +76,7 @@ public final class FeGaussianBlur extends FilterPrimitive {
 
         if (xSigma < 0 || ySigma < 0) return;
 
-        ImageProducer input = inputChannel(filterContext).producer();
+        ImageProducer input = impl().inputChannel(filterContext).producer();
 
         if (xSigma > 0) {
             input = new FilteredImageSource(input, createGaussianBlurFilter(g, xSigma, true));
@@ -85,7 +85,7 @@ public final class FeGaussianBlur extends FilterPrimitive {
             input = new FilteredImageSource(input, createGaussianBlurFilter(g, ySigma, false));
         }
 
-        saveResult(new ImageProducerChannel(input), filterContext);
+        impl().saveResult(new ImageProducerChannel(input), filterContext);
     }
 
     private @NotNull ImageFilter createGaussianBlurFilter(@NotNull Graphics2D g, double sigma, boolean horizontal) {

@@ -64,25 +64,49 @@ public final class Filter extends ContainerNode {
     private UnitType filterUnits;
     private UnitType filterPrimitiveUnits;
 
+    private boolean isValid;
+
     @Override
     public @NotNull String tagName() {
         return TAG;
     }
 
     public boolean hasEffect() {
-        return !children().isEmpty();
+        return isValid && !children().isEmpty();
     }
 
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
+
+        isValid = true;
+        for (SVGNode child : children()) {
+            FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+            if (!filterPrimitive.isValid()) {
+                isValid = false;
+                break;
+            }
+        }
+
         x = attributeNode.getLength("x", DEFAULT_FILTER_COORDINATE);
         y = attributeNode.getLength("y", DEFAULT_FILTER_COORDINATE);
         width = attributeNode.getLength("width", DEFAULT_FILTER_SIZE);
         height = attributeNode.getLength("height", DEFAULT_FILTER_SIZE);
 
+        // Note: Apparently these coordinates are always interpreted as percentages regardless of the
+        // specified unit (except for explicit percentages).
+        x = coerceToPercentage(x);
+        y = coerceToPercentage(y);
+        width = coerceToPercentage(width);
+        height = coerceToPercentage(height);
+
         filterUnits = attributeNode.getEnum("filterUnits", UnitType.ObjectBoundingBox);
         filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
+    }
+
+    private Length coerceToPercentage(@NotNull Length length) {
+        if (length.unit() == Unit.PERCENTAGE) return length;
+        return new Length(Unit.PERCENTAGE, length.raw() * 100);
     }
 
     public @NotNull FilterInfo createFilterInfo(@NotNull Graphics2D g, @NotNull RenderContext context,
@@ -109,15 +133,19 @@ public final class Filter extends ContainerNode {
                 () -> sourceChannel.applyFilter(new AlphaImageFilter()));
 
         for (SVGNode child : children()) {
-            FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-            Rectangle2D.Double filterPrimitiveRegion = filterPrimitiveUnits.computeViewBounds(
-                    context.measureContext(), filterInfo.elementBounds,
-                    filterPrimitive.x, filterPrimitive.y, filterPrimitive.width, filterPrimitive.height);
+            try {
+                FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+                Rectangle2D.Double filterPrimitiveRegion = filterPrimitiveUnits.computeViewBounds(
+                        context.measureContext(), filterInfo.elementBounds,
+                        filterPrimitive.x(), filterPrimitive.y(), filterPrimitive.width(), filterPrimitive.height());
 
-            Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.blittableImage.boundsInUserSpace(),
-                    filterPrimitiveRegion);
+                Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.blittableImage.boundsInUserSpace(),
+                        filterPrimitiveRegion);
 
-            filterPrimitive.applyFilter(g, context, filterContext);
+                filterPrimitive.applyFilter(g, context, filterContext);
+            } catch (IllegalFilterStateException ignored) {
+                // Just carry on applying filters
+            }
 
             // Todo: Respect filterPrimitiveRegion
         }

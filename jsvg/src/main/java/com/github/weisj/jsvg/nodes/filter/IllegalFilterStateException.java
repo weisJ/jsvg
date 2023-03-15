@@ -21,30 +21,5 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
-
-import org.jetbrains.annotations.NotNull;
-
-import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.renderer.RenderContext;
-
-public interface FilterPrimitive {
-
-    @NotNull
-    Length y();
-
-    @NotNull
-    Length x();
-
-    @NotNull
-    Length width();
-
-    @NotNull
-    Length height();
-
-    default boolean isValid() {
-        return true;
-    }
-
-    void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterContext filterContext);
+class IllegalFilterStateException extends IllegalStateException {
 }

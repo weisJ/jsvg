@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -42,7 +42,7 @@ import com.github.weisj.jsvg.util.ImageUtil;
 @PermittedContent(
     anyOf = { /* <animate>, <set> */ }
 )
-public final class FeDisplacementMap extends FilterPrimitive {
+public final class FeDisplacementMap extends AbstractFilterPrimitive {
     public static final String TAG = "fedisplacementmap";
 
     private ColorChannel xChannelSelector;
@@ -73,13 +73,13 @@ public final class FeDisplacementMap extends FilterPrimitive {
     public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull FilterContext filterContext) {
         if (scale == 0) return;
-        Channel input = inputChannel(filterContext);
+        Channel input = impl().inputChannel(filterContext);
         Channel displacementInput = filterContext.getChannel(inputChannel2);
         if (displacementInput == null) return;
 
         ImageFilter displacementFilter = new BufferedImageFilter(
                 new DisplacementOp(displacementInput.pixels(context), filterContext.info().tile()));
-        saveResult(input.applyFilter(displacementFilter), filterContext);
+        impl().saveResult(input.applyFilter(displacementFilter), filterContext);
     }
 
     private class DisplacementOp implements BufferedImageOp {

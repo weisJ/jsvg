@@ -63,7 +63,9 @@ public class FilterContext {
     }
 
     public @Nullable Channel getChannel(@NotNull Object kex) {
-        return resultChannels.get(kex.toString()).get();
+        Provider<Channel> provider = resultChannels.get(kex.toString());
+        if (provider == null) throw new IllegalFilterStateException();
+        return provider.get();
     }
 
 }

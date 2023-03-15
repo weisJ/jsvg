@@ -40,7 +40,7 @@ import com.github.weisj.jsvg.util.ImageUtil;
 @PermittedContent(
     anyOf = { /* <animate>, <set> */ }
 )
-public final class FeTurbulence extends FilterPrimitive {
+public final class FeTurbulence extends AbstractFilterPrimitive {
     public static final String TAG = "feturbulence";
 
     public enum Type {
@@ -84,7 +84,7 @@ public final class FeTurbulence extends FilterPrimitive {
         Channel turbulenceChannel =
                 new TurbulenceChannel(info.imageBounds(), info.imageWidth, info.imageHeight, seed, numOctaves,
                         baseFrequency[0], baseFrequency.length > 1 ? baseFrequency[1] : baseFrequency[0], type);
-        saveResult(turbulenceChannel, filterContext);
+        impl().saveResult(turbulenceChannel, filterContext);
     }
 
     public static class TurbulenceChannel implements Channel, PixelProvider {
