@@ -187,6 +187,10 @@ public final class Filter extends ContainerNode {
             return blittableImage.boundsInUserSpace();
         }
 
+        public @NotNull Rectangle2D elementBounds() {
+            return elementBounds;
+        }
+
         public @NotNull Graphics2D graphics() {
             return imageGraphics;
         }

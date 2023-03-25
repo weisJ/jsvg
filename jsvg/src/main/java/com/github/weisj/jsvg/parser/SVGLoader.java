@@ -114,6 +114,7 @@ public class SVGLoader {
         map.put(FeMerge.TAG, FeMerge::new);
         map.put(FeMergeNode.TAG, FeMergeNode::new);
         map.put(FeTurbulence.TAG, FeTurbulence::new);
+        map.put(FeOffset.TAG, FeOffset::new);
 
         map.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
         map.put("feComposite", () -> new DummyFilterPrimitive("feComposite"));
@@ -127,7 +128,6 @@ public class SVGLoader {
         map.put("feFuncR", () -> new DummyFilterPrimitive("feFuncR"));
         map.put("feImage", () -> new DummyFilterPrimitive("feImage"));
         map.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
-        map.put("feOffset", () -> new DummyFilterPrimitive("feOffset"));
         map.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));
         map.put("feTile", () -> new DummyFilterPrimitive("feTile"));
 

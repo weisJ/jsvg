@@ -132,10 +132,10 @@ For supported elements most of the attributes which apply to them are implemente
 | feFuncR             | :x:                     |
 | feGaussianBlur      | :white_check_mark:      |
 | feImage             | :x:                     |
-| feMerge             | :x:                     |
-| feMergeNode         | :x:                     |
+| feMerge             | :white_check_mark:      |
+| feMergeNode         | :white_check_mark:      |
 | feMorphology        | :x:                     |
-| feOffset            | :x:                     |
+| feOffset            | :ballot_box_with_check: |
 | fePointLight        | :x:                     |
 | feSpecularLighting  | :x:                     |
 | feSpotLight         | :x:                     |
