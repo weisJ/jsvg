@@ -65,11 +65,11 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
 
     @Override
-    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
-            @NotNull FilterContext filterContext) {
+    public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (stdDeviation.length == 0) return;
 
         Filter.FilterInfo filterInfo = filterContext.info();
+        // TODO: Use proper transform here
         AffineTransform at = filterInfo.graphics().getTransform();
         double xSigma = GeometryUtil.scaleXOfTransform(at) * stdDeviation[0];
         double ySigma = GeometryUtil.scaleYOfTransform(at) * stdDeviation[Math.min(stdDeviation.length - 1, 1)];
@@ -78,17 +78,19 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
         ImageProducer input = impl().inputChannel(filterContext).producer();
 
+        RenderingHints hints = filterContext.renderingHints();
         if (xSigma > 0) {
-            input = new FilteredImageSource(input, createGaussianBlurFilter(g, xSigma, true));
+            input = new FilteredImageSource(input, createGaussianBlurFilter(hints, xSigma, true));
         }
         if (ySigma > 0) {
-            input = new FilteredImageSource(input, createGaussianBlurFilter(g, ySigma, false));
+            input = new FilteredImageSource(input, createGaussianBlurFilter(hints, ySigma, false));
         }
 
         impl().saveResult(new ImageProducerChannel(input), filterContext);
     }
 
-    private @NotNull ImageFilter createGaussianBlurFilter(@NotNull Graphics2D g, double sigma, boolean horizontal) {
+    private @NotNull ImageFilter createGaussianBlurFilter(@NotNull RenderingHints hints, double sigma,
+            boolean horizontal) {
         double radius = 2f * sigma + 1;
         int size = (int) Math.ceil(radius) + 1;
         if (horizontal && xBlur != null && xCurrent == sigma) return xBlur;
@@ -127,10 +129,10 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
         if (horizontal) {
             xBlur = new BufferedImageFilter(
-                    new ConvolveOp(new Kernel(size, 1, data), edgeMode.awtCode(), g.getRenderingHints()));
+                    new ConvolveOp(new Kernel(size, 1, data), edgeMode.awtCode(), hints));
         } else {
             yBlur = new BufferedImageFilter(
-                    new ConvolveOp(new Kernel(1, size, data), edgeMode.awtCode(), g.getRenderingHints()));
+                    new ConvolveOp(new Kernel(1, size, data), edgeMode.awtCode(), hints));
         }
 
         return horizontal ? xBlur : yBlur;

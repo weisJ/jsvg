@@ -57,8 +57,7 @@ public class FeFlood extends AbstractFilterPrimitive {
     }
 
     @Override
-    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
-            @NotNull FilterContext filterContext) {
+    public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         // Todo: We should be able to optimize this heavily by implementing a custom image producer.
         // and even then filters like feBlend could benefit from knowing that this is a constant color.
         Filter.FilterInfo info = filterContext.info();

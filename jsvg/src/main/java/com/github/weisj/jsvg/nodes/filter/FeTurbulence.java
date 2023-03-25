@@ -78,8 +78,7 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
     }
 
     @Override
-    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
-            @NotNull FilterContext filterContext) {
+    public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         Filter.FilterInfo info = filterContext.info();
         Channel turbulenceChannel =
                 new TurbulenceChannel(info.imageBounds(), info.imageWidth, info.imageHeight, seed, numOctaves,

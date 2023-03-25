@@ -59,7 +59,7 @@ public final class FeBlend extends AbstractFilterPrimitive {
     }
 
     @Override
-    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
+    public void applyFilter(@NotNull RenderContext context,
             @NotNull FilterContext filterContext) {
         FilterPrimitiveBase impl = impl();
         Channel in = impl.inputChannel(filterContext);

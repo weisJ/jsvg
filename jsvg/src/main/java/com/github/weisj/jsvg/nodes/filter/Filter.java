@@ -124,7 +124,7 @@ public final class Filter extends ContainerNode {
     public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
         ImageProducer producer = filterInfo.blittableImage.image().getSource();
 
-        FilterContext filterContext = new FilterContext(filterInfo);
+        FilterContext filterContext = new FilterContext(filterInfo, filterPrimitiveUnits, g.getRenderingHints());
 
         Channel sourceChannel = new ImageProducerChannel(producer);
         filterContext.addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
@@ -142,7 +142,7 @@ public final class Filter extends ContainerNode {
                 Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.blittableImage.boundsInUserSpace(),
                         filterPrimitiveRegion);
 
-                filterPrimitive.applyFilter(g, context, filterContext);
+                filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException ignored) {
                 // Just carry on applying filters
             }

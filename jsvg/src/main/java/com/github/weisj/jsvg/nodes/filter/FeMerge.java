@@ -85,8 +85,7 @@ public class FeMerge extends ContainerNode implements FilterPrimitive {
     }
 
     @Override
-    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
-            @NotNull FilterContext filterContext) {
+    public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (inputChannels.length == 0) return;
         Channel in = filterPrimitiveBase.channel(inputChannels[0], filterContext);
         Channel result = in;

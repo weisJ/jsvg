@@ -46,5 +46,5 @@ public interface FilterPrimitive {
         return true;
     }
 
-    void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterContext filterContext);
+    void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext);
 }

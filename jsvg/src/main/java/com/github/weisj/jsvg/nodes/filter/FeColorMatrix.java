@@ -101,8 +101,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     }
 
     @Override
-    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
-            @NotNull FilterContext filterContext) {
+    public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (filter == null) return;
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(filter), filterContext);
     }

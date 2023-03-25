@@ -70,8 +70,7 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
     }
 
     @Override
-    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context,
-            @NotNull FilterContext filterContext) {
+    public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (scale == 0) return;
         Channel input = impl().inputChannel(filterContext);
         Channel displacementInput = filterContext.getChannel(inputChannel2);
