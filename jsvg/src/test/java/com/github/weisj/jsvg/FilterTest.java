@@ -78,6 +78,11 @@ class FilterTest {
     }
 
     @Test
+    void testOffset() {
+        assertDoesNotThrow(() -> render("filter/offset.svg"));
+    }
+
+    @Test
     void testDisplacementMap() {
         assertEquals(SUCCESS, compareImages("filter/displacement.svg"));
     }
