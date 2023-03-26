@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"
+	viewBox="0 0 100 100">
+	<defs>
+		<filter id="radio-b" width="100%" height="100%" x="0" y="0"
+			filterUnits="objectBoundingBox">
+			<feGaussianBlur in="SourceGraphic" stdDeviation="1"
+				edgeMode="wrap" />
+		</filter>
+	</defs>
+	<g fill="none" fill-rule="evenodd" filter="url(#radio-b)">
+		<rect x="10" y="10" width="20" height="20" fill="red" />
+		<rect x="70" y="10" width="20" height="20" fill="green" />
+		<rect x="10" y="70" width="20" height="20" fill="blue" />
+		<rect x="70" y="70" width="20" height="20" fill="orange" />
+
+		<rect x="30" y="10" width="40" height="20" fill="yellow" />
+		<rect x="30" y="70" width="40" height="20" fill="pink" />
+		<rect x="10" y="30" width="20" height="40" fill="purple" />
+		<rect x="70" y="30" width="20" height="40" fill="cyan" />
+
+		<rect x="30" y="30" width="40" height="40" fill="gray" />
+	</g>
+</svg>

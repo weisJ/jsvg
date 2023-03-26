@@ -24,8 +24,7 @@ package com.github.weisj.jsvg;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static com.github.weisj.jsvg.ReferenceTest.render;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -39,6 +38,13 @@ class FilterTest {
     void testGaussianBlur() {
         assertEquals(SUCCESS, compareImages("filter/blur.svg"));
         assertEquals(SUCCESS, compareImages("filter/blur2.svg"));
+    }
+
+    @Test
+    void testEdgeMode() {
+        assertDoesNotThrow(() -> render("filter/edgeModeDuplicate.svg"));
+        assertDoesNotThrow(() -> render("filter/edgeModeNone.svg"));
+        assertDoesNotThrow(() -> render("filter/edgeModeWrap.svg"));
     }
 
     @Test

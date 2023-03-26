@@ -48,8 +48,9 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     private double xCurrent;
     private double yCurrent;
-    private ImageFilter xBlur;
-    private ImageFilter yBlur;
+    private Kernel xBlur;
+    private Kernel yBlur;
+    private final Kernel[] kernels = new Kernel[2];
 
     @Override
     public @NotNull String tagName() {
@@ -68,9 +69,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (stdDeviation.length == 0) return;
 
-        Filter.FilterInfo filterInfo = filterContext.info();
         // TODO: Use proper transform here
-        AffineTransform at = filterInfo.graphics().getTransform();
+        AffineTransform at = filterContext.info().graphics().getTransform();
         double xSigma = GeometryUtil.scaleXOfTransform(at) * stdDeviation[0];
         double ySigma = GeometryUtil.scaleYOfTransform(at) * stdDeviation[Math.min(stdDeviation.length - 1, 1)];
 
@@ -78,19 +78,20 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
         ImageProducer input = impl().inputChannel(filterContext).producer();
 
-        RenderingHints hints = filterContext.renderingHints();
+        int kernelCount = 0;
         if (xSigma > 0) {
-            input = new FilteredImageSource(input, createGaussianBlurFilter(hints, xSigma, true));
+            kernels[kernelCount++] = createConvolveKernel(xSigma, true);
         }
         if (ySigma > 0) {
-            input = new FilteredImageSource(input, createGaussianBlurFilter(hints, ySigma, false));
+            kernels[kernelCount++] = createConvolveKernel(ySigma, false);
         }
 
-        impl().saveResult(new ImageProducerChannel(input), filterContext);
+        ImageProducer output = edgeMode.convolve(context, filterContext, input, kernels, kernelCount);
+        impl().saveResult(new ImageProducerChannel(output), filterContext);
     }
 
-    private @NotNull ImageFilter createGaussianBlurFilter(@NotNull RenderingHints hints, double sigma,
-            boolean horizontal) {
+
+    private @NotNull Kernel createConvolveKernel(double sigma, boolean horizontal) {
         double radius = 2f * sigma + 1;
         int size = (int) Math.ceil(radius) + 1;
         if (horizontal && xBlur != null && xCurrent == sigma) return xBlur;
@@ -128,11 +129,9 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
 
         if (horizontal) {
-            xBlur = new BufferedImageFilter(
-                    new ConvolveOp(new Kernel(size, 1, data), edgeMode.awtCode(), hints));
+            xBlur = new Kernel(size, 1, data);
         } else {
-            yBlur = new BufferedImageFilter(
-                    new ConvolveOp(new Kernel(1, size, data), edgeMode.awtCode(), hints));
+            yBlur = new Kernel(1, size, data);;
         }
 
         return horizontal ? xBlur : yBlur;
