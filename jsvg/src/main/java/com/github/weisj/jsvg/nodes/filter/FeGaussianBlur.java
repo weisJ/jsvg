@@ -131,7 +131,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         if (horizontal) {
             xBlur = new Kernel(size, 1, data);
         } else {
-            yBlur = new Kernel(1, size, data);;
+            yBlur = new Kernel(1, size, data);
         }
 
         return horizontal ? xBlur : yBlur;
