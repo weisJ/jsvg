@@ -69,52 +69,55 @@ public class SVGLoader {
         this.saxParser = saxParser;
     }
 
+    @SuppressWarnings("Convert2MethodRef")
     private static @NotNull Map<String, Supplier<SVGNode>> createNodeConstructorMap() {
+        // Note: We use '() -> new T()' instead of 'T::new' as the latter eagerly initialized the class T
+        // while the former doesn't.
         Map<String, Supplier<SVGNode>> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        map.put(Anchor.TAG, Anchor::new);
-        map.put(Circle.TAG, Circle::new);
-        map.put(ClipPath.TAG, ClipPath::new);
-        map.put(Defs.TAG, Defs::new);
-        map.put(Desc.TAG, Desc::new);
-        map.put(Ellipse.TAG, Ellipse::new);
-        map.put(Group.TAG, Group::new);
-        map.put(Image.TAG, Image::new);
-        map.put(Line.TAG, Line::new);
-        map.put(LinearGradient.TAG, LinearGradient::new);
-        map.put(Marker.TAG, Marker::new);
-        map.put(Mask.TAG, Mask::new);
-        map.put(MeshGradient.TAG, MeshGradient::new);
-        map.put(MeshPatch.TAG, MeshPatch::new);
-        map.put(MeshRow.TAG, MeshRow::new);
-        map.put(Metadata.TAG, Metadata::new);
-        map.put(Path.TAG, Path::new);
-        map.put(Pattern.TAG, Pattern::new);
-        map.put(Polygon.TAG, Polygon::new);
-        map.put(Polyline.TAG, Polyline::new);
-        map.put(RadialGradient.TAG, RadialGradient::new);
-        map.put(Rect.TAG, Rect::new);
-        map.put(SVG.TAG, SVG::new);
-        map.put(SolidColor.TAG, SolidColor::new);
-        map.put(Stop.TAG, Stop::new);
-        map.put(Style.TAG, Style::new);
-        map.put(Symbol.TAG, Symbol::new);
-        map.put(Text.TAG, Text::new);
-        map.put(TextPath.TAG, TextPath::new);
-        map.put(TextSpan.TAG, TextSpan::new);
-        map.put(Title.TAG, Title::new);
-        map.put(Use.TAG, Use::new);
-        map.put(View.TAG, View::new);
+        map.put(Anchor.TAG, () -> new Anchor());
+        map.put(Circle.TAG, () -> new Circle());
+        map.put(ClipPath.TAG, () -> new ClipPath());
+        map.put(Defs.TAG, () -> new Defs());
+        map.put(Desc.TAG, () -> new Desc());
+        map.put(Ellipse.TAG, () -> new Ellipse());
+        map.put(Group.TAG, () -> new Group());
+        map.put(Image.TAG, () -> new Image());
+        map.put(Line.TAG, () -> new Line());
+        map.put(LinearGradient.TAG, () -> new LinearGradient());
+        map.put(Marker.TAG, () -> new Marker());
+        map.put(Mask.TAG, () -> new Mask());
+        map.put(MeshGradient.TAG, () -> new MeshGradient());
+        map.put(MeshPatch.TAG, () -> new MeshPatch());
+        map.put(MeshRow.TAG, () -> new MeshRow());
+        map.put(Metadata.TAG, () -> new Metadata());
+        map.put(Path.TAG, () -> new Path());
+        map.put(Pattern.TAG, () -> new Pattern());
+        map.put(Polygon.TAG, () -> new Polygon());
+        map.put(Polyline.TAG, () -> new Polyline());
+        map.put(RadialGradient.TAG, () -> new RadialGradient());
+        map.put(Rect.TAG, () -> new Rect());
+        map.put(SVG.TAG, () -> new SVG());
+        map.put(SolidColor.TAG, () -> new SolidColor());
+        map.put(Stop.TAG, () -> new Stop());
+        map.put(Style.TAG, () -> new Style());
+        map.put(Symbol.TAG, () -> new Symbol());
+        map.put(Text.TAG, () -> new Text());
+        map.put(TextPath.TAG, () -> new TextPath());
+        map.put(TextSpan.TAG, () -> new TextSpan());
+        map.put(Title.TAG, () -> new Title());
+        map.put(Use.TAG, () -> new Use());
+        map.put(View.TAG, () -> new View());
 
-        map.put(Filter.TAG, Filter::new);
-        map.put(FeBlend.TAG, FeBlend::new);
-        map.put(FeColorMatrix.TAG, FeColorMatrix::new);
-        map.put(FeDisplacementMap.TAG, FeDisplacementMap::new);
-        map.put(FeFlood.TAG, FeFlood::new);
-        map.put(FeGaussianBlur.TAG, FeGaussianBlur::new);
-        map.put(FeMerge.TAG, FeMerge::new);
-        map.put(FeMergeNode.TAG, FeMergeNode::new);
-        map.put(FeTurbulence.TAG, FeTurbulence::new);
-        map.put(FeOffset.TAG, FeOffset::new);
+        map.put(Filter.TAG, () -> new Filter());
+        map.put(FeBlend.TAG, () -> new FeBlend());
+        map.put(FeColorMatrix.TAG, () -> new FeColorMatrix());
+        map.put(FeDisplacementMap.TAG, () -> new FeDisplacementMap());
+        map.put(FeFlood.TAG, () -> new FeFlood());
+        map.put(FeGaussianBlur.TAG, () -> new FeGaussianBlur());
+        map.put(FeMerge.TAG, () -> new FeMerge());
+        map.put(FeMergeNode.TAG, () -> new FeMergeNode());
+        map.put(FeTurbulence.TAG, () -> new FeTurbulence());
+        map.put(FeOffset.TAG, () -> new FeOffset());
 
         map.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
         map.put("feComposite", () -> new DummyFilterPrimitive("feComposite"));
@@ -224,7 +227,7 @@ public class SVGLoader {
         ResourceLoader resourceLoader();
     }
 
-    private static class SVGLoadHandler extends DefaultHandler implements LoadHelper {
+    private static final class SVGLoadHandler extends DefaultHandler implements LoadHelper {
 
         private static final boolean DEBUG_PRINT = false;
         private final PrintStream printer = System.out;
