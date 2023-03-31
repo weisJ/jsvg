@@ -70,11 +70,12 @@ public class FeOffset extends AbstractFilterPrimitive {
 
             if (filterContext.primitiveUnits() == UnitType.ObjectBoundingBox) {
                 Rectangle2D elementBounds = filterContext.info().elementBounds();
-                dx *= elementBounds.getWidth();
-                dy *= elementBounds.getHeight();
+                effectiveDx *= elementBounds.getWidth();
+                effectiveDy *= elementBounds.getHeight();
             }
 
             AffineTransform transform = AffineTransform.getTranslateInstance(effectiveDx, effectiveDy);
+
             AffineTransformOp op = new AffineTransformOp(transform, filterContext.renderingHints());
             result = in.applyFilter(new BufferedImageFilter(op));
         }
