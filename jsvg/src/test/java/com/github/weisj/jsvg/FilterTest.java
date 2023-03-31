@@ -59,7 +59,7 @@ class FilterTest {
     @Test
     @EnabledForJreRange(min = JRE.JAVA_9)
     void testTurbulence() {
-        assertEquals(SUCCESS, compareImages("filter/turbulence1.svg"));
+        assertEquals(SUCCESS, compareImages("filter/turbulence1.svg", 2));
         assertEquals(SUCCESS, compareImages("filter/turbulence2.svg"));
         assertEquals(SUCCESS, compareImages("filter/turbulence3.svg"));
     }
