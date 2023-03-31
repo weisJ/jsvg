@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;

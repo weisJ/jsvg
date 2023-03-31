@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
-
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 

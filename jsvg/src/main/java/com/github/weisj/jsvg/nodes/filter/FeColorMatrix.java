@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
 import java.awt.image.ImageFilter;
 import java.awt.image.RGBImageFilter;
 import java.util.Arrays;

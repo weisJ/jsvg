@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
