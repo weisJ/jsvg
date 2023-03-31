@@ -35,7 +35,7 @@ import com.github.weisj.jsvg.nodes.prototype.Instantiator;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public class BlittableImage {
+public final class BlittableImage {
 
     public interface BufferSurfaceSupplier {
         @NotNull

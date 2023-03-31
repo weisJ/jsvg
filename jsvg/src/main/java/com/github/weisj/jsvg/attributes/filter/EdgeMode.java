@@ -58,7 +58,7 @@ public enum EdgeMode {
             @NotNull ImageProducer producer, @NotNull Kernel[] kernels, int kernelCount);
 
 
-    private static class EdgeModeImage {
+    private static final class EdgeModeImage {
         private final @NotNull BufferedImage img;
         private final int xOff;
         private final int yOff;

@@ -110,7 +110,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         return (int) Math.max(Math.min(Math.round(value), 255), 0);
     }
 
-    private static class MatrixRGBFilter extends RGBImageFilter {
+    private static final class MatrixRGBFilter extends RGBImageFilter {
 
         private final double r1, r2, r3, r4, r5;
         private final double g1, g2, g3, g4, g5;
@@ -162,7 +162,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
     }
 
-    private static class LinearRGBFilter extends RGBImageFilter {
+    private static final class LinearRGBFilter extends RGBImageFilter {
         private final double r1, r2, r3;
         private final double g1, g2, g3;
         private final double b1, b2, b3;

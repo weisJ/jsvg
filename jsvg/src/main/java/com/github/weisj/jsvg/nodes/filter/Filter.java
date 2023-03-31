@@ -160,7 +160,7 @@ public final class Filter extends ContainerNode {
         return node instanceof FilterPrimitive && super.acceptChild(id, node);
     }
 
-    public static class FilterInfo {
+    public static final class FilterInfo {
         public final int imageWidth;
         public final int imageHeight;
 

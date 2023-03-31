@@ -45,7 +45,7 @@ public final class ShapeRenderer {
 
     private ShapeRenderer() {}
 
-    private static class PaintWithOpacity {
+    private static final class PaintWithOpacity {
         private final @NotNull SVGPaint paint;
         private final float opacity;
 
