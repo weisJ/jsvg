@@ -95,6 +95,7 @@ public final class Filter extends ContainerNode {
 
         // Note: Apparently these coordinates are always interpreted as percentages regardless of the
         // specified unit (except for explicit percentages).
+        // Unfortunately this results in rather large buffer images in general due to misuse.
         x = coerceToPercentage(x);
         y = coerceToPercentage(y);
         width = coerceToPercentage(width);
@@ -115,7 +116,7 @@ public final class Filter extends ContainerNode {
                 context.measureContext(), elementBounds, x, y, width, height);
 
         BlittableImage blitImage = BlittableImage.create(
-                ImageUtil::createCompatibleTransparentImage, context,
+                ImageUtil::createCompatibleTransparentImage, context, g.getClipBounds(),
                 imageBounds, elementBounds, UnitType.UserSpaceOnUse);
 
         return new FilterInfo(g, blitImage, elementBounds);

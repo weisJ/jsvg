@@ -89,7 +89,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
                 context.measureContext(), objectBounds, x, y, width, height);
 
         BlittableImage blitImage = BlittableImage.create(
-                ImageUtil::createLuminosityBuffer, context,
+                ImageUtil::createLuminosityBuffer, context, g.getClipBounds(),
                 maskBounds.createIntersection(objectBounds), objectBounds, maskContentUnits);
         Rectangle2D maskBoundsInUserSpace = blitImage.boundsInUserSpace();
 
