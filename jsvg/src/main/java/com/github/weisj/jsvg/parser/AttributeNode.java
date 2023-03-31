@@ -41,7 +41,7 @@ import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 
-public class AttributeNode {
+public final class AttributeNode {
     private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
     private static final Length Center = new Length(Unit.PERCENTAGE, 50f);
     private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);

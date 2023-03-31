@@ -42,7 +42,7 @@ import com.github.weisj.jsvg.attributes.stroke.StrokeResolver;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 
-public class RenderContext {
+public final class RenderContext {
 
     private final @Nullable JComponent targetComponent;
     private final @NotNull MeasureContext measureContext;

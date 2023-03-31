@@ -54,7 +54,7 @@ import com.github.weisj.jsvg.nodes.text.TextSpan;
  * Class for loading svg files as an {@link SVGDocument}.
  * Note that this class isn't guaranteed to be thread safe and hence shouldn't be used across multiple threads.
  */
-public class SVGLoader {
+public final class SVGLoader {
 
     static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
     private static final @NotNull Map<String, Supplier<SVGNode>> NODE_CONSTRUCTOR_MAP = createNodeConstructorMap();

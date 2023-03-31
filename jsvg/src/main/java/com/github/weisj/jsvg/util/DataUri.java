@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2013-2022 Jannis Weis
+ * Copyright (c) 2013-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -56,7 +56,7 @@ import org.jetbrains.annotations.Nullable;
  *
  *  Note: This file has been modified for usage in the JSVG project.
  */
-class DataUri {
+final class DataUri {
     private static final String CHARSET_OPTION_NAME = "charset";
     private static final String FILENAME_OPTION_NAME = "filename";
     private static final String CONTENT_DISPOSITION_OPTION_NAME = "content-disposition";
