@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class BlittableImage {
 
+    @FunctionalInterface
     public interface BufferSurfaceSupplier {
         @NotNull
         BufferedImage createBufferSurface(@NotNull AffineTransform at, double width, double height);
