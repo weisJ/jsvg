@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,13 +27,14 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.SeparatorMode;
 
 public final class FontParser {
     private FontParser() {}
 
     // Todo: font-variant
     public static @NotNull AttributeFontSpec parseFontSpec(@NotNull AttributeNode node) {
-        String[] fontFamilies = node.getStringList("font-family", true);
+        String[] fontFamilies = node.getStringList("font-family", SeparatorMode.COMMA_ONLY);
 
         // Todo: https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#fallback_weights
         @Nullable FontWeight weight = parseWeight(node);

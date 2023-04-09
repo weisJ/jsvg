@@ -248,12 +248,12 @@ public final class AttributeNode {
     }
 
     public @NotNull String[] getStringList(@NotNull String name) {
-        return getStringList(name, false);
+        return getStringList(name, SeparatorMode.COMMA_AND_WHITESPACE);
     }
 
 
-    public @NotNull String[] getStringList(@NotNull String name, boolean requireComma) {
-        return loadHelper.attributeParser().parseStringList(getValue(name), requireComma);
+    public @NotNull String[] getStringList(@NotNull String name, SeparatorMode separatorMode) {
+        return loadHelper.attributeParser().parseStringList(getValue(name), separatorMode);
     }
 
     public float getFloat(@NotNull String name, float fallback) {

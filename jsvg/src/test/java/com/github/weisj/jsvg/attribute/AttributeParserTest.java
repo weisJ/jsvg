@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
+import com.github.weisj.jsvg.parser.SeparatorMode;
 
 class AttributeParserTest {
 
@@ -72,7 +73,8 @@ class AttributeParserTest {
         for (int i = 0; i < 20; i++) {
             String[] arr = generateRandomStringArray(r);
             String[] parsed = parser.parseStringList(
-                    appendToList(arr, r, requireComma), requireComma);
+                    appendToList(arr, r, requireComma),
+                    requireComma ? SeparatorMode.COMMA_ONLY : SeparatorMode.COMMA_AND_WHITESPACE);
             Assertions.assertArrayEquals(arr, parsed);
         }
     }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.SeparatorMode;
 
 public class PaintOrder {
 
@@ -52,7 +53,7 @@ public class PaintOrder {
 
         if (value == null || "normal".equals(value)) return NORMAL;
 
-        String[] rawPhases = parser.parseStringList(value, false);
+        String[] rawPhases = parser.parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
         Phase[] phases = new Phase[3];
         int length = Math.min(phases.length, rawPhases.length);
         int i = 0;
