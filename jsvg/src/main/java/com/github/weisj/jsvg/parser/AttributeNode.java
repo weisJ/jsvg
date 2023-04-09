@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -40,6 +41,8 @@ import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
+import com.github.weisj.jsvg.parser.css.StyleProperty;
+import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 public final class AttributeNode {
     private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
@@ -50,17 +53,30 @@ public final class AttributeNode {
     private final @NotNull Map<String, String> attributes;
     private final @Nullable AttributeNode parent;
     private final @NotNull Map<@NotNull String, @NotNull Object> namedElements;
+    private final @NotNull List<@NotNull StyleSheet> styleSheets;
 
     private final @NotNull SVGLoader.LoadHelper loadHelper;
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
-            @Nullable AttributeNode parent, @NotNull Map<@NotNull String, @NotNull Object> namedElements,
+            @Nullable AttributeNode parent,
+            @NotNull Map<@NotNull String, @NotNull Object> namedElements,
+            @NotNull List<@NotNull StyleSheet> styleSheets,
             @NotNull SVGLoader.LoadHelper loadHelper) {
         this.tagName = tagName;
-        this.attributes = preprocessAttributes(attributes);
+        this.attributes = attributes;
         this.parent = parent;
         this.namedElements = namedElements;
+        this.styleSheets = styleSheets;
         this.loadHelper = loadHelper;
+    }
+
+    public void prepareForNodeBuilding() {
+        preprocessAttributes(attributes);
+    }
+
+    void applyStyleProperty(@NotNull StyleProperty p) {
+        if (hasAttribute(p.name())) return;
+        attributes.put(p.name(), p.value());
     }
 
     @NotNull
@@ -68,11 +84,16 @@ public final class AttributeNode {
         return namedElements;
     }
 
+    @NotNull
+    List<@NotNull StyleSheet> styleSheets() {
+        return styleSheets;
+    }
+
     private static boolean isBlank(@NotNull String s) {
         return s.trim().isEmpty();
     }
 
-    private static @NotNull Map<String, String> preprocessAttributes(@NotNull Map<String, String> attributes) {
+    private static void preprocessAttributes(@NotNull Map<String, String> attributes) {
         String styleStr = attributes.get("style");
         if (styleStr != null && !isBlank(styleStr)) {
             String[] styles = styleStr.split(";");
@@ -82,7 +103,6 @@ public final class AttributeNode {
                 attributes.put(styleDef[0].trim().toLowerCase(Locale.ENGLISH), styleDef[1].trim());
             }
         }
-        return attributes;
     }
 
     private <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {

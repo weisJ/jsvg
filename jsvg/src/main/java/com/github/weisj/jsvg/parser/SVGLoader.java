@@ -49,6 +49,8 @@ import com.github.weisj.jsvg.nodes.mesh.MeshRow;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
+import com.github.weisj.jsvg.parser.css.CssParser;
+import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 /**
  * Class for loading svg files as an {@link SVGDocument}.
@@ -235,6 +237,8 @@ public final class SVGLoader {
         private String ident = "";
 
         private final Map<String, Object> namedElements = new HashMap<>();
+        private final List<Style> styleElements = new ArrayList<>();
+        private final List<StyleSheet> styleSheets = new ArrayList<>();
         private final Deque<ParsedElement> currentNodeStack = new ArrayDeque<>();
 
         private ParsedElement rootNode;
@@ -242,6 +246,7 @@ public final class SVGLoader {
         private final @NotNull AttributeParser attributeParser;
         private final @NotNull ResourceLoader resourceLoader;
         private final @NotNull ParserProvider parserProvider;
+
 
         private SVGLoadHandler(@NotNull ParserProvider parserProvider, @NotNull ResourceLoader resourceLoader) {
             this.attributeParser = new AttributeParser(parserProvider.createPaintParser());
@@ -309,13 +314,17 @@ public final class SVGLoader {
                         attributes.getValue("id"),
                         new AttributeNode(qName, attrs, lastParsedElement != null
                                 ? lastParsedElement.attributeNode()
-                                : null, namedElements, this),
+                                : null, namedElements, styleSheets, this),
                         newNode);
 
                 if (lastParsedElement != null) {
                     lastParsedElement.addChild(parsedElement);
                 }
                 if (rootNode == null) rootNode = parsedElement;
+
+                if (parsedElement.node() instanceof Style) {
+                    styleElements.add((Style) parsedElement.node());
+                }
 
                 currentNodeStack.push(parsedElement);
                 String id = parsedElement.id();
@@ -364,6 +373,15 @@ public final class SVGLoader {
         @NotNull
         SVGDocument getDocument() {
             DomProcessor preProcessor = parserProvider.createPreProcessor();
+
+            if (!styleElements.isEmpty()) {
+                CssParser cssParser = parserProvider.createCssParser();
+                for (Style styleElement : styleElements) {
+                    styleElement.parseStyleSheet(cssParser);
+                    styleSheets.add(styleElement.styleSheet());
+                }
+            }
+
             if (preProcessor != null) preProcessor.process(rootNode);
             rootNode.build();
             DomProcessor postProcessor = parserProvider.createPostProcessor();

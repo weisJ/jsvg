@@ -35,4 +35,5 @@ module com.github.weisj.jsvg {
     exports com.github.weisj.jsvg.geometry.size;
     exports com.github.weisj.jsvg.nodes;
     exports com.github.weisj.jsvg.parser;
+    exports com.github.weisj.jsvg.parser.css;
 }

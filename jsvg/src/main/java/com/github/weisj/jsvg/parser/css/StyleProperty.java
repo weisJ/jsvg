@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,34 +19,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser;
+package com.github.weisj.jsvg.parser.css;
+
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
-import com.github.weisj.jsvg.parser.css.CssParser;
-import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
+import com.google.errorprone.annotations.Immutable;
 
-public class DefaultParserProvider implements ParserProvider {
-    @Override
-    public @NotNull PaintParser createPaintParser() {
-        return new DefaultPaintParser();
+@Immutable
+public final class StyleProperty {
+    private final @NotNull String name;
+    private final @NotNull String value;
+
+    public StyleProperty(@NotNull String name, @NotNull String value) {
+        this.name = name;
+        this.value = value;
+    }
+
+    public @NotNull String name() {
+        return name;
+    }
+
+    public @NotNull String value() {
+        return value;
     }
 
     @Override
-    public @NotNull CssParser createCssParser() {
-        return new SimpleCssParser();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StyleProperty that = (StyleProperty) o;
+        return name.equals(that.name) && value.equals(that.value);
     }
 
     @Override
-    public @Nullable DomProcessor createPreProcessor() {
-        return null;
+    public int hashCode() {
+        return Objects.hash(name, value);
     }
 
     @Override
-    public @Nullable DomProcessor createPostProcessor() {
-        return null;
+    public String toString() {
+        return "StyleProperty{" +
+                "name='" + name + '\'' +
+                ", value='" + value + '\'' +
+                '}';
     }
 }

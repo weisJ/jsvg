@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 public final class ParsedElement {
 
@@ -42,6 +43,7 @@ public final class ParsedElement {
     private final @Nullable String id;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
+
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NO;
@@ -104,6 +106,17 @@ public final class ParsedElement {
             return;
         }
         buildStatus = BuildStatus.BUILDING;
+
+        // Parse the inline style attributes.
+        attributeNode.prepareForNodeBuilding();
+        // Traverse the style sheets in backwards order to only use the newest definition.
+        // FIXME: Only use the newest *valid* definition of a property value.
+        List<StyleSheet> styleSheets = attributeNode.styleSheets();
+        for (int i = attributeNode.styleSheets().size() - 1; i >= 0; i--) {
+            StyleSheet sheet = styleSheets.get(i);
+            sheet.forEachMatchingRule(this, attributeNode::applyStyleProperty);
+        }
+
         // Build depth first to ensure child nodes are processed first.
         // e.g. LinearGradient depends on its stops to be build first.
         for (ParsedElement child : children) {

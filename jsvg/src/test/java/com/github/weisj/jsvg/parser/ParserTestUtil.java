@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -47,6 +47,6 @@ public final class ParserTestUtil {
     private ParserTestUtil() {}
 
     public static @NotNull AttributeNode createDummyAttributeNode(@NotNull Map<String, String> attrs) {
-        return new AttributeNode("dummy", attrs, null, Collections.emptyMap(), LOAD_HELPER);
+        return new AttributeNode("dummy", attrs, null, Collections.emptyMap(), Collections.emptyList(), LOAD_HELPER);
     }
 }

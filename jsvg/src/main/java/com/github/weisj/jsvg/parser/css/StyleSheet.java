@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,34 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser;
+package com.github.weisj.jsvg.parser.css;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
-import com.github.weisj.jsvg.parser.css.CssParser;
-import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
+import com.github.weisj.jsvg.parser.ParsedElement;
 
-public class DefaultParserProvider implements ParserProvider {
-    @Override
-    public @NotNull PaintParser createPaintParser() {
-        return new DefaultPaintParser();
+public interface StyleSheet {
+
+    interface RuleConsumer {
+        void applyRule(@NotNull StyleProperty property);
     }
 
-    @Override
-    public @NotNull CssParser createCssParser() {
-        return new SimpleCssParser();
-    }
-
-    @Override
-    public @Nullable DomProcessor createPreProcessor() {
-        return null;
-    }
-
-    @Override
-    public @Nullable DomProcessor createPostProcessor() {
-        return null;
-    }
+    void forEachMatchingRule(@NotNull ParsedElement element, @NotNull RuleConsumer ruleConsumer);
 }
