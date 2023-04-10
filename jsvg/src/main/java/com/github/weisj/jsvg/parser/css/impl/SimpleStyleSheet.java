@@ -35,10 +35,21 @@ import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 public class SimpleStyleSheet implements StyleSheet {
 
-    private final Map<String, @NotNull List<@NotNull StyleProperty>> classRules = new HashMap<>();
-    private final Map<String, @NotNull List<@NotNull StyleProperty>> idRules = new HashMap<>();
-    private final Map<String, @NotNull List<@NotNull StyleProperty>> tagNameRules = new HashMap<>();
+    private final @NotNull Map<String, @NotNull List<@NotNull StyleProperty>> classRules = new HashMap<>();
+    private final @NotNull Map<String, @NotNull List<@NotNull StyleProperty>> idRules = new HashMap<>();
+    private final @NotNull Map<String, @NotNull List<@NotNull StyleProperty>> tagNameRules = new HashMap<>();
 
+    public @NotNull Map<String, @NotNull List<@NotNull StyleProperty>> classRules() {
+        return classRules;
+    }
+
+    public @NotNull Map<String, @NotNull List<@NotNull StyleProperty>> idRules() {
+        return idRules;
+    }
+
+    public @NotNull Map<String, @NotNull List<@NotNull StyleProperty>> tagNameRules() {
+        return tagNameRules;
+    }
 
     void addTagNameRules(@NotNull String tagName, @NotNull List<@NotNull StyleProperty> rule) {
         tagNameRules.computeIfAbsent(tagName, k -> new ArrayList<>()).addAll(rule);

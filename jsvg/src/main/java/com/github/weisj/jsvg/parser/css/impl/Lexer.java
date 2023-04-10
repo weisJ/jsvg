@@ -140,12 +140,11 @@ public final class Lexer {
         return input.get(listIndex)[index];
     }
 
-    private char next() {
+    private void next() {
         index++;
-        if (listIndex < input.size() && index >= input.get(listIndex).length) {
+        if (index >= input.get(listIndex).length && listIndex + 1 < input.size()) {
             index = 0;
             listIndex++;
         }
-        return current();
     }
 }

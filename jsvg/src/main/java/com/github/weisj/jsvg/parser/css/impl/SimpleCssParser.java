@@ -30,14 +30,13 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleProperty;
-import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 public class SimpleCssParser implements CssParser {
 
     private static final Logger LOGGER = Logger.getLogger(SimpleCssParser.class.getName());
 
     @Override
-    public @NotNull StyleSheet parse(@NotNull List<char[]> input) {
+    public @NotNull SimpleStyleSheet parse(@NotNull List<char[]> input) {
         return new Parser(input).parse();
     }
 
@@ -127,7 +126,7 @@ public class SimpleCssParser implements CssParser {
         }
 
         private void skipToNextDefinition() {
-            while (current.type() != TokenType.CURLY_CLOSE) {
+            while (current.type() != TokenType.CURLY_CLOSE && current.type() != TokenType.EOF) {
                 next();
             }
             next();
