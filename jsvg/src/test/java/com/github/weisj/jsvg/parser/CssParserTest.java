@@ -23,18 +23,22 @@ package com.github.weisj.jsvg.parser;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import com.github.weisj.jsvg.parser.css.StyleProperty;
 import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
 import com.github.weisj.jsvg.parser.css.impl.SimpleStyleSheet;
+import com.github.weisj.jsvg.util.RandomData;
 
 class CssParserTest {
 
@@ -59,6 +63,13 @@ class CssParserTest {
         assertNoRulesProduced.accept(".a }");
         assertNoRulesProduced.accept(".a .b");
         assertNoRulesProduced.accept(".a :");
+        assertNoRulesProduced.accept(".a { .b }");
+        assertNoRulesProduced.accept(".a { .b : a; }");
+        assertNoRulesProduced.accept(".a { b : a }");
+
+        var s = cssParser.parse(inputFromString("#rule { c : d; }"));
+        assertTrue(s.idRules().containsKey("rule"));
+        assertEquals(List.of(new StyleProperty("c", "d")), s.idRules().get("rule"));
 
         var sheet = cssParser.parse(inputFromString("""
                 .a .b {}
@@ -80,15 +91,32 @@ class CssParserTest {
         assertEquals(0, sheet.tagNameRules().size());
         assertEquals(3, sheet.idRules().size());
 
-        assertTrue(sheet.idRules().containsKey("rule1"));
-        assertTrue(sheet.idRules().containsKey("rule2"));
-        assertTrue(sheet.idRules().containsKey("rule3"));
+        assertTrue(sheet.idRules().containsKey("rule1"), () -> sheet.idRules().toString());
+        assertTrue(sheet.idRules().containsKey("rule2"), () -> sheet.idRules().toString());
+        assertTrue(sheet.idRules().containsKey("rule3"), () -> sheet.idRules().toString());
 
         var p = List.of(new StyleProperty("fill", "orange"));
 
         assertEquals(p, sheet.idRules().get("rule1"));
         assertEquals(p, sheet.idRules().get("rule2"));
         assertEquals(p, sheet.idRules().get("rule3"));
+    }
+
+    @Test
+    @Timeout(value = 5)
+    void randomInput() {
+        SimpleCssParser cssParser = new SimpleCssParser();
+        Random r = new Random();
+        for (int i = 0; i < 200; i++) {
+            String[] inputStrings = RandomData.generateRandomStringArray(r, RandomData.CharType.ALL_ASCII);
+            List<char[]> input = new ArrayList<>();
+            for (String inputString : inputStrings) {
+                input.add(inputString.toCharArray());
+            }
+            assertDoesNotThrow(() -> {
+                cssParser.parse(input);
+            }, () -> Arrays.toString(inputStrings));
+        }
     }
 
     @Test

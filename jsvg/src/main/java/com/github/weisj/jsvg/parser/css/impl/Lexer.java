@@ -111,24 +111,33 @@ public final class Lexer {
     }
 
     private @Nullable String readIdentifier() {
-        if (!isIdentifierCharStart(current())) {
+        if (!isIdentifierCharStart(current()) || !isIdentifierChar(current())) {
             LOGGER.warning("Identifier starting with unexpected char '" + current() + "'");
+            if (readWhile(this::isIdentifierChar).isEmpty()) {
+                next();
+            }
             return null;
         }
         return readWhile(this::isIdentifierChar);
     }
 
     private @NotNull String readWhile(@NotNull Predicate<Character> filter) {
+        if (isEof()) return "";
+
+        int startListIndex = listIndex;
         int startIndex = index;
-        int listStartIndex = listIndex;
-        while (filter.test(current())) {
+        while (!isEof() && filter.test(current())) {
             next();
         }
+        int endListIndex = isEof() ? input.size() - 1 : listIndex;
+        int endIndex = isEof() ? input.get(endListIndex).length - 1 : index;
+
         StringBuilder builder = new StringBuilder();
         int start = startIndex;
-        for (int i = listStartIndex; i <= listIndex; i++) {
+        for (int i = startListIndex; i <= endListIndex; i++) {
             char[] segment = input.get(i);
-            int end = i == listIndex ? index : segment.length - 1;
+            int end = (i == endListIndex) ? endIndex : segment.length - 1;
+
             builder.append(String.valueOf(segment, start, end - start));
             start = 0;
         }
