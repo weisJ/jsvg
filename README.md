@@ -28,7 +28,7 @@ dependencies {
 }
 ````
 
-Also nightly snapshot builds will be release to maven:
+Also nightly snapshot builds will be released to maven:
 ````kotlin
 repositories {
     maven {
