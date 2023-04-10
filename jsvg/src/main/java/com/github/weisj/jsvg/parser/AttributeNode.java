@@ -76,12 +76,12 @@ public final class AttributeNode {
         // First process the inline styles. They have the highest priority.
         preprocessAttributes(attributes, styleSheetAttributes);
 
-        List<StyleSheet> styleSheets = styleSheets();
+        List<StyleSheet> sheets = styleSheets();
         // Traverse the style sheets in backwards order to only use the newest definition.
         // FIXME: Only use the newest *valid* definition of a property value.
-        for (int i = styleSheets.size() - 1; i >= 0; i--) {
-            StyleSheet sheet = styleSheets.get(i);
-            sheet.forEachMatchingRule(parsedElement, (p) -> {
+        for (int i = sheets.size() - 1; i >= 0; i--) {
+            StyleSheet sheet = sheets.get(i);
+            sheet.forEachMatchingRule(parsedElement, p -> {
                 if (!styleSheetAttributes.containsKey(p.name())) {
                     styleSheetAttributes.put(p.name(), p.value());
                 }
