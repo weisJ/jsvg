@@ -68,18 +68,22 @@ public class FeMerge extends ContainerNode implements FilterPrimitive {
         return inputChannels.length > 0;
     }
 
+    @Override
     public @NotNull Length x() {
         return filterPrimitiveBase.x;
     }
 
+    @Override
     public @NotNull Length y() {
         return filterPrimitiveBase.y;
     }
 
+    @Override
     public @NotNull Length width() {
         return filterPrimitiveBase.width;
     }
 
+    @Override
     public @NotNull Length height() {
         return filterPrimitiveBase.height;
     }

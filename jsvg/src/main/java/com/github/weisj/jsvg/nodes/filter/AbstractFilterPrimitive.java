@@ -43,18 +43,22 @@ public abstract class AbstractFilterPrimitive extends AbstractSVGNode implements
         return filterPrimitiveBase;
     }
 
+    @Override
     public @NotNull Length x() {
         return impl().x;
     }
 
+    @Override
     public @NotNull Length y() {
         return impl().y;
     }
 
+    @Override
     public @NotNull Length width() {
         return impl().width;
     }
 
+    @Override
     public @NotNull Length height() {
         return impl().height;
     }
