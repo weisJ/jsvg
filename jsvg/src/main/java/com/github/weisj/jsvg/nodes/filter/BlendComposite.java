@@ -183,7 +183,7 @@ public final class BlendComposite implements Composite {
         }
     }
 
-    private static abstract class Blender {
+    private abstract static class Blender {
         public abstract void blend(int[] src, int[] dst, int[] result);
 
         public static Blender forBlendMode(BlendMode blendMode) {

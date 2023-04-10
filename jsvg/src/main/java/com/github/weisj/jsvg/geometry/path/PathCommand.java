@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -64,7 +64,7 @@ public abstract class PathCommand {
         return isRelative;
     }
 
-    abstract public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist);
+    public abstract void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist);
 
     public int nodeCount() {
         return nodeCount;

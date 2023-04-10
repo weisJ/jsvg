@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,7 +48,7 @@ public abstract class MarkerOrientation {
     public abstract @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
             float dyOut);
 
-    private final static class AutoOrientation extends MarkerOrientation {
+    private static final class AutoOrientation extends MarkerOrientation {
         private static final @NotNull AutoOrientation INSTANCE = new AutoOrientation();
 
         @Override
@@ -67,7 +67,7 @@ public abstract class MarkerOrientation {
         }
     }
 
-    private final static class AutoStartReverseOrientation extends MarkerOrientation {
+    private static final class AutoStartReverseOrientation extends MarkerOrientation {
         private static final @NotNull AutoStartReverseOrientation INSTANCE = new AutoStartReverseOrientation();
 
         @Override
@@ -86,7 +86,7 @@ public abstract class MarkerOrientation {
         }
     }
 
-    private final static class AngleOrientation extends MarkerOrientation {
+    private static final class AngleOrientation extends MarkerOrientation {
         private static final @NotNull AngleOrientation DEFAULT = new AngleOrientation(0);
         private final @Radian float angle;
 
