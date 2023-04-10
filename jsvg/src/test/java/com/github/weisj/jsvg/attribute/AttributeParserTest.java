@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.SeparatorMode;
+import com.github.weisj.jsvg.util.RandomData;
 
 class AttributeParserTest {
 
@@ -54,7 +55,7 @@ class AttributeParserTest {
     void testFloatList() {
         Random r = new Random();
         for (int i = 0; i < 20; i++) {
-            float[] arr = generateRandomFloatArray(r);
+            float[] arr = RandomData.generateRandomFloatArray(r);
             float[] parsed = parser.parseFloatList(appendToList(box(arr), r, false));
             Assertions.assertArrayEquals(arr, parsed);
         }
@@ -71,7 +72,7 @@ class AttributeParserTest {
     private void testStringList(boolean requireComma) {
         Random r = new Random();
         for (int i = 0; i < 20; i++) {
-            String[] arr = generateRandomStringArray(r);
+            String[] arr = RandomData.generateRandomStringArray(r);
             String[] parsed = parser.parseStringList(
                     appendToList(arr, r, requireComma),
                     requireComma ? SeparatorMode.COMMA_ONLY : SeparatorMode.COMMA_AND_WHITESPACE);
@@ -89,35 +90,5 @@ class AttributeParserTest {
             }
         }
         return builder.toString();
-    }
-
-    private float[] generateRandomFloatArray(Random r) {
-        int count = 5 + r.nextInt(10);
-        float[] arr = new float[count];
-        for (int i = 0; i < count; i++) {
-            arr[i] = r.nextFloat();
-        }
-        return arr;
-    }
-
-    private String[] generateRandomStringArray(Random r) {
-        int count = 5 + r.nextInt(10);
-        String[] arr = new String[count];
-        for (int i = 0; i < count; i++) {
-            arr[i] = generateRandomString(r);
-        }
-        return arr;
-    }
-
-    private String generateRandomString(Random random) {
-        int leftLimit = 48; // numeral '0'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
-
-        return random.ints(leftLimit, rightLimit + 1)
-                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
     }
 }
