@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -112,13 +112,13 @@ public final class BlendComposite implements Composite {
     }
 
     private static boolean isColorModelInvalid(ColorModel cm) {
-        if ((cm instanceof DirectColorModel) && (cm.getTransferType() == DataBuffer.TYPE_INT)) {
+        if (cm instanceof DirectColorModel && cm.getTransferType() == DataBuffer.TYPE_INT) {
             DirectColorModel directCM = (DirectColorModel) cm;
 
-            return !((directCM.getRedMask() == 0x00FF0000)
-                    && (directCM.getGreenMask() == 0x0000FF00)
-                    && (directCM.getBlueMask() == 0x000000FF)
-                    && ((directCM.getNumComponents() != 4) || (directCM.getAlphaMask() == 0xFF000000)));
+            return !(directCM.getRedMask() == 0x00FF0000
+                    && directCM.getGreenMask() == 0x0000FF00
+                    && directCM.getBlueMask() == 0x000000FF
+                    && (directCM.getNumComponents() != 4 || directCM.getAlphaMask() == 0xFF000000));
         }
         return true;
     }

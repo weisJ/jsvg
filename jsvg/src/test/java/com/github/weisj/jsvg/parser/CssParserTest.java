@@ -50,7 +50,7 @@ class CssParserTest {
     void invalidCssProducesNoRules() {
         SimpleCssParser cssParser = new SimpleCssParser();
 
-        Consumer<String> assertNoRulesProduced = (css) -> {
+        Consumer<String> assertNoRulesProduced = css -> {
             SimpleStyleSheet sheet = cssParser.parse(inputFromString(css));
             assertEquals(0, sheet.classRules().size());
             assertEquals(0, sheet.idRules().size());

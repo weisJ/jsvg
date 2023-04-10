@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -50,9 +50,9 @@ public final class ColorUtil {
             b = 0;
         else if (b > 255) b = 255;
 
-        float componentR = (r / 255f);
-        float componentG = (g / 255f);
-        float componentB = (b / 255f);
+        float componentR = r / 255f;
+        float componentG = g / 255f;
+        float componentB = b / 255f;
 
         float minComponent;
         float maxComponent;
@@ -83,7 +83,7 @@ public final class ColorUtil {
             s = 0;
         } else {
             if (l < 0.5f) {
-                assert (maxComponent + minComponent) != 0;
+                assert maxComponent + minComponent != 0;
                 s = deltaMax / (maxComponent + minComponent);
             } else {
                 s = deltaMax / (2 - maxComponent - minComponent);

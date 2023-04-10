@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -132,7 +132,7 @@ class Arc extends PathCommand {
       * This constructs a non-rotated Arc2D from the SVG specification of an
      * Elliptical arc.  To get the final arc you need to apply a rotation
      * transform such as:
-     *
+     * <p>
      * AffineTransform.getRotateInstance
      *     (angle, arc.getX()+arc.getWidth()/2, arc.getY()+arc.getHeight()/2);
      *
@@ -170,8 +170,8 @@ class Arc extends PathCommand {
         //
         // Step 1 : Compute (x1, y1)
         //
-        double x1 = (cosAngle * dx2 + sinAngle * dy2);
-        double y1 = (-sinAngle * dx2 + cosAngle * dy2);
+        double x1 = cosAngle * dx2 + sinAngle * dy2;
+        double y1 = -sinAngle * dx2 + cosAngle * dy2;
         // Ensure radii are large enough
         rx = Math.abs(rx);
         ry = Math.abs(ry);
@@ -191,10 +191,10 @@ class Arc extends PathCommand {
         //
         // Step 2 : Compute (cx1, cy1)
         //
-        double sign = (largeArcFlag == sweepFlag) ? -1 : 1;
+        double sign = largeArcFlag == sweepFlag ? -1 : 1;
         double sq = ((Prx * Pry) - (Prx * Py1) - (Pry * Px1)) / ((Prx * Py1) + (Pry * Px1));
-        sq = (sq < 0) ? 0 : sq;
-        double coefficient = (sign * Math.sqrt(sq));
+        sq = sq < 0 ? 0 : sq;
+        double coefficient = sign * Math.sqrt(sq);
         double cx1 = coefficient * ((rx * y1) / ry);
         double cy1 = coefficient * -((ry * x1) / rx);
 
@@ -223,7 +223,7 @@ class Arc extends PathCommand {
         // Compute the angle extent
         n = Math.sqrt((ux * ux + uy * uy) * (vx * vx + vy * vy));
         p = ux * vx + uy * vy;
-        sign = (ux * vy - uy * vx < 0) ? -1d : 1d;
+        sign = ux * vy - uy * vx < 0 ? -1d : 1d;
         double angleExtent = Math.toDegrees(sign * Math.acos(p / n));
         if (!sweepFlag && angleExtent > 0) {
             angleExtent -= 360f;

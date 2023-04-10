@@ -171,7 +171,7 @@ public final class AttributeParser {
         for (; i < max; i++) {
             char c = value.charAt(i);
             if (Character.isWhitespace(c)) {
-                if (!inWhiteSpace && separatorMode != SeparatorMode.COMMA_ONLY && (i - start) > 0) {
+                if (!inWhiteSpace && separatorMode != SeparatorMode.COMMA_ONLY && i - start > 0) {
                     list.add(value.substring(start, i));
                     start = i + 1;
                 }
@@ -184,7 +184,7 @@ public final class AttributeParser {
                 start = i + 1;
             }
         }
-        if ((i - start) > 0) list.add(value.substring(start, i));
+        if (i - start > 0) list.add(value.substring(start, i));
         return list.toArray(new String[0]);
     }
 

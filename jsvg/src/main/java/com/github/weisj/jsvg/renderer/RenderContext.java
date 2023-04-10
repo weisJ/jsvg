@@ -120,7 +120,7 @@ public final class RenderContext {
 
     public @NotNull RenderContext deriveForChildGraphics() {
         // Pass non-trivial context mutator to ensure userSpaceTransform gets created a different copy.
-        return derive((t) -> t, null, null, null, null, null);
+        return derive(t -> t, null, null, null, null, null);
     }
 
     public @NotNull StrokeContext strokeContext() {
