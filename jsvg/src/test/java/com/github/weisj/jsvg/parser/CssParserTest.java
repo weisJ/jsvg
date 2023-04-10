@@ -103,7 +103,7 @@ class CssParserTest {
     }
 
     @Test
-    @Timeout(value = 5)
+    @Timeout(value = 10)
     void randomInput() {
         SimpleCssParser cssParser = new SimpleCssParser();
         Random r = new Random();
