@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.attributes.filter;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
@@ -95,8 +94,6 @@ public enum EdgeMode {
 
         int xOff = xSize / 2;
         int yOff = ySize / 2;
-
-        AffineTransform at = g.getTransform();
 
         g.translate(xOff, yOff);
         g.drawImage(img, null, null);
