@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.parser.css.impl;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -61,7 +62,7 @@ public class SimpleCssParser implements CssParser {
         }
 
         private void expected(@NotNull String type) {
-            LOGGER.warning("Expected '" + type + "' but got '" + current + "'");
+            LOGGER.warning(() -> MessageFormat.format("Expected ''{0}'' but got ''{1}''", type, current));
         }
 
         private void consume(TokenType type) {

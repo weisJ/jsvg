@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.parser.css.impl;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -30,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 public final class Lexer {
-    private static final Logger LOGGER = Logger.getLogger(SimpleCssParser.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Lexer.class.getName());
 
     private final @NotNull List<char[]> input;
     private int listIndex = 0;
@@ -83,8 +84,9 @@ public final class Lexer {
             case '#':
                 next();
                 return new Token(TokenType.ID_NAME, readIdentifier());
+            default:
+                return new Token(TokenType.IDENTIFIER, readIdentifier());
         }
-        return new Token(TokenType.IDENTIFIER, readIdentifier());
     }
 
     private boolean isEof() {
@@ -112,7 +114,7 @@ public final class Lexer {
 
     private @Nullable String readIdentifier() {
         if (!isIdentifierCharStart(current()) || !isIdentifierChar(current())) {
-            LOGGER.warning("Identifier starting with unexpected char '" + current() + "'");
+            LOGGER.warning(() -> MessageFormat.format("Identifier starting with unexpected char ''{0}''", current()));
             if (readWhile(this::isIdentifierChar).isEmpty()) {
                 next();
             }
