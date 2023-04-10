@@ -24,16 +24,23 @@ dependencies {
     jmh(testLibs.svgSalamander)
     jmh(testLibs.batik)
 }
+tasks {
 
-tasks.test {
-    doFirst {
-        workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
+    compileTestJava {
+        sourceCompatibility = JavaVersion.VERSION_17.toString()
+        targetCompatibility = JavaVersion.VERSION_17.toString()
     }
-    useJUnitPlatform()
-    testLogging {
-        showStandardStreams = true
-        showExceptions = true
-        showStackTraces = true
-        exceptionFormat = TestExceptionFormat.FULL
+
+    test {
+        doFirst {
+            workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
+        }
+        useJUnitPlatform()
+        testLogging {
+            showStandardStreams = true
+            showExceptions = true
+            showStackTraces = true
+            exceptionFormat = TestExceptionFormat.FULL
+        }
     }
 }
