@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -55,7 +55,7 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import com.google.errorprone.annotations.CheckReturnValue;
 
 @CheckReturnValue
-final class ReferenceTest {
+public final class ReferenceTest {
 
     private static final double DEFAULT_TOLERANCE = 0.5;
 
@@ -68,16 +68,16 @@ final class ReferenceTest {
         }
     }
 
-    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName) {
+    public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName) {
         return compareImages(fileName, DEFAULT_TOLERANCE);
     }
 
-    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance) {
+    public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance) {
         return compareImages(fileName, Objects.requireNonNull(ReferenceTest.class.getResource(fileName), fileName),
                 tolerance);
     }
 
-    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull URL url,
+    public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull URL url,
             double tolerance) {
         try {
             BufferedImage expected = renderReference(url.openStream());
@@ -199,10 +199,10 @@ final class ReferenceTest {
         return imagePointer[0];
     }
 
-    static final class ReferenceTestResult {
-        static final @NotNull ReferenceTest.ReferenceTestResult SUCCESS =
+    public static final class ReferenceTestResult {
+        public static final @NotNull ReferenceTest.ReferenceTestResult SUCCESS =
                 new ReferenceTestResult(ImageComparisonState.MATCH, () -> "SUCCESS");
-        static final @NotNull ReferenceTest.ReferenceTestResult FAILURE =
+        public static final @NotNull ReferenceTest.ReferenceTestResult FAILURE =
                 new ReferenceTestResult(ImageComparisonState.MATCH, () -> "FAILURE");
 
         private final @NotNull ImageComparisonState comparisonState;
