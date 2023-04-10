@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,7 +42,6 @@ import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
-import com.github.weisj.jsvg.parser.css.StyleProperty;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 public final class AttributeNode {
@@ -70,13 +70,41 @@ public final class AttributeNode {
         this.loadHelper = loadHelper;
     }
 
-    public void prepareForNodeBuilding() {
-        preprocessAttributes(attributes);
+    void prepareForNodeBuilding(@NotNull ParsedElement parsedElement) {
+        Map<String, String> styleSheetAttributes = new HashMap<>();
+
+        // First process the inline styles. They have the highest priority.
+        preprocessAttributes(attributes, styleSheetAttributes);
+
+        List<StyleSheet> styleSheets = styleSheets();
+        // Traverse the style sheets in backwards order to only use the newest definition.
+        // FIXME: Only use the newest *valid* definition of a property value.
+        for (int i = styleSheets.size() - 1; i >= 0; i--) {
+            StyleSheet sheet = styleSheets.get(i);
+            sheet.forEachMatchingRule(parsedElement, (p) -> {
+                if (!styleSheetAttributes.containsKey(p.name())) {
+                    styleSheetAttributes.put(p.name(), p.value());
+                }
+            });
+        }
+        attributes.putAll(styleSheetAttributes);
     }
 
-    void applyStyleProperty(@NotNull StyleProperty p) {
-        if (hasAttribute(p.name())) return;
-        attributes.put(p.name(), p.value());
+    private static boolean isBlank(@NotNull String s) {
+        return s.trim().isEmpty();
+    }
+
+    private static void preprocessAttributes(@NotNull Map<String, String> attributes,
+            @NotNull Map<String, String> styleAttributes) {
+        String styleStr = attributes.get("style");
+        if (styleStr != null && !isBlank(styleStr)) {
+            String[] styles = styleStr.split(";");
+            for (String style : styles) {
+                if (isBlank(style)) continue;
+                String[] styleDef = style.split(":", 2);
+                styleAttributes.put(styleDef[0].trim().toLowerCase(Locale.ENGLISH), styleDef[1].trim());
+            }
+        }
     }
 
     @NotNull
@@ -87,22 +115,6 @@ public final class AttributeNode {
     @NotNull
     List<@NotNull StyleSheet> styleSheets() {
         return styleSheets;
-    }
-
-    private static boolean isBlank(@NotNull String s) {
-        return s.trim().isEmpty();
-    }
-
-    private static void preprocessAttributes(@NotNull Map<String, String> attributes) {
-        String styleStr = attributes.get("style");
-        if (styleStr != null && !isBlank(styleStr)) {
-            String[] styles = styleStr.split(";");
-            for (String style : styles) {
-                if (isBlank(style)) continue;
-                String[] styleDef = style.split(":", 2);
-                attributes.put(styleDef[0].trim().toLowerCase(Locale.ENGLISH), styleDef[1].trim());
-            }
-        }
     }
 
     private <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
