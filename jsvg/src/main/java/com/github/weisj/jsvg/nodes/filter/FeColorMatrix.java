@@ -199,7 +199,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
     }
 
-    private static class LuminanceToAlphaFilter extends RGBImageFilter {
+    private static final class LuminanceToAlphaFilter extends RGBImageFilter {
 
         @Override
         public int filterRGB(int x, int y, int rgb) {

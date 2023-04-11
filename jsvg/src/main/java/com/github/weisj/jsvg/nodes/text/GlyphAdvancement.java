@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.attributes.text.LengthAdjust;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
-class GlyphAdvancement {
+final class GlyphAdvancement {
     private final float spacingAdjustment;
     private final float absoluteSpacingAdjustment;
     private final float glyphAdjustment;

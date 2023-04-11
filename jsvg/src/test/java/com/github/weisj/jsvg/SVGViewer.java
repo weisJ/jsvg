@@ -39,7 +39,9 @@ import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.kitfox.svg.app.beans.SVGIcon;
 
-public class SVGViewer {
+public final class SVGViewer {
+
+    private SVGViewer() {}
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -108,7 +110,7 @@ public class SVGViewer {
         BATIK
     }
 
-    private static class SVGPanel extends JPanel {
+    private static final class SVGPanel extends JPanel {
         private final Map<String, SVGDocument> iconCache = new HashMap<>();
         private SVGDocument document;
         private String selectedIconName;

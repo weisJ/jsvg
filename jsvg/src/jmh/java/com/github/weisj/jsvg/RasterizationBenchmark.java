@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -42,11 +42,11 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.kitfox.svg.app.beans.SVGIcon;
 
-public class RasterizationBenchmark {
+public final class RasterizationBenchmark {
     private static final String SVG_IMAGE = "benchmark_image.svg";
 
     @State(Scope.Benchmark)
-    public static class JSVGRasterization {
+    public static final class JSVGRasterization {
         private SVGDocument document;
 
         @Setup
@@ -70,7 +70,7 @@ public class RasterizationBenchmark {
     }
 
     @State(Scope.Benchmark)
-    public static class SVGSalamanderRasterization {
+    public static final class SVGSalamanderRasterization {
         private SVGIcon icon;
 
         @Setup
@@ -89,9 +89,9 @@ public class RasterizationBenchmark {
     }
 
     @State(Scope.Thread)
-    public static class BatikRasterization {
+    public static final class BatikRasterization {
 
-        private static class BufferedImageTranscoder extends ImageTranscoder {
+        private static final class BufferedImageTranscoder extends ImageTranscoder {
             private BufferedImage image;
 
             @Override

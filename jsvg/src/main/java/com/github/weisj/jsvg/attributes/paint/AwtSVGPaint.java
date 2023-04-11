@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,7 +27,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 
-public class AwtSVGPaint implements SimplePaintSVGPaint {
+public final class AwtSVGPaint implements SimplePaintSVGPaint {
 
     private final @NotNull Paint paint;
 

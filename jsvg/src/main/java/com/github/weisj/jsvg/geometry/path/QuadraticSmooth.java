@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,7 +26,7 @@ import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
-class QuadraticSmooth extends PathCommand {
+final class QuadraticSmooth extends PathCommand {
 
     private final float x;
     private final float y;

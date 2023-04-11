@@ -36,7 +36,7 @@ import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
 
-public class DefaultPaintParser implements PaintParser {
+public final class DefaultPaintParser implements PaintParser {
     private static final Logger LOGGER = Logger.getLogger(DefaultPaintParser.class.getName());
 
     // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
@@ -148,7 +148,7 @@ public class DefaultPaintParser implements PaintParser {
         }
     }
 
-    private static class ColorLookup {
+    private static final class ColorLookup {
         private static Map<String, Color> colorMap;
 
         private static Map<String, Color> colorMap() {

@@ -38,7 +38,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Mark McKay
  * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
  */
-class Arc extends PathCommand {
+final class Arc extends PathCommand {
 
     private final float rx;
     private final float ry;

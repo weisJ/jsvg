@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,7 +29,7 @@ import javax.swing.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SwingUIFuture<T> implements UIFuture<T> {
+public final class SwingUIFuture<T> implements UIFuture<T> {
 
     private final @NotNull AtomicReference<SwingWorker<Void, Void>> swingWorker;
     private @Nullable T value;

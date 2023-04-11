@@ -37,7 +37,7 @@ import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public class SVGDocument {
+public final class SVGDocument {
     private static final boolean DEBUG = false;
     private final @NotNull SVG root;
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-public class TextMetrics {
+public final class TextMetrics {
     private final double letterSpacingLength;
     private final double glyphLength;
     private final double fixedGlyphLength;

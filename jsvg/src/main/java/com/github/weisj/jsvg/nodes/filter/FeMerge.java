@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 @PermittedContent(
     anyOf = {FeMergeNode.class}
 )
-public class FeMerge extends ContainerNode implements FilterPrimitive {
+public final class FeMerge extends ContainerNode implements FilterPrimitive {
     public static final String TAG = "feMerge";
 
     private FilterPrimitiveBase filterPrimitiveBase;

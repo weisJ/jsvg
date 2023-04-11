@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
  *
  * @author Jannis Weis
  */
-public class PathParser {
+public final class PathParser {
     private final String input;
     private final int inputLength;
     private int index;
@@ -259,7 +259,7 @@ public class PathParser {
         return commands.toArray(new PathCommand[0]);
     }
 
-    private static class NumberCharState {
+    private static final class NumberCharState {
         int iteration = 0;
         boolean dotAllowed = true;
         boolean signAllowed = true;

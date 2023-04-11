@@ -222,7 +222,7 @@ public final class Filter extends ContainerNode {
         }
     }
 
-    private static class AlphaImageFilter extends RGBImageFilter {
+    private static final class AlphaImageFilter extends RGBImageFilter {
         private final ColorModel model = ColorModel.getRGBdefault();
 
         @Override

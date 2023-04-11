@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
 
-public class PaintOrder {
+public final class PaintOrder {
 
     public static final PaintOrder NORMAL = new PaintOrder(Phase.FILL, Phase.STROKE, Phase.MARKERS);
 

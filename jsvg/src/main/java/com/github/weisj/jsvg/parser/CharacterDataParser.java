@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.parser;
 
-class CharacterDataParser {
+final class CharacterDataParser {
     private static final boolean DEBUG = false;
 
     private enum State {

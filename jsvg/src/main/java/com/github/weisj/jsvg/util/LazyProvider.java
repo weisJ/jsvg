@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 
-public class LazyProvider<T> implements Provider<T> {
+public final class LazyProvider<T> implements Provider<T> {
     private final @NotNull Supplier<@NotNull T> supplier;
     private T t;
 

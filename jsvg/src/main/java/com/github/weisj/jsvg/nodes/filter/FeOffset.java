@@ -40,7 +40,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 @PermittedContent(
     anyOf = { /* <animate>, <set> */ }
 )
-public class FeOffset extends AbstractFilterPrimitive {
+public final class FeOffset extends AbstractFilterPrimitive {
     public static final String TAG = "feOffset";
 
     private float dx;

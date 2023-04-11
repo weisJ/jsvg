@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,7 +34,7 @@ public final class SVGRenderingHints {
     public static final Object VALUE_IMAGE_ANTIALIASING_ON = Value.ON;
     public static final Object VALUE_IMAGE_ANTIALIASING_OFF = Value.OFF;
 
-    private static class Key extends RenderingHints.Key {
+    private static final class Key extends RenderingHints.Key {
         /**
          * Construct a key using the indicated private key.  Each
          * subclass of Key maintains its own unique domain of integer
@@ -46,7 +46,7 @@ public final class SVGRenderingHints {
          *
          * @param privateKey the specified key
          */
-        protected Key(int privateKey) {
+        private Key(int privateKey) {
             super(privateKey);
         }
 

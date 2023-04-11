@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
@@ -35,7 +34,7 @@ import com.github.weisj.jsvg.util.ConstantProvider;
 import com.github.weisj.jsvg.util.LazyProvider;
 import com.github.weisj.jsvg.util.Provider;
 
-public class FilterContext {
+public final class FilterContext {
 
     private final @NotNull Map<@NotNull Object, @NotNull Provider<Channel>> resultChannels = new HashMap<>();
     private final Filter.FilterInfo info;
@@ -77,7 +76,7 @@ public class FilterContext {
         resultChannels.put(key.toString(), new ConstantProvider<>(channel));
     }
 
-    public @Nullable Channel getChannel(@NotNull Object kex) {
+    public @NotNull Channel getChannel(@NotNull Object kex) {
         Provider<Channel> provider = resultChannels.get(kex.toString());
         if (provider == null) throw new IllegalFilterStateException();
         return provider.get();

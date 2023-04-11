@@ -33,7 +33,7 @@ import com.github.weisj.jsvg.parser.SeparatorMode;
 import com.github.weisj.jsvg.parser.css.StyleProperty;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
 
-public class SimpleStyleSheet implements StyleSheet {
+public final class SimpleStyleSheet implements StyleSheet {
 
     private final @NotNull Map<String, @NotNull List<@NotNull StyleProperty>> classRules = new HashMap<>();
     private final @NotNull Map<String, @NotNull List<@NotNull StyleProperty>> idRules = new HashMap<>();

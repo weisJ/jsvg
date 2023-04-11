@@ -21,5 +21,5 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-class IllegalFilterStateException extends IllegalStateException {
+final class IllegalFilterStateException extends IllegalStateException {
 }

@@ -39,7 +39,7 @@ public abstract class AbstractFilterPrimitive extends AbstractSVGNode implements
         filterPrimitiveBase = new FilterPrimitiveBase(attributeNode);
     }
 
-    protected @NotNull FilterPrimitiveBase impl() {
+    protected final @NotNull FilterPrimitiveBase impl() {
         return filterPrimitiveBase;
     }
 

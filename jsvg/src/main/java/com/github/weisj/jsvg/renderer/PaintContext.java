@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,7 +33,7 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
-public class PaintContext implements Mutator<PaintContext> {
+public final class PaintContext implements Mutator<PaintContext> {
 
     public final @Nullable AwtSVGPaint color;
     public final @Nullable SVGPaint fillPaint;

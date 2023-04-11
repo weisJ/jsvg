@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleProperty;
 
-public class SimpleCssParser implements CssParser {
+public final class SimpleCssParser implements CssParser {
 
     private static final Logger LOGGER = Logger.getLogger(SimpleCssParser.class.getName());
 
@@ -42,7 +42,7 @@ public class SimpleCssParser implements CssParser {
     }
 
 
-    private static class ParserException extends RuntimeException {
+    private static final class ParserException extends RuntimeException {
     }
 
     private static final class Parser {

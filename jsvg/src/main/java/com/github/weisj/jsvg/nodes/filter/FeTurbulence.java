@@ -85,7 +85,7 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
         impl().saveResult(turbulenceChannel, filterContext);
     }
 
-    public static class TurbulenceChannel implements Channel, PixelProvider {
+    public static final class TurbulenceChannel implements Channel, PixelProvider {
 
         private final PerlinTurbulence perlinTurbulence;
         private final double[] channels = new double[4];

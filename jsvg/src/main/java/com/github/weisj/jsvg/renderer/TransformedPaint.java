@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,7 +29,7 @@ import java.awt.image.ColorModel;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TransformedPaint implements Paint {
+public final class TransformedPaint implements Paint {
     private final @NotNull Paint paint;
     private final @NotNull AffineTransform transform;
 

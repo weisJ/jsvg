@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.util;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ConstantProvider<T> implements Provider<T> {
+public final class ConstantProvider<T> implements Provider<T> {
     private final @NotNull T t;
 
     public ConstantProvider(@NotNull T t) {

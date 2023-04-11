@@ -28,7 +28,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
-public class FilterPrimitiveBase {
+public final class FilterPrimitiveBase {
 
     final @NotNull Length x;
     final @NotNull Length y;
@@ -53,17 +53,17 @@ public class FilterPrimitiveBase {
         resultChannel = result;
     }
 
-    protected @NotNull Channel channel(@NotNull Object channelName, @NotNull FilterContext context) {
+    public @NotNull Channel channel(@NotNull Object channelName, @NotNull FilterContext context) {
         Channel input = context.getChannel(channelName);
         if (input == null) throw new IllegalStateException("Input channel [" + channelName + "] doesn't exist.");
         return input;
     }
 
-    protected @NotNull Channel inputChannel(@NotNull FilterContext context) {
+    public @NotNull Channel inputChannel(@NotNull FilterContext context) {
         return channel(inputChannel, context);
     }
 
-    protected void saveResult(@NotNull Channel output, @NotNull FilterContext filterContext) {
+    public void saveResult(@NotNull Channel output, @NotNull FilterContext filterContext) {
         filterContext.addResult(resultChannel, output);
         if (resultChannel != DefaultFilterChannel.LastResult) {
             filterContext.addResult(DefaultFilterChannel.LastResult, output);

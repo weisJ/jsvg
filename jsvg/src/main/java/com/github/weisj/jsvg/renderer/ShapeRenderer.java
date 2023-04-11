@@ -59,7 +59,7 @@ public final class ShapeRenderer {
         }
     }
 
-    public static class PaintShape {
+    public static final class PaintShape {
         private final @NotNull Shape shape;
         private final @Nullable Rectangle2D bounds;
 
@@ -69,7 +69,7 @@ public final class ShapeRenderer {
         }
     }
 
-    public static class ShapePaintContext {
+    public static final class ShapePaintContext {
         private final @NotNull RenderContext context;
         private final @NotNull Set<VectorEffect> vectorEffects;
         private final @NotNull Stroke stroke;
@@ -84,7 +84,7 @@ public final class ShapeRenderer {
         }
     }
 
-    public static class ShapeMarkerInfo {
+    public static final class ShapeMarkerInfo {
         private final @NotNull ShapeNode node;
         private final @Nullable Marker markerStart;
         private final @Nullable Marker markerMid;

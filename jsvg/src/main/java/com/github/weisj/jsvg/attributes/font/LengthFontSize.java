@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
-public class LengthFontSize implements FontSize {
+public final class LengthFontSize implements FontSize {
     private final @NotNull Length size;
 
     public LengthFontSize(@NotNull Length size) {

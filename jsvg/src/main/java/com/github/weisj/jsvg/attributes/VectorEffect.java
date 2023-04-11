@@ -167,7 +167,7 @@ public enum VectorEffect implements HasMatchName {
         }
     }
 
-    private static class Flags {
+    private static final class Flags {
         private static final int NON_SCALING_SIZE = 1;
         private static final int NON_ROTATING = 1 << 1;
         private static final int FIXED_POSITION = 1 << 2;

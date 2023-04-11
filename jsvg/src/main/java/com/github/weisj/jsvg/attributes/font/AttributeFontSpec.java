@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -31,9 +31,9 @@ import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 
-public class AttributeFontSpec extends FontSpec implements Mutator<MeasurableFontSpec> {
-    protected final @Nullable FontSize size;
-    protected final @Nullable FontWeight weight;
+public final class AttributeFontSpec extends FontSpec implements Mutator<MeasurableFontSpec> {
+    private final @Nullable FontSize size;
+    private final @Nullable FontWeight weight;
 
     AttributeFontSpec(@NotNull String[] families, @Nullable FontStyle style, @Nullable Length sizeAdjust,
             @Percentage float stretch, @Nullable FontSize size, @Nullable FontWeight weight) {

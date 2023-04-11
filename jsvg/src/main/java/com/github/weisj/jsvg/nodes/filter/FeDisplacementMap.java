@@ -81,7 +81,7 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
         impl().saveResult(input.applyFilter(displacementFilter), filterContext);
     }
 
-    private class DisplacementOp implements BufferedImageOp {
+    private final class DisplacementOp implements BufferedImageOp {
 
         private final @NotNull PixelProvider displacementChannel;
         private final Rectangle2D sourceBounds;

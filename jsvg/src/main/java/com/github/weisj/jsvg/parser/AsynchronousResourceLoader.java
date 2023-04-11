@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,16 +28,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.util.ResourceUtil;
 
 
-public class AsynchronousResourceLoader implements ResourceLoader {
+public final class AsynchronousResourceLoader implements ResourceLoader {
     private static final Logger LOGGER = Logger.getLogger(AsynchronousResourceLoader.class.getName());
 
     @Override
-    public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URI uri) {
+    public @NotNull UIFuture<BufferedImage> loadImage(@NotNull URI uri) {
         return new SwingUIFuture<>(() -> {
             try {
                 return ResourceUtil.loadImage(uri);

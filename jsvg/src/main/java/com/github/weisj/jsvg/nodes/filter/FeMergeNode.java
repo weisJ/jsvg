@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 @PermittedContent(
     anyOf = { /* <animate>, <set> */ }
 )
-public class FeMergeNode extends AbstractSVGNode {
+public final class FeMergeNode extends AbstractSVGNode {
     public static final String TAG = "feMergeNode";
 
     private Object inputChannel;
