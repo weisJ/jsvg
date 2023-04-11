@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,11 +22,8 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class GraphicsUtil {
     private GraphicsUtil() {}
@@ -41,14 +38,6 @@ public final class GraphicsUtil {
             return current;
         }
         return paint;
-    }
-
-    public static @Nullable AffineTransform tryCreateInverse(@NotNull AffineTransform transform) {
-        try {
-            return transform.createInverse();
-        } catch (NoninvertibleTransformException e) {
-            return null;
-        }
     }
 
     public interface WrappingPaint {

@@ -41,10 +41,6 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint {
         this.maskOffset = new Point((int) Math.floor(maskOffset.getX()), (int) Math.floor(maskOffset.getY()));
     }
 
-    public @NotNull Paint paint() {
-        return paint;
-    }
-
     @Override
     public void setPaint(@NotNull Paint paint) {
         this.paint = GraphicsUtil.setupPaint(this.paint, paint);

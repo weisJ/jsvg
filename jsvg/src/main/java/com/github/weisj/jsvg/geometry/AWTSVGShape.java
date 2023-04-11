@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,7 +33,6 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class AWTSVGShape<T extends Shape> implements MeasurableShape {
     public static final Rectangle2D EMPTY_SHAPE = new Rectangle();
-    public static final SVGShape EMPTY = new AWTSVGShape<>(EMPTY_SHAPE, 0f);
     protected final @NotNull T shape;
     private Rectangle2D bounds;
 

@@ -60,10 +60,6 @@ public final class FilterContext {
         return renderingHints;
     }
 
-    public void addResult(@NotNull Object key, @NotNull Supplier<Channel> channel) {
-        resultChannels.put(key.toString(), new LazyProvider<>(channel));
-    }
-
     public void addResult(@NotNull Object key, @NotNull Channel channel) {
         resultChannels.put(key.toString(), new ConstantProvider<>(channel));
     }

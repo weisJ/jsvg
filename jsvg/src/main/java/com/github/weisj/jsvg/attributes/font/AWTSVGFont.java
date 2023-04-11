@@ -49,10 +49,6 @@ public final class AWTSVGFont implements SVGFont {
         this.glyphCache = new HashMap<>();
     }
 
-    public @NotNull Font font() {
-        return font;
-    }
-
     @Override
     public @NotNull Glyph codepointGlyph(char codepoint) {
         Glyph glyph = glyphCache.get(codepoint);
