@@ -28,18 +28,12 @@ import org.jetbrains.annotations.NotNull;
 public final class Glyph {
     private final @NotNull Shape outline;
     private final float advance;
-    private final char codepoint;
     private final boolean isEmpty;
 
-    public Glyph(char codepoint, @NotNull Shape outline, float advance, boolean isEmpty) {
-        this.codepoint = codepoint;
+    public Glyph(@NotNull Shape outline, float advance, boolean isEmpty) {
         this.outline = outline;
         this.advance = advance;
         this.isEmpty = isEmpty;
-    }
-
-    public char codepoint() {
-        return codepoint;
     }
 
     public float advance() {

@@ -142,6 +142,6 @@ public final class AWTSVGFont implements SVGFont {
         GlyphMetrics gm = glyphVector.getGlyphMetrics(0);
         float advance = gm.getAdvanceX();
         Shape shape = glyphVector.getGlyphOutline(0);
-        return new Glyph(codepoint, shape, advance, gm.getBounds2D().isEmpty());
+        return new Glyph(shape, advance, gm.getBounds2D().isEmpty());
     }
 }
