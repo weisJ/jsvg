@@ -101,9 +101,9 @@ public final class ShapeRenderer {
         }
     }
 
-    public static void renderWithPaintOrder(@NotNull Graphics2D g, @NotNull PaintOrder paintOrder,
-            @NotNull ShapePaintContext shapePaintContext, @NotNull PaintShape paintShape,
-            @Nullable ShapeMarkerInfo markerInfo) {
+    public static void renderWithPaintOrder(@NotNull Graphics2D g, boolean canBeFilledHint,
+            @NotNull PaintOrder paintOrder, @NotNull ShapePaintContext shapePaintContext,
+            @NotNull PaintShape paintShape, @Nullable ShapeMarkerInfo markerInfo) {
         Set<VectorEffect> vectorEffects = shapePaintContext.vectorEffects;
         VectorEffect.applyEffects(shapePaintContext.vectorEffects, g,
                 shapePaintContext.context, shapePaintContext.transform);
@@ -113,7 +113,9 @@ public final class ShapeRenderer {
             RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
             switch (phase) {
                 case FILL:
-                    ShapeRenderer.renderShapeFill(phaseContext, phaseGraphics, paintShape);
+                    if (canBeFilledHint) {
+                        ShapeRenderer.renderShapeFill(phaseContext, phaseGraphics, paintShape);
+                    }
                     break;
                 case STROKE:
                     Shape strokeShape = paintShape.shape;

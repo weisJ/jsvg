@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -74,7 +74,7 @@ final class GlyphRenderer {
         Stroke stroke = context.stroke(1f);
 
         // Todo: Vector-Effects
-        ShapeRenderer.renderWithPaintOrder(g, paintOrder,
+        ShapeRenderer.renderWithPaintOrder(g, true, paintOrder,
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects, stroke, null),
                 new ShapeRenderer.PaintShape(glyphRun, completeGlyphRunBounds),
                 null);
