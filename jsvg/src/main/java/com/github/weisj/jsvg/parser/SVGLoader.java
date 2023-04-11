@@ -42,6 +42,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.nodes.*;
+import com.github.weisj.jsvg.nodes.animation.*;
+import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.filter.*;
 import com.github.weisj.jsvg.nodes.mesh.MeshGradient;
 import com.github.weisj.jsvg.nodes.mesh.MeshPatch;
@@ -120,6 +122,10 @@ public final class SVGLoader {
         map.put(FeMergeNode.TAG, () -> new FeMergeNode());
         map.put(FeTurbulence.TAG, () -> new FeTurbulence());
         map.put(FeOffset.TAG, () -> new FeOffset());
+
+        map.put(Animate.TAG, () -> new Animate());
+        map.put(AnimateTransform.TAG, () -> new AnimateTransform());
+        map.put(Set.TAG, () -> new Set());
 
         map.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
         map.put("feComposite", () -> new DummyFilterPrimitive("feComposite"));

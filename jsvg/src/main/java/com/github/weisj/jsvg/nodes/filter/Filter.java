@@ -34,6 +34,8 @@ import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -47,7 +49,7 @@ import com.github.weisj.jsvg.util.ImageUtil;
 @ElementCategories({/* None */})
 @PermittedContent(
     categories = {Category.Descriptive, Category.FilterPrimitive},
-    anyOf = { /* <animate>, <set> */ }
+    anyOf = {Animate.class, Set.class}
 )
 public final class Filter extends ContainerNode {
     private static final boolean DEBUG = false;

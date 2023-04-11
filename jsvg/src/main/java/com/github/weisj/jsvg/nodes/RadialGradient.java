@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,6 +33,9 @@ import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
+import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -41,7 +44,7 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 @ElementCategories(Category.Gradient)
 @PermittedContent(
     categories = Category.Descriptive,
-    anyOf = {Stop.class /* <animate>, <animateTransform>, <set> */ }
+    anyOf = {Stop.class, Animate.class, AnimateTransform.class, Set.class,}
 )
 public final class RadialGradient extends AbstractGradient<RadialGradient> {
     public static final String TAG = "radialgradient";

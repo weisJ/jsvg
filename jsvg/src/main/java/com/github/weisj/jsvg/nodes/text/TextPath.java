@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -38,6 +38,9 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.ReversePathIterator;
 import com.github.weisj.jsvg.nodes.Anchor;
 import com.github.weisj.jsvg.nodes.ShapeNode;
+import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
+import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
@@ -49,7 +52,7 @@ import com.github.weisj.jsvg.util.PathUtil;
 @ElementCategories({Category.Graphic, Category.TextContent, Category.TextContentChild})
 @PermittedContent(
     categories = {Category.Descriptive},
-    anyOf = {Anchor.class, TextSpan.class /* <altGlyph>, <animate>, <animateColor>, <set>, <tref> */},
+    anyOf = {Anchor.class, TextSpan.class, Animate.class, AnimateTransform.class, Set.class, /* <altGlyph>, <tref> */},
     charData = true
 )
 public final class TextPath extends TextContainer {

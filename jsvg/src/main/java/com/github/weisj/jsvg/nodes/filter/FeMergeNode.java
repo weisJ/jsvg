@@ -25,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.nodes.AbstractSVGNode;
+import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -32,7 +34,7 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 
 @ElementCategories(Category.None)
 @PermittedContent(
-    anyOf = { /* <animate>, <set> */ }
+    anyOf = {Animate.class, Set.class}
 )
 public final class FeMergeNode extends AbstractSVGNode {
     public static final String TAG = "feMergeNode";

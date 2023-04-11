@@ -29,6 +29,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -37,7 +39,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
-    anyOf = { /* <animate>, <set> */ }
+    anyOf = {Animate.class, Set.class}
 )
 public final class FeGaussianBlur extends AbstractFilterPrimitive {
     public static final String TAG = "fegaussianblur";

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,36 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.filter;
+package com.github.weisj.jsvg.nodes.animation;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.animation.Animate;
-import com.github.weisj.jsvg.nodes.animation.Set;
+import com.github.weisj.jsvg.nodes.MetaSVGNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
-@ElementCategories(Category.FilterPrimitive)
-@PermittedContent(
-    anyOf = {Animate.class, Set.class}
-)
-public final class DummyFilterPrimitive extends AbstractFilterPrimitive {
-
-    private final @NotNull String tag;
-
-    public DummyFilterPrimitive(@NotNull String tag) {
-        this.tag = tag;
-    }
+@ElementCategories(Category.Animation)
+@PermittedContent(categories = {Category.Descriptive})
+public final class Animate extends MetaSVGNode {
+    public static final String TAG = "animate";
 
     @Override
     public @NotNull String tagName() {
-        return tag;
-    }
-
-    @Override
-    public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        impl().saveResult(impl().inputChannel(filterContext), filterContext);
+        return TAG;
     }
 }
