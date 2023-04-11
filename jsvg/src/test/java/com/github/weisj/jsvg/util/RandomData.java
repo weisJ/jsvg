@@ -55,10 +55,6 @@ public final class RandomData {
         return arr;
     }
 
-    public static String generateRandomString(Random random) {
-        return generateRandomString(random, CharType.ALPHA_NUMERIC_ONLY);
-    }
-
     public static String generateRandomString(Random random, CharType charType) {
         int targetStringLength = 10;
 
