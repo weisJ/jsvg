@@ -26,13 +26,12 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.util.ResourceUtil;
 
 public final class SynchronousResourceLoader implements ResourceLoader {
     @Override
-    public @Nullable UIFuture<BufferedImage> loadImage(@NotNull URI uri) throws IOException {
+    public @NotNull UIFuture<BufferedImage> loadImage(@NotNull URI uri) throws IOException {
         return new ValueUIFuture<>(ResourceUtil.loadImage(uri));
     }
 }
