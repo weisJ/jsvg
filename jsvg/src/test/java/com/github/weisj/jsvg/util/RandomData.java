@@ -79,7 +79,7 @@ public final class RandomData {
                         i -> ('0' <= i && i <= '9') || ('A' <= i && i <= 'Z') || ('a' <= i && i <= 'z');
             }
             default -> throw new IllegalStateException();
-        };
+        }
 
         return random.ints(leftLimit, rightLimit + 1)
                 .filter(allowedCharactersFilter)
