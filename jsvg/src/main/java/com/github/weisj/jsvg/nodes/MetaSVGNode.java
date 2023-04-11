@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 /**
  * Even though elements of this type can have an id, it doesn't provide any benefit as you
  * can't do anything with it (per contract of subclassing this type).
- *
+ * <p>
  * Note: Subclasses of this type may accept child nodes. Nonetheless this isn't a container type
  * as there is no reason to keep meta information for rendering. Any child elements with an "id" will
  * be kept by the loader for resolving during build time and discarded if unused.

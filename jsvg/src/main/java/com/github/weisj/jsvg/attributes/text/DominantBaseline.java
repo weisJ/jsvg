@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,17 +30,17 @@ public enum DominantBaseline implements HasMatchName {
     /**
      * If this property occurs on a <text> element, then the computed value depends on the value of the writing-mode
      * attribute.
-     *
+     * <p>
      * If the writing-mode is horizontal, then the value of the dominant-baseline component is alphabetic.
      * Otherwise, if the writing-mode is vertical, then the value of the dominant-baseline component is central.
-     *
+     * <p>
      * If this property occurs on a 'tspan', 'tref', 'altGlyph', or 'textPath' element, then the dominant-baseline
      * and the baseline-table components remain the same as those of the parent text content element.
-     *
+     * <p>
      * If the computed baseline-shift value actually shifts the baseline, then the baseline-table font-size component
      * is set to the value of the font-size attribute on the element on which the dominant-baseline attribute occurs,
      * otherwise the baseline-table font-size remains the same as that of the element.
-     *
+     * <p>
      * If there is no parent text content element, the scaled-baseline-table value is constructed as above for 'text'
      * elements.
      */
