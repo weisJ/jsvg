@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,7 +34,7 @@ public interface Renderable {
      * Indicated whether the element can only be rendered through means of instantiation e.g. being referenced in
      * a use tag. Instantiation doesn't create a new element it only controls, when an element can be rendered.
      *
-     * @return true if only rendered if instantiated.
+     * @return true if only rendered is instantiated.
      */
     default boolean requiresInstantiation() {
         return false;

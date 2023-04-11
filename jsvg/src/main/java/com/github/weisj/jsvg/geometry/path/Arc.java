@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * This is a little used SVG function, as most editors will save curves as
- * Beziers.  To reduce the need to rely on the Batik library, this functionality
+ * Béziers.  To reduce the need to rely on the Batik library, this functionality
  * is being bypassed for the time being.  In the future, it would be nice to
  * extend the GeneralPath command to include the arcTo ability provided by Batik.
  *

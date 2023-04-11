@@ -108,7 +108,7 @@ public final class Length {
     }
 
     /**
-     * Used for resolving lengths which are neither used as y/x-coordinates or width/height values.
+     * Used for resolving lengths which are neither used as y/x-coordinates nor width/height values.
      * Relative sizes are relative to the {@link ViewBox#normedDiagonalLength()}.
      * @param context the measuring context.
      * @return the resolved size.

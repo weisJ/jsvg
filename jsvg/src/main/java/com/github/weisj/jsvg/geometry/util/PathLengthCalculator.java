@@ -124,7 +124,7 @@ public final class PathLengthCalculator {
     /*
      * Takes the start-, first and second control- and end-point coordinates.
      *
-     * We approximate the cubic bezier curve with a quadratic one going through an adjusted midpoint.
+     * We approximate the cubic Bézier curve with a quadratic one going through an adjusted midpoint.
      * Then use the integral calculation above. If this approximation bring any problems we will have to
      * use more precise (but expensive) calculation.
      *

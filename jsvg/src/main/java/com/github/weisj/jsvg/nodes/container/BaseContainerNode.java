@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -86,7 +86,7 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
     }
 
     private CategoryCheckResult doIntersect(Category[] requested, Category[] provided) {
-        // Expected sizes for theses arrays is pretty small hence we don't need to
+        // Expected sizes for these arrays is pretty small hence we don't need to
         // be smart about the intersection check.
         CategoryCheckResult result = CategoryCheckResult.Denied;
         for (Category request : requested) {

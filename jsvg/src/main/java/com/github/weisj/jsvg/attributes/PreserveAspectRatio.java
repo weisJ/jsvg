@@ -144,7 +144,7 @@ public final class PreserveAspectRatio {
          * - the viewBox is scaled up as much as possible, while still meeting the other criteria
          * <p>
          * In this case, if the aspect ratio of the graphic does not match the viewport,
-         * some of the viewport will extend beyond the bounds of the viewBox
+         * some viewport will extend beyond the bounds of the viewBox
          * (i.e., the area into which the viewBox will draw will be smaller than the viewport).
          */
         @Default
@@ -156,7 +156,7 @@ public final class PreserveAspectRatio {
          * - the entire viewport is covered by the viewBox
          * - the viewBox is scaled down as much as possible, while still meeting the other criteria
          * <p>
-         * In this case, if the aspect ratio of the viewBox does not match the viewport, some of the
+         * In this case, if the aspect ratio of the viewBox does not match the viewport, some
          * viewBox will extend beyond the bounds of the viewport
          * (i.e., the area into which the viewBox will draw is larger than the viewport).
          */
