@@ -88,7 +88,7 @@ final class CharacterDataParser {
             boolean whiteSpace = isWhitespace(c);
             if (!segmentBreak && !whiteSpace) {
                 if (state == State.WHITESPACE_AFTER_CHAR
-                        || state.isVisualSpace && begin > initialOffset) {
+                        || (state.isVisualSpace && begin > initialOffset)) {
                     buffer.append(' ');
                 }
                 state = State.CHARACTER;

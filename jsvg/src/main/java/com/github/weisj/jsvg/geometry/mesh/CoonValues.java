@@ -35,4 +35,14 @@ public final class CoonValues {
         this.south = south;
         this.west = west;
     }
+
+    @Override
+    public String toString() {
+        return "CoonValues{" +
+                "north=" + north +
+                ", east=" + east +
+                ", south=" + south +
+                ", west=" + west +
+                '}';
+    }
 }
