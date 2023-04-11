@@ -136,39 +136,31 @@ public final class SVGViewer {
 
         private void printMemory() {
             switch (mode) {
-                case JSVG:
-                    System.out.println(mode + " Memory: "
-                            + SizeOf.newInstance().deepSizeOf(document));
-                    break;
-                case SVG_SALAMANDER:
-                    System.out.println(mode + " Memory: "
-                            + SizeOf.newInstance().deepSizeOf(icon.getSvgUniverse().getDiagram(icon.getSvgURI())));
-                    break;
-                case BATIK:
-                    System.out.println(mode + " Memory: "
-                            + SizeOf.newInstance().deepSizeOf(jsvgCanvas.getSVGDocument()));
-                    break;
+                case JSVG -> System.out.println(mode + " Memory: "
+                        + SizeOf.newInstance().deepSizeOf(document));
+                case SVG_SALAMANDER -> System.out.println(mode + " Memory: "
+                        + SizeOf.newInstance().deepSizeOf(icon.getSvgUniverse().getDiagram(icon.getSvgURI())));
+                case BATIK -> System.out.println(mode + " Memory: "
+                        + SizeOf.newInstance().deepSizeOf(jsvgCanvas.getSVGDocument()));
             }
         }
 
         private void selectIcon(@NotNull String name) {
             remove(jsvgCanvas);
             switch (mode) {
-                case JSVG:
-                    document = iconCache.computeIfAbsent(name, n -> {
-                        URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
-                        SVGLoader loader = new SVGLoader();
-                        return loader.load(url);
-                    });
-                    break;
-                case SVG_SALAMANDER:
+                case JSVG -> document = iconCache.computeIfAbsent(name, n -> {
+                    URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
+                    SVGLoader loader = new SVGLoader();
+                    return loader.load(url);
+                });
+                case SVG_SALAMANDER -> {
                     try {
                         icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
                     } catch (URISyntaxException e) {
                         throw new IllegalStateException(e);
                     }
-                    break;
-                case BATIK:
+                }
+                case BATIK -> {
                     add(jsvgCanvas);
                     try {
                         jsvgCanvas.setURI(
@@ -176,7 +168,7 @@ public final class SVGViewer {
                     } catch (URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
-                    break;
+                }
             }
             this.selectedIconName = name;
             repaint();

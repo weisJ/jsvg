@@ -227,8 +227,7 @@ public final class ReferenceTest {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof ReferenceTestResult)) return false;
-            ReferenceTestResult that = (ReferenceTestResult) o;
+            if (!(o instanceof ReferenceTestResult that)) return false;
             return comparisonState == that.comparisonState;
         }
 

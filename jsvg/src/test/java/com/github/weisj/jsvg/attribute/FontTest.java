@@ -78,13 +78,6 @@ class FontTest {
         return new AttributeEntry(key, value);
     }
 
-    private static final class AttributeEntry {
-        private final String key;
-        private final String value;
-
-        private AttributeEntry(String key, String value) {
-            this.key = key;
-            this.value = value;
-        }
+    private record AttributeEntry(String key, String value) {
     }
 }
