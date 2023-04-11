@@ -74,7 +74,6 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
         if (scale == 0) return;
         Channel input = impl().inputChannel(filterContext);
         Channel displacementInput = filterContext.getChannel(inputChannel2);
-        if (displacementInput == null) return;
 
         ImageFilter displacementFilter = new BufferedImageFilter(
                 new DisplacementOp(displacementInput.pixels(context), filterContext.info().tile()));

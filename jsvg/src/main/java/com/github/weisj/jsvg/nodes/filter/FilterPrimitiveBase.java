@@ -54,9 +54,7 @@ public final class FilterPrimitiveBase {
     }
 
     public @NotNull Channel channel(@NotNull Object channelName, @NotNull FilterContext context) {
-        Channel input = context.getChannel(channelName);
-        if (input == null) throw new IllegalStateException("Input channel [" + channelName + "] doesn't exist.");
-        return input;
+        return context.getChannel(channelName);
     }
 
     public @NotNull Channel inputChannel(@NotNull FilterContext context) {
