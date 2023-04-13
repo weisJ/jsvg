@@ -74,6 +74,8 @@ public final class Length {
                 return (1f / 6f) * pixelsPerInch * value;
             case EM:
                 return context.em() * value;
+            case REM:
+                return context.rem() * value;
             case EX:
                 return context.ex() * value;
             default:

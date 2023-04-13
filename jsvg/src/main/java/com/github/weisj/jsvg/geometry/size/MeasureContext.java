@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
@@ -79,6 +80,10 @@ public final class MeasureContext {
 
     public float em() {
         return em;
+    }
+
+    public float rem() {
+        return SVGFont.defaultFontSize();
     }
 
     public float ex() {
