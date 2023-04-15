@@ -49,12 +49,38 @@ dependencies {
 }
 ````
 
+### Loading
 To load an svg icon you can use
 the [`SVGLoader`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/parser/SVGLoader.java)
 class. It will produce
 an [`SVGDocument`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/SVGDocument.java)
-which
-can be rendered to any `Graphics2D` object you like (e.g. a `BufferedImage` or a swing component).
+
+````java
+SVGLoader loader = new SVGLoader();
+URL svgUrl = MyClass.class.getResource("mySvgFile.svg");
+SVGDocument svgDocument = loader.load(svgUrl);
+````
+Note that `SVGLoader` is not guaranteed to be thread safe hence shouldn't be used across multiple threads.
+
+### Rendering
+An `SVGDocument` can be rendered to any `Graphics2D` object you like e.g. a `BufferedImage` 
+````java
+FloatSize size = svgDocument.size();
+BufferedImage image = new BufferedImage((int) size.width, (int) size.height);
+Graphics2D g = image.createGraphics();
+svgDocument.render(null, g);
+g.dispose();
+````
+or a swing component
+````java
+class MyComponent extends JComponent {
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        svgDocument.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
+    }
+}
+````
 
 ## Supported features
 
