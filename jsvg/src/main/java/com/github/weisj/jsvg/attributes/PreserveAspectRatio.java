@@ -210,6 +210,7 @@ public final class PreserveAspectRatio {
         return Objects.hash(align, meetOrSlice);
     }
 
+    // https://www.w3.org/TR/SVG2/coords.html#ComputingAViewportsTransform
     public @NotNull AffineTransform computeViewPortTransform(@NotNull FloatSize size, @NotNull ViewBox viewBox) {
         AffineTransform viewTransform = new AffineTransform();
         if (align == Align.None) {
