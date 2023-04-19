@@ -115,6 +115,7 @@ public final class SVGLoader {
         map.put(Filter.TAG, () -> new Filter());
         map.put(FeBlend.TAG, () -> new FeBlend());
         map.put(FeColorMatrix.TAG, () -> new FeColorMatrix());
+        map.put(FeComposite.TAG, () -> new FeComposite());
         map.put(FeDisplacementMap.TAG, () -> new FeDisplacementMap());
         map.put(FeFlood.TAG, () -> new FeFlood());
         map.put(FeGaussianBlur.TAG, () -> new FeGaussianBlur());
@@ -128,7 +129,6 @@ public final class SVGLoader {
         map.put(Set.TAG, () -> new Set());
 
         map.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
-        map.put("feComposite", () -> new DummyFilterPrimitive("feComposite"));
         map.put("feConvolveMatrix", () -> new DummyFilterPrimitive("feConvolveMatrix"));
         map.put("feDiffuseLightning", () -> new DummyFilterPrimitive("feDiffuseLightning"));
         map.put("feDisplacementMap", () -> new DummyFilterPrimitive("feDisplacementMap"));

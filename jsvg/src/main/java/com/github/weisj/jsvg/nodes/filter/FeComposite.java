@@ -25,7 +25,6 @@ import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.filter.BlendMode;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -37,10 +36,10 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 @PermittedContent(
     anyOf = {Animate.class, Set.class}
 )
-public final class FeBlend extends AbstractCompositeFilterPrimitive {
-    public static final String TAG = "feblend";
+public final class FeComposite extends AbstractCompositeFilterPrimitive {
+    public static final String TAG = "fecomposite";
 
-    private BlendModeComposite composite;
+    private CompositeModeComposite composite;
 
     @Override
     public @NotNull String tagName() {
@@ -50,12 +49,11 @@ public final class FeBlend extends AbstractCompositeFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        BlendMode blendMode = attributeNode.getEnum("mode", BlendMode.Normal);
-        composite = new BlendModeComposite(blendMode);
+        composite = new CompositeModeComposite(attributeNode);
     }
 
     @Override
     protected @NotNull Composite composite() {
-        return composite;
+        return composite.composite();
     }
 }

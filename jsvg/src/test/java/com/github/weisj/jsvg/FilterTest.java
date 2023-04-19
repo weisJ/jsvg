@@ -87,4 +87,9 @@ class FilterTest {
         assertEquals(SUCCESS, compareImages("filter/displacement.svg"));
     }
 
+    @Test
+    void testComposite() {
+        // TODO: BackgroundImage not supported
+        assertDoesNotThrow(() -> render("filter/composite.svg"));
+    }
 }
