@@ -44,7 +44,7 @@ public final class FeBlend extends AbstractFilterPrimitive {
     public static final String TAG = "feblend";
 
     private Object inputChannel2;
-    private BlendComposite composite;
+    private BlendModeComposite composite;
 
     @Override
     public @NotNull String tagName() {
@@ -57,7 +57,7 @@ public final class FeBlend extends AbstractFilterPrimitive {
         inputChannel2 = attributeNode.getValue("in2");
         if (inputChannel2 == null) inputChannel2 = DefaultFilterChannel.LastResult;
         BlendMode blendMode = attributeNode.getEnum("mode", BlendMode.Normal);
-        composite = new BlendComposite(blendMode);
+        composite = new BlendModeComposite(blendMode);
     }
 
     @Override
