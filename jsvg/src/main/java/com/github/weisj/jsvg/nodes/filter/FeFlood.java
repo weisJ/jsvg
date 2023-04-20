@@ -65,7 +65,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
         Filter.FilterInfo info = filterContext.info();
         BufferedImage img = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
         if (floodOpacity != 0) {
-            Graphics2D graphics = (Graphics2D) img.getGraphics();
+            Graphics2D graphics = img.createGraphics();
             graphics.setComposite(AlphaComposite.Src.derive(floodOpacity));
             Rectangle rect = new Rectangle(0, 0, img.getWidth(), img.getHeight());
             floodColor.fillShape(graphics, context, rect, rect);

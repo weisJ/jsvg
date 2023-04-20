@@ -161,7 +161,7 @@ public final class ReferenceTest {
         SVGDocument document = Objects.requireNonNull(new SVGLoader().load(inputStream));
         FloatSize size = document.size();
         BufferedImage image = new BufferedImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = (Graphics2D) image.getGraphics();
+        Graphics2D g = image.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         document.render(null, g, new ViewBox(size));
         g.dispose();

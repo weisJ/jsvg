@@ -90,7 +90,7 @@ public enum EdgeMode {
         BufferedImage bufferedImage = new BufferedImage(
                 width + xSize, height + ySize,
                 BufferedImage.TYPE_INT_ARGB_PRE);
-        Graphics2D g = (Graphics2D) bufferedImage.getGraphics();
+        Graphics2D g = bufferedImage.createGraphics();
 
         int xOff = xSize / 2;
         int yOff = ySize / 2;
@@ -113,7 +113,7 @@ public enum EdgeMode {
         int width = edgeModeImage.width;
         int height = edgeModeImage.height;
 
-        Graphics2D g = (Graphics2D) edgeModeImage.img.getGraphics();
+        Graphics2D g = edgeModeImage.img.createGraphics();
 
         BufferedImage top = edgeModeImage.img.getSubimage(xOff, yOff, width, 1);
         BufferedImage left = edgeModeImage.img.getSubimage(xOff, yOff, 1, height);
@@ -161,7 +161,7 @@ public enum EdgeMode {
         int width = edgeModeImage.width;
         int height = edgeModeImage.height;
 
-        Graphics2D g = (Graphics2D) edgeModeImage.img.getGraphics();
+        Graphics2D g = edgeModeImage.img.createGraphics();
 
         BufferedImage top = edgeModeImage.img.getSubimage(xOff, yOff, width, yOff);
         BufferedImage left = edgeModeImage.img.getSubimage(xOff, yOff, xOff, height);
