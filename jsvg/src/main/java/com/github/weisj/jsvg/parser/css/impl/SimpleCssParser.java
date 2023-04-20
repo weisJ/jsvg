@@ -124,7 +124,7 @@ public final class SimpleCssParser implements CssParser {
 
         private void skipToNextDefinition() {
             while (current.type() != TokenType.CURLY_CLOSE && current.type() != TokenType.EOF) {
-                 try {
+                try {
                     next();
                 } catch (ParserException ignored) {
                 }
