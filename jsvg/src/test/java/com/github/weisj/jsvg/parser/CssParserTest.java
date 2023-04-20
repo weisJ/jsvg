@@ -120,6 +120,13 @@ class CssParserTest {
     }
 
     @Test
+    void invalidIdentifiers() {
+        SimpleCssParser parser = new SimpleCssParser();
+        assertDoesNotThrow(() -> parser.parse(inputFromString("..{}")));
+        assertDoesNotThrow(() -> parser.parse(inputFromString("#.{}")));
+    }
+
+    @Test
     void precedence() {
         assertEquals(SUCCESS, compareImages("css/precedence.svg"));
     }

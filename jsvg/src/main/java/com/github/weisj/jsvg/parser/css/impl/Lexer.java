@@ -27,7 +27,6 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 
 public final class Lexer {
@@ -112,13 +111,13 @@ public final class Lexer {
         return '0' <= c && c <= '9';
     }
 
-    private @Nullable String readIdentifier() {
+    private @NotNull String readIdentifier() {
         if (!isIdentifierCharStart(current()) || !isIdentifierChar(current())) {
             LOGGER.warning(() -> MessageFormat.format("Identifier starting with unexpected char ''{0}''", current()));
             if (readWhile(this::isIdentifierChar).isEmpty()) {
                 next();
             }
-            return null;
+            throw new ParserException();
         }
         return readWhile(this::isIdentifierChar);
     }

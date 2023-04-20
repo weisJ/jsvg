@@ -42,19 +42,15 @@ public final class SimpleCssParser implements CssParser {
     }
 
 
-    private static final class ParserException extends RuntimeException {
-    }
-
     private static final class Parser {
 
         private final @NotNull Lexer lexer;
         private final @NotNull SimpleStyleSheet sheet = new SimpleStyleSheet();
-        private @NotNull Token current;
+        private @NotNull Token current = new Token(TokenType.START);
 
 
         private Parser(@NotNull List<char[]> input) {
             this.lexer = new Lexer(input);
-            this.current = lexer.nextToken();
         }
 
         private void next() {
@@ -135,8 +131,12 @@ public final class SimpleCssParser implements CssParser {
 
         @NotNull
         SimpleStyleSheet parse() {
-            while (current.type() != TokenType.EOF) {
+            do {
                 try {
+                    if (current.type() == TokenType.START) {
+                        current = lexer.nextToken();
+                    }
+
                     List<Token> identifierList = readIdentifierList();
                     List<StyleProperty> properties = readProperties();
 
@@ -158,7 +158,7 @@ public final class SimpleCssParser implements CssParser {
                 } catch (ParserException e) {
                     skipToNextDefinition();
                 }
-            }
+            } while (current.type() != TokenType.EOF);
             return sheet;
         }
     }
