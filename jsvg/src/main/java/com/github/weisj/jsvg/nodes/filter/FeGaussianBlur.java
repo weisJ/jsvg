@@ -43,6 +43,12 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 )
 public final class FeGaussianBlur extends AbstractFilterPrimitive {
     public static final String TAG = "fegaussianblur";
+    private static final double SQRT_2_PI = Math.sqrt(2 * Math.PI);
+    private static final double THREE_QUARTER_SQRT_2_PI = SQRT_2_PI * 3f / 4f;
+    private static final float KERNEL_PRECISION = 0.001f;
+
+    // TODO: Use 2 here and implement fast box blurring
+    private static final double BOX_BLUR_APPROXIMATION_THRESHOLD = Double.POSITIVE_INFINITY;
 
     private float[] stdDeviation;
     private EdgeMode edgeMode;
@@ -93,8 +99,9 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
 
     private @NotNull Kernel createConvolveKernel(double sigma, boolean horizontal) {
-        double radius = 2f * sigma + 1;
-        int size = (int) Math.ceil(radius) + 1;
+        int radius = kernelRadiusForStandardDeviation(sigma);
+        int diameter = 2 * radius + 1;
+
         if (horizontal && xBlur != null && xCurrent == sigma) return xBlur;
         if (!horizontal && yBlur != null && yCurrent == sigma) return yBlur;
 
@@ -103,38 +110,58 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         } else {
             yCurrent = sigma;
         }
-        float[] data = new float[size];
+        float[] data = computeKernelData(diameter, sigma);
 
-        double radius2 = radius * radius;
-        double twoSigmaSquare = 2.0f * sigma * sigma;
-        double sigmaRoot = (float) Math.sqrt(twoSigmaSquare * Math.PI);
-        double total = 0.0f;
+        if (horizontal) {
+            xBlur = new Kernel(diameter, 1, data);
+        } else {
+            yBlur = new Kernel(1, diameter, data);
+        }
 
-        double middle = size / 2f;
-        for (int i = 0; i < size; i++) {
-            double distance = middle - i;
-            distance *= distance;
+        return horizontal ? xBlur : yBlur;
+    }
 
-            double value = distance <= radius2
-                    ? Math.exp(-distance / twoSigmaSquare) / sigmaRoot
-                    : 0f;
-            data[i] = (float) value;
+    private static float normalConvolve(float x, double standardDeviation) {
+        return (float) (Math.pow(Math.E, -x * x / (2 * standardDeviation * standardDeviation))
+                / (standardDeviation * SQRT_2_PI));
+    }
+
+    private static float[] computeKernelData(int diameter, double standardDeviation) {
+        final float[] data = new float[diameter];
+
+        int mid = diameter / 2;
+        float total = 0;
+        for (int i = 0; i < diameter; i++) {
+            data[i] = normalConvolve(i - mid, standardDeviation);
             total += data[i];
         }
 
         // Otherwise, data is all zeros, which we can't reasonably normalize.
-        if (total != 0) {
-            for (int i = 0; i < data.length; i++) {
-                data[i] = (float) (data[i] / total);
+        if (total > 0) {
+            for (int i = 0; i < diameter; i++) {
+                data[i] /= total;
             }
         }
 
-        if (horizontal) {
-            xBlur = new Kernel(size, 1, data);
-        } else {
-            yBlur = new Kernel(1, size, data);
-        }
+        return data;
+    }
 
-        return horizontal ? xBlur : yBlur;
+    public static int kernelRadiusForStandardDeviation(double standardDeviation) {
+        if (standardDeviation <= BOX_BLUR_APPROXIMATION_THRESHOLD) {
+            float areaSum = (float) (0.5 / (standardDeviation * SQRT_2_PI));
+            int i = 0;
+            while (areaSum < 0.5 - KERNEL_PRECISION) {
+                areaSum += normalConvolve(i, standardDeviation);
+                i++;
+            }
+            return i;
+        } else {
+            int diameter = (int) Math.floor(THREE_QUARTER_SQRT_2_PI * standardDeviation + 0.5f);
+            if (diameter % 2 == 0) {
+                return diameter - 1 + diameter / 2;
+            } else {
+                return diameter - 2 + diameter / 2;
+            }
+        }
     }
 }
