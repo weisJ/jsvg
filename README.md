@@ -50,28 +50,34 @@ dependencies {
 ````
 
 ### Loading
+
 To load an svg icon you can use
 the [`SVGLoader`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/parser/SVGLoader.java)
 class. It will produce
 an [`SVGDocument`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/SVGDocument.java)
 
 ````java
-SVGLoader loader = new SVGLoader();
-URL svgUrl = MyClass.class.getResource("mySvgFile.svg");
-SVGDocument svgDocument = loader.load(svgUrl);
+SVGLoader loader=new SVGLoader();
+    URL svgUrl=MyClass.class.getResource("mySvgFile.svg");
+    SVGDocument svgDocument=loader.load(svgUrl);
 ````
+
 Note that `SVGLoader` is not guaranteed to be thread safe hence shouldn't be used across multiple threads.
 
 ### Rendering
-An `SVGDocument` can be rendered to any `Graphics2D` object you like e.g. a `BufferedImage` 
+
+An `SVGDocument` can be rendered to any `Graphics2D` object you like e.g. a `BufferedImage`
+
 ````java
-FloatSize size = svgDocument.size();
-BufferedImage image = new BufferedImage((int) size.width, (int) size.height);
-Graphics2D g = image.createGraphics();
-svgDocument.render(null, g);
-g.dispose();
+FloatSize size=svgDocument.size();
+    BufferedImage image=new BufferedImage((int)size.width,(int)size.height);
+    Graphics2D g=image.createGraphics();
+    svgDocument.render(null,g);
+    g.dispose();
 ````
+
 or a swing component
+
 ````java
 class MyComponent extends JComponent {
     @Override
@@ -162,7 +168,7 @@ For supported elements most of the attributes which apply to them are implemente
 | feComponentTransfer | :x:                     |
 | feComposite         | :x:                     |
 | feConvolveMatrix    | :x:                     |
-| feDiffuseLighting   | :x:                     |
+| feDiffuseLighting   | :white_check_mark:      |
 | feDisplacementMap   | :white_check_mark:      |
 | feDistantLight      | :x:                     |
 | feFlood             | :white_check_mark:      |
