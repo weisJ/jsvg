@@ -130,6 +130,8 @@ public final class SVGViewer {
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
+            setBackground(Color.WHITE);
+            setOpaque(true);
             icon.setAutosize(SVGIcon.AUTOSIZE_BESTFIT);
             icon.setAntiAlias(true);
         }
