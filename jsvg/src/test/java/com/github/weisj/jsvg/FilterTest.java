@@ -91,5 +91,11 @@ class FilterTest {
     void testComposite() {
         // TODO: BackgroundImage not supported
         assertDoesNotThrow(() -> render("filter/composite.svg"));
+        assertEquals(SUCCESS, compareImages("filter/composite_bug33.svg"));
+    }
+
+    @Test
+    void testMergeNode() {
+        assertEquals(SUCCESS, compareImages("filter/merge_composite_bug33.svg"));
     }
 }
