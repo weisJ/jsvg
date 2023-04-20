@@ -124,9 +124,14 @@ public final class SimpleCssParser implements CssParser {
 
         private void skipToNextDefinition() {
             while (current.type() != TokenType.CURLY_CLOSE && current.type() != TokenType.EOF) {
-                next();
+                 try {
+                    next();
+                } catch (ParserException ignored) {
+                }
             }
-            next();
+            if (current.type() != TokenType.EOF) {
+                current = new Token(TokenType.START);
+            }
         }
 
         @NotNull
@@ -134,7 +139,7 @@ public final class SimpleCssParser implements CssParser {
             do {
                 try {
                     if (current.type() == TokenType.START) {
-                        current = lexer.nextToken();
+                        next();
                     }
 
                     List<Token> identifierList = readIdentifierList();
