@@ -132,7 +132,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         int mid = diameter / 2;
         float total = 0;
         for (int i = 0; i < diameter; i++) {
-            data[i] = normalConvolve(i - mid, standardDeviation);
+            data[i] = normalConvolve((float) i - mid, standardDeviation);
             total += data[i];
         }
 
