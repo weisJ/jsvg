@@ -88,10 +88,10 @@ public final class CompositeModeComposite {
 
         @Override
         public void blend(int[] src, int[] dst, int[] result) {
-            result[0] = k1 * src[0] * dst[0] + k2 * src[0] + k3 * dst[0] + k4;
-            result[1] = k1 * src[1] * dst[1] + k2 * src[1] + k3 * dst[1] + k4;
-            result[2] = k1 * src[2] * dst[2] + k2 * src[2] + k3 * dst[2] + k4;
-            result[3] = k1 * src[3] * dst[3] + k2 * src[3] + k3 * dst[3] + k4;
+            result[0] = Math.max(0, Math.min(255, k1 * src[0] * dst[0] + k2 * src[0] + k3 * dst[0] + k4));
+            result[1] = Math.max(0, Math.min(255, k1 * src[1] * dst[1] + k2 * src[1] + k3 * dst[1] + k4));
+            result[2] = Math.max(0, Math.min(255, k1 * src[2] * dst[2] + k2 * src[2] + k3 * dst[2] + k4));
+            result[3] = Math.max(0, Math.min(255, k1 * src[3] * dst[3] + k2 * src[3] + k3 * dst[3] + k4));
         }
     }
 
