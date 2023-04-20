@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.*;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 public final class ImageProducerChannel implements Channel, PixelProvider {
 
     private final @NotNull ImageProducer producer;
+
+    private BufferedImage rasterBuffer;
     private WritableRaster raster;
 
     public ImageProducerChannel(@NotNull ImageProducer producer) {
@@ -47,10 +50,21 @@ public final class ImageProducerChannel implements Channel, PixelProvider {
     }
 
     @Override
+    public @NotNull Image toImage(@NotNull RenderContext context) {
+        return rasterBuffer(context);
+    }
+
+    private @NotNull BufferedImage rasterBuffer(@NotNull RenderContext context) {
+        if (rasterBuffer == null) {
+            rasterBuffer = Channel.makeNonAliased(context.createImage(producer()));
+        }
+        return rasterBuffer;
+    }
+
+    @Override
     public @NotNull PixelProvider pixels(@NotNull RenderContext context) {
         if (raster == null) {
-            BufferedImage bufferedImage = toBufferedImageNonAliased(context);
-            raster = bufferedImage.getRaster();
+            raster = rasterBuffer(context).getRaster();
         }
         return this;
     }

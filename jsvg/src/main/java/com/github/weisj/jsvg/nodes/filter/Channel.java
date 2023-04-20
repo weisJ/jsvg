@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -35,8 +35,15 @@ public interface Channel {
     @NotNull
     ImageProducer producer();
 
+    default @NotNull Image toImage(@NotNull RenderContext context) {
+        return context.createImage(producer());
+    }
+
     default @NotNull BufferedImage toBufferedImageNonAliased(@NotNull RenderContext context) {
-        Image img = context.createImage(producer());
+        return makeNonAliased(toImage(context));
+    }
+
+    static @NotNull BufferedImage makeNonAliased(@NotNull Image img) {
         BufferedImage bufferedImage = new BufferedImage(
                 img.getWidth(null),
                 img.getHeight(null),
