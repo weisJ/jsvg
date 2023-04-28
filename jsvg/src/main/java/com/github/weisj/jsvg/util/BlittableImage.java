@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
@@ -58,19 +59,20 @@ public final class BlittableImage {
     }
 
     public static @NotNull BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
-            @NotNull RenderContext context, @NotNull Rectangle2D clipBounds,
+            @NotNull RenderContext context, @Nullable Rectangle2D clipBounds,
             @NotNull Rectangle2D bounds, @NotNull Rectangle2D objectBounds, @NotNull UnitType contentUnits) {
         Rectangle2D boundsInUserSpace =
                 GeometryUtil.containingBoundsAfterTransform(context.userSpaceTransform(), bounds);
         Rectangle2D boundsInRootSpace =
                 GeometryUtil.containingBoundsAfterTransform(context.rootTransform(), boundsInUserSpace);
 
-        Rectangle2D clipBoundsInUserSpace =
-                GeometryUtil.containingBoundsAfterTransform(context.userSpaceTransform(), clipBounds);
-        Rectangle2D clipBoundsInRootSpace =
-                GeometryUtil.containingBoundsAfterTransform(context.rootTransform(), clipBoundsInUserSpace);
-
-        Rectangle2D.intersect(clipBoundsInRootSpace, boundsInRootSpace, boundsInRootSpace);
+        if (clipBounds != null) {
+            Rectangle2D clipBoundsInUserSpace =
+                    GeometryUtil.containingBoundsAfterTransform(context.userSpaceTransform(), clipBounds);
+            Rectangle2D clipBoundsInRootSpace =
+                    GeometryUtil.containingBoundsAfterTransform(context.rootTransform(), clipBoundsInUserSpace);
+            Rectangle2D.intersect(clipBoundsInRootSpace, boundsInRootSpace, boundsInRootSpace);
+        }
 
         BufferedImage img = bufferSurfaceSupplier.createBufferSurface(new AffineTransform(),
                 boundsInRootSpace.getWidth(), boundsInRootSpace.getHeight());

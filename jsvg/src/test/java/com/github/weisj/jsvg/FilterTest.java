@@ -36,6 +36,7 @@ class FilterTest {
     void testGaussianBlur() {
         assertEquals(SUCCESS, compareImages("filter/blur.svg", 0.6));
         assertEquals(SUCCESS, compareImages("filter/blur2.svg"));
+        assertEquals(SUCCESS, compareImages("filter/slim.svg", 0));
     }
 
     @Test

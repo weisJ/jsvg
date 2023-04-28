@@ -118,7 +118,7 @@ public final class Filter extends ContainerNode {
                 context.measureContext(), elementBounds, x, y, width, height);
 
         BlittableImage blitImage = BlittableImage.create(
-                ImageUtil::createCompatibleTransparentImage, context, g.getClipBounds(),
+                ImageUtil::createCompatibleTransparentImage, context, null,
                 imageBounds, elementBounds, UnitType.UserSpaceOnUse);
 
         return new FilterInfo(g, blitImage, elementBounds);
