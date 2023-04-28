@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -104,7 +105,7 @@ public final class BlittableImage {
     }
 
     public @NotNull Graphics2D createGraphics() {
-        Graphics2D g = image.createGraphics();
+        Graphics2D g = GraphicsUtil.createGraphics(image);
         g.transform(context.rootTransform());
 
         if (contentUnits == UnitType.UserSpaceOnUse) {

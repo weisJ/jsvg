@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,6 +39,12 @@ public final class GraphicsUtil {
             return current;
         }
         return paint;
+    }
+
+    public static @NotNull Graphics2D createGraphics(@NotNull BufferedImage image) {
+        Graphics2D g = image.createGraphics();
+        g.clipRect(0, 0, image.getWidth(), image.getHeight());
+        return g;
     }
 
     public interface WrappingPaint {

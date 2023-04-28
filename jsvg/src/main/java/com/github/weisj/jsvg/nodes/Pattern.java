@@ -164,7 +164,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
 
         // TODO: With overflow = visible this does not result in the correct behaviour
         BufferedImage img = ImageUtil.createCompatibleTransparentImage(g, patternBounds.width, patternBounds.height);
-        Graphics2D imgGraphics = img.createGraphics();
+        Graphics2D imgGraphics = GraphicsUtil.createGraphics(img);
         imgGraphics.setRenderingHints(g.getRenderingHints());
         imgGraphics.scale(img.getWidth() / patternBounds.width, img.getHeight() / patternBounds.height);
 

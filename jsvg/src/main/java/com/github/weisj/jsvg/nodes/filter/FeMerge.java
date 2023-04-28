@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories(Category.FilterPrimitive)
@@ -95,7 +96,7 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
         Channel result = in;
         if (inputChannels.length > 1) {
             BufferedImage dst = in.toBufferedImageNonAliased(context);
-            Graphics2D imgGraphics = dst.createGraphics();
+            Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
             for (int i = 1; i < inputChannels.length; i++) {
                 Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
                 imgGraphics.drawImage(context.createImage(channel.producer()), null, context.targetComponent());

@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive {
@@ -59,7 +60,7 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
         BufferedImage dst = destinationChannel(impl, filterContext).toBufferedImageNonAliased(context);
 
         Image other = context.createImage(sourceChannel(impl, filterContext).producer());
-        Graphics2D imgGraphics = dst.createGraphics();
+        Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
         imgGraphics.setComposite(composite());
         imgGraphics.drawImage(other, null, context.targetComponent());
         imgGraphics.dispose();

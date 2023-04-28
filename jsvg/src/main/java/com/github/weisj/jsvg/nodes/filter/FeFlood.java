@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories(Category.FilterPrimitive)
@@ -65,7 +66,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
         Filter.FilterInfo info = filterContext.info();
         BufferedImage img = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
         if (floodOpacity != 0) {
-            Graphics2D graphics = img.createGraphics();
+            Graphics2D graphics = GraphicsUtil.createGraphics(img);
             graphics.setComposite(AlphaComposite.Src.derive(floodOpacity));
             Rectangle rect = new Rectangle(0, 0, img.getWidth(), img.getHeight());
             floodColor.fillShape(graphics, context, rect, rect);
