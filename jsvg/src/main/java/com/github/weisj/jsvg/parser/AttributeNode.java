@@ -168,8 +168,7 @@ public final class AttributeNode {
     }
 
     public @Nullable String getValue(@NotNull String key) {
-        String value = attributes.get(key);
-        return value != null ? value.trim() : null;
+        return attributes.get(key);
     }
 
     public @NotNull Color getColor(@NotNull String key) {

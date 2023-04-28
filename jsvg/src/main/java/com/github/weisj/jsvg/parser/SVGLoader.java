@@ -313,7 +313,7 @@ public final class SVGLoader {
 
                 Map<String, String> attrs = new HashMap<>(attributes.getLength());
                 for (int i = 0; i < attributes.getLength(); i++) {
-                    attrs.put(attributes.getQName(i), attributes.getValue(i));
+                    attrs.put(attributes.getQName(i), attributes.getValue(i).trim());
                 }
 
                 ParsedElement parsedElement = new ParsedElement(

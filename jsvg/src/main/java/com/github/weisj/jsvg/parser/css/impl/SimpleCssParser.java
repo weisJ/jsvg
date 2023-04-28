@@ -115,7 +115,7 @@ public final class SimpleCssParser implements CssParser {
                 consume(TokenType.COLON);
                 String value = consumeValue(TokenType.RAW_DATA);
                 consume(TokenType.SEMICOLON);
-                list.add(new StyleProperty(name, value));
+                list.add(new StyleProperty(name, value.trim()));
             }
 
             consume(TokenType.CURLY_CLOSE);
