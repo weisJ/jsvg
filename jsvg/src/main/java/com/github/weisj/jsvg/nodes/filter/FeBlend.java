@@ -40,7 +40,7 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 public final class FeBlend extends AbstractCompositeFilterPrimitive {
     public static final String TAG = "feblend";
 
-    private BlendModeComposite composite;
+    private Composite composite;
 
     @Override
     public @NotNull String tagName() {
@@ -51,7 +51,7 @@ public final class FeBlend extends AbstractCompositeFilterPrimitive {
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         BlendMode blendMode = attributeNode.getEnum("mode", BlendMode.Normal);
-        composite = new BlendModeComposite(blendMode);
+        composite = BlendModeComposite.create(blendMode);
     }
 
     @Override

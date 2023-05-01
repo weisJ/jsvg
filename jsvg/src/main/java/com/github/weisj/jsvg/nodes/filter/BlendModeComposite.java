@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.*;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.BlendMode;
@@ -30,8 +32,13 @@ public final class BlendModeComposite extends AbstractBlendComposite {
 
     private final @NotNull Blender blender;
 
-    public BlendModeComposite(BlendMode blendMode) {
+    private BlendModeComposite(BlendMode blendMode) {
         this.blender = createBlender(blendMode);
+    }
+
+    public static @NotNull Composite create(BlendMode mode) {
+        if (mode == BlendMode.Normal) return AlphaComposite.SrcOver;
+        return new BlendModeComposite(mode);
     }
 
     @Override
@@ -42,19 +49,7 @@ public final class BlendModeComposite extends AbstractBlendComposite {
     private static Blender createBlender(BlendMode blendMode) {
         switch (blendMode) {
             case Normal:
-                return (src, dst, result) -> {
-                    if (src[3] == 0) {
-                        result[0] = dst[0];
-                        result[1] = dst[1];
-                        result[2] = dst[2];
-                        result[3] = dst[3];
-                    } else {
-                        result[0] = src[0];
-                        result[1] = src[1];
-                        result[2] = src[2];
-                        result[3] = src[3];
-                    }
-                };
+                throw new IllegalStateException("Use AlphaComposite.SrcOver instead");
             case Multiply:
                 return (src, dst, result) -> {
                     result[0] = (src[0] * dst[0]) >> 8;
