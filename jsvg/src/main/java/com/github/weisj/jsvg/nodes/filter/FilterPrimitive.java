@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.Rectangle2D;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -42,6 +44,11 @@ public interface FilterPrimitive {
 
     default boolean isValid() {
         return true;
+    }
+
+    @NotNull
+    default Rectangle2D boundsNeededForOutput(@NotNull Rectangle2D region, @NotNull RenderContext context) {
+        return region;
     }
 
     void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext);

@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.filter;
 
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
@@ -71,15 +72,37 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.Duplicate);
     }
 
+    @Override
+    public @NotNull Rectangle2D boundsNeededForOutput(@NotNull Rectangle2D region,
+            @NotNull RenderContext context) {
+        AffineTransform transform = new AffineTransform();
+        transform.concatenate(context.rootTransform());
+        transform.concatenate(context.userSpaceTransform());
+        double[] sigma = computeAbsoluteStdDeviation(transform);
+        // Add one for safety
+        int horizontal = diameterForRadius(kernelRadiusForStandardDeviation(sigma[0])) + 1;
+        int vertical = diameterForRadius(kernelRadiusForStandardDeviation(sigma[1])) + 1;
+        return new Rectangle2D.Double(
+                region.getX() - horizontal,
+                region.getY() - vertical,
+                region.getWidth() + 2 * horizontal,
+                region.getHeight() + 2 * vertical);
+    }
+
+    private double[] computeAbsoluteStdDeviation(@NotNull AffineTransform at) {
+        double xSigma = GeometryUtil.scaleXOfTransform(at) * stdDeviation[0];
+        double ySigma = GeometryUtil.scaleYOfTransform(at) * stdDeviation[Math.min(stdDeviation.length - 1, 1)];
+        return new double[] {xSigma, ySigma};
+    }
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (stdDeviation.length == 0) return;
 
         // TODO: Use proper transform here
-        AffineTransform at = filterContext.info().graphics().getTransform();
-        double xSigma = GeometryUtil.scaleXOfTransform(at) * stdDeviation[0];
-        double ySigma = GeometryUtil.scaleYOfTransform(at) * stdDeviation[Math.min(stdDeviation.length - 1, 1)];
+        double[] sigma = computeAbsoluteStdDeviation(filterContext.info().graphics().getTransform());
+        double xSigma = sigma[0];
+        double ySigma = sigma[1];
 
         if (xSigma < 0 || ySigma < 0) return;
 
@@ -100,7 +123,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     private @NotNull Kernel createConvolveKernel(double sigma, boolean horizontal) {
         int radius = kernelRadiusForStandardDeviation(sigma);
-        int diameter = 2 * radius + 1;
+        int diameter = diameterForRadius(radius);
 
         if (horizontal && xBlur != null && xCurrent == sigma) return xBlur;
         if (!horizontal && yBlur != null && yCurrent == sigma) return yBlur;
@@ -144,6 +167,10 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
 
         return data;
+    }
+
+    public static int diameterForRadius(int radius) {
+        return 2 * radius + 1;
     }
 
     public static int kernelRadiusForStandardDeviation(double standardDeviation) {

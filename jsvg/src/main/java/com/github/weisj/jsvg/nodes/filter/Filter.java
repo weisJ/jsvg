@@ -117,8 +117,15 @@ public final class Filter extends ContainerNode {
         Rectangle2D.Double imageBounds = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds, x, y, width, height);
 
+        Rectangle2D neededInputRegion = elementBounds.getBounds2D();
+        for (SVGNode child : children()) {
+            FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+            Rectangle2D needed = filterPrimitive.boundsNeededForOutput(elementBounds.getBounds2D(), context);
+            Rectangle2D.union(needed, neededInputRegion, neededInputRegion);
+        }
+
         BlittableImage blitImage = BlittableImage.create(
-                ImageUtil::createCompatibleTransparentImage, context, null,
+                ImageUtil::createCompatibleTransparentImage, context, neededInputRegion,
                 imageBounds, elementBounds, UnitType.UserSpaceOnUse);
 
         return new FilterInfo(g, blitImage, elementBounds);
