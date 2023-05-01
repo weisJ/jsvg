@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImageFilter;
@@ -61,21 +62,40 @@ public final class FeOffset extends AbstractFilterPrimitive {
     }
 
     @Override
+    public @NotNull Rectangle2D boundsNeededForOutput(@NotNull Rectangle2D region, @NotNull RenderContext context) {
+        AffineTransform transform = new AffineTransform();
+        transform.concatenate(context.userSpaceTransform());
+        transform.concatenate(context.rootTransform());
+        Point2D off = offset(transform);
+        return new Rectangle2D.Double(
+                region.getX() + off.getX(),
+                region.getY() + off.getY(),
+                region.getWidth(),
+                region.getHeight());
+    }
+
+    private Point2D.Double offset(@NotNull AffineTransform at) {
+        double effectiveDx = GeometryUtil.scaleXOfTransform(at) * dx;
+        double effectiveDy = GeometryUtil.scaleYOfTransform(at) * dy;
+
+        return new Point2D.Double(effectiveDx, effectiveDy);
+    }
+
+    @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         Channel in = impl().inputChannel(filterContext);
         Channel result = in;
         if (dx != 0 || dy != 0) {
             AffineTransform at = filterContext.info().graphics().getTransform();
-            double effectiveDx = GeometryUtil.scaleXOfTransform(at) * dx;
-            double effectiveDy = GeometryUtil.scaleYOfTransform(at) * dy;
+            Point2D.Double off = offset(at);
 
             if (filterContext.primitiveUnits() == UnitType.ObjectBoundingBox) {
                 Rectangle2D elementBounds = filterContext.info().elementBounds();
-                effectiveDx *= elementBounds.getWidth();
-                effectiveDy *= elementBounds.getHeight();
+                off.x *= elementBounds.getWidth();
+                off.y *= elementBounds.getHeight();
             }
 
-            AffineTransform transform = AffineTransform.getTranslateInstance(effectiveDx, effectiveDy);
+            AffineTransform transform = AffineTransform.getTranslateInstance(off.x, off.y);
 
             AffineTransformOp op = new AffineTransformOp(transform, filterContext.renderingHints());
             result = in.applyFilter(new BufferedImageFilter(op));
