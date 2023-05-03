@@ -21,43 +21,40 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public final class FilterContext {
+public final class FilterLayoutContext {
 
-    private final @NotNull ChannelStorage<Channel> resultChannels = new ChannelStorage<>();
-    private final Filter.FilterInfo info;
+    private final @NotNull ChannelStorage<Rectangle2D> resultChannels = new ChannelStorage<>();
     private final @NotNull UnitType primitiveUnits;
-    private final @NotNull RenderingHints renderingHints;
+    private final @NotNull Rectangle2D elementBounds;
 
-    public FilterContext(@NotNull Filter.FilterInfo info, @NotNull UnitType primitiveUnits,
-            @NotNull RenderingHints renderingHints) {
-        this.info = info;
+    public FilterLayoutContext(@NotNull UnitType primitiveUnits, @NotNull Rectangle2D elementBounds) {
         this.primitiveUnits = primitiveUnits;
-        this.renderingHints = renderingHints;
-    }
-
-    public @NotNull Filter.FilterInfo info() {
-        return info;
+        this.elementBounds = elementBounds;
     }
 
     public @NotNull UnitType primitiveUnits() {
         return primitiveUnits;
     }
 
-    public @NotNull RenderingHints renderingHints() {
-        return renderingHints;
+    public @NotNull Rectangle2D elementBounds() {
+        return elementBounds;
     }
 
-    public @NotNull ChannelStorage<Channel> resultChannels() {
+    public @NotNull Rectangle2D filterPrimitiveRegion(@NotNull MeasureContext context,
+            @NotNull FilterPrimitive filterPrimitive) {
+        return primitiveUnits.computeViewBounds(context, elementBounds,
+                filterPrimitive.x(), filterPrimitive.y(), filterPrimitive.width(), filterPrimitive.height());
+    }
+
+    public @NotNull ChannelStorage<Rectangle2D> resultChannels() {
         return resultChannels;
     }
 
-    public @NotNull Channel getChannel(@NotNull Object key) {
-        return resultChannels.get(key);
-    }
 }

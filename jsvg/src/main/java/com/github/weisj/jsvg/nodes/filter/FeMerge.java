@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -87,6 +88,18 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     @Override
     public @NotNull Length height() {
         return filterPrimitiveBase.height;
+    }
+
+    @Override
+    public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
+        if (inputChannels.length == 0) return;
+        Rectangle2D in = filterLayoutContext.resultChannels().get(inputChannels[0]);
+        Rectangle2D result = in.getBounds2D();
+        for (int i = 1; i < inputChannels.length; i++) {
+            Rectangle2D channelBounds = filterLayoutContext.resultChannels().get(inputChannels[i]);
+            Rectangle2D.union(channelBounds, result, result);
+        }
+        filterPrimitiveBase.saveLayoutResult(result, filterLayoutContext);
     }
 
     @Override

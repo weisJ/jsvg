@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,43 +21,35 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.util.ConstantProvider;
+import com.github.weisj.jsvg.util.LazyProvider;
+import com.github.weisj.jsvg.util.Provider;
 
-public final class FilterContext {
+public final class ChannelStorage<T> {
+    private final @NotNull Map<@NotNull String, @NotNull Provider<T>> storage = new HashMap<>();
 
-    private final @NotNull ChannelStorage<Channel> resultChannels = new ChannelStorage<>();
-    private final Filter.FilterInfo info;
-    private final @NotNull UnitType primitiveUnits;
-    private final @NotNull RenderingHints renderingHints;
-
-    public FilterContext(@NotNull Filter.FilterInfo info, @NotNull UnitType primitiveUnits,
-            @NotNull RenderingHints renderingHints) {
-        this.info = info;
-        this.primitiveUnits = primitiveUnits;
-        this.renderingHints = renderingHints;
+    public void addResult(@NotNull Object key, @NotNull T value) {
+        storage.put(key.toString(), new ConstantProvider<>(value));
     }
 
-    public @NotNull Filter.FilterInfo info() {
-        return info;
+    public void addResult(@NotNull DefaultFilterChannel key, @NotNull Supplier<T> value) {
+        storage.put(key.toString(), new LazyProvider<>(value));
     }
 
-    public @NotNull UnitType primitiveUnits() {
-        return primitiveUnits;
+    public void addResult(@NotNull DefaultFilterChannel key, @NotNull T value) {
+        storage.put(key.toString(), new ConstantProvider<>(value));
     }
 
-    public @NotNull RenderingHints renderingHints() {
-        return renderingHints;
-    }
-
-    public @NotNull ChannelStorage<Channel> resultChannels() {
-        return resultChannels;
-    }
-
-    public @NotNull Channel getChannel(@NotNull Object key) {
-        return resultChannels.get(key);
+    public @NotNull T get(@NotNull Object key) {
+        Provider<T> provider = storage.get(key.toString());
+        if (provider == null) throw new IllegalFilterStateException();
+        return provider.get();
     }
 }

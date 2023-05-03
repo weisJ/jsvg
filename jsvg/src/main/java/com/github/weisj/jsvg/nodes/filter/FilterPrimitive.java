@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -46,10 +45,7 @@ public interface FilterPrimitive {
         return true;
     }
 
-    @NotNull
-    default Rectangle2D boundsNeededForOutput(@NotNull Rectangle2D region, @NotNull RenderContext context) {
-        return region;
-    }
+    void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext);
 
     void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext);
 }

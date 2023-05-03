@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
@@ -72,27 +73,29 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.Duplicate);
     }
 
-    @Override
-    public @NotNull Rectangle2D boundsNeededForOutput(@NotNull Rectangle2D region,
-            @NotNull RenderContext context) {
-        AffineTransform transform = new AffineTransform();
-        transform.concatenate(context.rootTransform());
-        transform.concatenate(context.userSpaceTransform());
-        double[] sigma = computeAbsoluteStdDeviation(transform);
-        // Add one for safety
-        int horizontal = diameterForRadius(kernelRadiusForStandardDeviation(sigma[0])) + 1;
-        int vertical = diameterForRadius(kernelRadiusForStandardDeviation(sigma[1])) + 1;
-        return new Rectangle2D.Double(
-                region.getX() - horizontal,
-                region.getY() - vertical,
-                region.getWidth() + 2 * horizontal,
-                region.getHeight() + 2 * vertical);
+    private double[] computeAbsoluteStdDeviation(@Nullable AffineTransform at) {
+        double xSigma = stdDeviation[0];
+        double ySigma = stdDeviation[Math.min(stdDeviation.length - 1, 1)];
+        if (at != null) {
+            xSigma *= GeometryUtil.scaleXOfTransform(at);
+            ySigma *= GeometryUtil.scaleYOfTransform(at);
+        }
+        return new double[] {xSigma, ySigma};
     }
 
-    private double[] computeAbsoluteStdDeviation(@NotNull AffineTransform at) {
-        double xSigma = GeometryUtil.scaleXOfTransform(at) * stdDeviation[0];
-        double ySigma = GeometryUtil.scaleYOfTransform(at) * stdDeviation[Math.min(stdDeviation.length - 1, 1)];
-        return new double[] {xSigma, ySigma};
+    @Override
+    public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
+        Rectangle2D input = impl().layoutInput(filterLayoutContext);
+        double[] sigma = computeAbsoluteStdDeviation(null);
+        int hExtend = kernelRadiusForStandardDeviation(sigma[0]) + 1;
+        int vExtend = kernelRadiusForStandardDeviation(sigma[1]) + 1;
+        impl().saveLayoutResult(
+                new Rectangle2D.Double(
+                        input.getX() - hExtend,
+                        input.getY() - vExtend,
+                        input.getWidth() + 2 * hExtend,
+                        input.getHeight() + 2 * vExtend),
+                filterLayoutContext);
     }
 
     @Override

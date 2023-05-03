@@ -48,6 +48,11 @@ public final class DummyFilterPrimitive extends AbstractFilterPrimitive {
     }
 
     @Override
+    public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
+        impl().saveLayoutResult(impl().layoutInput(filterLayoutContext), filterLayoutContext);
+    }
+
+    @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         impl().saveResult(impl().inputChannel(filterContext), filterContext);
     }

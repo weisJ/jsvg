@@ -60,6 +60,12 @@ public final class FeFlood extends AbstractFilterPrimitive {
     }
 
     @Override
+    public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
+        impl().saveLayoutResult(
+                filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this), filterLayoutContext);
+    }
+
+    @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         // Todo: We should be able to optimize this heavily by implementing a custom image producer.
         // and even then filters like feBlend could benefit from knowing that this is a constant color.

@@ -28,6 +28,7 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImageFilter;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
@@ -61,24 +62,33 @@ public final class FeOffset extends AbstractFilterPrimitive {
         dy = attributeNode.getFloat("dy", 0);
     }
 
-    @Override
-    public @NotNull Rectangle2D boundsNeededForOutput(@NotNull Rectangle2D region, @NotNull RenderContext context) {
-        AffineTransform transform = new AffineTransform();
-        transform.concatenate(context.userSpaceTransform());
-        transform.concatenate(context.rootTransform());
-        Point2D off = offset(transform);
-        return new Rectangle2D.Double(
-                region.getX() + off.getX(),
-                region.getY() + off.getY(),
-                region.getWidth(),
-                region.getHeight());
+    private Point2D.Double offset(@Nullable AffineTransform at, @NotNull UnitType filterPrimitiveUnits,
+            @NotNull Rectangle2D elementBounds) {
+        Point2D.Double off = new Point2D.Double(dx, dy);
+        if (at != null) {
+            off.x *= GeometryUtil.scaleXOfTransform(at);
+            off.y *= GeometryUtil.scaleYOfTransform(at);
+        }
+
+        if (filterPrimitiveUnits == UnitType.ObjectBoundingBox) {
+            off.x *= elementBounds.getWidth();
+            off.y *= elementBounds.getHeight();
+        }
+
+        return off;
     }
 
-    private Point2D.Double offset(@NotNull AffineTransform at) {
-        double effectiveDx = GeometryUtil.scaleXOfTransform(at) * dx;
-        double effectiveDy = GeometryUtil.scaleYOfTransform(at) * dy;
-
-        return new Point2D.Double(effectiveDx, effectiveDy);
+    @Override
+    public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
+        Rectangle2D input = impl().layoutInput(filterLayoutContext);
+        Point2D off = offset(null, filterLayoutContext.primitiveUnits(), filterLayoutContext.elementBounds());
+        impl().saveLayoutResult(
+                new Rectangle2D.Double(
+                        input.getX() - off.getX(),
+                        input.getY() - off.getY(),
+                        input.getWidth() + 2 * off.getX(),
+                        input.getHeight() + 2 * off.getY()),
+                filterLayoutContext);
     }
 
     @Override
@@ -87,14 +97,7 @@ public final class FeOffset extends AbstractFilterPrimitive {
         Channel result = in;
         if (dx != 0 || dy != 0) {
             AffineTransform at = filterContext.info().graphics().getTransform();
-            Point2D.Double off = offset(at);
-
-            if (filterContext.primitiveUnits() == UnitType.ObjectBoundingBox) {
-                Rectangle2D elementBounds = filterContext.info().elementBounds();
-                off.x *= elementBounds.getWidth();
-                off.y *= elementBounds.getHeight();
-            }
-
+            Point2D.Double off = offset(at, filterContext.primitiveUnits(), filterContext.info().elementBounds());
             AffineTransform transform = AffineTransform.getTranslateInstance(off.x, off.y);
 
             AffineTransformOp op = new AffineTransformOp(transform, filterContext.renderingHints());

@@ -90,6 +90,9 @@ public final class Filter extends ContainerNode {
             }
         }
 
+        filterUnits = attributeNode.getEnum("filterUnits", UnitType.ObjectBoundingBox);
+        filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
+
         x = attributeNode.getLength("x", DEFAULT_FILTER_COORDINATE);
         y = attributeNode.getLength("y", DEFAULT_FILTER_COORDINATE);
         width = attributeNode.getLength("width", DEFAULT_FILTER_SIZE);
@@ -98,36 +101,40 @@ public final class Filter extends ContainerNode {
         // Note: Apparently these coordinates are always interpreted as percentages regardless of the
         // specified unit (except for explicit percentages).
         // Unfortunately this results in rather large buffer images in general due to misuse.
-        x = coerceToPercentage(x);
-        y = coerceToPercentage(y);
-        width = coerceToPercentage(width);
-        height = coerceToPercentage(height);
-
-        filterUnits = attributeNode.getEnum("filterUnits", UnitType.ObjectBoundingBox);
-        filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
+        if (filterUnits == UnitType.ObjectBoundingBox) {
+            x = coerceToPercentage(x);
+            y = coerceToPercentage(y);
+            width = coerceToPercentage(width);
+            height = coerceToPercentage(height);
+        }
     }
 
-    private Length coerceToPercentage(@NotNull Length length) {
+    private @NotNull Length coerceToPercentage(@NotNull Length length) {
         if (length.unit() == Unit.PERCENTAGE) return length;
         return new Length(Unit.PERCENTAGE, length.raw() * 100);
     }
 
     public @NotNull FilterInfo createFilterInfo(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull Rectangle2D elementBounds) {
-        Rectangle2D.Double imageBounds = filterUnits.computeViewBounds(
+        Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds, x, y, width, height);
 
-        // TODO: This currently doesn't work correctly.
-        Rectangle2D neededInputRegion = elementBounds.getBounds2D();
+        FilterLayoutContext filterLayoutContext = new FilterLayoutContext(filterPrimitiveUnits, elementBounds);
+        Rectangle2D clippedElementBounds = elementBounds.createIntersection(g.getClipBounds());
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, clippedElementBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.LastResult, clippedElementBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, clippedElementBounds);
+
         for (SVGNode child : children()) {
             FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-            Rectangle2D needed = filterPrimitive.boundsNeededForOutput(neededInputRegion.getBounds2D(), context);
-            Rectangle2D.union(needed, neededInputRegion, neededInputRegion);
+            filterPrimitive.layoutFilter(context, filterLayoutContext);
         }
 
+        Rectangle2D clipHeuristic = filterLayoutContext.resultChannels().get(DefaultFilterChannel.LastResult);
+
         BlittableImage blitImage = BlittableImage.create(
-                ImageUtil::createCompatibleTransparentImage, context, null,
-                imageBounds, elementBounds, UnitType.UserSpaceOnUse);
+                ImageUtil::createCompatibleTransparentImage, context, clipHeuristic,
+                filterRegion, elementBounds, UnitType.UserSpaceOnUse);
 
         return new FilterInfo(g, blitImage, elementBounds);
     }
@@ -138,26 +145,18 @@ public final class Filter extends ContainerNode {
         FilterContext filterContext = new FilterContext(filterInfo, filterPrimitiveUnits, g.getRenderingHints());
 
         Channel sourceChannel = new ImageProducerChannel(producer);
-        filterContext.addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
-        filterContext.addResult(DefaultFilterChannel.LastResult, sourceChannel);
-        filterContext.addResult(DefaultFilterChannel.SourceAlpha,
+        filterContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
+        filterContext.resultChannels().addResult(DefaultFilterChannel.LastResult, sourceChannel);
+        filterContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha,
                 () -> sourceChannel.applyFilter(new AlphaImageFilter()));
 
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-                Rectangle2D.Double filterPrimitiveRegion = filterPrimitiveUnits.computeViewBounds(
-                        context.measureContext(), filterInfo.elementBounds,
-                        filterPrimitive.x(), filterPrimitive.y(), filterPrimitive.width(), filterPrimitive.height());
-
-                Rectangle2D.intersect(filterPrimitiveRegion, filterInfo.blittableImage.boundsInUserSpace(),
-                        filterPrimitiveRegion);
-
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException ignored) {
                 // Just carry on applying filters
             }
-
             // Todo: Respect filterPrimitiveRegion
         }
 
