@@ -151,10 +151,10 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
             int g = (rgb >> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            int nr = toRgbRange(r1 * r + r2 * g + r3 * b + r4 * a + r5);
-            int ng = toRgbRange(g1 * r + g2 * g + g3 * b + g4 * a + g5);
-            int nb = toRgbRange(b1 * r + b2 * g + b3 * b + b4 * a + b5);
-            int na = toRgbRange(a1 * r + a2 * g + a3 * b + a4 * a + a5);
+            int nr = toRgbRange(r1 * r + r2 * g + r3 * b + r4 * a + r5 * 255);
+            int ng = toRgbRange(g1 * r + g2 * g + g3 * b + g4 * a + g5 * 255);
+            int nb = toRgbRange(b1 * r + b2 * g + b3 * b + b4 * a + b5 * 255);
+            int na = toRgbRange(a1 * r + a2 * g + a3 * b + a4 * a + a5 * 255);
 
             return ((na & 0xFF) << 24) |
                     ((nr & 0xFF) << 16) |
