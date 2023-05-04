@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.util;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -74,28 +75,44 @@ public final class BlittableImage {
             Rectangle2D.intersect(clipBoundsInRootSpace, boundsInRootSpace, boundsInRootSpace);
         }
 
-        BufferedImage img = bufferSurfaceSupplier.createBufferSurface(new AffineTransform(),
-                boundsInRootSpace.getWidth(), boundsInRootSpace.getHeight());
+        int imgX = (int) Math.floor(boundsInRootSpace.getX());
+        int imgY = (int) Math.floor(boundsInRootSpace.getY());
+        int imgWidth = (int) Math.ceil(boundsInRootSpace.getX() + boundsInRootSpace.getWidth()) - imgX;
+        int imgHeight = (int) Math.ceil(boundsInRootSpace.getY() + boundsInRootSpace.getHeight()) - imgY;
+
+        Rectangle2D adjustedUserSpaceBounds = new Rectangle2D.Double(imgX, imgY, imgWidth, imgHeight);
+        try {
+            adjustedUserSpaceBounds = GeometryUtil
+                    .containingBoundsAfterTransform(context.rootTransform().createInverse(), adjustedUserSpaceBounds);
+        } catch (NoninvertibleTransformException e) {
+            throw new RuntimeException(e);
+        }
+
+        BufferedImage img = bufferSurfaceSupplier.createBufferSurface(new AffineTransform(), imgWidth, imgHeight);
 
         RenderContext imageContext = RenderContext.createInitial(context.targetComponent(),
                 contentUnits.deriveMeasure(context.measureContext()));
 
         AffineTransform rootTransform = new AffineTransform();
 
+        Rectangle2D ub = adjustedUserSpaceBounds;
+        // Adjust for subpixel alignment
+        rootTransform.translate(boundsInRootSpace.getX() - imgX, boundsInRootSpace.getY() - imgY);
+
         if (contentUnits == UnitType.ObjectBoundingBox) {
             rootTransform.scale(
-                    objectBounds.getWidth() * img.getWidth() / boundsInUserSpace.getWidth(),
-                    objectBounds.getWidth() * img.getHeight() / boundsInUserSpace.getHeight());
+                    objectBounds.getWidth() * img.getWidth() / ub.getWidth(),
+                    objectBounds.getWidth() * img.getHeight() / ub.getHeight());
         } else {
             rootTransform.scale(
-                    img.getWidth() / boundsInUserSpace.getWidth(),
-                    img.getHeight() / boundsInUserSpace.getHeight());
-            rootTransform.translate(-boundsInUserSpace.getX(), -boundsInUserSpace.getY());
+                    img.getWidth() / ub.getWidth(),
+                    img.getHeight() / ub.getHeight());
+            rootTransform.translate(-ub.getX(), -ub.getY());
         }
 
         imageContext.setRootTransform(rootTransform, context.userSpaceTransform());
 
-        return new BlittableImage(img, imageContext, boundsInUserSpace, contentUnits);
+        return new BlittableImage(img, imageContext, ub, contentUnits);
     }
 
     public @NotNull Rectangle2D boundsInUserSpace() {
