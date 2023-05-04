@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -34,7 +35,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import org.jetbrains.annotations.Nullable;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
