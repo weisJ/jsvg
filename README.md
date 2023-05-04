@@ -58,8 +58,8 @@ an [`SVGDocument`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/
 
 ````java
 SVGLoader loader=new SVGLoader();
-    URL svgUrl=MyClass.class.getResource("mySvgFile.svg");
-    SVGDocument svgDocument=loader.load(svgUrl);
+URL svgUrl=MyClass.class.getResource("mySvgFile.svg");
+SVGDocument svgDocument=loader.load(svgUrl);
 ````
 
 Note that `SVGLoader` is not guaranteed to be thread safe hence shouldn't be used across multiple threads.
@@ -70,10 +70,10 @@ An `SVGDocument` can be rendered to any `Graphics2D` object you like e.g. a `Buf
 
 ````java
 FloatSize size=svgDocument.size();
-    BufferedImage image=new BufferedImage((int)size.width,(int)size.height);
-    Graphics2D g=image.createGraphics();
-    svgDocument.render(null,g);
-    g.dispose();
+BufferedImage image=new BufferedImage((int)size.width,(int)size.height);
+Graphics2D g=image.createGraphics();
+svgDocument.render(null,g);
+g.dispose();
 ````
 
 or a swing component
@@ -166,7 +166,7 @@ For supported elements most of the attributes which apply to them are implemente
 | feBlend             | :white_check_mark:      |
 | feColorMatrix       | :white_check_mark:      |
 | feComponentTransfer | :x:                     |
-| feComposite         | :x:                     |
+| feComposite         | :white_check_mark:      |
 | feConvolveMatrix    | :x:                     |
 | feDiffuseLighting   | :white_check_mark:      |
 | feDisplacementMap   | :white_check_mark:      |
