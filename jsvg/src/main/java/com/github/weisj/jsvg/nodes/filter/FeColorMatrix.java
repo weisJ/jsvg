@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import org.jetbrains.annotations.Nullable;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -43,7 +44,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     public static final String TAG = "fecolormatrix";
     private static final String KEY_VALUES = "values";
 
-    private AffineRGBImageFilter filter;
+    private @Nullable AffineRGBImageFilter filter;
 
     @Override
     public @NotNull String tagName() {
@@ -102,7 +103,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        if (filter.isLinear()) {
+        if (filter != null && filter.isLinear()) {
             impl().saveLayoutResult(impl().layoutInput(filterLayoutContext), filterLayoutContext);
         } else {
             impl().saveLayoutResult(filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this),
@@ -112,8 +113,9 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        if (filter == null) return;
-        impl().saveResult(impl().inputChannel(filterContext).applyFilter(filter), filterContext);
+        @Nullable AffineRGBImageFilter f = filter;
+        if (f == null) return;
+        impl().saveResult(impl().inputChannel(filterContext).applyFilter(f), filterContext);
     }
 
     private static int toRgbRange(double value) {
