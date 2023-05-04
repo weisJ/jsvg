@@ -80,7 +80,8 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        impl().saveLayoutResult(impl().layoutInput(filterLayoutContext), filterLayoutContext);
+        impl().saveLayoutResult(
+                filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this), filterLayoutContext);
     }
 
     @Override
