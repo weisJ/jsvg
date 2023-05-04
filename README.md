@@ -210,12 +210,12 @@ For supported elements most of the attributes which apply to them are implemente
 
 ## Other elements
 
-| Element         | Status               |
-|-----------------|----------------------|
-| desc            | (:white_check_mark:) |
-| title           | (:white_check_mark:) |
-| metadata        | (:white_check_mark:) |
-| color-profile   | :x:                  |
-| :warning:cursor | :x:                  |
-| script          | :x:                  |
-| style           | :x:                  |
+| Element         | Status                  |
+|-----------------|-------------------------|
+| desc            | (:white_check_mark:)    |
+| title           | (:white_check_mark:)    |
+| metadata        | (:white_check_mark:)    |
+| color-profile   | :x:                     |
+| :warning:cursor | :x:                     |
+| script          | :x:                     |
+| style           | :ballot_box_with_check: |
