@@ -54,6 +54,6 @@ public final class DummyFilterPrimitive extends AbstractFilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        impl().saveResult(impl().inputChannel(filterContext), filterContext);
+        impl().noop(filterContext);
     }
 }

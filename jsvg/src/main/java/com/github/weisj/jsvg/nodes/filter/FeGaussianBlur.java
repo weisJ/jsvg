@@ -74,6 +74,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     }
 
     private double[] computeAbsoluteStdDeviation(@Nullable AffineTransform at) {
+        if (stdDeviation.length == 0) return new double[] {0, 0};
         double xSigma = stdDeviation[0];
         double ySigma = stdDeviation[Math.min(stdDeviation.length - 1, 1)];
         if (at != null) {
@@ -100,7 +101,10 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        if (stdDeviation.length == 0) return;
+        if (stdDeviation.length == 0) {
+            impl().noop(filterContext);
+            return;
+        }
 
         // TODO: Use proper transform here
         double[] sigma = computeAbsoluteStdDeviation(filterContext.info().graphics().getTransform());

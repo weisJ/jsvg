@@ -67,6 +67,10 @@ public final class FilterPrimitiveBase {
         return context.resultChannels().get(inputChannel);
     }
 
+    public void noop(@NotNull FilterContext context) {
+        saveResult(inputChannel(context), context);
+    }
+
     public void saveLayoutResult(@NotNull Rectangle2D outputBounds, @NotNull FilterLayoutContext filterLayoutContext) {
         saveResultImpl(outputBounds, filterLayoutContext.resultChannels());
     }

@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -92,7 +93,12 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        if (inputChannels.length == 0) return;
+        if (inputChannels.length == 0) {
+            filterPrimitiveBase.saveLayoutResult(
+                    filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic),
+                    filterLayoutContext);
+            return;
+        }
         Rectangle2D in = filterLayoutContext.resultChannels().get(inputChannels[0]);
         Rectangle2D result = in.getBounds2D();
         for (int i = 1; i < inputChannels.length; i++) {
@@ -104,7 +110,12 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        if (inputChannels.length == 0) return;
+        if (inputChannels.length == 0) {
+            filterPrimitiveBase.saveResult(
+                    filterPrimitiveBase.channel(DefaultFilterChannel.SourceGraphic, filterContext),
+                    filterContext);
+            return;
+        }
         Channel in = filterPrimitiveBase.channel(inputChannels[0], filterContext);
         Channel result = in;
         if (inputChannels.length > 1) {

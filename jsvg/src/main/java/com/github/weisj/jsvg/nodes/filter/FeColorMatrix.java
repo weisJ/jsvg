@@ -114,7 +114,10 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         @Nullable AffineRGBImageFilter f = filter;
-        if (f == null) return;
+        if (f == null) {
+            impl().noop(filterContext);
+            return;
+        }
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(f), filterContext);
     }
 
