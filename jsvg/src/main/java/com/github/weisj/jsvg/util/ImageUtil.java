@@ -23,14 +23,14 @@ package com.github.weisj.jsvg.util;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.awt.image.SinglePixelPackedSampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class ImageUtil {
     private ImageUtil() {}
@@ -40,14 +40,14 @@ public final class ImageUtil {
         return createCompatibleTransparentImage(g.getTransform(), width, height);
     }
 
-    public static @NotNull BufferedImage createCompatibleTransparentImage(@NotNull AffineTransform at, double width,
+    public static @NotNull BufferedImage createCompatibleTransparentImage(@Nullable AffineTransform at, double width,
             double height) {
         return new BufferedImage(
                 (int) Math.ceil(GeometryUtil.scaleXOfTransform(at) * width),
                 (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), BufferedImage.TYPE_INT_ARGB_PRE);
     }
 
-    public static @NotNull BufferedImage createLuminosityBuffer(@NotNull AffineTransform at, double width,
+    public static @NotNull BufferedImage createLuminosityBuffer(@Nullable AffineTransform at, double width,
             double height) {
         return new BufferedImage(
                 (int) Math.ceil(GeometryUtil.scaleXOfTransform(at) * width),

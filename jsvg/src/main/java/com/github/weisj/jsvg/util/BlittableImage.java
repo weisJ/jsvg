@@ -43,7 +43,7 @@ public final class BlittableImage {
     @FunctionalInterface
     public interface BufferSurfaceSupplier {
         @NotNull
-        BufferedImage createBufferSurface(@NotNull AffineTransform at, double width, double height);
+        BufferedImage createBufferSurface(@Nullable AffineTransform at, double width, double height);
     }
 
     private final @NotNull BufferedImage image;
@@ -88,7 +88,7 @@ public final class BlittableImage {
             throw new RuntimeException(e);
         }
 
-        BufferedImage img = bufferSurfaceSupplier.createBufferSurface(new AffineTransform(), imgWidth, imgHeight);
+        BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null, imgWidth, imgHeight);
 
         RenderContext imageContext = RenderContext.createInitial(context.targetComponent(),
                 contentUnits.deriveMeasure(context.measureContext()));

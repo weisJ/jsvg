@@ -28,6 +28,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class GeometryUtil {
     private static final float EPS = 0.0001f;
@@ -50,13 +51,15 @@ public final class GeometryUtil {
         return a < EPS;
     }
 
-    public static double scaleXOfTransform(@NotNull AffineTransform at) {
+    public static double scaleXOfTransform(@Nullable AffineTransform at) {
+        if (at == null) return 1;
         double sx = at.getScaleX();
         double shy = at.getShearY();
         return Math.sqrt(sx * sx + shy * shy);
     }
 
-    public static double scaleYOfTransform(@NotNull AffineTransform at) {
+    public static double scaleYOfTransform(@Nullable AffineTransform at) {
+        if (at == null) return 1;
         double sy = at.getScaleY();
         double shx = at.getShearX();
         return Math.sqrt(sy * sy + shx * shx);
