@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.attributes.filter;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
@@ -94,8 +93,7 @@ public enum EdgeMode {
         int xSize = kernelSize.width;
         int ySize = kernelSize.height;
 
-        BufferedImage bufferedImage = ImageUtil.createCompatibleTransparentImage((AffineTransform) null,
-                width + xSize, height + ySize);
+        BufferedImage bufferedImage = ImageUtil.createCompatibleTransparentImage(width + xSize, height + ySize);
         Graphics2D g = GraphicsUtil.createGraphics(bufferedImage);
 
         int xOff = xSize / 2;

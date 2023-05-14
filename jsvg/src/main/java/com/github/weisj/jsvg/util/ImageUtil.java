@@ -40,6 +40,11 @@ public final class ImageUtil {
         return createCompatibleTransparentImage(g.getTransform(), width, height);
     }
 
+    public static @NotNull BufferedImage createCompatibleTransparentImage(int width, int height) {
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
+    }
+
+
     public static @NotNull BufferedImage createCompatibleTransparentImage(@Nullable AffineTransform at, double width,
             double height) {
         return new BufferedImage(
