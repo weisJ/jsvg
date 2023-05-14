@@ -34,6 +34,10 @@ import org.jetbrains.annotations.Nullable;
  *
  * To test: the algorithm should produce the result 1043618065 as the 10,000th generated number if
  * the original seed is 1.
+ *
+ * NOTICE: This file contains adapted code from the Batik project:
+ * https://xmlgraphics.apache.org/batik/ by the Apache Software Foundation. It is licensed under the
+ * Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 public final class PerlinTurbulence {
     private static final int RAND_m = 2147483647; /* 2**31 - 1 */

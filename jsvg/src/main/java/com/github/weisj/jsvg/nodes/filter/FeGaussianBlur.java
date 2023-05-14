@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.nodes.InplaceBoxBlurFilter;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -49,8 +51,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     private static final double THREE_QUARTER_SQRT_2_PI = SQRT_2_PI * 3f / 4f;
     private static final float KERNEL_PRECISION = 0.001f;
 
-    // TODO: Use 2 here and implement fast box blurring
-    private static final double BOX_BLUR_APPROXIMATION_THRESHOLD = Double.POSITIVE_INFINITY;
+    private static final double BOX_BLUR_APPROXIMATION_THRESHOLD = 2;
 
     private float[] stdDeviation;
     private EdgeMode edgeMode;
@@ -59,7 +60,6 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     private double yCurrent;
     private Kernel xBlur;
     private Kernel yBlur;
-    private final Kernel[] kernels = new Kernel[2];
 
     @Override
     public @NotNull String tagName() {
@@ -88,8 +88,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         Rectangle2D input = impl().layoutInput(filterLayoutContext);
         double[] sigma = computeAbsoluteStdDeviation(null);
-        int hExtend = kernelRadiusForStandardDeviation(sigma[0]) + 1;
-        int vExtend = kernelRadiusForStandardDeviation(sigma[1]) + 1;
+        int hExtend = kernelDiameterForStandardDeviation(sigma[0]);
+        int vExtend = kernelDiameterForStandardDeviation(sigma[1]);
         impl().saveLayoutResult(
                 new Rectangle2D.Double(
                         input.getX() - hExtend,
@@ -106,32 +106,36 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             return;
         }
 
-        // TODO: Use proper transform here
         double[] sigma = computeAbsoluteStdDeviation(filterContext.info().graphics().getTransform());
         double xSigma = sigma[0];
         double ySigma = sigma[1];
 
-        if (xSigma < 0 || ySigma < 0) return;
+        if (xSigma <= 0 && ySigma <= 0) {
+            impl().noop(filterContext);
+            return;
+        }
 
         ImageProducer input = impl().inputChannel(filterContext).producer();
 
-        int kernelCount = 0;
-        if (xSigma > 0) {
-            kernels[kernelCount++] = createConvolveKernel(xSigma, true);
+        Kernel xBlurKernel = null;
+        Kernel yBlurKernel = null;
+        int dX = kernelDiameterForStandardDeviation(xSigma);
+        int dY = kernelDiameterForStandardDeviation(ySigma);
+
+        if (xSigma > 0 && xSigma < BOX_BLUR_APPROXIMATION_THRESHOLD) {
+            xBlurKernel = createConvolveKernel(dX, xSigma, true);
         }
-        if (ySigma > 0) {
-            kernels[kernelCount++] = createConvolveKernel(ySigma, false);
+        if (ySigma > 0 && ySigma < BOX_BLUR_APPROXIMATION_THRESHOLD) {
+            yBlurKernel = createConvolveKernel(dX, ySigma, false);
         }
 
-        ImageProducer output = edgeMode.convolve(context, filterContext, input, kernels, kernelCount);
+        ImageProducer output = edgeMode.convolve(context, filterContext, input,
+                new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, dX, dY));
         impl().saveResult(new ImageProducerChannel(output), filterContext);
     }
 
 
-    private @NotNull Kernel createConvolveKernel(double sigma, boolean horizontal) {
-        int radius = kernelRadiusForStandardDeviation(sigma);
-        int diameter = diameterForRadius(radius);
-
+    private @NotNull Kernel createConvolveKernel(int diameter, double sigma, boolean horizontal) {
         if (horizontal && xBlur != null && xCurrent == sigma) return xBlur;
         if (!horizontal && yBlur != null && yCurrent == sigma) return yBlur;
 
@@ -140,7 +144,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         } else {
             yCurrent = sigma;
         }
-        float[] data = computeKernelData(diameter, sigma);
+
+        float[] data = computeGaussianKernelData(diameter, sigma);
 
         if (horizontal) {
             xBlur = new Kernel(diameter, 1, data);
@@ -156,7 +161,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
                 / (standardDeviation * SQRT_2_PI));
     }
 
-    private static float[] computeKernelData(int diameter, double standardDeviation) {
+    private static float[] computeGaussianKernelData(int diameter, double standardDeviation) {
         final float[] data = new float[diameter];
 
         int mid = diameter / 2;
@@ -176,25 +181,90 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         return data;
     }
 
-    public static int diameterForRadius(int radius) {
-        return 2 * radius + 1;
-    }
-
-    public static int kernelRadiusForStandardDeviation(double standardDeviation) {
-        if (standardDeviation <= BOX_BLUR_APPROXIMATION_THRESHOLD) {
+    public static int kernelDiameterForStandardDeviation(double standardDeviation) {
+        if (standardDeviation < BOX_BLUR_APPROXIMATION_THRESHOLD) {
             float areaSum = (float) (0.5 / (standardDeviation * SQRT_2_PI));
             int i = 0;
             while (areaSum < 0.5 - KERNEL_PRECISION) {
                 areaSum += normalConvolve(i, standardDeviation);
                 i++;
             }
-            return i;
+            return i * 2 + 1;
         } else {
-            int diameter = (int) Math.floor(THREE_QUARTER_SQRT_2_PI * standardDeviation + 0.5f);
-            if (diameter % 2 == 0) {
-                return diameter - 1 + diameter / 2;
+            return (int) Math.floor(THREE_QUARTER_SQRT_2_PI * standardDeviation + 0.5f);
+        }
+    }
+
+
+    private static final class MixedQualityConvolveOperation implements EdgeMode.ConvolveOperation {
+
+        private final @Nullable Kernel xKernel;
+        private final @Nullable Kernel yKernel;
+
+        private final int dX;
+        private final int dY;
+
+        private MixedQualityConvolveOperation(@Nullable Kernel xKernel, @Nullable Kernel yKernel, int dX, int dY) {
+            this.xKernel = xKernel;
+            this.yKernel = yKernel;
+            this.dX = dX;
+            this.dY = dY;
+        }
+
+
+        @Override
+        public @NotNull Dimension maximumKernelSize() {
+            return new Dimension(
+                    xKernel != null ? xKernel.getXOrigin() : dX,
+                    yKernel != null ? yKernel.getXOrigin() : dY);
+        }
+
+        @Override
+        public @NotNull ImageProducer convolve(@NotNull BufferedImage image, @NotNull RenderingHints hints,
+                int awtEdgeMode) {
+            WritableRaster raster = image.getRaster();
+            if (xKernel != null && yKernel != null) {
+                BufferedImageOp op = new MultiConvolveOp(new ConvolveOp[] {
+                        new ConvolveOp(xKernel, awtEdgeMode, hints),
+                        new ConvolveOp(yKernel, awtEdgeMode, hints)
+                });
+                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(op));
+            } else if (xKernel != null) {
+                verticalBoxBlur(raster);
+                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(
+                        new ConvolveOp(xKernel, awtEdgeMode, hints)));
+            } else if (yKernel != null) {
+                horizontalBoxBlur(raster);
+                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(
+                        new ConvolveOp(yKernel, awtEdgeMode, hints)));
             } else {
-                return diameter - 2 + diameter / 2;
+                horizontalBoxBlur(raster);
+                verticalBoxBlur(raster);
+                return image.getSource();
+            }
+        }
+
+        private void horizontalBoxBlur(@NotNull WritableRaster raster) {
+            if ((dX & 0x01) == 0) {
+                InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2);
+                InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2 - 1);
+                InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX + 1, dX / 2);
+            } else {
+                InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2);
+                InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2);
+                InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2);
+            }
+        }
+
+        private void verticalBoxBlur(@NotNull WritableRaster raster) {
+            if ((dY & 0x01) == 0) {
+                InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2);
+                InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2 - 1);
+                InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY + 1, dY / 2);
+            } else {
+                InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2);
+                InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2);
+                InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2);
             }
         }
     }

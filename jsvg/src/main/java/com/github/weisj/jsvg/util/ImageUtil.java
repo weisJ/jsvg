@@ -54,12 +54,12 @@ public final class ImageUtil {
                 (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), BufferedImage.TYPE_BYTE_GRAY);
     }
 
-    public static int[] getINT_RGBA_DataBank(@NotNull WritableRaster raster) {
+    public static int[] getINT_RGBA_DataBank(@NotNull Raster raster) {
         DataBufferInt dstDB = (DataBufferInt) raster.getDataBuffer();
         return dstDB.getBankData()[0];
     }
 
-    public static int getINT_RGBA_DataOffset(@NotNull WritableRaster raster) {
+    public static int getINT_RGBA_DataOffset(@NotNull Raster raster) {
         DataBufferInt dstDB = (DataBufferInt) raster.getDataBuffer();
         SinglePixelPackedSampleModel sppsm = (SinglePixelPackedSampleModel) raster.getSampleModel();
         return dstDB.getOffset() + sppsm.getOffset(
@@ -67,7 +67,21 @@ public final class ImageUtil {
                 raster.getMinY() - raster.getSampleModelTranslateY());
     }
 
-    public static int getINT_RGBA_DataAdjust(@NotNull WritableRaster raster) {
-        return ((SinglePixelPackedSampleModel) raster.getSampleModel()).getScanlineStride() - raster.getWidth();
+    public static int getINT_RGBA_DataAdjust(@NotNull Raster raster) {
+        return getINT_RGBA_ScanlineStride(raster) - raster.getWidth();
+    }
+
+    public static int getINT_RGBA_ScanlineStride(@NotNull Raster raster) {
+        return ((SinglePixelPackedSampleModel) raster.getSampleModel()).getScanlineStride();
+    }
+
+    public static @NotNull BufferedImage copy(@NotNull RenderContext context, @NotNull ImageProducer producer) {
+        Image img = context.createImage(producer);
+        BufferedImage bufferedImage = createCompatibleTransparentImage((AffineTransform) null,
+                img.getWidth(null), img.getHeight(null));
+        Graphics2D g = GraphicsUtil.createGraphics(bufferedImage);
+        g.drawImage(img, null, null);
+        g.dispose();
+        return bufferedImage;
     }
 }
