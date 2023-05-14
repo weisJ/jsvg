@@ -28,7 +28,7 @@ import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
 
-public class MultiConvolveOp implements BufferedImageOp, RasterOp {
+final class MultiConvolveOp implements BufferedImageOp, RasterOp {
 
     private final @NotNull ConvolveOp[] ops;
     private final @NotNull ConvolveOp op;
