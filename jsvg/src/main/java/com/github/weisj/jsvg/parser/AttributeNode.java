@@ -55,19 +55,23 @@ public final class AttributeNode {
     private final @NotNull Map<@NotNull String, @NotNull Object> namedElements;
     private final @NotNull List<@NotNull StyleSheet> styleSheets;
 
-    private final @NotNull SVGLoader.LoadHelper loadHelper;
+    private final @NotNull LoadHelper loadHelper;
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
             @Nullable AttributeNode parent,
             @NotNull Map<@NotNull String, @NotNull Object> namedElements,
             @NotNull List<@NotNull StyleSheet> styleSheets,
-            @NotNull SVGLoader.LoadHelper loadHelper) {
+            @NotNull LoadHelper loadHelper) {
         this.tagName = tagName;
         this.attributes = attributes;
         this.parent = parent;
         this.namedElements = namedElements;
         this.styleSheets = styleSheets;
         this.loadHelper = loadHelper;
+    }
+
+    void addAttributes(@NotNull Map<String, String> attributes) {
+        this.attributes.putAll(attributes);
     }
 
     void prepareForNodeBuilding(@NotNull ParsedElement parsedElement) {

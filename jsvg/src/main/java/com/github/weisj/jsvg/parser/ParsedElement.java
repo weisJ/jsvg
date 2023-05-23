@@ -39,7 +39,7 @@ public final class ParsedElement {
         YES
     }
 
-    private final @Nullable String id;
+    private @Nullable String id;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
 
@@ -47,8 +47,7 @@ public final class ParsedElement {
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NO;
 
-    ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
-        this.id = id;
+    ParsedElement(@NotNull AttributeNode element, @NotNull SVGNode node) {
         this.attributeNode = element;
         this.node = node;
         PermittedContent permittedContent = node.getClass().getAnnotation(PermittedContent.class);
@@ -67,6 +66,9 @@ public final class ParsedElement {
     }
 
     public @Nullable String id() {
+        if (id == null) {
+            id = attributeNode.getValue("id");
+        }
         return id;
     }
 

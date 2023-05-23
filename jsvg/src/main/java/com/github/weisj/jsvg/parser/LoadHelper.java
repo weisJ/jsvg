@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,21 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.util;
+package com.github.weisj.jsvg.parser;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public final class Todo {
-    private Todo() {}
+import com.github.weisj.jsvg.attributes.AttributeParser;
 
-    @SuppressWarnings("TypeParameterUnusedInFormals")
-    public static <T> @NotNull T todo() {
-        return todo("");
+public final class LoadHelper {
+    private final @NotNull AttributeParser attributeParser;
+    private final @NotNull ResourceLoader resourceLoader;
+
+    public LoadHelper(@NotNull AttributeParser attributeParser, @NotNull ResourceLoader resourceLoader) {
+        this.attributeParser = attributeParser;
+        this.resourceLoader = resourceLoader;
     }
 
-    @SuppressWarnings({"TypeParameterUnusedInFormals", "DoNotCallSuggester"})
-    public static <T> @NotNull T todo(@Nullable String msg) {
-        throw new UnsupportedOperationException("Todo: " + msg);
+    public @NotNull AttributeParser attributeParser() {
+        return attributeParser;
+    }
+
+    public @NotNull ResourceLoader resourceLoader() {
+        return resourceLoader;
     }
 }

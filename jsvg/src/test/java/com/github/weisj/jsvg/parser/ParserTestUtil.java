@@ -32,17 +32,7 @@ import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
 public final class ParserTestUtil {
 
     private static final AttributeParser ATTRIBUTE_PARSER = new AttributeParser(new DefaultPaintParser());
-    private static final SVGLoader.LoadHelper LOAD_HELPER = new SVGLoader.LoadHelper() {
-        @Override
-        public @NotNull AttributeParser attributeParser() {
-            return ATTRIBUTE_PARSER;
-        }
-
-        @Override
-        public @NotNull ResourceLoader resourceLoader() {
-            return new SynchronousResourceLoader();
-        }
-    };
+    private static final LoadHelper LOAD_HELPER = new LoadHelper(ATTRIBUTE_PARSER, new SynchronousResourceLoader());
 
     private ParserTestUtil() {}
 
