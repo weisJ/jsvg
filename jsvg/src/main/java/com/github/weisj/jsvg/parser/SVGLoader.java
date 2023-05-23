@@ -23,20 +23,12 @@ package com.github.weisj.jsvg.parser;
 
 import java.io.*;
 import java.net.URL;
-import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
 
 import com.github.weisj.jsvg.SVGDocument;
 
@@ -48,37 +40,8 @@ public final class SVGLoader {
 
     static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
     private static final @NotNull NodeSupplier NODE_SUPPLIER = new NodeSupplier();
+    private final SaxSVGLoader loader = new SaxSVGLoader(NODE_SUPPLIER);
 
-    private final @NotNull SAXParser saxParser;
-
-    public SVGLoader() {
-        this(createSaxParser());
-    }
-
-    public SVGLoader(@NotNull SAXParser saxParser) {
-        this.saxParser = saxParser;
-    }
-
-    private static @NotNull SAXParser createSaxParser() {
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-        saxParserFactory.setNamespaceAware(true);
-        try {
-            SAXParser parser = saxParserFactory.newSAXParser();
-            setParserProperty(parser, XMLConstants.ACCESS_EXTERNAL_DTD);
-            setParserProperty(parser, XMLConstants.ACCESS_EXTERNAL_SCHEMA);
-            return parser;
-        } catch (ParserConfigurationException | SAXException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void setParserProperty(@NotNull SAXParser parser, @NotNull String property) {
-        try {
-            parser.setProperty(property, "");
-        } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
-            // We don't care if when the properties aren't recognized or supported.
-        }
-    }
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {
         return load(xmlBase, new DefaultParserProvider());
@@ -106,73 +69,27 @@ public final class SVGLoader {
     public @Nullable SVGDocument load(@NotNull InputStream inputStream,
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader) {
+        return loader.load(createDocumentInputStream(inputStream), parserProvider, resourceLoader);
+    }
+
+    private @Nullable InputStream createDocumentInputStream(@NotNull InputStream is) {
         try {
-            XMLReader xmlReader = saxParser.getXMLReader();
-            xmlReader.setEntityResolver(
-                    (publicId, systemId) -> {
-                        // Ignore all DTDs
-                        return new InputSource(new ByteArrayInputStream(new byte[0]));
-                    });
-            SVGLoadHandler handler = new SVGLoadHandler(parserProvider, resourceLoader);
-            xmlReader.setContentHandler(handler);
-            xmlReader.parse(new InputSource(createDocumentInputStream(inputStream)));
-            return handler.getDocument();
-        } catch (SAXParseException e) {
-            LOGGER.log(Level.WARNING, "Error processing ", e);
-        } catch (Throwable e) {
-            LOGGER.log(Level.WARNING, "Could not load SVG ", e);
+            BufferedInputStream bin = new BufferedInputStream(is);
+            bin.mark(2);
+            int b0 = bin.read();
+            int b1 = bin.read();
+            bin.reset();
+
+            // Check for gzip magic number
+            if ((b1 << 8 | b0) == GZIPInputStream.GZIP_MAGIC) {
+                return new GZIPInputStream(bin);
+            } else {
+                // Plain text
+                return bin;
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         return null;
     }
-
-    private InputStream createDocumentInputStream(@NotNull InputStream is) throws IOException {
-        BufferedInputStream bin = new BufferedInputStream(is);
-        bin.mark(2);
-        int b0 = bin.read();
-        int b1 = bin.read();
-        bin.reset();
-
-        // Check for gzip magic number
-        if ((b1 << 8 | b0) == GZIPInputStream.GZIP_MAGIC) {
-            return new GZIPInputStream(bin);
-        } else {
-            // Plain text
-            return bin;
-        }
-    }
-
-    private static final class SVGLoadHandler extends DefaultHandler {
-
-        private final SVGDocumentBuilder documentBuilder;
-
-        private SVGLoadHandler(@NotNull ParserProvider parserProvider, @NotNull ResourceLoader resourceLoader) {
-            documentBuilder = new SVGDocumentBuilder(parserProvider, resourceLoader, NODE_SUPPLIER);
-        }
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
-            documentBuilder.startElement(qName);
-            Map<String, String> attrs = new HashMap<>(attributes.getLength());
-            for (int i = 0; i < attributes.getLength(); i++) {
-                attrs.put(attributes.getQName(i), attributes.getValue(i).trim());
-            }
-            documentBuilder.addAttributes(attrs);
-        }
-
-        @Override
-        public void endElement(String uri, String localName, String qName) {
-            documentBuilder.endElement(qName);
-        }
-
-        @Override
-        public void characters(char[] ch, int start, int length) {
-            documentBuilder.addTextContent(ch, start, length);
-        }
-
-        @NotNull
-        SVGDocument getDocument() {
-            return documentBuilder.build();
-        }
-    }
-
 }
