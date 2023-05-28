@@ -104,6 +104,7 @@ public final class SaxSVGLoader {
                 @NotNull ResourceLoader resourceLoader,
                 @NotNull NodeSupplier nodeSupplier) {
             documentBuilder = new SVGDocumentBuilder(parserProvider, resourceLoader, nodeSupplier);
+            documentBuilder.startDocument();
         }
 
         @Override
@@ -127,6 +128,7 @@ public final class SaxSVGLoader {
 
         @NotNull
         SVGDocument getDocument() {
+            documentBuilder.endDocument();
             return documentBuilder.build();
         }
     }

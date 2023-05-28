@@ -56,7 +56,15 @@ public final class SVGDocumentBuilder {
         this.nodeSupplier = nodeSupplier;
     }
 
-    public void startElement(@NotNull String tagName) {
+    public void startDocument() {
+        if (rootNode != null) throw new IllegalStateException("Document already started");
+    }
+
+    public void endDocument() {
+        if (rootNode == null) throw new IllegalStateException("Document is empty");
+    }
+
+    public boolean startElement(@NotNull String tagName, @NotNull Map<String, String> attributes) {
         ParsedElement parentElement = !currentNodeStack.isEmpty()
                 ? currentNodeStack.peek()
                 : null;
