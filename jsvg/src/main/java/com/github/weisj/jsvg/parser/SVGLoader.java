@@ -40,8 +40,7 @@ public final class SVGLoader {
 
     static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
     private static final @NotNull NodeSupplier NODE_SUPPLIER = new NodeSupplier();
-    private final SaxSVGLoader loader = new SaxSVGLoader(NODE_SUPPLIER);
-
+    private final StaxSVGLoader loader = new StaxSVGLoader(NODE_SUPPLIER);
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {
         return load(xmlBase, new DefaultParserProvider());
