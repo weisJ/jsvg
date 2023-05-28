@@ -68,7 +68,12 @@ public final class SVGLoader {
     public @Nullable SVGDocument load(@NotNull InputStream inputStream,
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader) {
-        return loader.load(createDocumentInputStream(inputStream), parserProvider, resourceLoader);
+        try {
+            return loader.load(createDocumentInputStream(inputStream), parserProvider, resourceLoader);
+        } catch (Throwable e) {
+            LOGGER.log(Level.WARNING, "Could not load SVG ", e);
+        }
+        return null;
     }
 
     private @Nullable InputStream createDocumentInputStream(@NotNull InputStream is) {

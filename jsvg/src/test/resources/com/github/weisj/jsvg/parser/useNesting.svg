@@ -1,0 +1,29 @@
+<svg viewBox="0 0 10 10" width="100" height="100"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink">
+	<defs>
+		<rect id="use0" x="0" y="0" width="100%" height="100%"
+			fill="pink" />
+		<use id="use1" xlink:href="#use0" />
+		<use id="use2" xlink:href="#use1" />
+		<use id="use3" xlink:href="#use2" />
+		<use id="use4" xlink:href="#use3" />
+		<use id="use5" xlink:href="#use4" />
+		<use id="use6" xlink:href="#use5" />
+		<use id="use7" xlink:href="#use6" />
+		<use id="use8" xlink:href="#use7" />
+		<use id="use9" xlink:href="#use8" />
+		<use id="use10" xlink:href="#use9" />
+		<use id="use11" xlink:href="#use10" />
+		<use id="use12" xlink:href="#use11" />
+		<use id="use13" xlink:href="#use12" />
+		<use id="use14" xlink:href="#use13" />
+		<use id="use15" xlink:href="#use14" />
+		<use id="use16" xlink:href="#use15" />
+		<use id="use17" xlink:href="#use16" />
+		<use id="use18" xlink:href="#use17" />
+		<use id="use19" xlink:href="#use18" />
+		<use id="use20" xlink:href="#use19" />
+	</defs>
+	<use xlink:href="#use10" />
+</svg>

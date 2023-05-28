@@ -28,15 +28,17 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.attributes.AttributeParser;
-import com.github.weisj.jsvg.nodes.SVG;
-import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.nodes.Style;
+import com.github.weisj.jsvg.nodes.*;
+import com.github.weisj.jsvg.nodes.container.CommonRenderableContainerNode;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 public final class SVGDocumentBuilder {
 
+    private static final int MAX_USE_NESTING_DEPTH = 15;
+
     private final Map<String, Object> namedElements = new HashMap<>();
+    private final List<Use> useElements = new ArrayList<>();
     private final List<Style> styleElements = new ArrayList<>();
     private final List<StyleSheet> styleSheets = new ArrayList<>();
     private final Deque<ParsedElement> currentNodeStack = new ArrayDeque<>();
@@ -46,6 +48,7 @@ public final class SVGDocumentBuilder {
     private final @NotNull NodeSupplier nodeSupplier;
 
     private ParsedElement rootNode;
+
 
     public SVGDocumentBuilder(
             @NotNull ParserProvider parserProvider,
@@ -95,6 +98,10 @@ public final class SVGDocumentBuilder {
             styleElements.add((Style) parsedElement.node());
         }
 
+        if (parsedElement.node() instanceof Use) {
+            useElements.add((Use) parsedElement.node());
+        }
+
         currentNodeStack.push(parsedElement);
         return true;
     }
@@ -130,13 +137,7 @@ public final class SVGDocumentBuilder {
     public @NotNull SVGDocument build() {
         if (rootNode == null) throw new IllegalStateException("No root node");
 
-        if (!styleElements.isEmpty()) {
-            CssParser cssParser = parserProvider.createCssParser();
-            for (Style styleElement : styleElements) {
-                styleElement.parseStyleSheet(cssParser);
-                styleSheets.add(styleElement.styleSheet());
-            }
-        }
+        processStyleSheets();
 
         DomProcessor preProcessor = parserProvider.createPreProcessor();
         if (preProcessor != null) preProcessor.process(rootNode);
@@ -145,6 +146,41 @@ public final class SVGDocumentBuilder {
 
         DomProcessor postProcessor = parserProvider.createPostProcessor();
         if (postProcessor != null) postProcessor.process(rootNode);
+
+        validateUseElements();
         return new SVGDocument((SVG) rootNode.node());
+    }
+
+    private void processStyleSheets() {
+        if (styleElements.isEmpty()) return;
+        CssParser cssParser = parserProvider.createCssParser();
+        for (Style styleElement : styleElements) {
+            styleElement.parseStyleSheet(cssParser);
+            styleSheets.add(styleElement.styleSheet());
+        }
+    }
+
+    private void validateUseElements() {
+        if (useElements.isEmpty()) return;
+        for (Use useElement : useElements) {
+            checkCycle(useElement, new HashSet<>(), MAX_USE_NESTING_DEPTH);
+        }
+    }
+
+    private void checkCycle(@NotNull SVGNode node, @NotNull HashSet<SVGNode> seen, int depth) {
+        if (!seen.add(node)) {
+            throw new IllegalStateException("Cycle detected in use elements");
+        }
+        if (depth <= 0) {
+            throw new IllegalStateException("Maximum nesting depth exceeded");
+        }
+        if (node instanceof Use) {
+            SVGNode referenced = ((Use) node).referencedNode();
+            if (referenced != null) checkCycle(referenced, seen, depth - 1);
+        } else if (node instanceof CommonRenderableContainerNode) {
+            for (SVGNode child : ((CommonRenderableContainerNode) node).children()) {
+                checkCycle(child, seen, depth);
+            }
+        }
     }
 }

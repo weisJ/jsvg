@@ -37,7 +37,6 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.xml.sax.*;
 
 import com.github.weisj.jsvg.SVGDocument;
 
@@ -73,9 +72,8 @@ public final class StaxSVGLoader {
                     case XMLStreamConstants.START_ELEMENT:
                         StartElement element = event.asStartElement();
                         Map<String, String> attributes = new HashMap<>();
-                        element.getAttributes().forEachRemaining(attr -> {
-                            attributes.put(qualifiedName(attr.getName()), attr.getValue().trim());
-                        });
+                        element.getAttributes().forEachRemaining(
+                                attr -> attributes.put(qualifiedName(attr.getName()), attr.getValue().trim()));
                         if (!builder.startElement(qualifiedName(element.getName()), attributes)) {
                             skipElement(reader);
                         }
@@ -105,8 +103,8 @@ public final class StaxSVGLoader {
                 }
             }
             return builder.build();
-        } catch (Throwable e) {
-            LOGGER.log(Level.WARNING, "Could not load SVG ", e);
+        } catch (XMLStreamException e) {
+            LOGGER.log(Level.SEVERE, "Error while parsing SVG.", e);
         }
         return null;
     }
