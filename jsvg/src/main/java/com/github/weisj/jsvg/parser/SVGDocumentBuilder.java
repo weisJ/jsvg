@@ -67,12 +67,16 @@ public final class SVGDocumentBuilder {
         if (parentElement != null) flushText(parentElement, true);
 
         @Nullable SVGNode newNode = nodeSupplier.create(tagName);
-        if (newNode == null) return;
+        if (newNode == null) return false;
 
-        Map<String, String> attrs = new HashMap<>();
-        AttributeNode attributeNode = new AttributeNode(tagName, attrs, parentAttributeNode,
+        AttributeNode attributeNode = new AttributeNode(tagName, attributes, parentAttributeNode,
                 namedElements, styleSheets, loadHelper);
-        ParsedElement parsedElement = new ParsedElement(attributeNode, newNode);
+        String id = attributes.get("id");
+        ParsedElement parsedElement = new ParsedElement(id, attributeNode, newNode);
+
+        if (id != null && !namedElements.containsKey(id)) {
+            namedElements.put(id, parsedElement);
+        }
 
         if (parentElement != null) {
             parentElement.addChild(parsedElement);
@@ -84,18 +88,7 @@ public final class SVGDocumentBuilder {
         }
 
         currentNodeStack.push(parsedElement);
-    }
-
-    public void addAttributes(@NotNull Map<String, String> attributes) {
-        if (currentNodeStack.isEmpty()) {
-            throw new IllegalStateException("Adding attributes without a current node");
-        }
-        ParsedElement currentElement = currentNodeStack.peek();
-        currentElement.attributeNode().addAttributes(attributes);
-        String id = currentElement.id();
-        if (id != null && !namedElements.containsKey(id)) {
-            namedElements.put(id, currentElement);
-        }
+        return true;
     }
 
     public void addTextContent(char @NotNull [] characterData, int startOffset, int endOffset) {

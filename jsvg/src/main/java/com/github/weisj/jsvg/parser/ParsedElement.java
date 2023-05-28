@@ -39,7 +39,7 @@ public final class ParsedElement {
         YES
     }
 
-    private @Nullable String id;
+    private final @Nullable String id;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
 
@@ -47,9 +47,10 @@ public final class ParsedElement {
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NO;
 
-    ParsedElement(@NotNull AttributeNode element, @NotNull SVGNode node) {
+    ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
         this.attributeNode = element;
         this.node = node;
+        this.id = id;
         PermittedContent permittedContent = node.getClass().getAnnotation(PermittedContent.class);
         if (permittedContent == null) {
             throw new IllegalStateException("Element <" + node.tagName() + "> doesn't specify permitted content");
@@ -66,9 +67,6 @@ public final class ParsedElement {
     }
 
     public @Nullable String id() {
-        if (id == null) {
-            id = attributeNode.getValue("id");
-        }
         return id;
     }
 

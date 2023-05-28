@@ -108,12 +108,11 @@ public final class SaxSVGLoader {
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
-            documentBuilder.startElement(qName);
             Map<String, String> attrs = new HashMap<>(attributes.getLength());
             for (int i = 0; i < attributes.getLength(); i++) {
                 attrs.put(attributes.getQName(i), attributes.getValue(i).trim());
             }
-            documentBuilder.addAttributes(attrs);
+            documentBuilder.startElement(qName, attrs);
         }
 
         @Override

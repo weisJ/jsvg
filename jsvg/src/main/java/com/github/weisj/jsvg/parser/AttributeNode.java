@@ -70,10 +70,6 @@ public final class AttributeNode {
         this.loadHelper = loadHelper;
     }
 
-    void addAttributes(@NotNull Map<String, String> attributes) {
-        this.attributes.putAll(attributes);
-    }
-
     void prepareForNodeBuilding(@NotNull ParsedElement parsedElement) {
         Map<String, String> styleSheetAttributes = new HashMap<>();
 
