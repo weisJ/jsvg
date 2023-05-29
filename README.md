@@ -27,7 +27,7 @@ The library is available on maven central:
 
 ````kotlin
 dependencies {
-    implementation("com.github.weisj:jsvg:0.0.9")
+    implementation("com.github.weisj:jsvg:1.0.0")
 }
 ````
 
@@ -40,6 +40,7 @@ repositories {
     }
 }
 
+// Optional:
 configurations.all {
     resolutionStrategy.cacheChangingModulesFor(0, "seconds")
 }
@@ -57,9 +58,9 @@ class. It will produce
 an [`SVGDocument`](https://github.com/weisJ/jsvg/blob/master/jsvg/src/main/java/com/github/weisj/jsvg/SVGDocument.java)
 
 ````java
-SVGLoader loader=new SVGLoader();
-URL svgUrl=MyClass.class.getResource("mySvgFile.svg");
-SVGDocument svgDocument=loader.load(svgUrl);
+SVGLoader loader = new SVGLoader();
+URL svgUrl = MyClass.class.getResource("mySvgFile.svg");
+SVGDocument svgDocument = loader.load(svgUrl);
 ````
 
 Note that `SVGLoader` is not guaranteed to be thread safe hence shouldn't be used across multiple threads.
@@ -69,9 +70,9 @@ Note that `SVGLoader` is not guaranteed to be thread safe hence shouldn't be use
 An `SVGDocument` can be rendered to any `Graphics2D` object you like e.g. a `BufferedImage`
 
 ````java
-FloatSize size=svgDocument.size();
-BufferedImage image=new BufferedImage((int)size.width,(int)size.height);
-Graphics2D g=image.createGraphics();
+FloatSize size = svgDocument.size();
+BufferedImage image = new BufferedImage((int) size.width,(int) size.height);
+Graphics2D g = image.createGraphics();
 svgDocument.render(null,g);
 g.dispose();
 ````
