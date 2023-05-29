@@ -44,9 +44,16 @@ public final class StaxSVGLoader {
     private static final Logger LOGGER = Logger.getLogger(StaxSVGLoader.class.getName());
 
     private final @NotNull NodeSupplier nodeSupplier;
+    private final @NotNull XMLInputFactory xmlInputFactory;
 
     public StaxSVGLoader(@NotNull NodeSupplier nodeSupplier) {
+        this(nodeSupplier, XMLInputFactory.newFactory());
+    }
+
+    public StaxSVGLoader(@NotNull NodeSupplier nodeSupplier, @NotNull XMLInputFactory factory) {
         this.nodeSupplier = nodeSupplier;
+        this.xmlInputFactory = factory;
+        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
     }
 
     public @Nullable SVGDocument load(
@@ -55,7 +62,6 @@ public final class StaxSVGLoader {
             @NotNull ResourceLoader resourceLoader) {
         if (inputStream == null) return null;
         try {
-            XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
             XMLEventReader reader = xmlInputFactory.createXMLEventReader(inputStream);
             SVGDocumentBuilder builder = new SVGDocumentBuilder(parserProvider, resourceLoader, nodeSupplier);
 
