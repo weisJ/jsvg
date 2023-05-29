@@ -163,23 +163,20 @@ public final class SVGDocumentBuilder {
     private void validateUseElements() {
         if (useElements.isEmpty()) return;
         for (Use useElement : useElements) {
-            checkCycle(useElement, new HashSet<>(), MAX_USE_NESTING_DEPTH);
+            checkNestingDepth(useElement, MAX_USE_NESTING_DEPTH);
         }
     }
 
-    private void checkCycle(@NotNull SVGNode node, @NotNull HashSet<SVGNode> seen, int depth) {
-        if (!seen.add(node)) {
-            throw new IllegalStateException("Cycle detected in use elements");
-        }
-        if (depth <= 0) {
+    private void checkNestingDepth(@NotNull SVGNode node, int allowed_depth) {
+        if (allowed_depth <= 0) {
             throw new IllegalStateException("Maximum nesting depth exceeded");
         }
         if (node instanceof Use) {
             SVGNode referenced = ((Use) node).referencedNode();
-            if (referenced != null) checkCycle(referenced, seen, depth - 1);
+            if (referenced != null) checkNestingDepth(referenced, allowed_depth - 1);
         } else if (node instanceof CommonRenderableContainerNode) {
             for (SVGNode child : ((CommonRenderableContainerNode) node).children()) {
-                checkCycle(child, seen, depth);
+                checkNestingDepth(child, allowed_depth);
             }
         }
     }
