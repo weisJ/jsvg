@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,24 +48,40 @@ public final class StaxSVGLoader {
     private final @NotNull XMLInputFactory xmlInputFactory;
 
     public StaxSVGLoader(@NotNull NodeSupplier nodeSupplier) {
-        this(nodeSupplier, XMLInputFactory.newFactory());
+        this(nodeSupplier, createDefaultFactory());
+    }
+
+    private static @NotNull XMLInputFactory createDefaultFactory() {
+        XMLInputFactory factory = XMLInputFactory.newFactory();
+        factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        return factory;
     }
 
     public StaxSVGLoader(@NotNull NodeSupplier nodeSupplier, @NotNull XMLInputFactory factory) {
         this.nodeSupplier = nodeSupplier;
         this.xmlInputFactory = factory;
-        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+    }
+
+    private @Nullable XMLEventReader createReader(@Nullable InputStream inputStream) {
+        try {
+            return xmlInputFactory.createXMLEventReader(inputStream);
+        } catch (XMLStreamException e) {
+            LOGGER.log(Level.SEVERE, "Error while creating XMLEventReader.", e);
+            return null;
+        }
     }
 
     public @Nullable SVGDocument load(
             @Nullable InputStream inputStream,
             @NotNull ParserProvider parserProvider,
-            @NotNull ResourceLoader resourceLoader) {
+            @NotNull ResourceLoader resourceLoader) throws IOException, XMLStreamException {
         if (inputStream == null) return null;
+        XMLEventReader reader = createReader(inputStream);
+        if (reader == null) return null;
         try {
-            XMLEventReader reader = xmlInputFactory.createXMLEventReader(inputStream);
             SVGDocumentBuilder builder = new SVGDocumentBuilder(parserProvider, resourceLoader, nodeSupplier);
-
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 switch (event.getEventType()) {
@@ -111,6 +128,9 @@ public final class StaxSVGLoader {
             return builder.build();
         } catch (XMLStreamException e) {
             LOGGER.log(Level.SEVERE, "Error while parsing SVG.", e);
+        } finally {
+            reader.close();
+            inputStream.close();
         }
         return null;
     }

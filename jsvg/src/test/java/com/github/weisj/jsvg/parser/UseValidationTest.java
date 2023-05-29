@@ -23,7 +23,10 @@ package com.github.weisj.jsvg.parser;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import java.util.Objects;
+
+import javax.xml.stream.XMLStreamException;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -32,7 +35,7 @@ class UseValidationTest {
 
     private final StaxSVGLoader loader = new StaxSVGLoader(new NodeSupplier());
 
-    private void tryLoad(@NotNull String path) {
+    private void tryLoad(@NotNull String path) throws IOException, XMLStreamException {
         loader.load(
                 Objects.requireNonNull(UseValidationTest.class.getResourceAsStream(path)),
                 new DefaultParserProvider(),
