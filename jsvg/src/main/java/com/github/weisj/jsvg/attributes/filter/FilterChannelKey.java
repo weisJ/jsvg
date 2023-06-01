@@ -19,33 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.filter;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
+package com.github.weisj.jsvg.attributes.filter;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
-import com.github.weisj.jsvg.util.ConstantProvider;
-import com.github.weisj.jsvg.util.LazyProvider;
-import com.github.weisj.jsvg.util.Provider;
+public interface FilterChannelKey {
 
-public final class ChannelStorage<T> {
-    private final @NotNull Map<@NotNull Object, @NotNull Provider<T>> storage = new HashMap<>();
+    @NotNull
+    Object key();
 
-    public void addResult(@NotNull FilterChannelKey key, @NotNull T value) {
-        storage.put(key.key(), new ConstantProvider<>(value));
-    }
+    class StringKey implements FilterChannelKey {
+        private final @NotNull String key;
 
-    public void addResult(@NotNull FilterChannelKey key, @NotNull Supplier<T> value) {
-        storage.put(key.key(), new LazyProvider<>(value));
-    }
+        public StringKey(@NotNull String key) {
+            this.key = key;
+        }
 
-    public @NotNull T get(@NotNull FilterChannelKey key) {
-        Provider<T> provider = storage.get(key.key());
-        if (provider == null) throw new IllegalFilterStateException("Channel " + key + " not found.");
-        return provider.get();
+        @Override
+        public @NotNull Object key() {
+            return key;
+        }
     }
 }

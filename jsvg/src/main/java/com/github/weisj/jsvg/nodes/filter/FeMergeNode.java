@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes.filter;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.nodes.AbstractSVGNode;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -39,21 +40,20 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 public final class FeMergeNode extends AbstractSVGNode {
     public static final String TAG = "feMergeNode";
 
-    private Object inputChannel;
+    private FilterChannelKey inputChannel;
 
     @Override
     public @NotNull String tagName() {
         return TAG;
     }
 
-    public @NotNull Object inputChannel() {
+    public @NotNull FilterChannelKey inputChannel() {
         return inputChannel;
     }
 
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        inputChannel = attributeNode.getValue("in");
-        if (inputChannel == null) inputChannel = DefaultFilterChannel.LastResult;
+        inputChannel = attributeNode.getFilterChannelKey("in", DefaultFilterChannel.LastResult);
     }
 }

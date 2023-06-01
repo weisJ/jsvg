@@ -26,6 +26,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.AttributeNode;
@@ -37,8 +38,8 @@ public final class FilterPrimitiveBase {
     final @NotNull Length width;
     final @NotNull Length height;
 
-    private final @NotNull Object inputChannel;
-    private final @NotNull Object resultChannel;
+    private final @NotNull FilterChannelKey inputChannel;
+    private final @NotNull FilterChannelKey resultChannel;
 
     public FilterPrimitiveBase(@NotNull AttributeNode attributeNode) {
         x = attributeNode.getLength("x", Unit.PERCENTAGE.valueOf(0));
@@ -46,17 +47,12 @@ public final class FilterPrimitiveBase {
         width = attributeNode.getLength("width", Unit.PERCENTAGE.valueOf(100));
         height = attributeNode.getLength("height", Unit.PERCENTAGE.valueOf(100));
 
-        Object in = attributeNode.getValue("in");
-        if (in == null) in = DefaultFilterChannel.LastResult;
-        inputChannel = in;
-
-        Object result = attributeNode.getValue("result");
-        if (result == null) result = DefaultFilterChannel.LastResult;
-        resultChannel = result;
+        inputChannel = attributeNode.getFilterChannelKey("in", DefaultFilterChannel.LastResult);
+        resultChannel = attributeNode.getFilterChannelKey("result", DefaultFilterChannel.LastResult);
     }
 
-    public @NotNull Channel channel(@NotNull Object channelName, @NotNull FilterContext context) {
-        return context.getChannel(channelName);
+    public @NotNull Channel channel(@NotNull FilterChannelKey key, @NotNull FilterContext context) {
+        return context.getChannel(key);
     }
 
     public @NotNull Channel inputChannel(@NotNull FilterContext context) {

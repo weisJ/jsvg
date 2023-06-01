@@ -28,19 +28,19 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive {
-    private Object inputChannel2;
+    private FilterChannelKey inputChannel2;
 
     @Override
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        inputChannel2 = attributeNode.getValue("in2");
-        if (inputChannel2 == null) inputChannel2 = DefaultFilterChannel.LastResult;
+        inputChannel2 = attributeNode.getFilterChannelKey("in2", DefaultFilterChannel.LastResult);
     }
 
     protected abstract @NotNull Composite composite();

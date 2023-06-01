@@ -21,7 +21,9 @@
  */
 package com.github.weisj.jsvg.attributes.filter;
 
-public enum DefaultFilterChannel {
+import org.jetbrains.annotations.NotNull;
+
+public enum DefaultFilterChannel implements FilterChannelKey {
     /**
      * This keyword represents the graphics elements that were the original input into the <filter> element.
      */
@@ -55,5 +57,11 @@ public enum DefaultFilterChannel {
     /**
      * Uses the result of the preceding filter or SourceGraphic if this is the first filter.
      */
-    LastResult
+    LastResult;
+
+    @Override
+    public @NotNull Object key() {
+        if (this == LastResult) return this;
+        return toString();
+    }
 }

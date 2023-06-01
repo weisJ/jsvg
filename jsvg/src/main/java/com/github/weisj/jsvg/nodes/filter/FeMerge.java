@@ -29,6 +29,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -46,7 +47,7 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     public static final String TAG = "feMerge";
 
     private FilterPrimitiveBase filterPrimitiveBase;
-    private Object[] inputChannels;
+    private FilterChannelKey[] inputChannels;
 
     @Override
     public @NotNull String tagName() {
@@ -60,7 +61,7 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
         filterPrimitiveBase = new FilterPrimitiveBase(attributeNode);
 
         List<FeMergeNode> nodes = childrenOfType(FeMergeNode.class);
-        inputChannels = new Object[nodes.size()];
+        inputChannels = new FilterChannelKey[nodes.size()];
         for (int i = 0; i < inputChannels.length; i++) {
             inputChannels[i] = nodes.get(i).inputChannel();
         }

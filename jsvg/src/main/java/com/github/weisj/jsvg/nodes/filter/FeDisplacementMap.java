@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.ColorChannel;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -52,7 +53,7 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
 
     private float scale;
 
-    private Object inputChannel2;
+    private FilterChannelKey inputChannel2;
 
     @Override
     public @NotNull String tagName() {
@@ -67,8 +68,7 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
 
         scale = attributeNode.getFloat("scale", 0);
 
-        inputChannel2 = attributeNode.getValue("in2");
-        if (inputChannel2 == null) inputChannel2 = DefaultFilterChannel.LastResult;
+        inputChannel2 = attributeNode.getFilterChannelKey("in2", DefaultFilterChannel.LastResult);
     }
 
     @Override
