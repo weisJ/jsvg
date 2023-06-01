@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -56,7 +57,9 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        impl().saveLayoutResult(impl().layoutInput(filterLayoutContext), filterLayoutContext);
+        Rectangle2D in = impl().layoutInput(filterLayoutContext);
+        Rectangle2D in2 = filterLayoutContext.resultChannels().get(inputChannel2);
+        impl().saveLayoutResult(in.createUnion(in2), filterLayoutContext);
     }
 
     @Override
