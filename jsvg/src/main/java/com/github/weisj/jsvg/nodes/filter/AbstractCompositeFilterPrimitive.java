@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -30,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -57,9 +57,9 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        Rectangle2D in = impl().layoutInput(filterLayoutContext);
-        Rectangle2D in2 = filterLayoutContext.resultChannels().get(inputChannel2);
-        impl().saveLayoutResult(in.createUnion(in2), filterLayoutContext);
+        LayoutBounds in = impl().layoutInput(filterLayoutContext);
+        LayoutBounds in2 = filterLayoutContext.resultChannels().get(inputChannel2);
+        impl().saveLayoutResult(in.union(in2), filterLayoutContext);
     }
 
     @Override

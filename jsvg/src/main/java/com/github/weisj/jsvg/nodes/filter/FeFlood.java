@@ -26,8 +26,10 @@ import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -61,8 +63,10 @@ public final class FeFlood extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        impl().saveLayoutResult(
-                filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this), filterLayoutContext);
+        LayoutBounds layoutBounds = new LayoutBounds(
+                filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this),
+                new FloatInsets());
+        impl().saveLayoutResult(layoutBounds, filterLayoutContext);
     }
 
     @Override

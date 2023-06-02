@@ -30,6 +30,8 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.geometry.size.FloatInsets;
+
 public final class GeometryUtil {
     private static final float EPS = 0.0001f;
 
@@ -120,5 +122,57 @@ public final class GeometryUtil {
         r2.setFrameFromDiagonal(transform.transform(p3, p3), transform.transform(p4, p4));
         Rectangle2D.union(r1, r2, r1);
         return r1;
+    }
+
+    public static float left(@NotNull Rectangle2D rect) {
+        return (float) rect.getX();
+    }
+
+    public static float top(@NotNull Rectangle2D rect) {
+        return (float) rect.getY();
+    }
+
+    public static float right(@NotNull Rectangle2D rect) {
+        return (float) (rect.getX() + rect.getWidth());
+    }
+
+    public static float bottom(@NotNull Rectangle2D rect) {
+        return (float) (rect.getY() + rect.getHeight());
+    }
+
+    public static @NotNull Rectangle2D grow(@NotNull Rectangle2D bounds, FloatInsets grow) {
+        return new Rectangle2D.Double(
+                bounds.getX() - grow.left(),
+                bounds.getY() - grow.top(),
+                bounds.getWidth() + grow.left() + grow.right(),
+                bounds.getHeight() + grow.top() + grow.bottom());
+    }
+
+    public static @NotNull FloatInsets max(@NotNull FloatInsets in1, @NotNull FloatInsets in2) {
+        return new FloatInsets(
+                Math.max(in1.top(), in2.top()),
+                Math.max(in1.left(), in2.left()),
+                Math.max(in1.bottom(), in2.bottom()),
+                Math.max(in1.right(), in2.right()));
+    }
+
+    public static @NotNull FloatInsets min(@NotNull FloatInsets in1, @NotNull FloatInsets in2) {
+        return new FloatInsets(
+                Math.min(in1.top(), in2.top()),
+                Math.min(in1.left(), in2.left()),
+                Math.min(in1.bottom(), in2.bottom()),
+                Math.min(in1.right(), in2.right()));
+    }
+
+    public static @NotNull FloatInsets overhangInsets(@NotNull Rectangle2D reference, @NotNull Rectangle2D bounds) {
+        return new FloatInsets(
+                Math.max(0, top(reference) - top(bounds)),
+                Math.max(0, left(reference) - left(bounds)),
+                Math.max(0, bottom(bounds) - bottom(reference)),
+                Math.max(0, right(bounds) - right(reference)));
+    }
+
+    public static @NotNull String compactRepresentation(@NotNull Rectangle2D rect) {
+        return "[" + rect.getX() + ", " + rect.getY() + ", " + rect.getWidth() + "x" + rect.getHeight() + "]";
     }
 }

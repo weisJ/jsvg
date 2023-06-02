@@ -24,13 +24,13 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.InplaceBoxBlurFilter;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -86,17 +86,11 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        Rectangle2D input = impl().layoutInput(filterLayoutContext);
+        LayoutBounds input = impl().layoutInput(filterLayoutContext);
         double[] sigma = computeAbsoluteStdDeviation(null);
         int hExtend = kernelDiameterForStandardDeviation(sigma[0]);
         int vExtend = kernelDiameterForStandardDeviation(sigma[1]);
-        impl().saveLayoutResult(
-                new Rectangle2D.Double(
-                        input.getX() - hExtend,
-                        input.getY() - vExtend,
-                        input.getWidth() + 2 * hExtend,
-                        input.getHeight() + 2 * vExtend),
-                filterLayoutContext);
+        impl().saveLayoutResult(input.grow(hExtend, vExtend, filterLayoutContext), filterLayoutContext);
     }
 
     @Override

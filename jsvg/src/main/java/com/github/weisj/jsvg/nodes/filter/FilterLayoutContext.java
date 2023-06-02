@@ -26,17 +26,21 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public final class FilterLayoutContext {
 
-    private final @NotNull ChannelStorage<Rectangle2D> resultChannels = new ChannelStorage<>();
+    private final @NotNull ChannelStorage<LayoutBounds> resultChannels = new ChannelStorage<>();
     private final @NotNull UnitType primitiveUnits;
     private final @NotNull Rectangle2D elementBounds;
+    private final @NotNull Rectangle2D clipBounds;
 
-    public FilterLayoutContext(@NotNull UnitType primitiveUnits, @NotNull Rectangle2D elementBounds) {
+    public FilterLayoutContext(@NotNull UnitType primitiveUnits, @NotNull Rectangle2D elementBounds,
+            @NotNull Rectangle2D clipBounds) {
         this.primitiveUnits = primitiveUnits;
         this.elementBounds = elementBounds;
+        this.clipBounds = clipBounds;
     }
 
     public @NotNull UnitType primitiveUnits() {
@@ -53,8 +57,11 @@ public final class FilterLayoutContext {
                 filterPrimitive.x(), filterPrimitive.y(), filterPrimitive.width(), filterPrimitive.height());
     }
 
-    public @NotNull ChannelStorage<Rectangle2D> resultChannels() {
+    public @NotNull ChannelStorage<LayoutBounds> resultChannels() {
         return resultChannels;
     }
 
+    public @NotNull Rectangle2D clipBounds() {
+        return clipBounds;
+    }
 }

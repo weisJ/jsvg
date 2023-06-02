@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 
+
 public final class GraphicsUtil {
     private GraphicsUtil() {}
 

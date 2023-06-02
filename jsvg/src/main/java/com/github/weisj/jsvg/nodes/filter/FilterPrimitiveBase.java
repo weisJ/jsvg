@@ -21,12 +21,12 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.AttributeNode;
@@ -59,7 +59,7 @@ public final class FilterPrimitiveBase {
         return channel(inputChannel, context);
     }
 
-    public @NotNull Rectangle2D layoutInput(@NotNull FilterLayoutContext context) {
+    public @NotNull LayoutBounds layoutInput(@NotNull FilterLayoutContext context) {
         return context.resultChannels().get(inputChannel);
     }
 
@@ -67,7 +67,7 @@ public final class FilterPrimitiveBase {
         saveResult(inputChannel(context), context);
     }
 
-    public void saveLayoutResult(@NotNull Rectangle2D outputBounds, @NotNull FilterLayoutContext filterLayoutContext) {
+    public void saveLayoutResult(@NotNull LayoutBounds outputBounds, @NotNull FilterLayoutContext filterLayoutContext) {
         saveResultImpl(outputBounds, filterLayoutContext.resultChannels());
     }
 
