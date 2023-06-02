@@ -141,7 +141,11 @@ public final class Filter extends ContainerNode {
             filterPrimitive.layoutFilter(context, filterLayoutContext);
         }
 
-        LayoutBounds clipHeuristic = filterLayoutContext.resultChannels().get(DefaultFilterChannel.LastResult);
+        LayoutBounds.Data clipHeuristic = filterLayoutContext.resultChannels()
+                .get(DefaultFilterChannel.LastResult)
+                .resolve(LayoutBounds.ComputeFlags.INITIAL);
+
+        System.out.println(clipHeuristic);
 
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
         Rectangle2D clipHeuristicBounds = clipHeuristic.bounds().createIntersection(

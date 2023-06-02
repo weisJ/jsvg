@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.attributes.filter;
 
 import java.awt.geom.Rectangle2D;
+import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -31,55 +32,121 @@ import com.github.weisj.jsvg.nodes.filter.FilterLayoutContext;
 
 public final class LayoutBounds {
 
-    private final @NotNull Rectangle2D bounds;
-    private final @NotNull FloatInsets clipBoundsEscapeInsets;
+    public static final class Data {
+        private final @NotNull Rectangle2D bounds;
+        private final @NotNull FloatInsets clipBoundsEscapeInsets;
+
+        private Data(@NotNull Rectangle2D bounds, @NotNull FloatInsets clipBoundsEscapeInsets) {
+            this.bounds = bounds;
+            this.clipBoundsEscapeInsets = clipBoundsEscapeInsets;
+        }
+
+        public @NotNull FloatInsets clipBoundsEscapeInsets() {
+            return clipBoundsEscapeInsets;
+        }
+
+        public @NotNull Rectangle2D bounds() {
+            return bounds;
+        }
+
+        @Override
+        public String toString() {
+            return "Data{" +
+                    "bounds=" + GeometryUtil.compactRepresentation(bounds) +
+                    ", clipBoundsEscapeInsets=" + clipBoundsEscapeInsets +
+                    '}';
+        }
+    }
+
+    public static class ComputeFlags {
+
+        public static final @NotNull ComputeFlags INITIAL = new ComputeFlags(false);
+        public final boolean operatesOnWholeFilterRegion;
+
+        public ComputeFlags(boolean operatesOnWholeFilterRegion) {
+            this.operatesOnWholeFilterRegion = operatesOnWholeFilterRegion;
+        }
+
+        public @NotNull ComputeFlags or(@NotNull ComputeFlags other) {
+            return new ComputeFlags(operatesOnWholeFilterRegion || other.operatesOnWholeFilterRegion);
+        }
+    }
+
+    private final @NotNull Data data;
+    private final @NotNull BiFunction<@NotNull Data, ComputeFlags, @NotNull Data> transformer;
+    private final ComputeFlags additionalFlags;
 
     public LayoutBounds(@NotNull Rectangle2D bounds, @NotNull FloatInsets clipBoundsEscapeInsets) {
-        this.bounds = bounds;
-        this.clipBoundsEscapeInsets = clipBoundsEscapeInsets;
+        data = new Data(bounds, clipBoundsEscapeInsets);
+        transformer = (d, f) -> d;
+        additionalFlags = new ComputeFlags(false);
     }
 
-    public @NotNull Rectangle2D bounds() {
-        return bounds;
+    private LayoutBounds(@NotNull Data data,
+            @NotNull BiFunction<@NotNull Data, ComputeFlags, @NotNull Data> transformer,
+            @NotNull ComputeFlags flags) {
+        this.data = data;
+        this.transformer = transformer;
+        this.additionalFlags = flags;
     }
 
-    public @NotNull FloatInsets clipBoundsEscapeInsets() {
-        return clipBoundsEscapeInsets;
+    public @NotNull LayoutBounds transform(
+            @NotNull BiFunction<@NotNull Data, ComputeFlags, @NotNull Data> transformer) {
+        return new LayoutBounds(data, (data, flags) -> {
+            Data newData = transformer.apply(data, flags);
+            return transformer.apply(newData, flags);
+        }, additionalFlags);
+    }
+
+    public @NotNull LayoutBounds withFlags(@NotNull ComputeFlags flags) {
+        return new LayoutBounds(data, transformer, additionalFlags.or(flags));
+    }
+
+    public @NotNull Data resolve(@NotNull ComputeFlags flags) {
+        return transformer.apply(data, flags.or(additionalFlags));
     }
 
     public @NotNull LayoutBounds union(@NotNull LayoutBounds other) {
-        return new LayoutBounds(bounds.createUnion(other.bounds),
-                GeometryUtil.max(clipBoundsEscapeInsets(), other.clipBoundsEscapeInsets()));
+        return transform((data, flags) -> {
+            Data otherData = other.resolve(flags);
+            return new Data(
+                    data.bounds.createUnion(otherData.bounds),
+                    GeometryUtil.max(data.clipBoundsEscapeInsets, otherData.clipBoundsEscapeInsets));
+        });
     }
 
     public @NotNull LayoutBounds grow(float horizontal, float vertical, @NotNull FilterLayoutContext context) {
-        FloatInsets insets = clipBoundsEscapeInsets();
-        Rectangle2D clipBounds = context.clipBounds();
-        FloatInsets growInsets = new FloatInsets(vertical, horizontal, vertical, horizontal);
-        Rectangle2D newBounds = GeometryUtil.grow(bounds, growInsets);
-        FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, newBounds), growInsets);
-        return new LayoutBounds(newBounds, GeometryUtil.max(insets, ins));
+        return transform((data, flags) -> {
+            FloatInsets insets = data.clipBoundsEscapeInsets;
+            Rectangle2D clipBounds = context.clipBounds();
+            FloatInsets growInsets = new FloatInsets(vertical, horizontal, vertical, horizontal);
+            Rectangle2D newBounds = GeometryUtil.grow(data.bounds, growInsets);
+            FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, newBounds), growInsets);
+            return new Data(newBounds, GeometryUtil.max(insets, ins));
+        });
     }
 
     public @NotNull LayoutBounds translate(float dx, float dy, @NotNull FilterLayoutContext context) {
-        FloatInsets insets = clipBoundsEscapeInsets();
-        Rectangle2D clipBounds = context.clipBounds();
-        FloatInsets offsetInsets = new FloatInsets(
-                Math.max(-dy, 0),
-                Math.max(-dx, 0),
-                Math.max(dy, 0),
-                Math.max(dx, 0));
-        Rectangle2D newBounds = GeometryUtil.grow(bounds, offsetInsets);
-        // The new layout rect is the union of the original rect and the shifted rect.
-        FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, bounds), offsetInsets);
-        return new LayoutBounds(newBounds, GeometryUtil.max(insets, ins));
+        return transform((data, flags) -> {
+            FloatInsets insets = data.clipBoundsEscapeInsets;
+            Rectangle2D clipBounds = context.clipBounds();
+            FloatInsets offsetInsets = new FloatInsets(
+                    Math.max(-dy, 0),
+                    Math.max(-dx, 0),
+                    Math.max(dy, 0),
+                    Math.max(dx, 0));
+            Rectangle2D newBounds = GeometryUtil.grow(data.bounds, offsetInsets);
+            // The new layout rect is the union of the original rect and the shifted rect.
+            FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, data.bounds), offsetInsets);
+            return new Data(newBounds, GeometryUtil.max(insets, ins));
+        });
     }
 
     @Override
     public String toString() {
         return "LayoutBounds{" +
-                "bounds=" + GeometryUtil.compactRepresentation(bounds) +
-                ", clipInsets=" + clipBoundsEscapeInsets +
+                "data=" + data +
+                ", transformer=" + transformer +
                 '}';
     }
 }
