@@ -130,11 +130,15 @@ public final class Filter extends ContainerNode {
 
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
         LayoutBounds elementLayoutBounds = new LayoutBounds(effectiveFilterRegion, new FloatInsets());
+        LayoutBounds clippedElementLayoutBounds = new LayoutBounds(clippedElementBounds, new FloatInsets());
+        LayoutBounds sourceDependentBounds = elementLayoutBounds.transform(
+                (data, flags) -> flags.operatesOnWholeFilterRegion
+                        ? data
+                        : clippedElementLayoutBounds.resolve(flags));
 
-        // Fixme: Handle filter primitives which only operate on elementLayoutBounds.
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, elementLayoutBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.LastResult, elementLayoutBounds);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, elementLayoutBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceDependentBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentBounds);
 
         for (SVGNode child : children()) {
             FilterPrimitive filterPrimitive = (FilterPrimitive) child;
