@@ -224,7 +224,7 @@ public final class SVGRadialGradientPaint extends SVGMultipleGradientPaint {
             throw new IllegalArgumentException("Radius must be greater than zero");
         }
 
-        if (focusRadius <= 0) {
+        if (focusRadius < 0) {
             throw new IllegalArgumentException("Radius must be greater than zero");
         }
 
