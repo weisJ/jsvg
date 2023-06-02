@@ -141,8 +141,12 @@ public final class Filter extends ContainerNode {
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentBounds);
 
         for (SVGNode child : children()) {
-            FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-            filterPrimitive.layoutFilter(context, filterLayoutContext);
+            try {
+                FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+                filterPrimitive.layoutFilter(context, filterLayoutContext);
+            } catch (IllegalFilterStateException ignored) {
+                // Just carry on doing layout
+            }
         }
 
         LayoutBounds.Data clipHeuristic = filterLayoutContext.resultChannels()
