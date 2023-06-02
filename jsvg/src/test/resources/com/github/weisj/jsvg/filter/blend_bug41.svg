@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="560" viewBox="0 0 18 14">
+    <g filter="url(#b)">
+        <path fill="#fff" fill-opacity=".01" d="M30 5H10v21h20V5Z" />
+    </g>
+    <defs>
+        <filter id="b" width="44" height="45" x="-2" y="-3">
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0.5" />
+            <feBlend in2="BackgroundImageFix" result="blend1"/>
+            <feBlend in="SourceGraphic" in2="blend1"/>
+        </filter>
+    </defs>
+</svg>
