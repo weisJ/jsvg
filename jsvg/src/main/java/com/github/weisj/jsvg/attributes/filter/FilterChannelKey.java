@@ -39,5 +39,12 @@ public interface FilterChannelKey {
         public @NotNull Object key() {
             return key;
         }
+
+        @Override
+        public String toString() {
+            return "StringKey{" +
+                    "key='" + key + '\'' +
+                    '}';
+        }
     }
 }
