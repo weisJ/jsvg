@@ -25,11 +25,10 @@ import java.awt.image.RGBImageFilter;
 import java.util.Arrays;
 import java.util.Locale;
 
-
-import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;

@@ -63,9 +63,9 @@ public final class FeOffset extends AbstractFilterPrimitive {
         dy = attributeNode.getFloat("dy", 0);
     }
 
-    private Point2D.Float offset(@Nullable AffineTransform at, @NotNull UnitType filterPrimitiveUnits,
+    private Point2D.Double offset(@Nullable AffineTransform at, @NotNull UnitType filterPrimitiveUnits,
             @NotNull Rectangle2D elementBounds) {
-        Point2D.Float off = new Point2D.Float(dx, dy);
+        Point2D.Double off = new Point2D.Double(dx, dy);
         if (at != null) {
             off.x *= GeometryUtil.scaleXOfTransform(at);
             off.y *= GeometryUtil.scaleYOfTransform(at);
@@ -82,8 +82,8 @@ public final class FeOffset extends AbstractFilterPrimitive {
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
-        Point2D.Float off = offset(null, filterLayoutContext.primitiveUnits(), filterLayoutContext.elementBounds());
-        LayoutBounds result = input.translate(off.x, off.y, filterLayoutContext);
+        Point2D.Double off = offset(null, filterLayoutContext.primitiveUnits(), filterLayoutContext.elementBounds());
+        LayoutBounds result = input.translate((float) off.x, (float) off.y, filterLayoutContext);
         impl().saveLayoutResult(result, filterLayoutContext);
     }
 
@@ -93,7 +93,7 @@ public final class FeOffset extends AbstractFilterPrimitive {
         Channel result = in;
         if (dx != 0 || dy != 0) {
             AffineTransform at = filterContext.info().graphics().getTransform();
-            Point2D.Float off = offset(at, filterContext.primitiveUnits(), filterContext.info().elementBounds());
+            Point2D.Double off = offset(at, filterContext.primitiveUnits(), filterContext.info().elementBounds());
             AffineTransform transform = AffineTransform.getTranslateInstance(off.x, off.y);
 
             AffineTransformOp op = new AffineTransformOp(transform, filterContext.renderingHints());

@@ -127,6 +127,7 @@ public final class SimpleCssParser implements CssParser {
                 try {
                     next();
                 } catch (ParserException ignored) {
+                    // Errors are to be expected at this point, as we are handling an invalid definition.
                 }
             }
             if (current.type() != TokenType.EOF) {

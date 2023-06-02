@@ -77,7 +77,7 @@ public final class InplaceBoxBlurFilter {
                 sumA += (curr >>> 24);
                 sumR += (curr >> 16) & 0xFF;
                 sumG += (curr >> 8) & 0xFF;
-                sumB += (curr) & 0xFF;
+                sumB += curr & 0xFF;
                 k++;
                 sp++;
             }
@@ -97,14 +97,14 @@ public final class InplaceBoxBlurFilter {
                     sumA -= (curr >>> 24);
                     sumR -= (curr >> 16) & 0xFF;
                     sumG -= (curr >> 8) & 0xFF;
-                    sumB -= (curr) & 0xFF;
+                    sumB -= curr & 0xFF;
 
                     curr = buffer[k] = srcPixels[sp];
 
                     sumA += (curr >>> 24);
                     sumR += (curr >> 16) & 0xFF;
                     sumG += (curr >> 8) & 0xFF;
-                    sumB += (curr) & 0xFF;
+                    sumB += curr & 0xFF;
                     prev = dstPixels[dp] = (((sumA * scale) & 0xFF000000) |
                             (((sumR * scale) & 0xFF000000) >>> 8) |
                             (((sumG * scale) & 0xFF000000) >>> 16) |
@@ -158,7 +158,7 @@ public final class InplaceBoxBlurFilter {
                 sumA += (curr >>> 24);
                 sumR += (curr >> 16) & 0xFF;
                 sumG += (curr >> 8) & 0xFF;
-                sumB += (curr) & 0xFF;
+                sumB += curr & 0xFF;
                 k++;
                 sp += srcScanStride;
             }
@@ -179,14 +179,14 @@ public final class InplaceBoxBlurFilter {
                     sumA -= (curr >>> 24);
                     sumR -= (curr >> 16) & 0xFF;
                     sumG -= (curr >> 8) & 0xFF;
-                    sumB -= (curr) & 0xFF;
+                    sumB -= curr & 0xFF;
 
                     curr = buffer[k] = srcPixels[sp];
 
                     sumA += (curr >>> 24);
                     sumR += (curr >> 16) & 0xFF;
                     sumG += (curr >> 8) & 0xFF;
-                    sumB += (curr) & 0xFF;
+                    sumB += curr & 0xFF;
                     prev = dstPixels[dp] = (((sumA * scale) & 0xFF000000) |
                             (((sumR * scale) & 0xFF000000) >>> 8) |
                             (((sumG * scale) & 0xFF000000) >>> 16) |

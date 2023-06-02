@@ -149,8 +149,6 @@ public final class Filter extends ContainerNode {
                 .get(DefaultFilterChannel.LastResult)
                 .resolve(LayoutBounds.ComputeFlags.INITIAL);
 
-        System.out.println(clipHeuristic);
-
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
         Rectangle2D clipHeuristicBounds = clipHeuristic.bounds().createIntersection(
                 GeometryUtil.grow(graphicsClipBounds, insets));
