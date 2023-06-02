@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="560" viewBox="0 0 18 14">
+	<g filter="url(#b)">
+		<path fill="#fff" fill-opacity=".01" d="M30 5H10v21h20V5Z" />
+	</g>
+	<defs>
+		<filter id="b" x="-1" y="-1" width="2" height="2">
+			<feColorMatrix in="SourceAlpha" result="hardAlpha"
+				values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0.5" />
+		</filter>
+	</defs>
+</svg>

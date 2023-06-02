@@ -55,6 +55,8 @@ class FilterTest {
     @Test
     void testColorMatrix() {
         assertEquals(SUCCESS, compareImages("filter/colormatrix.svg", 1.5));
+        assertEquals(SUCCESS, compareImages("filter/colormatrix_bug41_1.svg"));
+        assertEquals(SUCCESS, compareImages("filter/colormatrix_bug41_2.svg"));
     }
 
     @Test
