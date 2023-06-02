@@ -25,6 +25,8 @@ import java.awt.image.RGBImageFilter;
 import java.util.Arrays;
 import java.util.Locale;
 
+
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,7 +46,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     public static final String TAG = "fecolormatrix";
     private static final String KEY_VALUES = "values";
 
-    private @Nullable RGBImageFilter filter;
+    private @Nullable AffineRGBImageFilter filter;
 
     @Override
     public @NotNull String tagName() {
@@ -104,7 +106,12 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         // Doesn't change the input bounds regardless whether filter is specified or not.
-        impl().saveLayoutResult(impl().layoutInput(filterLayoutContext), filterLayoutContext);
+        // If the filter is null or linear we can operate only on the visible area of the element.
+        // Otherwise, we need to consider the whole filter region.
+        LayoutBounds bounds = impl()
+                .layoutInput(filterLayoutContext)
+                .withFlags(new LayoutBounds.ComputeFlags(filter != null && !filter.isLinear()));
+        impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
     @Override
@@ -121,7 +128,11 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         return (int) Math.max(Math.min(Math.round(value), 255), 0);
     }
 
-    private static final class MatrixRGBFilter extends RGBImageFilter {
+    private static abstract class AffineRGBImageFilter extends RGBImageFilter {
+        abstract boolean isLinear();
+    }
+
+    private static final class MatrixRGBFilter extends AffineRGBImageFilter {
 
         private final double r1, r2, r3, r4, r5;
         private final double g1, g2, g3, g4, g5;
@@ -155,6 +166,11 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
 
         @Override
+        boolean isLinear() {
+            return r5 == 0 && g5 == 0 && b5 == 0 && a5 == 0;
+        }
+
+        @Override
         public int filterRGB(int x, int y, int rgb) {
             int a = (rgb >> 24) & 0xFF;
             int r = (rgb >> 16) & 0xFF;
@@ -173,7 +189,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
     }
 
-    private static final class LinearRGBFilter extends RGBImageFilter {
+    private static final class LinearRGBFilter extends AffineRGBImageFilter {
         private final double r1, r2, r3;
         private final double g1, g2, g3;
         private final double b1, b2, b3;
@@ -194,6 +210,11 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
 
         @Override
+        boolean isLinear() {
+            return true;
+        }
+
+        @Override
         public int filterRGB(int x, int y, int rgb) {
             int a = (rgb >> 24) & 0xFF;
             int r = (rgb >> 16) & 0xFF;
@@ -211,7 +232,12 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
     }
 
-    private static final class LuminanceToAlphaFilter extends RGBImageFilter {
+    private static final class LuminanceToAlphaFilter extends AffineRGBImageFilter {
+
+        @Override
+        boolean isLinear() {
+            return true;
+        }
 
         @Override
         public int filterRGB(int x, int y, int rgb) {
