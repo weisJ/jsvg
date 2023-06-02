@@ -174,6 +174,7 @@ final class SVGRadialGradientPaintContext extends SVGMultipleGradientPaintContex
      * @param x,y,w,h the area in device space for which colors are
      * generated.
      */
+    @Override
     protected void fillRaster(int[] pixels, int off, int adjust,
             int x, int y, int w, int h) {
         if (isSimpleFocus && isNonCyclic && isSimpleLookup) {
@@ -249,7 +250,7 @@ final class SVGRadialGradientPaintContext extends SVGMultipleGradientPaintContex
                     gIndex = 0;
                 } else {
                     float fIndex = gRel * SQRT_LUT_SIZE;
-                    int iIndex = (int) (fIndex);
+                    int iIndex = (int) fIndex;
                     float s0 = sqrtLookup[iIndex];
                     float s1 = sqrtLookup[iIndex + 1] - s0;
                     fIndex = s0 + (fIndex - iIndex) * s1;

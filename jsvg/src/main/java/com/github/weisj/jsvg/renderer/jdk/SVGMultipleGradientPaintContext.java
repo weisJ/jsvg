@@ -31,6 +31,7 @@ import java.awt.image.Raster;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -245,7 +246,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
                 int a = argb >>> 24;
                 int r = SRGBtoLinearRGB[(argb >> 16) & 0xff];
                 int g = SRGBtoLinearRGB[(argb >> 8) & 0xff];
-                int b = SRGBtoLinearRGB[(argb) & 0xff];
+                int b = SRGBtoLinearRGB[argb & 0xff];
                 normalizedColors[i] = new Color(r, g, b, a);
             }
         } else {
@@ -282,7 +283,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         // look-up time.
         int estimatedSize = 0;
         for (float normalizedInterval : normalizedIntervals) {
-            estimatedSize += (normalizedInterval / Imin) * GRADIENT_SIZE;
+            estimatedSize += (int) ((normalizedInterval / Imin) * GRADIENT_SIZE);
         }
 
         if (estimatedSize > MAX_GRADIENT_ARRAY_SIZE) {
@@ -449,22 +450,22 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         a1 = (rgb1 >> 24) & 0xff;
         r1 = (rgb1 >> 16) & 0xff;
         g1 = (rgb1 >> 8) & 0xff;
-        b1 = (rgb1) & 0xff;
+        b1 = rgb1 & 0xff;
 
         // calculate the total change in alpha, red, green, blue
         da = ((rgb2 >> 24) & 0xff) - a1;
         dr = ((rgb2 >> 16) & 0xff) - r1;
         dg = ((rgb2 >> 8) & 0xff) - g1;
-        db = ((rgb2) & 0xff) - b1;
+        db = (rgb2 & 0xff) - b1;
 
         // for each step in the interval calculate the in-between color by
         // multiplying the normalized current position by the total color
         // change (0.5 is added to prevent truncation round-off error)
         for (int i = 0; i < output.length; i++) {
-            output[i] = (((int) ((a1 + i * da * stepSize) + 0.5) << 24)) |
-                    (((int) ((r1 + i * dr * stepSize) + 0.5) << 16)) |
-                    (((int) ((g1 + i * dg * stepSize) + 0.5) << 8)) |
-                    (((int) ((b1 + i * db * stepSize) + 0.5)));
+            output[i] = ((int) ((a1 + i * da * stepSize) + 0.5) << 24) |
+                    ((int) ((r1 + i * dr * stepSize) + 0.5) << 16) |
+                    ((int) ((g1 + i * dg * stepSize) + 0.5) << 8) |
+                    ((int) ((b1 + i * db * stepSize) + 0.5));
         }
     }
 
@@ -481,7 +482,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         a1 = (rgb >> 24) & 0xff;
         r1 = (rgb >> 16) & 0xff;
         g1 = (rgb >> 8) & 0xff;
-        b1 = (rgb) & 0xff;
+        b1 = rgb & 0xff;
 
         // use the lookup table
         r1 = LinearRGBtoSRGB[r1];
@@ -492,7 +493,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         return ((a1 << 24) |
                 (r1 << 16) |
                 (g1 << 8) |
-                (b1));
+                b1);
     }
 
     /**
@@ -558,8 +559,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
                     float delta = position - fractions[i];
 
                     // this is the interval we want
-                    int index = (int) ((delta / normalizedIntervals[i])
-                            * (GRADIENT_SIZE_INDEX));
+                    int index = (int) ((delta / normalizedIntervals[i]) * GRADIENT_SIZE_INDEX);
 
                     return gradients[i][index];
                 }
@@ -640,12 +640,10 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * large.
      */
     private static synchronized Raster getCachedRaster(ColorModel cm, int w, int h) {
-        if (cm == cachedModel) {
+        if (Objects.equals(cm, cachedModel)) {
             if (cached != null) {
                 Raster ras = cached.get();
-                if (ras != null &&
-                        ras.getWidth() >= w &&
-                        ras.getHeight() >= h) {
+                if (ras != null && ras.getWidth() >= w && ras.getHeight() >= h) {
                     cached = null;
                     return ras;
                 }
