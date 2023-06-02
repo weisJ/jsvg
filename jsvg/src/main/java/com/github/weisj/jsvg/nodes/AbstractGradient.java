@@ -128,8 +128,48 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         }
 
         if (!realGradient && colors.length > 0) {
+            // If all stops are equal, we can just use the first color.
+            // This never gets passed to the radial gradient hence we don't need to provide a second stop.
             colors = new Color[] {colors[0]};
             offsets = new float[] {0f};
+        } else {
+            // To avoid copying the arrays, we just make sure that the first and last stop are 0 and 1
+            // respectively here instead of in the gradient implementation.
+            int offsetLength = offsets.length;
+            int off = 0;
+
+            boolean fixFirst = false;
+            boolean fixLast = false;
+
+            if (offsets[0] != 0f) {
+                // first stop is not equal to zero, fix this condition
+                fixFirst = true;
+                offsetLength++;
+                off++;
+            }
+            if (offsets[offsets.length - 1] != 1f) {
+                // last stop is not equal to one, fix this condition
+                fixLast = true;
+                offsetLength++;
+            }
+
+            float[] oldOffsets = offsets;
+            Color[] oldColors = colors;
+
+            offsets = new float[offsetLength];
+            colors = new Color[offsetLength];
+
+            System.arraycopy(oldOffsets, 0, offsets, off, oldOffsets.length);
+            System.arraycopy(oldColors, 0, colors, off, oldColors.length);
+
+            if (fixFirst) {
+                offsets[0] = 0f;
+                colors[0] = oldColors[0];
+            }
+            if (fixLast) {
+                offsets[offsetLength - 1] = 1f;
+                colors[offsetLength - 1] = oldColors[oldColors.length - 1];
+            }
         }
     }
 

@@ -40,6 +40,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.jdk.SVGRadialGradientPaint;
 
 @ElementCategories(Category.Gradient)
 @PermittedContent(
@@ -80,27 +81,8 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
         float radius = r.resolveLength(measure);
         float focusRadius = fr.resolveLength(measure);
 
-        float[] offsets = gradOffsets;
-        Color[] offsetColors = gradColors;
-        if (focusRadius > 0) {
-            // Todo: This isn't entirely correct. The 0% offset should lie on the boundary of the circle, which
-            // is skewed the way we handle it currently.
-            float[] newOffsets = new float[offsets.length + 1];
-            newOffsets[0] = Math.nextAfter(focusRadius / radius, Float.NEGATIVE_INFINITY);
-            float offset = focusRadius / radius;
-            float factor = 1 - offset;
-            for (int i = 1; i < newOffsets.length; i++) {
-                newOffsets[i] = offset + offsets[i - 1] * factor;
-            }
-            offsets = newOffsets;
-
-            Color[] newColors = new Color[gradColors.length + 1];
-            System.arraycopy(offsetColors, 0, newColors, 1, gradColors.length);
-            offsetColors = newColors;
-            newColors[0] = gradColors[0];
-        }
-        return new RadialGradientPaint(center, radius, focusCenter,
-                offsets, offsetColors, spreadMethod.cycleMethod(),
+        return new SVGRadialGradientPaint(center, radius, focusCenter, focusRadius,
+                gradOffsets, gradColors, spreadMethod.cycleMethod(),
                 MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
     }
 
