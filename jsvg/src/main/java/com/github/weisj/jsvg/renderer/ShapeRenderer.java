@@ -144,7 +144,7 @@ public final class ShapeRenderer {
             @NotNull PaintShape paintShape, @Nullable Stroke stroke) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
         if (!(stroke != null && paintWithOpacity.isVisible())) return;
-        g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
+        g.setComposite(GraphicsUtil.deriveComposite(g, paintWithOpacity.opacity));
         g.setStroke(stroke);
         paintWithOpacity.paint.drawShape(g, context, paintShape.shape, paintShape.bounds);
     }
@@ -153,7 +153,7 @@ public final class ShapeRenderer {
             @NotNull PaintShape paintShape) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.fillPaint(), context.fillOpacity());
         if (!paintWithOpacity.isVisible()) return;
-        g.setComposite(AlphaComposite.SrcOver.derive(paintWithOpacity.opacity));
+        g.setComposite(GraphicsUtil.deriveComposite(g, paintWithOpacity.opacity));
         paintWithOpacity.paint.fillShape(g, context, paintShape.shape, paintShape.bounds);
     }
 
