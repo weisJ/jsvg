@@ -125,7 +125,9 @@ public final class NodeRenderer {
             if (mask != null) {
                 // Todo: Proper object bounding box
                 elementBounds = elementBounds(renderable, childContext);
-                GraphicsUtil.safelySetPaint(childGraphics, mask.createMaskPaint(g, childContext, elementBounds));
+                if (!elementBounds.isEmpty()) {
+                    GraphicsUtil.safelySetPaint(childGraphics, mask.createMaskPaint(g, childContext, elementBounds));
+                }
             }
 
             ClipPath childClip = ((HasClip) renderable).clipPath();
