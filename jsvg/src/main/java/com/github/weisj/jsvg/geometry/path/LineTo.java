@@ -41,6 +41,14 @@ final class LineTo extends PathCommand {
         this.y = y;
     }
 
+    public float x() {
+        return x;
+    }
+
+    public float y() {
+        return y;
+    }
+
     @Override
     public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
         Point2D.Float offset = offset(hist);

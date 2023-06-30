@@ -92,6 +92,7 @@ public final class PathParser {
             valid = c == 'e' || c == 'E';
             state.exponentAllowed = !valid;
             state.signAllowed = valid;
+            state.dotAllowed = !valid;
         }
         state.iteration++;
         return valid;
