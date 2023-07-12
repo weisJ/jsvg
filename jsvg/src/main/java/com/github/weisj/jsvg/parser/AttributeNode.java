@@ -299,6 +299,12 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parseFloat(getValue(name), fallback);
     }
 
+    public float getNonNegativeFloat(@NotNull String name, float fallback) {
+        float value = getFloat(name, fallback);
+        if (Float.isFinite(value) && value < 0) return fallback;
+        return value;
+    }
+
     public int getInt(@NotNull String key, int fallback) {
         return loadHelper.attributeParser().parseInt(getValue(key), fallback);
     }

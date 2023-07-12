@@ -94,7 +94,7 @@ public final class StrokeContext {
                 attributeNode.getLength("stroke-width"),
                 attributeNode.getEnumNullable("stroke-linecap", LineCap.class),
                 attributeNode.getEnumNullable("stroke-linejoin", LineJoin.class),
-                attributeNode.getFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
+                attributeNode.getNonNegativeFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
                 attributeNode.getLengthList("stroke-dasharray"),
                 attributeNode.getLength("stroke-dashoffset"));
     }
