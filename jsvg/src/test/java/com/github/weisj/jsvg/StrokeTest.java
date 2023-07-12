@@ -37,4 +37,9 @@ class StrokeTest {
         assertEquals(SUCCESS, compareImages("stroke/stroke4.svg"));
         assertEquals(SUCCESS, compareImages("stroke/stroke5.svg"));
     }
+
+    @Test
+    void invalidMiterlimitTest() {
+        assertEquals(SUCCESS, compareImages("stroke/stroke_miterlimit_invalid.svg"));
+    }
 }

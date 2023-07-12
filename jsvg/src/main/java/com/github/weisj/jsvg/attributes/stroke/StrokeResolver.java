@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.renderer.StrokeContext;
 public final class StrokeResolver {
     private StrokeResolver() {}
 
+    // https://svgwg.org/svg2-draft/painting.html#StrokeMiterlimitProperty
     public static @NotNull Stroke resolve(float pathLengthFactor, @NotNull MeasureContext measureContext,
             @NotNull StrokeContext context) {
         Length strokeWidth = context.strokeWidth;
@@ -48,6 +49,9 @@ public final class StrokeResolver {
         assert lineJoin != null;
         assert Length.isSpecified(miterLimit);
         assert dashOffset != null;
+
+        // In practice, any miter join will exceed a miter limit between 0 and 1.
+        miterLimit = Math.max(1, miterLimit);
 
         float[] dashes = new float[dashPattern.length];
         float offsetLength = 0;
