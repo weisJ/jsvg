@@ -61,12 +61,19 @@ public final class SimpleCssParser implements CssParser {
             LOGGER.warning(() -> MessageFormat.format("Expected ''{0}'' but got ''{1}''", type, current));
         }
 
-        private void consume(TokenType type) {
+        private void consumeOrSkipAllowedToken(TokenType type, TokenType allowedTokeToSkip) {
             if (current.type() != type) {
-                expected(type.toString());
-                throw new ParserException();
+                if (current.type() != allowedTokeToSkip) {
+                    expected(type.toString());
+                    throw new ParserException();
+                }
+                return;
             }
             next();
+        }
+
+        private void consume(TokenType type) {
+            consumeOrSkipAllowedToken(type, null);
         }
 
         private @NotNull String consumeValue(TokenType type) {
@@ -114,7 +121,7 @@ public final class SimpleCssParser implements CssParser {
                 String name = consumeValue(TokenType.IDENTIFIER);
                 consume(TokenType.COLON);
                 String value = consumeValue(TokenType.RAW_DATA);
-                consume(TokenType.SEMICOLON);
+                consumeOrSkipAllowedToken(TokenType.SEMICOLON, TokenType.CURLY_CLOSE);
                 list.add(new StyleProperty(name, value.trim()));
             }
 

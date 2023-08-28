@@ -51,7 +51,7 @@ public final class Lexer {
         if (inRuleDefinition && parsingRaw) {
             // Raw parsing of RHS
             parsingRaw = false;
-            return new Token(TokenType.RAW_DATA, readWhile(c -> c != ';'));
+             return new Token(TokenType.RAW_DATA, readWhile(c -> c != ';' && c != '}'));
         }
 
         if (isEof()) return new Token(TokenType.EOF);

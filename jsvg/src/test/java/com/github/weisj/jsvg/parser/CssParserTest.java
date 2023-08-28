@@ -113,6 +113,15 @@ class CssParserTest {
     }
 
     @Test
+    void ruleWithoutSemicolon() {
+        SimpleCssParser cssParser = new SimpleCssParser();
+        var s = cssParser.parse(inputFromString(".cls{fill:#6e6e6e}"));
+        assertEquals(1, s.classRules().size());
+        assertTrue(s.classRules().containsKey("cls"));
+        assertEquals(List.of(new StyleProperty("fill", "#6e6e6e")), s.classRules().get("cls"));
+    }
+
+    @Test
     @Timeout(value = 10)
     void randomInput() {
         SimpleCssParser cssParser = new SimpleCssParser();
