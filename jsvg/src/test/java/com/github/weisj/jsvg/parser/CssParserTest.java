@@ -75,7 +75,6 @@ class CssParserTest {
         assertNoRulesProduced.accept(".a :");
         assertNoRulesProduced.accept(".a { .b }");
         assertNoRulesProduced.accept(".a { .b : a; }");
-        assertNoRulesProduced.accept(".a { b : a }");
 
         var s = cssParser.parse(inputFromString("#rule { c : d; }"));
         assertTrue(s.idRules().containsKey("rule"));
