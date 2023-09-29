@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -79,9 +80,12 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         // Todo: Handle bounding-box stuff as well (i.e. combined stroke etc.)
         Shape shape = ShapedContainer.super.elementShape(context);
         if (clipPathUnits == UnitType.ObjectBoundingBox) {
-            return clipPathUnits.viewTransform(elementBounds).createTransformedShape(shape);
-        } else {
-            return shape;
+            shape = clipPathUnits.viewTransform(elementBounds).createTransformedShape(shape);
         }
+        Area areaShape = new Area(shape);
+        if (areaShape.isRectangular()) {
+            return areaShape.getBounds();
+        }
+        return areaShape;
     }
 }

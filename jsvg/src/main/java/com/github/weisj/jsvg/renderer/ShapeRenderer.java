@@ -108,29 +108,36 @@ public final class ShapeRenderer {
         VectorEffect.applyEffects(shapePaintContext.vectorEffects, g,
                 shapePaintContext.context, shapePaintContext.transform);
 
+        Composite originalComposite = g.getComposite();
+        Paint originalPaint = g.getPaint();
+        Stroke originalStroke = g.getStroke();
+        AffineTransform originalTransform = g.getTransform();
+
         for (PaintOrder.Phase phase : paintOrder.phases()) {
-            Graphics2D phaseGraphics = (Graphics2D) g.create();
             RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
             switch (phase) {
                 case FILL:
                     if (canBeFilledHint) {
-                        ShapeRenderer.renderShapeFill(phaseContext, phaseGraphics, paintShape);
+                        ShapeRenderer.renderShapeFill(phaseContext, g, paintShape);
                     }
                     break;
                 case STROKE:
                     Shape strokeShape = paintShape.shape;
                     if (vectorEffects.contains(VectorEffect.NonScalingStroke)
                             && !vectorEffects.contains(VectorEffect.NonScalingSize)) {
-                        strokeShape = VectorEffect.applyNonScalingStroke(phaseGraphics, phaseContext, strokeShape);
+                        strokeShape = VectorEffect.applyNonScalingStroke(g, phaseContext, strokeShape);
                     }
-                    ShapeRenderer.renderShapeStroke(phaseContext, phaseGraphics,
+                    ShapeRenderer.renderShapeStroke(phaseContext, g,
                             new PaintShape(strokeShape, paintShape.bounds), shapePaintContext.stroke);
                     break;
                 case MARKERS:
-                    if (markerInfo != null) renderMarkers(phaseGraphics, phaseContext, paintShape, markerInfo);
+                    if (markerInfo != null) renderMarkers(g, phaseContext, paintShape, markerInfo);
                     break;
             }
-            phaseGraphics.dispose();
+            g.setComposite(originalComposite);
+            g.setPaint(originalPaint);
+            g.setStroke(originalStroke);
+            g.setTransform(originalTransform);
         }
     }
 
