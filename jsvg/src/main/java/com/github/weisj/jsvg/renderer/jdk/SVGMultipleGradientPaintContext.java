@@ -67,32 +67,48 @@ import org.jetbrains.annotations.NotNull;
  */
 abstract class SVGMultipleGradientPaintContext implements PaintContext {
 
+    private static final float MIN_INTERVAL_LENGTH = 0.001f;
+
     /**
      * The PaintContext's ColorModel.  This is ARGB if colors are not all
      * opaque, otherwise it is RGB.
      */
     protected ColorModel model;
 
-    /** Color model used if gradient colors are all opaque. */
+    /**
+     * Color model used if gradient colors are all opaque.
+     */
     private static final ColorModel XRGB_MODEL =
             new DirectColorModel(24, 0x00ff0000, 0x0000ff00, 0x000000ff);
 
-    /** The cached ColorModel. */
+    /**
+     * The cached ColorModel.
+     */
     protected static ColorModel cachedModel;
 
-    /** The cached raster, which is reusable among instances. */
+    /**
+     * The cached raster, which is reusable among instances.
+     */
     protected static WeakReference<Raster> cached;
 
-    /** Raster is reused whenever possible. */
+    /**
+     * Raster is reused whenever possible.
+     */
     protected Raster saved;
 
-    /** The method to use when painting out of the gradient bounds. */
+    /**
+     * The method to use when painting out of the gradient bounds.
+     */
     protected MultipleGradientPaint.CycleMethod cycleMethod;
 
-    /** The ColorSpace in which to perform the interpolation */
+    /**
+     * The ColorSpace in which to perform the interpolation
+     */
     protected MultipleGradientPaint.ColorSpaceType colorSpace;
 
-    /** Elements of the inverse transform matrix. */
+    /**
+     * Elements of the inverse transform matrix.
+     */
     protected float a00, a01, a10, a11, a02, a12;
 
     /**
@@ -123,16 +139,24 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      */
     private int[][] gradients;
 
-    /** Normalized intervals array. */
+    /**
+     * Normalized intervals array.
+     */
     private float[] normalizedIntervals;
 
-    /** Fractions array. */
+    /**
+     * Fractions array.
+     */
     private final float[] fractions;
 
-    /** Used to determine if gradient colors are all opaque. */
+    /**
+     * Used to determine if gradient colors are all opaque.
+     */
     private int transparencyTest;
 
-    /** Color space conversion lookup tables. */
+    /**
+     * Color space conversion lookup tables.
+     */
     private static final int[] SRGBtoLinearRGB = new int[256];
     private static final int[] LinearRGBtoSRGB = new int[256];
 
@@ -273,7 +297,9 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         // find smallest interval
         float Imin = 1;
         for (float interval : normalizedIntervals) {
-            Imin = Math.min(Imin, interval);
+            if (interval > MIN_INTERVAL_LENGTH) {
+                Imin = Math.min(Imin, interval);
+            }
         }
 
         // Estimate the size of the entire gradients array.
@@ -435,8 +461,8 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * Yet another helper function.  This one linearly interpolates between
      * 2 colors, filling up the output array.
      *
-     * @param rgb1 the start color
-     * @param rgb2 the end color
+     * @param rgb1   the start color
+     * @param rgb2   the end color
      * @param output the output array of colors; must not be null
      */
     private void interpolate(int rgb1, int rgb2, int[] output) {

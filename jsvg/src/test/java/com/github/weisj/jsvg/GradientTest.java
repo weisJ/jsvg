@@ -23,6 +23,8 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ReferenceTest.render;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -40,5 +42,10 @@ class GradientTest {
         assertEquals(SUCCESS, compareImages("gradient/radialGradient.svg"));
         assertEquals(SUCCESS, compareImages("gradient/radialGradient2.svg"));
         assertEquals(SUCCESS, compareImages("gradient/radialGradient3.svg"));
+    }
+
+    @Test
+    void radialGradientOutOfMemory() {
+        assertDoesNotThrow(() -> render("gradient/bad_gradient_stop_issue_51.svg"));
     }
 }
