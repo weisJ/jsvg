@@ -23,6 +23,8 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ReferenceTest.render;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Disabled;
@@ -58,5 +60,10 @@ class MaskTest {
         // [Note: Flaky] assertEquals(SUCCESS, compareImages("mask/chromeLogo.svg"));
         assertEquals(SUCCESS, compareImages("mask/classIcon.svg"));
         assertEquals(SUCCESS, compareImages("mask/complexTransform_bug32.svg"));
+    }
+
+    @Test
+    void emptyGroupReportsCorrectSize() {
+        assertDoesNotThrow(() -> render("mask/empty_group_issue_48.svg"));
     }
 }
