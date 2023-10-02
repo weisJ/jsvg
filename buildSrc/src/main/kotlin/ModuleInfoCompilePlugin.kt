@@ -27,7 +27,7 @@ class ModuleInfoCompilePlugin : Plugin<Project> {
                 classpath = files()
                 source("src/main/module/module-info.java")
                 source(javaCompile.source)
-                destinationDirectory.set(buildDir.resolve("classes/module"))
+                destinationDirectory.set(layout.buildDirectory.dir("classes/module"))
                 check(infoExtension.version.isJava9Compatible)
                 options.compilerArgs.addAll(listOf("--module-path", javaCompile.classpath.asPath))
                 if (infoExtension.extraArgs.isNotEmpty()) {
@@ -40,8 +40,8 @@ class ModuleInfoCompilePlugin : Plugin<Project> {
             }
             val copyModuleInfo by tasks.registering(Copy::class) {
                 dependsOn(compileModuleInfoJava)
-                from(buildDir.resolve("classes/module/module-info.class"))
-                into(buildDir.resolve("classes/java/main"))
+                from(layout.buildDirectory.dir("classes/module/module-info.class"))
+                into(layout.buildDirectory.dir("classes/java/main"))
             }
             compileJava.configure {
                 dependsOn(copyModuleInfo)
