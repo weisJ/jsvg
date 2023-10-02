@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.nodes.Marker;
 import com.github.weisj.jsvg.nodes.ShapeNode;
-import com.github.weisj.jsvg.util.ResettableGraphicsHolder;
+import com.github.weisj.jsvg.util.GraphicsResetHelper;
 
 public final class ShapeRenderer {
     private static final boolean DEBUG_MARKERS = false;
@@ -108,14 +108,14 @@ public final class ShapeRenderer {
         Set<VectorEffect> vectorEffects = shapePaintContext.vectorEffects;
         VectorEffect.applyEffects(shapePaintContext.vectorEffects, g,
                 shapePaintContext.context, shapePaintContext.transform);
-        ResettableGraphicsHolder holder = new ResettableGraphicsHolder(g);
+        GraphicsResetHelper resetHelper = new GraphicsResetHelper(g);
 
         for (PaintOrder.Phase phase : paintOrder.phases()) {
             RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
             switch (phase) {
                 case FILL:
                     if (canBeFilledHint) {
-                        ShapeRenderer.renderShapeFill(phaseContext, holder.getGraphics(), paintShape);
+                        ShapeRenderer.renderShapeFill(phaseContext, resetHelper.graphics(), paintShape);
                     }
                     break;
                 case STROKE:
@@ -123,16 +123,16 @@ public final class ShapeRenderer {
                     if (vectorEffects.contains(VectorEffect.NonScalingStroke)
                             && !vectorEffects.contains(VectorEffect.NonScalingSize)) {
                         strokeShape =
-                                VectorEffect.applyNonScalingStroke(holder.getGraphics(), phaseContext, strokeShape);
+                                VectorEffect.applyNonScalingStroke(resetHelper.graphics(), phaseContext, strokeShape);
                     }
-                    ShapeRenderer.renderShapeStroke(phaseContext, holder.getGraphics(),
+                    ShapeRenderer.renderShapeStroke(phaseContext, resetHelper.graphics(),
                             new PaintShape(strokeShape, paintShape.bounds), shapePaintContext.stroke);
                     break;
                 case MARKERS:
-                    if (markerInfo != null) renderMarkers(holder.getGraphics(), phaseContext, paintShape, markerInfo);
+                    if (markerInfo != null) renderMarkers(resetHelper.graphics(), phaseContext, paintShape, markerInfo);
                     break;
             }
-            holder.reset();
+            resetHelper.reset();
         }
     }
 

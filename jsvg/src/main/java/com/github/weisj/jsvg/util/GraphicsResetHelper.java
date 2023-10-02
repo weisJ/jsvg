@@ -31,7 +31,7 @@ import java.awt.geom.AffineTransform;
  * This class does not track what parameters have been modified, nor does it reset all configuration parameters. Which
  * parameters are reset should be expanded as needed.
  */
-public class ResettableGraphicsHolder {
+public class GraphicsResetHelper {
 
     private final Graphics2D graphics;
 
@@ -40,7 +40,7 @@ public class ResettableGraphicsHolder {
     private final Stroke originalStroke;
     private final AffineTransform originalTransform;
 
-    public ResettableGraphicsHolder(Graphics2D graphics) {
+    public GraphicsResetHelper(Graphics2D graphics) {
         this.graphics = graphics;
 
         originalComposite = graphics.getComposite();
@@ -49,7 +49,7 @@ public class ResettableGraphicsHolder {
         originalTransform = graphics.getTransform();
     }
 
-    public Graphics2D getGraphics() {
+    public Graphics2D graphics() {
         return graphics;
     }
 
