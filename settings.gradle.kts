@@ -1,5 +1,4 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-enableFeaturePreview("VERSION_CATALOGS")
 
 rootProject.name = "jsvg-root"
 
@@ -22,7 +21,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         fun VersionCatalogBuilder.idv(name: String, coordinates: String, versionRef: String = name) {
             val parts = coordinates.split(':', limit = 2)
-            alias(name).to(parts[0], parts[1]).version(extra["$versionRef.version"].toString())
+            library(name, parts[0], parts[1]).version(extra["$versionRef.version"].toString())
         }
         class VersionBundle(val bundleName: String, val builder: VersionCatalogBuilder) {
             val libs = mutableListOf<String>()
