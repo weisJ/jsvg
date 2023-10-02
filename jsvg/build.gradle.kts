@@ -32,6 +32,7 @@ tasks {
     }
 
     test {
+        dependsOn(jar)
         doFirst {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
