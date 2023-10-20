@@ -58,7 +58,8 @@ public final class ResourceUtil {
             .collect(Collectors.toSet());
 
     public static @Nullable RenderableResource loadImage(@NotNull URI uri) throws IOException {
-        if (uri.getPath().endsWith(".svg")) {
+        String path = uri.getPath();
+        if (path != null && path.endsWith(".svg")) {
             SVGLoader loader = new SVGLoader();
             try {
                 SVGDocument document = loader.load(uri.toURL());
