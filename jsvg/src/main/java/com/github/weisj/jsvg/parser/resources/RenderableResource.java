@@ -26,7 +26,6 @@ import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.renderer.RenderContext;
 

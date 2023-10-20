@@ -40,8 +40,11 @@ import javax.imageio.stream.ImageInputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ImageResource;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
+import com.github.weisj.jsvg.parser.resources.SVGResource;
 
 public final class ResourceUtil {
 
@@ -55,6 +58,18 @@ public final class ResourceUtil {
             .collect(Collectors.toSet());
 
     public static @Nullable RenderableResource loadImage(@NotNull URI uri) throws IOException {
+        if (uri.getPath().endsWith(".svg")) {
+            SVGLoader loader = new SVGLoader();
+            try {
+                SVGDocument document = loader.load(uri.toURL());
+                if (document != null) {
+                    return new SVGResource(document);
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Could not load svg resource", e);
+            }
+        }
+
         BufferedImage img = loadToBufferedImage(uri);
         if (img == null) return null;
         return new ImageResource(img);
@@ -92,8 +107,9 @@ public final class ResourceUtil {
         param.setDestination(image);
 
         try {
-            image = reader.read(0, param); // Don't really need the return value here, as it will always be same value
-                                           // as "image"
+            image = reader.read(0, param);
+            // Don't really need the return value here, as it will always be same value
+            // as "image"
         } catch (Exception e) {
             // Ignore this exception or display a warning or similar, for exceptions happening during decoding
             LOGGER.log(Level.SEVERE, e.getMessage(), e);

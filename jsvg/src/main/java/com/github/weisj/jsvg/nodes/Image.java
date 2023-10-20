@@ -126,8 +126,8 @@ public final class Image extends RenderableSVGNode {
         // Todo: Vector Effects
 
         AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(
-            new FloatSize(viewWidth, viewHeight),
-            new ViewBox(resourceWidth, resourceHeight));
+                new FloatSize(viewWidth, viewHeight),
+                new ViewBox(resourceWidth, resourceHeight));
 
         resource.render(g, context, imgTransform);
     }
