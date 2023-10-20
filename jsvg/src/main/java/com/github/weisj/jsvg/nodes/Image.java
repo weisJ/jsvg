@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,7 +32,6 @@ import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.SVGRenderingHints;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.ViewBox;
@@ -46,7 +44,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.UIFuture;
 import com.github.weisj.jsvg.parser.ValueUIFuture;
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.GraphicsReferencing})
@@ -64,7 +62,7 @@ public final class Image extends RenderableSVGNode {
     private PreserveAspectRatio preserveAspectRatio;
     private Overflow overflow;
 
-    private UIFuture<BufferedImage> imgResource;
+    private UIFuture<RenderableResource> imgResource;
 
 
     @Override
@@ -99,46 +97,38 @@ public final class Image extends RenderableSVGNode {
         }
     }
 
-    private @Nullable BufferedImage fetchImage(@NotNull RenderContext context) {
+    private @Nullable RenderableResource fetchImage(@NotNull RenderContext context) {
         if (imgResource == null) return null;
         if (imgResource instanceof ValueUIFuture) return imgResource.get();
         if (!imgResource.checkIfReady(context.targetComponent())) return null;
-        BufferedImage img = imgResource.get();
-        if (img != null) imgResource = new ValueUIFuture<>(img);
-        return img;
+        RenderableResource resource = imgResource.get();
+        if (resource != null) imgResource = new ValueUIFuture<>(resource);
+        return resource;
     }
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        BufferedImage img = fetchImage(context);
-        if (img == null) return;
+        RenderableResource resource = fetchImage(context);
+        if (resource == null) return;
 
         MeasureContext measure = context.measureContext();
-        int imgWidth = img.getWidth(context.targetComponent());
-        int imgHeight = img.getHeight(context.targetComponent());
-        if (imgWidth == 0 || imgHeight == 0) return;
+        FloatSize intrinsicResourceSize = resource.intrinsicSize(context);
+        float resourceWidth = intrinsicResourceSize.width;
+        float resourceHeight = intrinsicResourceSize.height;
+        if (resourceWidth == 0 || resourceHeight == 0) return;
 
-        float viewWidth = width.orElseIfUnspecified(imgWidth).resolveWidth(measure);
-        float viewHeight = height.orElseIfUnspecified(imgHeight).resolveHeight(measure);
-        ViewBox viewBox = new ViewBox(imgWidth, imgHeight);
+        float viewWidth = width.orElseIfUnspecified(resourceWidth).resolveWidth(measure);
+        float viewHeight = height.orElseIfUnspecified(resourceHeight).resolveHeight(measure);
 
         g.translate(x.resolveWidth(measure), y.resolveHeight(measure));
 
         if (overflow.establishesClip()) g.clip(new ViewBox(viewWidth, viewHeight));
-
         // Todo: Vector Effects
 
         AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(
-                new FloatSize(viewWidth, viewHeight), viewBox);
-        Object imageAntialiasing = g.getRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING);
-        if (imageAntialiasing == SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF) {
-            g.drawImage(img, imgTransform, context.targetComponent());
-        } else {
-            g.transform(imgTransform);
-            Rectangle imgRect = new Rectangle(0, 0, imgWidth, imgHeight);
-            // Painting using a TexturePaint allows for anti-aliased edges with a nontrivial transform
-            GraphicsUtil.safelySetPaint(g, new TexturePaint(img, imgRect));
-            g.fill(imgRect);
-        }
+            new FloatSize(viewWidth, viewHeight),
+            new ViewBox(resourceWidth, resourceHeight));
+
+        resource.render(g, context, imgTransform);
     }
 }

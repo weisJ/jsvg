@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -40,6 +40,9 @@ import javax.imageio.stream.ImageInputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.parser.resources.ImageResource;
+import com.github.weisj.jsvg.parser.resources.RenderableResource;
+
 public final class ResourceUtil {
 
     private static final Logger LOGGER = Logger.getLogger(ResourceUtil.class.getName());
@@ -51,7 +54,13 @@ public final class ResourceUtil {
             .map(s -> "image/" + s.toLowerCase(Locale.ENGLISH))
             .collect(Collectors.toSet());
 
-    public static @Nullable BufferedImage loadImage(@NotNull URI uri) throws IOException {
+    public static @Nullable RenderableResource loadImage(@NotNull URI uri) throws IOException {
+        BufferedImage img = loadToBufferedImage(uri);
+        if (img == null) return null;
+        return new ImageResource(img);
+    }
+
+    private static @Nullable BufferedImage loadToBufferedImage(@NotNull URI uri) throws IOException {
         String scheme = uri.getScheme();
         if ("data".equals(scheme)) {
             DataUri dataUri = DataUri.parse(uri.toString(), StandardCharsets.UTF_8);
