@@ -85,6 +85,10 @@ public final class StrokeContext {
                 && dashOffset == null;
     }
 
+    public boolean isStrokeVisible() {
+        return strokeWidth != null && strokeWidth.isSpecified() && strokeWidth.raw() > 0;
+    }
+
     public static @NotNull StrokeContext createDefault() {
         return new StrokeContext(Unit.Raw.valueOf(1), LineCap.Butt, LineJoin.Miter, 4f, new Length[0], Length.ZERO);
     }

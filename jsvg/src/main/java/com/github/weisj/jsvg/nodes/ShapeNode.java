@@ -129,21 +129,25 @@ public abstract class ShapeNode extends RenderableSVGNode
         return node instanceof Marker;
     }
 
-    @Override
-    public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+    private @NotNull Stroke computeEffectiveStroke(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
-        Shape paintShape = shape.shape(context);
-        @Nullable Rectangle2D bounds = shape.usesOptimizedBoundsCalculation()
-                ? shape.bounds(context, false)
-                : null;
         float pathLengthFactor = 1f;
         if (pathLength.isSpecified()) {
             double effectiveLength = pathLength.resolveLength(measureContext);
             double actualLength = shape.pathLength(measureContext);
             pathLengthFactor = (float) (actualLength / effectiveLength);
         }
+        return context.stroke(pathLengthFactor);
+    }
 
-        Stroke effectiveStroke = context.stroke(pathLengthFactor);
+    @Override
+    public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+        Shape paintShape = shape.shape(context);
+        @Nullable Rectangle2D bounds = shape.usesOptimizedBoundsCalculation()
+                ? shape.bounds(context, false)
+                : null;
+
+        Stroke effectiveStroke = computeEffectiveStroke(context);
         ShapeRenderer.renderWithPaintOrder(g, shape.canBeFilled(), paintOrder,
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects(), effectiveStroke, transform()),
                 new ShapeRenderer.PaintShape(paintShape, bounds),
