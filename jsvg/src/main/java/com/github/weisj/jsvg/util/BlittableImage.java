@@ -77,8 +77,11 @@ public final class BlittableImage {
 
         int imgX = (int) Math.floor(boundsInRootSpace.getX());
         int imgY = (int) Math.floor(boundsInRootSpace.getY());
-        int imgWidth = (int) Math.ceil(boundsInRootSpace.getX() + boundsInRootSpace.getWidth()) - imgX;
-        int imgHeight = (int) Math.ceil(boundsInRootSpace.getY() + boundsInRootSpace.getHeight()) - imgY;
+
+        int imgWidth =
+                Math.max(Math.abs((int) Math.ceil(boundsInRootSpace.getX() + boundsInRootSpace.getWidth()) - imgX), 1);
+        int imgHeight =
+                Math.max(Math.abs((int) Math.ceil(boundsInRootSpace.getY() + boundsInRootSpace.getHeight()) - imgY), 1);
 
         Rectangle2D adjustedUserSpaceBounds = new Rectangle2D.Double(imgX, imgY, imgWidth, imgHeight);
         try {
