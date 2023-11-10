@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -157,12 +158,19 @@ public final class ReferenceTest {
         }
     }
 
+    private static @NotNull RenderingHints referenceHintSet() {
+        return new RenderingHints(Map.of(
+                RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
+                RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE,
+                RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON,
+                RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
+    }
+
     private static BufferedImage render(@NotNull InputStream inputStream) {
         SVGDocument document = Objects.requireNonNull(new SVGLoader().load(inputStream));
         FloatSize size = document.size();
-        BufferedImage image = new BufferedImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new ReferenceImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         document.render(null, g, new ViewBox(size));
         g.dispose();
         return image;
@@ -183,7 +191,7 @@ public final class ReferenceTest {
 
                 @Override
                 public BufferedImage createImage(int w, int h) {
-                    return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    return new ReferenceImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 }
 
                 @Override
@@ -197,6 +205,20 @@ public final class ReferenceTest {
             throw new IOException("Couldn't convert image", ex);
         }
         return imagePointer[0];
+    }
+
+    private static class ReferenceImage extends BufferedImage {
+
+        public ReferenceImage(int width, int height, int imageType) {
+            super(width, height, imageType);
+        }
+
+        @Override
+        public Graphics2D createGraphics() {
+            Graphics2D g = super.createGraphics();
+            g.setRenderingHints(referenceHintSet());
+            return g;
+        }
     }
 
     public static final class ReferenceTestResult {
