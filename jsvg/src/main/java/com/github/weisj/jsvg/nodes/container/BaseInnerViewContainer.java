@@ -96,7 +96,6 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         }
         if (preserveAspectRatio == null) preserveAspectRatio = this.preserveAspectRatio;
 
-
         AffineTransform viewTransform = view != null
                 ? preserveAspectRatio.computeViewPortTransform(useSiteSize, view)
                 : null;

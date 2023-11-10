@@ -102,4 +102,11 @@ class FilterTest {
     void testMergeNode() {
         assertEquals(SUCCESS, compareImages("filter/merge_composite_bug33.svg"));
     }
+
+    @Test
+    void testOutOfBounds() {
+        assertEquals(SUCCESS, compareImages("filter/outOfBoundsVisible.svg"));
+        assertDoesNotThrow(() -> render("filter/outOfBoundsHidden.svg"));
+        assertEquals(SUCCESS, compareImages("filter/outOfBoundsHidden.svg"));
+    }
 }

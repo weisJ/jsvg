@@ -117,7 +117,7 @@ public final class Filter extends ContainerNode {
         return new Length(Unit.PERCENTAGE, length.raw() * 100);
     }
 
-    public @NotNull FilterInfo createFilterInfo(@NotNull Graphics2D g, @NotNull RenderContext context,
+    public @Nullable FilterInfo createFilterInfo(@NotNull Graphics2D g, @NotNull RenderContext context,
             @NotNull Rectangle2D elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds, x, y, width, height);
@@ -127,8 +127,10 @@ public final class Filter extends ContainerNode {
                 new FilterLayoutContext(filterPrimitiveUnits, elementBounds, graphicsClipBounds);
 
         Rectangle2D clippedElementBounds = elementBounds.createIntersection(graphicsClipBounds);
-
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
+
+        if (effectiveFilterRegion.isEmpty()) return null;
+
         LayoutBounds elementLayoutBounds = new LayoutBounds(effectiveFilterRegion, new FloatInsets());
         LayoutBounds clippedElementLayoutBounds = new LayoutBounds(clippedElementBounds, new FloatInsets());
         LayoutBounds sourceDependentBounds = elementLayoutBounds.transform(

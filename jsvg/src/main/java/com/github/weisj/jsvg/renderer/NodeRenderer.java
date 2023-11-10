@@ -69,11 +69,19 @@ public final class NodeRenderer {
         private final @NotNull Filter filter;
         private final @NotNull Filter.FilterInfo filterInfo;
 
-        InfoWithFilter(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Graphics2D g,
+        static @Nullable InfoWithFilter create(@NotNull Renderable renderable, @NotNull RenderContext context,
+                @NotNull Graphics2D g,
                 @NotNull Filter filter, @NotNull Rectangle2D elementBounds) {
+            Filter.FilterInfo info = filter.createFilterInfo(g, context, elementBounds);
+            if (info == null) return null;
+            return new InfoWithFilter(renderable, context, g, filter, info);
+        }
+
+        private InfoWithFilter(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Graphics2D g,
+                @NotNull Filter filter, @NotNull Filter.FilterInfo filterInfo) {
             super(renderable, context, g);
             this.filter = filter;
-            this.filterInfo = filter.createFilterInfo(g, context, elementBounds);
+            this.filterInfo = filterInfo;
         }
 
         @Override
@@ -153,16 +161,24 @@ public final class NodeRenderer {
             }
         }
 
+        Info info = tryCreateFilterInfo(renderable, childContext, childGraphics, elementBounds);
+        if (info != null) return info;
+
+        return new Info(renderable, childContext, childGraphics);
+    }
+
+    private static @Nullable InfoWithFilter tryCreateFilterInfo(
+            @NotNull Renderable renderable, @NotNull RenderContext childContext, @NotNull Graphics2D childGraphics,
+            @Nullable Rectangle2D elementBounds) {
         Filter filter = renderable instanceof HasFilter
                 ? ((HasFilter) renderable).filter()
                 : null;
 
         if (filter != null && filter.hasEffect()) {
             if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
-            return new InfoWithFilter(renderable, childContext, childGraphics, filter, elementBounds);
-        } else {
-            return new Info(renderable, childContext, childGraphics);
+            return InfoWithFilter.create(renderable, childContext, childGraphics, filter, elementBounds);
         }
+        return null;
     }
 
     private static @NotNull Rectangle2D elementBounds(@NotNull Object node, @NotNull RenderContext childContext) {
