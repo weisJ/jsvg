@@ -1,10 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" overflow="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"
+	viewBox="0 0 10 10" overflow="hidden">
 	<defs>
-		<filter
-			id="badFilter">
+		<filter id="badFilter">
 			<feGaussianBlur stdDeviation="1" />
 		</filter>
 	</defs>
-    <rect x="0" y="0" width="100%" height="100%" fill="none" stroke="magenta" stroke-width="0.5"/>
-    <rect x="10" y="10" width="10" height="10" filter="url(#badFilter)"/>
+	<rect x="0" y="0" width="100%" height="100%" fill="none"
+		stroke="magenta" stroke-width="0.5" />
+	<rect x="10" y="10" width="10" height="10"
+		filter="url(#badFilter)" />
 </svg>

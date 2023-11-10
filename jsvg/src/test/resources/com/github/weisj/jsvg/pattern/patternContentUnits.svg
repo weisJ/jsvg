@@ -1,4 +1,4 @@
-<svg viewBox="0 0 200 100" width="200" height="100"
+<svg viewBox="0 0 200 100" width="600" height="300"
 	xmlns="http://www.w3.org/2000/svg">
 	<!-- A pattern tile that content coordinates and values are computed against 
 		the current coordinate user space. Note that the size of the tile is computed 
