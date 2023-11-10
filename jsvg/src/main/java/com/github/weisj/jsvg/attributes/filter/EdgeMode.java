@@ -85,7 +85,7 @@ public enum EdgeMode {
 
     private static EdgeModeImage prepareEdgeModeImage(@NotNull RenderContext context,
             @NotNull ImageProducer producer, @NotNull ConvolveOperation convolveOperation) {
-        Image img = context.createImage(producer);
+        Image img = context.platformSupport().createImage(producer);
         int width = img.getWidth(null);
         int height = img.getHeight(null);
 

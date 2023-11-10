@@ -29,6 +29,8 @@ import javax.swing.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
+
 public final class SwingUIFuture<T> implements UIFuture<T> {
 
     private final @NotNull AtomicReference<SwingWorker<Void, Void>> swingWorker;
@@ -49,13 +51,14 @@ public final class SwingUIFuture<T> implements UIFuture<T> {
     }
 
     @Override
-    public boolean checkIfReady(@Nullable JComponent component) {
+    public boolean checkIfReady(@NotNull PlatformSupport platformSupport) {
         SwingWorker<?, ?> worker = swingWorker.get();
         if (worker == null || worker.isDone()) return true;
-        if (component != null) {
+        PlatformSupport.TargetSurface targetSurface = platformSupport.targetSurface();
+        if (targetSurface != null) {
             synchronized (SwingUIFuture.this) {
                 worker.addPropertyChangeListener(e -> {
-                    if (worker.isDone()) component.repaint();
+                    if (worker.isDone()) targetSurface.repaint();
                 });
             }
         }

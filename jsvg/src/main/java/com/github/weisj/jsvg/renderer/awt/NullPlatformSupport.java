@@ -19,32 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.resources;
+package com.github.weisj.jsvg.renderer.awt;
 
-import java.awt.*;
-import java.awt.geom.AffineTransform;
+import java.awt.image.ImageObserver;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.renderer.RenderContext;
+public final class NullPlatformSupport implements PlatformSupport {
 
-public class SVGResource implements RenderableResource {
-    private final @NotNull SVGDocument document;
-
-    public SVGResource(@NotNull SVGDocument document) {
-        this.document = document;
+    @Override
+    public @Nullable ImageObserver imageObserver() {
+        return null;
     }
 
     @Override
-    public @NotNull FloatSize intrinsicSize(@NotNull RenderContext context) {
-        return document.size();
-    }
-
-    @Override
-    public void render(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
-        g.transform(imgTransform);
-        document.renderWithPlatform(context.platformSupport(), g, null);
+    public @Nullable TargetSurface targetSurface() {
+        return null;
     }
 }

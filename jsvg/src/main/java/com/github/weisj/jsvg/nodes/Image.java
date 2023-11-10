@@ -100,7 +100,7 @@ public final class Image extends RenderableSVGNode {
     private @Nullable RenderableResource fetchImage(@NotNull RenderContext context) {
         if (imgResource == null) return null;
         if (imgResource instanceof ValueUIFuture) return imgResource.get();
-        if (!imgResource.checkIfReady(context.targetComponent())) return null;
+        if (!imgResource.checkIfReady(context.platformSupport())) return null;
         RenderableResource resource = imgResource.get();
         if (resource != null) imgResource = new ValueUIFuture<>(resource);
         return resource;

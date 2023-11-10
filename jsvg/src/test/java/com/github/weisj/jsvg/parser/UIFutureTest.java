@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,11 +23,16 @@ package com.github.weisj.jsvg.parser;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.awt.image.ImageObserver;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.*;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+
+import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
 
 class UIFutureTest {
 
@@ -44,10 +49,15 @@ class UIFutureTest {
         Object o = new Object();
         CountDownLatch startLatch = new CountDownLatch(1);
         CountDownLatch repaintLatch = new CountDownLatch(1);
-        JComponent component = new JComponent() {
+        PlatformSupport platformSupport = new PlatformSupport() {
             @Override
-            public void repaint() {
-                repaintLatch.countDown();
+            public @Nullable ImageObserver imageObserver() {
+                return null;
+            }
+
+            @Override
+            public @NotNull TargetSurface targetSurface() {
+                return repaintLatch::countDown;
             }
         };
 
@@ -59,10 +69,10 @@ class UIFutureTest {
             }
             return o;
         });
-        assertFalse(future.checkIfReady(component));
+        assertFalse(future.checkIfReady(platformSupport));
         startLatch.countDown();
         assertDoesNotThrow(() -> repaintLatch.await());
-        assertTrue(future.checkIfReady(component));
+        assertTrue(future.checkIfReady(platformSupport));
         assertEquals(o, future.get());
     }
 }

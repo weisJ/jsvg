@@ -19,32 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.resources;
+package com.github.weisj.jsvg.renderer.awt;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.attributes.font.SVGFont;
 
-public class SVGResource implements RenderableResource {
-    private final @NotNull SVGDocument document;
+public interface PlatformSupport {
 
-    public SVGResource(@NotNull SVGDocument document) {
-        this.document = document;
+    interface TargetSurface {
+        void repaint();
     }
 
-    @Override
-    public @NotNull FloatSize intrinsicSize(@NotNull RenderContext context) {
-        return document.size();
+    @Nullable
+    ImageObserver imageObserver();
+
+    @Nullable
+    TargetSurface targetSurface();
+
+    default float fontSize() {
+        return SVGFont.defaultFontSize();
     }
 
-    @Override
-    public void render(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
-        g.transform(imgTransform);
-        document.renderWithPlatform(context.platformSupport(), g, null);
+    default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
+        return Toolkit.getDefaultToolkit().createImage(imageProducer);
     }
+
 }

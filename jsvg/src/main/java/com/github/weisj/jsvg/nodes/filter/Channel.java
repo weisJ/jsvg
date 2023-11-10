@@ -36,7 +36,7 @@ public interface Channel {
     ImageProducer producer();
 
     default @NotNull Image toImage(@NotNull RenderContext context) {
-        return context.createImage(producer());
+        return context.platformSupport().createImage(producer());
     }
 
     default @NotNull BufferedImage toBufferedImageNonAliased(@NotNull RenderContext context) {

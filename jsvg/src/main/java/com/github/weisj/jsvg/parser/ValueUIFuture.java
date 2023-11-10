@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,9 +21,9 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import javax.swing.*;
+import org.jetbrains.annotations.NotNull;
 
-import org.jetbrains.annotations.Nullable;
+import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
 
 public final class ValueUIFuture<T> implements UIFuture<T> {
 
@@ -34,7 +34,7 @@ public final class ValueUIFuture<T> implements UIFuture<T> {
     }
 
     @Override
-    public boolean checkIfReady(@Nullable JComponent component) {
+    public boolean checkIfReady(@NotNull PlatformSupport platformSupport) {
         return true;
     }
 

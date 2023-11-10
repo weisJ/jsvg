@@ -123,7 +123,8 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
             Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
             for (int i = 1; i < inputChannels.length; i++) {
                 Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
-                imgGraphics.drawImage(context.createImage(channel.producer()), null, context.targetComponent());
+                imgGraphics.drawImage(context.platformSupport().createImage(channel.producer()),
+                        null, context.platformSupport().imageObserver());
             }
             result = new ImageProducerChannel(dst.getSource());
         }

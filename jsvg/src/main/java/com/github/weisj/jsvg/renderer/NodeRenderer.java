@@ -223,7 +223,7 @@ public final class NodeRenderer {
             MeasureContext newMeasure = context.measureContext().derive(viewBox,
                     Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
             return new RenderContext(
-                    context.targetComponent(),
+                    context.platformSupport(),
                     new AffineTransform(),
                     new AffineTransform(),
                     PaintContext.createDefault(),

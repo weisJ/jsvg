@@ -19,32 +19,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.resources;
+package com.github.weisj.jsvg.renderer.awt;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+
+import javax.swing.*;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.renderer.RenderContext;
+public final class JComponentPlatformSupport implements PlatformSupport {
 
-public class SVGResource implements RenderableResource {
-    private final @NotNull SVGDocument document;
+    private final @NotNull JComponent component;
 
-    public SVGResource(@NotNull SVGDocument document) {
-        this.document = document;
+    public JComponentPlatformSupport(@NotNull JComponent component) {
+        this.component = component;
     }
 
     @Override
-    public @NotNull FloatSize intrinsicSize(@NotNull RenderContext context) {
-        return document.size();
+    public float fontSize() {
+        Font font = component.getFont();
+        if (font != null) return font.getSize2D();
+        return PlatformSupport.super.fontSize();
     }
 
     @Override
-    public void render(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
-        g.transform(imgTransform);
-        document.renderWithPlatform(context.platformSupport(), g, null);
+    public @NotNull TargetSurface targetSurface() {
+        return component::repaint;
+    }
+
+    @Override
+    public @NotNull ImageObserver imageObserver() {
+        return component;
+    }
+
+    @Override
+    public @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
+        return component.createImage(imageProducer);
+    }
+
+    @Override
+    public String toString() {
+        return "JComponentAwtSupport{" +
+                "component=" + component +
+                '}';
     }
 }

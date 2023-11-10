@@ -56,7 +56,7 @@ public final class ImageProducerChannel implements Channel, PixelProvider {
 
     private @NotNull BufferedImage rasterBuffer(@NotNull RenderContext context) {
         if (rasterBuffer == null) {
-            rasterBuffer = Channel.makeNonAliased(context.createImage(producer()));
+            rasterBuffer = Channel.makeNonAliased(context.platformSupport().createImage(producer()));
         }
         return rasterBuffer;
     }

@@ -42,8 +42,8 @@ public class ImageResource implements RenderableResource {
     @Override
     public @NotNull FloatSize intrinsicSize(@NotNull RenderContext context) {
         return new FloatSize(
-                image.getWidth(context.targetComponent()),
-                image.getHeight(context.targetComponent()));
+                image.getWidth(context.platformSupport().imageObserver()),
+                image.getHeight(context.platformSupport().imageObserver()));
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ImageResource implements RenderableResource {
 
         Object imageAntialiasing = g.getRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING);
         if (imageAntialiasing == SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF) {
-            g.drawImage(image, imgTransform, context.targetComponent());
+            g.drawImage(image, imgTransform, context.platformSupport().imageObserver());
         } else {
             g.transform(imgTransform);
             Rectangle imgRect = new Rectangle(0, 0, imgWidth, imgHeight);

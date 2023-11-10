@@ -90,7 +90,7 @@ public final class BlittableImage {
 
         BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null, imgWidth, imgHeight);
 
-        RenderContext imageContext = RenderContext.createInitial(context.targetComponent(),
+        RenderContext imageContext = RenderContext.createInitial(context.platformSupport(),
                 contentUnits.deriveMeasure(context.measureContext()));
 
         AffineTransform rootTransform = new AffineTransform();

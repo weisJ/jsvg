@@ -67,10 +67,10 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
         FilterPrimitiveBase impl = impl();
         BufferedImage dst = destinationChannel(impl, filterContext).toBufferedImageNonAliased(context);
 
-        Image other = context.createImage(sourceChannel(impl, filterContext).producer());
+        Image other = context.platformSupport().createImage(sourceChannel(impl, filterContext).producer());
         Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
         imgGraphics.setComposite(composite());
-        imgGraphics.drawImage(other, null, context.targetComponent());
+        imgGraphics.drawImage(other, null, context.platformSupport().imageObserver());
         imgGraphics.dispose();
 
         impl.saveResult(new ImageProducerChannel(dst.getSource()), filterContext);

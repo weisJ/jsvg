@@ -36,6 +36,9 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.awt.JComponentPlatformSupport;
+import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
 
 public final class SVGDocument {
     private static final boolean DEBUG = false;
@@ -57,18 +60,30 @@ public final class SVGDocument {
     }
 
     public void render(@Nullable JComponent component, @NotNull Graphics2D graphics2D, @Nullable ViewBox bounds) {
+        PlatformSupport platformSupport = component != null
+                ? new JComponentPlatformSupport(component)
+                : new NullPlatformSupport();
+        renderWithPlatform(platformSupport, graphics2D, bounds);
+    }
+
+    private float computePlatformFontSize(@NotNull PlatformSupport platformSupport, @NotNull Graphics2D g) {
+        Font f = g.getFont();
+        if (f != null) return f.getSize2D();
+        return platformSupport.fontSize();
+    }
+
+    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Graphics2D graphics2D,
+            @Nullable ViewBox bounds) {
         Graphics2D g = (Graphics2D) graphics2D.create();
         setupSVGRenderingHints(g);
 
-        Font f = g.getFont();
-        if (f == null && component != null) f = component.getFont();
-        float defaultEm = f != null ? f.getSize2D() : SVGFont.defaultFontSize();
+        float defaultEm = computePlatformFontSize(platformSupport, g);
         float defaultEx = SVGFont.exFromEm(defaultEm);
 
         MeasureContext initialMeasure = bounds != null
                 ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx)
                 : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx);
-        RenderContext context = RenderContext.createInitial(component, initialMeasure);
+        RenderContext context = RenderContext.createInitial(platformSupport, initialMeasure);
 
         if (bounds == null) bounds = new ViewBox(root.size(context));
 

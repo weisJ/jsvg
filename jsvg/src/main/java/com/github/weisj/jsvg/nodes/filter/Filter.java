@@ -250,7 +250,9 @@ public final class Filter extends ContainerNode {
             }
 
             blittableImage.prepareForBlitting(g, context);
-            g.drawImage(context.createImage(producer), 0, 0, context.targetComponent());
+            g.drawImage(
+                    context.platformSupport().createImage(producer), 0, 0,
+                    context.platformSupport().imageObserver());
         }
 
         public void close() {

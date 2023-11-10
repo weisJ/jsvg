@@ -81,7 +81,7 @@ public final class ImageUtil {
     }
 
     public static @NotNull BufferedImage copy(@NotNull RenderContext context, @NotNull ImageProducer producer) {
-        Image img = context.createImage(producer);
+        Image img = context.platformSupport().createImage(producer);
         BufferedImage bufferedImage = createCompatibleTransparentImage((AffineTransform) null,
                 img.getWidth(null), img.getHeight(null));
         Graphics2D g = GraphicsUtil.createGraphics(bufferedImage);
