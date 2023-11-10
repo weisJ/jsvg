@@ -94,11 +94,18 @@ public final class SVGDocument {
 
     private void setupSVGRenderingHints(@NotNull Graphics2D g) {
         Object aaHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-        if (aaHint != RenderingHints.VALUE_ANTIALIAS_DEFAULT) setSVGRenderingHint(g,
-                SVGRenderingHints.KEY_IMAGE_ANTIALIASING,
-                aaHint == RenderingHints.VALUE_ANTIALIAS_ON
-                        ? SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON
-                        : SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF);
+        if (aaHint != RenderingHints.VALUE_ANTIALIAS_DEFAULT) {
+            setSVGRenderingHint(g,
+                    SVGRenderingHints.KEY_IMAGE_ANTIALIASING,
+                    aaHint == RenderingHints.VALUE_ANTIALIAS_ON
+                            ? SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON
+                            : SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF);
+        } else {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        if (g.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL) == RenderingHints.VALUE_STROKE_DEFAULT) {
+            g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        }
     }
 
     private void setSVGRenderingHint(@NotNull Graphics2D g, @NotNull RenderingHints.Key key, @NotNull Object o) {
