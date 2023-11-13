@@ -25,108 +25,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.util.ParserBase;
 
 /**
  * A helper for parsing {@link PathCommand}s.
  *
  * @author Jannis Weis
  */
-public final class PathParser {
-    private final String input;
-    private final int inputLength;
-    private int index;
+public final class PathParser extends ParserBase {
     private char currentCommand;
 
-    public PathParser(@Nullable String input) {
-        this.input = input;
-        this.inputLength = input != null ? input.length() : 0;
-    }
-
-    private @NotNull String currentLocation() {
-        return "(index=" + index + " in input=" + input + ")";
+    public PathParser(@NotNull String input) {
+        super(input, 0);
     }
 
     private boolean isCommandChar(char c) {
         return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
     }
 
-    private boolean isWhiteSpaceOrSeparator(char c) {
-        return c == ',' || Character.isWhitespace(c);
-    }
-
-    private char peek() {
-        return input.charAt(index);
-    }
-
-    private void consume() {
-        index++;
-    }
-
-    private boolean hasNext() {
-        return index < inputLength;
-    }
-
-    // This only checks for the rough structure of a number as we need to know
-    // when to separate the next token.
-    // Explicit parsing is done by Float#parseFloat.
-    private boolean isValidNumberChar(char c, NumberCharState state) {
-        boolean valid = '0' <= c && c <= '9';
-        if (valid && state.iteration == 1 && input.charAt(index - 1) == '0') {
-            // Break up combined zeros into multiple numbers.
-            return false;
-        }
-        state.signAllowed = state.signAllowed && !valid;
-        if (state.dotAllowed && !valid) {
-            valid = c == '.';
-            state.dotAllowed = !valid;
-        }
-        if (state.signAllowed && !valid) {
-            valid = c == '+' || c == '-';
-            state.signAllowed = valid;
-        }
-        if (state.exponentAllowed && !valid) {
-            // Possible exponent notation. Needs at least one preceding number
-            valid = c == 'e' || c == 'E';
-            state.exponentAllowed = !valid;
-            state.signAllowed = valid;
-            state.dotAllowed = !valid;
-        }
-        state.iteration++;
-        return valid;
-    }
-
-    private void consumeWhiteSpaceOrSeparator() {
-        while (hasNext() && isWhiteSpaceOrSeparator(peek())) {
-            consume();
-        }
-    }
-
-    private float nextFloatOrUnspecified() {
-        if (!hasNext()) return Length.UNSPECIFIED_RAW;
-        return nextFloat();
-    }
-
-    private float nextFloat() {
-        int start = index;
-        NumberCharState state = new NumberCharState();
-        while (hasNext() && isValidNumberChar(peek(), state)) {
-            consume();
-        }
-        int end = index;
+    @Override
+    public float nextFloat() throws NumberFormatException {
+        float f = super.nextFloat();
         consumeWhiteSpaceOrSeparator();
-        String token = input.substring(start, end);
-        try {
-            return Float.parseFloat(token);
-        } catch (NumberFormatException e) {
-            String msg = "Unexpected element while parsing cmd '" + currentCommand
-                    + "' encountered token '" + token + "' rest="
-                    + input.substring(start, Math.min(input.length(), start + 10))
-                    + currentLocation();
-            throw new IllegalStateException(msg, e);
-        }
+        return f;
     }
 
     private boolean nextFlag() {
@@ -142,8 +64,7 @@ public final class PathParser {
         }
     }
 
-    public @Nullable BezierPathCommand parseMeshCommand() {
-        if (input == null) return null;
+    public @NotNull BezierPathCommand parseMeshCommand() {
         char peekChar = peek();
         currentCommand = 'z';
         if (isCommandChar(peekChar)) {
@@ -168,7 +89,7 @@ public final class PathParser {
     }
 
     public PathCommand[] parsePathCommand() {
-        if (input == null || "none".equals(input)) return new PathCommand[0];
+        if ("none".equals(input)) return new PathCommand[0];
         List<PathCommand> commands = new ArrayList<>();
 
         currentCommand = 'Z';
@@ -258,12 +179,5 @@ public final class PathParser {
             commands.add(cmd);
         }
         return commands.toArray(new PathCommand[0]);
-    }
-
-    private static final class NumberCharState {
-        int iteration = 0;
-        boolean dotAllowed = true;
-        boolean signAllowed = true;
-        boolean exponentAllowed = true;
     }
 }

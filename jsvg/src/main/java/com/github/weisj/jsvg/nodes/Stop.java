@@ -74,7 +74,7 @@ public final class Stop extends AbstractSVGNode {
         color = ColorUtil.withAlpha(c, opacity);
         offset = attributeNode.getPercentage("offset", 0);
         String pathData = attributeNode.getValue("path");
-        path = new PathParser(pathData).parseMeshCommand();
+        path = pathData != null ? new PathParser(pathData).parseMeshCommand() : null;
     }
 
     @Override

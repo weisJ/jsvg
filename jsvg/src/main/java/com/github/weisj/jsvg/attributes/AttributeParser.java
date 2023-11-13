@@ -39,6 +39,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
+import com.github.weisj.jsvg.util.ParserBase;
 
 public final class AttributeParser {
 
@@ -153,12 +154,14 @@ public final class AttributeParser {
     }
 
     public double[] parseDoubleList(@Nullable String value) {
-        String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
-        double[] ret = new double[values.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = parseDouble(values[i], 0);
+        if (value == null || value.isEmpty()) return new double[0];
+        List<Double> list = new ArrayList<>();
+        ParserBase base = new ParserBase(value, 0);
+        while (base.hasNext()) {
+            list.add(base.nextDouble());
+            base.consumeWhiteSpaceOrSeparator();
         }
-        return ret;
+        return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
     public @NotNull String[] parseStringList(@Nullable String value, SeparatorMode separatorMode) {
