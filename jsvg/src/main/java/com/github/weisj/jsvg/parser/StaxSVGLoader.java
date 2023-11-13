@@ -43,6 +43,8 @@ import com.github.weisj.jsvg.SVGDocument;
 
 public final class StaxSVGLoader {
     private static final Logger LOGGER = Logger.getLogger(StaxSVGLoader.class.getName());
+    private static final String SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
+    private static final String XLINK_NAMESPACE_URI = "http://www.w3.org/1999/xlink";
 
     private final @NotNull NodeSupplier nodeSupplier;
     private final @NotNull XMLInputFactory xmlInputFactory;
@@ -94,6 +96,11 @@ public final class StaxSVGLoader {
 
                     case XMLStreamConstants.START_ELEMENT:
                         StartElement element = event.asStartElement();
+                        String uri = element.getName().getNamespaceURI();
+                        if (uri != null && !uri.isEmpty() && !SVG_NAMESPACE_URI.equals(uri)) {
+                            skipElement(reader);
+                            break;
+                        }
                         Map<String, String> attributes = new HashMap<>();
                         element.getAttributes().forEachRemaining(
                                 attr -> attributes.put(qualifiedName(attr.getName()), attr.getValue().trim()));
@@ -153,6 +160,8 @@ public final class StaxSVGLoader {
         String localName = name.getLocalPart();
         if (prefix == null) return localName;
         if (prefix.isEmpty()) return localName;
+        if (SVG_NAMESPACE_URI.equals(name.getNamespaceURI())) return localName;
+        if (XLINK_NAMESPACE_URI.equals(name.getNamespaceURI())) return "xlink:" + localName;
         return prefix + ":" + localName;
     }
 }
