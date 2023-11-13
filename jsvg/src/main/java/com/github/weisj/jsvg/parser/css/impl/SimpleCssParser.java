@@ -54,7 +54,11 @@ public final class SimpleCssParser implements CssParser {
         }
 
         private void next() {
-            current = lexer.nextToken();
+            Token next;
+            do {
+                next = lexer.nextToken();
+            } while (next.type() == TokenType.COMMENT);
+            current = next;
         }
 
         private void expected(@NotNull String type) {

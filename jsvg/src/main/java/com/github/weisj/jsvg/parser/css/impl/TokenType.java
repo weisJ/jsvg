@@ -25,6 +25,7 @@ public enum TokenType {
     START,
     CURLY_OPEN,
     CURLY_CLOSE,
+    COMMENT,
     COLON,
     COMMA,
     SEMICOLON,

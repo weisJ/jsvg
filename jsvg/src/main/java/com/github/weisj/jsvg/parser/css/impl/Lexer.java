@@ -83,6 +83,15 @@ public final class Lexer {
             case '#':
                 next();
                 return new Token(TokenType.ID_NAME, readIdentifier());
+            case '/':
+                if (peekNext() == '*') {
+                    next();
+                    next();
+                    String comment = readWhile(n -> !(n == '*' && peekNext() == '/'));
+                    next();
+                    next();
+                    return new Token(TokenType.COMMENT, comment);
+                }
             default:
                 return new Token(TokenType.IDENTIFIER, readIdentifier());
         }
@@ -148,6 +157,20 @@ public final class Lexer {
     private char current() {
         if (isEof()) return 0;
         return input.get(listIndex)[index];
+    }
+
+    private char peekNext() {
+        if (isEof()) return 0;
+        if (index + 1 < input.get(listIndex).length) return input.get(listIndex)[index + 1];
+        int currentIndex = listIndex + 1;
+        while (currentIndex < input.size()) {
+            if (input.get(currentIndex).length > 0) {
+                return input.get(currentIndex)[0];
+            } else {
+                currentIndex++;
+            }
+        }
+        return 0;
     }
 
     private void next() {
