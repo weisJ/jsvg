@@ -46,7 +46,7 @@ public final class SVGCircle implements MeasurableShape {
 
     private void validateShape(@NotNull MeasureContext measureContext) {
         float x = cx.resolveWidth(measureContext);
-        float y = cy.resolveWidth(measureContext);
+        float y = cy.resolveHeight(measureContext);
         float rr = r.resolveLength(measureContext);
         circle.setFrame(x - rr, y - rr, 2 * rr, 2 * rr);
     }

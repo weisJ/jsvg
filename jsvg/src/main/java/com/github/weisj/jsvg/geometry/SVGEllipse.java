@@ -48,7 +48,7 @@ public final class SVGEllipse implements MeasurableShape {
 
     private void validateShape(@NotNull MeasureContext measureContext) {
         float x = cx.resolveWidth(measureContext);
-        float y = cy.resolveWidth(measureContext);
+        float y = cy.resolveHeight(measureContext);
         float rrx = rx.resolveWidth(measureContext);
         float rry = ry.resolveHeight(measureContext);
         ellipse.setFrame(x - rrx, y - rry, 2 * rrx, 2 * rry);
