@@ -100,6 +100,7 @@ public final class SVGViewer {
         try (ResourceWalker walker = ResourceWalker.walkResources(pack)) {
             return walker.stream().filter(p -> p.endsWith("svg"))
                     .map(p -> p.substring(pack.length() + 1))
+                    .sorted()
                     .toArray(String[]::new);
         }
     }
