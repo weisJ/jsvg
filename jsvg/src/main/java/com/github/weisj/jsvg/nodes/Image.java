@@ -44,6 +44,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.UIFuture;
 import com.github.weisj.jsvg.parser.ValueUIFuture;
+import com.github.weisj.jsvg.parser.resources.MissingImageResource;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -109,7 +110,9 @@ public final class Image extends RenderableSVGNode {
     @Override
     public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
         RenderableResource resource = fetchImage(context);
-        if (resource == null) return;
+        if (resource == null) {
+            resource = new MissingImageResource();
+        }
 
         MeasureContext measure = context.measureContext();
         FloatSize intrinsicResourceSize = resource.intrinsicSize(context);
