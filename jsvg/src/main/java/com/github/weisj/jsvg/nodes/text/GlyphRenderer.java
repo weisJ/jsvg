@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -35,6 +35,7 @@ import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
@@ -60,7 +61,7 @@ final class GlyphRenderer {
         segment.currentRenderContext = context;
     }
 
-    static void renderGlyphRun(@NotNull Graphics2D g, @NotNull PaintOrder paintOrder,
+    static void renderGlyphRun(@NotNull Output output, @NotNull PaintOrder paintOrder,
             @NotNull Set<VectorEffect> vectorEffects, @NotNull StringTextSegment segment,
             @NotNull Rectangle2D completeGlyphRunBounds) {
         RenderContext context = segment.currentRenderContext;
@@ -74,7 +75,7 @@ final class GlyphRenderer {
         Stroke stroke = context.stroke(1f);
 
         // Todo: Vector-Effects
-        ShapeRenderer.renderWithPaintOrder(g, true, paintOrder,
+        ShapeRenderer.renderWithPaintOrder(output, true, paintOrder,
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects, stroke, null),
                 new ShapeRenderer.PaintShape(glyphRun, completeGlyphRunBounds),
                 null);

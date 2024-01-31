@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -42,6 +42,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories(Category.Gradient)
@@ -75,40 +76,40 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
         // Todo: transform
     }
 
-    public void renderMesh(@NotNull MeasureContext measure, @NotNull Graphics2D g) {
-        Graphics2D meshGraphics = (Graphics2D) g.create();
+    public void renderMesh(@NotNull MeasureContext measure, @NotNull Output output) {
+        Output meshOutput = output.createChild();
         // meshGraphics.translate(x.resolveWidth(measure), y.resolveHeight(measure));
 
-        meshGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        meshOutput.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         for (SVGNode child : children()) {
             MeshRow row = (MeshRow) child;
             for (SVGNode node : row.children()) {
                 MeshPatch patch = (MeshPatch) node;
-                patch.renderPath(meshGraphics);
+                patch.renderPath(meshOutput);
             }
         }
-        meshGraphics.dispose();
+        meshOutput.dispose();
     }
 
     @Override
-    public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
+    public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        Shape clip = g.getClip();
+        Shape clip = output.clip();
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        g.setClip(shape);
-        g.translate(b.getX(), b.getY());
-        renderMesh(context.measureContext(), g);
-        g.setClip(clip);
+        output.setClip(shape);
+        output.translate(b.getX(), b.getY());
+        renderMesh(context.measureContext(), output);
+        output.setClip(clip);
     }
 
     @Override
-    public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
+    public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        Shape clip = g.getClip();
+        Shape clip = output.clip();
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        g.setClip(g.getStroke().createStrokedShape(shape));
-        g.translate(b.getX(), b.getY());
-        renderMesh(context.measureContext(), g);
-        g.setClip(clip);
+        output.setClip(output.stroke().createStrokedShape(shape));
+        output.translate(b.getX(), b.getY());
+        renderMesh(context.measureContext(), output);
+        output.setClip(clip);
     }
 }

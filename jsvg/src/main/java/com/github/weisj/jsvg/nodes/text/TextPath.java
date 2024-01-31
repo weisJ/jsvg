@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -46,6 +46,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.PathUtil;
 
@@ -109,12 +110,10 @@ public final class TextPath extends TextContainer {
     }
 
     @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderSegment(createCursor(context), context, g);
+    public void render(@NotNull RenderContext context, @NotNull Output output) {
+        renderSegment(createCursor(context), context, output);
         if (DEBUG) {
-            Graphics2D debugGraphics = (Graphics2D) g.create();
-            paintDebugPath(context, debugGraphics);
-            debugGraphics.dispose();
+            output.debugPaint(g -> paintDebugPath(context, g));
         }
     }
 

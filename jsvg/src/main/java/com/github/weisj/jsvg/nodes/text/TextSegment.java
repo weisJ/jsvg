@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,11 +21,11 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.*;
 import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 interface TextSegment {
@@ -34,7 +34,7 @@ interface TextSegment {
         void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context);
 
         void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
-                @NotNull Graphics2D g);
+                @NotNull Output output);
 
         boolean hasFixedLength();
 

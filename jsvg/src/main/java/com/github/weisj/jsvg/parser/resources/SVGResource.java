@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class SVGResource implements RenderableResource {
@@ -43,8 +44,8 @@ public class SVGResource implements RenderableResource {
     }
 
     @Override
-    public void render(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
-        g.transform(imgTransform);
-        document.renderWithPlatform(context.platformSupport(), g, null);
+    public void render(@NotNull Output output, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
+        output.applyTransform(imgTransform);
+        document.renderWithPlatform(context.platformSupport(), output, null);
     }
 }

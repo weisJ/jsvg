@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface Transformable {
@@ -43,7 +44,7 @@ public interface Transformable {
     @NotNull
     Point2D transformOrigin(@NotNull MeasureContext context);
 
-    default void applyTransform(@Nullable Graphics2D g, @NotNull RenderContext context) {
+    default void applyTransform(@NotNull Output output, @NotNull RenderContext context) {
         AffineTransform transform = transform();
         if (transform != null) {
             Point2D transformOrigin = transformOrigin(context.measureContext());
@@ -53,7 +54,7 @@ public interface Transformable {
             conjugate.concatenate(transform);
             conjugate.translate(-transformOrigin.getX(), -transformOrigin.getY());
 
-            if (g != null) g.transform(conjugate);
+            output.applyTransform(conjugate);
             context.userSpaceTransform().concatenate(conjugate);
         }
     }

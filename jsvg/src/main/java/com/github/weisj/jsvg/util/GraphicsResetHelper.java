@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,14 +24,18 @@ package com.github.weisj.jsvg.util;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
+import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.renderer.Output;
+
 /**
  * A utility class that holds a {@link Graphics2D} object and is able to reset it back to its original configuration,
  * as this is often more efficient than creating a new graphics instance.
- *
+ * <
  * This class does not track what parameters have been modified, nor does it reset all configuration parameters. Which
  * parameters are reset should be expanded as needed.
  */
-public class GraphicsResetHelper {
+public class GraphicsResetHelper implements Output.SafeState {
 
     private final Graphics2D graphics;
 
@@ -40,7 +44,7 @@ public class GraphicsResetHelper {
     private final Stroke originalStroke;
     private final AffineTransform originalTransform;
 
-    public GraphicsResetHelper(Graphics2D graphics) {
+    public GraphicsResetHelper(@NotNull Graphics2D graphics) {
         this.graphics = graphics;
 
         originalComposite = graphics.getComposite();
@@ -49,11 +53,11 @@ public class GraphicsResetHelper {
         originalTransform = graphics.getTransform();
     }
 
-    public Graphics2D graphics() {
+    public @NotNull Graphics2D graphics() {
         return graphics;
     }
 
-    public void reset() {
+    public void restore() {
         graphics.setComposite(originalComposite);
         graphics.setPaint(originalPaint);
         graphics.setStroke(originalStroke);

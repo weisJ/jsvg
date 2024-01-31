@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,6 +26,7 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface Renderable {
@@ -42,7 +43,7 @@ public interface Renderable {
 
     boolean isVisible(@NotNull RenderContext context);
 
-    void render(@NotNull RenderContext context, @NotNull Graphics2D g);
+    void render(@NotNull RenderContext context, @NotNull Output output);
 
     default boolean parseIsVisible(@NotNull AttributeNode node) {
         return !"none".equals(node.getValue("display"))

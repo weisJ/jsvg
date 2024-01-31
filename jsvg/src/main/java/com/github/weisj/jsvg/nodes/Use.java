@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -139,23 +139,23 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     }
 
     @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+    public void render(@NotNull RenderContext context, @NotNull Output output) {
         if (referencedNode != null) {
             MeasureContext measureContext = context.measureContext();
-            context.translate(g, x.resolveWidth(measureContext), y.resolveHeight(measureContext));
+            context.translate(output, x.resolveWidth(measureContext), y.resolveHeight(measureContext));
 
             // Todo: Vector Effects
 
-            try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, g, this)) {
+            try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, output, this)) {
                 if (info == null) return;
                 if (referencedNode instanceof CommonInnerViewContainer) {
                     FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
                     if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
                     if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
                     CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
-                    view.renderWithSize(targetViewBox, view.viewBox(info.context), info.context, info.graphics());
+                    view.renderWithSize(targetViewBox, view.viewBox(info.context), info.context, info.output());
                 } else {
-                    info.renderable.render(info.context, info.graphics());
+                    info.renderable.render(info.context, info.output());
                 }
             }
         }

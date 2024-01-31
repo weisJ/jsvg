@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -79,7 +80,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
             Graphics2D graphics = GraphicsUtil.createGraphics(img);
             graphics.setComposite(AlphaComposite.Src.derive(floodOpacity));
             Rectangle rect = new Rectangle(0, 0, img.getWidth(), img.getHeight());
-            floodColor.fillShape(graphics, context, rect, rect);
+            floodColor.fillShape(new Graphics2DOutput(graphics), context, rect, rect);
             graphics.dispose();
         }
         impl().saveResult(new ImageProducerChannel(img.getSource()), filterContext);

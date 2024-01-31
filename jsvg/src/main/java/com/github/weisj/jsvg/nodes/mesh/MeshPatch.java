@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,7 +37,7 @@ import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.Output;
 
 @ElementCategories({ /* None */})
 @PermittedContent(
@@ -59,8 +59,8 @@ public final class MeshPatch extends ContainerNode {
         return TAG;
     }
 
-    public void renderPath(@NotNull Graphics2D g) {
-        AffineTransform at = g.getTransform();
+    public void renderPath(@NotNull Output output) {
+        AffineTransform at = output.transform();
         float scaleX = (float) GeometryUtil.scaleYOfTransform(at);
         float scaleY = (float) GeometryUtil.scaleYOfTransform(at);
         int depth = Math.max(
@@ -68,10 +68,10 @@ public final class MeshPatch extends ContainerNode {
                         coonPatch.east.estimateStepCount(scaleX, scaleY)),
                 Math.max(coonPatch.south.estimateStepCount(scaleX, scaleY),
                         coonPatch.west.estimateStepCount(scaleX, scaleY)));
-        renderPath(g, coonPatch, scaleX, scaleY, Math.min(MAX_DEPTH, depth));
+        renderPath(output, coonPatch, scaleX, scaleY, Math.min(MAX_DEPTH, depth));
     }
 
-    private void renderPath(@NotNull Graphics2D g, @NotNull CoonPatch patch, float scaleX, float scaleY, int depth) {
+    private void renderPath(@NotNull Output output, @NotNull CoonPatch patch, float scaleX, float scaleY, int depth) {
         CoonValues weights = patch.coonValues;
         // Check if we have reached the limit of discernible colors. This happens if our color weights
         // spectrum allows for less that approximately (1/255)^3, which is our "relative color-depth".
@@ -79,15 +79,15 @@ public final class MeshPatch extends ContainerNode {
                 * GeometryUtil.distanceSquared(weights.east, weights.west, scaleX, scaleY) < 0.000001) {
             float u = (weights.north.x + weights.east.x + weights.south.x + weights.west.x) / 4;
             float v = (weights.north.y + weights.east.y + weights.south.y + weights.west.y) / 4;
-            GraphicsUtil.safelySetPaint(g, bilinearInterpolation(u, v));
+            output.setPaint(bilinearInterpolation(u, v));
             Shape s = patch.toShape();
-            g.fill(s.getBounds2D());
+            output.fillShape(s.getBounds2D());
         } else {
             Subdivided<CoonPatch> patchSubdivided = patch.subdivide();
-            renderPath(g, patchSubdivided.northWest, scaleX, scaleY, depth - 1);
-            renderPath(g, patchSubdivided.northEast, scaleX, scaleY, depth - 1);
-            renderPath(g, patchSubdivided.southEast, scaleX, scaleY, depth - 1);
-            renderPath(g, patchSubdivided.southWest, scaleX, scaleY, depth - 1);
+            renderPath(output, patchSubdivided.northWest, scaleX, scaleY, depth - 1);
+            renderPath(output, patchSubdivided.northEast, scaleX, scaleY, depth - 1);
+            renderPath(output, patchSubdivided.southEast, scaleX, scaleY, depth - 1);
+            renderPath(output, patchSubdivided.southWest, scaleX, scaleY, depth - 1);
         }
     }
 

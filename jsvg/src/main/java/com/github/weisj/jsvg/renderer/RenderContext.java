@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -151,28 +151,28 @@ public final class RenderContext {
         this.userSpaceTransform.setTransform(userSpaceTransform);
     }
 
-    public void translate(@NotNull Graphics2D g, @NotNull Point2D dp) {
-        translate(g, dp.getX(), dp.getY());
+    public void translate(@NotNull Output output, @NotNull Point2D dp) {
+        translate(output, dp.getX(), dp.getY());
     }
 
-    public void translate(@NotNull Graphics2D g, double dx, double dy) {
+    public void translate(@NotNull Output output, double dx, double dy) {
         // TODO: Do this for remaining calls to translate/transform/scale etc.
-        g.translate(dx, dy);
+        output.translate(dx, dy);
         userSpaceTransform.translate(dx, dy);
     }
 
-    public void scale(@NotNull Graphics2D g, double sx, double sy) {
-        g.scale(sx, sy);
+    public void scale(@NotNull Output output, double sx, double sy) {
+        output.scale(sx, sy);
         userSpaceTransform.scale(sx, sy);
     }
 
-    public void rotate(@NotNull Graphics2D g, double angle) {
-        g.rotate(angle);
+    public void rotate(@NotNull Output output, double angle) {
+        output.rotate(angle);
         userSpaceTransform.rotate(angle);
     }
 
-    public void transform(@NotNull Graphics2D g, @NotNull AffineTransform at) {
-        g.transform(at);
+    public void transform(@NotNull Output output, @NotNull AffineTransform at) {
+        output.applyTransform(at);
         userSpaceTransform.concatenate(at);
     }
 

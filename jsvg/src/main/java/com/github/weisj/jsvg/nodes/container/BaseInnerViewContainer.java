@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.container;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
@@ -38,6 +37,7 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class BaseInnerViewContainer extends CommonRenderableContainerNode {
@@ -69,8 +69,8 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
     }
 
     @Override
-    public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderWithSize(size(context), viewBox(context), null, context, g);
+    public final void render(@NotNull RenderContext context, @NotNull Output output) {
+        renderWithSize(size(context), viewBox(context), null, context, output);
     }
 
     protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
@@ -78,13 +78,13 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
     }
 
     public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
-            @NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderWithSize(useSiteSize, view, null, context, g);
+            @NotNull RenderContext context, @NotNull Output output) {
+        renderWithSize(useSiteSize, view, null, context, output);
     }
 
     public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
             @Nullable PreserveAspectRatio preserveAspectRatio,
-            @NotNull RenderContext context, @NotNull Graphics2D g) {
+            @NotNull RenderContext context, @NotNull Output output) {
         MeasureContext measureContext = context.measureContext();
 
         Point2D outerPos = outerLocation(measureContext);
@@ -106,7 +106,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
         MeasureContext innerMeasure = innerContext.measureContext();
 
-        innerContext.translate(g, outerPos);
+        innerContext.translate(output, outerPos);
 
         Point2D anchorPos = anchorLocation(innerMeasure);
         if (anchorPos != null) {
@@ -116,27 +116,27 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
                         anchorPos.getX() * viewTransform.getScaleX() - viewTransform.getTranslateX(),
                         anchorPos.getY() * viewTransform.getScaleY() - viewTransform.getTranslateY());
             }
-            innerContext.translate(g, anchorPos);
+            innerContext.translate(output, anchorPos);
         }
 
         boolean shouldClip = overflow.establishesClip();
 
         // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
-        if (shouldClip) g.clip(new ViewBox(useSiteSize));
+        if (shouldClip) output.applyClip(new ViewBox(useSiteSize));
 
         if (viewTransform != null) {
-            innerContext.transform(g, viewTransform);
+            innerContext.transform(output, viewTransform);
 
             // If this element itself specifies a viewbox we have to respect its clipping rules.
-            if (shouldClip) g.clip(view);
+            if (shouldClip) output.applyClip(view);
         }
 
         if (this instanceof SVG && ((SVG) this).isTopLevel()) {
             // Needed for vector-effects to work properly.
-            context.setRootTransform(g.getTransform());
-            innerContext.setRootTransform(g.getTransform());
+            context.setRootTransform(output.transform());
+            innerContext.setRootTransform(output.transform());
         }
 
-        super.render(innerContext, g);
+        super.render(innerContext, output);
     }
 }

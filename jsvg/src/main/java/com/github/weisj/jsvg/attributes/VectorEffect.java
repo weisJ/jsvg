@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 
@@ -76,7 +77,7 @@ public enum VectorEffect implements HasMatchName {
         return flag;
     }
 
-    public static void applyEffects(@NotNull Set<VectorEffect> effects, @NotNull Graphics2D g,
+    public static void applyEffects(@NotNull Set<VectorEffect> effects, @NotNull Output output,
             @NotNull RenderContext context, @Nullable AffineTransform elementTransform) {
         int flags = flags(effects);
         if (flags == 0) return;
@@ -88,15 +89,15 @@ public enum VectorEffect implements HasMatchName {
 
         updateTransformForFlags(flags, shapeTransform, x0, y0);
 
-        g.setTransform(context.rootTransform());
-        g.transform(shapeTransform);
+        output.setTransform(context.rootTransform());
+        output.applyTransform(shapeTransform);
     }
 
-    public static @NotNull Shape applyNonScalingStroke(@NotNull Graphics2D g, @NotNull RenderContext context,
+    public static @NotNull Shape applyNonScalingStroke(@NotNull Output output, @NotNull RenderContext context,
             @NotNull Shape shape) {
         // For the stroke not to be scaled we have to pre-multiply the shape by the transform and then paint
         // in the non-transformed coordinate system.
-        g.setTransform(context.rootTransform());
+        output.setTransform(context.rootTransform());
         return context.userSpaceTransform().createTransformedShape(shape);
     }
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class CommonRenderableContainerNode extends BaseContainerNode<SVGNode>
@@ -76,9 +77,9 @@ public abstract class CommonRenderableContainerNode extends BaseContainerNode<SV
     }
 
     @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+    public void render(@NotNull RenderContext context, @NotNull Output output) {
         for (SVGNode child : children()) {
-            NodeRenderer.renderNode(child, context, g);
+            NodeRenderer.renderNode(child, context, output);
         }
     }
 
