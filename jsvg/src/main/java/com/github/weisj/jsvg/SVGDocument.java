@@ -22,14 +22,11 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
+import java.awt.geom.Path2D;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.swing.*;
 
-import com.github.weisj.jsvg.nodes.View;
-import com.github.weisj.jsvg.renderer.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.Output;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,8 +35,7 @@ import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.awt.JComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
@@ -64,14 +60,9 @@ public final class SVGDocument {
     }
 
     public @NotNull Shape computeShape(@Nullable ViewBox viewBox) {
-        Output output = null;
-        RenderContext context = prepareRenderContext(new NullPlatformSupport(), output, viewBox);
-        Shape shape = root.elementShape(context);
-        if (viewBox != null) {
-            System.out.println(context.userSpaceTransform());
-            shape = context.userSpaceTransform().createTransformedShape(shape);
-        }
-        return shape;
+        Path2D accumulator = new Path2D.Float();
+        renderWithPlatform(new NullPlatformSupport(), new ShapeOutput(accumulator), viewBox);
+        return accumulator;
     }
 
     public void render(@Nullable JComponent component, @NotNull Graphics2D g) {
