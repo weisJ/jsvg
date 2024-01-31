@@ -24,7 +24,6 @@ package com.github.weisj.jsvg.renderer;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
@@ -39,13 +38,13 @@ import com.github.weisj.jsvg.util.Provider;
 
 public class ShapeOutput implements Output {
 
-    private final @NotNull Path2D accumulatorShape;
+    private final @NotNull Area accumulatorShape;
     private @NotNull AffineTransform currentTransform;
     private @NotNull Stroke currentStroke;
     private @Nullable Area currentClip;
 
-    public ShapeOutput(@NotNull Path2D shape) {
-        accumulatorShape = shape;
+    public ShapeOutput(@NotNull Area area) {
+        accumulatorShape = area;
         currentStroke = new BasicStroke();
         currentTransform = new AffineTransform();
         currentClip = null;
@@ -67,11 +66,11 @@ public class ShapeOutput implements Output {
     private void append(@NotNull Shape shape, @NotNull AffineTransform transform) {
         AffineTransform at = new AffineTransform(currentTransform);
         at.concatenate(transform);
-        accumulatorShape.append(transformShape(shape, at), false);
+        accumulatorShape.add(new Area(transformShape(shape, at)));
     }
 
     private void append(@NotNull Shape shape) {
-        accumulatorShape.append(transformShape(shape, currentTransform), false);
+        accumulatorShape.add(new Area(transformShape(shape, currentTransform)));
     }
 
     @Override
