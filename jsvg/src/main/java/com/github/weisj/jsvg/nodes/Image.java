@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.net.URI;

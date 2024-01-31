@@ -32,6 +32,8 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.util.Provider;
+
 public interface Output {
 
     void fillShape(@NotNull Shape shape);
@@ -45,6 +47,14 @@ public interface Output {
     void drawImage(@NotNull Image image, @NotNull AffineTransform at, @Nullable ImageObserver observer);
 
     void setPaint(@NotNull Paint paint);
+
+    /**
+     * Set the paint used for the output. Use this version if computing the paint is expensive.
+     * Outputs which don't support paints can avoid the computation.
+     *
+     * @param paintProvider The paint provider.
+     */
+    void setPaint(@NotNull Provider<Paint> paintProvider);
 
     void setStroke(@NotNull Stroke stroke);
 
@@ -95,6 +105,8 @@ public interface Output {
 
     @NotNull
     SafeState safeState();
+
+    boolean supportsFilters();
 
     interface SafeState {
         void restore();

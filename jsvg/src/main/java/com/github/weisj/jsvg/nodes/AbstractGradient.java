@@ -184,7 +184,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setPaint(paintForBounds(context.measureContext(), b));
+        output.setPaint(() -> paintForBounds(context.measureContext(), b));
         output.fillShape(shape);
     }
 
@@ -192,7 +192,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setPaint(paintForBounds(context.measureContext(), b));
+        output.setPaint(() -> paintForBounds(context.measureContext(), b));
         output.drawShape(shape);
     }
 

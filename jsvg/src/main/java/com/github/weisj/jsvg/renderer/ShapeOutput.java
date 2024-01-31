@@ -34,6 +34,8 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.util.Provider;
+
 
 public class ShapeOutput implements Output {
 
@@ -99,7 +101,12 @@ public class ShapeOutput implements Output {
 
     @Override
     public void setPaint(@NotNull Paint paint) {
-        // DO NOTHING
+        // Not supported. Do nothing
+    }
+
+    @Override
+    public void setPaint(@NotNull Provider<Paint> paintProvider) {
+        // Not supported. Do nothing
     }
 
     @Override
@@ -211,6 +218,11 @@ public class ShapeOutput implements Output {
     @Override
     public @NotNull SafeState safeState() {
         return new ShapeOutputSafeState(this);
+    }
+
+    @Override
+    public boolean supportsFilters() {
+        return false;
     }
 
     private static class ShapeOutputSafeState implements SafeState {
