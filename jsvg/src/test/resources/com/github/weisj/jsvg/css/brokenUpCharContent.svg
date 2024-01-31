@@ -1,23 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"
 	viewBox="0 0 100 100">
 
 	<rect x="2.5%" y="25%" width="95%" height="50%"
 		class="longClassName" />
 
 	<style>
-		.l<desc>Stuff</desc>ongClassName
+		.l
+		<desc>Stuff</desc>
+		ongClassName
 		<desc>Stuff</desc>
 		{
 		<desc>Stuff</desc>
-		fi<desc>Stuff</desc>ll
+		fi
 		<desc>Stuff</desc>
-		: bl<desc>Stuff</desc>ue
+		ll
+		<desc>Stuff</desc>
+		: bl
+		<desc>Stuff</desc>
+		ue
 		<desc>Stuff</desc>
 		;
-		s<desc>Stuff</desc>t<desc>Stuff</desc>r<desc>Stuff</desc>o<desc>Stuff</desc>ke:
-        gre<desc>Stuff</desc>en;
+		s
 		<desc>Stuff</desc>
-		stro<desc>Stuff</desc>ke-<desc>Stuff</desc>widt<desc>Stuff</desc>h
+		t
+		<desc>Stuff</desc>
+		r
+		<desc>Stuff</desc>
+		o
+		<desc>Stuff</desc>
+		ke:
+		gre
+		<desc>Stuff</desc>
+		en;
+		<desc>Stuff</desc>
+		stro
+		<desc>Stuff</desc>
+		ke-
+		<desc>Stuff</desc>
+		widt
+		<desc>Stuff</desc>
+		h
 		<desc>Stuff</desc>
 		: 5%;
 		<desc>Stuff</desc>
