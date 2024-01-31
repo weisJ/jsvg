@@ -149,14 +149,14 @@ public final class NodeRenderer {
                 Shape childClipShape = childClip.clipShape(childContext, elementBounds);
 
                 if (CLIP_DEBUG) {
-                    output.debugPaint(g -> {
+                    childOutput.debugPaint(g -> {
                         g.setClip(null);
                         g.setPaint(Color.MAGENTA);
                         g.draw(childClipShape);
                     });
                 }
 
-                output.applyClip(childClipShape);
+                childOutput.applyClip(childClipShape);
             }
         }
 
