@@ -131,9 +131,11 @@ public final class NodeRenderer {
             Mask mask = ((HasClip) renderable).mask();
             if (mask != null) {
                 // Todo: Proper object bounding box
-                elementBounds = elementBounds(renderable, childContext);
-                if (!elementBounds.isEmpty()) {
-                    childOutput.setPaint(mask.createMaskPaint(childOutput, childContext, elementBounds));
+
+                Rectangle2D bounds = elementBounds(renderable, childContext);
+                elementBounds = bounds;
+                if (!bounds.isEmpty()) {
+                    childOutput.setPaint(() -> mask.createMaskPaint(childOutput, childContext, bounds));
                 }
             }
 
@@ -171,7 +173,7 @@ public final class NodeRenderer {
                 ? ((HasFilter) renderable).filter()
                 : null;
 
-        if (filter != null && filter.hasEffect()) {
+        if (filter != null && filter.hasEffect() && childOutput.supportsFilters()) {
             if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
             return InfoWithFilter.create(renderable, childContext, childOutput, filter, elementBounds);
         }

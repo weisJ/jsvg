@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.resources;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;

@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.util.GraphicsResetHelper;
+import com.github.weisj.jsvg.util.Provider;
 
 public class Graphics2DOutput implements Output {
     private final Graphics2D g;
@@ -72,6 +73,11 @@ public class Graphics2DOutput implements Output {
     }
 
     @Override
+    public void setPaint(@NotNull Provider<Paint> paintProvider) {
+        setPaint(paintProvider.get());
+    }
+
+    @Override
     public void setStroke(@NotNull Stroke stroke) {
         g.setStroke(stroke);
     }
@@ -87,7 +93,7 @@ public class Graphics2DOutput implements Output {
     }
 
     @Override
-    public void setClip(@NotNull Shape shape) {
+    public void setClip(@Nullable Shape shape) {
         g.setClip(shape);
     }
 
@@ -178,5 +184,10 @@ public class Graphics2DOutput implements Output {
     @Override
     public @NotNull SafeState safeState() {
         return new GraphicsResetHelper(g);
+    }
+
+    @Override
+    public boolean supportsFilters() {
+        return true;
     }
 }

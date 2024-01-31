@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes.filter;
 import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
@@ -33,10 +34,10 @@ public final class FilterContext {
     private final @NotNull ChannelStorage<Channel> resultChannels = new ChannelStorage<>();
     private final Filter.FilterInfo info;
     private final @NotNull UnitType primitiveUnits;
-    private final @NotNull RenderingHints renderingHints;
+    private final @Nullable RenderingHints renderingHints;
 
     public FilterContext(@NotNull Filter.FilterInfo info, @NotNull UnitType primitiveUnits,
-            @NotNull RenderingHints renderingHints) {
+            @Nullable RenderingHints renderingHints) {
         this.info = info;
         this.primitiveUnits = primitiveUnits;
         this.renderingHints = renderingHints;
@@ -50,7 +51,7 @@ public final class FilterContext {
         return primitiveUnits;
     }
 
-    public @NotNull RenderingHints renderingHints() {
+    public @Nullable RenderingHints renderingHints() {
         return renderingHints;
     }
 

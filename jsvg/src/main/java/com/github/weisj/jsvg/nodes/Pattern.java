@@ -142,7 +142,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setPaint(paintForBounds(output, context, b));
+        // TODO: Might not fully want to avoid this here if shape computation should become more fine grained.
+        output.setPaint(() -> paintForBounds(output, context, b));
         output.fillShape(shape);
     }
 
@@ -150,7 +151,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setPaint(paintForBounds(output, context, b));
+        output.setPaint(() -> paintForBounds(output, context, b));
         output.drawShape(shape);
     }
 
