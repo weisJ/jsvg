@@ -43,7 +43,7 @@ public interface Transformable {
     @NotNull
     Point2D transformOrigin(@NotNull MeasureContext context);
 
-    default void applyTransform(@NotNull Graphics2D g, @NotNull RenderContext context) {
+    default void applyTransform(@Nullable Graphics2D g, @NotNull RenderContext context) {
         AffineTransform transform = transform();
         if (transform != null) {
             Point2D transformOrigin = transformOrigin(context.measureContext());
@@ -53,7 +53,7 @@ public interface Transformable {
             conjugate.concatenate(transform);
             conjugate.translate(-transformOrigin.getX(), -transformOrigin.getY());
 
-            g.transform(conjugate);
+            if (g != null) g.transform(conjugate);
             context.userSpaceTransform().concatenate(conjugate);
         }
     }
