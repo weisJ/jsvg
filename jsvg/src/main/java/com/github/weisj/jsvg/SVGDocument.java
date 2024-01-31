@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.util.Objects;
 
@@ -60,7 +61,7 @@ public final class SVGDocument {
     }
 
     public @NotNull Shape computeShape(@Nullable ViewBox viewBox) {
-        Path2D accumulator = new Path2D.Float();
+        Area accumulator = new Area(new Path2D.Float());
         renderWithPlatform(new NullPlatformSupport(), new ShapeOutput(accumulator), viewBox);
         return accumulator;
     }
