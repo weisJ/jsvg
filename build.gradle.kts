@@ -112,6 +112,7 @@ allprojects {
             }
             format("svg") {
                 target("**/*.svg")
+                targetExclude("**/brokenUpCharContent.svg")
                 eclipseWtp(EclipseWtpFormatterStep.XML)
             }
             plugins.withType<JavaPlugin>().configureEach {
