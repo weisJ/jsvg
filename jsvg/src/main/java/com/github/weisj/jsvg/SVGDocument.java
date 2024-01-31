@@ -55,6 +55,11 @@ public final class SVGDocument {
         return size;
     }
 
+    public @NotNull Shape computeShape() {
+        RenderContext context = prepareRenderContext(new NullPlatformSupport(), null, null);
+        return root.elementShape(context);
+    }
+
     public void render(@Nullable JComponent component, @NotNull Graphics2D g) {
         render(component, g, null);
     }
@@ -66,9 +71,11 @@ public final class SVGDocument {
         renderWithPlatform(platformSupport, graphics2D, bounds);
     }
 
-    private float computePlatformFontSize(@NotNull PlatformSupport platformSupport, @NotNull Graphics2D g) {
-        Font f = g.getFont();
-        if (f != null) return f.getSize2D();
+    private float computePlatformFontSize(@NotNull PlatformSupport platformSupport, @Nullable Graphics2D g) {
+        if (g != null) {
+            Font f = g.getFont();
+            if (f != null) return f.getSize2D();
+        }
         return platformSupport.fontSize();
     }
 
@@ -76,18 +83,9 @@ public final class SVGDocument {
             @Nullable ViewBox bounds) {
         Graphics2D g = (Graphics2D) graphics2D.create();
         setupSVGRenderingHints(g);
-
-        float defaultEm = computePlatformFontSize(platformSupport, g);
-        float defaultEx = SVGFont.exFromEm(defaultEm);
-
-        MeasureContext initialMeasure = bounds != null
-                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx)
-                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx);
-        RenderContext context = RenderContext.createInitial(platformSupport, initialMeasure);
+        RenderContext context = prepareRenderContext(platformSupport, g, bounds);
 
         if (bounds == null) bounds = new ViewBox(root.size(context));
-
-        root.applyTransform(g, context);
 
         if (DEBUG) {
             Paint paint = g.getPaint();
@@ -105,6 +103,22 @@ public final class SVGDocument {
         }
 
         g.dispose();
+    }
+
+    private @NotNull RenderContext prepareRenderContext(
+            @NotNull PlatformSupport platformSupport,
+            @Nullable Graphics2D g,
+            @Nullable ViewBox bounds) {
+        float defaultEm = computePlatformFontSize(platformSupport, g);
+        float defaultEx = SVGFont.exFromEm(defaultEm);
+
+        MeasureContext initialMeasure = bounds != null
+                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx)
+                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx);
+        RenderContext context = RenderContext.createInitial(platformSupport, initialMeasure);
+
+        root.applyTransform(g, context);
+        return context;
     }
 
     private void setupSVGRenderingHints(@NotNull Graphics2D g) {
