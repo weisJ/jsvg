@@ -60,6 +60,11 @@ public final class MeshPatch extends ContainerNode {
     }
 
     public void renderPath(@NotNull Output output) {
+        if (!output.supportsColors()) {
+            output.fillShape(coonPatch.toShape());
+            return;
+        }
+
         AffineTransform at = output.transform();
         float scaleX = (float) GeometryUtil.scaleYOfTransform(at);
         float scaleY = (float) GeometryUtil.scaleYOfTransform(at);

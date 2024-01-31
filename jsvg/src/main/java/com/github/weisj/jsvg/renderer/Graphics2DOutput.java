@@ -185,4 +185,9 @@ public class Graphics2DOutput implements Output {
     public boolean supportsFilters() {
         return true;
     }
+
+    @Override
+    public boolean supportsColors() {
+        return true;
+    }
 }
