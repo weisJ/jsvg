@@ -65,9 +65,6 @@ public interface Output {
 
     void setClip(@Nullable Shape shape);
 
-    @Nullable
-    Shape clip();
-
     Optional<Float> contextFontSize();
 
     @NotNull

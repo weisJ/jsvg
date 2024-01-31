@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.util.Provider;
+import com.github.weisj.jsvg.util.ShapeUtil;
 
 
 public class ShapeOutput implements Output {
@@ -41,7 +42,7 @@ public class ShapeOutput implements Output {
     private final @NotNull Area accumulatorShape;
     private @NotNull AffineTransform currentTransform;
     private @NotNull Stroke currentStroke;
-    private @Nullable Area currentClip;
+    private @Nullable Shape currentClip;
 
     public ShapeOutput(@NotNull Area area) {
         accumulatorShape = area;
@@ -57,20 +58,22 @@ public class ShapeOutput implements Output {
         currentClip = parent.currentClip != null ? new Area(parent.currentClip) : null;
     }
 
-    private @NotNull Shape transformShape(@NotNull Shape shape, @NotNull AffineTransform transform) {
-        if (transform.isIdentity())
-            return shape;
-        return transform.createTransformedShape(shape);
+    private void addShape(@NotNull Shape shape) {
+        // NOTE: ShapeUtil.transformShape always returns a new shape hence we can safely modify shape.
+        Shape s = currentClip != null
+                ? ShapeUtil.intersect(currentClip, shape, true, false)
+                : shape;
+        accumulatorShape.add(new Area(s));
     }
 
     private void append(@NotNull Shape shape, @NotNull AffineTransform transform) {
         AffineTransform at = new AffineTransform(currentTransform);
         at.concatenate(transform);
-        accumulatorShape.add(new Area(transformShape(shape, at)));
+        addShape(ShapeUtil.transformShape(shape, at));
     }
 
     private void append(@NotNull Shape shape) {
-        accumulatorShape.add(new Area(transformShape(shape, currentTransform)));
+        addShape(ShapeUtil.transformShape(shape, currentTransform));
     }
 
     @Override
@@ -120,21 +123,19 @@ public class ShapeOutput implements Output {
 
     @Override
     public void applyClip(@NotNull Shape clipShape) {
-        if (currentClip == null) {
-            currentClip = new Area(clipShape);
+        Shape transformedShape = ShapeUtil.transformShape(clipShape, currentTransform);
+        if (currentClip != null) {
+            currentClip = ShapeUtil.intersect(currentClip, transformedShape, true, false);
         } else {
-            currentClip.intersect(new Area(clipShape));
+            currentClip = transformedShape;
         }
     }
 
     @Override
     public void setClip(@Nullable Shape shape) {
-        currentClip = shape != null ? new Area(shape) : null;
-    }
-
-    @Override
-    public @Nullable Shape clip() {
-        return currentClip;
+        currentClip = shape != null
+                ? ShapeUtil.transformShape(shape, currentTransform)
+                : null;
     }
 
     @Override
@@ -223,6 +224,7 @@ public class ShapeOutput implements Output {
     public boolean supportsFilters() {
         return false;
     }
+
 
     private static class ShapeOutputSafeState implements SafeState {
         private final @NotNull ShapeOutput shapeOutput;

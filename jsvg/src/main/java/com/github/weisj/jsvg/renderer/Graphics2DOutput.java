@@ -98,11 +98,6 @@ public class Graphics2DOutput implements Output {
     }
 
     @Override
-    public @NotNull Shape clip() {
-        return g.getClip();
-    }
-
-    @Override
     public Optional<Float> contextFontSize() {
         Font f = g.getFont();
         if (f != null) return Optional.of(f.getSize2D());
