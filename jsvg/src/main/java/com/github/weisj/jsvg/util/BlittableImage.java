@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,9 +34,7 @@ import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.*;
 
 public final class BlittableImage {
 
@@ -137,28 +135,29 @@ public final class BlittableImage {
         return g;
     }
 
-    public void renderNode(@NotNull Graphics2D parentGraphics, @NotNull SVGNode node,
+    public void renderNode(@NotNull Output parentOutput, @NotNull SVGNode node,
             @NotNull Instantiator instantiator) {
         Graphics2D imgGraphics = createGraphics();
-        imgGraphics.setRenderingHints(parentGraphics.getRenderingHints());
-        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(node, context, imgGraphics, instantiator)) {
-            if (info != null) info.renderable.render(info.context, info.graphics());
+        Output imgOutput = new Graphics2DOutput(imgGraphics);
+        imgGraphics.setRenderingHints(parentOutput.renderingHints());
+        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(node, context, imgOutput, instantiator)) {
+            if (info != null) info.renderable.render(info.context, info.output());
         }
         imgGraphics.dispose();
     }
 
-    public void prepareForBlitting(@NotNull Graphics2D g, @NotNull RenderContext parentContext) {
-        g.setTransform(parentContext.rootTransform());
-        g.translate(boundsInUserSpace.getX(), boundsInUserSpace.getY());
-        g.scale(
+    public void prepareForBlitting(@NotNull Output output, @NotNull RenderContext parentContext) {
+        output.setTransform(parentContext.rootTransform());
+        output.translate(boundsInUserSpace.getX(), boundsInUserSpace.getY());
+        output.scale(
                 boundsInUserSpace.getWidth() / image.getWidth(),
                 boundsInUserSpace.getHeight() / image.getHeight());
     }
 
-    public void blitTo(@NotNull Graphics2D g, @NotNull RenderContext parentContext) {
-        Graphics2D gg = (Graphics2D) g.create();
-        prepareForBlitting(g, parentContext);
-        gg.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null, null);
-        gg.dispose();
+    public void blitTo(@NotNull Output output, @NotNull RenderContext parentContext) {
+        Output out = output.createChild();
+        prepareForBlitting(out, parentContext);
+        out.drawImage(image);
+        out.dispose();
     }
 }

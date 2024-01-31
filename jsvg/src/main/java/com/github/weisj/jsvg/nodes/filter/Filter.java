@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -44,7 +44,8 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
@@ -117,11 +118,11 @@ public final class Filter extends ContainerNode {
         return new Length(Unit.PERCENTAGE, length.raw() * 100);
     }
 
-    public @Nullable FilterInfo createFilterInfo(@NotNull Graphics2D g, @NotNull RenderContext context,
+    public @Nullable FilterInfo createFilterInfo(@NotNull Output output, @NotNull RenderContext context,
             @NotNull Rectangle2D elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds, x, y, width, height);
-        Rectangle2D graphicsClipBounds = g.getClipBounds();
+        Rectangle2D graphicsClipBounds = output.clipBounds();
 
         FilterLayoutContext filterLayoutContext =
                 new FilterLayoutContext(filterPrimitiveUnits, elementBounds, graphicsClipBounds);
@@ -163,13 +164,13 @@ public final class Filter extends ContainerNode {
                 ImageUtil::createCompatibleTransparentImage, context, clipHeuristicBounds,
                 filterRegion, elementBounds, UnitType.UserSpaceOnUse);
 
-        return new FilterInfo(g, blitImage, elementBounds);
+        return new FilterInfo(output, blitImage, elementBounds);
     }
 
-    public void applyFilter(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
+    public void applyFilter(@NotNull Output output, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
         ImageProducer producer = filterInfo.blittableImage.image().getSource();
 
-        FilterContext filterContext = new FilterContext(filterInfo, filterPrimitiveUnits, g.getRenderingHints());
+        FilterContext filterContext = new FilterContext(filterInfo, filterPrimitiveUnits, output.renderingHints());
 
         Channel sourceChannel = new ImageProducerChannel(producer);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
@@ -201,12 +202,12 @@ public final class Filter extends ContainerNode {
         public final int imageHeight;
 
         private final @NotNull Rectangle2D elementBounds;
-        private final @NotNull Graphics2D imageGraphics;
+        private final @NotNull Output imageOutput;
         private final @NotNull BlittableImage blittableImage;
 
         private ImageProducer producer;
 
-        private FilterInfo(@NotNull Graphics2D g, @NotNull BlittableImage blittableImage,
+        private FilterInfo(@NotNull Output output, @NotNull BlittableImage blittableImage,
                 @NotNull Rectangle2D elementBounds) {
             this.blittableImage = blittableImage;
             this.elementBounds = elementBounds;
@@ -216,8 +217,9 @@ public final class Filter extends ContainerNode {
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();
 
-            this.imageGraphics = blittableImage.createGraphics();
-            this.imageGraphics.setRenderingHints(g.getRenderingHints());
+            Graphics2D g = blittableImage.createGraphics();
+            g.setRenderingHints(output.renderingHints());
+            this.imageOutput = new Graphics2DOutput(g);
         }
 
         public @NotNull Rectangle2D imageBounds() {
@@ -228,8 +230,8 @@ public final class Filter extends ContainerNode {
             return elementBounds;
         }
 
-        public @NotNull Graphics2D graphics() {
-            return imageGraphics;
+        public @NotNull Output output() {
+            return imageOutput;
         }
 
         public @NotNull Rectangle2D tile() {
@@ -241,22 +243,23 @@ public final class Filter extends ContainerNode {
                     imageBounds.getHeight());
         }
 
-        public void blitImage(@NotNull Graphics2D g, @NotNull RenderContext context) {
+        public void blitImage(@NotNull Output output, @NotNull RenderContext context) {
             Rectangle2D imageBounds = imageBounds();
 
             if (DEBUG) {
-                GraphicsUtil.safelySetPaint(g, Color.RED);
-                g.draw(imageBounds);
+                output.debugPaint(g -> {
+                    g.setColor(Color.RED);
+                    g.draw(imageBounds);
+                });
             }
 
-            blittableImage.prepareForBlitting(g, context);
-            g.drawImage(
-                    context.platformSupport().createImage(producer), 0, 0,
-                    context.platformSupport().imageObserver());
+            blittableImage.prepareForBlitting(output, context);
+            output.drawImage(
+                    context.platformSupport().createImage(producer), context.platformSupport().imageObserver());
         }
 
         public void close() {
-            imageGraphics.dispose();
+            imageOutput.dispose();
         }
     }
 

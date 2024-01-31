@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,7 +39,9 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.MaskedPaint;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
@@ -83,26 +85,26 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         maskUnits = attributeNode.getEnum("maskUnits", UnitType.ObjectBoundingBox);
     }
 
-    public @NotNull Paint createMaskPaint(@NotNull Graphics2D g, @NotNull RenderContext context,
+    public @NotNull Paint createMaskPaint(@NotNull Output output, @NotNull RenderContext context,
             @NotNull Rectangle2D objectBounds) {
         Rectangle2D.Double maskBounds = maskUnits.computeViewBounds(
                 context.measureContext(), objectBounds, x, y, width, height);
 
         BlittableImage blitImage = BlittableImage.create(
-                ImageUtil::createLuminosityBuffer, context, g.getClipBounds(),
+                ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
                 maskBounds.createIntersection(objectBounds), objectBounds, maskContentUnits);
         Rectangle2D maskBoundsInUserSpace = blitImage.boundsInUserSpace();
 
         if (isInvalidMaskingArea(maskBoundsInUserSpace)) return PaintParser.DEFAULT_COLOR;
 
-        blitImage.renderNode(g, this, this);
+        blitImage.renderNode(output, this, this);
 
 
         if (DEBUG) {
-            Graphics2D gg = (Graphics2D) g.create();
-            gg.setComposite(AlphaComposite.SrcOver.derive(0.5f));
-            blitImage.blitTo(gg, context);
-            gg.dispose();
+            output.debugPaint(g -> {
+                g.setComposite(AlphaComposite.SrcOver.derive(0.5f));
+                blitImage.blitTo(new Graphics2DOutput(g), context);
+            });
         }
 
         Point2D offset = new Point2D.Double(maskBoundsInUserSpace.getX(), maskBoundsInUserSpace.getY());

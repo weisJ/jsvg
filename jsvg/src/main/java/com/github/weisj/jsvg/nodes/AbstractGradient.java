@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,7 +37,7 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 @SuppressWarnings("java:S119") // Generic name Self is intentional
@@ -181,19 +181,19 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     protected abstract void buildGradient(@NotNull AttributeNode attributeNode, @Nullable Self template);
 
     @Override
-    public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
+    public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        GraphicsUtil.safelySetPaint(g, paintForBounds(context.measureContext(), b));
-        g.fill(shape);
+        output.setPaint(paintForBounds(context.measureContext(), b));
+        output.fillShape(shape);
     }
 
     @Override
-    public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
+    public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        GraphicsUtil.safelySetPaint(g, paintForBounds(context.measureContext(), b));
-        g.draw(shape);
+        output.setPaint(paintForBounds(context.measureContext(), b));
+        output.drawShape(shape);
     }
 
     private @NotNull Paint paintForBounds(@NotNull MeasureContext context, @NotNull Rectangle2D bounds) {

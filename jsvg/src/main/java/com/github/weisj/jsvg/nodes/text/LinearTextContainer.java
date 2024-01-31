@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class LinearTextContainer extends TextContainer {
@@ -59,8 +60,8 @@ abstract class LinearTextContainer extends TextContainer {
     }
 
     @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
-        renderSegment(createCursor(), context, g);
+    public void render(@NotNull RenderContext context, @NotNull Output output) {
+        renderSegment(createCursor(), context, output);
     }
 
     private @NotNull GlyphCursor createCursor() {

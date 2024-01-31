@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -47,21 +47,21 @@ public final class NodeRenderer {
     public static class Info implements AutoCloseable {
         public final @NotNull Renderable renderable;
         public final @NotNull RenderContext context;
-        public final @NotNull Graphics2D g;
+        public final @NotNull Output output;
 
-        Info(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Graphics2D g) {
+        Info(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Output output) {
             this.renderable = renderable;
             this.context = context;
-            this.g = g;
+            this.output = output;
         }
 
-        public @NotNull Graphics2D graphics() {
-            return g;
+        public @NotNull Output output() {
+            return output;
         }
 
         @Override
         public void close() {
-            g.dispose();
+            output.dispose();
         }
     }
 
@@ -70,37 +70,36 @@ public final class NodeRenderer {
         private final @NotNull Filter.FilterInfo filterInfo;
 
         static @Nullable InfoWithFilter create(@NotNull Renderable renderable, @NotNull RenderContext context,
-                @NotNull Graphics2D g,
-                @NotNull Filter filter, @NotNull Rectangle2D elementBounds) {
-            Filter.FilterInfo info = filter.createFilterInfo(g, context, elementBounds);
+                @NotNull Output output, @NotNull Filter filter, @NotNull Rectangle2D elementBounds) {
+            Filter.FilterInfo info = filter.createFilterInfo(output, context, elementBounds);
             if (info == null) return null;
-            return new InfoWithFilter(renderable, context, g, filter, info);
+            return new InfoWithFilter(renderable, context, output, filter, info);
         }
 
-        private InfoWithFilter(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Graphics2D g,
+        private InfoWithFilter(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Output output,
                 @NotNull Filter filter, @NotNull Filter.FilterInfo filterInfo) {
-            super(renderable, context, g);
+            super(renderable, context, output);
             this.filter = filter;
             this.filterInfo = filterInfo;
         }
 
         @Override
-        public @NotNull Graphics2D graphics() {
-            return filterInfo.graphics();
+        public @NotNull Output output() {
+            return filterInfo.output();
         }
 
         @Override
         public void close() {
-            filter.applyFilter(this.g, context, filterInfo);
-            filterInfo.blitImage(this.g, context);
+            filter.applyFilter(this.output, context, filterInfo);
+            filterInfo.blitImage(this.output, context);
             filterInfo.close();
             super.close();
         }
     }
 
-    public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Graphics2D g) {
-        try (Info info = createRenderInfo(node, context, g, null)) {
-            if (info != null) info.renderable.render(info.context, info.graphics());
+    public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output) {
+        try (Info info = createRenderInfo(node, context, output, null)) {
+            if (info != null) info.renderable.render(info.context, info.output());
         }
     }
 
@@ -110,7 +109,7 @@ public final class NodeRenderer {
     }
 
     public static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
-            @NotNull Graphics2D g, @Nullable Instantiator instantiator) {
+            @NotNull Output output, @Nullable Instantiator instantiator) {
         if (!(node instanceof Renderable)) return null;
         Renderable renderable = (Renderable) node;
         boolean instantiated = renderable.requiresInstantiation();
@@ -120,10 +119,10 @@ public final class NodeRenderer {
         if (!renderable.isVisible(context)) return null;
         RenderContext childContext = createChildContext(node, context, instantiator);
 
-        Graphics2D childGraphics = (Graphics2D) g.create();
+        Output childOutput = output.createChild();
 
         if (renderable instanceof Transformable && ((Transformable) renderable).shouldTransform()) {
-            ((Transformable) renderable).applyTransform(childGraphics, childContext);
+            ((Transformable) renderable).applyTransform(childOutput, childContext);
         }
 
         Rectangle2D elementBounds = null;
@@ -134,7 +133,7 @@ public final class NodeRenderer {
                 // Todo: Proper object bounding box
                 elementBounds = elementBounds(renderable, childContext);
                 if (!elementBounds.isEmpty()) {
-                    GraphicsUtil.safelySetPaint(childGraphics, mask.createMaskPaint(g, childContext, elementBounds));
+                    childOutput.setPaint(mask.createMaskPaint(childOutput, childContext, elementBounds));
                 }
             }
 
@@ -148,27 +147,25 @@ public final class NodeRenderer {
                 Shape childClipShape = childClip.clipShape(childContext, elementBounds);
 
                 if (CLIP_DEBUG) {
-                    Paint paint = childGraphics.getPaint();
-                    Shape clip = childGraphics.getClip();
-                    childGraphics.setClip(null);
-                    childGraphics.setPaint(Color.MAGENTA);
-                    childGraphics.draw(childClipShape);
-                    childGraphics.setPaint(paint);
-                    childGraphics.setClip(clip);
+                    output.debugPaint(g -> {
+                        g.setClip(null);
+                        g.setPaint(Color.MAGENTA);
+                        g.draw(childClipShape);
+                    });
                 }
 
-                childGraphics.clip(childClipShape);
+                output.applyClip(childClipShape);
             }
         }
 
-        Info info = tryCreateFilterInfo(renderable, childContext, childGraphics, elementBounds);
+        Info info = tryCreateFilterInfo(renderable, childContext, childOutput, elementBounds);
         if (info != null) return info;
 
-        return new Info(renderable, childContext, childGraphics);
+        return new Info(renderable, childContext, childOutput);
     }
 
     private static @Nullable InfoWithFilter tryCreateFilterInfo(
-            @NotNull Renderable renderable, @NotNull RenderContext childContext, @NotNull Graphics2D childGraphics,
+            @NotNull Renderable renderable, @NotNull RenderContext childContext, @NotNull Output childOutput,
             @Nullable Rectangle2D elementBounds) {
         Filter filter = renderable instanceof HasFilter
                 ? ((HasFilter) renderable).filter()
@@ -176,7 +173,7 @@ public final class NodeRenderer {
 
         if (filter != null && filter.hasEffect()) {
             if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
-            return InfoWithFilter.create(renderable, childContext, childGraphics, filter, elementBounds);
+            return InfoWithFilter.create(renderable, childContext, childOutput, filter, elementBounds);
         }
         return null;
     }

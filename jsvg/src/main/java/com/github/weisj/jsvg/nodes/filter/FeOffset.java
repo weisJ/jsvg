@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -92,7 +92,7 @@ public final class FeOffset extends AbstractFilterPrimitive {
         Channel in = impl().inputChannel(filterContext);
         Channel result = in;
         if (dx != 0 || dy != 0) {
-            AffineTransform at = filterContext.info().graphics().getTransform();
+            AffineTransform at = filterContext.info().output().transform();
             Point2D.Double off = offset(at, filterContext.primitiveUnits(), filterContext.info().elementBounds());
             AffineTransform transform = AffineTransform.getTranslateInstance(off.x, off.y);
 

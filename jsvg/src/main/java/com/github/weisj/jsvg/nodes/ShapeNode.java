@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.ShapeRenderer;
@@ -141,14 +142,14 @@ public abstract class ShapeNode extends RenderableSVGNode
     }
 
     @Override
-    public final void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+    public final void render(@NotNull RenderContext context, @NotNull Output output) {
         Shape paintShape = shape.shape(context);
         @Nullable Rectangle2D bounds = shape.usesOptimizedBoundsCalculation()
                 ? shape.bounds(context, false)
                 : null;
 
         Stroke effectiveStroke = computeEffectiveStroke(context);
-        ShapeRenderer.renderWithPaintOrder(g, shape.canBeFilled(), paintOrder,
+        ShapeRenderer.renderWithPaintOrder(output, shape.canBeFilled(), paintOrder,
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects(), effectiveStroke, transform()),
                 new ShapeRenderer.PaintShape(paintShape, bounds),
                 new ShapeRenderer.ShapeMarkerInfo(this, markerStart, markerMid, markerEnd,

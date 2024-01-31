@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -120,13 +120,13 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     protected abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
 
     protected final void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
-            @NotNull Graphics2D g) {
+            @NotNull Output output) {
         prepareSegmentForRendering(cursor, context);
 
         double offset = textAnchorOffset(context.fontRenderContext().textAnchor(), cursor);
-        context.translate(g, -offset, 0);
+        context.translate(output, -offset, 0);
 
-        renderSegmentWithoutLayout(cursor, context, g);
+        renderSegmentWithoutLayout(cursor, context, output);
     }
 
     private double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull GlyphCursor glyphCursor) {
@@ -234,15 +234,15 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
 
     @Override
     public void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
-            @NotNull Graphics2D g) {
+            @NotNull Output output) {
         forEachSegment(context,
                 (segment, ctx) -> {
                     if (isVisible(ctx)) {
-                        GlyphRenderer.renderGlyphRun(g, paintOrder, vectorEffects(), segment,
+                        GlyphRenderer.renderGlyphRun(output, paintOrder, vectorEffects(), segment,
                                 cursor.completeGlyphRunBounds);
                     }
                 },
-                (segment, ctx) -> segment.renderSegmentWithoutLayout(cursor, ctx, g));
+                (segment, ctx) -> segment.renderSegmentWithoutLayout(cursor, ctx, output));
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -46,6 +46,7 @@ import com.github.weisj.jsvg.parser.UIFuture;
 import com.github.weisj.jsvg.parser.ValueUIFuture;
 import com.github.weisj.jsvg.parser.resources.MissingImageResource;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.GraphicsReferencing})
@@ -108,7 +109,7 @@ public final class Image extends RenderableSVGNode {
     }
 
     @Override
-    public void render(@NotNull RenderContext context, @NotNull Graphics2D g) {
+    public void render(@NotNull RenderContext context, @NotNull Output output) {
         RenderableResource resource = fetchImage(context);
         if (resource == null) {
             resource = new MissingImageResource();
@@ -123,15 +124,15 @@ public final class Image extends RenderableSVGNode {
         float viewWidth = width.orElseIfUnspecified(resourceWidth).resolveWidth(measure);
         float viewHeight = height.orElseIfUnspecified(resourceHeight).resolveHeight(measure);
 
-        g.translate(x.resolveWidth(measure), y.resolveHeight(measure));
+        output.translate(x.resolveWidth(measure), y.resolveHeight(measure));
 
-        if (overflow.establishesClip()) g.clip(new ViewBox(viewWidth, viewHeight));
+        if (overflow.establishesClip()) output.applyClip(new ViewBox(viewWidth, viewHeight));
         // Todo: Vector Effects
 
         AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(
                 new FloatSize(viewWidth, viewHeight),
                 new ViewBox(resourceWidth, resourceHeight));
 
-        resource.render(g, context, imgTransform);
+        resource.render(output, context, imgTransform);
     }
 }

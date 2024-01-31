@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -46,9 +46,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
-import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.TransformedPaint;
+import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.Container)
@@ -141,31 +139,31 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     }
 
     @Override
-    public void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
+    public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        GraphicsUtil.safelySetPaint(g, paintForBounds(g, context, b));
-        g.fill(shape);
+        output.setPaint(paintForBounds(output, context, b));
+        output.fillShape(shape);
     }
 
     @Override
-    public void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
+    public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        GraphicsUtil.safelySetPaint(g, paintForBounds(g, context, b));
-        g.setPaint(paintForBounds(g, context, b));
-        g.draw(shape);
+        output.setPaint(paintForBounds(output, context, b));
+        output.drawShape(shape);
     }
 
-    private @NotNull Paint paintForBounds(@NotNull Graphics2D g, @NotNull RenderContext context,
+    private @NotNull Paint paintForBounds(@NotNull Output output, @NotNull RenderContext context,
             @NotNull Rectangle2D bounds) {
         MeasureContext measure = context.measureContext();
         Rectangle2D.Double patternBounds = patternUnits.computeViewBounds(measure, bounds, x, y, width, height);
 
         // TODO: With overflow = visible this does not result in the correct behaviour
-        BufferedImage img = ImageUtil.createCompatibleTransparentImage(g, patternBounds.width, patternBounds.height);
+        BufferedImage img =
+                ImageUtil.createCompatibleTransparentImage(output, patternBounds.width, patternBounds.height);
         Graphics2D imgGraphics = GraphicsUtil.createGraphics(img);
-        imgGraphics.setRenderingHints(g.getRenderingHints());
+        imgGraphics.setRenderingHints(output.renderingHints());
         imgGraphics.scale(img.getWidth() / patternBounds.width, img.getHeight() / patternBounds.height);
 
         RenderContext patternContext = RenderContext.createInitial(null, patternContentUnits.deriveMeasure(measure));
@@ -183,7 +181,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
             size = new FloatSize((float) patternBounds.getWidth(), (float) patternBounds.getHeight());
         }
 
-        renderWithSize(size, view, aspectRation, patternContext, imgGraphics);
+        renderWithSize(size, view, aspectRation, patternContext, new Graphics2DOutput(imgGraphics));
         imgGraphics.dispose();
 
         // Fixme: When patternTransform != null antialiasing is broken

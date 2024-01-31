@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,7 +27,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface SimplePaintSVGPaint extends SVGPaint {
@@ -36,16 +36,16 @@ public interface SimplePaintSVGPaint extends SVGPaint {
     Paint paint();
 
     @Override
-    default void fillShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
+    default void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        GraphicsUtil.safelySetPaint(g, paint());
-        g.fill(shape);
+        output.setPaint(paint());
+        output.fillShape(shape);
     }
 
     @Override
-    default void drawShape(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull Shape shape,
+    default void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        GraphicsUtil.safelySetPaint(g, paint());
-        g.draw(shape);
+        output.setPaint(paint());
+        output.drawShape(shape);
     }
 }

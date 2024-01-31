@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.SVGRenderingHints;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.renderer.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class ImageResource implements RenderableResource {
@@ -47,19 +47,19 @@ public class ImageResource implements RenderableResource {
     }
 
     @Override
-    public void render(@NotNull Graphics2D g, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
+    public void render(@NotNull Output output, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
         int imgWidth = image.getWidth();
         int imgHeight = image.getHeight();
 
-        Object imageAntialiasing = g.getRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING);
+        Object imageAntialiasing = output.renderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING);
         if (imageAntialiasing == SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF) {
-            g.drawImage(image, imgTransform, context.platformSupport().imageObserver());
+            output.drawImage(image, imgTransform, context.platformSupport().imageObserver());
         } else {
-            g.transform(imgTransform);
+            output.applyTransform(imgTransform);
             Rectangle imgRect = new Rectangle(0, 0, imgWidth, imgHeight);
             // Painting using a TexturePaint allows for anti-aliased edges with a nontrivial transform
-            GraphicsUtil.safelySetPaint(g, new TexturePaint(image, imgRect));
-            g.fill(imgRect);
+            output.setPaint(new TexturePaint(image, imgRect));
+            output.fillShape(imgRect);
         }
     }
 }

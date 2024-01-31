@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -80,11 +80,17 @@ public final class SVGViewer {
             renderingMode.add(jsvg);
             renderingMode.add(svgSalamander);
             renderingMode.add(batik);
+            renderingMode.add(Box.createHorizontalStrut(5));
+
+            JCheckBox paintShape = new JCheckBox("Paint SVG shape");
+            paintShape.addActionListener(e -> svgPanel.setPaintSVGShape(paintShape.isSelected()));
+            renderingMode.add(paintShape);
             renderingMode.add(Box.createHorizontalGlue());
 
             JButton resourceInfo = new JButton("Print Memory");
             resourceInfo.addActionListener(e -> svgPanel.printMemory());
             renderingMode.add(resourceInfo);
+
 
             frame.add(renderingMode, BorderLayout.SOUTH);
 
@@ -128,6 +134,7 @@ public final class SVGViewer {
             }
         };
         private final JSVGCanvas jsvgCanvas = new JSVGCanvas();
+        private boolean paintShape;
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
@@ -188,6 +195,11 @@ public final class SVGViewer {
             selectIcon(selectedIconName);
         }
 
+        public void setPaintSVGShape(boolean paintShape) {
+            this.paintShape = paintShape;
+            repaint();
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -198,7 +210,14 @@ public final class SVGViewer {
             System.out.println("======");
             switch (mode) {
                 case JSVG:
-                    document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
+                    ViewBox viewBox = new ViewBox(0, 0, getWidth(), getHeight());
+                    if (paintShape) {
+                        Shape shape = document.computeShape(viewBox);
+                        g.setColor(Color.MAGENTA);
+                        ((Graphics2D) g).fill(shape);
+                    } else {
+                        document.render(this, (Graphics2D) g, viewBox);
+                    }
                     break;
                 case SVG_SALAMANDER:
                     icon.paintIcon(this, g, 0, 0);

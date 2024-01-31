@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,7 +39,6 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.nodes.Marker;
 import com.github.weisj.jsvg.nodes.ShapeNode;
-import com.github.weisj.jsvg.util.GraphicsResetHelper;
 
 public final class ShapeRenderer {
     private static final boolean DEBUG_MARKERS = false;
@@ -102,20 +101,20 @@ public final class ShapeRenderer {
         }
     }
 
-    public static void renderWithPaintOrder(@NotNull Graphics2D g, boolean canBeFilledHint,
+    public static void renderWithPaintOrder(@NotNull Output output, boolean canBeFilledHint,
             @NotNull PaintOrder paintOrder, @NotNull ShapePaintContext shapePaintContext,
             @NotNull PaintShape paintShape, @Nullable ShapeMarkerInfo markerInfo) {
         Set<VectorEffect> vectorEffects = shapePaintContext.vectorEffects;
-        VectorEffect.applyEffects(shapePaintContext.vectorEffects, g,
+        VectorEffect.applyEffects(shapePaintContext.vectorEffects, output,
                 shapePaintContext.context, shapePaintContext.transform);
-        GraphicsResetHelper resetHelper = new GraphicsResetHelper(g);
+        Output.SafeState safeState = output.safeState();
 
         for (PaintOrder.Phase phase : paintOrder.phases()) {
             RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
             switch (phase) {
                 case FILL:
                     if (canBeFilledHint) {
-                        ShapeRenderer.renderShapeFill(phaseContext, resetHelper.graphics(), paintShape);
+                        ShapeRenderer.renderShapeFill(phaseContext, output, paintShape);
                     }
                     break;
                 case STROKE:
@@ -123,43 +122,43 @@ public final class ShapeRenderer {
                     if (vectorEffects.contains(VectorEffect.NonScalingStroke)
                             && !vectorEffects.contains(VectorEffect.NonScalingSize)) {
                         strokeShape =
-                                VectorEffect.applyNonScalingStroke(resetHelper.graphics(), phaseContext, strokeShape);
+                                VectorEffect.applyNonScalingStroke(output, phaseContext, strokeShape);
                     }
-                    ShapeRenderer.renderShapeStroke(phaseContext, resetHelper.graphics(),
+                    ShapeRenderer.renderShapeStroke(phaseContext, output,
                             new PaintShape(strokeShape, paintShape.bounds), shapePaintContext.stroke);
                     break;
                 case MARKERS:
-                    if (markerInfo != null) renderMarkers(resetHelper.graphics(), phaseContext, paintShape, markerInfo);
+                    if (markerInfo != null) renderMarkers(output, phaseContext, paintShape, markerInfo);
                     break;
             }
-            resetHelper.reset();
+            safeState.restore();
         }
     }
 
-    private static void renderMarkers(@NotNull Graphics2D g, @NotNull RenderContext context,
+    private static void renderMarkers(@NotNull Output output, @NotNull RenderContext context,
             @NotNull PaintShape paintShape, @NotNull ShapeMarkerInfo markerInfo) {
         if (markerInfo.markerStart == null && markerInfo.markerMid == null && markerInfo.markerEnd == null) return;
-        renderMarkersImpl(g, context, paintShape.shape.getPathIterator(null), markerInfo);
+        renderMarkersImpl(output, context, paintShape.shape.getPathIterator(null), markerInfo);
     }
 
-    private static void renderShapeStroke(@NotNull RenderContext context, @NotNull Graphics2D g,
+    private static void renderShapeStroke(@NotNull RenderContext context, @NotNull Output output,
             @NotNull PaintShape paintShape, @Nullable Stroke stroke) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
         if (!(stroke != null && paintWithOpacity.isVisible())) return;
-        g.setComposite(GraphicsUtil.deriveComposite(g, paintWithOpacity.opacity));
-        g.setStroke(stroke);
-        paintWithOpacity.paint.drawShape(g, context, paintShape.shape, paintShape.bounds);
+        output.applyOpacity(paintWithOpacity.opacity);
+        output.setStroke(stroke);
+        paintWithOpacity.paint.drawShape(output, context, paintShape.shape, paintShape.bounds);
     }
 
-    private static void renderShapeFill(@NotNull RenderContext context, @NotNull Graphics2D g,
+    private static void renderShapeFill(@NotNull RenderContext context, @NotNull Output output,
             @NotNull PaintShape paintShape) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.fillPaint(), context.fillOpacity());
         if (!paintWithOpacity.isVisible()) return;
-        g.setComposite(GraphicsUtil.deriveComposite(g, paintWithOpacity.opacity));
-        paintWithOpacity.paint.fillShape(g, context, paintShape.shape, paintShape.bounds);
+        output.applyOpacity(paintWithOpacity.opacity);
+        paintWithOpacity.paint.fillShape(output, context, paintShape.shape, paintShape.bounds);
     }
 
-    private static void renderMarkersImpl(@NotNull Graphics2D g, @NotNull RenderContext context,
+    private static void renderMarkersImpl(@NotNull Output output, @NotNull RenderContext context,
             @NotNull PathIterator iterator, @NotNull ShapeMarkerInfo markerInfo) {
         float[] args = new float[6];
 
@@ -209,7 +208,7 @@ public final class ShapeRenderer {
                         nextMarkerType = MarkerOrientation.MarkerType.START;
                     }
                     if (markerToPaint != null) {
-                        paintSingleMarker(markerInfo.node, context, g, markerToPaintType, markerToPaint,
+                        paintSingleMarker(markerInfo.node, context, output, markerToPaintType, markerToPaint,
                                 xPaint, yPaint, 0, 0, dx, dy);
                         if (onlyFirst) return;
                     }
@@ -252,19 +251,19 @@ public final class ShapeRenderer {
                     throw new IllegalStateException();
             }
 
-            paintSingleMarker(markerInfo.node, context, g, markerToPaintType, markerToPaint,
+            paintSingleMarker(markerInfo.node, context, output, markerToPaintType, markerToPaint,
                     xPaint, yPaint, dx, dy, dxOut, dyOut);
             if (onlyFirst) return;
 
             markerToPaint = nextMarker;
             markerToPaintType = nextMarkerType;
         }
-        paintSingleMarker(markerInfo.node, context, g, markerToPaintType, markerToPaint,
+        paintSingleMarker(markerInfo.node, context, output, markerToPaintType, markerToPaint,
                 x, y, dxIn, dyIn, 0, 0);
     }
 
     public static void paintSingleMarker(@NotNull ShapeNode shapeNode, @NotNull RenderContext context,
-            @NotNull Graphics2D g, @Nullable MarkerOrientation.MarkerType type, @Nullable Marker marker,
+            @NotNull Output output, @Nullable MarkerOrientation.MarkerType type, @Nullable Marker marker,
             float x, float y, float dxIn, float dyIn, float dxOut, float dyOut) {
         if (marker == null) return;
         assert type != null;
@@ -272,23 +271,21 @@ public final class ShapeRenderer {
         MarkerOrientation orientation = marker.orientation();
         @Radian float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
 
-        Graphics2D markerGraphics = (Graphics2D) g.create();
+        Output markerOutput = output.createChild();
         RenderContext markerContext = context.deriveForChildGraphics();
 
-        markerContext.translate(markerGraphics, x, y);
+        markerContext.translate(output, x, y);
 
         if (DEBUG_MARKERS) {
-            Graphics2D debugGraphics = (Graphics2D) markerGraphics.create();
-            paintDebugMarker(markerContext, debugGraphics, marker, rotation);
-            debugGraphics.dispose();
+            markerOutput.debugPaint(g -> paintDebugMarker(markerContext, g, marker, rotation));
         }
-        markerContext.rotate(markerGraphics, rotation);
+        markerContext.rotate(markerOutput, rotation);
 
-        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, markerContext, markerGraphics, shapeNode)) {
-            if (info != null) info.renderable.render(info.context, info.graphics());
+        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, markerContext, markerOutput, shapeNode)) {
+            if (info != null) info.renderable.render(info.context, info.output());
         }
 
-        markerGraphics.dispose();
+        markerOutput.dispose();
     }
 
     private static void paintDebugMarker(@NotNull RenderContext context, @NotNull Graphics2D g,
