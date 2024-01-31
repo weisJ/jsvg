@@ -274,7 +274,7 @@ public final class ShapeRenderer {
         Output markerOutput = output.createChild();
         RenderContext markerContext = context.deriveForChildGraphics();
 
-        markerContext.translate(output, x, y);
+        markerContext.translate(markerOutput, x, y);
 
         if (DEBUG_MARKERS) {
             markerOutput.debugPaint(g -> paintDebugMarker(markerContext, g, marker, rotation));
