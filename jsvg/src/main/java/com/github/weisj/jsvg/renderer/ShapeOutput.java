@@ -81,6 +81,7 @@ public class ShapeOutput implements Output {
         append(shape);
     }
 
+
     @Override
     public void drawShape(@NotNull Shape shape) {
         append(currentStroke.createStrokedShape(shape));
@@ -225,6 +226,10 @@ public class ShapeOutput implements Output {
         return false;
     }
 
+    @Override
+    public boolean supportsColors() {
+        return false;
+    }
 
     private static class ShapeOutputSafeState implements SafeState {
         private final @NotNull ShapeOutput shapeOutput;

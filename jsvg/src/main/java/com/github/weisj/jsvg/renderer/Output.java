@@ -105,6 +105,8 @@ public interface Output {
 
     boolean supportsFilters();
 
+    boolean supportsColors();
+
     interface SafeState {
         void restore();
     }
