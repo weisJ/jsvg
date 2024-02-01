@@ -98,7 +98,8 @@ public final class ShapeUtil {
      */
     @NotNull
     private static Shape intersectByArea(@NotNull Shape s1, @NotNull Shape s2, boolean keep1, boolean keep2) {
-        Area a1, a2;
+        Area a1;
+        Area a2;
 
         // First see if we can find an overwrite-able source shape
         // to use as our destination area to avoid duplication.
