@@ -191,18 +191,6 @@ public final class ShapeUtil {
         return mat.createTransformedShape(s);
     }
 
-    public Shape untransformShape(@NotNull Shape s, @NotNull AffineTransform transform) {
-        if (transform.getType() > AffineTransform.TYPE_TRANSLATION) {
-            try {
-                return transformShape(transform.createInverse(), s);
-            } catch (NoninvertibleTransformException e) {
-                return null;
-            }
-        } else {
-            return transformShape(-transform.getTranslateX(), -transform.getTranslateY(), s);
-        }
-    }
-
     private static Shape cloneShape(Shape s) {
         return new GeneralPath(s);
     }
