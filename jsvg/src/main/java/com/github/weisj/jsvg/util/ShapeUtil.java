@@ -95,10 +95,6 @@ public final class ShapeUtil {
      * methods proved fruitless. The boolean arguments keep1 and keep2 specify whether or not the first
      * or second shapes can be modified during the operation or whether that shape must be "kept"
      * unmodified.
-     *
-     * @see #intersectShapes
-     *
-     * @see #intersectRectShape
      */
     @NotNull
     private static Shape intersectByArea(@NotNull Shape s1, @NotNull Shape s2, boolean keep1, boolean keep2) {

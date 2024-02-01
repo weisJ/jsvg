@@ -92,6 +92,7 @@ public final class Lexer {
                     next();
                     return new Token(TokenType.COMMENT, comment);
                 }
+                // fall through
             default:
                 return new Token(TokenType.IDENTIFIER, readIdentifier());
         }
