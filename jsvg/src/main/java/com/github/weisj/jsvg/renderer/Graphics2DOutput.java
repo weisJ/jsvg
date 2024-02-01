@@ -38,6 +38,10 @@ import com.github.weisj.jsvg.util.Provider;
 public class Graphics2DOutput implements Output {
     private final Graphics2D g;
 
+    public @NotNull Graphics2D graphics() {
+        return g;
+    }
+
     public Graphics2DOutput(@NotNull Graphics2D g) {
         this.g = g;
     }
