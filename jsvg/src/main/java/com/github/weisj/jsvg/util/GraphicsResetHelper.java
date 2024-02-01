@@ -57,6 +57,7 @@ public class GraphicsResetHelper implements Output.SafeState {
         return graphics;
     }
 
+    @Override
     public void restore() {
         graphics.setComposite(originalComposite);
         graphics.setPaint(originalPaint);
