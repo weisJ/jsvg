@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
 
 class UIFutureTest {
@@ -38,7 +39,7 @@ class UIFutureTest {
     void testValueUiFuture() {
         Object o = new Object();
         UIFuture<Object> future = new ValueUIFuture<>(o);
-        assertTrue(future.checkIfReady(null));
+        assertTrue(future.checkIfReady(new NullPlatformSupport()));
         assertEquals(o, future.get());
     }
 
