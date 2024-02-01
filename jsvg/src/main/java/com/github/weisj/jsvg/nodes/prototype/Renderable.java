@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
-import java.awt.*;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.AttributeNode;
