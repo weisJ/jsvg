@@ -21,5 +21,5 @@
 	<use clip-path="url(#myClip1)" xlink:href="#r3" fill="red" />
 
 	<!-- The last rect is clipped with objectBoundingBox units -->
-	<use clip-path="url(#myClip2)" xlink:href="#r4" fill="red" />
+	<use clip-path="url(#myClip2)" xlink:href="#r4" fill="green" />
 </svg>

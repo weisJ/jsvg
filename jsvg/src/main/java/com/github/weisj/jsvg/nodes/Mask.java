@@ -45,6 +45,7 @@ import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.util.ShapeUtil;
 
 @ElementCategories(Category.Container)
 @PermittedContent(
@@ -95,10 +96,9 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
                 maskBounds.createIntersection(objectBounds), objectBounds, maskContentUnits);
         Rectangle2D maskBoundsInUserSpace = blitImage.boundsInUserSpace();
 
-        if (isInvalidMaskingArea(maskBoundsInUserSpace)) return PaintParser.DEFAULT_COLOR;
+        if (ShapeUtil.isInvalidArea(maskBoundsInUserSpace)) return PaintParser.DEFAULT_COLOR;
 
         blitImage.renderNode(output, this, this);
-
 
         if (DEBUG) {
             output.debugPaint(g -> {
@@ -110,10 +110,6 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         Point2D offset = new Point2D.Double(maskBoundsInUserSpace.getX(), maskBoundsInUserSpace.getY());
         context.rootTransform().transform(offset, offset);
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset);
-    }
-
-    private boolean isInvalidMaskingArea(@NotNull Rectangle2D area) {
-        return area.isEmpty() || Double.isNaN(area.getWidth()) || Double.isNaN(area.getHeight());
     }
 
     @Override

@@ -146,17 +146,27 @@ public final class NodeRenderer {
                 if (!childClip.isValid()) return null;
                 if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
 
-                Shape childClipShape = childClip.clipShape(childContext, elementBounds);
+                if (output.isSoftClippingEnabled()) {
+                    if (!elementBounds.isEmpty()) {
+                        Shape childClipShape = childClip.clipShape(childContext, elementBounds, true);
 
-                if (CLIP_DEBUG) {
-                    childOutput.debugPaint(g -> {
-                        g.setClip(null);
-                        g.setPaint(Color.MAGENTA);
-                        g.draw(childClipShape);
-                    });
+                        Rectangle2D bounds = elementBounds;
+                        childOutput.setPaint(() -> childClip.createPaintForSoftClipping(
+                                childOutput, childContext, bounds, childClipShape));
+                    }
+                } else {
+                    Shape childClipShape = childClip.clipShape(childContext, elementBounds, false);
+
+                    if (CLIP_DEBUG) {
+                        childOutput.debugPaint(g -> {
+                            g.setClip(null);
+                            g.setPaint(Color.MAGENTA);
+                            g.draw(childClipShape);
+                        });
+                    }
+
+                    childOutput.applyClip(childClipShape);
                 }
-
-                childOutput.applyClip(childClipShape);
             }
         }
 

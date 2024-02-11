@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -32,5 +32,12 @@ class ClipPathTest {
     @Test
     void tetClipPathUnits() {
         assertEquals(SUCCESS, compareImages("clipPathUnits.svg"));
+    }
+
+    @Test
+    void tetClipPathUnitsSoftClip() {
+        ReferenceTest.SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
+        assertEquals(SUCCESS, compareImages("clipPathUnits.svg"));
+        ReferenceTest.SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
     }
 }

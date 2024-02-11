@@ -59,6 +59,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 public final class ReferenceTest {
 
     private static final double DEFAULT_TOLERANCE = 0.5;
+    public static Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
 
     @Test
     void testIcons() {
@@ -163,7 +164,8 @@ public final class ReferenceTest {
                 RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
                 RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE,
                 RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON,
-                RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
+                RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY,
+                SVGRenderingHints.KEY_SOFT_CLIPPING, SOFT_CLIPPING_VALUE));
     }
 
     private static BufferedImage render(@NotNull InputStream inputStream) {

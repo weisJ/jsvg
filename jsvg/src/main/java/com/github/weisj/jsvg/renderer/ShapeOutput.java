@@ -231,6 +231,12 @@ public class ShapeOutput implements Output {
         return false;
     }
 
+    @Override
+    public boolean isSoftClippingEnabled() {
+        // Not needed here. Always return false
+        return false;
+    }
+
     private static class ShapeOutputSafeState implements SafeState {
         private final @NotNull ShapeOutput shapeOutput;
         private final @NotNull Stroke oldStroke;

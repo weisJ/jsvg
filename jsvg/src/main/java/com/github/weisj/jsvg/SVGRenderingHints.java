@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,10 +29,15 @@ public final class SVGRenderingHints {
     private SVGRenderingHints() {}
 
     private static final int P_KEY_IMAGE_ANTIALIASING = 1;
+    private static final int P_KEY_SOFT_CLIPPING = 2;
 
     public static final RenderingHints.Key KEY_IMAGE_ANTIALIASING = new Key(P_KEY_IMAGE_ANTIALIASING);
     public static final Object VALUE_IMAGE_ANTIALIASING_ON = Value.ON;
     public static final Object VALUE_IMAGE_ANTIALIASING_OFF = Value.OFF;
+
+    public static final RenderingHints.Key KEY_SOFT_CLIPPING = new Key(P_KEY_SOFT_CLIPPING);
+    public static final Object VALUE_SOFT_CLIPPING_ON = Value.ON;
+    public static final Object VALUE_SOFT_CLIPPING_OFF = Value.OFF;
 
     private static final class Key extends RenderingHints.Key {
         /**
