@@ -49,7 +49,7 @@ public final class SVGViewer {
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("test.svg");
+            iconBox.setSelectedItem("tmp.svg");
 
             SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
             svgPanel.setPreferredSize(new Dimension(1000, 600));
@@ -85,6 +85,11 @@ public final class SVGViewer {
             JCheckBox paintShape = new JCheckBox("Paint SVG shape");
             paintShape.addActionListener(e -> svgPanel.setPaintSVGShape(paintShape.isSelected()));
             renderingMode.add(paintShape);
+            renderingMode.add(Box.createHorizontalStrut(5));
+
+            JCheckBox softClipping = new JCheckBox("Soft clipping");
+            softClipping.addActionListener(e -> svgPanel.setSoftClipping(softClipping.isSelected()));
+            renderingMode.add(softClipping);
             renderingMode.add(Box.createHorizontalGlue());
 
             JButton resourceInfo = new JButton("Print Memory");
@@ -135,6 +140,7 @@ public final class SVGViewer {
         };
         private final JSVGCanvas jsvgCanvas = new JSVGCanvas();
         private boolean paintShape;
+        private boolean softClipping;
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
@@ -200,6 +206,11 @@ public final class SVGViewer {
             repaint();
         }
 
+        public void setSoftClipping(boolean softClipping) {
+            this.softClipping = softClipping;
+            repaint();
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -211,6 +222,10 @@ public final class SVGViewer {
             switch (mode) {
                 case JSVG:
                     ViewBox viewBox = new ViewBox(0, 0, getWidth(), getHeight());
+                    ((Graphics2D) g).setRenderingHint(
+                            SVGRenderingHints.KEY_SOFT_CLIPPING,
+                            softClipping ? SVGRenderingHints.VALUE_SOFT_CLIPPING_ON
+                                    : SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF);
                     if (paintShape) {
                         Shape shape = document.computeShape(viewBox);
                         g.setColor(Color.MAGENTA);

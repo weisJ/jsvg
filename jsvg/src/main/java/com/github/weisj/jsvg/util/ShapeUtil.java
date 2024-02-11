@@ -33,6 +33,10 @@ public final class ShapeUtil {
 
     private ShapeUtil() {}
 
+    public static boolean isInvalidArea(@NotNull Rectangle2D area) {
+        return area.isEmpty() || Double.isNaN(area.getWidth()) || Double.isNaN(area.getHeight());
+    }
+
     /*
      * Intersect two Shapes by the simplest method, attempting to produce a simplified result. The
      * boolean arguments keep1 and keep2 specify whether or not the first or second shapes can be

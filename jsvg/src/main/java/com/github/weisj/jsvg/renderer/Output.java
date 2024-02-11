@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.SVGRenderingHints;
 import com.github.weisj.jsvg.util.Provider;
 
 public interface Output {
@@ -106,6 +107,10 @@ public interface Output {
     boolean supportsFilters();
 
     boolean supportsColors();
+
+    default boolean isSoftClippingEnabled() {
+        return renderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING) == SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
+    }
 
     interface SafeState {
         void restore();

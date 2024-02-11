@@ -26,6 +26,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -143,6 +144,13 @@ public final class BlittableImage {
         try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(node, context, imgOutput, instantiator)) {
             if (info != null) info.renderable.render(info.context, info.output());
         }
+        imgGraphics.dispose();
+    }
+
+    public void render(@NotNull Output output, @NotNull Consumer<Graphics2D> painter) {
+        Graphics2D imgGraphics = createGraphics();
+        imgGraphics.setRenderingHints(output.renderingHints());
+        painter.accept(imgGraphics);
         imgGraphics.dispose();
     }
 
