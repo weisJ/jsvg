@@ -31,7 +31,7 @@ import com.github.weisj.jsvg.renderer.Output;
 /**
  * A utility class that holds a {@link Graphics2D} object and is able to reset it back to its original configuration,
  * as this is often more efficient than creating a new graphics instance.
- * <
+ * <p>
  * This class does not track what parameters have been modified, nor does it reset all configuration parameters. Which
  * parameters are reset should be expanded as needed.
  */
