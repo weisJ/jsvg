@@ -91,6 +91,35 @@ class MyComponent extends JComponent {
 }
 ````
 
+#### Rendering Quality
+
+The rendering quality can be adjusted by setting the `RenderingHints` of the `Graphics2D` object. The following
+properties are recommended:
+
+````java
+g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+````
+
+If either of these values are not set or have their respective default values (`VALUE_ANTIALIAS_DEFAULT` and `VALUE_STROKE_DEFAULT`)
+JSVG will automatically set them to the recommended values above.
+
+JSVG also supports custom SVG specific rendering hints. These can be set using the `SVGRenderingHints` class. For example:
+
+````java
+// Will use the value of RenderingHints.KEY_ANTIALIASING by default
+g.setRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING, SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON);
+````
+
+Additionally clipping with a `<clipPath>` element does not use soft-clipping (i.e. anti-aliasing along the edges of the clip shape).
+This can be enabled by setting
+
+````java
+g.setRenderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING, SVGRenderingHints.VALUE_SOFT_CLIPPING_ON);
+````
+
+In the future this will get stabilized and be enabled by default.
+
 ## Supported features
 
 For supported elements most of the attributes which apply to them are implemented.
