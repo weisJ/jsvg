@@ -91,6 +91,8 @@ class MyComponent extends JComponent {
 }
 ````
 
+For more in-depth examples see #Usage examples below.
+
 #### Rendering Quality
 
 The rendering quality can be adjusted by setting the `RenderingHints` of the `Graphics2D` object. The following
@@ -251,3 +253,190 @@ For supported elements most of the attributes which apply to them are implemente
 | :warning:cursor | :x:                     |
 | script          | :x:                     |
 | style           | :ballot_box_with_check: |
+
+
+## Usage examples
+
+To render an SVG to a swing component you can start from the following example:
+
+````java
+import javax.swing.*;
+import java.awt.*;
+import java.net.URL;
+
+import com.github.weisj.jsvg.*;
+import com.github.weisj.jsvg.attributes.*;
+import com.github.weisj.jsvg.parser.*;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+
+public class RenderExample {
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            SVGLoader loader = new SVGLoader();
+
+            URL svgUrl = RenderExample.class.getResource("path/to/image.svg");
+            SVGDocument document = loader.load(Objects.requireNonNull(svgUrl, "SVG file not found"));
+
+            JFrame frame = new JFrame();
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frame.setPreferredSize(new Dimension(400, 400));
+            frame.setContentPane(new SVGPanel(Objects.requireNonNull(document)));
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+
+    static class SVGPanel extends JPanel {
+        private @NotNull final SVGDocument document;
+
+        SVGPanel(@NotNull SVGDocument document) {
+            this.document = document;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            ((Graphics2D) g).setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+            ((Graphics2D) g).setRenderingHint(
+                RenderingHints.KEY_STROKE_CONTROL,
+                RenderingHints.VALUE_STROKE_PURE);
+
+            document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
+        }
+    }
+}
+````
+
+You can even change the color of svg elements by using a suitable `DomProcessor` together with a custom implementation
+of `SVGPaint`. Lets take the following SVG as an example:
+
+````svg
+
+````svg
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+    <rect x="0" y="0" width="100%" height="40%" id="myRect"/>
+    <rect x="0" y="60" width="100%" height="40%"/>
+</svg>
+````
+
+We want to change the color if the first rectangle at runtime. We start by loading the SVG using a custom `ParserProvider`
+which returns a `DomProcessor`for the pre-processing step. The `DomProcessor` will allow us to change attributes
+of the SVG elements before they are fully parsed.
+
+````java
+CustomColorsProcessor processor = new CustomColorsProcessor(List.of("myRect"));
+document = loader.load(svgUrl, new DefaultParserProvider() {
+    @Override
+    public DomProcessor createPreProcessor() {
+        return processor;
+    }
+});
+````
+
+The heavy lifting is done by the `CustomColorsProcessor` class which looks like this:
+
+````java
+class CustomColorsProcessor implements DomProcessor {
+
+    private final Map<String, DynamicAWTSvgPaint> customColors = new HashMap<>();
+
+    public CustomColorsProcessor(@NotNull List<String> elementIds) {
+        for (String elementId : elementIds) {
+            customColors.put(elementId, new DynamicAWTSvgPaint(Color.BLACK));
+        }
+    }
+
+    @Nullable DynamicAWTSvgPaint customColorForId(@NotNull String id) {
+        return customColors.get(id);
+    }
+
+    @Override
+    public void process(@NotNull ParsedElement root) {
+        processImpl(root);
+        root.children().forEach(this::process);
+    }
+
+    private void processImpl(ParsedElement element) {
+        // Obtain the id of the element
+        // Note: There that Element also has a node() method to obtain the SVGNode. However during the pre-processing
+        // phase the SVGNode is not yet fully parsed and doesn't contain any non-defaulted information.
+        String nodeId = element.id();
+        
+        // Check if this element is one of the elements we want to change the color of
+        if (customColors.containsKey(nodeId)) {
+            // The attribute node contains all the attributes of the element specified in the markup
+            // Even those which aren't valid for the element
+            AttributeNode attributeNode = element.attributeNode();
+            DynamicAWTSvgPaint dynamicColor = customColors.get(nodeId);
+
+            // This assumed that the fill attribute is a color and not a gradient or pattern.
+            Color color = attributeNode.getColor("fill");
+
+            dynamicColor.setColor(color);
+
+            // This can be anything as long as it's unique
+            String uniqueIdForDynamicColor = UUID.randomUUID().toString();
+
+            // Register the dynamic color as a custom element
+            element.registerNamedElement(uniqueIdForDynamicColor, dynamicColor);
+
+            // Refer to the custom element as the fill attribute
+            attributeNode.attributes().put("fill", uniqueIdForDynamicColor);
+            
+            // Note: This class can easily be adapted to also support changing the stroke color.
+            // With a bit more work it could also support changing the color of gradients and patterns.
+        }
+    }
+}
+
+class DynamicAWTSvgPaint implements SimplePaintSVGPaint {
+
+    private @NotNull Color color;
+
+    DynamicAWTSvgPaint(@NotNull Color color) {
+        this.color = color;
+    }
+
+    public void setColor(@NotNull Color color) {
+        this.color = color;
+    }
+    
+    public @NotNull Color color() {
+        return color;
+    }
+
+    @Override
+    public @NotNull Paint paint() {
+        return color;
+    }
+}
+````
+
+Now we simply have to obtain the `DynamicAWTSvgPaint` instance for the element we want to change the color of and
+hook it up in our UI:
+
+````java
+DynamicAWTSvgPaint dynamicColor = processor.customColorForId("myRect");
+
+SVGPanel panel = new SVGPanel(document);
+JButton button = new JButton("Change color");
+button.addActionListener(e -> {
+    Color newColor = JColorChooser.showDialog(panel, "Choose a color", dynamicColor.color());
+    if (newColor != null) {
+        dynamicColor.setColor(newColor);
+        // Make sure to repaint the panel to see the changes
+        panel.repaint();
+    }
+});
+JPanel content = new JPanel(new BorderLayout());
+content.add(panel, BorderLayout.CENTER);
+content.add(button, BorderLayout.SOUTH);
+frame.setContentPane(content);
+````
+
