@@ -317,11 +317,9 @@ You can even change the color of svg elements by using a suitable `DomProcessor`
 of `SVGPaint`. Lets take the following SVG as an example:
 
 ````svg
-
-````svg
 <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-    <rect x="0" y="0" width="100%" height="40%" id="myRect"/>
-    <rect x="0" y="60" width="100%" height="40%"/>
+    <rect x="0" y="0" width="100%" height="40%" id="myRect"></rect>
+    <rect x="0" y="60" width="100%" height="40%"></rect>
 </svg>
 ````
 
@@ -367,7 +365,7 @@ class CustomColorsProcessor implements DomProcessor {
         // Note: There that Element also has a node() method to obtain the SVGNode. However during the pre-processing
         // phase the SVGNode is not yet fully parsed and doesn't contain any non-defaulted information.
         String nodeId = element.id();
-        
+
         // Check if this element is one of the elements we want to change the color of
         if (customColors.containsKey(nodeId)) {
             // The attribute node contains all the attributes of the element specified in the markup
@@ -388,7 +386,7 @@ class CustomColorsProcessor implements DomProcessor {
 
             // Refer to the custom element as the fill attribute
             attributeNode.attributes().put("fill", uniqueIdForDynamicColor);
-            
+
             // Note: This class can easily be adapted to also support changing the stroke color.
             // With a bit more work it could also support changing the color of gradients and patterns.
         }
@@ -406,7 +404,7 @@ class DynamicAWTSvgPaint implements SimplePaintSVGPaint {
     public void setColor(@NotNull Color color) {
         this.color = color;
     }
-    
+
     public @NotNull Color color() {
         return color;
     }
@@ -439,4 +437,3 @@ content.add(panel, BorderLayout.CENTER);
 content.add(button, BorderLayout.SOUTH);
 frame.setContentPane(content);
 ````
-
