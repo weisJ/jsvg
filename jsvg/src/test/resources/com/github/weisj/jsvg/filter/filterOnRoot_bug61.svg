@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"
+	viewBox="0 0 100 100" filter="url(#drop-shadow)">
+	<circle cx="50" cy="50" r="40" fill="cornflowerBlue" />
+	<defs>
+		<filter id="drop-shadow">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+			<feOffset dx="4" dy="4" result="offsetblur" />
+			<feFlood flood-color="black" flood-opacity="0.5" />
+			<feComposite in2="offsetblur" operator="in" />
+			<feMerge>
+				<feMergeNode />
+				<feMergeNode in="SourceGraphic" />
+			</feMerge>
+		</filter>
+	</defs>
+</svg>
