@@ -124,7 +124,7 @@ public final class ShapeUtil {
 
         a1.intersect(a2);
         if (a1.isRectangular()) {
-            return a1.getBounds();
+            return a1.getBounds2D();
         }
 
         return a1;

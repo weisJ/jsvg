@@ -91,7 +91,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         }
         Area areaShape = new Area(shape);
         if (areaShape.isRectangular()) {
-            return areaShape.getBounds();
+            return areaShape.getBounds2D();
         }
         return areaShape;
     }
@@ -100,7 +100,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
             @NotNull Rectangle2D objectBounds, @NotNull Shape clipShape) {
         Rectangle2D transformedClipBounds = GeometryUtil.containingBoundsAfterTransform(
                 clipPathUnits.viewTransform(objectBounds),
-                clipShape.getBounds());
+                clipShape.getBounds2D());
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
                 transformedClipBounds, objectBounds, clipPathUnits);
