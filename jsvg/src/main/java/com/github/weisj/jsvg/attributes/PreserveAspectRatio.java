@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,24 +36,24 @@ public final class PreserveAspectRatio {
     private enum AlignType {
         Min {
             @Override
-            float align(float size1, float size2) {
+            double align(double size1, double size2) {
                 return 0;
             }
         },
         Mid {
             @Override
-            float align(float size1, float size2) {
+            double align(double size1, double size2) {
                 return (size1 - size2) / 2;
             }
         },
         Max {
             @Override
-            float align(float size1, float size2) {
+            double align(double size1, double size2) {
                 return size1 - size2;
             }
         };
 
-        abstract float align(float size1, float size2);
+        abstract double align(double size1, double size2);
     }
 
     public enum Align {
@@ -216,8 +216,8 @@ public final class PreserveAspectRatio {
         if (align == Align.None) {
             viewTransform.scale(size.width / viewBox.width, size.height / viewBox.height);
         } else {
-            float xScale = size.width / viewBox.width;
-            float yScale = size.height / viewBox.height;
+            double xScale = size.width / viewBox.width;
+            double yScale = size.height / viewBox.height;
 
             switch (meetOrSlice) {
                 case Meet:
