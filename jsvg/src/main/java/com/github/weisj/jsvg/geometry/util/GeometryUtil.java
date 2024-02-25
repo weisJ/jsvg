@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -148,6 +148,14 @@ public final class GeometryUtil {
                 bounds.getHeight() + grow.top() + grow.bottom());
     }
 
+    public static @NotNull Rectangle2D grow(@NotNull Rectangle2D bounds, double increase) {
+        return new Rectangle2D.Double(
+                bounds.getX() - increase,
+                bounds.getY() - increase,
+                bounds.getWidth() + 2 * increase,
+                bounds.getHeight() + 2 * increase);
+    }
+
     public static @NotNull FloatInsets max(@NotNull FloatInsets in1, @NotNull FloatInsets in2) {
         return new FloatInsets(
                 Math.max(in1.top(), in2.top()),
@@ -174,5 +182,18 @@ public final class GeometryUtil {
 
     public static @NotNull String compactRepresentation(@NotNull Rectangle2D rect) {
         return "[" + rect.getX() + ", " + rect.getY() + ", " + rect.getWidth() + "x" + rect.getHeight() + "]";
+    }
+
+    public static @NotNull Rectangle2D toIntegerBounds(@NotNull Rectangle2D in, @NotNull Rectangle2D out) {
+        double minY = Math.floor(in.getMinY());
+        double minX = Math.floor(in.getMinX());
+        double maxX = Math.ceil(in.getMaxX());
+        double maxY = Math.ceil(in.getMaxY());
+        out.setFrame(minX, minY, maxX - minX, maxY - minY);
+        return out;
+    }
+
+    public static @NotNull Rectangle2D adjustForAliasing(@NotNull Rectangle2D r) {
+        return toIntegerBounds(r, r);
     }
 }
