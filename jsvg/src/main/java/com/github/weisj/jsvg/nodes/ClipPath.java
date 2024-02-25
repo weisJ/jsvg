@@ -100,7 +100,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
             @NotNull Rectangle2D objectBounds, @NotNull Shape clipShape) {
         Rectangle2D transformedClipBounds = GeometryUtil.containingBoundsAfterTransform(
                 clipPathUnits.viewTransform(objectBounds),
-                clipShape.getBounds2D());
+                GeometryUtil.adjustForAliasing(clipShape.getBounds2D()));
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
                 transformedClipBounds, objectBounds, clipPathUnits);

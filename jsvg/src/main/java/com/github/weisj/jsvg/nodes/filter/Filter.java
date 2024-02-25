@@ -159,6 +159,7 @@ public final class Filter extends ContainerNode {
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
         Rectangle2D clipHeuristicBounds = clipHeuristic.bounds().createIntersection(
                 GeometryUtil.grow(graphicsClipBounds, insets));
+        GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createCompatibleTransparentImage, context, clipHeuristicBounds,

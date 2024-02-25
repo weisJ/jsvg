@@ -61,8 +61,9 @@ public final class BlittableImage {
     public static @NotNull BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
             @NotNull RenderContext context, @Nullable Rectangle2D clipBounds,
             @NotNull Rectangle2D bounds, @NotNull Rectangle2D objectBounds, @NotNull UnitType contentUnits) {
+        Rectangle2D adjustedElementBounds = GeometryUtil.toIntegerBounds(bounds, new Rectangle2D.Double());
         Rectangle2D boundsInUserSpace =
-                GeometryUtil.containingBoundsAfterTransform(context.userSpaceTransform(), bounds);
+                GeometryUtil.containingBoundsAfterTransform(context.userSpaceTransform(), adjustedElementBounds);
         Rectangle2D boundsInRootSpace =
                 GeometryUtil.containingBoundsAfterTransform(context.rootTransform(), boundsInUserSpace);
 
@@ -74,12 +75,10 @@ public final class BlittableImage {
             Rectangle2D.intersect(clipBoundsInRootSpace, boundsInRootSpace, boundsInRootSpace);
         }
 
-        int imgX = (int) Math.floor(boundsInRootSpace.getX());
-        int imgY = (int) Math.floor(boundsInRootSpace.getY());
-        int imgWidth = (int) Math.ceil(boundsInRootSpace.getX() + boundsInRootSpace.getWidth()) - imgX;
-        int imgHeight = (int) Math.ceil(boundsInRootSpace.getY() + boundsInRootSpace.getHeight()) - imgY;
+        // Convert to integer coordinates to ensure we donÄt cut off any pixels due to rounding errors.
+        GeometryUtil.adjustForAliasing(boundsInRootSpace);
 
-        Rectangle2D adjustedUserSpaceBounds = new Rectangle2D.Double(imgX, imgY, imgWidth, imgHeight);
+        Rectangle2D adjustedUserSpaceBounds = boundsInRootSpace.getBounds2D();
         try {
             adjustedUserSpaceBounds = GeometryUtil
                     .containingBoundsAfterTransform(context.rootTransform().createInverse(), adjustedUserSpaceBounds);
@@ -87,17 +86,17 @@ public final class BlittableImage {
             throw new RuntimeException(e);
         }
 
+        int imgWidth = (int) boundsInRootSpace.getWidth();
+        int imgHeight = (int) boundsInRootSpace.getHeight();
         BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null, imgWidth, imgHeight);
 
         RenderContext imageContext = RenderContext.createInitial(context.platformSupport(),
                 contentUnits.deriveMeasure(context.measureContext()));
 
-        AffineTransform rootTransform = new AffineTransform();
 
         Rectangle2D ub = adjustedUserSpaceBounds;
-        // Adjust for subpixel alignment
-        rootTransform.translate(boundsInRootSpace.getX() - imgX, boundsInRootSpace.getY() - imgY);
 
+        AffineTransform rootTransform = new AffineTransform();
         if (contentUnits == UnitType.ObjectBoundingBox) {
             rootTransform.scale(
                     objectBounds.getWidth() * img.getWidth() / ub.getWidth(),
