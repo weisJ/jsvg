@@ -47,6 +47,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.*;
+import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.Container)
@@ -168,7 +169,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         imgGraphics.setRenderingHints(output.renderingHints());
         imgGraphics.scale(img.getWidth() / patternBounds.width, img.getHeight() / patternBounds.height);
 
-        RenderContext patternContext = RenderContext.createInitial(null, patternContentUnits.deriveMeasure(measure));
+        RenderContext patternContext =
+                RenderContext.createInitial(new NullPlatformSupport(), patternContentUnits.deriveMeasure(measure));
         // TODO: What is the correct root transform here?
         patternContext.setRootTransform(imgGraphics.getTransform());
 

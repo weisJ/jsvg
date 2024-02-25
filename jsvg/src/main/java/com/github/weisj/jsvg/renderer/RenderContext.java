@@ -57,7 +57,7 @@ public final class RenderContext {
     private final @NotNull AffineTransform userSpaceTransform;
 
 
-    public static @NotNull RenderContext createInitial(@Nullable PlatformSupport awtSupport,
+    public static @NotNull RenderContext createInitial(@NotNull PlatformSupport awtSupport,
             @NotNull MeasureContext measureContext) {
         return new RenderContext(awtSupport,
                 new AffineTransform(),
