@@ -22,6 +22,9 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
@@ -50,6 +53,28 @@ public final class SVGViewer {
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
             iconBox.setSelectedItem("tmp.svg");
+
+            JComponent contentPane = (JComponent) frame.getContentPane();
+            contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.META_DOWN_MASK),
+                    "selectPreviousIcon");
+            contentPane.getActionMap().put("selectPreviousIcon", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int nextIndex = Math.max(0, iconBox.getSelectedIndex() - 1);
+                    iconBox.setSelectedIndex(nextIndex);
+                }
+            });
+            contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
+                    KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.META_DOWN_MASK),
+                    "selectNextIcon");
+            contentPane.getActionMap().put("selectNextIcon", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int nextIndex = Math.min(iconBox.getItemCount() - 1, iconBox.getSelectedIndex() + 1);
+                    iconBox.setSelectedIndex(nextIndex);
+                }
+            });
 
             SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
             svgPanel.setPreferredSize(new Dimension(1000, 600));
@@ -90,6 +115,11 @@ public final class SVGViewer {
             JCheckBox softClipping = new JCheckBox("Soft clipping");
             softClipping.addActionListener(e -> svgPanel.setSoftClipping(softClipping.isSelected()));
             renderingMode.add(softClipping);
+            renderingMode.add(Box.createHorizontalStrut(5));
+
+            JCheckBox lowRes = new JCheckBox("Render at intrinsic resolution");
+            lowRes.addActionListener(e -> svgPanel.setRenderAtLowResolution(lowRes.isSelected()));
+            renderingMode.add(lowRes);
             renderingMode.add(Box.createHorizontalGlue());
 
             JButton resourceInfo = new JButton("Print Memory");
@@ -141,6 +171,7 @@ public final class SVGViewer {
         private final JSVGCanvas jsvgCanvas = new JSVGCanvas();
         private boolean paintShape;
         private boolean softClipping;
+        private boolean lowResolution;
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
@@ -211,6 +242,11 @@ public final class SVGViewer {
             repaint();
         }
 
+        public void setRenderAtLowResolution(boolean lowResolution) {
+            this.lowResolution = lowResolution;
+            repaint();
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -222,17 +258,40 @@ public final class SVGViewer {
             switch (mode) {
                 case JSVG:
                     ViewBox viewBox = new ViewBox(0, 0, getWidth(), getHeight());
-                    ((Graphics2D) g).setRenderingHint(
+                    Graphics2D renderGraphics = (Graphics2D) g.create();
+                    BufferedImage img = null;
+                    if (this.lowResolution) {
+                        viewBox = new ViewBox(document.size());
+                        img = new BufferedImage((int) viewBox.width, (int) viewBox.height, BufferedImage.TYPE_INT_ARGB);
+                        renderGraphics = img.createGraphics();
+                    }
+                    renderGraphics.setRenderingHint(
+                            RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    renderGraphics.setRenderingHint(
+                            RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                    renderGraphics.setRenderingHint(
                             SVGRenderingHints.KEY_SOFT_CLIPPING,
                             softClipping ? SVGRenderingHints.VALUE_SOFT_CLIPPING_ON
                                     : SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF);
                     if (paintShape) {
                         Shape shape = document.computeShape(viewBox);
-                        g.setColor(Color.MAGENTA);
-                        ((Graphics2D) g).fill(shape);
+                        renderGraphics.setColor(Color.MAGENTA);
+                        renderGraphics.fill(shape);
                     } else {
-                        document.render(this, (Graphics2D) g, viewBox);
+                        document.render(this, renderGraphics, viewBox);
                     }
+
+                    if (img != null) {
+                        int w = img.getWidth();
+                        int h = img.getHeight();
+                        double scale = getWidth() < getHeight() ? (double) getWidth() / w : (double) getHeight() / h;
+                        g.translate(getWidth() / 2, getHeight() / 2);
+                        ((Graphics2D) g).scale(scale, scale);
+                        g.translate(-w / 2, -h / 2);
+                        g.drawImage(img, 0, 0, w, h, this);
+                    }
+                    renderGraphics.dispose();
+
                     break;
                 case SVG_SALAMANDER:
                     icon.paintIcon(this, g, 0, 0);
