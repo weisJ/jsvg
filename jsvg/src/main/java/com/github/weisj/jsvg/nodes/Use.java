@@ -146,17 +146,14 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
 
             // Todo: Vector Effects
 
-            try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(referencedNode, context, output, this)) {
-                if (info == null) return;
-                if (referencedNode instanceof CommonInnerViewContainer) {
-                    FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
-                    if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
-                    if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
-                    CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
-                    view.renderWithSize(targetViewBox, view.viewBox(info.context), info.context, info.output());
-                } else {
-                    info.renderable.render(info.context, info.output());
-                }
+            if (referencedNode instanceof CommonInnerViewContainer) {
+                FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
+                if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
+                if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
+                CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
+                NodeRenderer.renderWithSize(view, targetViewBox, context, output, this);
+            } else {
+                NodeRenderer.renderNode(referencedNode, context, output, this);
             }
         }
     }

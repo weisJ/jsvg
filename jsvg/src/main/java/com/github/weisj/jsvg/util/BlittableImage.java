@@ -141,9 +141,7 @@ public final class BlittableImage {
         Graphics2D imgGraphics = createGraphics();
         Output imgOutput = new Graphics2DOutput(imgGraphics);
         imgGraphics.setRenderingHints(parentOutput.renderingHints());
-        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(node, context, imgOutput, instantiator)) {
-            if (info != null) info.renderable.render(info.context, info.output());
-        }
+        NodeRenderer.renderNode(node, context, imgOutput, instantiator);
         imgGraphics.dispose();
     }
 

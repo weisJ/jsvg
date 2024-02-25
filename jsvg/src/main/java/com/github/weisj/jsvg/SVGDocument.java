@@ -24,7 +24,6 @@ package com.github.weisj.jsvg;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
-import java.util.Objects;
 
 import javax.swing.*;
 
@@ -103,10 +102,7 @@ public final class SVGDocument {
         output.applyClip(bounds);
         output.translate(bounds.x, bounds.y);
 
-        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(root, context, output, null)) {
-            Objects.requireNonNull(info);
-            root.renderWithSize(bounds.size(), root.viewBox(context), info.context, info.output);
-        }
+        NodeRenderer.renderWithSize(root, bounds.size(), context, output, null);
     }
 
     private @NotNull RenderContext prepareRenderContext(

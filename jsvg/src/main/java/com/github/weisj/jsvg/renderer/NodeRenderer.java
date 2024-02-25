@@ -31,11 +31,13 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.*;
 
@@ -44,10 +46,10 @@ public final class NodeRenderer {
 
     private NodeRenderer() {}
 
-    public static class Info implements AutoCloseable {
-        public final @NotNull Renderable renderable;
-        public final @NotNull RenderContext context;
-        public final @NotNull Output output;
+    private static class Info implements AutoCloseable {
+        protected final @NotNull RenderContext context;
+        protected final @NotNull Output output;
+        private final @NotNull Renderable renderable;
 
         Info(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Output output) {
             this.renderable = renderable;
@@ -90,16 +92,30 @@ public final class NodeRenderer {
 
         @Override
         public void close() {
-            filter.applyFilter(this.output, context, filterInfo);
-            filterInfo.blitImage(this.output, context);
+            Output previousOutput = this.output;
+            filter.applyFilter(previousOutput, context, filterInfo);
+            filterInfo.blitImage(previousOutput, context);
             filterInfo.close();
             super.close();
         }
     }
 
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output) {
-        try (Info info = createRenderInfo(node, context, output, null)) {
+        renderNode(node, context, output, null);
+    }
+
+    public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output,
+            @Nullable Instantiator instantiator) {
+        try (Info info = createRenderInfo(node, context, output, instantiator)) {
             if (info != null) info.renderable.render(info.context, info.output());
+        }
+    }
+
+    public static void renderWithSize(@NotNull BaseInnerViewContainer node, @NotNull FloatSize size,
+            @NotNull RenderContext context, @NotNull Output output,
+            @Nullable Instantiator instantiator) {
+        try (Info info = createRenderInfo(node, context, output, instantiator)) {
+            if (info != null) node.renderWithSize(size, node.viewBox(context), info.context, info.output());
         }
     }
 

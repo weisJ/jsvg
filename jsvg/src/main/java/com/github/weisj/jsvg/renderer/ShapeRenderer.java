@@ -281,9 +281,7 @@ public final class ShapeRenderer {
         }
         markerContext.rotate(markerOutput, rotation);
 
-        try (NodeRenderer.Info info = NodeRenderer.createRenderInfo(marker, markerContext, markerOutput, shapeNode)) {
-            if (info != null) info.renderable.render(info.context, info.output());
-        }
+        NodeRenderer.renderNode(marker, markerContext, markerOutput, shapeNode);
 
         markerOutput.dispose();
     }
