@@ -244,12 +244,12 @@ public final class Filter extends ContainerNode {
         }
 
         public void blitImage(@NotNull Output output, @NotNull RenderContext context) {
-            Rectangle2D imageBounds = imageBounds();
-
             if (DEBUG) {
                 output.debugPaint(g -> {
+                    Rectangle2D imageBounds = imageBounds();
                     g.setColor(Color.RED);
-                    g.draw(imageBounds);
+                    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+                    g.fill(imageBounds);
                 });
             }
 
