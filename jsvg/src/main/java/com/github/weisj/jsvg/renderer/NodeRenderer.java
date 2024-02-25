@@ -119,12 +119,13 @@ public final class NodeRenderer {
         }
     }
 
-    public static @NotNull RenderContext createChildContext(@NotNull SVGNode node, @NotNull RenderContext context,
+    public static @NotNull RenderContext createChildContext(@NotNull Renderable node, @NotNull RenderContext context,
             @Nullable Instantiator instantiator) {
+        if (!node.shouldEstablishChildContext()) return context;
         return setupRenderContext(instantiator, node, context);
     }
 
-    public static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
+    private static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
             @NotNull Output output, @Nullable Instantiator instantiator) {
         if (!(node instanceof Renderable)) return null;
         Renderable renderable = (Renderable) node;
@@ -133,7 +134,7 @@ public final class NodeRenderer {
             return null;
         }
         if (!renderable.isVisible(context)) return null;
-        RenderContext childContext = createChildContext(node, context, instantiator);
+        RenderContext childContext = createChildContext(renderable, context, instantiator);
 
         Output childOutput = output.createChild();
 

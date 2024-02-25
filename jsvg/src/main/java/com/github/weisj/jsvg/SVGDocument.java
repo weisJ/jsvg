@@ -111,7 +111,6 @@ public final class SVGDocument {
             @Nullable ViewBox bounds) {
         float defaultEm = computePlatformFontSize(platformSupport, output);
         float defaultEx = SVGFont.exFromEm(defaultEm);
-        // TODO: Abstract away Graphics2D to allow a "ShapeCollector" context.
         MeasureContext initialMeasure = bounds != null
                 ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx)
                 : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx);

@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.nodes.SVG;
+import com.github.weisj.jsvg.nodes.*;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.Output;
@@ -68,8 +68,12 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         overflow = attributeNode.getEnum("overflow", defaultOverflow());
     }
 
+    protected void renderWithCurrentViewBox(@NotNull RenderContext context, @NotNull Output output) {
+        super.render(context, output);
+    }
+
     @Override
-    public final void render(@NotNull RenderContext context, @NotNull Output output) {
+    public void render(@NotNull RenderContext context, @NotNull Output output) {
         renderWithSize(size(context), viewBox(context), null, context, output);
     }
 
@@ -136,7 +140,6 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
             context.setRootTransform(output.transform());
             innerContext.setRootTransform(output.transform());
         }
-
-        super.render(innerContext, output);
+        renderWithCurrentViewBox(innerContext, output);
     }
 }

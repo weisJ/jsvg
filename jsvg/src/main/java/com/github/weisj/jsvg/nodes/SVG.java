@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -38,6 +39,9 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
+import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Container, Category.Structural})
 @PermittedContent(
@@ -57,6 +61,7 @@ public final class SVG extends CommonInnerViewContainer {
     private static final float FALLBACK_HEIGHT = 150;
 
     private boolean isTopLevel;
+    private boolean inNonRootMode;
 
     @Override
     public @NotNull String tagName() {
@@ -64,12 +69,28 @@ public final class SVG extends CommonInnerViewContainer {
     }
 
     public boolean isTopLevel() {
-        return isTopLevel;
+        return isTopLevel && !inNonRootMode;
     }
+
 
     @Override
     public boolean shouldTransform() {
-        return !isTopLevel();
+        return !isTopLevel;
+    }
+
+    @Override
+    public @Nullable ClipPath clipPath() {
+        return !isTopLevel() ? super.clipPath() : null;
+    }
+
+    @Override
+    public @Nullable Mask mask() {
+        return !isTopLevel() ? super.mask() : null;
+    }
+
+    @Override
+    public @Nullable Filter filter() {
+        return !isTopLevel() ? super.filter() : null;
     }
 
     @Override
@@ -105,5 +126,35 @@ public final class SVG extends CommonInnerViewContainer {
                         .resolveWidth(topLevelContext),
                 height.orElseIfUnspecified(viewBox != null ? viewBox.height : FALLBACK_HEIGHT)
                         .resolveHeight(topLevelContext));
+    }
+
+    @Override
+    public boolean shouldEstablishChildContext() {
+        // If we redispatch we can skip creating a new child context. All values have already been resolved.
+        return !isTopLevel || !inNonRootMode;
+    }
+
+    @Override
+    protected void renderWithCurrentViewBox(@NotNull RenderContext context, @NotNull Output output) {
+        boolean needsHandlingAsChildNode = super.mask() != null
+                || super.filter() != null
+                || super.clipPath() != null;
+        if (needsHandlingAsChildNode) {
+            // TODO: Handle this more elegantly
+            inNonRootMode = true;
+            NodeRenderer.renderNode(this, context, output);
+            inNonRootMode = false;
+        } else {
+            super.renderWithCurrentViewBox(context, output);
+        }
+    }
+
+    @Override
+    public void render(@NotNull RenderContext context, @NotNull Output output) {
+        if (inNonRootMode) {
+            super.renderWithCurrentViewBox(context, output);
+        } else {
+            renderWithSize(size(context), viewBox(context), null, context, output);
+        }
     }
 }
