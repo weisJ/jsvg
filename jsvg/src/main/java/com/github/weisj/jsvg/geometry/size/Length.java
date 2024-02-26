@@ -176,12 +176,12 @@ public final class Length {
         return new Length(Unit.PERCENTAGE, raw() * 100);
     }
 
-    public Length orElseIfUnspecified(float value) {
+    public @NotNull Length orElseIfUnspecified(float value) {
         if (isUnspecified()) return Unit.Raw.valueOf(value);
         return this;
     }
 
-    public Length multiply(float scalingFactor) {
+    public @NotNull Length multiply(float scalingFactor) {
         if (scalingFactor == 0) return ZERO;
         return new Length(unit(), scalingFactor * raw());
     }
