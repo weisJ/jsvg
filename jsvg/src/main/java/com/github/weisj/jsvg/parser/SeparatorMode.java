@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,7 +22,24 @@
 package com.github.weisj.jsvg.parser;
 
 public enum SeparatorMode {
-    COMMA_ONLY,
-    WHITESPACE_ONLY,
-    COMMA_AND_WHITESPACE
+    COMMA_ONLY(',', false),
+    SEMICOLON_ONLY(';', false),
+    WHITESPACE_ONLY((char) 0, true),
+    COMMA_AND_WHITESPACE(',', true);
+
+    private final boolean allowWhitespace;
+    private final char separator;
+
+    SeparatorMode(char separator, boolean allowWhitespace) {
+        this.allowWhitespace = allowWhitespace;
+        this.separator = separator;
+    }
+
+    public boolean allowWhitespace() {
+        return allowWhitespace;
+    }
+
+    public char separator() {
+        return separator;
+    }
 }

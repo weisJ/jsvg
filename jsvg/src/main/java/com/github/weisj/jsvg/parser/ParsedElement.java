@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
+import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 public final class ParsedElement {
@@ -44,6 +45,7 @@ public final class ParsedElement {
     private final @NotNull SVGNode node;
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
+    private final @NotNull List<@NotNull ParsedElement> animationElements = new ArrayList<>();
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
 
@@ -92,6 +94,9 @@ public final class ParsedElement {
     }
 
     void addChild(ParsedElement parsedElement) {
+        if (Category.hasCategory(parsedElement.node, Category.Animation)) {
+            animationElements.add(parsedElement);
+        }
         children.add(parsedElement);
         if (node instanceof Container) {
             ((Container<?>) node).addChild(parsedElement.id, parsedElement.node);

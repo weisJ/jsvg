@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.time.Duration;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
@@ -199,6 +200,10 @@ public final class AttributeNode {
 
     public @NotNull Length getLength(@NotNull String key, @NotNull Length fallback) {
         return getLengthInternal(key, fallback);
+    }
+
+    public @NotNull Duration getDuration(@NotNull String key, @NotNull Duration fallback) {
+        return loadHelper.attributeParser().parseDuration(getValue(key), fallback);
     }
 
     @Contract("_,!null -> !null")

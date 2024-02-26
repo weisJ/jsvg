@@ -35,6 +35,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.time.Duration;
+import com.github.weisj.jsvg.attributes.time.TimeUnit;
 import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
@@ -53,21 +55,12 @@ public final class AttributeParser {
 
     @Contract("_,!null -> !null")
     public @Nullable Length parseLength(@Nullable String value, @Nullable Length fallback) {
-        if (value == null) return fallback;
-        Unit unit = Unit.Raw;
-        String lower = value.toLowerCase(Locale.ENGLISH);
-        for (Unit u : Unit.units()) {
-            if (lower.endsWith(u.suffix())) {
-                unit = u;
-                break;
-            }
-        }
-        String str = lower.substring(0, lower.length() - unit.suffix().length());
-        try {
-            return unit.valueOf(Float.parseFloat(str));
-        } catch (NumberFormatException e) {
-            return fallback;
-        }
+        return parseSuffixUnit(value, Unit.Raw, fallback);
+    }
+
+    @Contract("_,!null -> !null")
+    public @Nullable Duration parseDuration(@Nullable String value, @Nullable Duration fallback) {
+        return parseSuffixUnit(value, TimeUnit.Raw, fallback);
     }
 
     public @Percentage float parsePercentage(@Nullable String value, float fallback) {
@@ -84,6 +77,26 @@ public final class AttributeParser {
                 parsed = Float.parseFloat(value);
             }
             return Math.max(min, Math.min(max, parsed));
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    @Contract("_,_,!null -> !null")
+    private <U, V> @Nullable V parseSuffixUnit(@Nullable String value, @NotNull SuffixUnit<U, V> defaultUnit,
+            @Nullable V fallback) {
+        if (value == null) return fallback;
+        SuffixUnit<U, V> unit = defaultUnit;
+        String lower = value.toLowerCase(Locale.ENGLISH);
+        for (SuffixUnit<U, V> u : defaultUnit.units()) {
+            if (lower.endsWith(u.suffix())) {
+                unit = u;
+                break;
+            }
+        }
+        String str = lower.substring(0, lower.length() - unit.suffix().length());
+        try {
+            return unit.valueOf(Float.parseFloat(str));
         } catch (NumberFormatException e) {
             return fallback;
         }
@@ -184,7 +197,7 @@ public final class AttributeParser {
         for (; i < max; i++) {
             char c = value.charAt(i);
             if (Character.isWhitespace(c)) {
-                if (!inWhiteSpace && separatorMode != SeparatorMode.COMMA_ONLY && i - start > 0) {
+                if (!inWhiteSpace && separatorMode.allowWhitespace() && i - start > 0) {
                     list.add(value.substring(start, i));
                     start = i + 1;
                 }
@@ -192,7 +205,7 @@ public final class AttributeParser {
                 continue;
             }
             inWhiteSpace = false;
-            if (c == ',' && separatorMode != SeparatorMode.WHITESPACE_ONLY) {
+            if (separatorMode.separator() != 0 && c == separatorMode.separator()) {
                 list.add(value.substring(start, i));
                 start = i + 1;
             }
@@ -310,4 +323,5 @@ public final class AttributeParser {
     public @NotNull PaintParser paintParser() {
         return paintParser;
     }
+
 }
