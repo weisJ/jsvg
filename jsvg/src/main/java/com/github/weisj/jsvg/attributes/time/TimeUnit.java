@@ -19,49 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.geometry.size;
-
-import java.util.Locale;
+package com.github.weisj.jsvg.attributes.time;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.SuffixUnit;
 
-public enum Unit implements SuffixUnit<Unit, Length> {
-    PX,
-    CM,
-    MM,
-    IN,
-    EM,
-    REM,
-    EX,
-    CH,
-    PT,
-    PC,
-    PERCENTAGE("%"),
-    Raw("");
 
-    private static final Unit[] units = values();
+public enum TimeUnit implements SuffixUnit<TimeUnit, Duration> {
+    Hour(60 * 60 * 1000, "h"),
+    Minute(60 * 1000, "min"),
+    Second(1000, "s"),
+    Millisecond(1, "ms"),
+    Raw(1000, ""); // Same as seconds
+
+    private static final TimeUnit[] units = values();
 
     @Override
-    public @NotNull Unit @NotNull [] units() {
+    public @NotNull TimeUnit @NotNull [] units() {
         return units;
     }
 
     private final @NotNull String suffix;
+    private final long milliseconds;
 
-    Unit(@NotNull String suffix) {
+    TimeUnit(long milliseconds, @NotNull String suffix) {
         this.suffix = suffix;
-    }
-
-    Unit() {
-        this.suffix = name().toLowerCase(Locale.ENGLISH);
+        this.milliseconds = milliseconds;
     }
 
     @Override
-    public @NotNull Length valueOf(float value) {
-        if (value == 0) return Length.ZERO;
-        return new Length(this, value);
+    public @NotNull Duration valueOf(float value) {
+        if (value == 0) return new Duration(0);
+        return new Duration((long) (this.milliseconds * value));
     }
 
     @Override
