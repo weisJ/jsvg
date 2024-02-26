@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,53 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.geometry.size;
+package com.github.weisj.jsvg.attributes.time;
 
-import java.util.Locale;
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.SuffixUnit;
+import com.google.errorprone.annotations.Immutable;
 
-public enum Unit implements SuffixUnit<Unit, Length> {
-    PX,
-    CM,
-    MM,
-    IN,
-    EM,
-    REM,
-    EX,
-    CH,
-    PT,
-    PC,
-    PERCENTAGE("%"),
-    Raw("");
+@Immutable
+public final class Duration {
+    public static final long INDEFINITE_RAW = Long.MAX_VALUE;
+    public static final @NotNull Duration INDEFINITE = new Duration(INDEFINITE_RAW);
 
-    private static final Unit[] units = values();
+    private final long milliseconds;
 
-    @Override
-    public @NotNull Unit @NotNull [] units() {
-        return units;
+    public Duration(long milliseconds) {
+        this.milliseconds = milliseconds;
     }
 
-    private final @NotNull String suffix;
-
-    Unit(@NotNull String suffix) {
-        this.suffix = suffix;
-    }
-
-    Unit() {
-        this.suffix = name().toLowerCase(Locale.ENGLISH);
+    public long milliseconds() {
+        return milliseconds;
     }
 
     @Override
-    public @NotNull Length valueOf(float value) {
-        if (value == 0) return Length.ZERO;
-        return new Length(this, value);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Duration duration = (Duration) o;
+        return milliseconds == duration.milliseconds;
     }
 
     @Override
-    public @NotNull String suffix() {
-        return suffix;
+    public int hashCode() {
+        return Objects.hash(milliseconds);
     }
 }

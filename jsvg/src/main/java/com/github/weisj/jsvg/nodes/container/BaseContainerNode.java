@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,7 +30,6 @@ import com.github.weisj.jsvg.nodes.AbstractSVGNode;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Container<E> {
@@ -67,13 +66,9 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
         }
         if (allowedNodes.any()) return true;
 
+        Category[] categories = Category.categoriesOf(node);
         Class<? extends SVGNode> nodeType = node.getClass();
-        ElementCategories categories = nodeType.getAnnotation(ElementCategories.class);
-        if (categories == null) {
-            throw new IllegalStateException(
-                    "Element <" + node.tagName() + "> doesn't specify element category information");
-        }
-        CategoryCheckResult result = doIntersect(allowedNodes.categories(), categories.value());
+        CategoryCheckResult result = doIntersect(allowedNodes.categories(), categories);
         if (result == CategoryCheckResult.Allowed) return true;
         for (Class<? extends SVGNode> type : allowedNodes.anyOf()) {
             if (type.isAssignableFrom(nodeType)) return true;
