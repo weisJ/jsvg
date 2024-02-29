@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.nodes.animation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.time.Duration;
+import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.nodes.MetaSVGNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
