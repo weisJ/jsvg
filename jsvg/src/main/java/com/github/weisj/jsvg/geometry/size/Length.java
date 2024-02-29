@@ -30,7 +30,7 @@ import com.github.weisj.jsvg.attributes.ViewBox;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
-public final class Length {
+public class Length {
     public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
     public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
@@ -55,9 +55,10 @@ public final class Length {
         return !isUnspecified(value);
     }
 
-    private float resolveNonPercentage(@NotNull MeasureContext context) {
-        if (isUnspecified()) throw new IllegalStateException("Can't resolve size of unspecified length");
+    private static float resolveNonPercentage(@NotNull MeasureContext context, Unit unit, float value) {
+        if (isUnspecified(value)) throw new IllegalStateException("Can't resolve size of unspecified length");
         // If we are unspecified this will return the raw unspecified value, which we want.
+
         if (unit == Unit.Raw) return value;
         assert unit != Unit.PERCENTAGE;
         switch (unit) {
@@ -90,11 +91,13 @@ public final class Length {
      * @param context the measuring context.
      * @return the resolved size.
      */
-    public float resolveWidth(@NotNull MeasureContext context) {
-        if (unit == Unit.PERCENTAGE) {
-            return (value * context.viewWidth()) / 100f;
+    public final float resolveWidth(@NotNull MeasureContext context) {
+        Unit u = unit(context);
+        float raw = raw(context);
+        if (u == Unit.PERCENTAGE) {
+            return (raw * context.viewWidth()) / 100f;
         } else {
-            return resolveNonPercentage(context);
+            return resolveNonPercentage(context, u, raw);
         }
     }
 
@@ -103,11 +106,13 @@ public final class Length {
      * @param context the measuring context.
      * @return the resolved size.
      */
-    public float resolveHeight(@NotNull MeasureContext context) {
-        if (unit == Unit.PERCENTAGE) {
-            return (value * context.viewHeight()) / 100f;
+    public final float resolveHeight(@NotNull MeasureContext context) {
+        Unit u = unit(context);
+        float raw = raw(context);
+        if (u == Unit.PERCENTAGE) {
+            return (raw * context.viewHeight()) / 100f;
         } else {
-            return resolveNonPercentage(context);
+            return resolveNonPercentage(context, u, raw);
         }
     }
 
@@ -117,11 +122,13 @@ public final class Length {
      * @param context the measuring context.
      * @return the resolved size.
      */
-    public float resolveLength(@NotNull MeasureContext context) {
-        if (unit == Unit.PERCENTAGE) {
-            return (value / 100f) * context.normedDiagonalLength();
+    public final float resolveLength(@NotNull MeasureContext context) {
+        Unit u = unit(context);
+        float raw = raw(context);
+        if (u == Unit.PERCENTAGE) {
+            return (raw / 100f) * context.normedDiagonalLength();
         } else {
-            return resolveNonPercentage(context);
+            return resolveNonPercentage(context, u, raw);
         }
     }
 
@@ -131,11 +138,13 @@ public final class Length {
      * @param context the measuring context.
      * @return the resolved size.
      */
-    public float resolveFontSize(@NotNull MeasureContext context) {
-        if (unit == Unit.PERCENTAGE) {
-            return (value / 100f) * context.em();
+    public final float resolveFontSize(@NotNull MeasureContext context) {
+        Unit u = unit(context);
+        float raw = raw(context);
+        if (u == Unit.PERCENTAGE) {
+            return (raw / 100f) * context.em();
         } else {
-            return resolveNonPercentage(context);
+            return resolveNonPercentage(context, u, raw);
         }
     }
 
@@ -149,24 +158,24 @@ public final class Length {
         return value == 0;
     }
 
-    public float raw() {
+    public float raw(@NotNull MeasureContext context) {
         return value;
     }
 
-    public @NotNull Unit unit() {
+    public @NotNull Unit unit(@NotNull MeasureContext context) {
         return unit;
     }
 
     public boolean isUnspecified() {
-        return isUnspecified(raw());
+        return isUnspecified(value);
     }
 
-    public boolean isSpecified() {
+    public final boolean isSpecified() {
         return !isUnspecified();
     }
 
     public @NotNull Length coerceNonNegative() {
-        if (isSpecified() && raw() <= 0) return ZERO;
+        if (isSpecified() && value <= 0) return ZERO;
         return this;
     }
 
@@ -183,7 +192,7 @@ public final class Length {
 
     public @NotNull Length multiply(float scalingFactor) {
         if (scalingFactor == 0) return ZERO;
-        return new Length(unit(), scalingFactor * raw());
+        return new Length(unit, scalingFactor * value);
     }
 
     @Override
