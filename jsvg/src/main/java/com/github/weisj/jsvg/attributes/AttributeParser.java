@@ -33,10 +33,10 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.time.Duration;
+import com.github.weisj.jsvg.animation.time.TimeUnit;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-import com.github.weisj.jsvg.attributes.time.Duration;
-import com.github.weisj.jsvg.attributes.time.TimeUnit;
 import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;

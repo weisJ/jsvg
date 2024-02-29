@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.time;
+package com.github.weisj.jsvg.animation.time;
 
 import org.jetbrains.annotations.NotNull;
 
