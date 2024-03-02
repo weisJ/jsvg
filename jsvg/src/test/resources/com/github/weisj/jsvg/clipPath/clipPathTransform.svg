@@ -1,0 +1,11 @@
+<svg viewBox="0 0 100 100" width="400" height="400"
+	xmlns="http://www.w3.org/2000/svg">
+	<clipPath id="myClip1" clipPathUnits="userSpaceOnUse">
+		<rect x="45" width="40" height="20" />
+	</clipPath>
+	<g transform="rotate(30)">
+		<rect opacity="0.5" fill="blue" width="50" height="50" x="40"
+			clip-path="url(#myClip1)" />
+		<rect x="45" width="40" height="20" fill="red" opacity="0.5" />
+	</g>
+</svg>

@@ -30,14 +30,18 @@ import org.junit.jupiter.api.Test;
 class ClipPathTest {
 
     @Test
-    void tetClipPathUnits() {
-        assertEquals(SUCCESS, compareImages("clipPathUnits.svg"));
+    void testClipPathUnits() {
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits.svg"));
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits2.svg"));
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathTransform.svg"));
     }
 
     @Test
-    void tetClipPathUnitsSoftClip() {
+    void testClipPathUnitsSoftClip() {
         ReferenceTest.SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
-        assertEquals(SUCCESS, compareImages("clipPathUnits.svg"));
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits.svg"));
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits2.svg"));
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathTransform.svg"));
         ReferenceTest.SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
     }
 }
