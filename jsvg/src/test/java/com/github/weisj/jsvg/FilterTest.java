@@ -21,9 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.*;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
-import static com.github.weisj.jsvg.ReferenceTest.render;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
@@ -41,15 +40,15 @@ class FilterTest {
 
     @Test
     void testEdgeMode() {
-        assertDoesNotThrow(() -> render("filter/edgeModeDuplicate.svg"));
-        assertDoesNotThrow(() -> render("filter/edgeModeNone.svg"));
-        assertDoesNotThrow(() -> render("filter/edgeModeWrap.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/edgeModeDuplicate.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/edgeModeNone.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/edgeModeWrap.svg"));
     }
 
     @Test
     void testGaussianBlurNotThrowing() {
-        assertDoesNotThrow(() -> render("filter/blur.svg"));
-        assertDoesNotThrow(() -> render("filter/blur2.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/blur.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/blur2.svg"));
     }
 
     @Test
@@ -70,20 +69,20 @@ class FilterTest {
     @Test
     void testFlood() {
         // TODO: Filter region not applied correctly.
-        assertDoesNotThrow(() -> render("filter/flood.svg"));
-        assertDoesNotThrow(() -> render("filter/floodColor_bug29.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/flood.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/floodColor_bug29.svg"));
     }
 
     @Test
     void testBlend() {
         // Filter region not applied correctly.
-        assertDoesNotThrow(() -> render("filter/blend.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/blend.svg"));
         assertEquals(SUCCESS, compareImages("filter/blend_bug41.svg"));
     }
 
     @Test
     void testOffset() {
-        assertDoesNotThrow(() -> render("filter/offset.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/offset.svg"));
     }
 
     @Test
@@ -94,7 +93,7 @@ class FilterTest {
     @Test
     void testComposite() {
         // TODO: BackgroundImage not supported
-        assertDoesNotThrow(() -> render("filter/composite.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/composite.svg"));
         assertEquals(SUCCESS, compareImages("filter/composite_bug33.svg"));
     }
 
@@ -106,7 +105,7 @@ class FilterTest {
     @Test
     void testOutOfBounds() {
         assertEquals(SUCCESS, compareImages("filter/outOfBoundsVisible.svg"));
-        assertDoesNotThrow(() -> render("filter/outOfBoundsHidden.svg"));
+        assertDoesNotThrow(() -> renderJsvg("filter/outOfBoundsHidden.svg"));
         assertEquals(SUCCESS, compareImages("filter/outOfBoundsHidden.svg"));
     }
 

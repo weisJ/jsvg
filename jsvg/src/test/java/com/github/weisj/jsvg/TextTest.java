@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,7 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
-import static com.github.weisj.jsvg.ReferenceTest.render;
+import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,17 +37,17 @@ class TextTest {
         assertEquals(SUCCESS, compareImages("text/text2.svg"));
         assertEquals(SUCCESS, compareImages("text/text5.svg"));
         // Batik doesn't correctly implement rotation.
-        assertDoesNotThrow(() -> render("text/text3.svg"));
+        assertDoesNotThrow(() -> renderJsvg("text/text3.svg"));
         // textPath has to be checked manually.
-        assertDoesNotThrow(() -> render("text/text4.svg"));
-        assertDoesNotThrow(() -> render("text/text6.svg"));
+        assertDoesNotThrow(() -> renderJsvg("text/text4.svg"));
+        assertDoesNotThrow(() -> renderJsvg("text/text6.svg"));
     }
 
     @Test
     void textLengthTest() {
         assertEquals(SUCCESS, compareImages("text/textLength.svg"));
         // Batik doesn't implement this correctly. But our implementation isn't 100% correct too.
-        assertDoesNotThrow(() -> render("text/textLengthPath.svg"));
+        assertDoesNotThrow(() -> renderJsvg("text/textLengthPath.svg"));
     }
 
     @Test
@@ -57,7 +57,7 @@ class TextTest {
 
     @Test
     void dominantBaselineTest() {
-        assertDoesNotThrow(() -> render("text/dominantBaseline.svg"));
+        assertDoesNotThrow(() -> renderJsvg("text/dominantBaseline.svg"));
     }
 
     @Test
@@ -74,7 +74,7 @@ class TextTest {
     void fontStretchTest() {
         // Batik resolves font-stretch differently as we do, hence this will always fail.
         // Precisely AWT will happily synthesise a stretched font for us in all cases, but batik doesn't.
-        assertDoesNotThrow(() -> render("text/fontStretch.svg"));
+        assertDoesNotThrow(() -> renderJsvg("text/fontStretch.svg"));
 
     }
 }

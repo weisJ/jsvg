@@ -27,7 +27,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +60,69 @@ public final class ReferenceTest {
     private static final double DEFAULT_TOLERANCE = 0.5;
     public static Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
 
+    enum RenderType {
+        Batik,
+        JSVG
+    }
+
+    public sealed interface ImageSource {
+        @NotNull
+        String name();
+
+        @NotNull
+        InputStream openStream() throws IOException;
+
+        record PathImageSource(@NotNull String path) implements ImageSource {
+
+            @Override
+            public @NotNull String name() {
+                return path;
+            }
+
+            @Override
+            public @NotNull InputStream openStream() throws IOException {
+                return Objects.requireNonNull(ReferenceTest.class.getResource(path)).openStream();
+            }
+        }
+
+        record MemoryImageSource(@NotNull String name, @NotNull String data) implements ImageSource {
+
+            @Override
+            public @NotNull String name() {
+                return name;
+            }
+
+            @Override
+            public @NotNull InputStream openStream() {
+                return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+    }
+
+    public record ImageInfo(@NotNull ImageSource source, @NotNull RenderType renderType) {
+        @NotNull
+        BufferedImage render() throws IOException {
+            return switch (renderType) {
+                case Batik -> renderBatik(source.openStream());
+                case JSVG -> renderJsvg(source.openStream());
+            };
+        }
+    }
+
+    public record CompareInfo(@NotNull ImageInfo expected, @NotNull ImageInfo actual, double tolerance) {
+
+        public CompareInfo(@NotNull ImageInfo expected, @NotNull ImageInfo actual) {
+            this(expected, actual, DEFAULT_TOLERANCE);
+        }
+
+        @NotNull
+        String name() {
+            String aName = expected.source.name();
+            String bName = actual.source.name();
+            return aName.equals(bName) ? aName : aName + " vs " + bName;
+        }
+    }
+
     @Test
     void testIcons() {
         String[] iconNames = {"desktop.svg", "drive.svg", "folder.svg", "general.svg", "homeFolder.svg", "image.svg",
@@ -75,42 +137,38 @@ public final class ReferenceTest {
     }
 
     public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance) {
-        return compareImages(fileName, Objects.requireNonNull(ReferenceTest.class.getResource(fileName), fileName),
-                tolerance);
-    }
-
-    public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull URL url,
-            double tolerance) {
-        try {
-            BufferedImage expected = renderReference(url.openStream());
-            BufferedImage actual = render(url.openStream());
-            return compareImageRasterization(expected, actual, name, tolerance);
-        } catch (Exception e) {
-            Assertions.fail(name, e);
-            return ReferenceTestResult.FAILURE;
-        }
+        return compareImages(new CompareInfo(
+                new ImageInfo(new ImageSource.PathImageSource(fileName), RenderType.Batik),
+                new ImageInfo(new ImageSource.PathImageSource(fileName), RenderType.JSVG),
+                tolerance));
     }
 
     static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent) {
         return compareImages(name, svgContent, DEFAULT_TOLERANCE);
     }
 
-    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent,
-            double tolerance) {
+    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull CompareInfo compareInfo) {
         try {
-            BufferedImage expected =
-                    renderReference(new ByteArrayInputStream(svgContent.getBytes(StandardCharsets.UTF_8)));
-            BufferedImage actual = render(new ByteArrayInputStream(svgContent.getBytes(StandardCharsets.UTF_8)));
-            return compareImageRasterization(expected, actual, name, tolerance);
+            BufferedImage expected = compareInfo.expected.render();
+            BufferedImage actual = compareInfo.actual.render();
+            return compareImageRasterization(expected, actual, compareInfo.name(), compareInfo.tolerance());
         } catch (Exception e) {
-            Assertions.fail(name, e);
+            Assertions.fail(compareInfo.name(), e);
             return ReferenceTestResult.FAILURE;
         }
     }
 
-    public static @NotNull ReferenceTest.ReferenceTestResult compareImageRasterization(@NotNull BufferedImage expected,
-            @NotNull BufferedImage actual,
-            @NotNull String name, double tolerance) {
+    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent,
+            double tolerance) {
+        return compareImages(new CompareInfo(
+                new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), RenderType.Batik),
+                new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), RenderType.JSVG),
+                tolerance));
+    }
+
+    public static @NotNull ReferenceTest.ReferenceTestResult compareImageRasterization(
+            @NotNull BufferedImage expected, @NotNull BufferedImage actual,
+            @NotNull String name, @NotNull double tolerance) {
         ImageComparison comp = new ImageComparison(expected, actual);
         comp.setAllowingPercentOfDifferentPixels(tolerance);
         ImageComparisonResult comparison = comp.compareImages();
@@ -151,9 +209,9 @@ public final class ReferenceTest {
         });
     }
 
-    public static BufferedImage render(@NotNull String path) {
+    public static BufferedImage renderJsvg(@NotNull String path) {
         try {
-            return render(Objects.requireNonNull(ReferenceTest.class.getResource(path)).openStream());
+            return renderJsvg(Objects.requireNonNull(ReferenceTest.class.getResource(path)).openStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -168,7 +226,7 @@ public final class ReferenceTest {
                 SVGRenderingHints.KEY_SOFT_CLIPPING, SOFT_CLIPPING_VALUE));
     }
 
-    private static BufferedImage render(@NotNull InputStream inputStream) {
+    private static BufferedImage renderJsvg(@NotNull InputStream inputStream) {
         SVGDocument document = Objects.requireNonNull(new SVGLoader().load(inputStream));
         FloatSize size = document.size();
         BufferedImage image = new ReferenceImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
@@ -178,7 +236,7 @@ public final class ReferenceTest {
         return image;
     }
 
-    private static BufferedImage renderReference(@NotNull InputStream inputStream) throws IOException {
+    private static BufferedImage renderBatik(@NotNull InputStream inputStream) throws IOException {
         final BufferedImage[] imagePointer = new BufferedImage[1];
 
         TranscodingHints transcoderHints = new TranscodingHints();

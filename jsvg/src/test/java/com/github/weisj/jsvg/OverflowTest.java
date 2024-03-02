@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,7 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
-import static com.github.weisj.jsvg.ReferenceTest.render;
+import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
@@ -40,7 +40,7 @@ class OverflowTest {
 
     @Test
     void imageOverflowTest() {
-        BufferedImage img = render("overflowImage.svg");
+        BufferedImage img = renderJsvg("overflowImage.svg");
         assertEquals(Color.RED, new Color(img.getRGB(100, 200)));
         assertEquals(new Color(0, 0, 0, 0), new Color(img.getRGB(300, 200), true));
 

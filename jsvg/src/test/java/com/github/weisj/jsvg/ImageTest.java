@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,7 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
-import static com.github.weisj.jsvg.ReferenceTest.render;
+import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,6 +39,6 @@ class ImageTest {
     @Test
     void embeddedImageTest() {
         // Batik doesn't support data uris
-        assertDoesNotThrow(() -> render("image/imageBase64.svg"));
+        assertDoesNotThrow(() -> renderJsvg("image/imageBase64.svg"));
     }
 }

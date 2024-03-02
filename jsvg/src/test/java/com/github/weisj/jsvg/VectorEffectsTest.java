@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.render;
+import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.Test;
@@ -30,23 +30,23 @@ class VectorEffectsTest {
 
     @Test
     void simpleEffects() {
-        assertDoesNotThrow(() -> render("vectorEffect/before.svg"));
-        assertDoesNotThrow(() -> render("vectorEffect/none.svg"));
-        assertDoesNotThrow(() -> render("vectorEffect/nonScalingSize.svg"));
-        assertDoesNotThrow(() -> render("vectorEffect/nonRotation.svg"));
-        assertDoesNotThrow(() -> render("vectorEffect/fixedPosition.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/before.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/none.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingSize.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonRotation.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/fixedPosition.svg"));
     }
 
     @Test
     void combinedEffects() {
-        assertDoesNotThrow(() -> render("vectorEffect/nonScalingSizeNonRotation.svg"));
-        assertDoesNotThrow(() -> render("vectorEffect/nonScalingSizeFixedPosition.svg"));
-        assertDoesNotThrow(() -> render("vectorEffect/nonRotationFixedPosition.svg"));
-        assertDoesNotThrow(() -> render("vectorEffect/nonScalingSizeNonRotationFixedPosition.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingSizeNonRotation.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingSizeFixedPosition.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonRotationFixedPosition.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingSizeNonRotationFixedPosition.svg"));
     }
 
     @Test
     void nonScalingStroke() {
-        assertDoesNotThrow(() -> render("vectorEffect/nonScalingStroke.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingStroke.svg"));
     }
 }
