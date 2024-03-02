@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.ElementBounds;
 import com.github.weisj.jsvg.renderer.MaskedPaint;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -82,12 +83,12 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         return true;
     }
 
-    public @NotNull Shape clipShape(@NotNull RenderContext context, @NotNull Rectangle2D elementBounds,
+    public @NotNull Shape clipShape(@NotNull RenderContext context, @NotNull ElementBounds elementBounds,
             boolean useSoftClip) {
         // Todo: Handle bounding-box stuff as well (i.e. combined stroke etc.)
         Shape shape = ShapedContainer.super.elementShape(context);
         if (!useSoftClip && clipPathUnits == UnitType.ObjectBoundingBox) {
-            shape = clipPathUnits.viewTransform(elementBounds).createTransformedShape(shape);
+            shape = clipPathUnits.viewTransform(elementBounds.boundingBox()).createTransformedShape(shape);
         }
         Area areaShape = new Area(shape);
         if (areaShape.isRectangular()) {
@@ -98,13 +99,15 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
 
     // TODO: Check if clip would be rectangular and use normal clipping
     public @NotNull Paint createPaintForSoftClipping(@NotNull Output output, @NotNull RenderContext context,
-            @NotNull Rectangle2D objectBounds, @NotNull Shape clipShape) {
+            @NotNull ElementBounds elementBounds, @NotNull Shape clipShape) {
         Rectangle2D transformedClipBounds = GeometryUtil.containingBoundsAfterTransform(
-                clipPathUnits.viewTransform(objectBounds), clipShape.getBounds2D());
+                clipPathUnits.viewTransform(elementBounds.boundingBox()), clipShape.getBounds2D());
 
+        // NOTE: We can't intersect with objectBounds here as they don't include the stroke
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
-                transformedClipBounds.createIntersection(objectBounds), objectBounds, clipPathUnits);
+                transformedClipBounds.createIntersection(elementBounds.geometryBox()),
+                elementBounds.boundingBox(), clipPathUnits);
 
         if (blitImage == null) return PaintParser.DEFAULT_COLOR;
 

@@ -72,7 +72,7 @@ public final class NodeRenderer {
         private final @NotNull Filter.FilterInfo filterInfo;
 
         static @Nullable InfoWithFilter create(@NotNull Renderable renderable, @NotNull RenderContext context,
-                @NotNull Output output, @NotNull Filter filter, @NotNull Rectangle2D elementBounds) {
+                @NotNull Output output, @NotNull Filter filter, @NotNull ElementBounds elementBounds) {
             Filter.FilterInfo info = filter.createFilterInfo(output, context, elementBounds);
             if (info == null) return null;
             return new InfoWithFilter(renderable, context, output, filter, info);
@@ -142,17 +142,16 @@ public final class NodeRenderer {
             ((Transformable) renderable).applyTransform(childOutput, childContext);
         }
 
-        Rectangle2D elementBounds = null;
+        ElementBounds elementBounds = new ElementBounds(renderable, childContext);
         if (renderable instanceof HasClip) {
 
             Mask mask = ((HasClip) renderable).mask();
             if (mask != null) {
                 // Todo: Proper object bounding box
 
-                Rectangle2D bounds = elementBounds(renderable, childContext);
-                elementBounds = bounds;
+                Rectangle2D bounds = elementBounds.geometryBox();
                 if (!bounds.isEmpty()) {
-                    childOutput.setPaint(() -> mask.createMaskPaint(childOutput, childContext, bounds));
+                    childOutput.setPaint(() -> mask.createMaskPaint(childOutput, childContext, elementBounds));
                 }
             }
 
@@ -161,15 +160,14 @@ public final class NodeRenderer {
             if (childClip != null) {
                 // Elements with an invalid clip shouldn't be painted
                 if (!childClip.isValid()) return null;
-                if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
 
                 if (output.isSoftClippingEnabled()) {
-                    if (!elementBounds.isEmpty()) {
+                    Rectangle2D bounds = elementBounds.geometryBox();
+                    if (!bounds.isEmpty()) {
                         Shape childClipShape = childClip.clipShape(childContext, elementBounds, true);
 
-                        Rectangle2D bounds = elementBounds;
                         childOutput.setPaint(() -> childClip.createPaintForSoftClipping(
-                                childOutput, childContext, bounds, childClipShape));
+                                childOutput, childContext, elementBounds, childClipShape));
                     }
                 } else {
                     Shape childClipShape = childClip.clipShape(childContext, elementBounds, false);
@@ -195,29 +193,16 @@ public final class NodeRenderer {
 
     private static @Nullable InfoWithFilter tryCreateFilterInfo(
             @NotNull Renderable renderable, @NotNull RenderContext childContext, @NotNull Output childOutput,
-            @Nullable Rectangle2D elementBounds) {
+            @NotNull ElementBounds elementBounds) {
         Filter filter = renderable instanceof HasFilter
                 ? ((HasFilter) renderable).filter()
                 : null;
 
         if (filter != null && filter.hasEffect() && childOutput.supportsFilters()) {
-            if (elementBounds == null) elementBounds = elementBounds(renderable, childContext);
             return InfoWithFilter.create(renderable, childContext, childOutput, filter, elementBounds);
         }
         return null;
     }
-
-    private static @NotNull Rectangle2D elementBounds(@NotNull Object node, @NotNull RenderContext childContext) {
-        Rectangle2D elementBounds;
-        if (node instanceof HasShape) {
-            elementBounds = ((HasShape) node).untransformedElementBounds(childContext);
-        } else {
-            MeasureContext measureContext = childContext.measureContext();
-            elementBounds = new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());
-        }
-        return elementBounds;
-    }
-
 
     public static @NotNull RenderContext setupRenderContext(@NotNull Object node, @NotNull RenderContext context) {
         return setupRenderContext(null, node, context);

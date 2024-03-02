@@ -284,7 +284,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     }
 
     @Override
-    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context) {
+    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
+        // TODO: Bounding-box is specified by the character box.
         return untransformedElementShape(context).getBounds2D();
     }
 

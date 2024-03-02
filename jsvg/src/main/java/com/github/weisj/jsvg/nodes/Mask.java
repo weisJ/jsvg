@@ -40,6 +40,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.ElementBounds;
 import com.github.weisj.jsvg.renderer.MaskedPaint;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -86,13 +87,14 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
     }
 
     public @NotNull Paint createMaskPaint(@NotNull Output output, @NotNull RenderContext context,
-            @NotNull Rectangle2D objectBounds) {
+            @NotNull ElementBounds elementBounds) {
         Rectangle2D.Double maskBounds = maskUnits.computeViewBounds(
-                context.measureContext(), objectBounds, x, y, width, height);
+                context.measureContext(), elementBounds.boundingBox(), x, y, width, height);
 
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
-                maskBounds.createIntersection(objectBounds), objectBounds, maskContentUnits);
+                maskBounds.createIntersection(elementBounds.geometryBox()), elementBounds.boundingBox(),
+                maskContentUnits);
 
         if (blitImage == null) return PaintParser.DEFAULT_COLOR;
 

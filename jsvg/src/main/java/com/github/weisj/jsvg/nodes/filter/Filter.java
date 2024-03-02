@@ -44,6 +44,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.ElementBounds;
 import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -119,15 +120,15 @@ public final class Filter extends ContainerNode {
     }
 
     public @Nullable FilterInfo createFilterInfo(@NotNull Output output, @NotNull RenderContext context,
-            @NotNull Rectangle2D elementBounds) {
+            @NotNull ElementBounds elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
-                context.measureContext(), elementBounds, x, y, width, height);
+                context.measureContext(), elementBounds.boundingBox(), x, y, width, height);
         Rectangle2D graphicsClipBounds = output.clipBounds();
 
         FilterLayoutContext filterLayoutContext =
-                new FilterLayoutContext(filterPrimitiveUnits, elementBounds, graphicsClipBounds);
+                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds);
 
-        Rectangle2D clippedElementBounds = elementBounds.createIntersection(graphicsClipBounds);
+        Rectangle2D clippedElementBounds = elementBounds.boundingBox().createIntersection(graphicsClipBounds);
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
 
         if (effectiveFilterRegion.isEmpty()) return null;
@@ -163,11 +164,11 @@ public final class Filter extends ContainerNode {
 
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createCompatibleTransparentImage, context, clipHeuristicBounds,
-                filterRegion, elementBounds, UnitType.UserSpaceOnUse);
+                filterRegion, elementBounds.boundingBox(), UnitType.UserSpaceOnUse);
 
         if (blitImage == null) return null;
 
-        return new FilterInfo(output, blitImage, elementBounds);
+        return new FilterInfo(output, blitImage, elementBounds.boundingBox());
     }
 
     public void applyFilter(@NotNull Output output, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {

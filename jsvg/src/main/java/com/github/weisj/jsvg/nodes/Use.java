@@ -105,11 +105,11 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     }
 
     @Override
-    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context) {
+    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
         // Todo: Inner views need to handle this differently
         return referencedNode instanceof HasShape
                 ? ((HasShape) referencedNode).elementBounds(
-                        NodeRenderer.createChildContext((Renderable) referencedNode, context, this))
+                        NodeRenderer.createChildContext((Renderable) referencedNode, context, this), box)
                 : AWTSVGShape.EMPTY_SHAPE;
     }
 
