@@ -141,9 +141,23 @@ public final class SVGViewer {
         try (ResourceWalker walker = ResourceWalker.walkResources(pack)) {
             return walker.stream().filter(p -> p.endsWith("svg"))
                     .map(p -> p.substring(pack.length() + 1))
-                    .sorted()
+                    .sorted(SVGViewer::compareAsPaths)
                     .toArray(String[]::new);
         }
+    }
+
+    private static int compareAsPaths(@NotNull String a, @NotNull String b) {
+        if (a.contains("/")) {
+            if (b.contains("/")) {
+                return a.compareTo(b);
+            } else {
+                return -1;
+            }
+        }
+        if (b.contains("/")) {
+            return 1;
+        }
+        return a.compareTo(b);
     }
 
     private enum RenderingMode {
