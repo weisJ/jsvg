@@ -114,6 +114,7 @@ public final class SVGViewer {
 
             JCheckBox softClipping = new JCheckBox("Soft clipping");
             softClipping.addActionListener(e -> svgPanel.setSoftClipping(softClipping.isSelected()));
+            softClipping.doClick();
             renderingMode.add(softClipping);
             renderingMode.add(Box.createHorizontalStrut(5));
 
