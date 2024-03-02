@@ -140,21 +140,20 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
-        if (referencedNode != null) {
-            MeasureContext measureContext = context.measureContext();
-            context.translate(output, x.resolveWidth(measureContext), y.resolveHeight(measureContext));
+        if (referencedNode == null) return;
+        MeasureContext measureContext = context.measureContext();
+        context.translate(output, x.resolveWidth(measureContext), y.resolveHeight(measureContext));
 
-            // Todo: Vector Effects
+        // Todo: Vector Effects
 
-            if (referencedNode instanceof CommonInnerViewContainer) {
-                FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
-                if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
-                if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
-                CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
-                NodeRenderer.renderWithSize(view, targetViewBox, context, output, this);
-            } else {
-                NodeRenderer.renderNode(referencedNode, context, output, this);
-            }
+        if (referencedNode instanceof CommonInnerViewContainer) {
+            FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
+            if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
+            if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
+            CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
+            NodeRenderer.renderWithSize(view, targetViewBox, context, output, this);
+        } else {
+            NodeRenderer.renderNode(referencedNode, context, output, this);
         }
     }
 
