@@ -165,6 +165,8 @@ public final class Filter extends ContainerNode {
                 ImageUtil::createCompatibleTransparentImage, context, clipHeuristicBounds,
                 filterRegion, elementBounds, UnitType.UserSpaceOnUse);
 
+        if (blitImage == null) return null;
+
         return new FilterInfo(output, blitImage, elementBounds);
     }
 
@@ -224,7 +226,7 @@ public final class Filter extends ContainerNode {
         }
 
         public @NotNull Rectangle2D imageBounds() {
-            return blittableImage.boundsInUserSpace();
+            return blittableImage.boundsInRootSpace();
         }
 
         public @NotNull Rectangle2D elementBounds() {

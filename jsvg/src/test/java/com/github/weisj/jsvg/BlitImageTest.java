@@ -23,6 +23,7 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -87,6 +88,7 @@ class BlitImageTest {
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createCompatibleTransparentImage, context, null,
                 bounds, objectBounds, unitType);
+        assertNotNull(blitImage);
         blitImage.render(output, renderRoutine);
         blitImage.blitTo(output);
     }

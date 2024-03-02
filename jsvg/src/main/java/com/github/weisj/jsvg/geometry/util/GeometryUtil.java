@@ -196,20 +196,53 @@ public final class GeometryUtil {
         return toIntegerBounds(r, r);
     }
 
-    public static @NotNull Rectangle2D userBoundsToDeviceBounds(@NotNull RenderContext context,
-            @NotNull Rectangle2D r) {
-        Rectangle2D out = containingBoundsAfterTransform(context.userSpaceTransform(), r);
-        return containingBoundsAfterTransform(context.rootTransform(), out);
-    }
-
-    public static @NotNull Rectangle2D deviceBoundsToUserBounds(@NotNull RenderContext context,
-            @NotNull Rectangle2D r) {
+    public static @NotNull AffineTransform createInverse(@NotNull AffineTransform at) {
         try {
-            Rectangle2D out = containingBoundsAfterTransform(context.rootTransform().createInverse(), r);
-            return containingBoundsAfterTransform(context.rootTransform().createInverse(), out);
+            return at.createInverse();
         } catch (NoninvertibleTransformException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public enum Space {
+        User,
+        Root,
+        Device
+    }
+
+    public static @NotNull Rectangle2D convertBounds(@NotNull RenderContext context, @NotNull Rectangle2D r,
+            @NotNull Space from, @NotNull Space to) {
+        if (from == to) return r;
+        Rectangle2D out = r;
+        if (from == Space.User) {
+            if (to == Space.Root) {
+                out = containingBoundsAfterTransform(context.userSpaceTransform(), r);
+            } else if (to == Space.Device) {
+                out = containingBoundsAfterTransform(context.userSpaceTransform(), r);
+                out = containingBoundsAfterTransform(context.rootTransform(), out);
+            }
+        }
+        if (from == Space.Root) {
+            if (to == Space.User) {
+                out = containingBoundsAfterTransform(createInverse(context.rootTransform()), r);
+            } else if (to == Space.Device) {
+                out = containingBoundsAfterTransform(context.rootTransform(), r);
+            }
+        }
+        if (from == Space.Device) {
+            if (to == Space.User) {
+                out = containingBoundsAfterTransform(createInverse(context.rootTransform()), r);
+                out = containingBoundsAfterTransform(createInverse(context.userSpaceTransform()), out);
+            } else if (to == Space.Root) {
+                out = containingBoundsAfterTransform(createInverse(context.rootTransform()), r);
+            }
+        }
+        return out;
+    }
+
+    public static @NotNull Rectangle2D userBoundsToDeviceBounds(@NotNull RenderContext context,
+            @NotNull Rectangle2D r) {
+        return convertBounds(context, r, Space.User, Space.Device);
     }
 
     public static @NotNull Point2D getLocation(@NotNull Rectangle2D r) {

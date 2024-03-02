@@ -54,17 +54,17 @@ public final class BlittableImage {
     private final @NotNull BufferedImage image;
     public final @NotNull RenderContext context;
     private final @NotNull Rectangle2D boundsInDeviceSpace;
-    private final @NotNull Rectangle2D boundsInUserSpace;
+    private final @NotNull Rectangle2D boundsInRootSpace;
 
     private BlittableImage(@NotNull BufferedImage image, @NotNull RenderContext context,
-            @NotNull Rectangle2D boundsInDeviceSpace, @NotNull Rectangle2D boundsInUserSpace) {
+            @NotNull Rectangle2D boundsInDeviceSpace, @NotNull Rectangle2D boundsInRootSpace) {
         this.image = image;
         this.context = context;
         this.boundsInDeviceSpace = boundsInDeviceSpace;
-        this.boundsInUserSpace = boundsInUserSpace;
+        this.boundsInRootSpace = boundsInRootSpace;
     }
 
-    public static @NotNull BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
+    public static @Nullable BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
             @NotNull RenderContext context, @Nullable Rectangle2D clipBounds,
             @NotNull Rectangle2D bounds, @NotNull Rectangle2D objectBounds, @NotNull UnitType contentUnits) {
         Rectangle2D boundsInDeviceSpace = GeometryUtil.userBoundsToDeviceBounds(context, bounds);
@@ -74,10 +74,13 @@ public final class BlittableImage {
             Rectangle2D.intersect(clipBoundsInDeviceSpace, boundsInDeviceSpace, boundsInDeviceSpace);
         }
 
+        if (ShapeUtil.isInvalidArea(boundsInDeviceSpace)) return null;
+
         // Convert to integer coordinates to ensure we don't cut off any pixels due to rounding errors.
-        // Increase size by 1 to ensure we don't cut off any pixels needed for anti-aliasing.
-        boundsInDeviceSpace = GeometryUtil.adjustForAliasing(GeometryUtil.grow(boundsInDeviceSpace, 1));
-        Rectangle2D adjustedUserSpaceBounds = GeometryUtil.deviceBoundsToUserBounds(context, boundsInDeviceSpace);
+        GeometryUtil.adjustForAliasing(boundsInDeviceSpace);
+
+        Rectangle2D adjustedBoundsInRootSpace = GeometryUtil.convertBounds(context, boundsInDeviceSpace,
+                GeometryUtil.Space.Device, GeometryUtil.Space.Root);
 
         BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null,
                 boundsInDeviceSpace.getWidth(),
@@ -97,15 +100,15 @@ public final class BlittableImage {
         RenderContext imageContext = context.deriveForSurface();
         imageContext.setRootTransform(rootTransform, userSpaceTransform);
 
-        return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedUserSpaceBounds);
+        return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedBoundsInRootSpace);
     }
 
     public @NotNull Rectangle2D boundsInDeviceSpace() {
         return boundsInDeviceSpace;
     }
 
-    public @NotNull Rectangle2D boundsInUserSpace() {
-        return boundsInUserSpace;
+    public @NotNull Rectangle2D boundsInRootSpace() {
+        return boundsInRootSpace;
     }
 
     public @NotNull BufferedImage image() {

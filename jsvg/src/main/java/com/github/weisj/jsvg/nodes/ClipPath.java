@@ -41,7 +41,6 @@ import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
-import com.github.weisj.jsvg.util.ShapeUtil;
 
 @ElementCategories({/* None */})
 @PermittedContent(
@@ -107,7 +106,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
                 ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
                 transformedClipBounds.createIntersection(objectBounds), objectBounds, clipPathUnits);
 
-        if (ShapeUtil.isInvalidArea(blitImage.boundsInUserSpace())) return PaintParser.DEFAULT_COLOR;
+        if (blitImage == null) return PaintParser.DEFAULT_COLOR;
 
         blitImage.clearBackground(Color.BLACK);
         blitImage.render(output, g -> {

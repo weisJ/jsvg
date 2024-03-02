@@ -45,7 +45,6 @@ import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
-import com.github.weisj.jsvg.util.ShapeUtil;
 
 @ElementCategories(Category.Container)
 @PermittedContent(
@@ -95,7 +94,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
                 ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
                 maskBounds.createIntersection(objectBounds), objectBounds, maskContentUnits);
 
-        if (ShapeUtil.isInvalidArea(blitImage.boundsInUserSpace())) return PaintParser.DEFAULT_COLOR;
+        if (blitImage == null) return PaintParser.DEFAULT_COLOR;
 
         blitImage.renderNode(output, this, this);
 
