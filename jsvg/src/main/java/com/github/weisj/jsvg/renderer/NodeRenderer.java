@@ -238,13 +238,14 @@ public final class NodeRenderer {
         @Nullable ContextElementAttributes contextElementAttributes = null;
         if (instantiator != null) contextElementAttributes = instantiator.createContextAttributes(context);
 
-        return context.derive(paintContext, fontSpec, null, fontRenderContext, fillRule, contextElementAttributes);
+        return context.derive(paintContext, fontSpec, null, fontRenderContext, fillRule, contextElementAttributes,
+                false);
     }
 
     public static @NotNull RenderContext setupInnerViewRenderContext(@NotNull ViewBox viewBox,
             @NotNull RenderContext context, boolean inheritAttributes) {
         if (inheritAttributes) {
-            return context.derive(null, null, viewBox, null, null, null);
+            return context.derive(null, null, viewBox, null, null, null, false);
         } else {
             MeasureContext newMeasure = context.measureContext().derive(viewBox,
                     Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);

@@ -246,15 +246,9 @@ public final class Filter extends ContainerNode {
 
         public void blitImage(@NotNull Output output, @NotNull RenderContext context) {
             if (DEBUG) {
-                output.debugPaint(g -> {
-                    Rectangle2D imageBounds = imageBounds();
-                    g.setColor(Color.RED);
-                    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
-                    g.fill(imageBounds);
-                });
+                blittableImage.debug(output, false);
             }
-
-            blittableImage.prepareForBlitting(output, context);
+            blittableImage.prepareForBlitting(output);
             output.drawImage(
                     context.platformSupport().createImage(producer), context.platformSupport().imageObserver());
         }

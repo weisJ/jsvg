@@ -49,6 +49,7 @@ import com.github.weisj.jsvg.util.ShapeUtil;
     anyOf = {Use.class, Text.class}
 )
 public final class ClipPath extends ContainerNode implements ShapedContainer<SVGNode> {
+    private static final boolean DEBUG = false;
     public static final String TAG = "clippath";
     private boolean isValid;
 
@@ -96,28 +97,29 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         return areaShape;
     }
 
+    // TODO: Check if clip would be rectangular and use normal clipping
     public @NotNull Paint createPaintForSoftClipping(@NotNull Output output, @NotNull RenderContext context,
             @NotNull Rectangle2D objectBounds, @NotNull Shape clipShape) {
         Rectangle2D transformedClipBounds = GeometryUtil.containingBoundsAfterTransform(
-                clipPathUnits.viewTransform(objectBounds),
-                GeometryUtil.adjustForAliasing(clipShape.getBounds2D()));
+                clipPathUnits.viewTransform(objectBounds), clipShape.getBounds2D());
+
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
-                transformedClipBounds, objectBounds, clipPathUnits);
-        Rectangle2D clipBoundsInUserSpace = blitImage.boundsInUserSpace();
+                transformedClipBounds.createIntersection(objectBounds), objectBounds, clipPathUnits);
 
-        if (ShapeUtil.isInvalidArea(clipBoundsInUserSpace)) return PaintParser.DEFAULT_COLOR;
+        if (ShapeUtil.isInvalidArea(blitImage.boundsInUserSpace())) return PaintParser.DEFAULT_COLOR;
 
+        blitImage.clearBackground(Color.BLACK);
         blitImage.render(output, g -> {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, blitImage.image().getWidth(), blitImage.image().getHeight());
             g.setColor(Color.WHITE);
             g.fill(clipShape);
         });
 
-        Point2D offset = new Point2D.Double(clipBoundsInUserSpace.getX(), clipBoundsInUserSpace.getY());
-        context.rootTransform().transform(offset, offset);
+        if (DEBUG) {
+            blitImage.debug(output);
+        }
 
+        Point2D offset = GeometryUtil.getLocation(blitImage.boundsInDeviceSpace());
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset);
     }
 }

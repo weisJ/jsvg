@@ -23,9 +23,9 @@ package com.github.weisj.jsvg.util;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +37,13 @@ import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
 import com.github.weisj.jsvg.renderer.*;
 
+/**
+ * Class that encapsulates rendering to an offscreen image.
+ * The image is aligned to the pixel boundary of the root image surface. Rendering to the
+ * image behaves and the blitting it behaves as if it was rendered directly to the root surface.
+ */
 public final class BlittableImage {
+
 
     @FunctionalInterface
     public interface BufferSurfaceSupplier {
@@ -46,71 +52,56 @@ public final class BlittableImage {
     }
 
     private final @NotNull BufferedImage image;
-    private final @NotNull RenderContext context;
+    public final @NotNull RenderContext context;
+    private final @NotNull Rectangle2D boundsInDeviceSpace;
     private final @NotNull Rectangle2D boundsInUserSpace;
-    private final @NotNull UnitType contentUnits;
 
     private BlittableImage(@NotNull BufferedImage image, @NotNull RenderContext context,
-            @NotNull Rectangle2D boundsInUserSpace, @NotNull UnitType contentUnits) {
+            @NotNull Rectangle2D boundsInDeviceSpace, @NotNull Rectangle2D boundsInUserSpace) {
         this.image = image;
         this.context = context;
+        this.boundsInDeviceSpace = boundsInDeviceSpace;
         this.boundsInUserSpace = boundsInUserSpace;
-        this.contentUnits = contentUnits;
     }
 
     public static @NotNull BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
             @NotNull RenderContext context, @Nullable Rectangle2D clipBounds,
             @NotNull Rectangle2D bounds, @NotNull Rectangle2D objectBounds, @NotNull UnitType contentUnits) {
-        Rectangle2D adjustedElementBounds = GeometryUtil.toIntegerBounds(bounds, new Rectangle2D.Double());
-        Rectangle2D boundsInUserSpace =
-                GeometryUtil.containingBoundsAfterTransform(context.userSpaceTransform(), adjustedElementBounds);
-        Rectangle2D boundsInRootSpace =
-                GeometryUtil.containingBoundsAfterTransform(context.rootTransform(), boundsInUserSpace);
+        Rectangle2D boundsInDeviceSpace = GeometryUtil.userBoundsToDeviceBounds(context, bounds);
 
         if (clipBounds != null) {
-            Rectangle2D clipBoundsInUserSpace =
-                    GeometryUtil.containingBoundsAfterTransform(context.userSpaceTransform(), clipBounds);
-            Rectangle2D clipBoundsInRootSpace =
-                    GeometryUtil.containingBoundsAfterTransform(context.rootTransform(), clipBoundsInUserSpace);
-            Rectangle2D.intersect(clipBoundsInRootSpace, boundsInRootSpace, boundsInRootSpace);
+            Rectangle2D clipBoundsInDeviceSpace = GeometryUtil.userBoundsToDeviceBounds(context, clipBounds);
+            Rectangle2D.intersect(clipBoundsInDeviceSpace, boundsInDeviceSpace, boundsInDeviceSpace);
         }
 
-        // Convert to integer coordinates to ensure we donÄt cut off any pixels due to rounding errors.
-        GeometryUtil.adjustForAliasing(boundsInRootSpace);
+        // Convert to integer coordinates to ensure we don't cut off any pixels due to rounding errors.
+        // Increase size by 1 to ensure we don't cut off any pixels needed for anti-aliasing.
+        boundsInDeviceSpace = GeometryUtil.adjustForAliasing(GeometryUtil.grow(boundsInDeviceSpace, 1));
+        Rectangle2D adjustedUserSpaceBounds = GeometryUtil.deviceBoundsToUserBounds(context, boundsInDeviceSpace);
 
-        Rectangle2D adjustedUserSpaceBounds = boundsInRootSpace.getBounds2D();
-        try {
-            adjustedUserSpaceBounds = GeometryUtil
-                    .containingBoundsAfterTransform(context.rootTransform().createInverse(), adjustedUserSpaceBounds);
-        } catch (NoninvertibleTransformException e) {
-            throw new RuntimeException(e);
-        }
-
-        int imgWidth = (int) boundsInRootSpace.getWidth();
-        int imgHeight = (int) boundsInRootSpace.getHeight();
-        BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null, imgWidth, imgHeight);
-
-        RenderContext imageContext = RenderContext.createInitial(context.platformSupport(),
-                contentUnits.deriveMeasure(context.measureContext()));
-
-
-        Rectangle2D ub = adjustedUserSpaceBounds;
+        BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null,
+                boundsInDeviceSpace.getWidth(),
+                boundsInDeviceSpace.getHeight());
 
         AffineTransform rootTransform = new AffineTransform();
+        rootTransform.translate(-boundsInDeviceSpace.getX(), -boundsInDeviceSpace.getY());
+        rootTransform.concatenate(context.rootTransform());
+
+        AffineTransform userSpaceTransform = new AffineTransform(context.userSpaceTransform());
         if (contentUnits == UnitType.ObjectBoundingBox) {
-            rootTransform.scale(
-                    objectBounds.getWidth() * img.getWidth() / ub.getWidth(),
-                    objectBounds.getWidth() * img.getHeight() / ub.getHeight());
-        } else {
-            rootTransform.scale(
-                    img.getWidth() / ub.getWidth(),
-                    img.getHeight() / ub.getHeight());
-            rootTransform.translate(-ub.getX(), -ub.getY());
+            userSpaceTransform = new AffineTransform(userSpaceTransform);
+            userSpaceTransform.translate(objectBounds.getX(), objectBounds.getY());
+            userSpaceTransform.scale(objectBounds.getWidth(), objectBounds.getHeight());
         }
 
-        imageContext.setRootTransform(rootTransform, context.userSpaceTransform());
+        RenderContext imageContext = context.deriveForSurface();
+        imageContext.setRootTransform(rootTransform, userSpaceTransform);
 
-        return new BlittableImage(img, imageContext, ub, contentUnits);
+        return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedUserSpaceBounds);
+    }
+
+    public @NotNull Rectangle2D boundsInDeviceSpace() {
+        return boundsInDeviceSpace;
     }
 
     public @NotNull Rectangle2D boundsInUserSpace() {
@@ -124,24 +115,20 @@ public final class BlittableImage {
     public @NotNull Graphics2D createGraphics() {
         Graphics2D g = GraphicsUtil.createGraphics(image);
         g.transform(context.rootTransform());
-
-        if (contentUnits == UnitType.UserSpaceOnUse) {
-            g.transform(context.userSpaceTransform());
-        } else {
-            // Reset the view transform.
-            context.setRootTransform(context.rootTransform(), new AffineTransform());
-        }
-
+        g.transform(context.userSpaceTransform());
         return g;
     }
 
     public void renderNode(@NotNull Output parentOutput, @NotNull SVGNode node,
             @NotNull Instantiator instantiator) {
-        Graphics2D imgGraphics = createGraphics();
-        Output imgOutput = new Graphics2DOutput(imgGraphics);
-        imgGraphics.setRenderingHints(parentOutput.renderingHints());
-        NodeRenderer.renderNode(node, context, imgOutput, instantiator);
-        imgGraphics.dispose();
+        render(parentOutput, (out, ctx) -> NodeRenderer.renderNode(node, ctx, out, instantiator));
+    }
+
+    public void clearBackground(@NotNull Color color) {
+        Graphics2D g = image.createGraphics();
+        g.setColor(color);
+        g.fillRect(0, 0, image.getWidth(), image.getHeight());
+        g.dispose();
     }
 
     public void render(@NotNull Output output, @NotNull Consumer<Graphics2D> painter) {
@@ -151,18 +138,40 @@ public final class BlittableImage {
         imgGraphics.dispose();
     }
 
-    public void prepareForBlitting(@NotNull Output output, @NotNull RenderContext parentContext) {
-        output.setTransform(parentContext.rootTransform());
-        output.translate(boundsInUserSpace.getX(), boundsInUserSpace.getY());
-        output.scale(
-                boundsInUserSpace.getWidth() / image.getWidth(),
-                boundsInUserSpace.getHeight() / image.getHeight());
+    public void render(@NotNull Output output, @NotNull BiConsumer<Output, RenderContext> painter) {
+        Graphics2D imgGraphics = createGraphics();
+        imgGraphics.setRenderingHints(output.renderingHints());
+        painter.accept(new Graphics2DOutput(imgGraphics), context);
+        imgGraphics.dispose();
     }
 
-    public void blitTo(@NotNull Output output, @NotNull RenderContext parentContext) {
+    public void prepareForBlitting(@NotNull Output output) {
+        output.setTransform(AffineTransform.getTranslateInstance(
+                boundsInDeviceSpace.getX(), boundsInDeviceSpace.getY()));
+    }
+
+    public void blitTo(@NotNull Output output) {
         Output out = output.createChild();
-        prepareForBlitting(out, parentContext);
+        out.setTransform(AffineTransform.getTranslateInstance(
+                boundsInDeviceSpace.getX(), boundsInDeviceSpace.getY()));
         out.drawImage(image);
         out.dispose();
+    }
+
+    public void debug(@NotNull Output output) {
+        debug(output, true);
+    }
+
+    public void debug(@NotNull Output output, boolean drawImage) {
+        output.debugPaint(g -> {
+            g.setComposite(AlphaComposite.SrcOver.derive(0.5f));
+            g.setTransform(AffineTransform.getTranslateInstance(
+                    boundsInDeviceSpace.getX(), boundsInDeviceSpace.getY()));
+            if (drawImage) {
+                g.drawImage(image, 0, 0, null);
+            }
+            g.setColor(Color.MAGENTA);
+            g.drawRect(0, 0, image.getWidth(), image.getHeight());
+        });
     }
 }

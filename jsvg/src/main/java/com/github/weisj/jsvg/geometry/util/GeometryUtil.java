@@ -22,15 +22,13 @@
 package com.github.weisj.jsvg.geometry.util;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class GeometryUtil {
     private static final float EPS = 0.0001f;
@@ -112,6 +110,7 @@ public final class GeometryUtil {
 
     public static @NotNull Rectangle2D containingBoundsAfterTransform(@NotNull AffineTransform transform,
             @NotNull Rectangle2D rect) {
+        if (transform.isIdentity()) return rect.getBounds2D();
         Point2D.Double p1 = new Point2D.Double(rect.getX(), rect.getY());
         Point2D.Double p2 = new Point2D.Double(rect.getX() + rect.getWidth(), rect.getY());
         Point2D.Double p3 = new Point2D.Double(rect.getX(), rect.getY() + rect.getHeight());
@@ -195,5 +194,25 @@ public final class GeometryUtil {
 
     public static @NotNull Rectangle2D adjustForAliasing(@NotNull Rectangle2D r) {
         return toIntegerBounds(r, r);
+    }
+
+    public static @NotNull Rectangle2D userBoundsToDeviceBounds(@NotNull RenderContext context,
+            @NotNull Rectangle2D r) {
+        Rectangle2D out = containingBoundsAfterTransform(context.userSpaceTransform(), r);
+        return containingBoundsAfterTransform(context.rootTransform(), out);
+    }
+
+    public static @NotNull Rectangle2D deviceBoundsToUserBounds(@NotNull RenderContext context,
+            @NotNull Rectangle2D r) {
+        try {
+            Rectangle2D out = containingBoundsAfterTransform(context.rootTransform().createInverse(), r);
+            return containingBoundsAfterTransform(context.rootTransform().createInverse(), out);
+        } catch (NoninvertibleTransformException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static @NotNull Point2D getLocation(@NotNull Rectangle2D r) {
+        return new Point2D.Double(r.getX(), r.getY());
     }
 }

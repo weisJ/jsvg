@@ -31,6 +31,7 @@ import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.container.CommonRenderableContainerNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
@@ -39,7 +40,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.MaskedPaint;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -94,21 +94,16 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
                 maskBounds.createIntersection(objectBounds), objectBounds, maskContentUnits);
-        Rectangle2D maskBoundsInUserSpace = blitImage.boundsInUserSpace();
 
-        if (ShapeUtil.isInvalidArea(maskBoundsInUserSpace)) return PaintParser.DEFAULT_COLOR;
+        if (ShapeUtil.isInvalidArea(blitImage.boundsInUserSpace())) return PaintParser.DEFAULT_COLOR;
 
         blitImage.renderNode(output, this, this);
 
         if (DEBUG) {
-            output.debugPaint(g -> {
-                g.setComposite(AlphaComposite.SrcOver.derive(0.5f));
-                blitImage.blitTo(new Graphics2DOutput(g), context);
-            });
+            blitImage.debug(output);
         }
 
-        Point2D offset = new Point2D.Double(maskBoundsInUserSpace.getX(), maskBoundsInUserSpace.getY());
-        context.rootTransform().transform(offset, offset);
+        Point2D offset = GeometryUtil.getLocation(blitImage.boundsInDeviceSpace());
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset);
     }
 
