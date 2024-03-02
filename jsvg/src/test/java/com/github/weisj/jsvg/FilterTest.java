@@ -113,4 +113,11 @@ class FilterTest {
     void testFilterOnRoot() {
         assertEquals(SUCCESS, compareImages("filter/filterOnRoot_bug61.svg"));
     }
+
+    @Test
+    void testSubpixelAlignment() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                new ImageInfo(new ImageSource.PathImageSource("filter/ptr_ref_bug62.svg"), RenderType.JSVG),
+                new ImageInfo(new ImageSource.PathImageSource("filter/ptr_bug62.svg"), RenderType.JSVG))));
+    }
 }
