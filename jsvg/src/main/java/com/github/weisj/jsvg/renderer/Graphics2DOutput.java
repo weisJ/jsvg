@@ -44,6 +44,7 @@ public class Graphics2DOutput implements Output {
 
     public Graphics2DOutput(@NotNull Graphics2D g) {
         this.g = g;
+        GraphicsUtil.preparePaint(g.getPaint());
     }
 
     @Override
@@ -115,6 +116,7 @@ public class Graphics2DOutput implements Output {
 
     @Override
     public void dispose() {
+        GraphicsUtil.cleanupPaint(g.getPaint());
         g.dispose();
     }
 

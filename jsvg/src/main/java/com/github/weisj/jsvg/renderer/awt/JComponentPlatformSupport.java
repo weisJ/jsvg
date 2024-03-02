@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -47,6 +47,11 @@ public final class JComponentPlatformSupport implements PlatformSupport {
     @Override
     public @NotNull TargetSurface targetSurface() {
         return component::repaint;
+    }
+
+    @Override
+    public boolean isLongLived() {
+        return true;
     }
 
     @Override

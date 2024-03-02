@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,21 +29,37 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint {
+import com.github.weisj.jsvg.util.ReferenceCounter;
+
+public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, GraphicsUtil.ReferenceCountedPaint {
     private @NotNull Paint paint;
     private final @NotNull Raster maskRaster;
     private final @NotNull Point maskOffset;
+    private final @Nullable ReferenceCounter referenceCounter;
 
-    public MaskedPaint(@NotNull Paint paint, @NotNull Raster maskRaster, @NotNull Point2D maskOffset) {
+    public MaskedPaint(@NotNull Paint paint, @NotNull Raster maskRaster, @NotNull Point2D maskOffset,
+            @Nullable ReferenceCounter referenceCounter) {
         this.paint = paint;
         this.maskRaster = maskRaster;
         this.maskOffset = new Point((int) Math.floor(maskOffset.getX()), (int) Math.floor(maskOffset.getY()));
+        this.referenceCounter = referenceCounter;
     }
 
     @Override
     public void setPaint(@NotNull Paint paint) {
         this.paint = GraphicsUtil.setupPaint(this.paint, paint);
+    }
+
+    @Override
+    public @NotNull Paint paint() {
+        return paint;
+    }
+
+    @Override
+    public @Nullable ReferenceCounter referenceCounter() {
+        return referenceCounter;
     }
 
     @Override

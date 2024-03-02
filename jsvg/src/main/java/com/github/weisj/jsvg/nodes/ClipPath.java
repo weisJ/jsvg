@@ -41,6 +41,7 @@ import com.github.weisj.jsvg.renderer.MaskedPaint;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
+import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories({/* None */})
@@ -51,6 +52,9 @@ import com.github.weisj.jsvg.util.ImageUtil;
 public final class ClipPath extends ContainerNode implements ShapedContainer<SVGNode> {
     private static final boolean DEBUG = false;
     public static final String TAG = "clippath";
+
+    private final CachedSurfaceSupplier surfaceSupplier =
+            new CachedSurfaceSupplier(ImageUtil::createLuminosityBuffer);
     private boolean isValid;
 
     private UnitType clipPathUnits;
@@ -104,8 +108,9 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
                 clipPathUnits.viewTransform(elementBounds.boundingBox()), clipShape.getBounds2D());
 
         // NOTE: We can't intersect with objectBounds here as they don't include the stroke
+        boolean useCache = surfaceSupplier.useCache(output, context);
         BlittableImage blitImage = BlittableImage.create(
-                ImageUtil::createLuminosityBuffer, context, output.clipBounds(),
+                surfaceSupplier.surfaceSupplier(useCache), context, output.clipBounds(),
                 transformedClipBounds.createIntersection(elementBounds.geometryBox()),
                 elementBounds.boundingBox(), clipPathUnits);
 
@@ -122,6 +127,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         }
 
         Point2D offset = GeometryUtil.getLocation(blitImage.boundsInDeviceSpace());
-        return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset);
+        return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
+                surfaceSupplier.referenceCounter(useCache));
     }
 }

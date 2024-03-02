@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,7 +26,9 @@ import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.util.ReferenceCounter;
 
 
 public final class GraphicsUtil {
@@ -38,9 +40,32 @@ public final class GraphicsUtil {
         g.setPaint(setupPaint(g.getPaint(), paint));
     }
 
+    public static void cleanupPaint(@NotNull Paint paint) {
+        if (paint instanceof WrappingPaint) {
+            cleanupPaint(((WrappingPaint) paint).paint());
+        }
+        if (paint instanceof ReferenceCountedPaint) {
+            ReferenceCounter counter = ((ReferenceCountedPaint) paint).referenceCounter();
+            if (counter != null) counter.decreaseReference();
+        }
+    }
+
+    public static void preparePaint(@NotNull Paint paint) {
+        if (paint instanceof WrappingPaint) {
+            preparePaint(((WrappingPaint) paint).paint());
+        }
+        if (paint instanceof ReferenceCountedPaint) {
+            ReferenceCounter counter = ((ReferenceCountedPaint) paint).referenceCounter();
+            if (counter != null) counter.increaseReference();
+        }
+    }
+
     public static @NotNull Paint setupPaint(@NotNull Paint current, @NotNull Paint paint) {
+        preparePaint(paint);
         if (current instanceof WrappingPaint) {
-            ((WrappingPaint) current).setPaint(paint);
+            WrappingPaint wrappingPaint = (WrappingPaint) current;
+            cleanupPaint(wrappingPaint.paint());
+            wrappingPaint.setPaint(paint);
             return current;
         }
         return paint;
@@ -65,5 +90,13 @@ public final class GraphicsUtil {
 
     public interface WrappingPaint {
         void setPaint(@NotNull Paint paint);
+
+        @NotNull
+        Paint paint();
+    }
+
+    public interface ReferenceCountedPaint {
+        @Nullable
+        ReferenceCounter referenceCounter();
     }
 }

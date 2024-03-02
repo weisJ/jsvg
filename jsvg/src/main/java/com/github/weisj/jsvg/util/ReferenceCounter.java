@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,39 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.awt;
-
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
+package com.github.weisj.jsvg.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.font.SVGFont;
+public class ReferenceCounter {
+    private int count;
+    private @Nullable Runnable onZero;
 
-public interface PlatformSupport {
-
-    interface TargetSurface {
-        void repaint();
+    public ReferenceCounter(@NotNull Runnable onZero) {
+        this.onZero = onZero;
     }
 
-    @Nullable
-    ImageObserver imageObserver();
-
-    @Nullable
-    TargetSurface targetSurface();
-
-    default float fontSize() {
-        return SVGFont.defaultFontSize();
+    private void checkNotDisposed() {
+        if (onZero == null) throw new IllegalStateException("ReferenceCounter is already at zero");
     }
 
-    default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
-        return Toolkit.getDefaultToolkit().createImage(imageProducer);
+    public void increaseReference() {
+        checkNotDisposed();
+        count++;
     }
 
-    default boolean isLongLived() {
-        return false;
+    public void decreaseReference() {
+        count--;
+        if (count <= 0) {
+            checkNotDisposed();
+            onZero.run();
+            onZero = null;
+        }
     }
-
 }
