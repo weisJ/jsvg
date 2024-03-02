@@ -139,7 +139,7 @@ class ToShapeTest {
 
     @Test
     void testOther() {
-        assertEquals(SUCCESS, compareShape("clipPathUnits.svg"));
+        assertEquals(SUCCESS, compareShape("clipPath/clipPathUnits.svg"));
         assertEquals(SUCCESS, compareShape("fillRule.svg"));
         assertEquals(SUCCESS, compareShape("paintOrder.svg"));
     }
