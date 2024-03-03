@@ -27,7 +27,6 @@ import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class MaskTest {
@@ -47,10 +46,9 @@ class MaskTest {
         assertEquals(SUCCESS, compareImages("mask/translucentMask.svg"));
     }
 
-    @Disabled("Overlapping elements currently may bleed through the mask")
     @Test
     void testOverlapping() {
-        assertEquals(SUCCESS, compareImages("mask/overlapping.svg", 0.1));
+        assertEquals(SUCCESS, compareImages("mask/overlapping.svg"));
     }
 
     @Test
