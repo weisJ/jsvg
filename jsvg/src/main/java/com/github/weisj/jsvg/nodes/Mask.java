@@ -102,6 +102,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
 
         if (blitImage == null) return PaintParser.DEFAULT_COLOR;
 
+        blitImage.clearBackground(Color.BLACK);
         blitImage.renderNode(output, this, this);
 
         if (DEBUG) {
