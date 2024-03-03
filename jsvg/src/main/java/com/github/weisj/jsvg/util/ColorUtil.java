@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -164,11 +164,11 @@ public final class ColorUtil {
             return (v1 + (v2 - v1) * 6.0f * vH);
         }
         if ((2.0f * vH) < 1.0f) {
-            return (v2);
+            return v2;
         }
         if ((3.0f * vH) < 2.0f) {
             return (v1 + (v2 - v1) * ((2.0f / 3.0f) - vH) * 6.0f);
         }
-        return (v1);
+        return v1;
     }
 }
