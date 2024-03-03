@@ -21,6 +21,9 @@
  */
 package com.github.weisj.jsvg.util;
 
+import java.util.Objects;
+
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +35,7 @@ public class ReferenceCounter {
         this.onZero = onZero;
     }
 
+    @Contract
     private void checkNotDisposed() {
         if (onZero == null) throw new IllegalStateException("ReferenceCounter is already at zero");
     }
@@ -45,7 +49,7 @@ public class ReferenceCounter {
         count--;
         if (count <= 0) {
             checkNotDisposed();
-            onZero.run();
+            Objects.requireNonNull(onZero).run();
             onZero = null;
         }
     }
