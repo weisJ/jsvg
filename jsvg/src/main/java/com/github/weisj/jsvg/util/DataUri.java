@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2013-2023 Jannis Weis
+ * Copyright (c) 2013-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -143,7 +143,7 @@ final class DataUri {
     public static DataUri parse(@NotNull String uri, Charset charset) throws MalformedDataUriException {
 
         // If URI does not start with a case-insensitive "data:": Throw a MALFORMED_URI exception.
-        if (!uri.toLowerCase().startsWith("data:"))
+        if (!uri.toLowerCase(Locale.ENGLISH).startsWith("data:"))
             throw new MalformedDataUriException("URI must start with a case-insensitive `data:'");
 
         // If URI does not contain a ",": Throw a MALFORMED_URI exception.
@@ -197,7 +197,7 @@ final class DataUri {
             String s = headers[header];
 
             // Let s equal the lowercase version of s
-            s = s.toLowerCase();
+            s = s.toLowerCase(Locale.ENGLISH);
 
             // Let eq be the position result of searching for "=" in s.
             int eq = s.indexOf('=');
@@ -251,7 +251,7 @@ final class DataUri {
                 if (-1 == eq) {
 
                     // If name is found case-insensitively in supportedContentEncodings:
-                    final String nameCaseInsensitive = name.toLowerCase();
+                    final String nameCaseInsensitive = name.toLowerCase(Locale.ENGLISH);
 
                     if (supportedContentEncodings.contains(nameCaseInsensitive)) {
 
@@ -271,11 +271,11 @@ final class DataUri {
 
                     // If the length of value is greater than 0 and name is found case-insensitively
                     // in supportedValues:
-                    final String nameCaseInsensitive = name.toLowerCase();
+                    final String nameCaseInsensitive = name.toLowerCase(Locale.ENGLISH);
 
                     if (!value.isEmpty() && supportedValues.containsKey(nameCaseInsensitive)) {
 
-                        // If the corresponding value for name found (case-insensitivley) in
+                        // If the corresponding value for name found (case-insensitively) in
                         // supportedValueSetBits is false:
                         boolean valueSet = supportedValueSetBits.get(nameCaseInsensitive);
 
