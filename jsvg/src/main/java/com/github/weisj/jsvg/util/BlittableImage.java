@@ -98,7 +98,10 @@ public final class BlittableImage {
             userSpaceTransform.scale(objectBounds.getWidth(), objectBounds.getHeight());
         }
 
-        RenderContext imageContext = context.deriveForSurface();
+        // Note: This should actually be the render context from the declaration site of the mask/clipPath
+        // etc.
+        RenderContext imageContext = RenderContext.createInitial(context.platformSupport(),
+                contentUnits.deriveMeasure(context.measureContext()));
         imageContext.setRootTransform(rootTransform, userSpaceTransform);
 
         return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedBoundsInRootSpace);

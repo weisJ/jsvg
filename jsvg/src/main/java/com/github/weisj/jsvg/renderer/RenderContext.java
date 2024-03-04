@@ -94,8 +94,7 @@ public final class RenderContext {
     RenderContext derive(@Nullable Mutator<PaintContext> context,
             @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
-            @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes,
-            boolean newRootTransform) {
+            @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes) {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
@@ -113,19 +112,13 @@ public final class RenderContext {
 
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
 
-        AffineTransform rootAt = newRootTransform ? new AffineTransform(rootTransform) : rootTransform;
-        return new RenderContext(awtSupport, rootAt, new AffineTransform(userSpaceTransform),
+        return new RenderContext(awtSupport, rootTransform, new AffineTransform(userSpaceTransform),
                 newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newFillRule, newContextAttributes);
     }
 
     public @NotNull RenderContext deriveForChildGraphics() {
         // Pass non-trivial context mutator to ensure userSpaceTransform gets created a different copy.
-        return derive(t -> t, null, null, null, null, null, false);
-    }
-
-    public @NotNull RenderContext deriveForSurface() {
-        // Pass non-trivial context mutator to ensure userSpaceTransform gets created a different copy.
-        return derive(t -> t, null, null, null, null, null, true);
+        return derive(t -> t, null, null, null, null, null);
     }
 
     public @NotNull StrokeContext strokeContext() {
