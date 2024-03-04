@@ -66,13 +66,12 @@ public class CachedSurfaceSupplier {
         Iterator<CachedImage> it = c.images.iterator();
         while (it.hasNext()) {
             CachedImage cachedImage = it.next();
-            if (cachedImage.inUse) continue;
             BufferedImage img = cachedImage.image.get();
             if (img == null) {
                 it.remove();
                 continue;
             }
-            if (img.getWidth() >= width && img.getHeight() >= height) {
+            if (!cachedImage.inUse && img.getWidth() >= width && img.getHeight() >= height) {
                 cachedImage.inUse = true;
                 c.lastIssuedCounter = new ReferenceCounter(cachedImage::free);
                 return img.getSubimage(0, 0, (int) width, (int) height);
