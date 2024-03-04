@@ -107,7 +107,6 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         Rectangle2D transformedClipBounds = GeometryUtil.containingBoundsAfterTransform(
                 clipPathUnits.viewTransform(elementBounds.boundingBox()), clipShape.getBounds2D());
 
-        // NOTE: We can't intersect with objectBounds here as they don't include the stroke
         boolean useCache = surfaceSupplier.useCache(output, context);
         BlittableImage blitImage = BlittableImage.create(
                 surfaceSupplier.surfaceSupplier(useCache), context, output.clipBounds(),
