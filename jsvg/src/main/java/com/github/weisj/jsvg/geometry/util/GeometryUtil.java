@@ -200,7 +200,7 @@ public final class GeometryUtil {
         try {
             return at.createInverse();
         } catch (NoninvertibleTransformException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
