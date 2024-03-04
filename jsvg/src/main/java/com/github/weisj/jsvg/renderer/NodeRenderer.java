@@ -128,67 +128,86 @@ public final class NodeRenderer {
     private static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
             @NotNull Output output, @Nullable Instantiator instantiator) {
         if (!(node instanceof Renderable)) return null;
+
         Renderable renderable = (Renderable) node;
-        boolean instantiated = renderable.requiresInstantiation();
-        if (instantiated && (instantiator == null || !instantiator.canInstantiate(node))) {
-            return null;
-        }
+
+        if (!checkInstantiation(node, instantiator, renderable)) return null;
         if (!renderable.isVisible(context)) return null;
+
         RenderContext childContext = createChildContext(renderable, context, instantiator);
-
         Output childOutput = output.createChild();
-
-        if (renderable instanceof Transformable && ((Transformable) renderable).shouldTransform()) {
-            ((Transformable) renderable).applyTransform(childOutput, childContext);
-        }
-
         ElementBounds elementBounds = new ElementBounds(renderable, childContext);
+
+        applyTransform(renderable, childOutput, childContext);
+
         if (renderable instanceof HasClip) {
-
-            Mask mask = ((HasClip) renderable).mask();
-            if (mask != null) {
-                // Todo: Proper object bounding box
-
-                Rectangle2D bounds = elementBounds.geometryBox();
-                if (!bounds.isEmpty()) {
-                    childOutput.setPaint(() -> mask.createMaskPaint(childOutput, childContext, elementBounds));
-                }
-            }
-
-            ClipPath childClip = ((HasClip) renderable).clipPath();
-
-            if (childClip != null) {
-                // Elements with an invalid clip shouldn't be painted
-                if (!childClip.isValid()) return null;
-
-                if (output.isSoftClippingEnabled()) {
-                    Rectangle2D bounds = elementBounds.geometryBox();
-                    if (!bounds.isEmpty()) {
-                        Shape childClipShape = childClip.clipShape(childContext, elementBounds, true);
-
-                        childOutput.setPaint(() -> childClip.createPaintForSoftClipping(
-                                childOutput, childContext, elementBounds, childClipShape));
-                    }
-                } else {
-                    Shape childClipShape = childClip.clipShape(childContext, elementBounds, false);
-
-                    if (CLIP_DEBUG) {
-                        childOutput.debugPaint(g -> {
-                            g.setClip(null);
-                            g.setPaint(Color.MAGENTA);
-                            g.draw(childClipShape);
-                        });
-                    }
-
-                    childOutput.applyClip(childClipShape);
-                }
-            }
+            setupMask((HasClip) renderable, elementBounds, childOutput, childContext);
+            if (!setupClip((HasClip) renderable, elementBounds, childContext, childOutput)) return null;
         }
 
         Info info = tryCreateFilterInfo(renderable, childContext, childOutput, elementBounds);
         if (info != null) return info;
 
         return new Info(renderable, childContext, childOutput);
+    }
+
+    private static void applyTransform(@NotNull Renderable renderable, @NotNull Output childOutput,
+            @NotNull RenderContext childContext) {
+        if (renderable instanceof Transformable && ((Transformable) renderable).shouldTransform()) {
+            ((Transformable) renderable).applyTransform(childOutput, childContext);
+        }
+    }
+
+    private static boolean checkInstantiation(@NotNull SVGNode node, @Nullable Instantiator instantiator,
+            @NotNull Renderable renderable) {
+        boolean instantiated = renderable.requiresInstantiation();
+        return !instantiated || (instantiator != null && instantiator.canInstantiate(node));
+    }
+
+    private static boolean setupClip(@NotNull HasClip renderable, @NotNull ElementBounds elementBounds,
+            @NotNull RenderContext childContext, @NotNull Output childOutput) {
+        ClipPath childClip = renderable.clipPath();
+
+        if (childClip != null) {
+            // Elements with an invalid clip shouldn't be painted
+            if (!childClip.isValid()) return false;
+
+            if (childOutput.isSoftClippingEnabled()) {
+                Rectangle2D bounds = elementBounds.geometryBox();
+                if (!bounds.isEmpty()) {
+                    Shape childClipShape = childClip.clipShape(childContext, elementBounds, true);
+
+                    childOutput.setPaint(() -> childClip.createPaintForSoftClipping(
+                            childOutput, childContext, elementBounds, childClipShape));
+                }
+            } else {
+                Shape childClipShape = childClip.clipShape(childContext, elementBounds, false);
+
+                if (CLIP_DEBUG) {
+                    childOutput.debugPaint(g -> {
+                        g.setClip(null);
+                        g.setPaint(Color.MAGENTA);
+                        g.draw(childClipShape);
+                    });
+                }
+
+                childOutput.applyClip(childClipShape);
+            }
+        }
+        return true;
+    }
+
+    private static void setupMask(HasClip renderable, ElementBounds elementBounds, Output childOutput,
+            RenderContext childContext) {
+        Mask mask = renderable.mask();
+        if (mask != null) {
+            // Todo: Proper object bounding box
+
+            Rectangle2D bounds = elementBounds.geometryBox();
+            if (!bounds.isEmpty()) {
+                childOutput.setPaint(() -> mask.createMaskPaint(childOutput, childContext, elementBounds));
+            }
+        }
     }
 
     private static @Nullable InfoWithFilter tryCreateFilterInfo(
