@@ -109,7 +109,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
             blitImage.debug(output);
         }
 
-        Point2D offset = GeometryUtil.getLocation(blitImage.boundsInDeviceSpace());
+        Point2D offset = GeometryUtil.getLocation(blitImage.imageBoundsInDeviceSpace());
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
                 surfaceSupplier.referenceCounter(useCache));
     }

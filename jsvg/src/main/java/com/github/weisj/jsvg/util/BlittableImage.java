@@ -54,14 +54,14 @@ public final class BlittableImage {
     private final @NotNull BufferedImage image;
     public final @NotNull RenderContext context;
     private final @NotNull Rectangle2D boundsInDeviceSpace;
-    private final @NotNull Rectangle2D boundsInRootSpace;
+    private final @NotNull Rectangle2D userBoundsInRootSpace;
 
     private BlittableImage(@NotNull BufferedImage image, @NotNull RenderContext context,
-            @NotNull Rectangle2D boundsInDeviceSpace, @NotNull Rectangle2D boundsInRootSpace) {
+            @NotNull Rectangle2D boundsInDeviceSpace, @NotNull Rectangle2D userBoundsInRootSpace) {
         this.image = image;
         this.context = context;
         this.boundsInDeviceSpace = boundsInDeviceSpace;
-        this.boundsInRootSpace = boundsInRootSpace;
+        this.userBoundsInRootSpace = userBoundsInRootSpace;
     }
 
     public static @Nullable BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
@@ -76,11 +76,12 @@ public final class BlittableImage {
 
         if (ShapeUtil.isInvalidArea(boundsInDeviceSpace)) return null;
 
-        // Convert to integer coordinates to ensure we don't cut off any pixels due to rounding errors.
-        GeometryUtil.adjustForAliasing(boundsInDeviceSpace);
-
         Rectangle2D adjustedBoundsInRootSpace = GeometryUtil.convertBounds(context, boundsInDeviceSpace,
                 GeometryUtil.Space.Device, GeometryUtil.Space.Root);
+
+        // Convert to integer coordinates to ensure we don't cut off any pixels due to rounding errors.
+        // Increase size by 1 to ensure we don't cut off any pixels used for anti-aliasing.
+        boundsInDeviceSpace = GeometryUtil.adjustForAliasing(GeometryUtil.grow(boundsInDeviceSpace, 1));
 
         BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null,
                 boundsInDeviceSpace.getWidth(),
@@ -103,12 +104,12 @@ public final class BlittableImage {
         return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedBoundsInRootSpace);
     }
 
-    public @NotNull Rectangle2D boundsInDeviceSpace() {
+    public @NotNull Rectangle2D imageBoundsInDeviceSpace() {
         return boundsInDeviceSpace;
     }
 
-    public @NotNull Rectangle2D boundsInRootSpace() {
-        return boundsInRootSpace;
+    public @NotNull Rectangle2D userBoundsInRootSpace() {
+        return userBoundsInRootSpace;
     }
 
     public @NotNull BufferedImage image() {

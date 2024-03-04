@@ -227,7 +227,7 @@ public final class Filter extends ContainerNode {
         }
 
         public @NotNull Rectangle2D imageBounds() {
-            return blittableImage.boundsInRootSpace();
+            return blittableImage.userBoundsInRootSpace();
         }
 
         public @NotNull Rectangle2D elementBounds() {
