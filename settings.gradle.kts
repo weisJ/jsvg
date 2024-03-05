@@ -50,7 +50,7 @@ dependencyResolutionManagement {
             }
             idv("svgSalamander", "com.formdev:svgSalamander")
             idv("batik", "org.apache.xmlgraphics:batik-all")
-            idv("imageCompare", "com.github.romankh3:image-comparison")
+            idv("imageCompare", "com.github.weisj:image-comparison")
             idv("sizeof", "org.ehcache:sizeof")
         }
         create("toolLibs") {

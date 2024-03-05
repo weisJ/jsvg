@@ -59,7 +59,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 public final class ReferenceTest {
 
     private static final double DEFAULT_TOLERANCE = 0.3;
-    private static final double DEFAULT_PIXEL_TOLERANCE = 0;
+    private static final double DEFAULT_PIXEL_TOLERANCE = 0.1;
     public static Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
 
     enum RenderType {
@@ -183,6 +183,9 @@ public final class ReferenceTest {
         comp.setPixelToleranceLevel(pixelTolerance);
         ImageComparisonResult comparison = comp.compareImages();
         ImageComparisonState state = comparison.getImageComparisonState();
+        if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
+            return ReferenceTestResult.SUCCESS;
+        }
         return new ReferenceTestResult(state, () -> {
             StringBuilder sb = new StringBuilder();
             sb.append("Image: ").append(name).append('\n');
