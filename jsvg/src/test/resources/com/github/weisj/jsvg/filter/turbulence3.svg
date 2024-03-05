@@ -5,6 +5,11 @@
 		various parameter
 		settings for feTurbulence.
 	</desc>
+	<style>
+		text {
+		display: none;
+		}
+	</style>
 	<g font-family="Verdana" font-size="10" text-anchor="middle">
 		<defs>
 			<filter id="Turb1" filterUnits="objectBoundingBox" x="0%"
