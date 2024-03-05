@@ -162,9 +162,11 @@ public final class Filter extends ContainerNode {
                 GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
+        RenderContext imageContext = context.deriveForSurface();
+
         BlittableImage blitImage = BlittableImage.create(
                 ImageUtil::createCompatibleTransparentImage, context, clipHeuristicBounds,
-                filterRegion, elementBounds.boundingBox(), UnitType.UserSpaceOnUse);
+                filterRegion, elementBounds.boundingBox(), UnitType.UserSpaceOnUse, imageContext);
 
         if (blitImage == null) return null;
 
@@ -236,6 +238,10 @@ public final class Filter extends ContainerNode {
 
         public @NotNull Output output() {
             return imageOutput;
+        }
+
+        public @NotNull RenderContext context() {
+            return blittableImage.context();
         }
 
         public @NotNull Rectangle2D tile() {

@@ -61,6 +61,10 @@ public final class NodeRenderer {
             return output;
         }
 
+        public @NotNull RenderContext context() {
+            return context;
+        }
+
         @Override
         public void close() {
             output.dispose();
@@ -91,6 +95,11 @@ public final class NodeRenderer {
         }
 
         @Override
+        public @NotNull RenderContext context() {
+            return filterInfo.context();
+        }
+
+        @Override
         public void close() {
             Output previousOutput = this.output;
             filter.applyFilter(previousOutput, context, filterInfo);
@@ -107,7 +116,7 @@ public final class NodeRenderer {
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output,
             @Nullable Instantiator instantiator) {
         try (Info info = createRenderInfo(node, context, output, instantiator)) {
-            if (info != null) info.renderable.render(info.context, info.output());
+            if (info != null) info.renderable.render(info.context(), info.output());
         }
     }
 
@@ -115,7 +124,7 @@ public final class NodeRenderer {
             @NotNull RenderContext context, @NotNull Output output,
             @Nullable Instantiator instantiator) {
         try (Info info = createRenderInfo(node, context, output, instantiator)) {
-            if (info != null) node.renderWithSize(size, node.viewBox(context), info.context, info.output());
+            if (info != null) node.renderWithSize(size, node.viewBox(info.context()), info.context(), info.output());
         }
     }
 

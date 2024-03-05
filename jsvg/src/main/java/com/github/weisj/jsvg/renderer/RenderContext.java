@@ -95,6 +95,15 @@ public final class RenderContext {
             @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
             @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes) {
+        return derive(context, attributeFontSpec, viewBox, frc, fillRule, contextAttributes, null);
+    }
+
+    @NotNull
+    RenderContext derive(@Nullable Mutator<PaintContext> context,
+            @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
+            @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
+            @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes,
+            @Nullable AffineTransform rootTransform) {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
@@ -111,14 +120,20 @@ public final class RenderContext {
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
 
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
+        AffineTransform newRootTransform = rootTransform != null ? rootTransform : this.rootTransform;
 
-        return new RenderContext(awtSupport, rootTransform, new AffineTransform(userSpaceTransform),
+        return new RenderContext(awtSupport, newRootTransform, new AffineTransform(userSpaceTransform),
                 newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newFillRule, newContextAttributes);
     }
 
     public @NotNull RenderContext deriveForChildGraphics() {
         // Pass non-trivial context mutator to ensure userSpaceTransform gets created a different copy.
         return derive(t -> t, null, null, null, null, null);
+    }
+
+    public @NotNull RenderContext deriveForSurface() {
+        return derive(t -> t, null, null, null, null, null,
+                new AffineTransform(rootTransform));
     }
 
     public @NotNull StrokeContext strokeContext() {
