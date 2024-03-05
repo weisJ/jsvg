@@ -123,16 +123,11 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
             innerContext.translate(output, anchorPos);
         }
 
-        boolean shouldClip = overflow.establishesClip();
-
         // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
-        if (shouldClip) output.applyClip(new ViewBox(useSiteSize));
+        if (overflow.establishesClip()) output.applyClip(new ViewBox(useSiteSize));
 
         if (viewTransform != null) {
             innerContext.transform(output, viewTransform);
-
-            // If this element itself specifies a viewbox we have to respect its clipping rules.
-            if (shouldClip) output.applyClip(view);
         }
 
         if (this instanceof SVG && ((SVG) this).isTopLevel()) {
