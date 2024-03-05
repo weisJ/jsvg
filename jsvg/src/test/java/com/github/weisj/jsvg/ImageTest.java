@@ -21,11 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +30,8 @@ class ImageTest {
 
     @Test
     void externalImageTest() {
-        assertEquals(SUCCESS, compareImages("image/imageExternal.svg"));
+        // Can't compare with batik as it fails with cross origin requests
+        assertDoesNotThrow(() -> renderJsvg("image/imageExternal.svg"));
     }
 
     @Test
