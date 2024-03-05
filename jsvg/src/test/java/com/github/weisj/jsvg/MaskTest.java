@@ -21,8 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.*;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +43,9 @@ class MaskTest {
 
     @Test
     void testTranslucentMask() {
-        assertEquals(SUCCESS, compareImages("mask/translucentMask.svg"));
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                new ImageInfo(new ImageSource.PathImageSource("mask/translucentMask.svg"), RenderType.JSVG),
+                new ImageInfo(new ImageSource.PathImageSource("mask/translucentMask_ref.svg"), RenderType.JSVG))));
     }
 
     @Test
