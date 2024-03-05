@@ -139,7 +139,7 @@ class BlitImageTest {
                 (o, ctx) -> renderShape.accept(o));
 
         assertEquals(SUCCESS, ReferenceTest.compareImageRasterization(reference.image(), actual.image(),
-                "BlitImage", 0f));
+                "BlitImage", 0f, 0f));
     }
 
     @Test

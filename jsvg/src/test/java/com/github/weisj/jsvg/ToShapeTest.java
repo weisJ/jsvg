@@ -188,7 +188,7 @@ class ToShapeTest {
             SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url.openStream()));
             BufferedImage expected = renderReference(document);
             BufferedImage actual = renderShape(document);
-            return ReferenceTest.compareImageRasterization(expected, actual, path, tolerance);
+            return ReferenceTest.compareImageRasterization(expected, actual, path, tolerance, 0);
         } catch (IOException e) {
             Assertions.fail(e);
             return ReferenceTest.ReferenceTestResult.FAILURE;

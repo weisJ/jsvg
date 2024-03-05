@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.batik.anim.dom.SVGDOMImplementation;
@@ -57,7 +58,8 @@ import com.google.errorprone.annotations.CheckReturnValue;
 @CheckReturnValue
 public final class ReferenceTest {
 
-    private static final double DEFAULT_TOLERANCE = 0.5;
+    private static final double DEFAULT_TOLERANCE = 0.3;
+    private static final double DEFAULT_PIXEL_TOLERANCE = 0;
     public static Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
 
     enum RenderType {
@@ -109,10 +111,11 @@ public final class ReferenceTest {
         }
     }
 
-    public record CompareInfo(@NotNull ImageInfo expected, @NotNull ImageInfo actual, double tolerance) {
+    public record CompareInfo(@NotNull ImageInfo expected, @NotNull ImageInfo actual, double tolerance,
+            double pixelTolerance) {
 
         public CompareInfo(@NotNull ImageInfo expected, @NotNull ImageInfo actual) {
-            this(expected, actual, DEFAULT_TOLERANCE);
+            this(expected, actual, DEFAULT_TOLERANCE, DEFAULT_PIXEL_TOLERANCE);
         }
 
         @NotNull
@@ -137,10 +140,15 @@ public final class ReferenceTest {
     }
 
     public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance) {
+        return compareImages(fileName, tolerance, DEFAULT_PIXEL_TOLERANCE);
+    }
+
+    public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance,
+            double pixelTolerance) {
         return compareImages(new CompareInfo(
                 new ImageInfo(new ImageSource.PathImageSource(fileName), RenderType.Batik),
                 new ImageInfo(new ImageSource.PathImageSource(fileName), RenderType.JSVG),
-                tolerance));
+                tolerance, pixelTolerance));
     }
 
     static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent) {
@@ -151,7 +159,8 @@ public final class ReferenceTest {
         try {
             BufferedImage expected = compareInfo.expected.render();
             BufferedImage actual = compareInfo.actual.render();
-            return compareImageRasterization(expected, actual, compareInfo.name(), compareInfo.tolerance());
+            return compareImageRasterization(expected, actual, compareInfo.name(),
+                    compareInfo.tolerance(), compareInfo.pixelTolerance());
         } catch (Exception e) {
             Assertions.fail(compareInfo.name(), e);
             return ReferenceTestResult.FAILURE;
@@ -163,14 +172,15 @@ public final class ReferenceTest {
         return compareImages(new CompareInfo(
                 new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), RenderType.Batik),
                 new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), RenderType.JSVG),
-                tolerance));
+                tolerance, DEFAULT_PIXEL_TOLERANCE));
     }
 
     public static @NotNull ReferenceTest.ReferenceTestResult compareImageRasterization(
             @NotNull BufferedImage expected, @NotNull BufferedImage actual,
-            @NotNull String name, @NotNull double tolerance) {
+            @NotNull String name, double tolerance, double pixelTolerance) {
         ImageComparison comp = new ImageComparison(expected, actual);
         comp.setAllowingPercentOfDifferentPixels(tolerance);
+        comp.setPixelToleranceLevel(pixelTolerance);
         ImageComparisonResult comparison = comp.compareImages();
         ImageComparisonState state = comparison.getImageComparisonState();
         if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
@@ -195,8 +205,23 @@ public final class ReferenceTest {
                             .append(',')
                             .append(rectangle.getMaxPoint().x)
                             .append(',')
-                            .append(rectangle.getMaxPoint().y)
-                            .append('\n');
+                            .append(rectangle.getMaxPoint().y);
+                    Point p = rectangle.getMinPoint();
+                    Color expectedPixel = new Color(expected.getRGB(p.x, p.y), true);
+                    Color actualPixel = new Color(actual.getRGB(p.x, p.y), true);
+                    Consumer<Color> printPixel = (Color c) -> {
+                        sb.append('[')
+                                .append(c.getRed()).append(' ')
+                                .append(c.getGreen()).append(' ')
+                                .append(c.getBlue()).append(' ')
+                                .append(c.getAlpha())
+                                .append(']');
+                    };
+                    sb.append(" => ");
+                    printPixel.accept(expectedPixel);
+                    sb.append(" vs ");
+                    printPixel.accept(actualPixel);
+                    sb.append('\n');
                 }
                 ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_diff.png"),
                         comparison.getResult());
