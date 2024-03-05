@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -153,7 +153,7 @@ public abstract class AbstractBlendComposite implements Composite {
     }
 
     @FunctionalInterface
-    interface Blender {
+    public interface Blender {
         void blend(int[] src, int[] dst, int[] result);
     }
 }

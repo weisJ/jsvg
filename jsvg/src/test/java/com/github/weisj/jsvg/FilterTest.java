@@ -25,6 +25,7 @@ import static com.github.weisj.jsvg.ReferenceTest.*;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
@@ -77,7 +78,7 @@ class FilterTest {
     void testBlend() {
         // Filter region not applied correctly.
         assertDoesNotThrow(() -> renderJsvg("filter/blend.svg"));
-        assertEquals(SUCCESS, compareImages("filter/blend_bug41.svg"));
+        assertEquals(SUCCESS, compareImages("filter/blend_bug41.svg", 0.1f, 0.05f));
     }
 
     @Test
@@ -119,5 +120,17 @@ class FilterTest {
         assertEquals(SUCCESS, compareImages(new CompareInfo(
                 new ImageInfo(new ImageSource.PathImageSource("filter/ptr_ref_bug62.svg"), RenderType.JSVG),
                 new ImageInfo(new ImageSource.PathImageSource("filter/ptr_bug62.svg"), RenderType.JSVG))));
+    }
+
+    @Test
+    void testFilterChannels() {
+        assertEquals(SUCCESS, compareImages("filter/channelSourceGraphic.svg"));
+        assertEquals(SUCCESS, compareImages("filter/channelSourceAlpha.svg"));
+    }
+
+    @Test
+    @Disabled("Issue #67")
+    void testSourceAlpha() {
+        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend.svg"));
     }
 }

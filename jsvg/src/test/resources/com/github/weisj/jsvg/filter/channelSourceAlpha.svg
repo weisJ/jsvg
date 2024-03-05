@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2">
+	<g filter="url(#b)">
+		<rect fill="red" fill-opacity=".5" width="100%" height="100%" />
+	</g>
+	<defs>
+		<filter id="b">
+			<feMerge>
+				<feMergeNode in="SourceGraphic" />
+			</feMerge>
+		</filter>
+	</defs>
+</svg>
