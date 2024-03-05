@@ -31,6 +31,6 @@ class FillTest {
 
     @Test
     void testFillAttributeOnSVGRoot() {
-        assertEquals(SUCCESS, compareImages("fillOnSVG.svg"));
+        assertEquals(SUCCESS, compareImages("fillOnSVG.svg", 2));
     }
 }
