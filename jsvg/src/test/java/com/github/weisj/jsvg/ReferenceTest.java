@@ -183,9 +183,6 @@ public final class ReferenceTest {
         comp.setPixelToleranceLevel(pixelTolerance);
         ImageComparisonResult comparison = comp.compareImages();
         ImageComparisonState state = comparison.getImageComparisonState();
-        if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
-            state = ImageComparisonState.MATCH;
-        }
         return new ReferenceTestResult(state, () -> {
             StringBuilder sb = new StringBuilder();
             sb.append("Image: ").append(name).append('\n');
@@ -193,7 +190,8 @@ public final class ReferenceTest {
                     .append('\n');
             sb.append("Actual size: ").append(actual.getWidth()).append('x').append(actual.getHeight())
                     .append('\n');
-            sb.append("Difference: ").append(comparison.getDifferencePercent()).append('%')
+            sb.append("Difference: ").append(comparison.getDifferencePercent() * 100).append('%')
+                    .append(" > ").append(tolerance * 100).append('%')
                     .append('\n');
             List<Rectangle> rects = comparison.getRectangles();
             if (rects != null) {
