@@ -1,5 +1,5 @@
 <svg viewBox="0 0 400 100" width="400" height="100"
-	xmlns="http://www.w3.org/2000/svg">
+	xmlns="http://www.w3.org/2000/svg" font-family="serif" font-size="16">
 	<text y="20" letter-spacing="2">Bigger letter-spacing</text>
 	<text x="200" y="20" letter-spacing="-0.5">Smaller letter-spacing</text>
 </svg>
