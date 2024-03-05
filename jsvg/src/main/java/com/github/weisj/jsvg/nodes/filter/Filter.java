@@ -25,6 +25,8 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +59,7 @@ import com.github.weisj.jsvg.util.ImageUtil;
     anyOf = {Animate.class, Set.class}
 )
 public final class Filter extends ContainerNode {
+    private static final Logger LOGGER = Logger.getLogger(Filter.class.getName());
     private static final boolean DEBUG = false;
     public static final String TAG = "filter";
 
@@ -188,8 +191,9 @@ public final class Filter extends ContainerNode {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
                 filterPrimitive.applyFilter(context, filterContext);
-            } catch (IllegalFilterStateException ignored) {
+            } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
+                LOGGER.log(Level.INFO, "Exception during filter", e);
             }
             // Todo: Respect filterPrimitiveRegion
         }

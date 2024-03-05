@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -139,7 +139,6 @@ public final class NodeSupplier {
         constructorMap.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
         constructorMap.put("feConvolveMatrix", () -> new DummyFilterPrimitive("feConvolveMatrix"));
         constructorMap.put("feDiffuseLightning", () -> new DummyFilterPrimitive("feDiffuseLightning"));
-        constructorMap.put("feDisplacementMap", () -> new DummyFilterPrimitive("feDisplacementMap"));
         constructorMap.put("feDropShadow", () -> new DummyFilterPrimitive("feDropShadow"));
         constructorMap.put("feFuncA", () -> new DummyFilterPrimitive("feFuncA"));
         constructorMap.put("feFuncB", () -> new DummyFilterPrimitive("feFuncB"));
