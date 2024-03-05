@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -38,11 +38,11 @@ public final class StrokeContext {
     public final @Nullable LineJoin lineJoin;
     public final float miterLimit;
 
-    public final Length[] dashPattern;
+    public final Length @Nullable [] dashPattern;
     public final @Nullable Length dashOffset;
 
     public StrokeContext(@Nullable Length strokeWidth, @Nullable LineCap lineCap, @Nullable LineJoin lineJoin,
-            float miterLimit, @NotNull Length[] dashPattern, @Nullable Length dashOffset) {
+            float miterLimit, @NotNull Length @Nullable [] dashPattern, @Nullable Length dashOffset) {
         this.strokeWidth = strokeWidth;
         this.lineCap = lineCap;
         this.lineJoin = lineJoin;
@@ -51,7 +51,8 @@ public final class StrokeContext {
         this.dashOffset = dashOffset;
     }
 
-    private static Length[] validateDashPattern(@NotNull Length[] pattern) {
+    private static Length[] validateDashPattern(@NotNull Length @Nullable [] pattern) {
+        if (pattern == null) return null;
         if (pattern.length == 0) return pattern;
         for (Length length : pattern) {
             if (length.raw() < 0) {
@@ -72,7 +73,7 @@ public final class StrokeContext {
                 context.lineCap != null ? context.lineCap : lineCap,
                 context.lineJoin != null ? context.lineJoin : lineJoin,
                 Length.isSpecified(context.miterLimit) ? context.miterLimit : miterLimit,
-                context.dashPattern.length > 0 ? context.dashPattern : dashPattern,
+                context.dashPattern != null ? context.dashPattern : dashPattern,
                 context.dashOffset != null ? context.dashOffset : dashOffset);
     }
 
@@ -81,7 +82,7 @@ public final class StrokeContext {
                 && lineCap == null
                 && lineJoin == null
                 && Length.isUnspecified(miterLimit)
-                && dashPattern.length == 0
+                && dashPattern == null
                 && dashOffset == null;
     }
 
@@ -99,7 +100,7 @@ public final class StrokeContext {
                 attributeNode.getEnumNullable("stroke-linecap", LineCap.class),
                 attributeNode.getEnumNullable("stroke-linejoin", LineJoin.class),
                 attributeNode.getNonNegativeFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
-                attributeNode.getLengthList("stroke-dasharray"),
+                attributeNode.getLengthList("stroke-dasharray", null),
                 attributeNode.getLength("stroke-dashoffset"));
     }
 

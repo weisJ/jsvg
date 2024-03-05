@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -240,8 +240,14 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
     }
 
-    public @NotNull Length[] getLengthList(@NotNull String key) {
-        return loadHelper.attributeParser().parseLengthList(getValue(key));
+    public @NotNull Length @NotNull [] getLengthList(@NotNull String key) {
+        return getLengthList(key, new Length[0]);
+    }
+
+
+    @Contract("_,!null -> !null")
+    public @NotNull Length @Nullable [] getLengthList(@NotNull String key, Length @Nullable [] fallback) {
+        return loadHelper.attributeParser().parseLengthList(getValue(key), fallback);
     }
 
     public float[] getFloatList(@NotNull String key) {

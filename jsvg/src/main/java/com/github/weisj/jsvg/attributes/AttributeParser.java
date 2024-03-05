@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -132,13 +132,15 @@ public final class AttributeParser {
         }
     }
 
-    public Length[] parseLengthList(@Nullable String value) {
+    @Contract("_,!null -> !null")
+    public @NotNull Length @Nullable [] parseLengthList(@Nullable String value, Length @Nullable [] fallback) {
         if (value != null && value.equalsIgnoreCase("none")) return new Length[0];
-        String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
+        String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE, null);
+        if (values == null) return fallback;
         Length[] ret = new Length[values.length];
         for (int i = 0; i < ret.length; i++) {
             Length length = parseLength(values[i], null);
-            if (length == null) return new Length[0];
+            if (length == null) return fallback;
             ret[i] = length;
         }
         return ret;
@@ -165,7 +167,13 @@ public final class AttributeParser {
     }
 
     public @NotNull String[] parseStringList(@Nullable String value, SeparatorMode separatorMode) {
-        if (value == null || value.isEmpty()) return new String[0];
+        return parseStringList(value, separatorMode, new String[0]);
+    }
+
+    @Contract("_,_,!null -> !null")
+    public @NotNull String @Nullable [] parseStringList(@Nullable String value, SeparatorMode separatorMode,
+            @NotNull String @Nullable [] fallback) {
+        if (value == null || value.isEmpty()) return fallback;
         List<String> list = new ArrayList<>();
         int max = value.length();
         int start = 0;
