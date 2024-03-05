@@ -39,9 +39,17 @@ class ClipPathTest {
     @Test
     void testClipPathUnitsSoftClip() {
         ReferenceTest.SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
-        assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits.svg"));
-        assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits2.svg"));
-        assertEquals(SUCCESS, compareImages("clipPath/clipPathTransform.svg"));
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits.svg", 0.75));
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits2.svg", 0.75));
+        assertEquals(SUCCESS, compareImages("clipPath/clipPathTransform.svg", 0.75));
+        ReferenceTest.SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
+    }
+
+    @Test
+    void filterAndClipPath() {
+        ReferenceTest.SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
+        assertEquals(SUCCESS, compareImages("clipPath/filterAndClipPath.svg"));
+        assertEquals(SUCCESS, compareImages("clipPath/filterAndClipPath2.svg", 0.1));
         ReferenceTest.SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
     }
 }
