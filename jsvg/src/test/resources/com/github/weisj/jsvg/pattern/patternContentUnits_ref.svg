@@ -1,0 +1,97 @@
+<svg viewBox="0 0 200 100" width="600" height="300"
+	xmlns="http://www.w3.org/2000/svg">
+	<!-- A pattern tile that content coordinates and values are computed against 
+		the current coordinate user space. Note that the size of the tile is computed 
+		against the bounding box of the target element -->
+	<pattern id="p1" width="20%" height="20%"
+		patternContentUnits="userSpaceOnUse">
+		<circle cx="10" cy="10" r="10" />
+	</pattern>
+
+	<!-- A pattern tile that content coordinates and values are computed against 
+		the bounding box of the target element. Note that the size of the tile is 
+		also computed against the bounding box of the target element -->
+	<pattern id="p2" width="20%" height="20%"
+		patternContentUnits="objectBoundingBox">
+		<circle cx=".1" cy=".1" r=".1" />
+	</pattern>
+
+	<!-- Left square with user space tiles -->
+	<g fill="black" transform="translate(10 10)">
+		<defs>
+			<clipPath id="c">
+				<rect width="16" height="16" />
+			</clipPath>
+			<circle id="pc1" cx="10" cy="10" r="10" clip-path="url(#c)" />
+		</defs>
+		<use href="#pc1" x="0" y="0" />
+		<use href="#pc1" x="16" y="0" />
+		<use href="#pc1" x="32" y="0" />
+		<use href="#pc1" x="48" y="0" />
+		<use href="#pc1" x="64" y="0" />
+
+		<use href="#pc1" x="0" y="16" />
+		<use href="#pc1" x="16" y="16" />
+		<use href="#pc1" x="32" y="16" />
+		<use href="#pc1" x="48" y="16" />
+		<use href="#pc1" x="64" y="16" />
+
+		<use href="#pc1" x="0" y="32" />
+		<use href="#pc1" x="16" y="32" />
+		<use href="#pc1" x="32" y="32" />
+		<use href="#pc1" x="48" y="32" />
+		<use href="#pc1" x="64" y="32" />
+
+		<use href="#pc1" x="0" y="48" />
+		<use href="#pc1" x="16" y="48" />
+		<use href="#pc1" x="32" y="48" />
+		<use href="#pc1" x="48" y="48" />
+		<use href="#pc1" x="64" y="48" />
+
+		<use href="#pc1" x="0" y="64" />
+		<use href="#pc1" x="16" y="64" />
+		<use href="#pc1" x="32" y="64" />
+		<use href="#pc1" x="48" y="64" />
+		<use href="#pc1" x="64" y="64" />
+	</g>
+	<rect x="10" y="10" width="80" height="80" stroke="red"
+		fill="none" />
+
+	<!-- Right square with bounding box tiles -->
+	<g fill="black" transform="translate(110 10)">
+		<defs>
+			<circle id="pc2" cx="8" cy="8" r="8" />
+		</defs>
+		<use href="#pc2" x="0" y="0" />
+		<use href="#pc2" x="16" y="0" />
+		<use href="#pc2" x="32" y="0" />
+		<use href="#pc2" x="48" y="0" />
+		<use href="#pc2" x="64" y="0" />
+
+		<use href="#pc2" x="0" y="16" />
+		<use href="#pc2" x="16" y="16" />
+		<use href="#pc2" x="32" y="16" />
+		<use href="#pc2" x="48" y="16" />
+		<use href="#pc2" x="64" y="16" />
+
+		<use href="#pc2" x="0" y="32" />
+		<use href="#pc2" x="16" y="32" />
+		<use href="#pc2" x="32" y="32" />
+		<use href="#pc2" x="48" y="32" />
+		<use href="#pc2" x="64" y="32" />
+
+		<use href="#pc2" x="0" y="48" />
+		<use href="#pc2" x="16" y="48" />
+		<use href="#pc2" x="32" y="48" />
+		<use href="#pc2" x="48" y="48" />
+		<use href="#pc2" x="64" y="48" />
+
+		<use href="#pc2" x="0" y="64" />
+		<use href="#pc2" x="16" y="64" />
+		<use href="#pc2" x="32" y="64" />
+		<use href="#pc2" x="48" y="64" />
+		<use href="#pc2" x="64" y="64" />
+	</g>
+	<rect x="110" y="10" width="80" height="80" fill="none"
+		stroke="red" />
+</svg>
