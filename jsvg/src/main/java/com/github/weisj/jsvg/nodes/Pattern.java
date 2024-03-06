@@ -25,21 +25,21 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Overflow;
-import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.UnitType;
-import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
+import com.github.weisj.jsvg.nodes.prototype.Instantiator;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -47,7 +47,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.*;
-import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
+import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.Container)
@@ -60,7 +60,7 @@ import com.github.weisj.jsvg.util.ImageUtil;
     anyOf = {Anchor.class, ClipPath.class, Filter.class, Image.class, Mask.class, Marker.class, Pattern.class,
             Style.class, Text.class, View.class}
 )
-public final class Pattern extends BaseInnerViewContainer implements SVGPaint, ShapedContainer<SVGNode> {
+public final class Pattern extends BaseInnerViewContainer implements SVGPaint, ShapedContainer<SVGNode>, Instantiator {
     public static final String TAG = "pattern";
 
     private Length x;
@@ -107,6 +107,11 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         if (viewBox == null && template != null) viewBox = template.viewBox;
         preserveAspectRatio = template != null ? template.preserveAspectRatio : preserveAspectRatio;
 
+        patternUnits = attributeNode.getEnum("patternUnits",
+                template != null ? template.patternUnits : UnitType.ObjectBoundingBox);
+        patternContentUnits = attributeNode.getEnum("patternContentUnits",
+                template != null ? template.patternContentUnits : UnitType.UserSpaceOnUse);
+
         x = attributeNode.getLength("x", template != null ? template.x : Length.ZERO);
         y = attributeNode.getLength("y", template != null ? template.y : Length.ZERO);
         // Note: width == 0 || height == 0 implies nothing should be painted.
@@ -115,13 +120,22 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         height = attributeNode.getLength("height", template != null ? template.height : Length.ZERO)
                 .coerceNonNegative();
 
+        // TODO: Might need to do this for mask/filter as well. Generalise to treat raw as percentage
+        // somehow.
+        if (patternUnits == UnitType.ObjectBoundingBox) {
+            x = coerceToPercentage(x);
+            y = coerceToPercentage(y);
+            width = coerceToPercentage(width);
+            height = coerceToPercentage(height);
+        }
+
         patternTransform = attributeNode.parseTransform("patternTransform");
         if (patternTransform == null && template != null) patternTransform = template.patternTransform;
+    }
 
-        patternUnits = attributeNode.getEnum("patternUnits",
-                template != null ? template.patternUnits : UnitType.ObjectBoundingBox);
-        patternContentUnits = attributeNode.getEnum("patternContentUnits",
-                template != null ? template.patternContentUnits : UnitType.UserSpaceOnUse);
+    private @NotNull Length coerceToPercentage(@NotNull Length length) {
+        if (length.unit() != Unit.Raw) return length;
+        return Unit.PERCENTAGE.valueOf(length.raw() * 100);
     }
 
     private @Nullable Pattern parseTemplate(@NotNull AttributeNode attributeNode) {
@@ -132,11 +146,6 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     @Override
     public boolean isVisible() {
         return !width.isZero() && !height.isZero() && SVGPaint.super.isVisible();
-    }
-
-    @Override
-    public boolean requiresInstantiation() {
-        return true;
     }
 
     @Override
@@ -163,34 +172,32 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         Rectangle2D.Double patternBounds = patternUnits.computeViewBounds(measure, bounds, x, y, width, height);
 
         // TODO: With overflow = visible this does not result in the correct behaviour
-        BufferedImage img =
-                ImageUtil.createCompatibleTransparentImage(output, patternBounds.width, patternBounds.height);
-        Graphics2D imgGraphics = GraphicsUtil.createGraphics(img);
-        imgGraphics.setRenderingHints(output.renderingHints());
-        imgGraphics.scale(img.getWidth() / patternBounds.width, img.getHeight() / patternBounds.height);
+        BlittableImage blittableImage = BlittableImage.create(
+                ImageUtil::createCompatibleTransparentImage, context, null,
+                patternBounds, bounds, patternContentUnits);
 
-        RenderContext patternContext =
-                RenderContext.createInitial(new NullPlatformSupport(), patternContentUnits.deriveMeasure(measure));
-        // TODO: What is the correct root transform here?
-        patternContext.setRootTransform(imgGraphics.getTransform());
+        if (blittableImage == null) return PaintParser.DEFAULT_COLOR;
 
-        FloatSize size;
-        ViewBox view = viewBox;
-        PreserveAspectRatio aspectRation = this.preserveAspectRatio;
-        if (view == null && patternContentUnits == UnitType.ObjectBoundingBox) {
-            size = new FloatSize(img.getWidth(), img.getHeight());
-            view = new ViewBox(0, 0, 1, 1);
-            aspectRation = PreserveAspectRatio.none();
-        } else {
-            size = new FloatSize((float) patternBounds.getWidth(), (float) patternBounds.getHeight());
-        }
-
-        renderWithSize(size, view, aspectRation, patternContext, new Graphics2DOutput(imgGraphics));
-        imgGraphics.dispose();
+        blittableImage.render(output, (out, ctx) -> {
+            if (patternContentUnits == UnitType.UserSpaceOnUse) {
+                ctx.translate(out, patternBounds.getX(), patternBounds.getY());
+            }
+            renderWithSize(new FloatSize(patternBounds), viewBox, ctx, out);
+        });
 
         // Fixme: When patternTransform != null antialiasing is broken
         return patternTransform != null
-                ? new TransformedPaint(new TexturePaint(img, patternBounds), patternTransform)
-                : new TexturePaint(img, patternBounds);
+                ? new TransformedPaint(new TexturePaint(blittableImage.image(), patternBounds), patternTransform)
+                : new TexturePaint(blittableImage.image(), patternBounds);
+    }
+
+    @Override
+    public boolean requiresInstantiation() {
+        return true;
+    }
+
+    @Override
+    public boolean canInstantiate(@NotNull SVGNode node) {
+        return node == this;
     }
 }
