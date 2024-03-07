@@ -214,7 +214,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
 
         @Override
-        public @NotNull ImageProducer convolve(@NotNull BufferedImage image, @NotNull RenderingHints hints,
+        public @NotNull ImageProducer convolve(@NotNull BufferedImage image, @Nullable RenderingHints hints,
                 int awtEdgeMode) {
             WritableRaster raster = image.getRaster();
             if (xKernel != null && yKernel != null) {

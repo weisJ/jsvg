@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.filter.FilterContext;
 import com.github.weisj.jsvg.renderer.GraphicsUtil;
@@ -64,7 +65,7 @@ public enum EdgeMode {
         Dimension maximumKernelSize();
 
         @NotNull
-        ImageProducer convolve(@NotNull BufferedImage image, @NotNull RenderingHints hints, int awtEdgeMode);
+        ImageProducer convolve(@NotNull BufferedImage image, @Nullable RenderingHints hints, int awtEdgeMode);
     }
 
     private static final class EdgeModeImage {
@@ -190,7 +191,7 @@ public enum EdgeMode {
         return new FilteredImageSource(output, cropImageFilter);
     }
 
-    private static ImageProducer applyConvolutions(@NotNull RenderingHints hints, @NotNull BufferedImage image,
+    private static ImageProducer applyConvolutions(@Nullable RenderingHints hints, @NotNull BufferedImage image,
             @NotNull ConvolveOperation convolveOperation, int awtEdgeMode) {
         return convolveOperation.convolve(image, hints, awtEdgeMode);
     }
