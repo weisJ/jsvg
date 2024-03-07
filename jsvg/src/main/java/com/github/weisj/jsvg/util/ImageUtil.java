@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.util;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
@@ -34,6 +36,7 @@ import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class ImageUtil {
+
     private ImageUtil() {}
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(@NotNull Output output,
@@ -42,15 +45,14 @@ public final class ImageUtil {
     }
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(int width, int height) {
-        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
+        return new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
     }
-
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(@Nullable AffineTransform at, double width,
             double height) {
-        return new BufferedImage(
+        return createCompatibleTransparentImage(
                 (int) Math.ceil(GeometryUtil.scaleXOfTransform(at) * width),
-                (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height), BufferedImage.TYPE_INT_ARGB_PRE);
+                (int) Math.ceil(GeometryUtil.scaleYOfTransform(at) * height));
     }
 
     public static @NotNull BufferedImage createLuminosityBuffer(@Nullable AffineTransform at, double width,
