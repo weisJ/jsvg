@@ -49,7 +49,8 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
 
     @Override
     public void setPaint(@NotNull Paint paint) {
-        this.paint = GraphicsUtil.setupPaint(this.paint, paint);
+        // Note: Inner masked paints are handled in GraphicsUtil.safelySetPaint
+        this.paint = paint;
     }
 
     @Override

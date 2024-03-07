@@ -198,8 +198,7 @@ public final class Filter extends ContainerNode {
             // Todo: Respect filterPrimitiveRegion
         }
 
-        filterInfo.producer = Objects.requireNonNull(
-                filterContext.getChannel(DefaultFilterChannel.LastResult)).producer();
+        filterInfo.result = Objects.requireNonNull(filterContext.getChannel(DefaultFilterChannel.LastResult));
     }
 
     @Override
@@ -216,7 +215,7 @@ public final class Filter extends ContainerNode {
         private final @NotNull Output imageOutput;
         private final @NotNull BlittableImage blittableImage;
 
-        private ImageProducer producer;
+        private Channel result;
 
         private FilterInfo(@NotNull Output output, @NotNull BlittableImage blittableImage,
                 @NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion) {
@@ -265,8 +264,7 @@ public final class Filter extends ContainerNode {
             }
             output.applyClip(filterRegion);
             blittableImage.prepareForBlitting(output);
-            output.drawImage(
-                    context.platformSupport().createImage(producer), context.platformSupport().imageObserver());
+            output.drawImage(result.toBufferedImageNonAliased(context), context.platformSupport().imageObserver());
         }
 
         public void close() {

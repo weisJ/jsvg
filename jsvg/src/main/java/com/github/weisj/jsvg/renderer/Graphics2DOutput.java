@@ -64,7 +64,7 @@ public class Graphics2DOutput implements Output {
 
     @Override
     public void drawImage(@NotNull Image image, @Nullable ImageObserver observer) {
-        g.drawImage(image, 0, 0, null);
+        GraphicsUtil.safelyDrawImage(g, image, observer);
     }
 
     @Override

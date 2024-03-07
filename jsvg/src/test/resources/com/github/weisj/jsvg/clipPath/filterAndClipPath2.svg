@@ -3,9 +3,7 @@
 		height="100%" fill="black" />
 	<defs>
 		<filter id="a">
-			<feMerge>
-				<feMergeNode in="SourceGraphic" />
-			</feMerge>
+			<feGaussianBlur stdDeviation="5" />
 		</filter>
 		<clipPath id="b">
 			<circle cx="50%" cy="50%" r="25%" />
