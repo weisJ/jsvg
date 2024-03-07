@@ -173,7 +173,7 @@ public final class Filter extends ContainerNode {
 
         if (blitImage == null) return null;
 
-        return new FilterInfo(output, blitImage, elementBounds.boundingBox());
+        return new FilterInfo(output, blitImage, elementBounds.boundingBox(), filterRegion);
     }
 
     public void applyFilter(@NotNull Output output, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
@@ -212,15 +212,17 @@ public final class Filter extends ContainerNode {
         public final int imageHeight;
 
         private final @NotNull Rectangle2D elementBounds;
+        private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Output imageOutput;
         private final @NotNull BlittableImage blittableImage;
 
         private ImageProducer producer;
 
         private FilterInfo(@NotNull Output output, @NotNull BlittableImage blittableImage,
-                @NotNull Rectangle2D elementBounds) {
+                @NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion) {
             this.blittableImage = blittableImage;
             this.elementBounds = elementBounds;
+            this.filterRegion = filterRegion;
 
             BufferedImage image = blittableImage.image();
 
@@ -261,6 +263,7 @@ public final class Filter extends ContainerNode {
             if (DEBUG) {
                 blittableImage.debug(output, false);
             }
+            output.applyClip(filterRegion);
             blittableImage.prepareForBlitting(output);
             output.drawImage(
                     context.platformSupport().createImage(producer), context.platformSupport().imageObserver());

@@ -132,4 +132,9 @@ class FilterTest {
     void testSourceAlpha() {
         assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend.svg", 0, 0.05));
     }
+
+    @Test
+    void testFilterRegionClip() {
+        assertEquals(SUCCESS, compareImages("filter/filterRegionClip.svg"));
+    }
 }
