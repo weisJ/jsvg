@@ -75,9 +75,9 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
                 float s = attributeNode.getFloat(KEY_VALUES, 1);
                 if (s != 1) {
                     filter = new NoAlphaMatrixRGBFilter(
-                            0.213 + 0.787 * s, 0.715 * (1 - s), 0.072 * (1 - s),
-                            0.213 * (1 - s), 0.715 + 0.285 * s, 0.072 * (1 - s),
-                            0.213 * (1 - s), 0.715 * (1 - s), 0.072 + 0.928 * s);
+                            0.213 + 0.787 * s, 0.715 - 0.715 * s, 0.072 - 0.072 * s,
+                            0.213 - 0.213 * s, 0.715 + 0.285 * s, 0.072 - 0.072 * s,
+                            0.213 - 0.213 * s, 0.715 - 0.715 * s, 0.072 + 0.928 * s);
                 }
                 break;
             case "huerotate":
@@ -120,6 +120,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
             impl().noop(filterContext);
             return;
         }
+
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(f), filterContext);
     }
 
