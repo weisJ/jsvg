@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -131,10 +131,10 @@ public final class LayoutBounds {
             FloatInsets insets = data.clipBoundsEscapeInsets;
             Rectangle2D clipBounds = context.clipBounds();
             FloatInsets offsetInsets = new FloatInsets(
-                    Math.max(-dy, 0),
-                    Math.max(-dx, 0),
                     Math.max(dy, 0),
-                    Math.max(dx, 0));
+                    Math.max(dx, 0),
+                    Math.max(-dy, 0),
+                    Math.max(-dx, 0));
             Rectangle2D newBounds = GeometryUtil.grow(data.bounds, offsetInsets);
             // The new layout rect is the union of the original rect and the shifted rect.
             FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, data.bounds), offsetInsets);

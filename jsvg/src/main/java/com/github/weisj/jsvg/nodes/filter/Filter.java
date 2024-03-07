@@ -131,7 +131,7 @@ public final class Filter extends ContainerNode {
         FilterLayoutContext filterLayoutContext =
                 new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds);
 
-        Rectangle2D clippedElementBounds = elementBounds.boundingBox().createIntersection(graphicsClipBounds);
+        Rectangle2D clippedElementBounds = elementBounds.geometryBox().createIntersection(graphicsClipBounds);
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
 
         if (effectiveFilterRegion.isEmpty()) return null;
