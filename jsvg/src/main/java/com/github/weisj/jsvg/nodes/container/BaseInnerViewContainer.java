@@ -134,6 +134,9 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
             // Needed for vector-effects to work properly.
             context.setRootTransform(output.transform());
             innerContext.setRootTransform(output.transform());
+
+            // If this element itself specifies a viewbox we have to respect its clipping rules.
+            if (viewTransform != null && overflow.establishesClip()) output.applyClip(view);
         }
         renderWithCurrentViewBox(innerContext, output);
     }

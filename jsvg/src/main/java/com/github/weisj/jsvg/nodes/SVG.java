@@ -115,7 +115,7 @@ public final class SVG extends CommonInnerViewContainer {
 
     @Override
     protected @NotNull Overflow defaultOverflow() {
-        return isTopLevel ? Overflow.Visible : Overflow.Hidden;
+        return Overflow.Hidden;
     }
 
     public @NotNull FloatSize sizeForTopLevel(float em, float ex) {
