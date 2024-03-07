@@ -1,0 +1,64 @@
+<svg width="300" height="1000" viewBox="0 0 60 500"
+	preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	color-interpolation-filters="sRGB">
+
+	<!-- ref -->
+	<defs>
+		<g id="circles">
+			<circle cx="30" cy="30" r="20" fill="blue" fill-opacity="0.5" />
+			<circle cx="20" cy="50" r="20" fill="green" fill-opacity="0.5" />
+			<circle cx="40" cy="50" r="20" fill="red" fill-opacity="0.5" />
+		</g>
+	</defs>
+	<use xlink:href="#circles" />
+
+	<!-- identity matrix -->
+	<filter id="colorMeTheSame">
+		<feColorMatrix in="SourceGraphic" type="matrix"
+			values="
+                1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 1 0" />
+	</filter>
+	<use xlink:href="#circles" transform="translate(0 70)"
+		filter="url(#colorMeTheSame)" />
+
+	<!-- Combine RGB into green matrix -->
+	<filter id="colorMeGreen">
+		<feColorMatrix in="SourceGraphic" type="matrix"
+			values="
+                0 0 0 0 0
+                1 1 1 1 0
+                0 0 0 0 0
+                0 0 0 1 0" />
+	</filter>
+	<use xlink:href="#circles" transform="translate(0 140)"
+		filter="url(#colorMeGreen)" />
+
+	<!-- saturate -->
+	<filter id="colorMeSaturate">
+		<feColorMatrix in="SourceGraphic" type="saturate"
+			values="0.2" />
+	</filter>
+	<use xlink:href="#circles" transform="translate(0 210)"
+		filter="url(#colorMeSaturate)" />
+
+	<!-- hueRotate -->
+	<filter id="colorMeHueRotate">
+		<feColorMatrix in="SourceGraphic" type="hueRotate"
+			values="180" />
+	</filter>
+	<use xlink:href="#circles" transform="translate(0 280)"
+		filter="url(#colorMeHueRotate)" />
+
+	<!-- luminanceToAlpha -->
+	<filter id="colorMeLTA">
+		<feColorMatrix in="SourceGraphic"
+			type="luminanceToAlpha" />
+		<feComposite in2="SourceGraphic" operator="in" /> <!-- Fix for batik -->
+	</filter>
+	<use xlink:href="#circles" transform="translate(0 350)"
+		filter="url(#colorMeLTA)" />
+</svg>

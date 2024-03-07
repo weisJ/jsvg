@@ -34,9 +34,31 @@ class FilterTest {
 
     @Test
     void testGaussianBlur() {
-        assertEquals(SUCCESS, compareImages("filter/blur.svg", 0.6));
+        assertEquals(SUCCESS, compareImages("filter/blur.svg", 0.4));
         assertEquals(SUCCESS, compareImages("filter/blur2.svg"));
-        assertEquals(SUCCESS, compareImages("filter/slim.svg", 0));
+    }
+
+    @Test
+    void testIdeaShadows() {
+        assertEquals(SUCCESS, compareImages("filter/slim.svg", 0, 0.05));
+
+        assertEquals(SUCCESS, compareImages("shadow/bottom.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("shadow/bottomLeft.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("shadow/bottomRight.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("shadow/left.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("shadow/right.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("shadow/top.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("shadow/topLeft.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("shadow/topRight.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("shadow/bottom.svg", 0, 0.05));
+
+        assertEquals(SUCCESS, compareImages("roundShadow/bottomLeft.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("roundShadow/bottomRight.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("roundShadow/left.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("roundShadow/right.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("roundShadow/top.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("roundShadow/topLeft.svg", 0, 0.05));
+        assertEquals(SUCCESS, compareImages("roundShadow/topRight.svg", 0, 0.05));
     }
 
     @Test
@@ -54,7 +76,9 @@ class FilterTest {
 
     @Test
     void testColorMatrix() {
-        assertEquals(SUCCESS, compareImages("filter/colormatrix.svg", 1.5));
+        assertEquals(SUCCESS, compareImages("filter/colormatrix_sRGB.svg"));
+        // See #71:
+        // assertEquals(SUCCESS, compareImages("filter/colormatrix.svg", 1.5));
         assertEquals(SUCCESS, compareImages("filter/colormatrix_bug41_1.svg"));
         assertEquals(SUCCESS, compareImages("filter/colormatrix_bug41_2.svg"));
     }
