@@ -193,8 +193,8 @@ public final class ReferenceTest {
                     .append('\n');
             sb.append("Actual size: ").append(actual.getWidth()).append('x').append(actual.getHeight())
                     .append('\n');
-            sb.append("Difference: ").append(comparison.getDifferencePercent() * 100).append('%')
-                    .append(" > ").append(tolerance * 100).append('%')
+            sb.append("Difference: ").append(comparison.getDifferencePercent()).append('%')
+                    .append(" > ").append(tolerance).append('%')
                     .append('\n');
             List<Rectangle> rects = comparison.getRectangles();
             if (rects != null) {
@@ -218,9 +218,9 @@ public final class ReferenceTest {
                                 .append(c.getAlpha())
                                 .append(']');
                     };
-                    sb.append(" => ");
+                    sb.append(" => Expected pixel: ");
                     printPixel.accept(expectedPixel);
-                    sb.append(" vs ");
+                    sb.append(" Actual pixel: ");
                     printPixel.accept(actualPixel);
                     sb.append('\n');
                 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,7 +28,9 @@ import java.awt.image.ImageProducer;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 public interface Channel {
 
@@ -44,10 +46,8 @@ public interface Channel {
     }
 
     static @NotNull BufferedImage makeNonAliased(@NotNull Image img) {
-        BufferedImage bufferedImage = new BufferedImage(
-                img.getWidth(null),
-                img.getHeight(null),
-                BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bufferedImage = ImageUtil.createCompatibleTransparentImage(
+                img.getWidth(null), img.getHeight(null));
         Graphics imageGraphics = bufferedImage.getGraphics();
         imageGraphics.drawImage(img, 0, 0, null);
         imageGraphics.dispose();
@@ -59,4 +59,8 @@ public interface Channel {
 
     @NotNull
     PixelProvider pixels(@NotNull RenderContext context);
+
+    default boolean isDefaultChannel(DefaultFilterChannel channel) {
+        return false;
+    }
 }

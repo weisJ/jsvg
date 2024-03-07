@@ -129,8 +129,7 @@ class FilterTest {
     }
 
     @Test
-    @Disabled("Issue #67")
     void testSourceAlpha() {
-        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend.svg"));
+        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend.svg", 0, 0.05));
     }
 }
