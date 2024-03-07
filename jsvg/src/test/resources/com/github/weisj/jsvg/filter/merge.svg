@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"
+	viewBox="0 0 100 100" fill="none">
+	<defs>
+		<filter id="a" filterUnits="objectBoundingBox" x="-20%"
+			y="-20%" height="140%" width="140%">
+			<feOffset dx="5" dy="5" in="SourceGraphic" result="off1" />
+			<feOffset dx="-5" dy="-5" in="SourceGraphic" result="off2" />
+			<feMerge>
+				<feMergeNode in="off1" />
+				<feMergeNode in="off2" />
+			</feMerge>
+		</filter>
+	</defs>
+	<rect stroke="orange" x="25" y="25" width="50" height="50" />
+	<rect stroke="red" x="25" y="25" width="50" height="50"
+		filter="url(#a)" />
+</svg>

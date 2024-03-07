@@ -100,6 +100,7 @@ class FilterTest {
 
     @Test
     void testMergeNode() {
+        assertEquals(SUCCESS, compareImages("filter/merge.svg"));
         assertEquals(SUCCESS, compareImages("filter/merge_composite_bug33.svg"));
     }
 
