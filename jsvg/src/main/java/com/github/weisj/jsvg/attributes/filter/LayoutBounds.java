@@ -91,10 +91,10 @@ public final class LayoutBounds {
     }
 
     public @NotNull LayoutBounds transform(
-            @NotNull BiFunction<@NotNull Data, ComputeFlags, @NotNull Data> transformer) {
+            @NotNull BiFunction<@NotNull Data, ComputeFlags, @NotNull Data> newTransformer) {
         return new LayoutBounds(data, (data, flags) -> {
             Data newData = transformer.apply(data, flags);
-            return transformer.apply(newData, flags);
+            return newTransformer.apply(newData, flags);
         }, additionalFlags);
     }
 
@@ -129,15 +129,15 @@ public final class LayoutBounds {
     public @NotNull LayoutBounds translate(float dx, float dy, @NotNull FilterLayoutContext context) {
         return transform((data, flags) -> {
             FloatInsets insets = data.clipBoundsEscapeInsets;
-            Rectangle2D clipBounds = context.clipBounds();
             FloatInsets offsetInsets = new FloatInsets(
                     Math.max(dy, 0),
                     Math.max(dx, 0),
                     Math.max(-dy, 0),
                     Math.max(-dx, 0));
             Rectangle2D newBounds = GeometryUtil.grow(data.bounds, offsetInsets);
+            Rectangle2D clipBounds = context.clipBounds();
             // The new layout rect is the union of the original rect and the shifted rect.
-            FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, data.bounds), offsetInsets);
+            FloatInsets ins = GeometryUtil.max(GeometryUtil.overhangInsets(clipBounds, data.bounds), offsetInsets);
             return new Data(newBounds, GeometryUtil.max(insets, ins));
         });
     }

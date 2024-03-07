@@ -161,8 +161,8 @@ public final class Filter extends ContainerNode {
                 .resolve(LayoutBounds.ComputeFlags.INITIAL);
 
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
-        Rectangle2D clipHeuristicBounds = clipHeuristic.bounds().createIntersection(
-                GeometryUtil.grow(graphicsClipBounds, insets));
+        Rectangle2D clipHeuristicBounds = clipHeuristic.bounds()
+                .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
         RenderContext imageContext = context.deriveForSurface();
