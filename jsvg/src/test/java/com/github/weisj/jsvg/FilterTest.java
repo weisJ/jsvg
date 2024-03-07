@@ -137,4 +137,11 @@ class FilterTest {
     void testFilterRegionClip() {
         assertEquals(SUCCESS, compareImages("filter/filterRegionClip.svg"));
     }
+
+    @Test
+    @Disabled("See #70")
+    void testFilterPrimitiveRegionClip() {
+        assertEquals(SUCCESS, compareImages("filter/filterPrimitiveRegionClip.svg"));
+        assertEquals(SUCCESS, compareImages("filter/filterPrimitiveRegionClip2.svg"));
+    }
 }
