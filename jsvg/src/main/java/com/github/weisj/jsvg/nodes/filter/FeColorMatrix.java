@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -74,7 +74,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
             case "saturate":
                 float s = attributeNode.getFloat(KEY_VALUES, 1);
                 if (s != 1) {
-                    filter = new LinearRGBFilter(
+                    filter = new NoAlphaMatrixRGBFilter(
                             0.213 + 0.787 * s, 0.715 * (1 - s), 0.072 * (1 - s),
                             0.213 * (1 - s), 0.715 + 0.285 * s, 0.072 * (1 - s),
                             0.213 * (1 - s), 0.715 * (1 - s), 0.072 + 0.928 * s);
@@ -87,7 +87,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
                     double sin = Math.sin(radians);
                     double cos = Math.cos(radians);
                     //@formatter:off
-                    filter = new LinearRGBFilter(
+                    filter = new NoAlphaMatrixRGBFilter(
                         0.213 + cos * 0.787 - sin * 0.2127, 0.715 - 0.715 * cos - 0.715 * sin,0.072 - 0.072 * cos + 0.982 * sin,
                         0.213 - cos * 0.213 + sin * 0.143, 0.715 + 0.285 * cos + 0.140 * sin,0.072 - 0.072 * cos - 0.283 * sin,
                         0.213 - cos * 0.213 - sin * 0.787, 0.715 - 0.715 * cos + 0.715 * sin,0.072 + 0.982 * cos + 0.072 * sin);
@@ -188,12 +188,12 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
     }
 
-    private static final class LinearRGBFilter extends AffineRGBImageFilter {
+    private static final class NoAlphaMatrixRGBFilter extends AffineRGBImageFilter {
         private final double r1, r2, r3;
         private final double g1, g2, g3;
         private final double b1, b2, b3;
 
-        private LinearRGBFilter(
+        private NoAlphaMatrixRGBFilter(
                 double r1, double r2, double r3,
                 double g1, double g2, double g3,
                 double b1, double b2, double b3) {
