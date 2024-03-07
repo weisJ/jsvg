@@ -121,9 +121,12 @@ public abstract class AbstractBlendComposite implements Composite {
             int[] srcPixels = new int[width];
             int[] dstPixels = new int[width];
 
-            for (int y = 0; y < height; y++) {
-                src.getDataElements(0, y, width, 1, srcPixels);
-                dstIn.getDataElements(0, y, width, 1, dstPixels);
+            int minY = dstOut.getMinY();
+            int maxY = minY + height;
+
+            for (int y = minY; y < maxY; y++) {
+                src.getDataElements(dstOut.getMinX(), y, width, 1, srcPixels);
+                dstIn.getDataElements(dstOut.getMinX(), y, width, 1, dstPixels);
 
                 for (int x = 0; x < width; x++) {
                     // pixels are stored as INT_ARGB
@@ -155,5 +158,23 @@ public abstract class AbstractBlendComposite implements Composite {
     @FunctionalInterface
     public interface Blender {
         void blend(int[] src, int[] dst, int[] result);
+
+        default @NotNull Blender withAlphaCompositing() {
+            return (src, dst, result) -> {
+                this.blend(src, dst, result);
+                int dstA = dst[3];
+                int dstM = 255 - dstA;
+                result[0] = ((255 - dstM) * src[0] + dstA * result[0]) >> 8;
+                result[1] = ((255 - dstM) * src[1] + dstA * result[1]) >> 8;
+                result[2] = ((255 - dstM) * src[2] + dstA * result[2]) >> 8;
+
+                int srcA = src[3];
+                int srcM = 255 - srcA;
+                result[0] = result[0] + (dst[0] * srcM) >> 8;
+                result[1] = result[1] + (dst[1] * srcM) >> 8;
+                result[2] = result[2] + (dst[2] * srcM) >> 8;
+                result[3] = 255 - (srcM * dstM) >> 8;
+            };
+        }
     }
 }
