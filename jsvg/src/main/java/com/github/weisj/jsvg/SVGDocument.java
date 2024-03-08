@@ -55,6 +55,10 @@ public final class SVGDocument {
         return size;
     }
 
+    public @NotNull ViewBox viewBox() {
+        return root.staticViewBox(size());
+    }
+
     public @NotNull Shape computeShape() {
         return computeShape(null);
     }
