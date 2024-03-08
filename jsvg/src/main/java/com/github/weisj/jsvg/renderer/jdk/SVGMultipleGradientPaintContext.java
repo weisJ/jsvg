@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,6 +34,8 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.util.ColorUtil;
 
 /*
  * Copyright (c) 2006, 2018, Oracle and/or its affiliates. All rights reserved. DO NOT ALTER OR
@@ -155,20 +157,6 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
     private int transparencyTest;
 
     /**
-     * Color space conversion lookup tables.
-     */
-    private static final int[] SRGBtoLinearRGB = new int[256];
-    private static final int[] LinearRGBtoSRGB = new int[256];
-
-    static {
-        // build the tables
-        for (int k = 0; k < 256; k++) {
-            SRGBtoLinearRGB[k] = convertSRGBtoLinearRGB(k);
-            LinearRGBtoSRGB[k] = convertLinearRGBtoSRGB(k);
-        }
-    }
-
-    /**
      * Constant number of max colors between any 2 arbitrary colors.
      * Used for creating and indexing gradients arrays.
      */
@@ -267,11 +255,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
             // convert the colors using the lookup table
             for (int i = 0; i < colors.length; i++) {
                 int argb = colors[i].getRGB();
-                int a = argb >>> 24;
-                int r = SRGBtoLinearRGB[(argb >> 16) & 0xff];
-                int g = SRGBtoLinearRGB[(argb >> 8) & 0xff];
-                int b = SRGBtoLinearRGB[argb & 0xff];
-                normalizedColors[i] = new Color(r, g, b, a);
+                normalizedColors[i] = new Color(ColorUtil.sRGBtoLinearRGB(argb), true);
             }
         } else {
             // we can just use this array by reference since we do not
@@ -395,7 +379,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         // gradients back to sRGB using the lookup table
         if (colorSpace == MultipleGradientPaint.ColorSpaceType.LINEAR_RGB) {
             for (int i = 0; i < gradient.length; i++) {
-                gradient[i] = convertEntireColorLinearRGBtoSRGB(gradient[i]);
+                gradient[i] = ColorUtil.linearRGBtoSRGB(gradient[i]);
             }
         }
 
@@ -451,7 +435,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         if (colorSpace == MultipleGradientPaint.ColorSpaceType.LINEAR_RGB) {
             for (int j = 0; j < gradients.length; j++) {
                 for (int i = 0; i < gradients[j].length; i++) {
-                    gradients[j][i] = convertEntireColorLinearRGBtoSRGB(gradients[j][i]);
+                    gradients[j][i] = ColorUtil.linearRGBtoSRGB(gradients[j][i]);
                 }
             }
         }
@@ -493,33 +477,6 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
                     ((int) ((g1 + i * dg * stepSize) + 0.5) << 8) |
                     ((int) ((b1 + i * db * stepSize) + 0.5));
         }
-    }
-
-    /**
-     * Yet another helper function.  This one extracts the color components
-     * of an integer RGB triple, converts them from LinearRGB to SRGB, then
-     * recompacts them into an int.
-     */
-    private int convertEntireColorLinearRGBtoSRGB(int rgb) {
-        // color components
-        int a1, r1, g1, b1;
-
-        // extract red, green, blue components
-        a1 = (rgb >> 24) & 0xff;
-        r1 = (rgb >> 16) & 0xff;
-        g1 = (rgb >> 8) & 0xff;
-        b1 = rgb & 0xff;
-
-        // use the lookup table
-        r1 = LinearRGBtoSRGB[r1];
-        g1 = LinearRGBtoSRGB[g1];
-        b1 = LinearRGBtoSRGB[b1];
-
-        // re-compact the components
-        return ((a1 << 24) |
-                (r1 << 16) |
-                (g1 << 8) |
-                b1);
     }
 
     /**
@@ -593,40 +550,6 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         }
 
         return gradients[gradients.length - 1][GRADIENT_SIZE_INDEX];
-    }
-
-    /**
-     * Helper function to convert a color component in sRGB space to linear
-     * RGB space.  Used to build a static lookup table.
-     */
-    private static int convertSRGBtoLinearRGB(int color) {
-        float input, output;
-
-        input = color / 255.0f;
-        if (input <= 0.04045f) {
-            output = input / 12.92f;
-        } else {
-            output = (float) Math.pow((input + 0.055) / 1.055, 2.4);
-        }
-
-        return Math.round(output * 255.0f);
-    }
-
-    /**
-     * Helper function to convert a color component in linear RGB space to
-     * SRGB space.  Used to build a static lookup table.
-     */
-    private static int convertLinearRGBtoSRGB(int color) {
-        float input, output;
-
-        input = color / 255.0f;
-        if (input <= 0.0031308) {
-            output = input * 12.92f;
-        } else {
-            output = (1.055f * ((float) Math.pow(input, (1.0 / 2.4)))) - 0.055f;
-        }
-
-        return Math.round(output * 255.0f);
     }
 
     @Override

@@ -28,6 +28,7 @@ import java.util.Locale;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -36,6 +37,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ColorUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -115,12 +117,12 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        @Nullable RGBImageFilter f = filter;
+        @Nullable AffineRGBImageFilter f = filter;
         if (f == null) {
             impl().noop(filterContext);
             return;
         }
-
+        f.setConvertToLinear(colorInterpolation(filterContext) == ColorInterpolation.LinearRGB);
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(f), filterContext);
     }
 
@@ -129,7 +131,32 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     }
 
     private static abstract class AffineRGBImageFilter extends RGBImageFilter {
+
+        private final int[] tmp = new int[4];
+        private boolean convertToLinear;
+
         abstract boolean isLinear();
+
+        protected int[] getRGB(int rgb) {
+            tmp[3] = (rgb >> 24) & 0xFF;
+            tmp[2] = (rgb >> 16) & 0xFF;
+            tmp[1] = (rgb >> 8) & 0xFF;
+            tmp[0] = rgb & 0xFF;
+            if (convertToLinear) ColorUtil.sRGBtoLinearRGBinPlace(tmp);
+            return tmp;
+        }
+
+        protected int pack(int[] argb) {
+            if (convertToLinear) ColorUtil.linearRGBtoSRGBinPlace(argb);
+            return ((argb[3] & 0xFF) << 24) |
+                    ((argb[2] & 0xFF) << 16) |
+                    ((argb[1] & 0xFF) << 8) |
+                    (argb[0] & 0xFF);
+        }
+
+        void setConvertToLinear(boolean convertToLinear) {
+            this.convertToLinear = convertToLinear;
+        }
     }
 
     private static final class MatrixRGBFilter extends AffineRGBImageFilter {
@@ -172,20 +199,19 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
 
         @Override
         public int filterRGB(int x, int y, int rgb) {
-            int a = (rgb >> 24) & 0xFF;
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
+            int[] argb = getRGB(rgb);
 
-            int nr = toRgbRange(r1 * r + r2 * g + r3 * b + r4 * a + r5 * 255);
-            int ng = toRgbRange(g1 * r + g2 * g + g3 * b + g4 * a + g5 * 255);
-            int nb = toRgbRange(b1 * r + b2 * g + b3 * b + b4 * a + b5 * 255);
-            int na = toRgbRange(a1 * r + a2 * g + a3 * b + a4 * a + a5 * 255);
+            int a = argb[3];
+            int r = argb[2];
+            int g = argb[1];
+            int b = argb[0];
 
-            return ((na & 0xFF) << 24) |
-                    ((nr & 0xFF) << 16) |
-                    ((ng & 0xFF) << 8) |
-                    (nb & 0xFF);
+            argb[3] = toRgbRange(a1 * r + a2 * g + a3 * b + a4 * a + a5 * 255);
+            argb[2] = toRgbRange(r1 * r + r2 * g + r3 * b + r4 * a + r5 * 255);
+            argb[1] = toRgbRange(g1 * r + g2 * g + g3 * b + g4 * a + g5 * 255);
+            argb[0] = toRgbRange(b1 * r + b2 * g + b3 * b + b4 * a + b5 * 255);
+
+            return pack(argb);
         }
     }
 
@@ -216,19 +242,18 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
 
         @Override
         public int filterRGB(int x, int y, int rgb) {
-            int a = (rgb >> 24) & 0xFF;
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
+            int[] argb = getRGB(rgb);
 
-            int nr = toRgbRange(r1 * r + r2 * g + r3 * b);
-            int ng = toRgbRange(g1 * r + g2 * g + g3 * b);
-            int nb = toRgbRange(b1 * r + b2 * g + b3 * b);
+            int a = argb[3];
+            int r = argb[2];
+            int g = argb[1];
+            int b = argb[0];
 
-            return (a << 24) |
-                    ((nr & 0xFF) << 16) |
-                    ((ng & 0xFF) << 8) |
-                    (nb & 0xFF);
+            argb[2] = toRgbRange(r1 * r + r2 * g + r3 * b);
+            argb[1] = toRgbRange(g1 * r + g2 * g + g3 * b);
+            argb[0] = toRgbRange(b1 * r + b2 * g + b3 * b);
+
+            return pack(argb);
         }
     }
 
@@ -241,11 +266,8 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
 
         @Override
         public int filterRGB(int x, int y, int rgb) {
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
-
-            int na = toRgbRange(0.2125 * r + 0.7164 * g + 0.0712 * b);
+            int[] argb = getRGB(rgb);
+            int na = toRgbRange(0.2125 * argb[2] + 0.7164 * argb[1] + 0.0712 * argb[0]);
             return (na & 0xFF) << 24;
         }
     }

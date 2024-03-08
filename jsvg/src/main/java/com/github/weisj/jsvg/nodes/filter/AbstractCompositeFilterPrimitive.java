@@ -23,13 +23,11 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
@@ -72,77 +70,19 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
 
         Image other = context.platformSupport().createImage(sourceChannel(impl, filterContext).producer());
         Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
-        imgGraphics.setComposite(computeComposite(filterContext, impl));
+        imgGraphics.setComposite(computeComposite(filterContext));
         imgGraphics.drawImage(other, null, context.platformSupport().imageObserver());
         imgGraphics.dispose();
 
         impl.saveResult(new ImageProducerChannel(dst.getSource()), filterContext);
     }
 
-    private @NotNull Composite computeComposite(@NotNull FilterContext filterContext,
-            @NotNull FilterPrimitiveBase impl) {
+    private @NotNull Composite computeComposite(@NotNull FilterContext filterContext) {
         Composite comp = composite();
-        if (destinationChannel(impl, filterContext).isDefaultChannel(DefaultFilterChannel.SourceAlpha)) {
-            comp = new AlphaChannelComposite(comp, true);
-        } else if (sourceChannel(impl, filterContext).isDefaultChannel(DefaultFilterChannel.SourceAlpha)) {
-            comp = new AlphaChannelComposite(comp, false);
+        if (comp instanceof AbstractBlendComposite) {
+            ColorInterpolation colorInterpolation = colorInterpolation(filterContext);
+            ((AbstractBlendComposite) comp).setConvertToLinearRGB(colorInterpolation == ColorInterpolation.LinearRGB);
         }
         return comp;
-    }
-
-    private static class AlphaChannelComposite implements Composite {
-        private final @NotNull Composite composite;
-        private final boolean useSrc;
-
-        private AlphaChannelComposite(@NotNull Composite composite, boolean useSrc) {
-            this.composite = composite;
-            this.useSrc = useSrc;
-        }
-
-        @Override
-        public @NotNull CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel,
-                RenderingHints hints) {
-            return new AlphaChannelCompositeContext(composite.createContext(srcColorModel, dstColorModel, hints),
-                    useSrc);
-        }
-
-        private static class AlphaChannelCompositeContext implements CompositeContext {
-            private final @NotNull CompositeContext context;
-            private final boolean useSrc;
-
-            private AlphaChannelCompositeContext(@NotNull CompositeContext context, boolean useSrc) {
-                this.context = context;
-                this.useSrc = useSrc;
-            }
-
-            @Override
-            public void dispose() {
-                context.dispose();
-            }
-
-            @Override
-            public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
-                Raster effectiveSrc = useSrc ? src : dstIn;
-                if (effectiveSrc.getNumBands() != 4 || dstOut.getNumBands() != 4) {
-                    throw new IllegalArgumentException("Expected 4 bands");
-                }
-                WritableRaster effectiveDstOut = dstOut;
-                if (effectiveSrc == effectiveDstOut) {
-                    effectiveDstOut = dstOut.createCompatibleWritableRaster();
-                }
-
-                context.compose(src, dstIn, effectiveDstOut);
-
-                int[] srcData = new int[1];
-                for (int x = 0; x < dstOut.getWidth(); x++) {
-                    for (int y = 0; y < dstOut.getHeight(); y++) {
-                        effectiveSrc.getDataElements(x, y, srcData);
-                        int a = effectiveDstOut.getSample(x, y, 3);
-                        srcData[0] = (srcData[0] & 0x00FFFFFF) | (a << 24);
-                        dstOut.setDataElements(x, y, srcData);
-                    }
-                }
-            }
-        }
     }
 }

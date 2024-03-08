@@ -54,6 +54,8 @@ import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.util.ColorUtil;
+
 /**
  * <p>A blend composite defines the rule according to which a drawing primitive
  * (known as the source) is mixed with existing graphics (know as the
@@ -78,7 +80,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class AbstractBlendComposite implements Composite {
 
+    protected AbstractBlendComposite() {}
+
     protected abstract @NotNull Blender blender();
+
+    private boolean convertToLinearRGB;
 
     private static boolean isColorModelInvalid(ColorModel cm) {
         if (cm instanceof DirectColorModel && cm.getTransferType() == DataBuffer.TYPE_INT) {
@@ -92,19 +98,25 @@ public abstract class AbstractBlendComposite implements Composite {
         return true;
     }
 
+    public void setConvertToLinearRGB(boolean convertToLinearRGB) {
+        this.convertToLinearRGB = convertToLinearRGB;
+    }
+
     @Override
     public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
         if (isColorModelInvalid(srcColorModel) || isColorModelInvalid(dstColorModel)) {
             throw new RasterFormatException("Incompatible color models");
         }
-        return new BlendingContext(blender());
+        return new BlendingContext(blender(), convertToLinearRGB);
     }
 
     private static final class BlendingContext implements CompositeContext {
         private final @NotNull Blender blender;
+        private final boolean convertToLinearRGB;
 
-        private BlendingContext(@NotNull Blender blender) {
+        private BlendingContext(@NotNull Blender blender, boolean convertToLinearRGB) {
             this.blender = blender;
+            this.convertToLinearRGB = convertToLinearRGB;
         }
 
         @Override
@@ -143,7 +155,16 @@ public abstract class AbstractBlendComposite implements Composite {
                     dstPixel[2] = pixel & 0xFF;
                     dstPixel[3] = (pixel >> 24) & 0xFF;
 
-                    blender.blend(srcPixel, dstPixel, result);
+                    if (convertToLinearRGB) {
+                        ColorUtil.sRGBtoLinearRGBinPlace(srcPixel);
+                        ColorUtil.sRGBtoLinearRGBinPlace(dstPixel);
+
+                        blender.blend(srcPixel, dstPixel, result);
+
+                        ColorUtil.linearRGBtoSRGBinPlace(result);
+                    } else {
+                        blender.blend(srcPixel, dstPixel, result);
+                    }
 
                     dstPixels[x] = ((result[3] & 0xFF) << 24)
                             | ((result[0] & 0xFF) << 16)
