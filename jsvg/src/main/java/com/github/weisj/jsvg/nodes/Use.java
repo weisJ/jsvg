@@ -35,10 +35,7 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
-import com.github.weisj.jsvg.nodes.prototype.HasContext;
-import com.github.weisj.jsvg.nodes.prototype.HasShape;
-import com.github.weisj.jsvg.nodes.prototype.Instantiator;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -167,6 +164,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
                 ", referencedNode=" + (referencedNode != null ? referencedNode.id() : null) +
                 ", styleContext=" + paintContext +
                 ", fillRule=" + fillRule +
+                ", fontRenderContext=" + fontRenderContext +
                 '}';
     }
 }

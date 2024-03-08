@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
@@ -40,6 +41,7 @@ public final class FilterPrimitiveBase {
 
     private final @NotNull FilterChannelKey inputChannel;
     private final @NotNull FilterChannelKey resultChannel;
+    private final ColorInterpolation colorInterpolation;
 
     public FilterPrimitiveBase(@NotNull AttributeNode attributeNode) {
         x = attributeNode.getLength("x", Unit.PERCENTAGE.valueOf(0));
@@ -49,6 +51,12 @@ public final class FilterPrimitiveBase {
 
         inputChannel = attributeNode.getFilterChannelKey("in", DefaultFilterChannel.LastResult);
         resultChannel = attributeNode.getFilterChannelKey("result", DefaultFilterChannel.LastResult);
+
+        colorInterpolation = attributeNode.getEnum("color-interpolation-filters", ColorInterpolation.Inherit);
+    }
+
+    public ColorInterpolation colorInterpolation(@NotNull FilterContext filterContext) {
+        return filterContext.colorInterpolation(colorInterpolation);
     }
 
     public @NotNull Channel channel(@NotNull FilterChannelKey key, @NotNull FilterContext context) {

@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
@@ -73,6 +74,7 @@ public final class Filter extends ContainerNode {
 
     private UnitType filterUnits;
     private UnitType filterPrimitiveUnits;
+    private ColorInterpolation colorInterpolation;
 
     private boolean isValid;
 
@@ -100,6 +102,7 @@ public final class Filter extends ContainerNode {
 
         filterUnits = attributeNode.getEnum("filterUnits", UnitType.ObjectBoundingBox);
         filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
+        colorInterpolation = attributeNode.getEnum("color-interpolation-filters", ColorInterpolation.LinearRGB);
 
         x = attributeNode.getLength("x", DEFAULT_FILTER_COORDINATE);
         y = attributeNode.getLength("y", DEFAULT_FILTER_COORDINATE);
@@ -179,7 +182,8 @@ public final class Filter extends ContainerNode {
     public void applyFilter(@NotNull Output output, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
         ImageProducer producer = filterInfo.blittableImage.image().getSource();
 
-        FilterContext filterContext = new FilterContext(filterInfo, filterPrimitiveUnits, output.renderingHints());
+        FilterContext filterContext =
+                new FilterContext(filterInfo, filterPrimitiveUnits, colorInterpolation, output.renderingHints());
 
         Channel sourceChannel = new ImageProducerChannel(producer);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
@@ -193,7 +197,7 @@ public final class Filter extends ContainerNode {
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
-                LOGGER.log(Level.INFO, "Exception during filter", e);
+                LOGGER.log(Level.FINE, "Exception during filter", e);
             }
             // Todo: Respect filterPrimitiveRegion
         }

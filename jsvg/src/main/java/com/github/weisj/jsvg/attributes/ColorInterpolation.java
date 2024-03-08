@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,36 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.filter;
-
+package com.github.weisj.jsvg.attributes;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.ColorInterpolation;
-import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.renderer.RenderContext;
+public enum ColorInterpolation implements HasMatchName {
+    S_RGB("sRGB"),
+    LinearRGB("linearRGB"),
+    Auto("auto"),
+    Inherit("inherit");
 
-public interface FilterPrimitive {
+    private final @NotNull String matchName;
 
-    @NotNull
-    Length y();
-
-    @NotNull
-    Length x();
-
-    @NotNull
-    Length width();
-
-    @NotNull
-    Length height();
-
-    default boolean isValid() {
-        return true;
+    ColorInterpolation(@NotNull String matchName) {
+        this.matchName = matchName;
     }
 
-    void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext);
-
-    void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext);
-
-    ColorInterpolation colorInterpolation(@NotNull FilterContext filterContext);
+    @Override
+    public @NotNull String matchName() {
+        return matchName;
+    }
 }

@@ -26,6 +26,7 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 
@@ -34,12 +35,14 @@ public final class FilterContext {
     private final @NotNull ChannelStorage<Channel> resultChannels = new ChannelStorage<>();
     private final Filter.FilterInfo info;
     private final @NotNull UnitType primitiveUnits;
+    private final @Nullable ColorInterpolation colorInterpolation;
     private final @Nullable RenderingHints renderingHints;
 
     public FilterContext(@NotNull Filter.FilterInfo info, @NotNull UnitType primitiveUnits,
-            @Nullable RenderingHints renderingHints) {
+            @Nullable ColorInterpolation colorInterpolation, @Nullable RenderingHints renderingHints) {
         this.info = info;
         this.primitiveUnits = primitiveUnits;
+        this.colorInterpolation = colorInterpolation;
         this.renderingHints = renderingHints;
     }
 
@@ -61,5 +64,12 @@ public final class FilterContext {
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {
         return resultChannels.get(key);
+    }
+
+    public ColorInterpolation colorInterpolation(ColorInterpolation colorInterpolation) {
+        if (colorInterpolation != ColorInterpolation.Inherit) {
+            return colorInterpolation;
+        }
+        return this.colorInterpolation;
     }
 }

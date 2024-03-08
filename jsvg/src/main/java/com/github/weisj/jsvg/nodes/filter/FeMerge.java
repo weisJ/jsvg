@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
@@ -129,5 +130,10 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
             result = new ImageProducerChannel(dst.getSource());
         }
         filterPrimitiveBase.saveResult(result, filterContext);
+    }
+
+    @Override
+    public ColorInterpolation colorInterpolation(@NotNull FilterContext filterContext) {
+        return filterPrimitiveBase.colorInterpolation(filterContext);
     }
 }
