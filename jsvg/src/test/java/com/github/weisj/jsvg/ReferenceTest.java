@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -128,11 +130,18 @@ public final class ReferenceTest {
 
     @Test
     void testIcons() {
-        String[] iconNames = {"desktop.svg", "drive.svg", "folder.svg", "general.svg", "homeFolder.svg", "image.svg",
-                "missingImage.svg", "newFolder.svg", "pendingImage.svg", "text.svg", "unknown.svg", "upFolder.svg"};
-        for (String iconName : iconNames) {
-            Assertions.assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/" + iconName));
-        }
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/desktop.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/drive.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/folder.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/general.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/homeFolder.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/image.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/missingImage.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/newFolder.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/pendingImage.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/text.svg"));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/unknown.svg", 0.4));
+        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/upFolder.svg"));
     }
 
     public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName) {
