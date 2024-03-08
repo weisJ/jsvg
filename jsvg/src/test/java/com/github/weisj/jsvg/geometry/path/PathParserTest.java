@@ -50,9 +50,4 @@ class PathParserTest {
         Assertions.assertEquals(4, cmds.length);
         Assertions.assertEquals(6, cmds[0].nodeCount());
     }
-
-    @Test
-    void invalidFlagShouldThrow() {
-        Assertions.assertThrows(IllegalStateException.class, () -> new PathParser("a1 2 3 4 5 6 7").parsePathCommand());
-    }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.geometry.path;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +35,7 @@ import com.github.weisj.jsvg.util.ParserBase;
  * @author Jannis Weis
  */
 public final class PathParser extends ParserBase {
+    private static final Logger LOGGER = Logger.getLogger(PathParser.class.getName());
     private char currentCommand;
 
     public PathParser(@NotNull String input) {
@@ -91,7 +93,15 @@ public final class PathParser extends ParserBase {
     public PathCommand[] parsePathCommand() {
         if ("none".equals(input)) return new PathCommand[0];
         List<PathCommand> commands = new ArrayList<>();
+        try {
+            parsePathCommandInto(commands);
+        } catch (Exception e) {
+            LOGGER.info("Error parsing path command: " + e.getMessage());
+        }
+        return commands.toArray(new PathCommand[0]);
+    }
 
+    private void parsePathCommandInto(List<PathCommand> commands) {
         currentCommand = 'Z';
         while (hasNext()) {
             char peekChar = peek();
@@ -178,6 +188,5 @@ public final class PathParser extends ParserBase {
             }
             commands.add(cmd);
         }
-        return commands.toArray(new PathCommand[0]);
     }
 }
