@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2">
+	<g filter="url(#b)">
+		<rect fill="red" fill-opacity=".5" width="50%" height="100%" />
+	</g>
+	<g filter="url(#c)">
+		<rect fill="red" fill-opacity=".5" x="50%" width="50%"
+			height="100%" />
+	</g>
+	<defs>
+		<filter id="b" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feBlend in="SourceGraphic" in2="SourceAlpha" mode="multiply" />
+		</filter>
+		<filter id="c" x="0" y="0" width="1" height="1">
+			<feBlend in2="SourceGraphic" in="SourceAlpha" mode="multiply" />
+		</filter>
+	</defs>
+</svg>
