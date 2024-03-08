@@ -170,10 +170,10 @@ public abstract class AbstractBlendComposite implements Composite {
 
                 int srcA = src[3];
                 int srcM = 255 - srcA;
-                result[0] = result[0] + (dst[0] * srcM) >> 8;
-                result[1] = result[1] + (dst[1] * srcM) >> 8;
-                result[2] = result[2] + (dst[2] * srcM) >> 8;
-                result[3] = 255 - (srcM * dstM) >> 8;
+                result[0] = result[0] + ((dst[0] * srcM) >> 8);
+                result[1] = result[1] + ((dst[1] * srcM) >> 8);
+                result[2] = result[2] + ((dst[2] * srcM) >> 8);
+                result[3] = 255 - ((srcM * dstM) >> 8);
             };
         }
     }

@@ -246,7 +246,7 @@ public final class AttributeNode {
 
 
     @Contract("_,!null -> !null")
-    public @NotNull Length @Nullable [] getLengthList(@NotNull String key, Length @Nullable [] fallback) {
+    public @NotNull Length[] getLengthList(@NotNull String key, Length[] fallback) {
         return loadHelper.attributeParser().parseLengthList(getValue(key), fallback);
     }
 

@@ -102,7 +102,7 @@ class FilterTest {
     void testBlend() {
         // Filter region not applied correctly.
         assertDoesNotThrow(() -> renderJsvg("filter/blend.svg"));
-        assertEquals(SUCCESS, compareImages("filter/blend_bug41.svg", 0.1f, 0.05f));
+        assertEquals(SUCCESS, compareImages("filter/blend_bug41.svg", 0, 1 / 255f));
     }
 
     @Test

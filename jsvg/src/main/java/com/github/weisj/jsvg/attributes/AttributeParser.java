@@ -133,7 +133,7 @@ public final class AttributeParser {
     }
 
     @Contract("_,!null -> !null")
-    public @NotNull Length @Nullable [] parseLengthList(@Nullable String value, Length @Nullable [] fallback) {
+    public @NotNull Length[] parseLengthList(@Nullable String value, Length @Nullable [] fallback) {
         if (value != null && value.equalsIgnoreCase("none")) return new Length[0];
         String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE, null);
         if (values == null) return fallback;
@@ -171,8 +171,8 @@ public final class AttributeParser {
     }
 
     @Contract("_,_,!null -> !null")
-    public @NotNull String @Nullable [] parseStringList(@Nullable String value, SeparatorMode separatorMode,
-            @NotNull String @Nullable [] fallback) {
+    public @NotNull String[] parseStringList(@Nullable String value, SeparatorMode separatorMode,
+            @NotNull String[] fallback) {
         if (value == null || value.isEmpty()) return fallback;
         List<String> list = new ArrayList<>();
         int max = value.length();

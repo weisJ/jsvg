@@ -42,7 +42,7 @@ public final class StrokeContext {
     public final @Nullable Length dashOffset;
 
     public StrokeContext(@Nullable Length strokeWidth, @Nullable LineCap lineCap, @Nullable LineJoin lineJoin,
-            float miterLimit, @NotNull Length @Nullable [] dashPattern, @Nullable Length dashOffset) {
+            float miterLimit, @NotNull Length[] dashPattern, @Nullable Length dashOffset) {
         this.strokeWidth = strokeWidth;
         this.lineCap = lineCap;
         this.lineJoin = lineJoin;
@@ -51,7 +51,7 @@ public final class StrokeContext {
         this.dashOffset = dashOffset;
     }
 
-    private static Length[] validateDashPattern(@NotNull Length @Nullable [] pattern) {
+    private static Length[] validateDashPattern(@NotNull Length[] pattern) {
         if (pattern == null) return null;
         if (pattern.length == 0) return pattern;
         for (Length length : pattern) {
