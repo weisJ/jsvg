@@ -50,10 +50,9 @@ public final class ColorUtil {
             b = 0;
         else if (b > 255) b = 255;
 
-        float factor = (float) a;
-        float componentR = r / factor;
-        float componentG = g / factor;
-        float componentB = b / factor;
+        float componentR = r / (float) a;
+        float componentG = g / (float) a;
+        float componentB = b / (float) a;
 
         float minComponent;
         float maxComponent;

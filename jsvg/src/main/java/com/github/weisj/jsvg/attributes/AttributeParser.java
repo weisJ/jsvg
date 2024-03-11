@@ -133,7 +133,7 @@ public final class AttributeParser {
     }
 
     @Contract("_,!null -> !null")
-    public @NotNull Length[] parseLengthList(@Nullable String value, Length @Nullable [] fallback) {
+    public Length @Nullable [] parseLengthList(@Nullable String value, Length @Nullable [] fallback) {
         if (value != null && value.equalsIgnoreCase("none")) return new Length[0];
         String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE, null);
         if (values == null) return fallback;

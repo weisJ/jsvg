@@ -101,7 +101,6 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         return areaShape;
     }
 
-    // TODO: Check if clip would be rectangular and use normal clipping
     public @NotNull Paint createPaintForSoftClipping(@NotNull Output output, @NotNull RenderContext context,
             @NotNull ElementBounds elementBounds, @NotNull Shape clipShape) {
         Rectangle2D transformedClipBounds = GeometryUtil.containingBoundsAfterTransform(
