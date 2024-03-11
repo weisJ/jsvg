@@ -120,8 +120,6 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         height = attributeNode.getLength("height", template != null ? template.height : Length.ZERO)
                 .coerceNonNegative();
 
-        // TODO: Might need to do this for mask/filter as well. Generalise to treat raw as percentage
-        // somehow.
         if (patternUnits == UnitType.ObjectBoundingBox) {
             x = coerceToPercentage(x);
             y = coerceToPercentage(y);

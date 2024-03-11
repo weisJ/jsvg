@@ -171,8 +171,8 @@ public final class AttributeParser {
     }
 
     @Contract("_,_,!null -> !null")
-    public @NotNull String[] parseStringList(@Nullable String value, SeparatorMode separatorMode,
-            @NotNull String[] fallback) {
+    public String @Nullable [] parseStringList(@Nullable String value, SeparatorMode separatorMode,
+            String @Nullable [] fallback) {
         if (value == null || value.isEmpty()) return fallback;
         List<String> list = new ArrayList<>();
         int max = value.length();

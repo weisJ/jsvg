@@ -55,6 +55,7 @@ import java.awt.image.*;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.util.ColorUtil;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 /**
  * <p>A blend composite defines the rule according to which a drawing primitive
@@ -107,16 +108,22 @@ public abstract class AbstractBlendComposite implements Composite {
         if (isColorModelInvalid(srcColorModel) || isColorModelInvalid(dstColorModel)) {
             throw new RasterFormatException("Incompatible color models");
         }
-        return new BlendingContext(blender(), convertToLinearRGB);
+        return new BlendingContext(blender(), srcColorModel, dstColorModel, convertToLinearRGB);
     }
 
     private static final class BlendingContext implements CompositeContext {
         private final @NotNull Blender blender;
+        private final @NotNull ColorModel sourceColorModel;
+        private final @NotNull ColorModel destinationColorModel;
         private final boolean convertToLinearRGB;
 
-        private BlendingContext(@NotNull Blender blender, boolean convertToLinearRGB) {
+        private BlendingContext(@NotNull Blender blender, @NotNull ColorModel sourceColorModel,
+                @NotNull ColorModel destinationColorModel,
+                boolean convertToLinearRGB) {
             this.blender = blender;
             this.convertToLinearRGB = convertToLinearRGB;
+            this.sourceColorModel = sourceColorModel;
+            this.destinationColorModel = destinationColorModel;
         }
 
         @Override
@@ -124,6 +131,15 @@ public abstract class AbstractBlendComposite implements Composite {
 
         @Override
         public void compose(@NotNull Raster src, @NotNull Raster dstIn, @NotNull WritableRaster dstOut) {
+            ColorModel srcPre = sourceColorModel;
+            if (!sourceColorModel.isAlphaPremultiplied()) {
+                srcPre = ImageUtil.coerceData((WritableRaster) src, sourceColorModel, true);
+            }
+            ColorModel dstInPre = destinationColorModel;
+            if (!destinationColorModel.isAlphaPremultiplied()) {
+                dstInPre = ImageUtil.coerceData((WritableRaster) dstIn, destinationColorModel, true);
+            }
+
             int width = Math.min(src.getWidth(), dstIn.getWidth());
             int height = Math.min(src.getHeight(), dstIn.getHeight());
 
@@ -156,12 +172,12 @@ public abstract class AbstractBlendComposite implements Composite {
                     dstPixel[3] = (pixel >> 24) & 0xFF;
 
                     if (convertToLinearRGB) {
-                        ColorUtil.sRGBtoLinearRGBinPlace(srcPixel);
-                        ColorUtil.sRGBtoLinearRGBinPlace(dstPixel);
+                        ColorUtil.sRGBtoLinearRGBPreInPlace(srcPixel);
+                        ColorUtil.sRGBtoLinearRGBPreInPlace(dstPixel);
 
                         blender.blend(srcPixel, dstPixel, result);
 
-                        ColorUtil.linearRGBtoSRGBinPlace(result);
+                        ColorUtil.linearRGBtoSRGBPreInPlace(result);
                     } else {
                         blender.blend(srcPixel, dstPixel, result);
                     }
@@ -173,29 +189,24 @@ public abstract class AbstractBlendComposite implements Composite {
                 }
                 dstOut.setDataElements(0, y, width, 1, dstPixels);
             }
+
+            if (!sourceColorModel.isAlphaPremultiplied()) {
+                ImageUtil.coerceData((WritableRaster) src, srcPre, false);
+            }
+
+            if (!destinationColorModel.isAlphaPremultiplied()) {
+                ImageUtil.coerceData(dstOut, dstInPre, false);
+
+                if (dstIn != dstOut) {
+                    ImageUtil.coerceData((WritableRaster) dstIn, dstInPre, false);
+                }
+            }
         }
     }
 
     @FunctionalInterface
     public interface Blender {
-        void blend(int[] src, int[] dst, int[] result);
+        void blend(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result);
 
-        default @NotNull Blender withAlphaCompositing() {
-            return (src, dst, result) -> {
-                this.blend(src, dst, result);
-                int dstA = dst[3];
-                int dstM = 255 - dstA;
-                result[0] = ((255 - dstM) * src[0] + dstA * result[0]) >> 8;
-                result[1] = ((255 - dstM) * src[1] + dstA * result[1]) >> 8;
-                result[2] = ((255 - dstM) * src[2] + dstA * result[2]) >> 8;
-
-                int srcA = src[3];
-                int srcM = 255 - srcA;
-                result[0] = result[0] + ((dst[0] * srcM) >> 8);
-                result[1] = result[1] + ((dst[1] * srcM) >> 8);
-                result[2] = result[2] + ((dst[2] * srcM) >> 8);
-                result[3] = 255 - ((srcM * dstM) >> 8);
-            };
-        }
     }
 }

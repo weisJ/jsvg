@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -87,7 +87,7 @@ public final class CompositeModeComposite {
         }
 
         @Override
-        public void blend(int[] src, int[] dst, int[] result) {
+        public void blend(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
             result[0] = Math.max(0, Math.min(255, k1 * src[0] * dst[0] + k2 * src[0] + k3 * dst[0] + k4));
             result[1] = Math.max(0, Math.min(255, k1 * src[1] * dst[1] + k2 * src[1] + k3 * dst[1] + k4));
             result[2] = Math.max(0, Math.min(255, k1 * src[2] * dst[2] + k2 * src[2] + k3 * dst[2] + k4));
@@ -104,7 +104,7 @@ public final class CompositeModeComposite {
         }
 
         @Override
-        public void blend(int[] src, int[] dst, int[] result) {
+        public void blend(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
             result[0] = Math.min(255, src[0] + dst[0]);
             result[1] = Math.min(255, src[1] + dst[1]);
             result[2] = Math.min(255, src[2] + dst[2]);

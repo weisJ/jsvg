@@ -77,7 +77,7 @@ class FilterTest {
     @Test
     void testColorMatrix() {
         assertEquals(SUCCESS, compareImages("filter/colormatrix_sRGB.svg"));
-        assertEquals(SUCCESS, compareImages("filter/colormatrix.svg"));
+        assertEquals(SUCCESS, compareImages("filter/colormatrix_linearRGB.svg"));
         assertEquals(SUCCESS, compareImages("filter/colormatrix_bug41_1.svg"));
         assertEquals(SUCCESS, compareImages("filter/colormatrix_bug41_2.svg"));
     }
@@ -101,7 +101,7 @@ class FilterTest {
     void testBlend() {
         // Filter region not applied correctly.
         assertDoesNotThrow(() -> renderJsvg("filter/blend.svg"));
-        assertEquals(SUCCESS, compareImages("filter/blend_bug41.svg", 0, 1 / 255f));
+        assertEquals(SUCCESS, compareImages("filter/blend_bug41.svg", 0, 1 / 256f));
     }
 
     @Test
@@ -154,9 +154,9 @@ class FilterTest {
 
     @Test
     void testSourceAlpha() {
-        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend.svg", 0, 0.1));
-        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend2.svg", 0, 0.1));
-        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend_sRGB.svg", 0, 0.1));
+        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend.svg", 0, 1 / 255f));
+        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend2.svg", 0, 1 / 255f));
+        assertEquals(SUCCESS, compareImages("filter/channelSourceAlphaBlend_sRGB.svg", 0, 1 / 255f));
     }
 
     @Test

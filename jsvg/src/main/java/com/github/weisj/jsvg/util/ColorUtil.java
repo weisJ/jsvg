@@ -39,7 +39,7 @@ public final class ColorUtil {
         return String.format("Color[%d,%d,%d,%d]", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
     }
 
-    public static void RGBtoHSL(int r, int g, int b, float @NotNull [] hsl) {
+    public static void RGBPretoHSL(int r, int g, int b, int a, float @NotNull [] hsl) {
         if (r < 0)
             r = 0;
         else if (r > 255) r = 255;
@@ -50,9 +50,10 @@ public final class ColorUtil {
             b = 0;
         else if (b > 255) b = 255;
 
-        float componentR = r / 255f;
-        float componentG = g / 255f;
-        float componentB = b / 255f;
+        float factor = (float) a;
+        float componentR = r / factor;
+        float componentG = g / factor;
+        float componentB = b / factor;
 
         float minComponent;
         float maxComponent;
@@ -175,27 +176,58 @@ public final class ColorUtil {
     /**
      * Color space conversion lookup tables.
      */
+    private static final int[][] SRGBtoLinearRGBPre = new int[256][256];
     private static final int[] SRGBtoLinearRGB = new int[256];
+    private static final int[][] LinearRGBtoSRGBPre = new int[256][256];
     private static final int[] LinearRGBtoSRGB = new int[256];
 
     static {
         // build the tables
         for (int k = 0; k < 256; k++) {
-            SRGBtoLinearRGB[k] = convertSRGBtoLinearRGB(k);
-            LinearRGBtoSRGB[k] = convertLinearRGBtoSRGB(k);
+            SRGBtoLinearRGB[k] = convertSRGBtoLinearRGB(k, 1);
+            LinearRGBtoSRGB[k] = convertLinearRGBtoSRGB(k, 1);
+        }
+        SRGBtoLinearRGBPre[255] = SRGBtoLinearRGB;
+        LinearRGBtoSRGBPre[255] = LinearRGBtoSRGB;
+        for (int i = 0; i < 255; i++) {
+            int[] sRGBtoLinear = new int[256];
+            int[] linearTosRGB = new int[256];
+            float alpha = i / 255f;
+            for (int k = 0; k < 256; k++) {
+                sRGBtoLinear[k] = convertSRGBtoLinearRGB(k, alpha);
+                linearTosRGB[k] = convertLinearRGBtoSRGB(k, alpha);
+            }
+            SRGBtoLinearRGBPre[i] = sRGBtoLinear;
+            LinearRGBtoSRGBPre[i] = linearTosRGB;
         }
     }
 
-    public static void sRGBtoLinearRGBinPlace(int[] argb) {
+    public static void sRGBtoLinearRGBinPlace(int @NotNull [] argb) {
         argb[0] = SRGBtoLinearRGB[argb[0]];
         argb[1] = SRGBtoLinearRGB[argb[1]];
         argb[2] = SRGBtoLinearRGB[argb[2]];
     }
 
-    public static void linearRGBtoSRGBinPlace(int[] argb) {
+    public static void linearRGBtoSRGBinPlace(int @NotNull [] argb) {
         argb[0] = LinearRGBtoSRGB[argb[0]];
         argb[1] = LinearRGBtoSRGB[argb[1]];
         argb[2] = LinearRGBtoSRGB[argb[2]];
+    }
+
+    public static void sRGBtoLinearRGBPreInPlace(int @NotNull [] argb) {
+        int alpha = argb[3];
+        int[] table = SRGBtoLinearRGBPre[alpha];
+        argb[0] = table[argb[0]];
+        argb[1] = table[argb[1]];
+        argb[2] = table[argb[2]];
+    }
+
+    public static void linearRGBtoSRGBPreInPlace(int @NotNull [] argb) {
+        int alpha = argb[3];
+        int[] table = LinearRGBtoSRGBPre[alpha];
+        argb[0] = table[argb[0]];
+        argb[1] = table[argb[1]];
+        argb[2] = table[argb[2]];
     }
 
     public static int sRGBtoLinearRGB(int argb) {
@@ -224,33 +256,33 @@ public final class ColorUtil {
      * Helper function to convert a color component in sRGB space to linear
      * RGB space.  Used to build a static lookup table.
      */
-    private static int convertSRGBtoLinearRGB(int color) {
-        float input, output;
-
-        input = color / 255.0f;
+    private static int convertSRGBtoLinearRGB(int color, float alpha) {
+        float factor = (255f * alpha);
+        float input = color / factor;
+        float output;
         if (input <= 0.04045f) {
             output = input / 12.92f;
         } else {
             output = (float) Math.pow((input + 0.055) / 1.055, 2.4);
         }
 
-        return Math.round(output * 255.0f);
+        return Math.round(output * factor);
     }
 
     /**
      * Helper function to convert a color component in linear RGB space to
      * SRGB space.  Used to build a static lookup table.
      */
-    private static int convertLinearRGBtoSRGB(int color) {
-        float input, output;
-
-        input = color / 255.0f;
+    private static int convertLinearRGBtoSRGB(int color, float alpha) {
+        float factor = (255f * alpha);
+        float input = color / factor;
+        float output;
         if (input <= 0.0031308) {
             output = input * 12.92f;
         } else {
             output = (1.055f * ((float) Math.pow(input, (1.0 / 2.4)))) - 0.055f;
         }
 
-        return Math.round(output * 255.0f);
+        return Math.round(output * factor);
     }
 }

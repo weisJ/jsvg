@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.renderer;
 
 import java.util.Arrays;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,13 +52,14 @@ public final class StrokeContext {
         this.dashOffset = dashOffset;
     }
 
-    private static Length[] validateDashPattern(@NotNull Length[] pattern) {
+    @Contract("null -> null")
+    private static Length @Nullable [] validateDashPattern(Length @Nullable [] pattern) {
         if (pattern == null) return null;
         if (pattern.length == 0) return pattern;
         for (Length length : pattern) {
             if (length.raw() < 0) {
                 // Dash length is negative. Bail
-                return new Length[0];
+                return null;
             }
             if (!length.isZero()) return pattern;
         }

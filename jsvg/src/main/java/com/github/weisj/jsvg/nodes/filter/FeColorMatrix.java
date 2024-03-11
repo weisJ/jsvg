@@ -244,7 +244,6 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         public int filterRGB(int x, int y, int rgb) {
             int[] argb = getRGB(rgb);
 
-            int a = argb[3];
             int r = argb[2];
             int g = argb[1];
             int b = argb[0];
