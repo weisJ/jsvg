@@ -121,6 +121,11 @@ public final class NodeSupplier {
         constructorMap.put(FeMergeNode.TAG, () -> new FeMergeNode());
         constructorMap.put(FeTurbulence.TAG, () -> new FeTurbulence());
         constructorMap.put(FeOffset.TAG, () -> new FeOffset());
+        constructorMap.put(FeComponentTransfer.TAG, () -> new FeComponentTransfer());
+        constructorMap.put(TransferFunctionElement.FeFuncB.TAG, () -> new TransferFunctionElement.FeFuncB());
+        constructorMap.put(TransferFunctionElement.FeFuncG.TAG, () -> new TransferFunctionElement.FeFuncG());
+        constructorMap.put(TransferFunctionElement.FeFuncR.TAG, () -> new TransferFunctionElement.FeFuncR());
+        constructorMap.put(TransferFunctionElement.FeFuncA.TAG, () -> new TransferFunctionElement.FeFuncA());
     }
 
     private void populateAnimationNodeConstructors() {
@@ -136,14 +141,9 @@ public final class NodeSupplier {
     }
 
     private void populateDummyNodeConstructors() {
-        constructorMap.put("feComponentTransfer", () -> new DummyFilterPrimitive("feComponentTransfer"));
         constructorMap.put("feConvolveMatrix", () -> new DummyFilterPrimitive("feConvolveMatrix"));
         constructorMap.put("feDiffuseLightning", () -> new DummyFilterPrimitive("feDiffuseLightning"));
         constructorMap.put("feDropShadow", () -> new DummyFilterPrimitive("feDropShadow"));
-        constructorMap.put("feFuncA", () -> new DummyFilterPrimitive("feFuncA"));
-        constructorMap.put("feFuncB", () -> new DummyFilterPrimitive("feFuncB"));
-        constructorMap.put("feFuncG", () -> new DummyFilterPrimitive("feFuncG"));
-        constructorMap.put("feFuncR", () -> new DummyFilterPrimitive("feFuncR"));
         constructorMap.put("feImage", () -> new DummyFilterPrimitive("feImage"));
         constructorMap.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
         constructorMap.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,38 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.prototype.spec;
+package com.github.weisj.jsvg.attributes.filter;
 
-public enum Category {
-    // Animations aren't supported
-    Animation(false),
-    BasicShape,
-    Container,
-    // Descriptions don't provide any information
-    // in a static context.
-    Descriptive(false),
-    FilterPrimitive,
-    TransferFunctionElement,
-    Gradient,
-    Graphic,
-    GraphicsReferencing,
-    Shape,
-    Structural,
-    TextContent,
-    TextContentChild,
-    None;
-
-    private final boolean effectivelyAllowed;
-
-    Category() {
-        this(true);
-    }
-
-    Category(boolean effectivelyAllowed) {
-        this.effectivelyAllowed = effectivelyAllowed;
-    }
-
-    public boolean isEffectivelyAllowed() {
-        return effectivelyAllowed;
-    }
+public enum TransferFunctionType {
+    Identity,
+    Table,
+    Discrete,
+    Linear,
+    Gamma
 }
