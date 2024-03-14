@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.image.RGBImageFilter;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -37,7 +36,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.util.ColorUtil;
+import com.github.weisj.jsvg.util.ColorSpaceAwareRGBImageFilter;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -130,33 +129,9 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         return (int) Math.max(Math.min(Math.round(value), 255), 0);
     }
 
-    private static abstract class AffineRGBImageFilter extends RGBImageFilter {
-
-        private final int[] tmp = new int[4];
-        private boolean convertToLinear;
+    private static abstract class AffineRGBImageFilter extends ColorSpaceAwareRGBImageFilter {
 
         abstract boolean isLinear();
-
-        protected int[] getRGB(int rgb) {
-            tmp[3] = (rgb >> 24) & 0xFF;
-            tmp[2] = (rgb >> 16) & 0xFF;
-            tmp[1] = (rgb >> 8) & 0xFF;
-            tmp[0] = rgb & 0xFF;
-            if (convertToLinear) ColorUtil.sRGBtoLinearRGBinPlace(tmp);
-            return tmp;
-        }
-
-        protected int pack(int[] argb) {
-            if (convertToLinear) ColorUtil.linearRGBtoSRGBinPlace(argb);
-            return ((argb[3] & 0xFF) << 24) |
-                    ((argb[2] & 0xFF) << 16) |
-                    ((argb[1] & 0xFF) << 8) |
-                    (argb[0] & 0xFF);
-        }
-
-        void setConvertToLinear(boolean convertToLinear) {
-            this.convertToLinear = convertToLinear;
-        }
     }
 
     private static final class MatrixRGBFilter extends AffineRGBImageFilter {
