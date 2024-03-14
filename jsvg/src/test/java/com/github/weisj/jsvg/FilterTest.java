@@ -170,4 +170,10 @@ class FilterTest {
         assertEquals(SUCCESS, compareImages("filter/filterPrimitiveRegionClip.svg"));
         assertEquals(SUCCESS, compareImages("filter/filterPrimitiveRegionClip2.svg"));
     }
+
+    @Test
+    void testComponentTransfer() {
+        assertEquals(SUCCESS, compareImages("filter/componentTransfer.svg", 0.05, 0.05));
+        assertEquals(SUCCESS, compareImages("filter/componentTransfer_sRGB.svg", 0.05, 0.05));
+    }
 }
