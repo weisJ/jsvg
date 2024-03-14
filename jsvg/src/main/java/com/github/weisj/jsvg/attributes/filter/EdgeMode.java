@@ -51,7 +51,8 @@ public enum EdgeMode {
         @Override
         public ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
                 @NotNull ImageProducer producer, @NotNull ConvolveOperation convolveOperation) {
-            return applyConvolutions(filterContext.renderingHints(), ImageUtil.copy(context, producer),
+            return applyConvolutions(filterContext.renderingHints(),
+                    ImageUtil.copy(context, producer, ImageUtil.Premultiplied.Yes),
                     convolveOperation, ConvolveOp.EDGE_ZERO_FILL);
         }
     };
@@ -94,7 +95,8 @@ public enum EdgeMode {
         int xSize = kernelSize.width;
         int ySize = kernelSize.height;
 
-        BufferedImage bufferedImage = ImageUtil.createCompatibleTransparentImage(width + xSize, height + ySize);
+        BufferedImage bufferedImage = ImageUtil.createCompatibleTransparentImage(width + xSize, height + ySize,
+                ImageUtil.Premultiplied.Yes);
         Graphics2D g = GraphicsUtil.createGraphics(bufferedImage);
 
         int xOff = xSize / 2;
@@ -184,9 +186,8 @@ public enum EdgeMode {
         g.drawImage(topRight, 0, yOff + height, null);
         g.drawImage(topLeft, xOff + width, yOff + height, null);
 
-        ImageProducer output =
-                applyConvolutions(filterContext.renderingHints(), edgeModeImage.img, convolveOperation,
-                        ConvolveOp.EDGE_NO_OP);
+        ImageProducer output = applyConvolutions(filterContext.renderingHints(), edgeModeImage.img, convolveOperation,
+                ConvolveOp.EDGE_NO_OP);
         CropImageFilter cropImageFilter = new CropImageFilter(xOff, yOff, width, height);
         return new FilteredImageSource(output, cropImageFilter);
     }

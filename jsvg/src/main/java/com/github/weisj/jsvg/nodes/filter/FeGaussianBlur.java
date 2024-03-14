@@ -217,6 +217,10 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         public @NotNull ImageProducer convolve(@NotNull BufferedImage image, @Nullable RenderingHints hints,
                 int awtEdgeMode) {
             WritableRaster raster = image.getRaster();
+            if (!image.getColorModel().isAlphaPremultiplied()) {
+                throw new IllegalStateException("Image should be premultiplied");
+            }
+
             if (xKernel != null && yKernel != null) {
                 BufferedImageOp op = new MultiConvolveOp(new ConvolveOp[] {
                         new ConvolveOp(xKernel, awtEdgeMode, hints),

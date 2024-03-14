@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.util;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 
 import java.awt.*;
@@ -39,13 +40,24 @@ public final class ImageUtil {
 
     private ImageUtil() {}
 
+    public enum Premultiplied {
+        Yes,
+        No
+    }
+
     public static @NotNull BufferedImage createCompatibleTransparentImage(@NotNull Output output,
             double width, double height) {
         return createCompatibleTransparentImage(output.transform(), width, height);
     }
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(int width, int height) {
-        return new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
+        return createCompatibleTransparentImage(width, height, Premultiplied.No);
+    }
+
+    public static @NotNull BufferedImage createCompatibleTransparentImage(int width, int height,
+            Premultiplied preMultiplied) {
+        int type = preMultiplied == Premultiplied.Yes ? TYPE_INT_ARGB_PRE : TYPE_INT_ARGB;
+        return new BufferedImage(width, height, type);
     }
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(@Nullable AffineTransform at, double width,
@@ -102,13 +114,18 @@ public final class ImageUtil {
         return ((SinglePixelPackedSampleModel) raster.getSampleModel()).getScanlineStride();
     }
 
-    public static @NotNull BufferedImage copy(@NotNull RenderContext context, @NotNull ImageProducer producer) {
-        return toBufferedImage(context.platformSupport().createImage(producer));
+    public static @NotNull BufferedImage copy(@NotNull RenderContext context, @NotNull ImageProducer producer,
+            Premultiplied premultiplied) {
+        return toBufferedImage(context.platformSupport().createImage(producer), premultiplied);
     }
 
     public static @NotNull BufferedImage toBufferedImage(@NotNull Image img) {
-        BufferedImage bufferedImage = createCompatibleTransparentImage((AffineTransform) null,
-                img.getWidth(null), img.getHeight(null));
+        return toBufferedImage(img, Premultiplied.No);
+    }
+
+    public static @NotNull BufferedImage toBufferedImage(@NotNull Image img, Premultiplied premultiplied) {
+        BufferedImage bufferedImage = createCompatibleTransparentImage(img.getWidth(null), img.getHeight(null),
+                premultiplied);
         Graphics2D g = GraphicsUtil.createGraphics(bufferedImage);
         g.drawImage(img, null, null);
         g.dispose();
