@@ -100,6 +100,7 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
         if (redValid || greenValid || blueValid || alphaValid) {
             sRGBlookupTable = new ByteLookupTable(0, tables);
         }
+        children().clear();
     }
 
     @Override

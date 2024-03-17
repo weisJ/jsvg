@@ -66,6 +66,7 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
         for (int i = 0; i < inputChannels.length; i++) {
             inputChannels[i] = nodes.get(i).inputChannel();
         }
+        children().clear();
     }
 
     @Override
