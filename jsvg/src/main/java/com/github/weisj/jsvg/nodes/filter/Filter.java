@@ -104,25 +104,14 @@ public final class Filter extends ContainerNode {
         filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
         colorInterpolation = attributeNode.getEnum("color-interpolation-filters", ColorInterpolation.LinearRGB);
 
-        x = attributeNode.getLength("x", DEFAULT_FILTER_COORDINATE);
-        y = attributeNode.getLength("y", DEFAULT_FILTER_COORDINATE);
-        width = attributeNode.getLength("width", DEFAULT_FILTER_SIZE);
-        height = attributeNode.getLength("height", DEFAULT_FILTER_SIZE);
-
-        // Note: Apparently these coordinates are always interpreted as percentages regardless of the
-        // specified unit (except for explicit percentages).
-        // Unfortunately this results in rather large buffer images in general due to misuse.
-        if (filterUnits == UnitType.ObjectBoundingBox) {
-            x = coerceToPercentage(x);
-            y = coerceToPercentage(y);
-            width = coerceToPercentage(width);
-            height = coerceToPercentage(height);
-        }
-    }
-
-    private @NotNull Length coerceToPercentage(@NotNull Length length) {
-        if (length.unit() == Unit.PERCENTAGE) return length;
-        return new Length(Unit.PERCENTAGE, length.raw() * 100);
+        x = attributeNode.getLength("x", DEFAULT_FILTER_COORDINATE)
+                .coercePercentageToCorrectUnit(filterUnits);
+        y = attributeNode.getLength("y", DEFAULT_FILTER_COORDINATE)
+                .coercePercentageToCorrectUnit(filterUnits);
+        width = attributeNode.getLength("width", DEFAULT_FILTER_SIZE)
+                .coercePercentageToCorrectUnit(filterUnits);
+        height = attributeNode.getLength("height", DEFAULT_FILTER_SIZE)
+                .coercePercentageToCorrectUnit(filterUnits);
     }
 
     public @Nullable FilterInfo createFilterInfo(@NotNull Output output, @NotNull RenderContext context,

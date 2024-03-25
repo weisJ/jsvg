@@ -80,13 +80,17 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        x = attributeNode.getLength("x", Unit.PERCENTAGE.valueOf(-10));
-        y = attributeNode.getLength("y", Unit.PERCENTAGE.valueOf(-10));
-        width = attributeNode.getLength("width", Unit.PERCENTAGE.valueOf(120));
-        height = attributeNode.getLength("height", Unit.PERCENTAGE.valueOf(120));
-
         maskContentUnits = attributeNode.getEnum("maskContentUnits", UnitType.UserSpaceOnUse);
         maskUnits = attributeNode.getEnum("maskUnits", UnitType.ObjectBoundingBox);
+
+        x = attributeNode.getLength("x", Unit.PERCENTAGE.valueOf(-10))
+                .coercePercentageToCorrectUnit(maskUnits);
+        y = attributeNode.getLength("y", Unit.PERCENTAGE.valueOf(-10))
+                .coercePercentageToCorrectUnit(maskUnits);
+        width = attributeNode.getLength("width", Unit.PERCENTAGE.valueOf(120))
+                .coercePercentageToCorrectUnit(maskUnits);
+        height = attributeNode.getLength("height", Unit.PERCENTAGE.valueOf(120))
+                .coercePercentageToCorrectUnit(maskUnits);
     }
 
     public @NotNull Paint createMaskPaint(@NotNull Output output, @NotNull RenderContext context,

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.google.errorprone.annotations.Immutable;
 
@@ -165,6 +166,12 @@ public final class Length {
     public @NotNull Length coerceNonNegative() {
         if (isSpecified() && raw() <= 0) return ZERO;
         return this;
+    }
+
+    public @NotNull Length coercePercentageToCorrectUnit(@NotNull UnitType unitType) {
+        if (unitType == UnitType.UserSpaceOnUse) return this;
+        if (unit() == Unit.PERCENTAGE) return this;
+        return new Length(Unit.PERCENTAGE, raw() * 100);
     }
 
     public Length orElseIfUnspecified(float value) {

@@ -36,7 +36,6 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
@@ -112,28 +111,20 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         patternContentUnits = attributeNode.getEnum("patternContentUnits",
                 template != null ? template.patternContentUnits : UnitType.UserSpaceOnUse);
 
-        x = attributeNode.getLength("x", template != null ? template.x : Length.ZERO);
-        y = attributeNode.getLength("y", template != null ? template.y : Length.ZERO);
+        x = attributeNode.getLength("x", template != null ? template.x : Length.ZERO)
+                .coercePercentageToCorrectUnit(patternUnits);
+        y = attributeNode.getLength("y", template != null ? template.y : Length.ZERO)
+                .coercePercentageToCorrectUnit(patternUnits);
         // Note: width == 0 || height == 0 implies nothing should be painted.
         width = attributeNode.getLength("width", template != null ? template.width : Length.ZERO)
-                .coerceNonNegative();
+                .coerceNonNegative()
+                .coercePercentageToCorrectUnit(patternUnits);
         height = attributeNode.getLength("height", template != null ? template.height : Length.ZERO)
-                .coerceNonNegative();
-
-        if (patternUnits == UnitType.ObjectBoundingBox) {
-            x = coerceToPercentage(x);
-            y = coerceToPercentage(y);
-            width = coerceToPercentage(width);
-            height = coerceToPercentage(height);
-        }
+                .coerceNonNegative()
+                .coercePercentageToCorrectUnit(patternUnits);
 
         patternTransform = attributeNode.parseTransform("patternTransform");
         if (patternTransform == null && template != null) patternTransform = template.patternTransform;
-    }
-
-    private @NotNull Length coerceToPercentage(@NotNull Length length) {
-        if (length.unit() != Unit.Raw) return length;
-        return Unit.PERCENTAGE.valueOf(length.raw() * 100);
     }
 
     private @Nullable Pattern parseTemplate(@NotNull AttributeNode attributeNode) {
