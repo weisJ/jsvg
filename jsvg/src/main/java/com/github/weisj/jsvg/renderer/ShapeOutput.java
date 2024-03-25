@@ -212,6 +212,11 @@ public class ShapeOutput implements Output {
     }
 
     @Override
+    public float currentOpacity() {
+        return 1;
+    }
+
+    @Override
     public void applyOpacity(float opacity) {
         // Not supported. Do nothing
     }

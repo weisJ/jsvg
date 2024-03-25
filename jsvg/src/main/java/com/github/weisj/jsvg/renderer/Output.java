@@ -99,6 +99,8 @@ public interface Output {
 
     void translate(double dx, double dy);
 
+    float currentOpacity();
+
     void applyOpacity(float opacity);
 
     @NotNull
@@ -110,6 +112,10 @@ public interface Output {
 
     default boolean isSoftClippingEnabled() {
         return renderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING) == SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
+    }
+
+    default boolean hasMaskedPaint() {
+        return false;
     }
 
     interface SafeState {

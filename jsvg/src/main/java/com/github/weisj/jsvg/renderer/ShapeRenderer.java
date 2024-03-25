@@ -22,10 +22,7 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
@@ -109,6 +106,7 @@ public final class ShapeRenderer {
                 shapePaintContext.context, shapePaintContext.transform);
         Output.SafeState safeState = output.safeState();
 
+        boolean fillPainted = false;
         for (PaintOrder.Phase phase : paintOrder.phases()) {
             RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
             switch (phase) {
@@ -116,6 +114,7 @@ public final class ShapeRenderer {
                     if (canBeFilledHint) {
                         ShapeRenderer.renderShapeFill(phaseContext, output, paintShape);
                     }
+                    fillPainted = true;
                     break;
                 case STROKE:
                     Shape strokeShape = paintShape.shape;
@@ -125,7 +124,8 @@ public final class ShapeRenderer {
                                 VectorEffect.applyNonScalingStroke(output, phaseContext, strokeShape);
                     }
                     ShapeRenderer.renderShapeStroke(phaseContext, output,
-                            new PaintShape(strokeShape, paintShape.bounds), shapePaintContext.stroke);
+                            new PaintShape(strokeShape, paintShape.bounds), shapePaintContext.stroke,
+                            !fillPainted && canBeFilledHint);
                     break;
                 case MARKERS:
                     if (markerInfo != null) renderMarkers(output, phaseContext, paintShape, markerInfo);
@@ -142,11 +142,22 @@ public final class ShapeRenderer {
     }
 
     private static void renderShapeStroke(@NotNull RenderContext context, @NotNull Output output,
-            @NotNull PaintShape paintShape, @Nullable Stroke stroke) {
+            @NotNull PaintShape paintShape, @Nullable Stroke stroke, boolean willBeFilledAfterwards) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
         if (!(stroke != null && paintWithOpacity.isVisible())) return;
         output.applyOpacity(paintWithOpacity.opacity);
         output.setStroke(stroke);
+        boolean removeFillArea = output.hasMaskedPaint()
+                && willBeFilledAfterwards
+                && context.fillPaint().isVisible()
+                && context.fillOpacity() == 1
+                && output.currentOpacity() == 1;
+        if (removeFillArea) {
+            Area s = new Area(stroke.createStrokedShape(paintShape.shape));
+            s.subtract(new Area(paintShape.shape));
+            paintWithOpacity.paint.fillShape(output, context, s, paintShape.bounds);
+            return;
+        }
         paintWithOpacity.paint.drawShape(output, context, paintShape.shape, paintShape.bounds);
     }
 

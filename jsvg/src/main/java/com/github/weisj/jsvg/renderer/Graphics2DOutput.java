@@ -178,8 +178,22 @@ public class Graphics2DOutput implements Output {
     }
 
     @Override
+    public float currentOpacity() {
+        Composite composite = g.getComposite();
+        if (composite instanceof AlphaComposite) {
+            return ((AlphaComposite) composite).getAlpha();
+        }
+        return 1;
+    }
+
+    @Override
     public void applyOpacity(float opacity) {
         g.setComposite(GraphicsUtil.deriveComposite(g, opacity));
+    }
+
+    @Override
+    public boolean hasMaskedPaint() {
+        return g.getPaint() instanceof MaskedPaint;
     }
 
     @Override
