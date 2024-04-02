@@ -46,69 +46,6 @@ public final class NodeRenderer {
 
     private NodeRenderer() {}
 
-    private static class Info implements AutoCloseable {
-        protected final @NotNull RenderContext context;
-        protected final @NotNull Output output;
-        private final @NotNull Renderable renderable;
-
-        Info(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Output output) {
-            this.renderable = renderable;
-            this.context = context;
-            this.output = output;
-        }
-
-        public @NotNull Output output() {
-            return output;
-        }
-
-        public @NotNull RenderContext context() {
-            return context;
-        }
-
-        @Override
-        public void close() {
-            output.dispose();
-        }
-    }
-
-    private static final class InfoWithFilter extends Info {
-        private final @NotNull Filter filter;
-        private final @NotNull Filter.FilterInfo filterInfo;
-
-        static @Nullable InfoWithFilter create(@NotNull Renderable renderable, @NotNull RenderContext context,
-                @NotNull Output output, @NotNull Filter filter, @NotNull ElementBounds elementBounds) {
-            Filter.FilterInfo info = filter.createFilterInfo(output, context, elementBounds);
-            if (info == null) return null;
-            return new InfoWithFilter(renderable, context, output, filter, info);
-        }
-
-        private InfoWithFilter(@NotNull Renderable renderable, @NotNull RenderContext context, @NotNull Output output,
-                @NotNull Filter filter, @NotNull Filter.FilterInfo filterInfo) {
-            super(renderable, context, output);
-            this.filter = filter;
-            this.filterInfo = filterInfo;
-        }
-
-        @Override
-        public @NotNull Output output() {
-            return filterInfo.output();
-        }
-
-        @Override
-        public @NotNull RenderContext context() {
-            return filterInfo.context();
-        }
-
-        @Override
-        public void close() {
-            Output previousOutput = this.output;
-            filter.applyFilter(previousOutput, context, filterInfo);
-            filterInfo.blitImage(previousOutput, context);
-            filterInfo.close();
-            super.close();
-        }
-    }
-
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output) {
         renderNode(node, context, output, null);
     }
@@ -116,7 +53,7 @@ public final class NodeRenderer {
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output,
             @Nullable Instantiator instantiator) {
         try (Info info = createRenderInfo(node, context, output, instantiator)) {
-            if (info != null) info.renderable.render(info.context(), info.output());
+            if (info != null) info.renderable().render(info.context(), info.output());
         }
     }
 
@@ -219,7 +156,7 @@ public final class NodeRenderer {
         }
     }
 
-    private static @Nullable InfoWithFilter tryCreateFilterInfo(
+    private static @Nullable Info.InfoWithFilter tryCreateFilterInfo(
             @NotNull Renderable renderable, @NotNull RenderContext childContext, @NotNull Output childOutput,
             @NotNull ElementBounds elementBounds) {
         Filter filter = renderable instanceof HasFilter
@@ -227,7 +164,7 @@ public final class NodeRenderer {
                 : null;
 
         if (filter != null && filter.hasEffect() && childOutput.supportsFilters()) {
-            return InfoWithFilter.create(renderable, childContext, childOutput, filter, elementBounds);
+            return Info.InfoWithFilter.create(renderable, childContext, childOutput, filter, elementBounds);
         }
         return null;
     }
