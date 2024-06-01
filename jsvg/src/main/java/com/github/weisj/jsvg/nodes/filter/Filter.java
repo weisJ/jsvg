@@ -114,7 +114,7 @@ public final class Filter extends ContainerNode {
                 .coercePercentageToCorrectUnit(filterUnits);
     }
 
-    public @Nullable FilterInfo createFilterInfo(@NotNull Output output, @NotNull RenderContext context,
+    public @Nullable FilterBounds createFilterBounds(@NotNull Output output, @NotNull RenderContext context,
             @NotNull ElementBounds elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds.boundingBox(), x, y, width, height);
@@ -157,18 +157,10 @@ public final class Filter extends ContainerNode {
                 .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
-        RenderContext imageContext = context.deriveForSurface();
-
-        BlittableImage blitImage = BlittableImage.create(
-                ImageUtil::createCompatibleTransparentImage, context, clipHeuristicBounds,
-                filterRegion, elementBounds.boundingBox(), UnitType.UserSpaceOnUse, imageContext);
-
-        if (blitImage == null) return null;
-
-        return new FilterInfo(output, blitImage, elementBounds.boundingBox(), filterRegion);
+        return new FilterBounds(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds);
     }
 
-    public void applyFilter(@NotNull Output output, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
+    public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
         ImageProducer producer = filterInfo.blittableImage.image().getSource();
 
         FilterContext filterContext =
@@ -191,7 +183,8 @@ public final class Filter extends ContainerNode {
             // Todo: Respect filterPrimitiveRegion
         }
 
-        filterInfo.result = Objects.requireNonNull(filterContext.getChannel(DefaultFilterChannel.LastResult));
+        Channel result = Objects.requireNonNull(filterContext.getChannel(DefaultFilterChannel.LastResult));
+        return result.toBufferedImageNonAliased(context);
     }
 
     @Override
@@ -199,69 +192,73 @@ public final class Filter extends ContainerNode {
         return node instanceof FilterPrimitive && super.acceptChild(id, node);
     }
 
-    public static final class FilterInfo {
-        public final int imageWidth;
-        public final int imageHeight;
-
+    public static final class FilterBounds {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
-        private final @NotNull Output imageOutput;
-        private final @NotNull BlittableImage blittableImage;
+        private final @NotNull Rectangle2D effectiveFilterArea;
 
-        private Channel result;
-
-        private FilterInfo(@NotNull Output output, @NotNull BlittableImage blittableImage,
-                @NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion) {
-            this.blittableImage = blittableImage;
+        private FilterBounds(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
+                @NotNull Rectangle2D effectiveFilterArea) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
-
-            BufferedImage image = blittableImage.image();
-
-            this.imageWidth = image.getWidth();
-            this.imageHeight = image.getHeight();
-
-            Graphics2D g = blittableImage.createGraphics();
-            g.setRenderingHints(output.renderingHints());
-            this.imageOutput = new Graphics2DOutput(g);
-        }
-
-        public @NotNull Rectangle2D imageBounds() {
-            return blittableImage.userBoundsInRootSpace();
+            this.effectiveFilterArea = effectiveFilterArea;
         }
 
         public @NotNull Rectangle2D elementBounds() {
             return elementBounds;
         }
 
+        public @NotNull Rectangle2D filterRegion() {
+            return filterRegion;
+        }
+
+        public @NotNull Rectangle2D effectiveFilterArea() {
+            return effectiveFilterArea;
+        }
+    }
+
+    public static final class FilterInfo {
+        public final int imageWidth;
+        public final int imageHeight;
+
+        private final @NotNull FilterBounds filterBounds;
+        private final @NotNull BlittableImage blittableImage;
+        private final @NotNull Output imageOutput;
+
+        public FilterInfo(@NotNull BlittableImage blittableImage, @NotNull Output imageOutput,
+                @NotNull FilterBounds filterBounds) {
+            BufferedImage image = blittableImage.image();
+            this.imageWidth = image.getWidth();
+            this.imageHeight = image.getHeight();
+            this.blittableImage = blittableImage;
+            this.filterBounds = filterBounds;
+            this.imageOutput = imageOutput;
+        }
+
+        public @NotNull Rectangle2D imageBounds() {
+            return blittableImage.userBoundsInRootSpace();
+        }
+
+        public @NotNull Rectangle2D filterRegion() {
+            return filterBounds.filterRegion();
+        }
+
+        public @NotNull Rectangle2D elementBounds() {
+            return filterBounds.elementBounds();
+        }
+
         public @NotNull Output output() {
             return imageOutput;
         }
 
-        public @NotNull RenderContext context() {
-            return blittableImage.context();
-        }
-
         public @NotNull Rectangle2D tile() {
+            Rectangle2D elementBounds = elementBounds();
             Rectangle2D imageBounds = imageBounds();
             return new Rectangle2D.Double(
                     imageBounds.getX() - elementBounds.getX(),
                     imageBounds.getY() - elementBounds.getY(),
                     imageBounds.getWidth(),
                     imageBounds.getHeight());
-        }
-
-        public void blitImage(@NotNull Output output, @NotNull RenderContext context) {
-            if (DEBUG) {
-                blittableImage.debug(output, false);
-            }
-            output.applyClip(filterRegion);
-            blittableImage.prepareForBlitting(output);
-            output.drawImage(result.toBufferedImageNonAliased(context), context.platformSupport().imageObserver());
-        }
-
-        public void close() {
-            imageOutput.dispose();
         }
     }
 

@@ -156,17 +156,17 @@ public final class NodeRenderer {
         }
     }
 
-    private static @Nullable Info.InfoWithFilter tryCreateFilterInfo(
+    private static @Nullable Info.InfoWithIsolation tryCreateFilterInfo(
             @NotNull Renderable renderable, @NotNull RenderContext childContext, @NotNull Output childOutput,
             @NotNull ElementBounds elementBounds) {
         Filter filter = renderable instanceof HasFilter
                 ? ((HasFilter) renderable).filter()
                 : null;
 
-        if (filter != null && filter.hasEffect() && childOutput.supportsFilters()) {
-            return Info.InfoWithFilter.create(renderable, childContext, childOutput, filter, elementBounds);
+        if (filter != null && !(filter.hasEffect() && childOutput.supportsFilters())) {
+            filter = null;
         }
-        return null;
+        return Info.InfoWithIsolation.create(renderable, childContext, childOutput, elementBounds, filter);
     }
 
     public static @NotNull RenderContext setupRenderContext(@NotNull Object node, @NotNull RenderContext context) {
