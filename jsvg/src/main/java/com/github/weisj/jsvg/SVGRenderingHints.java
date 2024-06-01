@@ -31,6 +31,7 @@ public final class SVGRenderingHints {
     private static final int P_KEY_IMAGE_ANTIALIASING = 1;
     private static final int P_KEY_SOFT_CLIPPING = 2;
     private static final int P_KEY_CACHE_OFFSCREEN_IMAGE = 3;
+    private static final int P_KEY_MASK_CLIP_RENDERING = 4;
 
     public static final RenderingHints.Key KEY_IMAGE_ANTIALIASING = new Key(P_KEY_IMAGE_ANTIALIASING);
     public static final Object VALUE_IMAGE_ANTIALIASING_ON = Value.ON;
@@ -40,6 +41,10 @@ public final class SVGRenderingHints {
     public static final Object VALUE_SOFT_CLIPPING_ON = Value.ON;
     public static final Object VALUE_SOFT_CLIPPING_OFF = Value.OFF;
 
+    public static final RenderingHints.Key KEY_MASK_CLIP_RENDERING = new Key(P_KEY_MASK_CLIP_RENDERING);
+    public static final Object VALUE_MASK_CLIP_RENDERING_FAST = RenderingMode.FAST;
+    public static final Object VALUE_MASK_CLIP_RENDERING_ACCURACY = RenderingMode.ACCURACY;
+    public static final Object VALUE_MASK_CLIP_RENDERING_DEFAULT = RenderingMode.FAST;
 
     public static final RenderingHints.Key KEY_CACHE_OFFSCREEN_IMAGE = new Key(P_KEY_CACHE_OFFSCREEN_IMAGE);
     public static final Object VALUE_USE_CACHE = Value.ON;
@@ -70,5 +75,10 @@ public final class SVGRenderingHints {
     private enum Value {
         ON,
         OFF
+    }
+
+    private enum RenderingMode {
+        FAST,
+        ACCURACY
     }
 }

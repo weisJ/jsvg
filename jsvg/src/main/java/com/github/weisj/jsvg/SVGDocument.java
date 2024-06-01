@@ -148,6 +148,9 @@ public final class SVGDocument {
         if (g.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL) == RenderingHints.VALUE_STROKE_DEFAULT) {
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         }
+        setSVGRenderingHint(g,
+                SVGRenderingHints.KEY_MASK_CLIP_RENDERING,
+                SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_DEFAULT);
     }
 
     private void setSVGRenderingHint(@NotNull Graphics2D g, @NotNull RenderingHints.Key key, @NotNull Object o) {
