@@ -21,47 +21,14 @@
  */
 package com.github.weisj.jsvg.renderer.awt;
 
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
-
 import javax.swing.*;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class JComponentPlatformSupport implements PlatformSupport {
-
-    private final @NotNull JComponent component;
+public final class JComponentPlatformSupport extends AwtComponentPlatformSupport {
 
     public JComponentPlatformSupport(@NotNull JComponent component) {
-        this.component = component;
-    }
-
-    @Override
-    public float fontSize() {
-        Font font = component.getFont();
-        if (font != null) return font.getSize2D();
-        return PlatformSupport.super.fontSize();
-    }
-
-    @Override
-    public @NotNull TargetSurface targetSurface() {
-        return component::repaint;
-    }
-
-    @Override
-    public boolean isLongLived() {
-        return true;
-    }
-
-    @Override
-    public @NotNull ImageObserver imageObserver() {
-        return component;
-    }
-
-    @Override
-    public @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
-        return component.createImage(imageProducer);
+        super(component);
     }
 
     @Override
