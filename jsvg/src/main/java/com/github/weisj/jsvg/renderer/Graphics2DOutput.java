@@ -64,7 +64,7 @@ public class Graphics2DOutput implements Output {
 
     @Override
     public void drawImage(@NotNull Image image, @Nullable ImageObserver observer) {
-        GraphicsUtil.safelyDrawImage(g, image, observer);
+        GraphicsUtil.safelyDrawImage(this, g, image, observer);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class Graphics2DOutput implements Output {
 
     @Override
     public void setPaint(@NotNull Paint paint) {
-        GraphicsUtil.safelySetPaint(g, paint);
+        GraphicsUtil.safelySetPaint(this, g, paint);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class Graphics2DOutput implements Output {
 
     @Override
     public void dispose() {
-        GraphicsUtil.cleanupPaint(g.getPaint());
+        GraphicsUtil.cleanupPaint(this, g.getPaint());
         g.dispose();
     }
 

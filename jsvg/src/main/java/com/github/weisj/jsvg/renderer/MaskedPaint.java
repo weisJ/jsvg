@@ -31,20 +31,25 @@ import java.awt.image.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.util.ReferenceCounter;
+import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
 
-public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, GraphicsUtil.ReferenceCountedPaint {
+public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, GraphicsUtil.DisposablePaint {
     private @NotNull Paint paint;
     private final @NotNull Raster maskRaster;
     private final @NotNull Point maskOffset;
-    private final @Nullable ReferenceCounter referenceCounter;
+    private final @Nullable CachedSurfaceSupplier.ResourceCleaner cleaner;
 
     public MaskedPaint(@NotNull Paint paint, @NotNull Raster maskRaster, @NotNull Point2D maskOffset,
-            @Nullable ReferenceCounter referenceCounter) {
+            @Nullable CachedSurfaceSupplier.ResourceCleaner cleaner) {
         this.paint = paint;
         this.maskRaster = maskRaster;
         this.maskOffset = new Point((int) Math.floor(maskOffset.getX()), (int) Math.floor(maskOffset.getY()));
-        this.referenceCounter = referenceCounter;
+        this.cleaner = cleaner;
+    }
+
+    @Override
+    public void cleanupIfNeeded(@NotNull Output output) {
+        if (cleaner != null) cleaner.clean(output);
     }
 
     @Override
@@ -56,11 +61,6 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
     @Override
     public @NotNull Paint paint() {
         return paint;
-    }
-
-    @Override
-    public @Nullable ReferenceCounter referenceCounter() {
-        return referenceCounter;
     }
 
     @Override

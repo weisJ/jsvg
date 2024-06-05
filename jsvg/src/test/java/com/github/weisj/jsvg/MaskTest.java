@@ -67,4 +67,9 @@ class MaskTest {
     void emptyGroupReportsCorrectSize() {
         assertDoesNotThrow(() -> renderJsvg("mask/empty_group_issue_48.svg"));
     }
+
+    @Test
+    void nestedMask() {
+        assertEquals(SUCCESS, compareImages("mask/nestedMask.svg"));
+    }
 }

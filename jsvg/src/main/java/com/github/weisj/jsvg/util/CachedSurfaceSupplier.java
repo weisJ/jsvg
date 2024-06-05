@@ -73,25 +73,53 @@ public class CachedSurfaceSupplier {
             }
             if (!cachedImage.inUse && img.getWidth() >= width && img.getHeight() >= height) {
                 cachedImage.inUse = true;
-                c.lastIssuedCounter = new ReferenceCounter(cachedImage::free);
+                c.lastIssuedCleaner = new ResourceCleaner(null, cachedImage::free);
                 return img.getSubimage(0, 0, (int) width, (int) height);
             }
         }
         BufferedImage image = surfaceSupplier.createBufferSurface(null, width, height);
         CachedImage cachedImage = new CachedImage(image);
         c.images.add(cachedImage);
-        c.lastIssuedCounter = new ReferenceCounter(cachedImage::free);
+        c.lastIssuedCleaner = new ResourceCleaner(null, cachedImage::free);
         return image;
     }
 
-    public @Nullable ReferenceCounter referenceCounter(boolean useCache) {
+    public @Nullable ResourceCleaner resourceCleaner(Object owner, boolean useCache) {
         if (!useCache) return null;
-        return cache.get().lastIssuedCounter;
+        ResourceCleaner cleaner = cache.get().lastIssuedCleaner;
+        if (cleaner != null) {
+            return cleaner.withOwner(owner);
+        }
+        return null;
+    }
+
+    public static class ResourceCleaner {
+        private final @Nullable Object owner;
+        private @Nullable Runnable cleaner;
+
+        public ResourceCleaner(@Nullable Object owner, @Nullable Runnable cleaner) {
+            this.owner = owner;
+            this.cleaner = cleaner;
+        }
+
+        public void clean(Object owner) {
+            if (this.owner == owner) {
+                if (cleaner == null) {
+                    throw new IllegalStateException("Resource already cleaned");
+                }
+                cleaner.run();
+                cleaner = null;
+            }
+        }
+
+        private @NotNull ResourceCleaner withOwner(Object owner) {
+            return new ResourceCleaner(owner, cleaner);
+        }
     }
 
     private static class Cache {
         private final List<CachedImage> images = new ArrayList<>();
-        private @Nullable ReferenceCounter lastIssuedCounter;
+        private @Nullable ResourceCleaner lastIssuedCleaner;
     }
 
     private static class CachedImage {

@@ -126,6 +126,6 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
 
         Point2D offset = GeometryUtil.getLocation(blitImage.imageBoundsInDeviceSpace());
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
-                surfaceSupplier.referenceCounter(useCache));
+                surfaceSupplier.resourceCleaner(output, useCache));
     }
 }

@@ -115,7 +115,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
 
         Point2D offset = GeometryUtil.getLocation(blitImage.imageBoundsInDeviceSpace());
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
-                surfaceSupplier.referenceCounter(useCache));
+                surfaceSupplier.resourceCleaner(output, useCache));
     }
 
     @Override

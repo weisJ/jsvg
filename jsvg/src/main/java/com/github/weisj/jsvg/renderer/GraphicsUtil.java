@@ -30,7 +30,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.util.ImageUtil;
-import com.github.weisj.jsvg.util.ReferenceCounter;
 
 
 public final class GraphicsUtil {
@@ -38,21 +37,21 @@ public final class GraphicsUtil {
 
     private GraphicsUtil() {}
 
-    public static void safelySetPaint(@NotNull Graphics2D g, @NotNull Paint paint) {
-        safelySetPaint(g, paint, true);
+    public static void safelySetPaint(@NotNull Output output, @NotNull Graphics2D g, @NotNull Paint paint) {
+        safelySetPaint(output, g, paint, true);
     }
 
-    public static void safelySetPaint(@NotNull Graphics2D g, @NotNull Paint paint, boolean disposeOld) {
-        g.setPaint(exchangePaint(g.getPaint(), paint, disposeOld));
+    public static void safelySetPaint(@NotNull Output output, @NotNull Graphics2D g, @NotNull Paint paint,
+            boolean disposeOld) {
+        g.setPaint(exchangePaint(output, g.getPaint(), paint, disposeOld));
     }
 
-    public static void cleanupPaint(@NotNull Paint paint) {
+    public static void cleanupPaint(@NotNull Output output, @NotNull Paint paint) {
         if (paint instanceof WrappingPaint) {
-            cleanupPaint(((WrappingPaint) paint).paint());
+            cleanupPaint(output, ((WrappingPaint) paint).paint());
         }
-        if (paint instanceof ReferenceCountedPaint) {
-            ReferenceCounter counter = ((ReferenceCountedPaint) paint).referenceCounter();
-            if (counter != null) counter.decreaseReference();
+        if (paint instanceof DisposablePaint) {
+            ((DisposablePaint) paint).cleanupIfNeeded(output);
         }
     }
 
@@ -60,21 +59,23 @@ public final class GraphicsUtil {
         if (paint instanceof WrappingPaint) {
             preparePaint(((WrappingPaint) paint).paint());
         }
-        if (paint instanceof ReferenceCountedPaint) {
-            ReferenceCounter counter = ((ReferenceCountedPaint) paint).referenceCounter();
-            if (counter != null) counter.increaseReference();
-        }
     }
 
-    private static @NotNull Paint exchangePaint(@NotNull Paint current, @NotNull Paint paint, boolean updateRefCounts) {
+    private static @NotNull Paint exchangePaint(@NotNull Output output, @NotNull Paint current, @NotNull Paint paint,
+            boolean doCleanUp) {
+        if (paint instanceof WrappingPaint) {
+            WrappingPaint wrappingPaint = (WrappingPaint) paint;
+            wrappingPaint.safelySetPaint(output, current, doCleanUp);
+            return paint;
+        }
         if (current instanceof WrappingPaint) {
             WrappingPaint wrappingPaint = (WrappingPaint) current;
-            wrappingPaint.safelySetPaint(paint, updateRefCounts);
+            wrappingPaint.safelySetPaint(output, paint, doCleanUp);
             return current;
         }
-        if (updateRefCounts) {
+        if (doCleanUp) {
             preparePaint(paint);
-            cleanupPaint(current);
+            cleanupPaint(output, current);
         }
         return paint;
     }
@@ -96,7 +97,8 @@ public final class GraphicsUtil {
         return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity);
     }
 
-    public static void safelyDrawImage(@NotNull Graphics2D g, @NotNull Image image, @Nullable ImageObserver observer) {
+    public static void safelyDrawImage(@NotNull Output output, @NotNull Graphics2D g, @NotNull Image image,
+            @Nullable ImageObserver observer) {
         Paint p = g.getPaint();
         if (p instanceof WrappingPaint) {
             WrappingPaint wrappingPaint = (WrappingPaint) p;
@@ -108,9 +110,9 @@ public final class GraphicsUtil {
                     : ImageUtil.toBufferedImage(image);
             TexturePaint texturePaint = new TexturePaint(img, r);
 
-            wrappingPaint.setPaint(exchangePaint(wrappingPaint.paint(), texturePaint, false));
+            wrappingPaint.setPaint(exchangePaint(output, wrappingPaint.paint(), texturePaint, false));
             g.fill(r);
-            wrappingPaint.setPaint(exchangePaint(texturePaint, inner, false));
+            wrappingPaint.setPaint(exchangePaint(output, texturePaint, inner, false));
         } else {
             g.drawImage(image, 0, 0, observer);
         }
@@ -130,13 +132,13 @@ public final class GraphicsUtil {
             return p;
         }
 
-        default void safelySetPaint(@NotNull Paint paint, boolean updateRefCounts) {
-            setPaint(exchangePaint(paint(), paint, updateRefCounts));
+        default void safelySetPaint(@NotNull Output output, @NotNull Paint paint, boolean updateRefCounts) {
+            setPaint(exchangePaint(output, paint(), paint, updateRefCounts));
         }
     }
 
-    public interface ReferenceCountedPaint {
-        @Nullable
-        ReferenceCounter referenceCounter();
+    public interface DisposablePaint {
+
+        void cleanupIfNeeded(@NotNull Output output);
     }
 }
