@@ -25,6 +25,10 @@ import javax.swing.*;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @deprecated Use {@link AwtComponentPlatformSupport} instead.
+ */
+@Deprecated
 public final class JComponentPlatformSupport extends AwtComponentPlatformSupport {
 
     public JComponentPlatformSupport(@NotNull JComponent component) {
