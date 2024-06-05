@@ -73,8 +73,9 @@ public final class SVGDocument {
         render(component, g, null);
     }
 
+    @Deprecated
     public void render(@Nullable JComponent component, @NotNull Graphics2D graphics2D, @Nullable ViewBox bounds) {
-        render(component, graphics2D, bounds);
+        render((Component) component, graphics2D, bounds);
     }
 
     public void render(@Nullable Component component, @NotNull Graphics2D graphics2D, @Nullable ViewBox bounds) {
