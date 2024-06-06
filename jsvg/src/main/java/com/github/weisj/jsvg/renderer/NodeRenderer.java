@@ -28,6 +28,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.SVGRenderingHints;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
@@ -42,8 +43,6 @@ import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.*;
 
 public final class NodeRenderer {
-    private static final boolean CLIP_DEBUG = false;
-
     private NodeRenderer() {}
 
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output) {
@@ -86,12 +85,27 @@ public final class NodeRenderer {
 
         applyTransform(renderable, childOutput, childContext);
 
+        Mask maskForIsolation = null;
+        ClipPath clipPathForIsolation = null;
         if (renderable instanceof HasClip) {
-            setupMask((HasClip) renderable, elementBounds, childOutput, childContext);
-            if (!setupClip((HasClip) renderable, elementBounds, childContext, childOutput)) return null;
+            maskForIsolation = setupMask((HasClip) renderable, elementBounds, childOutput, childContext);
+
+            ClipPath clipPath = setupClip((HasClip) renderable, elementBounds, childContext, childOutput);
+            // Elements with an invalid clip shouldn't be painted
+            if (clipPath != null && !clipPath.isValid()) return null;
+
+            if (useAccurateMasking(childOutput)) {
+                clipPathForIsolation = clipPath;
+            }
         }
 
-        Info info = tryCreateFilterInfo(renderable, childContext, childOutput, elementBounds);
+        Filter filter = null;
+        if (renderable instanceof HasFilter) {
+            filter = setupFilter((HasFilter) renderable, childOutput);
+        }
+
+        Info info = Info.InfoWithIsolation.create(renderable, childContext, childOutput, elementBounds,
+                new IsolationEffects(filter, maskForIsolation, clipPathForIsolation));
         if (info != null) return info;
 
         return new Info(renderable, childContext, childOutput);
@@ -110,63 +124,44 @@ public final class NodeRenderer {
         return !instantiated || (instantiator != null && instantiator.canInstantiate(node));
     }
 
-    private static boolean setupClip(@NotNull HasClip renderable, @NotNull ElementBounds elementBounds,
+    private static @Nullable ClipPath setupClip(@NotNull HasClip renderable, @NotNull ElementBounds elementBounds,
             @NotNull RenderContext childContext, @NotNull Output childOutput) {
         ClipPath childClip = renderable.clipPath();
+        if (childClip == null) return null;
+        if (!childClip.isValid()) return childClip;
 
-        if (childClip != null) {
-            // Elements with an invalid clip shouldn't be painted
-            if (!childClip.isValid()) return false;
+        childClip.applyClip(childOutput, childContext, elementBounds);
 
-            if (childOutput.isSoftClippingEnabled()) {
-                Rectangle2D bounds = elementBounds.geometryBox();
-                if (!bounds.isEmpty()) {
-                    Shape childClipShape = childClip.clipShape(childContext, elementBounds, true);
-
-                    childOutput.setPaint(() -> childClip.createPaintForSoftClipping(
-                            childOutput, childContext, elementBounds, childClipShape));
-                }
-            } else {
-                Shape childClipShape = childClip.clipShape(childContext, elementBounds, false);
-
-                if (CLIP_DEBUG) {
-                    childOutput.debugPaint(g -> {
-                        g.setClip(null);
-                        g.setPaint(Color.MAGENTA);
-                        g.draw(childClipShape);
-                    });
-                }
-
-                childOutput.applyClip(childClipShape);
-            }
-        }
-        return true;
+        return childClip;
     }
 
-    private static void setupMask(HasClip renderable, ElementBounds elementBounds, Output childOutput,
+    private static @Nullable Mask setupMask(HasClip renderable, ElementBounds elementBounds, Output childOutput,
             RenderContext childContext) {
         Mask mask = renderable.mask();
-        if (mask != null) {
-            // Todo: Proper object bounding box
+        if (mask == null) return null;
+        // Todo: Proper object bounding box
 
-            Rectangle2D bounds = elementBounds.geometryBox();
-            if (!bounds.isEmpty()) {
-                childOutput.setPaint(() -> mask.createMaskPaint(childOutput, childContext, elementBounds));
-            }
-        }
+        Rectangle2D bounds = elementBounds.geometryBox();
+        if (bounds.isEmpty()) return null;
+
+        if (useAccurateMasking(childOutput)) return mask;
+
+        childOutput.setPaint(() -> mask.createMaskPaint(childOutput, childContext, elementBounds));
+        return null;
     }
 
-    private static @Nullable Info.InfoWithIsolation tryCreateFilterInfo(
-            @NotNull Renderable renderable, @NotNull RenderContext childContext, @NotNull Output childOutput,
-            @NotNull ElementBounds elementBounds) {
-        Filter filter = renderable instanceof HasFilter
-                ? ((HasFilter) renderable).filter()
-                : null;
+    private static @Nullable Filter setupFilter(@NotNull HasFilter hasFilter, @NotNull Output childOutput) {
+        Filter filter = hasFilter.filter();
 
         if (filter != null && !(filter.hasEffect() && childOutput.supportsFilters())) {
             filter = null;
         }
-        return Info.InfoWithIsolation.create(renderable, childContext, childOutput, elementBounds, filter);
+        return filter;
+    }
+
+    private static boolean useAccurateMasking(@NotNull Output output) {
+        return output.renderingHint(
+                SVGRenderingHints.KEY_MASK_CLIP_RENDERING) == SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY;
     }
 
     public static @NotNull RenderContext setupRenderContext(@NotNull Object node, @NotNull RenderContext context) {

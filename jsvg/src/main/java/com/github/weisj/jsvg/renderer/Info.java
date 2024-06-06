@@ -21,18 +21,20 @@
  */
 package com.github.weisj.jsvg.renderer;
 
-import com.github.weisj.jsvg.attributes.UnitType;
-import com.github.weisj.jsvg.util.BlittableImage;
-import com.github.weisj.jsvg.util.ImageUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import com.github.weisj.jsvg.nodes.filter.Filter;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
-
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.filter.Filter;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.util.BlittableImage;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 class Info implements AutoCloseable {
     protected final @NotNull RenderContext context;
@@ -66,16 +68,22 @@ class Info implements AutoCloseable {
 
         private final @NotNull BlittableImage blittableImage;
         private final @NotNull Output imageOutput;
-        private final @Nullable Filter filter;
+        private final @NotNull ElementBounds elementBounds;
+        private final @NotNull IsolationEffects isolationEffects;
         private final @Nullable Filter.FilterInfo filterInfo;
 
         static @Nullable InfoWithIsolation create(@NotNull Renderable renderable,
                 @NotNull RenderContext context, @NotNull Output output,
-                @NotNull ElementBounds elementBounds, @Nullable Filter filter) {
+                @NotNull ElementBounds elementBounds, @NotNull IsolationEffects effects) {
 
             Rectangle2D clipBounds = null;
             Rectangle2D bounds = null;
             Filter.FilterBounds filterBounds = null;
+            Filter.FilterInfo filterInfo = null;
+
+            Filter filter = effects.filter;
+            Mask mask = effects.mask;
+            ClipPath clipPath = effects.clipPath;
 
             if (filter != null) {
                 filterBounds = filter.createFilterBounds(output, context, elementBounds);
@@ -84,8 +92,13 @@ class Info implements AutoCloseable {
                     clipBounds = filterBounds.effectiveFilterArea();
                 }
             }
+            if (mask != null || clipPath != null) {
+                bounds = elementBounds.geometryBox();
+            }
 
-            if (bounds == null) return null;
+            if (bounds == null) {
+                return null;
+            }
 
             RenderContext imageContext = context.deriveForSurface();
 
@@ -98,20 +111,24 @@ class Info implements AutoCloseable {
             g.setRenderingHints(output.renderingHints());
             Output imageOutput = new Graphics2DOutput(g);
 
-            Filter.FilterInfo filterInfo = new Filter.FilterInfo(blitImage, imageOutput, filterBounds);
+            if (filter != null && filterBounds != null) {
+                filterInfo = new Filter.FilterInfo(blitImage, imageOutput, filterBounds);
+            }
 
             return new InfoWithIsolation(
-                    renderable, context, output, imageOutput, blitImage, filter, filterInfo);
+                    renderable, context, output, imageOutput, blitImage, elementBounds, effects, filterInfo);
         }
 
         private InfoWithIsolation(@NotNull Renderable renderable, @NotNull RenderContext context,
                 @NotNull Output output, @NotNull Output imageOutput,
                 @NotNull BlittableImage blittableImage,
-                @Nullable Filter filter, @Nullable Filter.FilterInfo filterInfo) {
+                @NotNull ElementBounds elementBounds,
+                @NotNull IsolationEffects isolationEffects, @Nullable Filter.FilterInfo filterInfo) {
             super(renderable, context, output);
             this.blittableImage = blittableImage;
             this.imageOutput = imageOutput;
-            this.filter = filter;
+            this.elementBounds = elementBounds;
+            this.isolationEffects = isolationEffects;
             this.filterInfo = filterInfo;
         }
 
@@ -129,11 +146,20 @@ class Info implements AutoCloseable {
         public void close() {
             Output previousOutput = this.output;
             BufferedImage result = this.blittableImage.image();
-            if (filter != null) {
+
+            if (isolationEffects.filter != null) {
                 assert filterInfo != null;
-                result = filter.applyFilter(previousOutput, context, filterInfo);
+                result = isolationEffects.filter.applyFilter(previousOutput, context, filterInfo);
                 previousOutput.applyClip(filterInfo.filterRegion());
             }
+            if (isolationEffects.mask != null) {
+                previousOutput.setPaint(() -> isolationEffects.mask.createMaskPaint(
+                        previousOutput, context, elementBounds));
+            }
+            if (isolationEffects.clipPath != null) {
+                isolationEffects.clipPath.applyClip(previousOutput, context, elementBounds);
+            }
+
             blittableImage.prepareForBlitting(previousOutput);
             previousOutput.drawImage(result, context.platformSupport().imageObserver());
             imageOutput.dispose();

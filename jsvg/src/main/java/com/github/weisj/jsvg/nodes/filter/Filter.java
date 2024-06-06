@@ -48,11 +48,9 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.ElementBounds;
-import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
-import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories({/* None */})
 @PermittedContent(
@@ -160,7 +158,8 @@ public final class Filter extends ContainerNode {
         return new FilterBounds(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds);
     }
 
-    public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
+    public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
+            @NotNull FilterInfo filterInfo) {
         ImageProducer producer = filterInfo.blittableImage.image().getSource();
 
         FilterContext filterContext =

@@ -19,38 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.util;
+package com.github.weisj.jsvg.renderer;
 
-import java.util.Objects;
-
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ReferenceCounter {
-    private int count;
-    private @Nullable Runnable onZero;
+import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 
-    public ReferenceCounter(@NotNull Runnable onZero) {
-        this.onZero = onZero;
-    }
+class IsolationEffects {
+    public final @Nullable Filter filter;
+    public final @Nullable Mask mask;
+    public final @Nullable ClipPath clipPath;
 
-    @Contract
-    private void checkNotDisposed() {
-        if (onZero == null) throw new IllegalStateException("ReferenceCounter is already at zero");
-    }
-
-    public void increaseReference() {
-        checkNotDisposed();
-        count++;
-    }
-
-    public void decreaseReference() {
-        count--;
-        if (count <= 0) {
-            checkNotDisposed();
-            Objects.requireNonNull(onZero).run();
-            onZero = null;
-        }
+    public IsolationEffects(
+            @Nullable Filter filter,
+            @Nullable Mask mask,
+            @Nullable ClipPath clipPath) {
+        this.filter = filter;
+        this.mask = mask;
+        this.clipPath = clipPath;
     }
 }

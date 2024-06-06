@@ -128,4 +128,27 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
                 surfaceSupplier.resourceCleaner(output, useCache));
     }
+
+    public void applyClip(@NotNull Output output, @NotNull RenderContext context,
+            @NotNull ElementBounds elementBounds) {
+        if (output.isSoftClippingEnabled()) {
+            Rectangle2D bounds = elementBounds.geometryBox();
+            if (!bounds.isEmpty()) {
+                output.setPaint(() -> {
+                    Shape childClipShape = clipShape(context, elementBounds, true);
+                    return createPaintForSoftClipping(output, context, elementBounds, childClipShape);
+                });
+            }
+        } else {
+            Shape childClipShape = clipShape(context, elementBounds, false);
+            if (DEBUG) {
+                output.debugPaint(g -> {
+                    g.setClip(null);
+                    g.setPaint(Color.MAGENTA);
+                    g.draw(childClipShape);
+                });
+            }
+            output.applyClip(childClipShape);
+        }
+    }
 }
