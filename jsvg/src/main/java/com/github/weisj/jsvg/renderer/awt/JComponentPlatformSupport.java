@@ -21,6 +21,10 @@
  */
 package com.github.weisj.jsvg.renderer.awt;
 
+import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+
 import javax.swing.*;
 
 import org.jetbrains.annotations.NotNull;
@@ -29,16 +33,42 @@ import org.jetbrains.annotations.NotNull;
  * @deprecated Use {@link AwtComponentPlatformSupport} instead.
  */
 @Deprecated
-public final class JComponentPlatformSupport extends AwtComponentPlatformSupport {
+public final class JComponentPlatformSupport implements PlatformSupport {
+    private final @NotNull AwtComponentPlatformSupport impl;
 
     public JComponentPlatformSupport(@NotNull JComponent component) {
-        super(component);
+        impl = new AwtComponentPlatformSupport(component);
+    }
+
+    @Override
+    public float fontSize() {
+        return impl.fontSize();
+    }
+
+    @Override
+    public @NotNull TargetSurface targetSurface() {
+        return impl.targetSurface();
+    }
+
+    @Override
+    public boolean isLongLived() {
+        return impl.isLongLived();
+    }
+
+    @Override
+    public @NotNull ImageObserver imageObserver() {
+        return impl.imageObserver();
+    }
+
+    @Override
+    public @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
+        return impl.createImage(imageProducer);
     }
 
     @Override
     public String toString() {
-        return "JComponentAwtSupport{" +
-                "component=" + component +
+        return "JComponentPlatformSupport{" +
+                "component=" + imageObserver() +
                 '}';
     }
 }

@@ -27,8 +27,8 @@ import java.awt.image.ImageProducer;
 
 import org.jetbrains.annotations.NotNull;
 
-public class AwtComponentPlatformSupport implements PlatformSupport {
-    protected final @NotNull Component component;
+public final class AwtComponentPlatformSupport implements PlatformSupport {
+    private final @NotNull Component component;
 
     public AwtComponentPlatformSupport(@NotNull Component component) {
         this.component = component;
