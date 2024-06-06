@@ -36,7 +36,7 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.renderer.*;
-import com.github.weisj.jsvg.renderer.awt.JComponentPlatformSupport;
+import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
 
@@ -73,19 +73,29 @@ public final class SVGDocument {
         render(component, g, null);
     }
 
+    @Deprecated
     public void render(@Nullable JComponent component, @NotNull Graphics2D graphics2D, @Nullable ViewBox bounds) {
+        render((Component) component, graphics2D, bounds);
+    }
+
+    public void render(@Nullable Component component, @NotNull Graphics2D graphics2D, @Nullable ViewBox bounds) {
         PlatformSupport platformSupport = component != null
-                ? new JComponentPlatformSupport(component)
+                ? new AwtComponentPlatformSupport(component)
                 : new NullPlatformSupport();
+        renderWithPlatform(platformSupport, graphics2D, bounds);
+    }
+
+    private float computePlatformFontSize(@NotNull PlatformSupport platformSupport, @NotNull Output output) {
+        return output.contextFontSize().orElseGet(platformSupport::fontSize);
+    }
+
+    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Graphics2D graphics2D,
+            @Nullable ViewBox bounds) {
         Graphics2D g = (Graphics2D) graphics2D.create();
         setupSVGRenderingHints(g);
         Output output = new Graphics2DOutput(g);
         renderWithPlatform(platformSupport, output, bounds);
         output.dispose();
-    }
-
-    private float computePlatformFontSize(@NotNull PlatformSupport platformSupport, @NotNull Output output) {
-        return output.contextFontSize().orElseGet(platformSupport::fontSize);
     }
 
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,23 +21,49 @@
  */
 package com.github.weisj.jsvg.renderer.awt;
 
-import javax.swing.*;
+import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
 
 import org.jetbrains.annotations.NotNull;
 
-/**
- * @deprecated Use {@link AwtComponentPlatformSupport} instead.
- */
-@Deprecated
-public final class JComponentPlatformSupport extends AwtComponentPlatformSupport {
+public class AwtComponentPlatformSupport implements PlatformSupport {
+    protected final @NotNull Component component;
 
-    public JComponentPlatformSupport(@NotNull JComponent component) {
-        super(component);
+    public AwtComponentPlatformSupport(@NotNull Component component) {
+        this.component = component;
+    }
+
+    @Override
+    public float fontSize() {
+        Font font = component.getFont();
+        if (font != null) return font.getSize2D();
+        return PlatformSupport.super.fontSize();
+    }
+
+    @Override
+    public @NotNull TargetSurface targetSurface() {
+        return component::repaint;
+    }
+
+    @Override
+    public boolean isLongLived() {
+        return true;
+    }
+
+    @Override
+    public @NotNull ImageObserver imageObserver() {
+        return component;
+    }
+
+    @Override
+    public @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
+        return component.createImage(imageProducer);
     }
 
     @Override
     public String toString() {
-        return "JComponentAwtSupport{" +
+        return "AwtComponentSupport{" +
                 "component=" + component +
                 '}';
     }
