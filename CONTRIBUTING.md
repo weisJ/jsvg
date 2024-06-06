@@ -3,7 +3,7 @@ are working on or comment on an existing issue that you would like to work on it
 
 To ensure proper formatting you can run
 ````
-gradlew autostyleCheck
+gradlew spotlessApply
 ````
 for automatic formatting.
 
