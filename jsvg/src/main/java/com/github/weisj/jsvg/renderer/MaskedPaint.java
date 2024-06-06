@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.renderer;
 
+import static com.github.weisj.jsvg.util.ColorUtil.div255;
+
 import java.awt.*;
 import java.awt.PaintContext;
 import java.awt.geom.AffineTransform;
@@ -149,14 +151,14 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
                     int rx = x + i - offset.x;
                     int ry = y + j - offset.y;
 
-                    int alpha;
+                    int luminance;
                     if ((rx >= softMaskMinX) && (rx < softMaskMaxX) && (ry >= softMaskMinY) && (ry < softMaskMaxY)) {
-                        alpha = maskRaster.getSample(rx, ry, 0);
+                        luminance = maskRaster.getSample(rx, ry, 0);
                     } else {
-                        alpha = 0;
+                        luminance = 0;
                     }
-                    alpha = alpha * result.getSample(i, j, numColorComponents) / 255;
-                    result.setSample(i, j, numColorComponents, alpha);
+                    int newAlpha = div255(luminance * result.getSample(i, j, numColorComponents));
+                    result.setSample(i, j, numColorComponents, newAlpha);
                 }
             }
 

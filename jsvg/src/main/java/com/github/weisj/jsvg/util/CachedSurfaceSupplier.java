@@ -53,7 +53,7 @@ public class CachedSurfaceSupplier {
     @NotNull
     public BlittableImage.BufferSurfaceSupplier surfaceSupplier(boolean useCache) {
         if (!useCache) {
-            return ImageUtil::createLuminosityBuffer;
+            return surfaceSupplier;
         }
         return this::createBufferSurface;
     }

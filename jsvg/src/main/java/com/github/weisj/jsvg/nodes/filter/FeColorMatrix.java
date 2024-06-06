@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import static com.github.weisj.jsvg.util.ColorUtil.toRgbRange;
+
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -37,6 +39,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.ColorSpaceAwareRGBImageFilter;
+import com.github.weisj.jsvg.util.ColorUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -123,10 +126,6 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
         f.setConvertToLinear(colorInterpolation(filterContext) == ColorInterpolation.LinearRGB);
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(f), filterContext);
-    }
-
-    private static int toRgbRange(double value) {
-        return (int) Math.max(Math.min(Math.round(value), 255), 0);
     }
 
     private static abstract class AffineRGBImageFilter extends ColorSpaceAwareRGBImageFilter {
@@ -231,7 +230,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         }
     }
 
-    private static final class LuminanceToAlphaFilter extends AffineRGBImageFilter {
+    public static final class LuminanceToAlphaFilter extends AffineRGBImageFilter {
 
         @Override
         boolean isLinear() {
@@ -241,7 +240,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         @Override
         public int filterRGB(int x, int y, int rgb) {
             int[] argb = getRGB(rgb);
-            int na = toRgbRange(0.2125 * argb[2] + 0.7164 * argb[1] + 0.0712 * argb[0]);
+            int na = ColorUtil.computeLuminance(argb[2], argb[1], argb[0]);
             return (na & 0xFF) << 24;
         }
     }

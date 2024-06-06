@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"
+	viewBox="0 0 100 100">
+
+	<defs>
+		<mask id="myMask" maskContentUnits="objectBoundingBox" x="-50%"
+			y="-50%" width="200%" height="200%">
+			<rect x="-0.5" y="-0.5" width="2" height="2" fill="white" />
+			<circle cx="0.5" cy="0.5" r="0.4" fill="black" />
+		</mask>
+		<clipPath id="myClip" clipPathUnits="objectBoundingBox"
+			shape-rendering="geometricPrecision">
+			<path
+				d="M -0.5,-0.5 h 2 v 2 h -2 z
+               M 0.5,0.1 a 0.4,0.4 0 0 0 0,0.8
+                         a 0.4,0.4 0 0 0 0,-0.8 z" />
+		</clipPath>
+	</defs>
+
+	<g clip-path="url(#myClip)">
+		<rect x="10" y="10" width="50" height="50" fill="red" />
+		<rect x="10" y="10" width="80" height="80" fill="white"
+			stroke="black" stroke-width="2" />
+	</g>
+
+	<rect x="40" y="40" width="50" height="50" fill="white"
+		mask="url(#myMask)" stroke="blue" stroke-width="16"
+		paint-order="stroke fill" />
+
+</svg>

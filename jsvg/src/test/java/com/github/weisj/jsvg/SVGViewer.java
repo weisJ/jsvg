@@ -120,8 +120,12 @@ public final class SVGViewer {
 
             JCheckBox lowRes = new JCheckBox("Render at intrinsic resolution");
             lowRes.addActionListener(e -> svgPanel.setRenderAtLowResolution(lowRes.isSelected()));
-            lowRes.doClick();
             renderingMode.add(lowRes);
+            renderingMode.add(Box.createHorizontalStrut(5));
+
+            JCheckBox strictRendering = new JCheckBox("Strict Mask Rendering");
+            strictRendering.addActionListener(e -> svgPanel.setStrictMaskRendering(strictRendering.isSelected()));
+            renderingMode.add(strictRendering);
             renderingMode.add(Box.createHorizontalGlue());
 
             JButton resourceInfo = new JButton("Print Memory");
@@ -139,27 +143,7 @@ public final class SVGViewer {
     }
 
     private static String[] findIcons() {
-        String pack = SVGViewer.class.getPackage().getName();
-        try (ResourceWalker walker = ResourceWalker.walkResources(pack)) {
-            return walker.stream().filter(p -> p.endsWith("svg"))
-                    .map(p -> p.substring(pack.length() + 1))
-                    .sorted(SVGViewer::compareAsPaths)
-                    .toArray(String[]::new);
-        }
-    }
-
-    private static int compareAsPaths(@NotNull String a, @NotNull String b) {
-        if (a.contains("/")) {
-            if (b.contains("/")) {
-                return a.compareTo(b);
-            } else {
-                return -1;
-            }
-        }
-        if (b.contains("/")) {
-            return 1;
-        }
-        return a.compareTo(b);
+        return ResourceWalker.findIcons(SVGViewer.class.getPackage(), "");
     }
 
     private enum RenderingMode {
@@ -188,6 +172,7 @@ public final class SVGViewer {
         private boolean paintShape;
         private boolean softClipping;
         private boolean lowResolution;
+        private Object maskRenderingValue = SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_DEFAULT;
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
@@ -263,6 +248,13 @@ public final class SVGViewer {
             repaint();
         }
 
+        public void setStrictMaskRendering(boolean strict) {
+            this.maskRenderingValue = strict
+                    ? SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY
+                    : SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_FAST;
+            repaint();
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -270,6 +262,8 @@ public final class SVGViewer {
                     RenderingHints.VALUE_ANTIALIAS_ON);
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                     RenderingHints.VALUE_STROKE_PURE);
+            ((Graphics2D) g).setRenderingHint(SVGRenderingHints.KEY_MASK_CLIP_RENDERING,
+                    maskRenderingValue);
             System.out.println("======");
             switch (mode) {
                 case JSVG:

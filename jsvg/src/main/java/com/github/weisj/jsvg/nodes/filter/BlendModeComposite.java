@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import static com.github.weisj.jsvg.util.ColorUtil.div255;
+
 import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,12 +46,6 @@ public final class BlendModeComposite extends AbstractBlendComposite {
     @Override
     protected @NotNull Blender blender() {
         return blender;
-    }
-
-    private static int div255(int x) {
-        // https://docs.google.com/document/d/1tNrMWShq55rfltcZxAx1N-6f82Dt7MWLDHm-5GQVEnE/edit
-        x += 128;
-        return (x + (x >> 8)) >> 8;
     }
 
     /**

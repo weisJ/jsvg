@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.github.weisj.darklaf.util.Lambdas;
 import com.github.weisj.darklaf.util.StreamUtil;
 
@@ -47,6 +49,31 @@ public final class ResourceWalker implements AutoCloseable {
 
     private ResourceWalker(final String... packages) {
         this.packages = packages;
+    }
+
+    public static String[] findIcons(@NotNull Package pack, @NotNull String basePath) {
+        String packName = pack.getName();
+        try (ResourceWalker walker = ResourceWalker.walkResources(packName)) {
+            return walker.stream().filter(p -> p.endsWith("svg"))
+                    .map(p -> p.substring(packName.length() + 1))
+                    .filter(p -> p.startsWith(basePath))
+                    .sorted(ResourceWalker::compareAsPaths)
+                    .toArray(String[]::new);
+        }
+    }
+
+    private static int compareAsPaths(@NotNull String a, @NotNull String b) {
+        if (a.contains("/")) {
+            if (b.contains("/")) {
+                return a.compareTo(b);
+            } else {
+                return -1;
+            }
+        }
+        if (b.contains("/")) {
+            return 1;
+        }
+        return a.compareTo(b);
     }
 
     public Stream<String> stream() {

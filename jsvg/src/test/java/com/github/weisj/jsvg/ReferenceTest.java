@@ -44,6 +44,7 @@ import org.apache.batik.transcoder.TranscodingHints;
 import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.util.SVGConstants;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +65,7 @@ public final class ReferenceTest {
     private static final double DEFAULT_PIXEL_TOLERANCE = 0.1;
     public static Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
 
-    enum RenderType {
+    public enum RenderType {
         Batik,
         JSVG
     }
@@ -103,12 +104,27 @@ public final class ReferenceTest {
         }
     }
 
-    public record ImageInfo(@NotNull ImageSource source, @NotNull RenderType renderType) {
+    public static class ImageInfo {
+        private final @NotNull ImageSource source;
+        private final @NotNull RenderType renderType;
+        private final @Nullable Consumer<Graphics2D> graphicsMutator;
+
+        public ImageInfo(@NotNull ImageSource source, @NotNull RenderType renderType) {
+            this(source, renderType, null);
+        }
+
+        public ImageInfo(@NotNull ImageSource source, @NotNull RenderType renderType,
+                @Nullable Consumer<Graphics2D> graphicsMutator) {
+            this.source = source;
+            this.renderType = renderType;
+            this.graphicsMutator = graphicsMutator;
+        }
+
         @NotNull
         BufferedImage render() throws IOException {
             return switch (renderType) {
                 case Batik -> renderBatik(source.openStream());
-                case JSVG -> renderJsvg(source.openStream());
+                case JSVG -> renderJsvg(source.openStream(), graphicsMutator);
             };
         }
     }
@@ -245,8 +261,14 @@ public final class ReferenceTest {
     }
 
     public static BufferedImage renderJsvg(@NotNull String path) {
+        return renderJsvg(path, null);
+    }
+
+
+    private static BufferedImage renderJsvg(@NotNull String path, @Nullable Consumer<Graphics2D> graphicsMutator) {
         try {
-            return renderJsvg(Objects.requireNonNull(ReferenceTest.class.getResource(path)).openStream());
+            return renderJsvg(Objects.requireNonNull(ReferenceTest.class.getResource(path)).openStream(),
+                    graphicsMutator);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -261,11 +283,13 @@ public final class ReferenceTest {
                 SVGRenderingHints.KEY_SOFT_CLIPPING, SOFT_CLIPPING_VALUE));
     }
 
-    private static BufferedImage renderJsvg(@NotNull InputStream inputStream) {
+    private static BufferedImage renderJsvg(@NotNull InputStream inputStream,
+            @Nullable Consumer<Graphics2D> graphicsMutator) {
         SVGDocument document = Objects.requireNonNull(new SVGLoader().load(inputStream));
         FloatSize size = document.size();
         BufferedImage image = new ReferenceImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
+        if (graphicsMutator != null) graphicsMutator.accept(g);
         document.render(null, g, new ViewBox(size));
         g.dispose();
         return image;

@@ -29,6 +29,20 @@ import org.jetbrains.annotations.Nullable;
 public final class ColorUtil {
     private ColorUtil() {}
 
+    public static int div255(int x) {
+        // https://docs.google.com/document/d/1tNrMWShq55rfltcZxAx1N-6f82Dt7MWLDHm-5GQVEnE/edit
+        x += 128;
+        return (x + (x >> 8)) >> 8;
+    }
+
+    public static int computeLuminance(int r, int g, int b) {
+        return toRgbRange(0.2125 * r + 0.7164 * g + 0.0712 * b);
+    }
+
+    public static int toRgbRange(double value) {
+        return (int) Math.max(Math.min(Math.round(value), 255), 0);
+    }
+
     public static Color withAlpha(@NotNull Color c, float alpha) {
         int a = Math.max(Math.min(255, (int) (alpha * 255)), 0);
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), a);
