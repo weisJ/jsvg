@@ -89,7 +89,6 @@ public abstract class TransferFunctionElement extends AbstractSVGNode {
         }
     }
 
-    // TODO: Rebuild to be based on lookup tables.
     private static byte @Nullable [] createLookupTable(TransferFunctionType type,
             @NotNull AttributeNode attributeNode) {
         switch (type) {

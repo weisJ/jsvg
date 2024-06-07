@@ -113,7 +113,7 @@ JSVG also supports custom SVG specific rendering hints. These can be set using t
 g.setRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING, SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON);
 ````
 
-Additionally clipping with a `<clipPath>` element does not use soft-clipping (i.e. anti-aliasing along the edges of the clip shape).
+By default clipping with a `<clipPath>` element does not use soft-clipping (i.e. anti-aliasing along the edges of the clip shape).
 This can be enabled by setting
 
 ````java
@@ -122,12 +122,23 @@ g.setRenderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING, SVGRenderingHints.VALUE_
 
 In the future this will get stabilized and be enabled by default.
 
+Supported custom rendering hints are:
+
+| Key                         | Values                                                                                                          | Default                                                              | Description                                                                                                                                                                   |
+|-----------------------------|-----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `KEY_IMAGE_ANTIALIASING`    | `VALUE_IMAGE_ANTIALIAS_ON`<br>`VALUE_IMAGE_ANTIALIAS_OFF`                                                       | Value of `RenderingHints.KEY_ANTIALIASING`                           | Enables anti-aliasing for images                                                                                                                                              |
+| `KEY_SOFT_CLIPPING`         | `VALUE_SOFT_CLIPPING_ON`<br>`VALUE_SOFT_CLIPPING_OFF`                                                           | `VALUE_SOFT_CLIPPING_OFF`                                            | Enables soft (anti-aliased) clipping for `clipPath`                                                                                                                           |
+| `KEY_MASK_CLIP_RENDERING`   | `VALUE_MASK_CLIP_RENDERING_FAST`<br>`VALUE_MASK_CLIP_RENDERING_ACCURACY`<br>`VALUE_MASK_CLIP_RENDERING_DEFAULT` | `VALUE_MASK_CLIP_RENDERING_DEFAULT = VALUE_MASK_CLIP_RENDERING_FAST` | Changes how masks and clip paths are rendered. Accurate rendering enforces the sub-image to which the mask/clip is applied to be rendered on its own isolated offscreen image |
+| `KEY_CACHE_OFFSCREEN_IMAGE` | `VALUE_USE_CACHE`<br>`VALUE_NO_CACHE`                                                                           | `VALUE_USE_CACHE`                                                    | Whether to cache offscreen images. This can be useful for performance reasons, but can also lead to increased memory usage.                                                   |
+
+All are exposed through the `SVGRenderingHints`class.
+
 ## Supported features
 
 For supported elements most of the attributes which apply to them are implemented.
 
 - :white_check_mark:: The element is supported. Note that this doesn't mean that every attribute is supported.
-- (:white_check_mark:): The element is supported, but won't have any effect (e.g. it's currently not possible to query
+- :white_check_mark:*: The element is supported, but won't have any effect (e.g. it's currently not possible to query
   the content of a `<desc>` element)
 - :ballot_box_with_check:: The element is partially implemented and might not support most basic features of the
   element.
@@ -137,27 +148,27 @@ For supported elements most of the attributes which apply to them are implemente
 
 ## Shape and container elements
 
-| Element       | Status               |
-|---------------|----------------------|
-| a             | :white_check_mark:   |
-| circle        | :white_check_mark:   |
-| clipPath      | :white_check_mark:   |
-| defs          | :white_check_mark:   |
-| ellipse       | :white_check_mark:   |
-| foreignObject | :x:                  |
-| g             | :white_check_mark:   |
-| image         | :white_check_mark:   |
-| line          | :white_check_mark:   |
-| marker        | :white_check_mark:   |
-| mask          | :white_check_mark:   |
-| path          | :white_check_mark:   |
-| polygon       | :white_check_mark:   |
-| polyline      | :white_check_mark:   |
-| rect          | :white_check_mark:   |
-| svg           | :white_check_mark:   |
-| symbol        | :white_check_mark:   |
-| use           | :white_check_mark:   |
-| view          | (:white_check_mark:) |
+| Element       | Status              |
+|---------------|---------------------|
+| a             | :white_check_mark:  |
+| circle        | :white_check_mark:  |
+| clipPath      | :white_check_mark:  |
+| defs          | :white_check_mark:  |
+| ellipse       | :white_check_mark:  |
+| foreignObject | :x:                 |
+| g             | :white_check_mark:  |
+| image         | :white_check_mark:  |
+| line          | :white_check_mark:  |
+| marker        | :white_check_mark:  |
+| mask          | :white_check_mark:  |
+| path          | :white_check_mark:  |
+| polygon       | :white_check_mark:  |
+| polyline      | :white_check_mark:  |
+| rect          | :white_check_mark:  |
+| svg           | :white_check_mark:  |
+| symbol        | :white_check_mark:  |
+| use           | :white_check_mark:  |
+| view          | :white_check_mark:* |
 
 ## Paint server elements
 
@@ -199,17 +210,17 @@ For supported elements most of the attributes which apply to them are implemente
 |---------------------|-------------------------|
 | feBlend             | :white_check_mark:      |
 | feColorMatrix       | :white_check_mark:      |
-| feComponentTransfer | :x:                     |
+| feComponentTransfer | :white_check_mark:      |
 | feComposite         | :white_check_mark:      |
 | feConvolveMatrix    | :x:                     |
 | feDiffuseLighting   | :white_check_mark:      |
 | feDisplacementMap   | :white_check_mark:      |
 | feDistantLight      | :x:                     |
 | feFlood             | :white_check_mark:      |
-| feFuncA             | :x:                     |
-| feFuncB             | :x:                     |
-| feFuncG             | :x:                     |
-| feFuncR             | :x:                     |
+| feFuncA             | :white_check_mark:      |
+| feFuncB             | :white_check_mark:      |
+| feFuncG             | :white_check_mark:      |
+| feFuncR             | :white_check_mark:      |
 | feGaussianBlur      | :white_check_mark:      |
 | feImage             | :x:                     |
 | feMerge             | :white_check_mark:      |
