@@ -52,7 +52,7 @@ public final class SVGViewer {
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("clipPath/filterAndClipPath2.svg");
+            iconBox.setSelectedItem("tmp.svg");
 
             JComponent contentPane = (JComponent) frame.getContentPane();
             contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
@@ -262,6 +262,10 @@ public final class SVGViewer {
                     RenderingHints.VALUE_ANTIALIAS_ON);
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                     RenderingHints.VALUE_STROKE_PURE);
+            ((Graphics2D) g).setRenderingHint(
+                    SVGRenderingHints.KEY_SOFT_CLIPPING,
+                    softClipping ? SVGRenderingHints.VALUE_SOFT_CLIPPING_ON
+                            : SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF);
             ((Graphics2D) g).setRenderingHint(SVGRenderingHints.KEY_MASK_CLIP_RENDERING,
                     maskRenderingValue);
             System.out.println("======");
@@ -273,16 +277,10 @@ public final class SVGViewer {
                     if (this.lowResolution) {
                         viewBox = new ViewBox(document.size());
                         img = new BufferedImage((int) viewBox.width, (int) viewBox.height, BufferedImage.TYPE_INT_ARGB);
-                        renderGraphics = img.createGraphics();
+                        Graphics2D imgGraphics = img.createGraphics();
+                        imgGraphics.setRenderingHints(renderGraphics.getRenderingHints());
+                        renderGraphics = imgGraphics;
                     }
-                    renderGraphics.setRenderingHint(
-                            RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    renderGraphics.setRenderingHint(
-                            RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-                    renderGraphics.setRenderingHint(
-                            SVGRenderingHints.KEY_SOFT_CLIPPING,
-                            softClipping ? SVGRenderingHints.VALUE_SOFT_CLIPPING_ON
-                                    : SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF);
                     if (paintShape) {
                         Shape shape = document.computeShape(viewBox);
                         renderGraphics.setColor(Color.MAGENTA);
