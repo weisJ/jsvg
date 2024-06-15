@@ -311,7 +311,7 @@ allprojects {
                         licenses {
                             license {
                                 name.set("MIT")
-                                url.set("https://github.com/jsvg/jsvg/blob/master/LICENSE")
+                                url.set("https://github.com/weisj/jsvg/blob/master/LICENSE")
                                 distribution.set("repo")
                             }
                         }
