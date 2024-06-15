@@ -286,7 +286,7 @@ public final class SVGViewer {
                         renderGraphics.setColor(Color.MAGENTA);
                         renderGraphics.fill(shape);
                     } else {
-                        document.render(this, renderGraphics, viewBox);
+                        document.render((Component) this, renderGraphics, viewBox);
                     }
 
                     if (img != null) {
