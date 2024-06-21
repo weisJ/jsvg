@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,7 +37,7 @@ public final class SVGDocumentBuilder {
 
     private static final int MAX_USE_NESTING_DEPTH = 15;
 
-    private final Map<String, Object> namedElements = new HashMap<>();
+    private final ParsedDocument parsedDocument = new ParsedDocument();
     private final List<Use> useElements = new ArrayList<>();
     private final List<Style> styleElements = new ArrayList<>();
     private final List<StyleSheet> styleSheets = new ArrayList<>();
@@ -49,13 +49,28 @@ public final class SVGDocumentBuilder {
 
     private ParsedElement rootNode;
 
-
+    /**
+     * @deprecated use {@link #SVGDocumentBuilder(LoaderContext, NodeSupplier)} instead
+     */
+    @Deprecated
     public SVGDocumentBuilder(
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader,
             @NotNull NodeSupplier nodeSupplier) {
-        this.parserProvider = parserProvider;
-        this.loadHelper = new LoadHelper(new AttributeParser(parserProvider.createPaintParser()), resourceLoader);
+        this(LoaderContext.builder()
+                .parserProvider(parserProvider)
+                .resourceLoader(resourceLoader)
+                .build(),
+                nodeSupplier);
+    }
+
+    public SVGDocumentBuilder(
+            @NotNull LoaderContext loaderContext,
+            @NotNull NodeSupplier nodeSupplier) {
+        this.parserProvider = loaderContext.parserProvider();
+        this.loadHelper = new LoadHelper(
+                new AttributeParser(parserProvider.createPaintParser()),
+                loaderContext);
         this.nodeSupplier = nodeSupplier;
     }
 
@@ -81,12 +96,12 @@ public final class SVGDocumentBuilder {
         if (newNode == null) return false;
 
         AttributeNode attributeNode = new AttributeNode(tagName, attributes, parentAttributeNode,
-                namedElements, styleSheets, loadHelper);
+                parsedDocument, styleSheets, loadHelper);
         String id = attributes.get("id");
         ParsedElement parsedElement = new ParsedElement(id, attributeNode, newNode);
 
-        if (id != null && !namedElements.containsKey(id)) {
-            namedElements.put(id, parsedElement);
+        if (id != null && !parsedDocument.hasElementWithId(id)) {
+            parsedDocument.registerNamedElement(id, parsedElement);
         }
 
         if (parentElement != null) {

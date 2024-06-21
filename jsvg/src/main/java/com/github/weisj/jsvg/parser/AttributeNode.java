@@ -54,20 +54,20 @@ public final class AttributeNode {
     private final @NotNull String tagName;
     private final @NotNull Map<String, String> attributes;
     private final @Nullable AttributeNode parent;
-    private final @NotNull Map<@NotNull String, @NotNull Object> namedElements;
+    private final @NotNull ParsedDocument document;
     private final @NotNull List<@NotNull StyleSheet> styleSheets;
 
     private final @NotNull LoadHelper loadHelper;
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
             @Nullable AttributeNode parent,
-            @NotNull Map<@NotNull String, @NotNull Object> namedElements,
+            @NotNull ParsedDocument document,
             @NotNull List<@NotNull StyleSheet> styleSheets,
             @NotNull LoadHelper loadHelper) {
         this.tagName = tagName;
         this.attributes = attributes;
         this.parent = parent;
-        this.namedElements = namedElements;
+        this.document = document;
         this.styleSheets = styleSheets;
         this.loadHelper = loadHelper;
     }
@@ -110,8 +110,8 @@ public final class AttributeNode {
     }
 
     @NotNull
-    Map<String, Object> namedElements() {
-        return namedElements;
+    ParsedDocument document() {
+        return document;
     }
 
     @NotNull
@@ -119,20 +119,8 @@ public final class AttributeNode {
         return styleSheets;
     }
 
-    private <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
-        if (id == null) return null;
-        // Todo: Look up in spec how elements should be resolved if multiple elements have the same id.
-        Object node = namedElements.get(id);
-        if (node instanceof ParsedElement) {
-            node = ((ParsedElement) node).nodeEnsuringBuildStatus();
-        }
-        return type.isInstance(node) ? type.cast(node) : null;
-    }
-
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
-        String url = loadHelper.attributeParser().parseUrl(value);
-        if (url != null && url.startsWith("#")) url = url.substring(1);
-        return getElementById(type, url);
+        return loadHelper.elementLoader().loadElement(type, value, document, loadHelper.attributeParser());
     }
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @Nullable String value) {

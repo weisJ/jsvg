@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -61,15 +61,28 @@ public final class SVGLoader {
     }
 
     public @Nullable SVGDocument load(@NotNull InputStream inputStream, @NotNull ParserProvider parserProvider) {
-        return load(inputStream, parserProvider, new SynchronousResourceLoader());
+        return load(inputStream, LoaderContext.builder()
+                .parserProvider(parserProvider)
+                .build());
     }
 
-
+    /**
+     * @deprecated use {@link #load(InputStream, LoaderContext)} instead
+     */
+    @Deprecated
     public @Nullable SVGDocument load(@NotNull InputStream inputStream,
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader) {
+        return load(inputStream, LoaderContext.builder()
+                .parserProvider(parserProvider)
+                .resourceLoader(resourceLoader)
+                .build());
+    }
+
+    public @Nullable SVGDocument load(@NotNull InputStream inputStream,
+            @NotNull LoaderContext loaderContext) {
         try {
-            return loader.load(createDocumentInputStream(inputStream), parserProvider, resourceLoader);
+            return loader.load(createDocumentInputStream(inputStream), loaderContext);
         } catch (Throwable e) {
             LOGGER.log(Level.WARNING, "Could not load SVG ", e);
         }

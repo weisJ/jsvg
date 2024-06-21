@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -75,15 +75,28 @@ public final class StaxSVGLoader {
         }
     }
 
+    /**
+     * @deprecated use {@link #load(InputStream, LoaderContext)} instead
+     */
+    @Deprecated
     public @Nullable SVGDocument load(
             @Nullable InputStream inputStream,
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader) throws IOException, XMLStreamException {
+        return load(inputStream, LoaderContext.builder()
+                .parserProvider(parserProvider)
+                .resourceLoader(resourceLoader)
+                .build());
+    }
+
+    public @Nullable SVGDocument load(
+            @Nullable InputStream inputStream,
+            @NotNull LoaderContext loaderContext) throws IOException, XMLStreamException {
         if (inputStream == null) return null;
         XMLEventReader reader = createReader(inputStream);
         if (reader == null) return null;
         try {
-            SVGDocumentBuilder builder = new SVGDocumentBuilder(parserProvider, resourceLoader, nodeSupplier);
+            SVGDocumentBuilder builder = new SVGDocumentBuilder(loaderContext, nodeSupplier);
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 switch (event.getEventType()) {

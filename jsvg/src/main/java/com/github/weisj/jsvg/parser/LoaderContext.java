@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,36 +23,31 @@ package com.github.weisj.jsvg.parser;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
+public interface LoaderContext {
+    @NotNull
+    ParserProvider parserProvider();
 
-public final class LoadHelper {
-    private final @NotNull AttributeParser attributeParser;
-    private final @NotNull ResourceLoader resourceLoader;
-    private final @NotNull ElementLoader elementLoader;
+    @NotNull
+    ResourceLoader resourceLoader();
 
-    /**
-     * @deprecated use {@link #LoadHelper(AttributeParser, LoaderContext)} instead
-     */
-    @Deprecated
-    public LoadHelper(@NotNull AttributeParser attributeParser, @NotNull ResourceLoader resourceLoader) {
-        this(attributeParser, LoaderContext.builder().resourceLoader(resourceLoader).build());
+    @NotNull
+    ElementLoader elementLoader();
+
+    static @NotNull Builder builder() {
+        return MutableLoaderContext.createDefault();
     }
 
-    public LoadHelper(@NotNull AttributeParser attributeParser, @NotNull LoaderContext loaderContext) {
-        this.attributeParser = attributeParser;
-        this.resourceLoader = loaderContext.resourceLoader();
-        this.elementLoader = loaderContext.elementLoader();
-    }
+    interface Builder {
+        @NotNull
+        Builder parserProvider(@NotNull ParserProvider parserProvider);
 
-    public @NotNull AttributeParser attributeParser() {
-        return attributeParser;
-    }
+        @NotNull
+        Builder resourceLoader(@NotNull ResourceLoader resourceLoader);
 
-    public @NotNull ResourceLoader resourceLoader() {
-        return resourceLoader;
-    }
+        @NotNull
+        Builder elementLoader(@NotNull ElementLoader elementLoader);
 
-    public @NotNull ElementLoader elementLoader() {
-        return elementLoader;
+        @NotNull
+        LoaderContext build();
     }
 }

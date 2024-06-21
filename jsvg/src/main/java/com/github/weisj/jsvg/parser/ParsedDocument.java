@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,23 +21,24 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
+public class ParsedDocument {
+    private final Map<String, Object> namedElements = new HashMap<>();
 
-public final class ParserTestUtil {
+    public void registerNamedElement(@NotNull String name, @Nullable Object element) {
+        namedElements.put(name, element);
+    }
 
-    private static final AttributeParser ATTRIBUTE_PARSER = new AttributeParser(new DefaultPaintParser());
-    private static final LoadHelper LOAD_HELPER = new LoadHelper(ATTRIBUTE_PARSER, LoaderContext.builder().build());
+    public Object getNamedElement(@NotNull String name) {
+        return namedElements.get(name);
+    }
 
-    private ParserTestUtil() {}
-
-    public static @NotNull AttributeNode createDummyAttributeNode(@NotNull Map<String, String> attrs) {
-        ParsedDocument document = new ParsedDocument();
-        return new AttributeNode("dummy", attrs, null, document, Collections.emptyList(), LOAD_HELPER);
+    public boolean hasElementWithId(@NotNull String id) {
+        return namedElements.containsKey(id);
     }
 }
