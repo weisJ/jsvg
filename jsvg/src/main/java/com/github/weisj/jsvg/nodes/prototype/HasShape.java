@@ -32,7 +32,7 @@ public interface HasShape {
 
     enum Box {
         BoundingBox,
-        GeometryBox
+        StrokeBox
     }
 
     default @NotNull Shape elementShape(@NotNull RenderContext context) {

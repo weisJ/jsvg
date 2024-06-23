@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.filter.Filter;
+import com.github.weisj.jsvg.nodes.prototype.HasFilter;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 
 public class ElementBounds {
@@ -40,6 +42,7 @@ public class ElementBounds {
     private final RenderContext context;
 
     private Rectangle2D boundingBox;
+    private Rectangle2D strokeBox;
     private Rectangle2D geometryBox;
 
     public @NotNull Rectangle2D boundingBox() {
@@ -51,9 +54,19 @@ public class ElementBounds {
 
     public @NotNull Rectangle2D geometryBox() {
         if (geometryBox == null) {
-            geometryBox = elementBounds(node, context, HasShape.Box.GeometryBox);
+            geometryBox = strokeBox();
+            if (node instanceof HasFilter) {
+                geometryBox = filterBounds((HasFilter) node, context, geometryBox);
+            }
         }
         return geometryBox;
+    }
+
+    public @NotNull Rectangle2D strokeBox() {
+        if (strokeBox == null) {
+            strokeBox = elementBounds(node, context, HasShape.Box.StrokeBox);
+        }
+        return strokeBox;
     }
 
     private static @NotNull Rectangle2D elementBounds(@NotNull Object node, @NotNull RenderContext context,
@@ -66,6 +79,15 @@ public class ElementBounds {
             elementBounds = new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());
         }
         return elementBounds;
+    }
+
+    private @NotNull Rectangle2D filterBounds(@NotNull HasFilter node, @NotNull RenderContext context,
+            @NotNull Rectangle2D elementBounds) {
+        Filter filter = node.filter();
+        if (filter == null) return elementBounds;
+        Filter.FilterBounds filterBounds = filter.createFilterBounds(null, context, this);
+        if (filterBounds == null) return elementBounds;
+        return elementBounds.createUnion(filterBounds.effectiveFilterArea());
     }
 
 }

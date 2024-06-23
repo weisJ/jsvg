@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.Objects;
@@ -59,11 +58,13 @@ import com.github.weisj.jsvg.util.BlittableImage;
 )
 public final class Filter extends ContainerNode {
     private static final Logger LOGGER = Logger.getLogger(Filter.class.getName());
-    private static final boolean DEBUG = false;
     public static final String TAG = "filter";
 
     private static final Length DEFAULT_FILTER_COORDINATE = Unit.PERCENTAGE.valueOf(-10);
     private static final Length DEFAULT_FILTER_SIZE = Unit.PERCENTAGE.valueOf(120);
+    private static final Rectangle2D.Double NO_CLIP_BOUNDS = new Rectangle2D.Double(
+            -(Double.MAX_VALUE / 3), -(Double.MAX_VALUE / 3),
+            2 * (Double.MAX_VALUE / 3), 2 * (Double.MAX_VALUE / 3));
 
     private Length x;
     private Length y;
@@ -112,11 +113,13 @@ public final class Filter extends ContainerNode {
                 .coercePercentageToCorrectUnit(filterUnits);
     }
 
-    public @Nullable FilterBounds createFilterBounds(@NotNull Output output, @NotNull RenderContext context,
+    public @Nullable FilterBounds createFilterBounds(@Nullable Output output, @NotNull RenderContext context,
             @NotNull ElementBounds elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds.boundingBox(), x, y, width, height);
-        Rectangle2D graphicsClipBounds = output.clipBounds();
+        Rectangle2D graphicsClipBounds = output != null
+                ? output.clipBounds()
+                : NO_CLIP_BOUNDS.getBounds2D();
 
         FilterLayoutContext filterLayoutContext =
                 new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds);
