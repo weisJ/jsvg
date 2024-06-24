@@ -141,7 +141,7 @@ class ToShapeTest {
     void testOther() {
         assertEquals(SUCCESS, compareShape("clipPath/clipPathUnits.svg"));
         assertEquals(SUCCESS, compareShape("fillRule.svg"));
-        assertEquals(SUCCESS, compareShape("paintOrder.svg"));
+        assertEquals(SUCCESS, compareShape("paintOrder/paintOrder.svg"));
     }
 
     private static @NotNull BufferedImage prepareImage(@NotNull SVGDocument document) {
