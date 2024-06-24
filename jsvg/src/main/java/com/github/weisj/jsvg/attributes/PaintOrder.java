@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.attributes;
 
+import java.util.Arrays;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,5 +85,23 @@ public final class PaintOrder {
             if (!found) return phase;
         }
         throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PaintOrder that = (PaintOrder) o;
+        return Arrays.equals(phases, that.phases);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(phases);
+    }
+
+    @Override
+    public String toString() {
+        return "PaintOrder" + Arrays.toString(phases);
     }
 }
