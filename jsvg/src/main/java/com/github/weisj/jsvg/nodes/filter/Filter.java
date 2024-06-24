@@ -172,7 +172,7 @@ public final class Filter extends ContainerNode {
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
         filterContext.resultChannels().addResult(DefaultFilterChannel.LastResult, sourceChannel);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha,
-                () -> new SourceAlphaChannel(sourceChannel.applyFilter(new AlphaImageFilter()).producer()));
+                () -> new SourceAlphaChannel(sourceChannel.alphaChannel().producer()));
 
         for (SVGNode child : children()) {
             try {
@@ -264,23 +264,10 @@ public final class Filter extends ContainerNode {
         }
     }
 
-    private static final class AlphaImageFilter extends RGBImageFilter {
-        private final ColorModel model = ColorModel.getRGBdefault();
-
-        @Override
-        public int filterRGB(int x, int y, int rgb) {
-            return model.getAlpha(rgb) << 24;
-        }
-    }
-
     private static final class SourceAlphaChannel extends ImageProducerChannel {
         public SourceAlphaChannel(@NotNull ImageProducer producer) {
             super(producer);
         }
 
-        @Override
-        public boolean isDefaultChannel(DefaultFilterChannel channel) {
-            return channel == DefaultFilterChannel.SourceAlpha;
-        }
     }
 }

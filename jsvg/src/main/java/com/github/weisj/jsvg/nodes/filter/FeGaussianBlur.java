@@ -26,6 +26,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,6 +61,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     private double yCurrent;
     private Kernel xBlur;
     private Kernel yBlur;
+    private boolean onlyAlpha;
 
     @Override
     public @NotNull String tagName() {
@@ -71,6 +73,11 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         super.build(attributeNode);
         stdDeviation = attributeNode.getFloatList("stdDeviation");
         edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.Duplicate);
+    }
+
+    @ApiStatus.Internal
+    public void setOnlyAlpha(boolean onlyAlpha) {
+        this.onlyAlpha = onlyAlpha;
     }
 
     private double[] computeAbsoluteStdDeviation(@Nullable AffineTransform at) {
@@ -109,7 +116,11 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             return;
         }
 
-        ImageProducer input = impl().inputChannel(filterContext).producer();
+        Channel inputChannel = impl().inputChannel(filterContext);
+        if (onlyAlpha) {
+            inputChannel = inputChannel.alphaChannel();
+        }
+        ImageProducer input = inputChannel.producer();
 
         Kernel xBlurKernel = null;
         Kernel yBlurKernel = null;

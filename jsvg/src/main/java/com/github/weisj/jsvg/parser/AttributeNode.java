@@ -33,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.*;
-import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
@@ -70,6 +69,10 @@ public final class AttributeNode {
         this.document = document;
         this.styleSheets = styleSheets;
         this.loadHelper = loadHelper;
+    }
+
+    public @NotNull AttributeNode copy() {
+        return new AttributeNode(tagName, new HashMap<>(attributes), parent, document, styleSheets, loadHelper);
     }
 
     void prepareForNodeBuilding(@NotNull ParsedElement parsedElement) {
@@ -266,7 +269,7 @@ public final class AttributeNode {
         return getElementByUrl(Filter.class, getValue("filter"));
     }
 
-    public @NotNull FilterChannelKey getFilterChannelKey(@NotNull String key, @NotNull DefaultFilterChannel fallback) {
+    public @NotNull FilterChannelKey getFilterChannelKey(@NotNull String key, @NotNull FilterChannelKey fallback) {
         String in = getValue(key);
         if (in == null) return fallback;
         return new FilterChannelKey.StringKey(in);

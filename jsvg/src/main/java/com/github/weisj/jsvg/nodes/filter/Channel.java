@@ -28,7 +28,6 @@ import java.awt.image.ImageProducer;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.ImageUtil;
 
@@ -60,7 +59,7 @@ public interface Channel {
     @NotNull
     PixelProvider pixels(@NotNull RenderContext context);
 
-    default boolean isDefaultChannel(DefaultFilterChannel channel) {
-        return false;
+    default @NotNull Channel alphaChannel() {
+        return this.applyFilter(new AlphaImageFilter());
     }
 }
