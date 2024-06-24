@@ -24,7 +24,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v3
       - name: Build & Test
         run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
@@ -56,7 +56,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v3
       - name: Build & Test
         run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
@@ -88,7 +88,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v3
       - name: Build & Test
         run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
