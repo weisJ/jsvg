@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+	<circle cx="90" cy="90" r="80" fill="green" stroke="blue"
+		stroke-width="10" paint-order="stroke fill" />
+
+	<circle r="80" cx="150" cy="150" fill="orange" stroke="blue"
+		stroke-width="10" paint-order="stroke fill" />
+
+</svg>

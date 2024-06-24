@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+	<defs>
+		<g id="a-circle">
+			<circle r="80" />
+		</g>
+	</defs>
+
+	<circle cx="90" cy="90" r="80" fill="green" stroke="blue"
+		stroke-width="10" paint-order="stroke fill" />
+
+	<use href="#a-circle" x="150" y="150" fill="orange" stroke="blue"
+		stroke-width="10" paint-order="stroke fill" />
+
+</svg>

@@ -21,8 +21,15 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.CompareInfo;
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo;
+import static com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
+import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ReferenceTest.RenderType;
+import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +38,13 @@ class PaintOrderTest {
     @Test
     void paintOrderRefTest() {
         // Batik doesn't support 'paint-order', so we can't do a proper reference test.
-        assertDoesNotThrow(() -> renderJsvg("paintOrder.svg"));
+        assertDoesNotThrow(() -> renderJsvg("paintOrder/paintOrder.svg"));
+    }
+
+    @Test
+    void paintOrderUse() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                new ImageInfo(new PathImageSource("paintOrder/inherit_bug83_ref.svg"), RenderType.JSVG),
+                new ImageInfo(new PathImageSource("paintOrder/inherit_bug83.svg"), RenderType.JSVG))));
     }
 }
