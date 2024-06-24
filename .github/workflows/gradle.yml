@@ -23,13 +23,10 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 17
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
       - name: Build & Test
-        uses: eskatos/gradle-command-action@v1
-        with:
-          arguments: build test -PskipSpotless
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
+        run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
         uses: actions/upload-artifact@v1
         if: ${{ failure() }}
@@ -58,13 +55,10 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 17
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
       - name: Build & Test
-        uses: eskatos/gradle-command-action@v1
-        with:
-          arguments: build test -PskipSpotless
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
+        run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
         uses: actions/upload-artifact@v1
         if: ${{ failure() }}
@@ -93,13 +87,10 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 17
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
       - name: Build & Test
-        uses: eskatos/gradle-command-action@v1
-        with:
-          arguments: build test -PskipSpotless
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
+        run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
         uses: actions/upload-artifact@v1
         if: ${{ failure() }}

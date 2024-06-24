@@ -32,13 +32,10 @@ jobs:
         with:
           languages: 'java'
 
-      - name: Build
-        uses: eskatos/gradle-command-action@v1
-        with:
-          arguments: build -PskipSpotless -x test
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+      - name: Build with Gradle
+        run: ./gradlew build -PskipSpotless -x test
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
