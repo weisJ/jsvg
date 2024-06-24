@@ -112,4 +112,9 @@ class MaskTest {
                 new ImageInfo(new ImageSource.PathImageSource("mask/mask_isolation_bug74.svg"), RenderType.JSVG,
                         g -> g.setRenderingHint(KEY_MASK_CLIP_RENDERING, VALUE_MASK_CLIP_RENDERING_ACCURACY)))));
     }
+
+    @Test
+    void testMaskAreaIfFilterIsApplied() {
+        assertEquals(SUCCESS, compareImages("mask/filterMask_bug84.svg"));
+    }
 }

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
+	width="500" height="500" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<defs>
+		<filter id="drop-shadow" x="0" y="0">
+            <?feDropShadow dx="5" dy="10" stdDeviation="2" flood-opacity="0.5" ?>
+			<feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+			<feOffset dx="5" dy="10" result="offset-blur" />
+			<feFlood flood-color="black" flood-opacity="0.5" />
+			<feComposite in2="offset-blur" operator="in" />
+		</filter>
+		<filter id="white-fill" x="0" y="0" width="1" height="1">
+			<feFlood flood-color="white" />
+			<feComposite in2="SourceAlpha" operator="in" />
+		</filter>
+		<mask id="graphic1-mask" x="0" y="0">
+			<use xlink:href="#graphic1" filter="url(#white-fill)" />
+		</mask>
+		<clipPath id="graphic1-clip">
+			<use xlink:href="#graphic1" />
+		</clipPath>
+	</defs>
+
+	<rect id="graphic1" x="13" y="13" width="120" height="230"
+		fill="green" />
+	<use xlink:href="#graphic2" filter="url(#drop-shadow)"
+		mask="url(#graphic1-mask)" />
+	<circle id="graphic2" cx="120" cy="110" r="70" fill="orange" />
+
+</svg>
