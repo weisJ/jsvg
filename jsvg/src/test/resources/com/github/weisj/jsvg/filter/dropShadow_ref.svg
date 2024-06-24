@@ -1,0 +1,44 @@
+<svg viewBox="0 0 30 10" xmlns="http://www.w3.org/2000/svg"
+	width="300" height="100">
+	<defs>
+		<filter id="shadow">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="0.2" />
+			<feOffset dx="0.2" dy="0.4" result="offsetblur" />
+			<feFlood flood-color="black" flood-opacity="1" />
+			<feComposite in2="offsetblur" operator="in" />
+			<feMerge>
+				<feMergeNode />
+				<feMergeNode in="SourceGraphic" />
+			</feMerge>
+		</filter>
+		<filter id="shadow2">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="0.5" />
+			<feOffset dx="0" dy="0" result="offsetblur" />
+			<feFlood flood-color="cyan" flood-opacity="1" />
+			<feComposite in2="offsetblur" operator="in" />
+			<feMerge>
+				<feMergeNode />
+				<feMergeNode in="SourceGraphic" />
+			</feMerge>
+		</filter>
+		<filter id="shadow3">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="0" />
+			<feOffset dx="-0.8" dy="-0.8" result="offsetblur" />
+			<feFlood flood-color="pink" flood-opacity="0.5" />
+			<feComposite in2="offsetblur" operator="in" />
+			<feMerge>
+				<feMergeNode />
+				<feMergeNode in="SourceGraphic" />
+			</feMerge>
+		</filter>
+	</defs>
+
+	<circle cx="5" cy="50%" r="4"
+		style="fill:pink; filter:url(#shadow);" />
+
+	<circle cx="15" cy="50%" r="4"
+		style="fill:pink; filter:url(#shadow2);" />
+
+	<circle cx="25" cy="50%" r="4"
+		style="fill:pink; filter:url(#shadow3);" />
+</svg>

@@ -30,6 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
 
+import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
+
 class FilterTest {
 
     @Test
@@ -142,8 +144,8 @@ class FilterTest {
     @Test
     void testSubpixelAlignment() {
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource("filter/ptr_ref_bug62.svg"), RenderType.JSVG),
-                new ImageInfo(new ImageSource.PathImageSource("filter/ptr_bug62.svg"), RenderType.JSVG))));
+                new ImageInfo(new PathImageSource("filter/ptr_ref_bug62.svg"), RenderType.JSVG),
+                new ImageInfo(new PathImageSource("filter/ptr_bug62.svg"), RenderType.JSVG))));
     }
 
     @Test
@@ -175,5 +177,12 @@ class FilterTest {
     void testComponentTransfer() {
         assertEquals(SUCCESS, compareImages("filter/componentTransfer.svg", 0.05, 0.05));
         assertEquals(SUCCESS, compareImages("filter/componentTransfer_sRGB.svg", 0.05, 0.05));
+    }
+
+    @Test
+    void testDropShadow() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                new ImageInfo(new PathImageSource("filter/dropShadow_ref.svg"), RenderType.JSVG),
+                new ImageInfo(new PathImageSource("filter/dropShadow.svg"), RenderType.JSVG))));
     }
 }
