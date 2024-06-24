@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.FillRule;
+import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
@@ -213,6 +214,11 @@ public final class RenderContext {
 
     public @NotNull SVGPaint fillPaint() {
         return resolvePaint(paintContext.fillPaint);
+    }
+
+    public @NotNull PaintOrder paintOrder() {
+        PaintOrder paintOrder = paintContext.paintOrder;
+        return paintOrder != null ? paintOrder : PaintOrder.NORMAL;
     }
 
     private @NotNull SVGPaint resolvePaint(@Nullable SVGPaint p) {

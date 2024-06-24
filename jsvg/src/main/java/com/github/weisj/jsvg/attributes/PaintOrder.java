@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -47,11 +47,13 @@ public final class PaintOrder {
         return phases;
     }
 
-    public static @NotNull PaintOrder parse(@NotNull AttributeNode attributeNode) {
+    public static @Nullable PaintOrder parse(@NotNull AttributeNode attributeNode) {
         @Nullable String value = attributeNode.getValue("paint-order");
         @NotNull AttributeParser parser = attributeNode.parser();
 
-        if (value == null || "normal".equals(value)) return NORMAL;
+        if (value == null) return null;
+        if ("inherit".equals(value)) return null;
+        if ("none".equals(value)) return NORMAL;
 
         String[] rawPhases = parser.parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
         Phase[] phases = new Phase[3];

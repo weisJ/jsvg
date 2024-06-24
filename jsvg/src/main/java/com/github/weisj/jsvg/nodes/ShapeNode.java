@@ -28,7 +28,6 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontSize;
@@ -46,8 +45,6 @@ import com.github.weisj.jsvg.renderer.ShapeRenderer;
 
 public abstract class ShapeNode extends RenderableSVGNode
         implements HasShape, HasPaintContext, HasFontContext, HasVectorEffects, Instantiator {
-
-    private PaintOrder paintOrder;
 
     private PaintContext paintContext;
     private FontSize fontSize;
@@ -84,7 +81,6 @@ public abstract class ShapeNode extends RenderableSVGNode
     @Override
     public final void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        paintOrder = PaintOrder.parse(attributeNode);
         paintContext = PaintContext.parse(attributeNode);
 
         fontSize = FontParser.parseFontSize(attributeNode);
@@ -158,7 +154,7 @@ public abstract class ShapeNode extends RenderableSVGNode
                 : null;
 
         Stroke effectiveStroke = computeEffectiveStroke(context);
-        ShapeRenderer.renderWithPaintOrder(output, shape.canBeFilled(), paintOrder,
+        ShapeRenderer.renderWithPaintOrder(output, shape.canBeFilled(), context.paintOrder(),
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects(), effectiveStroke, transform()),
                 new ShapeRenderer.PaintShape(paintShape, bounds),
                 new ShapeRenderer.ShapeMarkerInfo(this, markerStart, markerMid, markerEnd,

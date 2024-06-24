@@ -32,7 +32,6 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
@@ -54,7 +53,6 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         implements TextSegment.RenderableSegment, HasShape, HasContext.ByDelegate, HasVectorEffects, Renderable {
     private final List<@NotNull TextSegment> segments = new ArrayList<>();
 
-    private PaintOrder paintOrder;
     protected AttributeFontSpec fontSpec;
     protected LengthAdjust lengthAdjust;
     protected Length textLength;
@@ -68,7 +66,6 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        paintOrder = PaintOrder.parse(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
         textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
@@ -237,7 +234,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         forEachSegment(context,
                 (segment, ctx) -> {
                     if (isVisible(ctx)) {
-                        GlyphRenderer.renderGlyphRun(output, paintOrder, vectorEffects(), segment,
+                        GlyphRenderer.renderGlyphRun(output, context.paintOrder(), vectorEffects(), segment,
                                 cursor.completeGlyphRunBounds);
                     }
                 },
