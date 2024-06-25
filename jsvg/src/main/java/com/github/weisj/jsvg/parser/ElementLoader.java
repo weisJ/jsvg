@@ -28,6 +28,5 @@ import com.github.weisj.jsvg.attributes.AttributeParser;
 
 public interface ElementLoader {
     <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
-            @NotNull ParsedDocument document,
-            @NotNull AttributeParser attributeParser);
+            @NotNull ParsedDocument document, @NotNull AttributeParser attributeParser);
 }

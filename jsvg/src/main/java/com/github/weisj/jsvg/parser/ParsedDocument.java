@@ -43,8 +43,15 @@ public class ParsedDocument {
         namedElements.put(name, element);
     }
 
-    public Object getNamedElement(@NotNull String name) {
-        return namedElements.get(name);
+    public <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
+        if (id == null) return null;
+        Object node = namedElements.get(id);
+        if (node instanceof ParsedElement) {
+            node = ((ParsedElement) node).nodeEnsuringBuildStatus();
+            // Ensure we aren't holding ParsedElement longer than needed.
+            namedElements.put(id, node);
+        }
+        return type.isInstance(node) ? type.cast(node) : null;
     }
 
     public boolean hasElementWithId(@NotNull String id) {

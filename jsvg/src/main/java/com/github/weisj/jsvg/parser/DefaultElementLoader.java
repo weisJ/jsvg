@@ -39,28 +39,16 @@ public class DefaultElementLoader implements ElementLoader {
 
     @Override
     public <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
-            @NotNull ParsedDocument document,
-            @NotNull AttributeParser attributeParser) {
+            @NotNull ParsedDocument document, @NotNull AttributeParser attributeParser) {
         String url = attributeParser.parseUrl(value);
         if (url == null) return null;
         if (url.contains("#")) {
             String[] parts = url.split("#", 2);
             ParsedDocument parsedDocument = documentFinder.resolveDocument(document, parts[0]);
             if (parsedDocument == null) return null;
-            return getElementById(parsedDocument, type, parts[1]);
+            return parsedDocument.getElementById(type, parts[1]);
         }
-        return getElementById(document, type, url);
-    }
-
-    private <T> @Nullable T getElementById(@NotNull ParsedDocument document, @NotNull Class<T> type,
-            @Nullable String id) {
-        if (id == null) return null;
-        // Todo: Look up in spec how elements should be resolved if multiple elements have the same id.
-        Object node = document.getNamedElement(id);
-        if (node instanceof ParsedElement) {
-            node = ((ParsedElement) node).nodeEnsuringBuildStatus();
-        }
-        return type.isInstance(node) ? type.cast(node) : null;
+        return document.getElementById(type, url);
     }
 
     interface DocumentFinder {
