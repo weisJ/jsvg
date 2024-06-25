@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,8 +49,14 @@ public final class SVGLoader {
 
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase, @NotNull ParserProvider parserProvider) {
+        return load(xmlBase, LoaderContext.builder()
+                .parserProvider(parserProvider)
+                .build());
+    }
+
+    public @Nullable SVGDocument load(@NotNull URL xmlBase, @NotNull LoaderContext loaderContext) {
         try {
-            return load(xmlBase.openStream(), parserProvider);
+            return load(xmlBase.openStream(), loaderContext);
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Could not read " + xmlBase, e);
         }
@@ -89,7 +96,12 @@ public final class SVGLoader {
         return null;
     }
 
-    private @Nullable InputStream createDocumentInputStream(@NotNull InputStream is) {
+    @ApiStatus.Internal
+    StaxSVGLoader loader() {
+        return loader;
+    }
+
+    static @Nullable InputStream createDocumentInputStream(@NotNull InputStream is) {
         try {
             BufferedInputStream bin = new BufferedInputStream(is);
             bin.mark(2);

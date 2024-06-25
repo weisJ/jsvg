@@ -29,6 +29,15 @@ import org.jetbrains.annotations.Nullable;
 
 public class ParsedDocument {
     private final Map<String, Object> namedElements = new HashMap<>();
+    private final @NotNull LoaderContext loaderContext;
+
+    public ParsedDocument(@NotNull LoaderContext loaderContext) {
+        this.loaderContext = loaderContext;
+    }
+
+    public @NotNull LoaderContext loaderContext() {
+        return loaderContext;
+    }
 
     public void registerNamedElement(@NotNull String name, @Nullable Object element) {
         namedElements.put(name, element);

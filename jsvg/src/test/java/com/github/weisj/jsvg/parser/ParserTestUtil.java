@@ -37,7 +37,7 @@ public final class ParserTestUtil {
     private ParserTestUtil() {}
 
     public static @NotNull AttributeNode createDummyAttributeNode(@NotNull Map<String, String> attrs) {
-        ParsedDocument document = new ParsedDocument();
+        ParsedDocument document = new ParsedDocument(LoaderContext.createDefault());
         return new AttributeNode("dummy", attrs, null, document, Collections.emptyList(), LOAD_HELPER);
     }
 }

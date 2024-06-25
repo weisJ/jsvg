@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.util.*;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,11 +38,11 @@ public final class SVGDocumentBuilder {
 
     private static final int MAX_USE_NESTING_DEPTH = 15;
 
-    private final ParsedDocument parsedDocument = new ParsedDocument();
-    private final List<Use> useElements = new ArrayList<>();
-    private final List<Style> styleElements = new ArrayList<>();
-    private final List<StyleSheet> styleSheets = new ArrayList<>();
-    private final Deque<ParsedElement> currentNodeStack = new ArrayDeque<>();
+    private final @NotNull ParsedDocument parsedDocument;
+    private final @NotNull List<@NotNull Use> useElements = new ArrayList<>();
+    private final @NotNull List<@NotNull Style> styleElements = new ArrayList<>();
+    private final @NotNull List<@NotNull StyleSheet> styleSheets = new ArrayList<>();
+    private final @NotNull Deque<@NotNull ParsedElement> currentNodeStack = new ArrayDeque<>();
 
     private final @NotNull ParserProvider parserProvider;
     private final @NotNull LoadHelper loadHelper;
@@ -72,6 +73,13 @@ public final class SVGDocumentBuilder {
                 new AttributeParser(parserProvider.createPaintParser()),
                 loaderContext);
         this.nodeSupplier = nodeSupplier;
+        this.parsedDocument = new ParsedDocument(loaderContext);
+    }
+
+    @ApiStatus.Internal
+    @NotNull
+    ParsedDocument parsedDocument() {
+        return parsedDocument;
     }
 
     public void startDocument() {

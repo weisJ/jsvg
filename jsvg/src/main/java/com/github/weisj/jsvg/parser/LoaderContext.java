@@ -37,6 +37,10 @@ public interface LoaderContext {
         return MutableLoaderContext.createDefault();
     }
 
+    static @NotNull LoaderContext createDefault() {
+        return builder().build();
+    }
+
     interface Builder {
         @NotNull
         Builder parserProvider(@NotNull ParserProvider parserProvider);

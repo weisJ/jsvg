@@ -21,12 +21,21 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.AttributeParser;
 
 public class DefaultElementLoader implements ElementLoader {
+
+    private static final DocumentFinder DEFAULT_DOCUMENT_FINDER = new DefaultDocumentFinder();
+    private @NotNull DocumentFinder documentFinder = DEFAULT_DOCUMENT_FINDER;
+
+    @ApiStatus.Internal
+    void setDocumentFinder(@NotNull DocumentFinder documentFinder) {
+        this.documentFinder = documentFinder;
+    }
 
     @Override
     public <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
@@ -36,17 +45,11 @@ public class DefaultElementLoader implements ElementLoader {
         if (url == null) return null;
         if (url.contains("#")) {
             String[] parts = url.split("#", 2);
-            ParsedDocument parsedDocument = resolveDocument(document, parts[0]);
+            ParsedDocument parsedDocument = documentFinder.resolveDocument(document, parts[0]);
             if (parsedDocument == null) return null;
             return getElementById(parsedDocument, type, parts[1]);
         }
         return getElementById(document, type, url);
-    }
-
-    private @Nullable ParsedDocument resolveDocument(@NotNull ParsedDocument document, @NotNull String name) {
-        if (name.isEmpty()) return document;
-        // Document references are not supported
-        return null;
     }
 
     private <T> @Nullable T getElementById(@NotNull ParsedDocument document, @NotNull Class<T> type,
@@ -58,5 +61,18 @@ public class DefaultElementLoader implements ElementLoader {
             node = ((ParsedElement) node).nodeEnsuringBuildStatus();
         }
         return type.isInstance(node) ? type.cast(node) : null;
+    }
+
+    interface DocumentFinder {
+        @Nullable
+        ParsedDocument resolveDocument(@NotNull ParsedDocument document, @NotNull String name);
+    }
+
+    private static class DefaultDocumentFinder implements DocumentFinder {
+        @Override
+        public @Nullable ParsedDocument resolveDocument(@NotNull ParsedDocument document, @NotNull String name) {
+            if (name.isEmpty()) return document;
+            return null;
+        }
     }
 }

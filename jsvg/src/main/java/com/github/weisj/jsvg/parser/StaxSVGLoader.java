@@ -36,6 +36,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -89,7 +90,9 @@ public final class StaxSVGLoader {
                 .build());
     }
 
-    public @Nullable SVGDocument load(
+    @ApiStatus.Internal
+    @Nullable
+    SVGDocumentBuilder parse(
             @Nullable InputStream inputStream,
             @NotNull LoaderContext loaderContext) throws IOException, XMLStreamException {
         if (inputStream == null) return null;
@@ -145,7 +148,7 @@ public final class StaxSVGLoader {
                         break;
                 }
             }
-            return builder.build();
+            return builder;
         } catch (XMLStreamException e) {
             LOGGER.log(Level.SEVERE, "Error while parsing SVG.", e);
         } finally {
@@ -153,6 +156,14 @@ public final class StaxSVGLoader {
             inputStream.close();
         }
         return null;
+    }
+
+    public @Nullable SVGDocument load(
+            @Nullable InputStream inputStream,
+            @NotNull LoaderContext loaderContext) throws IOException, XMLStreamException {
+        SVGDocumentBuilder builder = parse(inputStream, loaderContext);
+        if (builder == null) return null;
+        return builder.build();
     }
 
     private static void skipElement(@NotNull XMLEventReader reader) throws XMLStreamException {
