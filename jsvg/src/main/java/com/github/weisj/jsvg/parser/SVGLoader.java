@@ -56,6 +56,7 @@ public final class SVGLoader {
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase, @NotNull LoaderContext loaderContext) {
         try {
+            loaderContext.elementLoader().addResourceRoot(xmlBase);
             return load(xmlBase.openStream(), loaderContext);
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Could not read " + xmlBase, e);

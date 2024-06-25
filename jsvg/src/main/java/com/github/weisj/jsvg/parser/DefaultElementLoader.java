@@ -21,7 +21,8 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import org.jetbrains.annotations.ApiStatus;
+import java.net.URI;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,11 +31,31 @@ import com.github.weisj.jsvg.attributes.AttributeParser;
 public class DefaultElementLoader implements ElementLoader {
 
     private static final DocumentFinder DEFAULT_DOCUMENT_FINDER = new DefaultDocumentFinder();
-    private @NotNull DocumentFinder documentFinder = DEFAULT_DOCUMENT_FINDER;
+    private boolean enableLoadingExternalElements;
+    private ExternalDocumentFinder externalDocumentFinder = null;
 
-    @ApiStatus.Internal
-    void setDocumentFinder(@NotNull DocumentFinder documentFinder) {
-        this.documentFinder = documentFinder;
+    @Override
+    public void enableLoadingExternalElements(boolean enable) {
+        enableLoadingExternalElements = enable;
+        if (enable && externalDocumentFinder == null) {
+            externalDocumentFinder = new ExternalDocumentFinder();
+        }
+    }
+
+    private @NotNull DocumentFinder documentFinder() {
+        return enableLoadingExternalElements ? externalDocumentFinder : DEFAULT_DOCUMENT_FINDER;
+    }
+
+    private @NotNull ExternalDocumentFinder externalDocumentFinder() {
+        if (externalDocumentFinder == null) {
+            externalDocumentFinder = new ExternalDocumentFinder();
+        }
+        return externalDocumentFinder;
+    }
+
+    @Override
+    public void addResourceRoot(@NotNull URI uri) {
+        externalDocumentFinder().addResourceRoot(uri);
     }
 
     @Override
@@ -44,7 +65,7 @@ public class DefaultElementLoader implements ElementLoader {
         if (url == null) return null;
         if (url.contains("#")) {
             String[] parts = url.split("#", 2);
-            ParsedDocument parsedDocument = documentFinder.resolveDocument(document, parts[0]);
+            ParsedDocument parsedDocument = documentFinder().resolveDocument(document, parts[0]);
             if (parsedDocument == null) return null;
             return parsedDocument.getElementById(type, parts[1]);
         }

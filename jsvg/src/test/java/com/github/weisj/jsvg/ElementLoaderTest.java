@@ -19,34 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser;
+package com.github.weisj.jsvg;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
+import com.github.weisj.jsvg.ReferenceTest.CompareInfo;
+import com.github.weisj.jsvg.ReferenceTest.ImageInfo;
+import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ReferenceTest.RenderType;
 
-public interface ElementLoader {
-    <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
-            @NotNull ParsedDocument document, @NotNull AttributeParser attributeParser);
+class ElementLoaderTest {
 
-    @ApiStatus.Experimental
-    void enableLoadingExternalElements(boolean enable);
-
-    @ApiStatus.Experimental
-    void addResourceRoot(@NotNull URI uri);
-
-    @ApiStatus.Experimental
-    default void addResourceRoot(@NotNull URL url) {
-        try {
-            addResourceRoot(url.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    @Test
+    void testLoadingExternalResource() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                new ImageInfo(new PathImageSource("externalResource/externalFromClassPath_ref.svg"), RenderType.JSVG),
+                new ImageInfo(new PathImageSource("externalResource/externalFromClassPath.svg"), RenderType.JSVG))));
     }
 }

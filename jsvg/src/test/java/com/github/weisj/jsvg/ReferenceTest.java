@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,7 @@ import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.google.errorprone.annotations.CheckReturnValue;
 
@@ -77,6 +79,9 @@ public final class ReferenceTest {
         @NotNull
         InputStream openStream() throws IOException;
 
+        @Nullable
+        URL url();
+
         record PathImageSource(@NotNull String path) implements ImageSource {
 
             @Override
@@ -85,8 +90,13 @@ public final class ReferenceTest {
             }
 
             @Override
+            public @Nullable URL url() {
+                return ReferenceTest.class.getResource(path);
+            }
+
+            @Override
             public @NotNull InputStream openStream() throws IOException {
-                return Objects.requireNonNull(ReferenceTest.class.getResource(path)).openStream();
+                return Objects.requireNonNull(url()).openStream();
             }
         }
 
@@ -95,6 +105,11 @@ public final class ReferenceTest {
             @Override
             public @NotNull String name() {
                 return name;
+            }
+
+            @Override
+            public @Nullable URL url() {
+                return null;
             }
 
             @Override
@@ -124,7 +139,7 @@ public final class ReferenceTest {
         BufferedImage render() throws IOException {
             return switch (renderType) {
                 case Batik -> renderBatik(source.openStream());
-                case JSVG -> renderJsvg(source.openStream(), graphicsMutator);
+                case JSVG -> renderJsvg(source, graphicsMutator);
             };
         }
     }
@@ -260,15 +275,9 @@ public final class ReferenceTest {
         });
     }
 
-    public static BufferedImage renderJsvg(@NotNull String path) {
-        return renderJsvg(path, null);
-    }
-
-
-    private static BufferedImage renderJsvg(@NotNull String path, @Nullable Consumer<Graphics2D> graphicsMutator) {
+    public static @NotNull BufferedImage renderJsvg(@NotNull String path) {
         try {
-            return renderJsvg(Objects.requireNonNull(ReferenceTest.class.getResource(path)).openStream(),
-                    graphicsMutator);
+            return renderJsvg(new ImageSource.PathImageSource(path), null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -283,14 +292,24 @@ public final class ReferenceTest {
                 SVGRenderingHints.KEY_SOFT_CLIPPING, SOFT_CLIPPING_VALUE));
     }
 
-    private static BufferedImage renderJsvg(@NotNull InputStream inputStream,
-            @Nullable Consumer<Graphics2D> graphicsMutator) {
-        SVGDocument document = Objects.requireNonNull(new SVGLoader().load(inputStream));
+    private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
+            @Nullable Consumer<Graphics2D> graphicsMutator) throws IOException {
+        LoaderContext loaderContext = LoaderContext.createDefault();
+        loaderContext.elementLoader().enableLoadingExternalElements(true);
+        SVGDocument document;
+
+        URL url = imageSource.url();
+        if (url != null) {
+            document = Objects.requireNonNull(new SVGLoader().load(url, loaderContext));
+        } else {
+            document = Objects.requireNonNull(new SVGLoader().load(imageSource.openStream(), loaderContext));
+        }
+
         FloatSize size = document.size();
         BufferedImage image = new ReferenceImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
         if (graphicsMutator != null) graphicsMutator.accept(g);
-        document.render(null, g, new ViewBox(size));
+        document.render((Component) null, g, new ViewBox(size));
         g.dispose();
         return image;
     }

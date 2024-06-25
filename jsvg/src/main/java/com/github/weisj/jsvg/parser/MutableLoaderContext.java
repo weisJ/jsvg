@@ -26,13 +26,12 @@ import org.jetbrains.annotations.NotNull;
 public class MutableLoaderContext implements LoaderContext, LoaderContext.Builder {
     private static final ParserProvider DEFAULT_PARSER_PROVIDER = new DefaultParserProvider();
     private static final ResourceLoader DEFAULT_RESOURCE_LOADER = new SynchronousResourceLoader();
-    private static final ElementLoader DEFAULT_ELEMENT_LOADER = new DefaultElementLoader();
     private @NotNull ParserProvider parserProvider;
     private @NotNull ResourceLoader resourceLoader;
     private @NotNull ElementLoader elementLoader;
 
     static @NotNull MutableLoaderContext createDefault() {
-        return new MutableLoaderContext(DEFAULT_PARSER_PROVIDER, DEFAULT_RESOURCE_LOADER, DEFAULT_ELEMENT_LOADER);
+        return new MutableLoaderContext(DEFAULT_PARSER_PROVIDER, DEFAULT_RESOURCE_LOADER, new DefaultElementLoader());
     }
 
     private MutableLoaderContext(@NotNull ParserProvider parserProvider, @NotNull ResourceLoader resourceLoader,
