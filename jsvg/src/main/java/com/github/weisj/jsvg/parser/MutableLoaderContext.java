@@ -29,7 +29,6 @@ public class MutableLoaderContext implements LoaderContext, LoaderContext.Builde
     private static final ResourceLoader DEFAULT_RESOURCE_LOADER = new SynchronousResourceLoader();
     private static final ElementLoader DEFAULT_ELEMENT_LOADER =
             ElementLoader.create(ElementLoader.ExternalDocumentPolicy.DENY);
-
     private @NotNull ParserProvider parserProvider;
     private @NotNull ResourceLoader resourceLoader;
     private @NotNull ElementLoader elementLoader;
