@@ -33,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Experimental
 class ExternalDocumentFinder implements DefaultElementLoader.DocumentFinder {
-    private final static Logger LOGGER = Logger.getLogger(ExternalDocumentFinder.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ExternalDocumentFinder.class.getName());
 
     private final @NotNull Map<URI, ParsedDocument> cache = new HashMap<>();
 

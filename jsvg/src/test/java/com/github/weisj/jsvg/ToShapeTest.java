@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
 
@@ -185,11 +184,11 @@ class ToShapeTest {
     private static ReferenceTest.ReferenceTestResult compareShape(@NotNull String path, float tolerance) {
         try {
             URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path), path);
-            SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url.openStream()));
+            SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
             BufferedImage expected = renderReference(document);
             BufferedImage actual = renderShape(document);
             return ReferenceTest.compareImageRasterization(expected, actual, path, tolerance, 0);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Assertions.fail(e);
             return ReferenceTest.ReferenceTestResult.FAILURE;
         }

@@ -54,12 +54,14 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
         AttributeNode child = attributeNode.copy();
         Map<String, String> attributes = child.attributes();
 
+        String resultKey = "result";
+
         FilterChannelKey inputId = attributeNode.getFilterChannelKey("in", outerLastResult);
-        String resultId = attributes.get("result");
+        String resultId = attributes.get(resultKey);
         if (resultId == null) {
             resultId = "dropshadow-" + attributeNode.hashCode();
         }
-        attributes.put("result", resultId);
+        attributes.put(resultKey, resultId);
 
         FeGaussianBlur blur = new FeGaussianBlur();
         blur.build(child);
@@ -68,11 +70,11 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
         attributes.put("in", resultId);
 
         String offsetResultId = resultId + "-offset-" + resultId.hashCode();
-        attributes.put("result", offsetResultId);
+        attributes.put(resultKey, offsetResultId);
         FeOffset offset = new FeOffset();
         offset.build(child);
 
-        attributes.put("result", resultId);
+        attributes.put(resultKey, resultId);
         FeFlood flood = new FeFlood();
         flood.build(child);
 

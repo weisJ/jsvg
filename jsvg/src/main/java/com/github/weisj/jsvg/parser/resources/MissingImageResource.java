@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -62,7 +63,8 @@ public final class MissingImageResource implements RenderableResource {
                         "    <polygon fill=\"#231F20\" opacity=\"0.8\" points=\"13.6,11.1 12.9,10.4 11.5,11.8 10.1,10.4 9.4,11.1 10.8,12.5 9.4,13.9 10.1,14.6 11.5,13.2 12.9,14.6\n"
                         +
                         "\t    13.6,13.9 12.2,12.5 \"/>\n" +
-                        "</svg>\n").getBytes(StandardCharsets.UTF_8)));
+                        "</svg>\n").getBytes(StandardCharsets.UTF_8)),
+                null, LoaderContext.createDefault());
     });
 
     @Override
