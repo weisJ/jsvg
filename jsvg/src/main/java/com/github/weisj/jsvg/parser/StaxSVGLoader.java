@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -77,14 +78,14 @@ public final class StaxSVGLoader {
     }
 
     /**
-     * @deprecated use {@link #load(InputStream, LoaderContext)} instead
+     * @deprecated use {@link #load(InputStream, URI, LoaderContext)} instead
      */
     @Deprecated
     public @Nullable SVGDocument load(
             @Nullable InputStream inputStream,
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader) throws IOException, XMLStreamException {
-        return load(inputStream, LoaderContext.builder()
+        return load(inputStream, null, LoaderContext.builder()
                 .parserProvider(parserProvider)
                 .resourceLoader(resourceLoader)
                 .build());
@@ -94,12 +95,13 @@ public final class StaxSVGLoader {
     @Nullable
     SVGDocumentBuilder parse(
             @Nullable InputStream inputStream,
+            @Nullable URI xmlBase,
             @NotNull LoaderContext loaderContext) throws IOException, XMLStreamException {
         if (inputStream == null) return null;
         XMLEventReader reader = createReader(inputStream);
         if (reader == null) return null;
         try {
-            SVGDocumentBuilder builder = new SVGDocumentBuilder(loaderContext, nodeSupplier);
+            SVGDocumentBuilder builder = new SVGDocumentBuilder(xmlBase, loaderContext, nodeSupplier);
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 switch (event.getEventType()) {
@@ -160,8 +162,9 @@ public final class StaxSVGLoader {
 
     public @Nullable SVGDocument load(
             @Nullable InputStream inputStream,
+            @Nullable URI xmlBase,
             @NotNull LoaderContext loaderContext) throws IOException, XMLStreamException {
-        SVGDocumentBuilder builder = parse(inputStream, loaderContext);
+        SVGDocumentBuilder builder = parse(inputStream, xmlBase, loaderContext);
         if (builder == null) return null;
         return builder.build();
     }

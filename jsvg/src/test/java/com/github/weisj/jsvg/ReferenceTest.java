@@ -302,7 +302,7 @@ public final class ReferenceTest {
         if (url != null) {
             document = Objects.requireNonNull(new SVGLoader().load(url, loaderContext));
         } else {
-            document = Objects.requireNonNull(new SVGLoader().load(imageSource.openStream(), loaderContext));
+            document = Objects.requireNonNull(new SVGLoader().load(imageSource.openStream(), null, loaderContext));
         }
 
         FloatSize size = document.size();

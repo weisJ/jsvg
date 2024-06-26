@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import java.net.URI;
 import java.util.*;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -51,14 +52,14 @@ public final class SVGDocumentBuilder {
     private ParsedElement rootNode;
 
     /**
-     * @deprecated use {@link #SVGDocumentBuilder(LoaderContext, NodeSupplier)} instead
+     * @deprecated use {@link #SVGDocumentBuilder(URI, LoaderContext, NodeSupplier)} instead
      */
     @Deprecated
     public SVGDocumentBuilder(
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader,
             @NotNull NodeSupplier nodeSupplier) {
-        this(LoaderContext.builder()
+        this(null, LoaderContext.builder()
                 .parserProvider(parserProvider)
                 .resourceLoader(resourceLoader)
                 .build(),
@@ -66,6 +67,7 @@ public final class SVGDocumentBuilder {
     }
 
     public SVGDocumentBuilder(
+            @Nullable URI rootURI,
             @NotNull LoaderContext loaderContext,
             @NotNull NodeSupplier nodeSupplier) {
         this.parserProvider = loaderContext.parserProvider();
@@ -73,7 +75,7 @@ public final class SVGDocumentBuilder {
                 new AttributeParser(parserProvider.createPaintParser()),
                 loaderContext);
         this.nodeSupplier = nodeSupplier;
-        this.parsedDocument = new ParsedDocument(loaderContext);
+        this.parsedDocument = new ParsedDocument(rootURI, loaderContext);
     }
 
     @ApiStatus.Internal

@@ -22,6 +22,8 @@
 package com.github.weisj.jsvg.parser;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,41 +58,57 @@ public final class SVGLoader {
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase, @NotNull LoaderContext loaderContext) {
         try {
-            loaderContext.elementLoader().addResourceRoot(xmlBase);
-            return load(xmlBase.openStream(), loaderContext);
-        } catch (IOException e) {
+            URI uri = xmlBase.toURI();
+            return load(xmlBase.openStream(), uri, loaderContext);
+        } catch (URISyntaxException | IOException e) {
             LOGGER.log(Level.WARNING, "Could not read " + xmlBase, e);
         }
         return null;
     }
 
+    /**
+     * @deprecated use {@link #load(InputStream, URI, LoaderContext)} instead
+     */
+    @Deprecated
     public @Nullable SVGDocument load(@NotNull InputStream inputStream) {
         return load(inputStream, new DefaultParserProvider());
     }
 
+    /**
+     * @deprecated use {@link #load(InputStream, URI, LoaderContext)} instead
+     */
+    @Deprecated
     public @Nullable SVGDocument load(@NotNull InputStream inputStream, @NotNull ParserProvider parserProvider) {
-        return load(inputStream, LoaderContext.builder()
+        return load(inputStream, null, LoaderContext.builder()
                 .parserProvider(parserProvider)
                 .build());
     }
 
     /**
-     * @deprecated use {@link #load(InputStream, LoaderContext)} instead
+     * @deprecated use {@link #load(InputStream, URI, LoaderContext)} instead
      */
     @Deprecated
     public @Nullable SVGDocument load(@NotNull InputStream inputStream,
             @NotNull ParserProvider parserProvider,
             @NotNull ResourceLoader resourceLoader) {
-        return load(inputStream, LoaderContext.builder()
+        return load(inputStream, null, LoaderContext.builder()
                 .parserProvider(parserProvider)
                 .resourceLoader(resourceLoader)
                 .build());
     }
 
-    public @Nullable SVGDocument load(@NotNull InputStream inputStream,
+    /**
+     * Load an SVG document from the given input stream.
+     *
+     * @param inputStream the input stream to read the SVG document from
+     * @param xmlBase The uri of the document. This is used to resolve external documents (if enabled).
+     * @param loaderContext The loader context to use for loading the document.
+     * @return The loaded SVG document or null if an error occurred.
+     */
+    public @Nullable SVGDocument load(@NotNull InputStream inputStream, @Nullable URI xmlBase,
             @NotNull LoaderContext loaderContext) {
         try {
-            return loader.load(createDocumentInputStream(inputStream), loaderContext);
+            return loader.load(createDocumentInputStream(inputStream), xmlBase, loaderContext);
         } catch (Throwable e) {
             LOGGER.log(Level.WARNING, "Could not load SVG ", e);
         }

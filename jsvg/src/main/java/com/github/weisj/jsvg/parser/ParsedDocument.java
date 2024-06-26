@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +30,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class ParsedDocument {
     private final Map<String, Object> namedElements = new HashMap<>();
+    private final @Nullable URI rootURI;
     private final @NotNull LoaderContext loaderContext;
 
-    public ParsedDocument(@NotNull LoaderContext loaderContext) {
+    public ParsedDocument(@Nullable URI rootURI, @NotNull LoaderContext loaderContext) {
+        this.rootURI = rootURI;
         this.loaderContext = loaderContext;
     }
 
@@ -56,5 +59,9 @@ public class ParsedDocument {
 
     public boolean hasElementWithId(@NotNull String id) {
         return namedElements.containsKey(id);
+    }
+
+    public @Nullable URI rootURI() {
+        return rootURI;
     }
 }

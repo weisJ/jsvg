@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import java.net.URI;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,13 +36,10 @@ public class DefaultElementLoader implements ElementLoader {
     @Override
     public void enableLoadingExternalElements(boolean enable) {
         enableLoadingExternalElements = enable;
-        if (enable && externalDocumentFinder == null) {
-            externalDocumentFinder = new ExternalDocumentFinder();
-        }
     }
 
     private @NotNull DocumentFinder documentFinder() {
-        return enableLoadingExternalElements ? externalDocumentFinder : DEFAULT_DOCUMENT_FINDER;
+        return enableLoadingExternalElements ? externalDocumentFinder() : DEFAULT_DOCUMENT_FINDER;
     }
 
     private @NotNull ExternalDocumentFinder externalDocumentFinder() {
@@ -51,11 +47,6 @@ public class DefaultElementLoader implements ElementLoader {
             externalDocumentFinder = new ExternalDocumentFinder();
         }
         return externalDocumentFinder;
-    }
-
-    @Override
-    public void addResourceRoot(@NotNull URI uri) {
-        externalDocumentFinder().addResourceRoot(uri);
     }
 
     @Override

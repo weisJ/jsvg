@@ -21,12 +21,10 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-
-import javax.xml.stream.XMLStreamException;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -35,55 +33,41 @@ import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Experimental
 class ExternalDocumentFinder implements DefaultElementLoader.DocumentFinder {
+    private final static Logger LOGGER = Logger.getLogger(ExternalDocumentFinder.class.getName());
 
-    private final @NotNull List<ResourceRoot> resourceRoots = new ArrayList<>();
-    private final @NotNull Map<String, ParsedDocument> cache = new HashMap<>();
+    private final @NotNull Map<URI, ParsedDocument> cache = new HashMap<>();
 
     @Override
     public @Nullable ParsedDocument resolveDocument(@NotNull ParsedDocument document, @NotNull String name) {
         if (name.isEmpty()) return document;
-        return cache.computeIfAbsent(name, (p) -> locateDocument(document.loaderContext(), p));
+        return locateDocument(document, name);
     }
 
-    public void addResourceRoot(@NotNull URI uri) {
-        resourceRoots.add(new URIResourceRoot(uri));
-    }
-
-    private @Nullable ParsedDocument locateDocument(@NotNull LoaderContext context, @NotNull String name) {
+    private @Nullable ParsedDocument locateDocument(@NotNull ParsedDocument document, @NotNull String name) {
+        URI root = document.rootURI();
+        if (root == null) return null;
         try {
-            Optional<URL> url = resourceRoots.stream()
-                    .map(root -> root.getResource(name))
-                    .filter(Objects::nonNull)
-                    .findFirst();
-            if (!url.isPresent()) return null;
-            SVGDocumentBuilder builder = new SVGLoader().loader()
-                    .parse(SVGLoader.createDocumentInputStream(url.get().openStream()), context);
-            if (builder == null) return null;
-            return builder.parsedDocument();
-        } catch (IOException | XMLStreamException e) {
-            return null;
-        }
-    }
+            URI documentUri = root.resolve(name);
+            URL documentUrl = documentUri.toURL();
 
-    private interface ResourceRoot {
-        @Nullable
-        URL getResource(@NotNull String path);
-    }
+            synchronized (cache) {
+                ParsedDocument cachedDocument = cache.get(documentUri);
+                if (cachedDocument != null) return cachedDocument;
 
-    private static class URIResourceRoot implements ResourceRoot {
-        private final @NotNull URI uri;
+                SVGDocumentBuilder builder = new SVGLoader().loader().parse(
+                        SVGLoader.createDocumentInputStream(documentUrl.openStream()),
+                        documentUri,
+                        document.loaderContext());
+                if (builder == null) return null;
 
-        public URIResourceRoot(@NotNull URI uri) {
-            this.uri = uri;
-        }
-
-        @Override
-        public @Nullable URL getResource(@NotNull String path) {
-            try {
-                return uri.resolve(path).toURL();
-            } catch (Exception e) {
-                return null;
+                ParsedDocument parsedDocument = builder.parsedDocument();
+                cache.put(documentUri, parsedDocument);
+                return parsedDocument;
             }
+        } catch (Exception e) {
+            LOGGER.warning(
+                    String.format("Failed to load external document: %s from %s - %s", name, root, e.getMessage()));
+            return null;
         }
     }
 }

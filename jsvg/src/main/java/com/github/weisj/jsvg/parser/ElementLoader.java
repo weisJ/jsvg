@@ -21,9 +21,6 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -37,16 +34,4 @@ public interface ElementLoader {
 
     @ApiStatus.Experimental
     void enableLoadingExternalElements(boolean enable);
-
-    @ApiStatus.Experimental
-    void addResourceRoot(@NotNull URI uri);
-
-    @ApiStatus.Experimental
-    default void addResourceRoot(@NotNull URL url) {
-        try {
-            addResourceRoot(url.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
