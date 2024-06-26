@@ -22,6 +22,8 @@
 package com.github.weisj.jsvg.nodes;
 
 
+import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.prototype.Container;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.MeasurableShape;
@@ -58,6 +60,7 @@ public final class Rect extends ShapeNode {
 
         rx = rx.coerceNonNegative().orElseIfUnspecified(0);
         ry = ry.coerceNonNegative().orElseIfUnspecified(0);
+
 
         if (rx.isZero() && ry.isZero()) {
             return new SVGRectangle(x, y, width, height);
