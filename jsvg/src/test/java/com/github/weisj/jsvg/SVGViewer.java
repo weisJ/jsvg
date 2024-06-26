@@ -39,6 +39,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.parser.ElementLoader;
+import com.github.weisj.jsvg.parser.ElementLoader.ExternalDocumentPolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.kitfox.svg.app.beans.SVGIcon;
@@ -200,8 +202,9 @@ public final class SVGViewer {
                 case JSVG -> document = iconCache.computeIfAbsent(name, n -> {
                     URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
                     SVGLoader loader = new SVGLoader();
-                    LoaderContext loaderContext = LoaderContext.createDefault();
-                    loaderContext.elementLoader().enableLoadingExternalElements(true);
+                    LoaderContext loaderContext = LoaderContext.builder()
+                            .elementLoader(ElementLoader.create(ExternalDocumentPolicy.ALLOW_ALL_RELATIVE))
+                            .build();
                     return loader.load(url, loaderContext);
                 });
                 case SVG_SALAMANDER -> {

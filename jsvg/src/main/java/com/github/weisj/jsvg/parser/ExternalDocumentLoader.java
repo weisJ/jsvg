@@ -32,10 +32,15 @@ import org.jetbrains.annotations.Nullable;
 
 
 @ApiStatus.Experimental
-class ExternalDocumentFinder implements DefaultElementLoader.DocumentFinder {
-    private static final Logger LOGGER = Logger.getLogger(ExternalDocumentFinder.class.getName());
+class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
+    private static final Logger LOGGER = Logger.getLogger(ExternalDocumentLoader.class.getName());
 
     private final @NotNull Map<URI, ParsedDocument> cache = new HashMap<>();
+    private final @NotNull ElementLoader.ExternalDocumentPolicy policy;
+
+    ExternalDocumentLoader(@NotNull ElementLoader.ExternalDocumentPolicy policy) {
+        this.policy = policy;
+    }
 
     @Override
     public @Nullable ParsedDocument resolveDocument(@NotNull ParsedDocument document, @NotNull String name) {
@@ -47,9 +52,10 @@ class ExternalDocumentFinder implements DefaultElementLoader.DocumentFinder {
         URI root = document.rootURI();
         if (root == null) return null;
         try {
-            URI documentUri = root.resolve(name);
-            URL documentUrl = documentUri.toURL();
+            URI documentUri = policy.resolveDocumentURI(root, name);
+            if (documentUri == null) return null;
 
+            URL documentUrl = documentUri.toURL();
             synchronized (cache) {
                 ParsedDocument cachedDocument = cache.get(documentUri);
                 if (cachedDocument != null) return cachedDocument;

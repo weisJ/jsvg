@@ -22,6 +22,8 @@
 package com.github.weisj.jsvg.parser;
 
 
+import java.net.URI;
+
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,9 +31,20 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.AttributeParser;
 
 public interface ElementLoader {
+
+    static @NotNull ElementLoader create(ExternalDocumentPolicy policy) {
+        return new DefaultElementLoader(policy);
+    }
+
     <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
             @NotNull ParsedDocument document, @NotNull AttributeParser attributeParser);
 
     @ApiStatus.Experimental
-    void enableLoadingExternalElements(boolean enable);
+    interface ExternalDocumentPolicy {
+        ExternalDocumentPolicy DENY = (base, path) -> null;
+        ExternalDocumentPolicy ALLOW_ALL_RELATIVE = (base, path) -> base.resolve(path);
+
+        @Nullable
+        URI resolveDocumentURI(@NotNull URI baseDocumentUri, @NotNull String documentPath);
+    }
 }

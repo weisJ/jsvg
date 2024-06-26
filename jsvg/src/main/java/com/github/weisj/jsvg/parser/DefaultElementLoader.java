@@ -27,26 +27,19 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.AttributeParser;
 
-public class DefaultElementLoader implements ElementLoader {
+class DefaultElementLoader implements ElementLoader {
 
-    private static final DocumentFinder DEFAULT_DOCUMENT_FINDER = new DefaultDocumentFinder();
-    private boolean enableLoadingExternalElements;
-    private ExternalDocumentFinder externalDocumentFinder = null;
+    private static final DocumentLoader DEFAULT_DOCUMENT_LOADER = new DefaultDocumentLoader();
+    private final DocumentLoader documentLoader;
 
-    @Override
-    public void enableLoadingExternalElements(boolean enable) {
-        enableLoadingExternalElements = enable;
+    DefaultElementLoader(ExternalDocumentPolicy policy) {
+        documentLoader = createDocumentLoader(policy);
     }
 
-    private @NotNull DocumentFinder documentFinder() {
-        return enableLoadingExternalElements ? externalDocumentFinder() : DEFAULT_DOCUMENT_FINDER;
-    }
-
-    private @NotNull ExternalDocumentFinder externalDocumentFinder() {
-        if (externalDocumentFinder == null) {
-            externalDocumentFinder = new ExternalDocumentFinder();
-        }
-        return externalDocumentFinder;
+    private static @NotNull DocumentLoader createDocumentLoader(@Nullable ExternalDocumentPolicy policy) {
+        if (policy == null) return DEFAULT_DOCUMENT_LOADER;
+        if (policy == ExternalDocumentPolicy.DENY) return DEFAULT_DOCUMENT_LOADER;
+        return new ExternalDocumentLoader(policy);
     }
 
     @Override
@@ -56,19 +49,19 @@ public class DefaultElementLoader implements ElementLoader {
         if (url == null) return null;
         if (url.contains("#")) {
             String[] parts = url.split("#", 2);
-            ParsedDocument parsedDocument = documentFinder().resolveDocument(document, parts[0]);
+            ParsedDocument parsedDocument = documentLoader.resolveDocument(document, parts[0]);
             if (parsedDocument == null) return null;
             return parsedDocument.getElementById(type, parts[1]);
         }
         return document.getElementById(type, url);
     }
 
-    interface DocumentFinder {
+    interface DocumentLoader {
         @Nullable
         ParsedDocument resolveDocument(@NotNull ParsedDocument document, @NotNull String name);
     }
 
-    private static class DefaultDocumentFinder implements DocumentFinder {
+    private static class DefaultDocumentLoader implements DocumentLoader {
         @Override
         public @Nullable ParsedDocument resolveDocument(@NotNull ParsedDocument document, @NotNull String name) {
             if (name.isEmpty()) return document;
