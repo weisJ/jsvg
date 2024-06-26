@@ -41,8 +41,14 @@ public interface ElementLoader {
 
     @ApiStatus.Experimental
     interface ExternalDocumentPolicy {
+        /**
+         * Deny loading of external documents.
+         */
         ExternalDocumentPolicy DENY = (base, path) -> null;
-        ExternalDocumentPolicy ALLOW_ALL_RELATIVE = (base, path) -> base.resolve(path);
+        /**
+         * Allow external documents to be loaded relative to the base document.
+         */
+        ExternalDocumentPolicy ALLOW_RELATIVE = (base, path) -> base.resolve(path);
 
         @Nullable
         URI resolveDocumentURI(@NotNull URI baseDocumentUri, @NotNull String documentPath);

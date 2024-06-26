@@ -203,7 +203,7 @@ public final class SVGViewer {
                     URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
                     SVGLoader loader = new SVGLoader();
                     LoaderContext loaderContext = LoaderContext.builder()
-                            .elementLoader(ElementLoader.create(ExternalDocumentPolicy.ALLOW_ALL_RELATIVE))
+                            .elementLoader(ElementLoader.create(ExternalDocumentPolicy.ALLOW_RELATIVE))
                             .build();
                     return loader.load(url, loaderContext);
                 });

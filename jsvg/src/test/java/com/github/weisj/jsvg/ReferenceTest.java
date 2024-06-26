@@ -296,7 +296,7 @@ public final class ReferenceTest {
     private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
             @Nullable Consumer<Graphics2D> graphicsMutator) throws IOException {
         LoaderContext loaderContext = LoaderContext.builder()
-                .elementLoader(ElementLoader.create(ElementLoader.ExternalDocumentPolicy.ALLOW_ALL_RELATIVE))
+                .elementLoader(ElementLoader.create(ElementLoader.ExternalDocumentPolicy.ALLOW_RELATIVE))
                 .build();
         SVGDocument document;
 
