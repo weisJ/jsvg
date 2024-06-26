@@ -49,6 +49,7 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
     }
 
     private @Nullable ParsedDocument locateDocument(@NotNull ParsedDocument document, @NotNull String name) {
+        if (name.isEmpty()) return document;
         URI root = document.rootURI();
         if (root == null) return null;
         try {
