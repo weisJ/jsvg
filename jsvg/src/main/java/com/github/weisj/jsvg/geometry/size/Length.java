@@ -23,20 +23,20 @@ package com.github.weisj.jsvg.geometry.size;
 
 import java.util.Objects;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.google.errorprone.annotations.Immutable;
 
-@Immutable
-public class Length {
+public final class Length {
     public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
     public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
 
-    private final @NotNull Unit unit;
-    private final float value;
+    private @NotNull Unit unit;
+    private float value;
 
     private static final float pixelsPerInch = 96f;
     private static final float inchesPerCm = .3936f;
@@ -91,9 +91,9 @@ public class Length {
      * @param context the measuring context.
      * @return the resolved size.
      */
-    public final float resolveWidth(@NotNull MeasureContext context) {
-        Unit u = unit(context);
-        float raw = raw(context);
+    public float resolveWidth(@NotNull MeasureContext context) {
+        Unit u = unit();
+        float raw = raw();
         if (u == Unit.PERCENTAGE) {
             return (raw * context.viewWidth()) / 100f;
         } else {
@@ -106,9 +106,9 @@ public class Length {
      * @param context the measuring context.
      * @return the resolved size.
      */
-    public final float resolveHeight(@NotNull MeasureContext context) {
-        Unit u = unit(context);
-        float raw = raw(context);
+    public float resolveHeight(@NotNull MeasureContext context) {
+        Unit u = unit();
+        float raw = raw();
         if (u == Unit.PERCENTAGE) {
             return (raw * context.viewHeight()) / 100f;
         } else {
@@ -122,9 +122,9 @@ public class Length {
      * @param context the measuring context.
      * @return the resolved size.
      */
-    public final float resolveLength(@NotNull MeasureContext context) {
-        Unit u = unit(context);
-        float raw = raw(context);
+    public float resolveLength(@NotNull MeasureContext context) {
+        Unit u = unit();
+        float raw = raw();
         if (u == Unit.PERCENTAGE) {
             return (raw / 100f) * context.normedDiagonalLength();
         } else {
@@ -138,9 +138,9 @@ public class Length {
      * @param context the measuring context.
      * @return the resolved size.
      */
-    public final float resolveFontSize(@NotNull MeasureContext context) {
-        Unit u = unit(context);
-        float raw = raw(context);
+    public float resolveFontSize(@NotNull MeasureContext context) {
+        Unit u = unit();
+        float raw = raw();
         if (u == Unit.PERCENTAGE) {
             return (raw / 100f) * context.em();
         } else {
@@ -158,11 +158,17 @@ public class Length {
         return value == 0;
     }
 
-    public float raw(@NotNull MeasureContext context) {
+    public float raw() {
         return value;
     }
 
-    public @NotNull Unit unit(@NotNull MeasureContext context) {
+    @ApiStatus.Internal
+    public void setValue(float value, @NotNull Unit unit) {
+        this.value = value;
+        this.unit = unit;
+    }
+
+    public @NotNull Unit unit() {
         return unit;
     }
 
