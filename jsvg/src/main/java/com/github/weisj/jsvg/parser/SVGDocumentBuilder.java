@@ -159,11 +159,11 @@ public final class SVGDocumentBuilder {
         }
     }
 
-    void preProcess() {
+    void preProcess(@Nullable URI documentUri) {
         if (rootNode == null) throw new IllegalStateException("No root node");
         processStyleSheets();
 
-        DomProcessor preProcessor = parserProvider.createPreProcessor();
+        DomProcessor preProcessor = parserProvider.createPreProcessor(documentUri);
         if (preProcessor != null) preProcessor.process(rootNode);
     }
 
@@ -174,7 +174,7 @@ public final class SVGDocumentBuilder {
     }
 
     public @NotNull SVGDocument build() {
-        preProcess();
+        preProcess(parsedDocument.rootURI());
         rootNode.build();
         postProcess();
         validateUseElements();
