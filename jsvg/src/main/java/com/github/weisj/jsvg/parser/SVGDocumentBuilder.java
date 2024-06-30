@@ -159,19 +159,24 @@ public final class SVGDocumentBuilder {
         }
     }
 
-    public @NotNull SVGDocument build() {
+    void preProcess() {
         if (rootNode == null) throw new IllegalStateException("No root node");
-
         processStyleSheets();
 
         DomProcessor preProcessor = parserProvider.createPreProcessor();
         if (preProcessor != null) preProcessor.process(rootNode);
+    }
 
-        rootNode.build();
-
+    void postProcess() {
+        if (rootNode == null) throw new IllegalStateException("No root node");
         DomProcessor postProcessor = parserProvider.createPostProcessor();
         if (postProcessor != null) postProcessor.process(rootNode);
+    }
 
+    public @NotNull SVGDocument build() {
+        preProcess();
+        rootNode.build();
+        postProcess();
         validateUseElements();
         return new SVGDocument((SVG) rootNode.node());
     }

@@ -65,6 +65,7 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
                         documentUri,
                         document.loaderContext());
                 if (builder == null) return null;
+                builder.preProcess();
 
                 ParsedDocument parsedDocument = builder.parsedDocument();
                 cache.put(documentUri, parsedDocument);
