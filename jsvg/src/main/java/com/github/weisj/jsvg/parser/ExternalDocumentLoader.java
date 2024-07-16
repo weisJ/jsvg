@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
 class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
     private static final Logger LOGGER = Logger.getLogger(ExternalDocumentLoader.class.getName());
 
-    private final @NotNull Map<URI, ParsedDocument> cache = new HashMap<>();
+    private final @NotNull Map<URI, CachedDocument> cache = new HashMap<>();
     private final @NotNull ElementLoader.ExternalDocumentPolicy policy;
 
     ExternalDocumentLoader(@NotNull ElementLoader.ExternalDocumentPolicy policy) {
@@ -57,24 +57,40 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
 
             URL documentUrl = documentUri.toURL();
             synchronized (cache) {
-                ParsedDocument cachedDocument = cache.get(documentUri);
-                if (cachedDocument != null) return cachedDocument;
-
-                SVGDocumentBuilder builder = new SVGLoader().loader().parse(
-                        SVGLoader.createDocumentInputStream(documentUrl.openStream()),
-                        documentUri,
-                        document.loaderContext());
-                if (builder == null) return null;
-                builder.preProcess(documentUri);
-
-                ParsedDocument parsedDocument = builder.parsedDocument();
-                cache.put(documentUri, parsedDocument);
-                return parsedDocument;
+                CachedDocument cachedDocument = cache.get(documentUri);
+                if (cachedDocument != null) {
+                    ParsedDocument cached = cachedDocument.document;
+                    if (cached == null) {
+                        throw new IllegalStateException("Reference cycle containing external document: " + documentUri);
+                    }
+                    return cached;
+                }
             }
+            CachedDocument cachedDocument = new CachedDocument();
+            synchronized (cache) {
+                cache.put(documentUri, cachedDocument);
+            }
+
+            SVGDocumentBuilder builder = new SVGLoader().loader().parse(
+                    SVGLoader.createDocumentInputStream(documentUrl.openStream()),
+                    documentUri,
+                    document.loaderContext());
+            if (builder == null) return null;
+            builder.preProcess(documentUri);
+
+            ParsedDocument parsedDocument = builder.parsedDocument();
+            synchronized (cache) {
+                cachedDocument.document = parsedDocument;
+            }
+            return parsedDocument;
         } catch (Exception e) {
             LOGGER.warning(
                     String.format("Failed to load external document: %s from %s - %s", name, root, e.getMessage()));
             return null;
         }
+    }
+
+    private static final class CachedDocument {
+        private @Nullable ParsedDocument document;
     }
 }
