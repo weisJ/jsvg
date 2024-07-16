@@ -216,6 +216,7 @@ For supported elements most of the attributes which apply to them are implemente
 | feDiffuseLighting   | :white_check_mark:      |
 | feDisplacementMap   | :white_check_mark:      |
 | feDistantLight      | :x:                     |
+| feDropShadow        | :white_check_mark:      |
 | feFlood             | :white_check_mark:      |
 | feFuncA             | :white_check_mark:      |
 | feFuncB             | :white_check_mark:      |
