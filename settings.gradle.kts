@@ -5,7 +5,11 @@ rootProject.name = "jsvg-root"
 pluginManagement {
     plugins {
         fun String.v() = extra["$this.version"].toString()
-        fun idv(id: String, key: String = id) = id(id) version key.v()
+
+        fun idv(
+            id: String,
+            key: String = id,
+        ) = id(id) version key.v()
         idv("com.diffplug.spotless")
         idv("com.github.vlsi.crlf", "com.github.vlsi.vlsi-release-plugins")
         idv("com.github.vlsi.gradle-extensions", "com.github.vlsi.vlsi-release-plugins")
@@ -19,16 +23,32 @@ pluginManagement {
 
 dependencyResolutionManagement {
     versionCatalogs {
-        fun VersionCatalogBuilder.idv(name: String, coordinates: String, versionRef: String = name) {
+        fun VersionCatalogBuilder.idv(
+            name: String,
+            coordinates: String,
+            versionRef: String = name,
+        ) {
             val parts = coordinates.split(':', limit = 2)
             library(name, parts[0], parts[1]).version(extra["$versionRef.version"].toString())
         }
-        class VersionBundle(val bundleName: String, val builder: VersionCatalogBuilder) {
+
+        class VersionBundle(
+            val bundleName: String,
+            val builder: VersionCatalogBuilder,
+        ) {
             val libs = mutableListOf<String>()
-            fun idv(name: String, coordinates: String, versionRef: String = bundleName) =
-                builder.idv("$bundleName-$name".also { libs.add(it) }, coordinates, versionRef)
+
+            fun idv(
+                name: String,
+                coordinates: String,
+                versionRef: String = bundleName,
+            ) = builder.idv("$bundleName-$name".also { libs.add(it) }, coordinates, versionRef)
         }
-        fun VersionCatalogBuilder.bundle(name: String, init: VersionBundle.() -> Unit) = VersionBundle(name, this).run {
+
+        fun VersionCatalogBuilder.bundle(
+            name: String,
+            init: VersionBundle.() -> Unit,
+        ) = VersionBundle(name, this).run {
             init()
             bundle(name, libs)
         }
@@ -69,5 +89,5 @@ dependencyResolutionManagement {
 }
 
 include(
-    "jsvg"
+    "jsvg",
 )

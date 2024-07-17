@@ -168,7 +168,7 @@ allprojects {
             configure<SigningExtension> {
                 useInMemoryPgpKeys(
                     project.stringProperty("signing.inMemoryKey")?.replace("#", "\n"),
-                    project.stringProperty("signing.password")
+                    project.stringProperty("signing.password"),
                 )
             }
         }
@@ -193,7 +193,7 @@ allprojects {
                     disable(
                         "StringSplitter",
                         "InlineMeSuggester",
-                        "MissingSummary"
+                        "MissingSummary",
                     )
                 }
             }
@@ -293,11 +293,11 @@ allprojects {
 
                         description.set(
                             project.description
-                                ?: "A lightweight Java2D SVG renderer"
+                                ?: "A lightweight Java2D SVG renderer",
                         )
                         name.set(
                             (project.findProperty("artifact.name") as? String)
-                                ?: project.name.replaceFirstChar { it.uppercase() }.replace("-", " ")
+                                ?: project.name.replaceFirstChar { it.uppercase() }.replace("-", " "),
                         )
                         url.set("https://github.com/weisJ/jsvg")
                         organization {
