@@ -65,7 +65,7 @@ public final class SVGDocument {
 
     public @NotNull Shape computeShape(@Nullable ViewBox viewBox) {
         Area accumulator = new Area(new Path2D.Float());
-        renderWithPlatform(new NullPlatformSupport(), new ShapeOutput(accumulator), viewBox);
+        renderWithPlatform(NullPlatformSupport.INSTANCE, new ShapeOutput(accumulator), viewBox);
         return accumulator;
     }
 
@@ -81,7 +81,7 @@ public final class SVGDocument {
     public void render(@Nullable Component component, @NotNull Graphics2D graphics2D, @Nullable ViewBox bounds) {
         PlatformSupport platformSupport = component != null
                 ? new AwtComponentPlatformSupport(component)
-                : new NullPlatformSupport();
+                : NullPlatformSupport.INSTANCE;
         renderWithPlatform(platformSupport, graphics2D, bounds);
     }
 
