@@ -76,7 +76,7 @@ class BlitImageTest {
     @NotNull
     RenderContext createTestContext(int vw, int vh) {
         return RenderContext.createInitial(
-                new NullPlatformSupport(),
+                NullPlatformSupport.INSTANCE,
                 new MeasureContext(vw, vh,
                         SVGFont.defaultFontSize(),
                         SVGFont.exFromEm(SVGFont.defaultFontSize())));

@@ -160,7 +160,7 @@ class ToShapeTest {
         Graphics2D g = img.createGraphics();
         g.setColor(Color.BLACK);
         document.renderWithPlatform(
-                new NullPlatformSupport(),
+                NullPlatformSupport.INSTANCE,
                 new BlackAndWhiteOutput(g),
                 new ViewBox(0, 0, img.getWidth(), img.getHeight()));
         g.dispose();

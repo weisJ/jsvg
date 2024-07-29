@@ -39,7 +39,7 @@ class UIFutureTest {
     void testValueUiFuture() {
         Object o = new Object();
         UIFuture<Object> future = new ValueUIFuture<>(o);
-        assertTrue(future.checkIfReady(new NullPlatformSupport()));
+        assertTrue(future.checkIfReady(NullPlatformSupport.INSTANCE));
         assertEquals(o, future.get());
     }
 

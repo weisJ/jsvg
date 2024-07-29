@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,6 +26,15 @@ import java.awt.image.ImageObserver;
 import org.jetbrains.annotations.Nullable;
 
 public final class NullPlatformSupport implements PlatformSupport {
+    public static final NullPlatformSupport INSTANCE = new NullPlatformSupport(true);
+
+    /**
+     * @deprecated prefer {@link #INSTANCE} field usage
+     */
+    @Deprecated
+    public NullPlatformSupport() {}
+
+    private NullPlatformSupport(boolean noDeprecation) {}
 
     @Override
     public @Nullable ImageObserver imageObserver() {
