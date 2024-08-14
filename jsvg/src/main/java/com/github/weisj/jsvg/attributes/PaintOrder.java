@@ -56,19 +56,22 @@ public final class PaintOrder {
         if (value == null) return null;
         if ("inherit".equals(value)) return null;
         if ("none".equals(value)) return NORMAL;
+        if ("normal".equals(value)) return NORMAL;
 
         String[] rawPhases = parser.parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
         Phase[] phases = new Phase[3];
         int length = Math.min(phases.length, rawPhases.length);
-        int i = 0;
-        while (i < length) {
-            phases[i] = parser.parseEnum(rawPhases[i], Phase.class);
-            if (phases[i] != null) i++;
+        int phasesIndex = 0;
+        int rawPhasesIndex = 0;
+        while (phasesIndex < length && rawPhasesIndex < length) {
+            phases[phasesIndex] = parser.parseEnum(rawPhases[rawPhasesIndex], Phase.class);
+            if (phases[phasesIndex] != null) phasesIndex++;
+            rawPhasesIndex++;
         }
-        while (i < 3) {
+        while (phasesIndex < 3) {
             // Fill up with normal order
-            phases[i] = findNextInNormalOrder(phases, i);
-            i++;
+            phases[phasesIndex] = findNextInNormalOrder(phases, phasesIndex);
+            phasesIndex++;
         }
         return new PaintOrder(phases);
     }
