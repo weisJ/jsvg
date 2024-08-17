@@ -25,6 +25,7 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +44,7 @@ import com.github.weisj.jsvg.util.ParserBase;
 
 public final class AttributeParser {
 
+    private static final Logger LOGGER = Logger.getLogger(AttributeParser.class.getName());
     private final @NotNull PaintParser paintParser;
 
     public AttributeParser(@NotNull PaintParser paintParser) {
@@ -236,22 +238,21 @@ public final class AttributeParser {
 
     public @Nullable AffineTransform parseTransform(@Nullable String value) {
         if (value == null) return null;
+        if ("none".equals(value)) return null;
         final Matcher transformMatcher = TRANSFORM_PATTERN.matcher(value);
         AffineTransform transform = new AffineTransform();
         while (transformMatcher.find()) {
             String group = transformMatcher.group();
-            try {
-                parseSingleTransform(group, transform);
-            } catch (Exception e) {
-                throw new IllegalArgumentException(
-                        "Illegal transform definition '" + value + "' encountered error while parsing '" + group + "'",
-                        e);
+            if (!parseSingleTransform(group, transform)) {
+                LOGGER.warning(String.format("Illegal transform definition '%s' encountered error while parsing '%s'",
+                        value, group));
+                return null;
             }
         }
         return transform;
     }
 
-    private void parseSingleTransform(@NotNull String value, @NotNull AffineTransform tx) {
+    private boolean parseSingleTransform(@NotNull String value, @NotNull AffineTransform tx) {
         int first = value.indexOf('(');
         int last = value.lastIndexOf(')');
         String command = value.substring(0, value.indexOf('(')).toLowerCase(Locale.ENGLISH);
@@ -300,8 +301,9 @@ public final class AttributeParser {
                 tx.shear(0, Math.tan(Math.toRadians(values[0])));
                 break;
             default:
-                throw new IllegalArgumentException("Unknown transform type: " + command);
+                return false;
         }
+        return true;
     }
 
     public @NotNull PaintParser paintParser() {
