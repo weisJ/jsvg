@@ -117,8 +117,8 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             colors[i] = stopColor;
         }
 
-        // Rebalance if nextAfter pushed us out of range.
-        if (offsets[offsets.length - 1] > 1f) {
+        // Re-balance if nextAfter pushed us out of range.
+        if (offsets.length > 0 && offsets[offsets.length - 1] > 1f) {
             float diff = offsets[offsets.length - 1] - 1f;
             offsets[offsets.length - 1] = 1f;
             int i = offsets.length - 2;

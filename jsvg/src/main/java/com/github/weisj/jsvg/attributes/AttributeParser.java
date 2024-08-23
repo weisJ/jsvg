@@ -244,8 +244,9 @@ public final class AttributeParser {
         while (transformMatcher.find()) {
             String group = transformMatcher.group();
             if (!parseSingleTransform(group, transform)) {
-                LOGGER.warning(String.format("Illegal transform definition '%s' encountered error while parsing '%s'",
-                        value, group));
+                LOGGER.warning(
+                        () -> String.format("Illegal transform definition '%s' encountered error while parsing '%s'",
+                                value, group));
                 return null;
             }
         }

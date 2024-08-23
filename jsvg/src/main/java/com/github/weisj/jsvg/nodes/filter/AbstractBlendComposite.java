@@ -127,7 +127,9 @@ public abstract class AbstractBlendComposite implements Composite {
         }
 
         @Override
-        public void dispose() {}
+        public void dispose() {
+            /* No cleanup needed */
+        }
 
         @Override
         public void compose(@NotNull Raster src, @NotNull Raster dstIn, @NotNull WritableRaster dstOut) {

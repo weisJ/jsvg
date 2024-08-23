@@ -147,6 +147,7 @@ public final class StaxSVGLoader {
                     case XMLStreamConstants.NAMESPACE:
                     case XMLStreamConstants.NOTATION_DECLARATION:
                     case XMLStreamConstants.ENTITY_DECLARATION:
+                    default:
                         break;
                 }
             }
