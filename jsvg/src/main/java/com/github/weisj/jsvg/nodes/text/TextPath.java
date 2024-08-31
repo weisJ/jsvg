@@ -99,7 +99,12 @@ public final class TextPath extends TextContainer {
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return pathShape != null && super.isVisible(context);
+        return isValid(context) && super.isVisible(context);
+    }
+
+    @Override
+    public boolean isValid(@NotNull RenderContext currentContext) {
+        return pathShape != null;
     }
 
     @Override
@@ -111,9 +116,10 @@ public final class TextPath extends TextContainer {
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderSegment(createCursor(context), context, output);
         if (DEBUG) {
             output.debugPaint(g -> paintDebugPath(context, g));
+        } else {
+            throw new IllegalStateException("TextPath can only be rendered as part of a Text node.");
         }
     }
 
@@ -180,14 +186,14 @@ public final class TextPath extends TextContainer {
     }
 
     @Override
-    protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
+    GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
         return new PathGlyphCursor(current,
                 startOffset.resolveLength(context.measureContext()),
                 createPathIterator(context));
     }
 
     @Override
-    protected void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
+    void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
         current.updateFrom(local);
     }
 }

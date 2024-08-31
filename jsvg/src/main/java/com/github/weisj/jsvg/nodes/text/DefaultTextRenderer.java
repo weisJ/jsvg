@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,34 +21,16 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.geom.Path2D;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-interface TextSegment {
-    default boolean isValid(@NotNull RenderContext currentContext) {
-        return true;
-    }
+final class DefaultTextRenderer implements TextRenderer {
+    static final DefaultTextRenderer INSTANCE = new DefaultTextRenderer();
 
-    interface RenderableSegment extends TextSegment {
-        void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context);
-
-        void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
-                @NotNull Output output);
-
-        boolean hasFixedLength();
-
-        enum UseTextLengthForCalculation {
-            YES,
-            NO
-        }
-
-        @NotNull
-        TextMetrics computeTextMetrics(@NotNull RenderContext context, @NotNull UseTextLengthForCalculation flag);
-
-        void appendTextShape(@NotNull GlyphCursor cursor, @NotNull Path2D textShape, @NotNull RenderContext context);
+    @Override
+    public void render(@NotNull Text text, @NotNull RenderContext context, @NotNull Output output) {
+        text.renderSegment(text.createCursor(), context, output);
     }
 }

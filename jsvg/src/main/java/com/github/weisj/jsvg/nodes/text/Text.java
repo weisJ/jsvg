@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -31,6 +31,8 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.TextContent})
 @PermittedContent(
@@ -52,6 +54,11 @@ public final class Text extends LinearTextContainer implements HasGeometryContex
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         geometryContext = HasGeometryContextImpl.parse(attributeNode);
+    }
+
+    @Override
+    public void render(@NotNull RenderContext context, @NotNull Output output) {
+        output.textRenderer().render(this, context, output);
     }
 
     @Override

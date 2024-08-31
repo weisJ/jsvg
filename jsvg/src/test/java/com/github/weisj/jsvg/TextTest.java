@@ -27,7 +27,18 @@ import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.net.URL;
+import java.util.Objects;
+
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import com.github.weisj.jsvg.nodes.text.TextExtractingTextRenderer;
+import com.github.weisj.jsvg.nodes.text.TextRenderer;
+import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.renderer.NullOutput;
+import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
 
 class TextTest {
 
@@ -78,6 +89,32 @@ class TextTest {
         // Batik resolves font-stretch differently as we do, hence this will always fail.
         // Precisely AWT will happily synthesise a stretched font for us in all cases, but batik doesn't.
         assertDoesNotThrow(() -> renderJsvg("text/fontStretch.svg"));
+    }
 
+    @Test
+    void testExtractingText() {
+        try {
+            String path = "text/extractText.svg";
+            URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path), path);
+            SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
+
+            StringBuilder textBuilder = new StringBuilder();
+            document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
+                @Override
+                public @NotNull TextRenderer textRenderer() {
+                    return new TextExtractingTextRenderer() {
+
+                        @Override
+                        public void processText(@NotNull String text) {
+                            textBuilder.append(text);
+                        }
+                    };
+                }
+            }, null);
+
+            assertEquals("A B C D E F", textBuilder.toString());
+        } catch (Exception e) {
+            Assertions.fail(e);
+        }
     }
 }

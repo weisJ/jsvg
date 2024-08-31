@@ -88,6 +88,11 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         return context;
     }
 
+    @NotNull
+    List<@NotNull TextSegment> segments() {
+        return segments;
+    }
+
     @Override
     protected boolean acceptChild(@Nullable String id, @NotNull SVGNode node) {
         return node instanceof TextSegment;
@@ -109,11 +114,11 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         return segments;
     }
 
-    protected abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);
+    abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);
 
     // Update necessary information from the local cursor to the parent cursor e.g. the current x/y
     // position.
-    protected abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
+    abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
 
     protected final void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
             @NotNull Output output) {
@@ -137,11 +142,12 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         }
     }
 
-    private void forEachSegment(@NotNull RenderContext context,
+    void forEachSegment(@NotNull RenderContext context,
             @NotNull BiConsumer<StringTextSegment, RenderContext> onStringTextSegment,
             @NotNull BiConsumer<RenderableSegment, RenderContext> onRenderableSegment) {
         for (TextSegment segment : children()) {
             RenderContext currentContext = context;
+            if (!segment.isValid(currentContext)) continue;
             if (segment instanceof Renderable) {
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
@@ -233,10 +239,9 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
             @NotNull Output output) {
         forEachSegment(context,
                 (segment, ctx) -> {
-                    if (isVisible(ctx)) {
-                        GlyphRenderer.renderGlyphRun(output, context.paintOrder(), vectorEffects(), segment,
-                                cursor.completeGlyphRunBounds);
-                    }
+                    if (!isVisible(ctx)) return;
+                    GlyphRenderer.renderGlyphRun(output, context.paintOrder(), vectorEffects(), segment,
+                            cursor.completeGlyphRunBounds);
                 },
                 (segment, ctx) -> segment.renderSegmentWithoutLayout(cursor, ctx, output));
     }

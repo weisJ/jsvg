@@ -30,7 +30,6 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class LinearTextContainer extends TextContainer {
@@ -59,12 +58,8 @@ abstract class LinearTextContainer extends TextContainer {
         return textPath;
     }
 
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderSegment(createCursor(), context, output);
-    }
-
-    private @NotNull GlyphCursor createCursor() {
+    @NotNull
+    GlyphCursor createCursor() {
         return new GlyphCursor(0, 0, new AffineTransform());
     }
 
