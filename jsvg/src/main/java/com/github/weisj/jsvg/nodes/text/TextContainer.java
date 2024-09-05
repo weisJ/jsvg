@@ -215,7 +215,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
 
     private void accumulateSegmentMetrics(@NotNull IntermediateTextMetrics metrics, @NotNull StringTextSegment segment,
             @NotNull SVGFont font, float letterSpacing, int index) {
-        int glyphCount = segment.codepoints().length;
+        int glyphCount = segment.codepoints().size();
 
         boolean lastSegment = index == children().size() - 1;
         int whiteSpaceCount = lastSegment ? (glyphCount - 1) : glyphCount;
@@ -224,7 +224,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         metrics.letterSpacingLength += whiteSpaceCount * letterSpacing;
         metrics.controllableLetterSpacingCount += whiteSpaceCount;
 
-        for (char codepoint : segment.codepoints()) {
+        for (String codepoint : segment.codepoints()) {
             metrics.glyphLength += font.codepointGlyph(codepoint).advance();
         }
     }

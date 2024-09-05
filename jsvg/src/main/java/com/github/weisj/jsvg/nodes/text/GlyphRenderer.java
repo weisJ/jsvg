@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.List;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
@@ -94,9 +95,9 @@ final class GlyphRenderer {
         boolean isLastSegment = segment.isLastSegmentInParent();
         boolean shouldSkipLastSpacing = isLastSegment && cursor.advancement().shouldSkipLastSpacing();
 
-        char[] codepoints = segment.codepoints();
-        for (int i = 0, count = codepoints.length; i < count; i++) {
-            char codepoint = codepoints[i];
+        List<String> codepoints = segment.codepoints();
+        for (int i = 0, count = codepoints.size(); i < count; i++) {
+            String codepoint = codepoints.get(i);
 
             boolean lastCodepoint = i == count - 1;
 

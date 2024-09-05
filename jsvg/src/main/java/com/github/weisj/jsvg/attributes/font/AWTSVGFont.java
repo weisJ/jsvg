@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,7 +37,7 @@ import com.github.weisj.jsvg.nodes.text.Glyph;
 public final class AWTSVGFont implements SVGFont {
     private final @NotNull Font font;
     private final FontRenderContext frc = new FontRenderContext(null, true, true);
-    private final HashMap<Character, Glyph> glyphCache;
+    private final HashMap<String, Glyph> glyphCache;
 
     private @Nullable LineMetrics lineMetrics;
     private float[] baselineOffsets;
@@ -50,7 +50,7 @@ public final class AWTSVGFont implements SVGFont {
     }
 
     @Override
-    public @NotNull Glyph codepointGlyph(char codepoint) {
+    public @NotNull Glyph codepointGlyph(@NotNull String codepoint) {
         Glyph glyph = glyphCache.get(codepoint);
         if (glyph != null) return glyph;
         glyph = createGlyph(codepoint);
@@ -78,7 +78,7 @@ public final class AWTSVGFont implements SVGFont {
     @Override
     public float effectiveExHeight() {
         if (Length.isUnspecified(exHeight)) {
-            exHeight = (float) codepointGlyph('x').glyphOutline().getBounds2D().getHeight();
+            exHeight = (float) codepointGlyph("x").glyphOutline().getBounds2D().getHeight();
         }
         return exHeight;
     }
@@ -132,12 +132,11 @@ public final class AWTSVGFont implements SVGFont {
     }
 
     @NotNull
-    private Glyph createGlyph(char codepoint) {
-        char[] buffer = new char[] {codepoint};
-        GlyphVector glyphVector = font.createGlyphVector(frc, buffer);
+    private Glyph createGlyph(@NotNull String codepoint) {
+        GlyphVector glyphVector = font.createGlyphVector(frc, codepoint);
         GlyphMetrics gm = glyphVector.getGlyphMetrics(0);
         float advance = gm.getAdvanceX();
-        Shape shape = glyphVector.getGlyphOutline(0);
+        Shape shape = glyphVector.getOutline(0, 0);
         return new Glyph(shape, advance, gm.getBounds2D().isEmpty());
     }
 }

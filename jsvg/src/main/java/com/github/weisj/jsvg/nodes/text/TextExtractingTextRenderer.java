@@ -51,7 +51,7 @@ public abstract class TextExtractingTextRenderer implements TextRenderer {
     }
 
     private void processSegment(@NotNull StringTextSegment segment, @NotNull RenderContext context) {
-        processText(String.copyValueOf(segment.codepoints()), context);
+        processText(String.join("", segment.codepoints()), context);
     }
 
     public abstract void processText(@NotNull String text, @NotNull RenderContext context);

@@ -22,6 +22,10 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
+import java.text.BreakIterator;
+import java.text.CharacterIterator;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 final class StringTextSegment implements TextSegment {
-    private final char[] codepoints;
+    private final List<String> codepoints;
     private final TextContainer parent;
     private final int index;
 
@@ -41,15 +45,87 @@ final class StringTextSegment implements TextSegment {
     public StringTextSegment(@NotNull TextContainer parent, int index, char[] codepoints) {
         this.parent = parent;
         this.index = index;
-        assert codepoints.length != 0;
-        this.codepoints = codepoints;
+
+        BreakIterator it = BreakIterator.getCharacterInstance();
+        it.setText(new CodepointsCharacterIterator(codepoints));
+        int start = it.first();
+        List<String> characters = new ArrayList<>();
+        for (int end = it.next(); end != BreakIterator.DONE; start = end, end = it.next()) {
+            characters.add(String.copyValueOf(codepoints, start, end - start));
+        }
+        this.codepoints = characters;
     }
 
-    public char @NotNull [] codepoints() {
+    public @NotNull List<@NotNull String> codepoints() {
         return codepoints;
     }
 
     public boolean isLastSegmentInParent() {
         return index == parent.children().size() - 1;
+    }
+
+    private static final class CodepointsCharacterIterator implements CharacterIterator {
+        private final char[] codepoints;
+        private int index;
+
+        private CodepointsCharacterIterator(char[] codepoints) {
+            this.codepoints = codepoints;
+        }
+
+        @Override
+        public char first() {
+            return codepoints.length == 0 ? DONE : codepoints[0];
+        }
+
+        @Override
+        public char last() {
+            return codepoints.length == 0 ? DONE : codepoints[codepoints.length - 1];
+        }
+
+        @Override
+        public char current() {
+            return index == codepoints.length ? DONE : codepoints[index];
+        }
+
+        @Override
+        public char next() {
+            return index == codepoints.length ? DONE : codepoints[index++];
+        }
+
+        @Override
+        public char previous() {
+            return index == 0 ? DONE : codepoints[--index];
+        }
+
+        @Override
+        public char setIndex(int position) {
+            if (position < 0 || position > codepoints.length) {
+                throw new IllegalArgumentException("Invalid index");
+            }
+            index = position;
+            return current();
+        }
+
+        @Override
+        public int getBeginIndex() {
+            return 0;
+        }
+
+        @Override
+        public int getEndIndex() {
+            return codepoints.length;
+        }
+
+        @Override
+        public int getIndex() {
+            return index;
+        }
+
+        @Override
+        public @NotNull Object clone() {
+            CodepointsCharacterIterator it = new CodepointsCharacterIterator(codepoints);
+            it.index = index;
+            return it;
+        }
     }
 }
