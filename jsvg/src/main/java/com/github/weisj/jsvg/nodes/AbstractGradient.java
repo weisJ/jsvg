@@ -132,7 +132,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             // This never gets passed to the radial gradient hence we don't need to provide a second stop.
             colors = new Color[] {colors[0]};
             offsets = new float[] {0f};
-        } else {
+        } else if (offsets.length > 0) {
             // To avoid copying the arrays, we just make sure that the first and last stop are 0 and 1
             // respectively here instead of in the gradient implementation.
             int offsetLength = offsets.length;
