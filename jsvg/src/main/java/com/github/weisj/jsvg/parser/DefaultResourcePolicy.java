@@ -31,11 +31,11 @@ import org.jetbrains.annotations.Nullable;
 class DefaultResourcePolicy implements ExternalResourcePolicy {
     private static final Logger LOGGER = Logger.getLogger(DefaultResourcePolicy.class.getName());
 
-    static int FLAG_ALLOW_RELATIVE = 1;
-    static int FLAG_ALLOW_ABSOLUTE = 2;
-    static int FLAG_ALLOW_NON_LOCAL = 4;
+    static final int FLAG_ALLOW_RELATIVE = 1;
+    static final int FLAG_ALLOW_ABSOLUTE = 2;
+    static final int FLAG_ALLOW_NON_LOCAL = 4;
 
-    private int flags;
+    private final int flags;
 
     DefaultResourcePolicy(int flags) {
         this.flags = flags;
