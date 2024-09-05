@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.nodes.text.TextExtractingTextRenderer;
 import com.github.weisj.jsvg.nodes.text.TextRenderer;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullOutput;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
 
 class TextTest {
@@ -105,7 +106,7 @@ class TextTest {
                     return new TextExtractingTextRenderer() {
 
                         @Override
-                        public void processText(@NotNull String text) {
+                        public void processText(@NotNull String text, @NotNull RenderContext context) {
                             textBuilder.append(text);
                         }
                     };

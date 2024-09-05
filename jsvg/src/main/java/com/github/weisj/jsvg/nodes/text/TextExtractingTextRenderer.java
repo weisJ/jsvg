@@ -23,6 +23,8 @@ package com.github.weisj.jsvg.nodes.text;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
+import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -35,18 +37,22 @@ public abstract class TextExtractingTextRenderer implements TextRenderer {
 
     private void processContainer(@NotNull TextContainer textContainer, @NotNull RenderContext context) {
         for (TextSegment segment : textContainer.segments()) {
-            if (!segment.isValid(context)) continue;
+            RenderContext currentContext = context;
+            if (!segment.isValid(currentContext)) continue;
+            if (segment instanceof Renderable) {
+                currentContext = NodeRenderer.setupRenderContext(segment, context);
+            }
             if (segment instanceof StringTextSegment) {
-                processSegment((StringTextSegment) segment);
+                processSegment((StringTextSegment) segment, currentContext);
             } else if (segment instanceof TextContainer) {
-                processContainer((TextContainer) segment, context);
+                processContainer((TextContainer) segment, currentContext);
             }
         }
     }
 
-    private void processSegment(@NotNull StringTextSegment segment) {
-        processText(String.copyValueOf(segment.codepoints()));
+    private void processSegment(@NotNull StringTextSegment segment, @NotNull RenderContext context) {
+        processText(String.copyValueOf(segment.codepoints()), context);
     }
 
-    public abstract void processText(@NotNull String text);
+    public abstract void processText(@NotNull String text, @NotNull RenderContext context);
 }
