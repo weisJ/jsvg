@@ -56,7 +56,7 @@ import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.parser.ElementLoader;
+import com.github.weisj.jsvg.parser.ExternalResourcePolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -296,7 +296,7 @@ public final class ReferenceTest {
     private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
             @Nullable Consumer<Graphics2D> graphicsMutator) throws IOException {
         LoaderContext loaderContext = LoaderContext.builder()
-                .elementLoader(ElementLoader.create(ElementLoader.ExternalDocumentPolicy.ALLOW_RELATIVE))
+                .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
                 .build();
         SVGDocument document;
 

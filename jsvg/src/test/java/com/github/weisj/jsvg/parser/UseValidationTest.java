@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,11 +24,15 @@ package com.github.weisj.jsvg.parser;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Objects;
 
 import javax.xml.stream.XMLStreamException;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class UseValidationTest {
@@ -36,10 +40,12 @@ class UseValidationTest {
     private final StaxSVGLoader loader = new StaxSVGLoader(new NodeSupplier());
 
     private void tryLoad(@NotNull String path) throws IOException, XMLStreamException {
-        loader.load(
-                Objects.requireNonNull(UseValidationTest.class.getResourceAsStream(path)),
-                new DefaultParserProvider(),
-                new SynchronousResourceLoader());
+        URL url = Objects.requireNonNull(UseValidationTest.class.getResource(path));
+        try (InputStream stream = url.openStream()) {
+            loader.load(stream, url.toURI(), LoaderContext.createDefault());
+        } catch (URISyntaxException e) {
+            Assertions.fail(e);
+        }
     }
 
     @Test

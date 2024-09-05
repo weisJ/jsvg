@@ -21,13 +21,28 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import java.net.URI;
+
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
+@ApiStatus.Experimental
+public interface ExternalResourcePolicy {
+    /**
+     * Deny loading of external resources.
+     */
+    ExternalResourcePolicy DENY = (base, path) -> null;
+    /**
+     * Allow external resources to be loaded relative to the base document.
+     */
+    ExternalResourcePolicy ALLOW_RELATIVE = new DefaultResourcePolicy(DefaultResourcePolicy.FLAG_ALLOW_RELATIVE);
+    ExternalResourcePolicy ALLOW_ALL = new DefaultResourcePolicy(
+            DefaultResourcePolicy.FLAG_ALLOW_RELATIVE
+                    | DefaultResourcePolicy.FLAG_ALLOW_ABSOLUTE
+                    | DefaultResourcePolicy.FLAG_ALLOW_NON_LOCAL);
 
-public interface ElementLoader {
 
-    <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
-            @NotNull ParsedDocument document, @NotNull AttributeParser attributeParser);
+    @Nullable
+    URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull String resourcePath);
 }

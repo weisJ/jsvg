@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -323,5 +324,9 @@ public final class AttributeNode {
 
     public @NotNull ResourceLoader resourceLoader() {
         return loadHelper.resourceLoader();
+    }
+
+    public @Nullable URI resolveResourceURI(@NotNull String url) {
+        return loadHelper.externalResourcePolicy().resolveResourceURI(document.rootURI(), url);
     }
 }

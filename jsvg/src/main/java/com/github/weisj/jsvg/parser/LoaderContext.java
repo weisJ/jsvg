@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 public interface LoaderContext {
@@ -32,6 +33,9 @@ public interface LoaderContext {
 
     @NotNull
     ElementLoader elementLoader();
+
+    @NotNull
+    ExternalResourcePolicy externalResourcePolicy();
 
     static @NotNull Builder builder() {
         return MutableLoaderContext.createDefault();
@@ -50,6 +54,10 @@ public interface LoaderContext {
 
         @NotNull
         Builder elementLoader(@NotNull ElementLoader elementLoader);
+
+        @ApiStatus.Experimental
+        @NotNull
+        Builder externalResourcePolicy(@NotNull ExternalResourcePolicy policy);
 
         @NotNull
         LoaderContext build();

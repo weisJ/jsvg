@@ -32,14 +32,18 @@ class DefaultElementLoader implements ElementLoader {
     private static final DocumentLoader DEFAULT_DOCUMENT_LOADER = new DefaultDocumentLoader();
     private final DocumentLoader documentLoader;
 
-    DefaultElementLoader(ExternalDocumentPolicy policy) {
-        documentLoader = createDocumentLoader(policy);
+    enum AllowExternalResources {
+        DENY,
+        ALLOW
     }
 
-    private static @NotNull DocumentLoader createDocumentLoader(@Nullable ExternalDocumentPolicy policy) {
-        if (policy == null) return DEFAULT_DOCUMENT_LOADER;
-        if (policy == ExternalDocumentPolicy.DENY) return DEFAULT_DOCUMENT_LOADER;
-        return new ExternalDocumentLoader(policy);
+    DefaultElementLoader(AllowExternalResources allowExternalResources) {
+        documentLoader = createDocumentLoader(allowExternalResources);
+    }
+
+    private static @NotNull DocumentLoader createDocumentLoader(AllowExternalResources allowExternalResources) {
+        if (allowExternalResources == AllowExternalResources.DENY) return DEFAULT_DOCUMENT_LOADER;
+        return new ExternalDocumentLoader();
     }
 
     @Override

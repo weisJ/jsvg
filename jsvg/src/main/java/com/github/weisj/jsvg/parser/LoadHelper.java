@@ -27,8 +27,7 @@ import com.github.weisj.jsvg.attributes.AttributeParser;
 
 public final class LoadHelper {
     private final @NotNull AttributeParser attributeParser;
-    private final @NotNull ResourceLoader resourceLoader;
-    private final @NotNull ElementLoader elementLoader;
+    private final @NotNull LoaderContext loaderContext;
 
     /**
      * @deprecated use {@link #LoadHelper(AttributeParser, LoaderContext)} instead
@@ -40,8 +39,7 @@ public final class LoadHelper {
 
     public LoadHelper(@NotNull AttributeParser attributeParser, @NotNull LoaderContext loaderContext) {
         this.attributeParser = attributeParser;
-        this.resourceLoader = loaderContext.resourceLoader();
-        this.elementLoader = loaderContext.elementLoader();
+        this.loaderContext = loaderContext;
     }
 
     public @NotNull AttributeParser attributeParser() {
@@ -49,10 +47,14 @@ public final class LoadHelper {
     }
 
     public @NotNull ResourceLoader resourceLoader() {
-        return resourceLoader;
+        return loaderContext.resourceLoader();
     }
 
     public @NotNull ElementLoader elementLoader() {
-        return elementLoader;
+        return loaderContext.elementLoader();
+    }
+
+    public @NotNull ExternalResourcePolicy externalResourcePolicy() {
+        return loaderContext.externalResourcePolicy();
     }
 }

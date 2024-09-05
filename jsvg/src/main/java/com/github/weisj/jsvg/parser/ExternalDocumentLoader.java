@@ -36,11 +36,6 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
     private static final Logger LOGGER = Logger.getLogger(ExternalDocumentLoader.class.getName());
 
     private final @NotNull Map<URI, CachedDocument> cache = new HashMap<>();
-    private final @NotNull ElementLoader.ExternalDocumentPolicy policy;
-
-    ExternalDocumentLoader(@NotNull ElementLoader.ExternalDocumentPolicy policy) {
-        this.policy = policy;
-    }
 
     @Override
     public @Nullable ParsedDocument resolveDocument(@NotNull ParsedDocument document, @NotNull String name) {
@@ -49,12 +44,13 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
     }
 
     private @Nullable ParsedDocument locateDocument(@NotNull ParsedDocument document, @NotNull String name) {
-        URI root = document.rootURI();
-        if (root == null) return null;
-        try {
-            URI documentUri = policy.resolveDocumentURI(root, name);
-            if (documentUri == null) return null;
+        URI documentUri = document
+                .loaderContext()
+                .externalResourcePolicy()
+                .resolveResourceURI(document.rootURI(), name);
+        if (documentUri == null) return null;
 
+        try {
             URL documentUrl = documentUri.toURL();
             synchronized (cache) {
                 CachedDocument cachedDocument = cache.get(documentUri);
@@ -84,8 +80,8 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
             }
             return parsedDocument;
         } catch (Exception e) {
-            LOGGER.warning(
-                    String.format("Failed to load external document: %s from %s - %s", name, root, e.getMessage()));
+            LOGGER.warning(String.format("Failed to load external document: %s from %s - %s",
+                    name, documentUri, e.getMessage()));
             return null;
         }
     }

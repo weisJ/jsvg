@@ -24,7 +24,6 @@ package com.github.weisj.jsvg.nodes;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -88,13 +87,15 @@ public final class Image extends RenderableSVGNode {
         overflow = attributeNode.getEnum("overflow", Overflow.Hidden);
 
         String url = attributeNode.parser().parseUrl(attributeNode.getHref());
-        if (url != null) {
-            try {
-                imgResource = attributeNode.resourceLoader().loadImage(new URI(url));
-            } catch (IOException | URISyntaxException e) {
-                LOGGER.log(Level.INFO, e.getMessage(), e);
-                imgResource = null; // Image didn't load. TODO: Maybe we should show a missing image instead.
-            }
+        if (url == null) return;
+        URI resolvedUri = attributeNode.resolveResourceURI(url);
+        if (resolvedUri == null) return;
+
+        try {
+            imgResource = attributeNode.resourceLoader().loadImage(resolvedUri);
+        } catch (IOException e) {
+            LOGGER.log(Level.INFO, e.getMessage(), e);
+            imgResource = null; // Image didn't load. TODO: Maybe we should show a missing image instead.
         }
     }
 

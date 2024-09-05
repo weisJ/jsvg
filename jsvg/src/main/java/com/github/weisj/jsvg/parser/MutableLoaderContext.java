@@ -28,20 +28,14 @@ public class MutableLoaderContext implements LoaderContext, LoaderContext.Builde
     private static final ParserProvider DEFAULT_PARSER_PROVIDER = new DefaultParserProvider();
     private static final ResourceLoader DEFAULT_RESOURCE_LOADER = new SynchronousResourceLoader();
     private static final ElementLoader DEFAULT_ELEMENT_LOADER =
-            ElementLoader.create(ElementLoader.ExternalDocumentPolicy.DENY);
-    private @NotNull ParserProvider parserProvider;
-    private @NotNull ResourceLoader resourceLoader;
-    private @NotNull ElementLoader elementLoader;
+            new DefaultElementLoader(DefaultElementLoader.AllowExternalResources.DENY);
+    private @NotNull ParserProvider parserProvider = DEFAULT_PARSER_PROVIDER;
+    private @NotNull ResourceLoader resourceLoader = DEFAULT_RESOURCE_LOADER;
+    private @NotNull ElementLoader elementLoader = DEFAULT_ELEMENT_LOADER;
+    private @NotNull ExternalResourcePolicy externalResourcePolicy = ExternalResourcePolicy.DENY;
 
     static @NotNull MutableLoaderContext createDefault() {
-        return new MutableLoaderContext(DEFAULT_PARSER_PROVIDER, DEFAULT_RESOURCE_LOADER, DEFAULT_ELEMENT_LOADER);
-    }
-
-    private MutableLoaderContext(@NotNull ParserProvider parserProvider, @NotNull ResourceLoader resourceLoader,
-            @NotNull ElementLoader elementLoader) {
-        this.parserProvider = parserProvider;
-        this.resourceLoader = resourceLoader;
-        this.elementLoader = elementLoader;
+        return new MutableLoaderContext();
     }
 
     @Override
@@ -57,6 +51,11 @@ public class MutableLoaderContext implements LoaderContext, LoaderContext.Builde
     @Override
     public @NotNull ElementLoader elementLoader() {
         return elementLoader;
+    }
+
+    @Override
+    public @NotNull ExternalResourcePolicy externalResourcePolicy() {
+        return externalResourcePolicy;
     }
 
     @Override
@@ -78,7 +77,17 @@ public class MutableLoaderContext implements LoaderContext, LoaderContext.Builde
     }
 
     @Override
+    public @NotNull Builder externalResourcePolicy(@NotNull ExternalResourcePolicy policy) {
+        this.externalResourcePolicy = policy;
+        return this;
+    }
+
+    @Override
     public @NotNull LoaderContext build() {
+        // Check if policy changed. This avoid instantiating the heavier external loader.
+        if (this.externalResourcePolicy != ExternalResourcePolicy.DENY) {
+            this.elementLoader = new DefaultElementLoader(DefaultElementLoader.AllowExternalResources.ALLOW);
+        }
         return this;
     }
 }
