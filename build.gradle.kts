@@ -140,8 +140,40 @@ allprojects {
         // Ensure builds are reproducible
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
-        dirMode = "775".toInt(8)
-        fileMode = "664".toInt(8)
+        dirPermissions {
+            user {
+                read = true
+                write = true
+                execute = true
+            }
+            group {
+                read = true
+                write = true
+                execute = true
+            }
+            other {
+                read = true
+                write = false
+                execute = true
+            }
+        }
+        filePermissions {
+            user {
+                read = true
+                write = true
+                execute = false
+            }
+            group {
+                read = true
+                write = false
+                execute = false
+            }
+            other {
+                read = true
+                write = false
+                execute = false
+            }
+        }
     }
 
     if (!enableGradleMetadata) {
