@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.RenderType.Batik;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
@@ -68,9 +69,16 @@ public final class ReferenceTest {
     private static final double DEFAULT_PIXEL_TOLERANCE = 0.1;
     public static Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
 
-    public enum RenderType {
-        Batik,
-        JSVG
+    public sealed interface RenderType {
+        BatikType Batik = new BatikType();
+        JSVGType JSVG = new JSVGType(LoaderContext.builder()
+                .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
+                .build());
+
+        record BatikType() implements RenderType {
+        }
+        record JSVGType(@NotNull LoaderContext loaderContext) implements RenderType {
+        }
     }
 
     public sealed interface ImageSource {
@@ -139,8 +147,9 @@ public final class ReferenceTest {
         @NotNull
         BufferedImage render() throws IOException {
             return switch (renderType) {
-                case Batik -> renderBatik(source.openStream());
-                case JSVG -> renderJsvg(source, graphicsMutator);
+                case RenderType.BatikType() -> renderBatik(source.openStream());
+                case RenderType.JSVGType(LoaderContext loaderContext) ->
+                    renderJsvg(source, graphicsMutator, loaderContext);
             };
         }
     }
@@ -187,7 +196,7 @@ public final class ReferenceTest {
     public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance,
             double pixelTolerance) {
         return compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource(fileName), RenderType.Batik),
+                new ImageInfo(new ImageSource.PathImageSource(fileName), Batik),
                 new ImageInfo(new ImageSource.PathImageSource(fileName), RenderType.JSVG),
                 tolerance, pixelTolerance));
     }
@@ -211,7 +220,7 @@ public final class ReferenceTest {
     static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent,
             double tolerance) {
         return compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), RenderType.Batik),
+                new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), Batik),
                 new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), RenderType.JSVG),
                 tolerance, DEFAULT_PIXEL_TOLERANCE));
     }
@@ -278,7 +287,7 @@ public final class ReferenceTest {
 
     public static @NotNull BufferedImage renderJsvg(@NotNull String path) {
         try {
-            return renderJsvg(new ImageSource.PathImageSource(path), null);
+            return renderJsvg(new ImageSource.PathImageSource(path), null, RenderType.JSVG.loaderContext());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -294,10 +303,7 @@ public final class ReferenceTest {
     }
 
     private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
-            @Nullable Consumer<Graphics2D> graphicsMutator) throws IOException {
-        LoaderContext loaderContext = LoaderContext.builder()
-                .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
-                .build();
+            @Nullable Consumer<Graphics2D> graphicsMutator, LoaderContext loaderContext) throws IOException {
         SVGDocument document;
 
         URL url = imageSource.url();
