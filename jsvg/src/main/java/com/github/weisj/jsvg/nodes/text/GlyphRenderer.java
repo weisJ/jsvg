@@ -49,8 +49,8 @@ final class GlyphRenderer {
             @NotNull RenderContext context) {
         MeasureContext measure = context.measureContext();
 
-        Shape glyphRun = layoutGlyphRun(segment, cursor, font, measure, context.fontRenderContext());
-        Rectangle2D bounds = glyphRun.getBounds2D();
+        GlyphRun glyphRun = layoutGlyphRun(segment, cursor, font, measure, context.fontRenderContext());
+        Rectangle2D bounds = glyphRun.shape().getBounds2D();
 
         if (Length.isUnspecified((float) cursor.completeGlyphRunBounds.getX())) {
             cursor.completeGlyphRunBounds.setRect(bounds);
@@ -68,7 +68,7 @@ final class GlyphRenderer {
         RenderContext context = segment.currentRenderContext;
         assert context != null;
 
-        Shape glyphRun = segment.currentGlyphRun;
+        GlyphRun glyphRun = segment.currentGlyphRun;
         assert glyphRun != null;
 
         // Use pathLengthFactor of 1 as pathLength isn't allowed on text
@@ -78,7 +78,7 @@ final class GlyphRenderer {
         // Todo: Vector-Effects
         ShapeRenderer.renderWithPaintOrder(output, true, paintOrder,
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects, stroke, null),
-                new ShapeRenderer.PaintShape(glyphRun, completeGlyphRunBounds),
+                new ShapeRenderer.PaintShape(glyphRun.shape(), completeGlyphRunBounds),
                 null);
 
         // Invalidate the glyphRun. Avoids holding onto the RenderContext, which may reference a JComponent.
@@ -86,7 +86,8 @@ final class GlyphRenderer {
         segment.currentGlyphRun = null;
     }
 
-    static Shape layoutGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
+    static @NotNull GlyphRun layoutGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor,
+            @NotNull SVGFont font,
             @NotNull MeasureContext measure, @NotNull FontRenderContext fontRenderContext) {
         float letterSpacing = fontRenderContext.letterSpacing().resolveLength(measure);
 
@@ -110,11 +111,11 @@ final class GlyphRenderer {
             // If null no more characters should be processed.
             if (glyphTransform == null) break;
             if (!glyph.isRendered()) continue;
-            Shape glyphOutline = glyph.glyphOutline();
 
             float baselineOffset = computeBaselineOffset(font, fontRenderContext);
             glyphTransform.translate(0, -baselineOffset);
 
+            Shape glyphOutline = glyph.glyphOutline();
             Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
             glyphPath.append(renderPath, false);
             if (DEBUG) {
@@ -122,7 +123,7 @@ final class GlyphRenderer {
             }
         }
 
-        return glyphPath;
+        return new GlyphRun(glyphPath);
     }
 
     private static float computeBaselineOffset(@NotNull SVGFont font, @NotNull FontRenderContext fontRenderContext) {

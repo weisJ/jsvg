@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -261,16 +260,16 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     }
 
     @Override
-    public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull Path2D textShape,
+    public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull MutableGlyphRun glyphRun,
             @NotNull RenderContext context) {
         SVGFont font = context.font();
         GlyphCursor localCursor = createLocalCursor(context, cursor);
         localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
 
         forEachSegment(context,
-                (segment, ctx) -> textShape.append(GlyphRenderer.layoutGlyphRun(segment, localCursor, font,
-                        ctx.measureContext(), ctx.fontRenderContext()), false),
-                (segment, ctx) -> segment.appendTextShape(localCursor, textShape, ctx));
+                (segment, ctx) -> glyphRun.append(GlyphRenderer.layoutGlyphRun(segment, localCursor, font,
+                        ctx.measureContext(), ctx.fontRenderContext())),
+                (segment, ctx) -> segment.appendTextShape(localCursor, glyphRun, ctx));
 
         cleanUpLocalCursor(cursor, localCursor);
     }

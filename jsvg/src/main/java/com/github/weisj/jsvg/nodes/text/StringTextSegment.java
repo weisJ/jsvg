@@ -38,7 +38,7 @@ final class StringTextSegment implements TextSegment {
     private final int index;
 
     @Nullable
-    Shape currentGlyphRun = null;
+    GlyphRun currentGlyphRun = null;
     @Nullable
     RenderContext currentRenderContext = null;
 
