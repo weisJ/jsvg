@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,20 +30,21 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public interface SVGPaint {
-    AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
-    SVGPaint NONE = new NonePaint();
-    SVGPaint CURRENT_COLOR = new SentinelPaint("currentColor");
-    SVGPaint CONTEXT_FILL = new SentinelPaint("contextFill");
-    SVGPaint CONTEXT_STROKE = new SentinelPaint("contextStroke");
+final class NonePaint implements SVGPaint {
+    @Override
+    public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds) {
+        // Do nothing
+    }
 
-    void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
-            @Nullable Rectangle2D bounds);
+    @Override
+    public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
+            @Nullable Rectangle2D bounds) {
+        // Do nothing
+    }
 
-    void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
-            @Nullable Rectangle2D bounds);
-
-    default boolean isVisible() {
-        return this != NONE;
+    @Override
+    public String toString() {
+        return "SVGPaint.None";
     }
 }
