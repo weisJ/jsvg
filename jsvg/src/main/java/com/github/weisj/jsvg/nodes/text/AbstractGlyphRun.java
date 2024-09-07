@@ -22,17 +22,43 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
 public class AbstractGlyphRun<T extends Shape> {
     private final @NotNull T shape;
+    private final @NotNull List<@NotNull PaintableEmoji> emojis;
 
-    public AbstractGlyphRun(@NotNull T shape) {
+    public AbstractGlyphRun(@NotNull T shape, @NotNull List<@NotNull PaintableEmoji> emojis) {
         this.shape = shape;
+        this.emojis = emojis;
     }
 
     public @NotNull T shape() {
         return shape;
+    }
+
+    public @NotNull List<@NotNull PaintableEmoji> emojis() {
+        return emojis;
+    }
+
+    public static class PaintableEmoji {
+        private final @NotNull EmojiGlyph glyph;
+        private final @NotNull AffineTransform transform;
+
+        PaintableEmoji(@NotNull EmojiGlyph glyph, @NotNull AffineTransform transform) {
+            this.glyph = glyph;
+            this.transform = transform;
+        }
+
+        public @NotNull EmojiGlyph glyph() {
+            return glyph;
+        }
+
+        public @NotNull AffineTransform transform() {
+            return transform;
+        }
     }
 }

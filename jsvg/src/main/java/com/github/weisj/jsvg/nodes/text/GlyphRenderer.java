@@ -25,6 +25,8 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -35,10 +37,7 @@ import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.renderer.FontRenderContext;
-import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.ShapeRenderer;
+import com.github.weisj.jsvg.renderer.*;
 
 final class GlyphRenderer {
     private static final boolean DEBUG = false;
@@ -81,6 +80,22 @@ final class GlyphRenderer {
                 new ShapeRenderer.PaintShape(glyphRun.shape(), completeGlyphRunBounds),
                 null);
 
+        // Experimental Emoji rendering
+        if (output instanceof Graphics2DOutput) {
+            Graphics2DOutput g2dOutput = (Graphics2DOutput) output;
+            Graphics2D g = (Graphics2D) g2dOutput.graphics().create();
+            AffineTransform transform = g.getTransform();
+
+            g.setFont(g.getFont().deriveFont((float) context.font().size()));
+            for (AbstractGlyphRun.PaintableEmoji emoji : glyphRun.emojis()) {
+                g.setTransform(transform);
+                g.transform(emoji.transform());
+                g.drawString(emoji.glyph().codepoint(), 0, 0);
+            }
+
+            g.dispose();
+        }
+
         // Invalidate the glyphRun. Avoids holding onto the RenderContext, which may reference a JComponent.
         segment.currentRenderContext = null;
         segment.currentGlyphRun = null;
@@ -92,6 +107,7 @@ final class GlyphRenderer {
         float letterSpacing = fontRenderContext.letterSpacing().resolveLength(measure);
 
         Path2D glyphPath = new Path2D.Float();
+        List<AbstractGlyphRun.PaintableEmoji> emojis = null;
 
         boolean isLastSegment = segment.isLastSegmentInParent();
         boolean shouldSkipLastSpacing = isLastSegment && cursor.advancement().shouldSkipLastSpacing();
@@ -115,15 +131,24 @@ final class GlyphRenderer {
             float baselineOffset = computeBaselineOffset(font, fontRenderContext);
             glyphTransform.translate(0, -baselineOffset);
 
-            Shape glyphOutline = glyph.glyphOutline();
-            Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
-            glyphPath.append(renderPath, false);
-            if (DEBUG) {
-                glyphPath.append(glyphTransform.createTransformedShape(glyphOutline.getBounds2D()), false);
+            if (glyph instanceof EmojiGlyph) {
+                if (emojis == null) {
+                    emojis = new ArrayList<>();
+                }
+                emojis.add(new AbstractGlyphRun.PaintableEmoji(
+                        (EmojiGlyph) glyph,
+                        new AffineTransform(glyphTransform)));
+            } else {
+                Shape glyphOutline = glyph.glyphOutline();
+                Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
+                glyphPath.append(renderPath, false);
+                if (DEBUG) {
+                    glyphPath.append(glyphTransform.createTransformedShape(glyphOutline.getBounds2D()), false);
+                }
             }
         }
 
-        return new GlyphRun(glyphPath);
+        return new GlyphRun(glyphPath, emojis != null ? emojis : Collections.emptyList());
     }
 
     private static float computeBaselineOffset(@NotNull SVGFont font, @NotNull FontRenderContext fontRenderContext) {

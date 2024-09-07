@@ -32,9 +32,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.nodes.text.EmojiGlyph;
 import com.github.weisj.jsvg.nodes.text.Glyph;
 
 public final class AWTSVGFont implements SVGFont {
+
     private final @NotNull Font font;
     private final FontRenderContext frc = new FontRenderContext(null, true, true);
     private final HashMap<String, Glyph> glyphCache;
@@ -49,11 +51,15 @@ public final class AWTSVGFont implements SVGFont {
         this.glyphCache = new HashMap<>();
     }
 
+    public @NotNull Font font() {
+        return font;
+    }
+
     @Override
     public @NotNull Glyph codepointGlyph(@NotNull String codepoint) {
         Glyph glyph = glyphCache.get(codepoint);
         if (glyph != null) return glyph;
-        glyph = createGlyph(codepoint);
+        glyph = createGlyph(codepoint.toCharArray());
         glyphCache.put(codepoint, glyph);
         return glyph;
     }
@@ -132,11 +138,25 @@ public final class AWTSVGFont implements SVGFont {
     }
 
     @NotNull
-    private Glyph createGlyph(@NotNull String codepoint) {
+    private Glyph createGlyph(char @NotNull [] codepoint) {
         GlyphVector glyphVector = font.createGlyphVector(frc, codepoint);
         GlyphMetrics gm = glyphVector.getGlyphMetrics(0);
         float advance = gm.getAdvanceX();
+
+        if (isPossibleEmoji(codepoint)) {
+            return new EmojiGlyph(String.valueOf(codepoint), advance);
+        }
+
         Shape shape = glyphVector.getOutline(0, 0);
         return new Glyph(shape, advance, gm.getBounds2D().isEmpty());
+    }
+
+    private static boolean isPossibleEmoji(char @NotNull [] codepoint) {
+        for (char c : codepoint) {
+            if (Character.isHighSurrogate(c) || Character.isLowSurrogate(c)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -22,15 +22,17 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.geom.Path2D;
+import java.util.ArrayList;
 
 import org.jetbrains.annotations.NotNull;
 
 class MutableGlyphRun extends AbstractGlyphRun<Path2D> {
     public MutableGlyphRun() {
-        super(new Path2D.Float());
+        super(new Path2D.Float(), new ArrayList<>());
     }
 
     public void append(@NotNull GlyphRun glyphRun) {
         shape().append(glyphRun.shape(), false);
+        emojis().addAll(glyphRun.emojis());
     }
 }

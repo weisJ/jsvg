@@ -25,9 +25,15 @@ import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
-class GlyphRun extends AbstractGlyphRun<Shape> {
+public class EmojiGlyph extends Glyph {
+    private final @NotNull String codepoint;
 
-    GlyphRun(@NotNull Shape shape, @NotNull java.util.List<@NotNull PaintableEmoji> emojis) {
-        super(shape, emojis);
+    public EmojiGlyph(@NotNull String codepoint, float advance) {
+        super(new Rectangle(), advance, false);
+        this.codepoint = codepoint;
+    }
+
+    public @NotNull String codepoint() {
+        return codepoint;
     }
 }
