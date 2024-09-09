@@ -19,23 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.text;
+package com.github.weisj.jsvg.util;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
+public final class SystemUtil {
 
-import org.jetbrains.annotations.NotNull;
+    private SystemUtil() {}
 
-public class EmojiGlyph extends Glyph {
-    private final @NotNull String codepoint;
-    BufferedImage largeBitmap;
-
-    public EmojiGlyph(@NotNull String codepoint, float advance) {
-        super(new Rectangle(), advance, false);
-        this.codepoint = codepoint;
-    }
-
-    public @NotNull String codepoint() {
-        return codepoint;
-    }
+    public static final String OS_NAME = System.getProperty("os.name").toLowerCase();
+    public static final boolean isMacOS = OS_NAME.contains("mac");
 }

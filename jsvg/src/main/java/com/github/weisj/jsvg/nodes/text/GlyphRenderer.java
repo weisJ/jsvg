@@ -79,19 +79,11 @@ final class GlyphRenderer {
                 null);
 
         // Experimental Emoji rendering
-        if (output instanceof Graphics2DOutput) {
-            Graphics2DOutput g2dOutput = (Graphics2DOutput) output;
-            Graphics2D g = (Graphics2D) g2dOutput.graphics().create();
-            AffineTransform transform = g.getTransform();
-
-            g.setFont(g.getFont().deriveFont((float) context.font().size()));
-            for (AbstractGlyphRun.PaintableEmoji emoji : glyphRun.emojis()) {
-                g.setTransform(transform);
-                g.transform(emoji.transform());
-                g.drawString(emoji.glyph().codepoint(), 0, 0);
-            }
-
-            g.dispose();
+        SVGFont font = context.font();
+        Output.SafeState safeState = output.safeState();
+        for (AbstractGlyphRun.PaintableEmoji emoji : glyphRun.emojis()) {
+            emoji.render(output, font);
+            safeState.restore();
         }
 
         // Invalidate the glyphRun. Avoids holding onto the RenderContext, which may reference a JComponent.

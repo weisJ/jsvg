@@ -23,11 +23,20 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.renderer.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.util.SystemUtil;
+
 public class AbstractGlyphRun<T extends Shape> {
+    private static final Logger LOGGER = Logger.getLogger(AbstractGlyphRun.class.getName());
     private final @NotNull T shape;
     private final @NotNull List<@NotNull PaintableEmoji> emojis;
 
@@ -53,12 +62,37 @@ public class AbstractGlyphRun<T extends Shape> {
             this.transform = transform;
         }
 
-        public @NotNull EmojiGlyph glyph() {
-            return glyph;
-        }
+        public void render(@NotNull Output output, @NotNull SVGFont font) {
+            output.applyTransform(transform);
+            int fontSize = font.size();
 
-        public @NotNull AffineTransform transform() {
-            return transform;
+            // The JDK text pipeline on macOS can only render Emoji up to 100pt.
+            // In this case we have to paint to a buffer which is then scaled up.
+            int maxFontSize = SystemUtil.isMacOS ? 100 : Integer.MAX_VALUE;
+
+            if (output.transform().getScaleY() * fontSize > maxFontSize) {
+                // Guess where the baseline ought to be for descenders to be fully visible. Very hackish.
+                float baselinePosition = 0.9f;
+                if (glyph.largeBitmap == null) {
+                    // Size of bitmap is guessed, as there is now reliable way to get the size of the glyph.
+                    BufferedImage bitmap = ImageUtil.createCompatibleTransparentImage(maxFontSize, maxFontSize);
+                    Graphics g = bitmap.getGraphics();
+                    g.setFont(g.getFont().deriveFont((float) maxFontSize));
+
+                    g.drawString(glyph.codepoint(), 0, (int) (baselinePosition * maxFontSize));
+                    g.dispose();
+                    glyph.largeBitmap = bitmap;
+                }
+                output.scale((double) fontSize / maxFontSize, (double) fontSize / maxFontSize);
+                output.translate(0, -(int) (baselinePosition * maxFontSize));
+                output.drawImage(glyph.largeBitmap);
+            } else {
+                if (output instanceof Graphics2DOutput) {
+                    Graphics2D g = ((Graphics2DOutput) output).graphics();
+                    g.setFont(g.getFont().deriveFont((float) fontSize));
+                    g.drawString(glyph.codepoint(), 0, 0);
+                }
+            }
         }
     }
 }
