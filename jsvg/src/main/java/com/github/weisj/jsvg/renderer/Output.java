@@ -33,7 +33,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGRenderingHints;
-import com.github.weisj.jsvg.nodes.text.TextRenderer;
+import com.github.weisj.jsvg.nodes.text.NullTextOutput;
+import com.github.weisj.jsvg.nodes.text.TextOutput;
 import com.github.weisj.jsvg.util.Provider;
 
 public interface Output {
@@ -107,8 +108,8 @@ public interface Output {
     @NotNull
     SafeState safeState();
 
-    default @NotNull TextRenderer textRenderer() {
-        return TextRenderer.createDefault();
+    default @NotNull TextOutput textOutput() {
+        return NullTextOutput.INSTANCE;
     }
 
     boolean supportsFilters();

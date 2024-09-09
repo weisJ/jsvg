@@ -113,15 +113,15 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         return segments;
     }
 
-    abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);
+    protected abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);
 
     // Update necessary information from the local cursor to the parent cursor e.g. the current x/y
     // position.
-    abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
+    protected abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
 
     protected final void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
             @NotNull Output output) {
-        prepareSegmentForRendering(cursor, context);
+        prepareSegmentForRendering(cursor, context, output.textOutput());
 
         double offset = textAnchorOffset(context.fontRenderContext().textAnchor(), cursor);
         context.translate(output, -offset, 0);
@@ -246,15 +246,16 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     }
 
     @Override
-    public void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context) {
+    public void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
+            @NotNull TextOutput textOutput) {
         SVGFont font = context.font();
 
         GlyphCursor localCursor = createLocalCursor(context, cursor);
         localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
 
         forEachSegment(context,
-                (segment, ctx) -> GlyphRenderer.prepareGlyphRun(segment, localCursor, font, ctx),
-                (segment, ctx) -> segment.prepareSegmentForRendering(localCursor, ctx));
+                (segment, ctx) -> GlyphRenderer.prepareGlyphRun(segment, localCursor, font, ctx, textOutput),
+                (segment, ctx) -> segment.prepareSegmentForRendering(localCursor, ctx, textOutput));
 
         cleanUpLocalCursor(cursor, localCursor);
     }
@@ -267,8 +268,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
 
         forEachSegment(context,
-                (segment, ctx) -> glyphRun.append(GlyphRenderer.layoutGlyphRun(segment, localCursor, font,
-                        ctx.measureContext(), ctx.fontRenderContext())),
+                (segment, ctx) -> glyphRun.append(
+                        GlyphRenderer.layoutGlyphRun(segment, localCursor, font, ctx, NullTextOutput.INSTANCE)),
                 (segment, ctx) -> segment.appendTextShape(localCursor, glyphRun, ctx));
 
         cleanUpLocalCursor(cursor, localCursor);

@@ -31,8 +31,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.TextContent})
 @PermittedContent(
@@ -54,11 +52,6 @@ public final class Text extends LinearTextContainer implements HasGeometryContex
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         geometryContext = HasGeometryContextImpl.parse(attributeNode);
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Output output) {
-        output.textRenderer().render(this, context, output);
     }
 
     @Override

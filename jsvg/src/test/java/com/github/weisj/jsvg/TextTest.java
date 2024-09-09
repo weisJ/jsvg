@@ -34,11 +34,9 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.nodes.text.TextExtractingTextRenderer;
-import com.github.weisj.jsvg.nodes.text.TextRenderer;
+import com.github.weisj.jsvg.nodes.text.TextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullOutput;
-import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
 
 class TextTest {
@@ -102,14 +100,8 @@ class TextTest {
             StringBuilder textBuilder = new StringBuilder();
             document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
                 @Override
-                public @NotNull TextRenderer textRenderer() {
-                    return new TextExtractingTextRenderer() {
-
-                        @Override
-                        public void processText(@NotNull String text, @NotNull RenderContext context) {
-                            textBuilder.append(text);
-                        }
-                    };
+                public @NotNull TextOutput textOutput() {
+                    return (codepoint, glyphTransform, context) -> textBuilder.append(codepoint);
                 }
             }, null);
 

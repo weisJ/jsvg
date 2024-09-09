@@ -30,8 +30,6 @@ import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ElementCategories({Category.TextContent, Category.TextContentChild})
 @PermittedContent(
@@ -45,10 +43,5 @@ public final class TextSpan extends LinearTextContainer {
     @Override
     public @NotNull String tagName() {
         return TAG;
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Output output) {
-        throw new IllegalStateException("TextSpan can only be rendered as part of a Text node.");
     }
 }

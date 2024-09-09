@@ -21,16 +21,19 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
+import java.awt.geom.AffineTransform;
+
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-final class DefaultTextRenderer implements TextRenderer {
-    static final DefaultTextRenderer INSTANCE = new DefaultTextRenderer();
+public class NullTextOutput implements TextOutput {
+    public static final NullTextOutput INSTANCE = new NullTextOutput();
+
 
     @Override
-    public void render(@NotNull Text text, @NotNull RenderContext context, @NotNull Output output) {
-        text.renderSegment(text.createCursor(), context, output);
+    public void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform,
+            @NotNull RenderContext context) {
+        // Do nothing
     }
 }

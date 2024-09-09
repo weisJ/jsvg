@@ -33,7 +33,8 @@ interface TextSegment {
     }
 
     interface RenderableSegment extends TextSegment {
-        void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context);
+        void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
+                @NotNull TextOutput textOutput);
 
         void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
                 @NotNull Output output);

@@ -45,10 +45,8 @@ final class GlyphRenderer {
     private GlyphRenderer() {}
 
     static void prepareGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
-            @NotNull RenderContext context) {
-        MeasureContext measure = context.measureContext();
-
-        GlyphRun glyphRun = layoutGlyphRun(segment, cursor, font, measure, context.fontRenderContext());
+            @NotNull RenderContext context, @NotNull TextOutput textOutput) {
+        GlyphRun glyphRun = layoutGlyphRun(segment, cursor, font, context, textOutput);
         Rectangle2D bounds = glyphRun.shape().getBounds2D();
 
         if (Length.isUnspecified((float) cursor.completeGlyphRunBounds.getX())) {
@@ -102,8 +100,10 @@ final class GlyphRenderer {
     }
 
     static @NotNull GlyphRun layoutGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor,
-            @NotNull SVGFont font,
-            @NotNull MeasureContext measure, @NotNull FontRenderContext fontRenderContext) {
+            @NotNull SVGFont font, @NotNull RenderContext context,
+            @NotNull TextOutput textOutput) {
+        MeasureContext measure = context.measureContext();
+        FontRenderContext fontRenderContext = context.fontRenderContext();
         float letterSpacing = fontRenderContext.letterSpacing().resolveLength(measure);
 
         Path2D glyphPath = new Path2D.Float();
@@ -126,26 +126,29 @@ final class GlyphRenderer {
 
             // If null no more characters should be processed.
             if (glyphTransform == null) break;
-            if (!glyph.isRendered()) continue;
 
-            float baselineOffset = computeBaselineOffset(font, fontRenderContext);
-            glyphTransform.translate(0, -baselineOffset);
+            if (glyph.isRendered()) {
+                float baselineOffset = computeBaselineOffset(font, fontRenderContext);
+                glyphTransform.translate(0, -baselineOffset);
 
-            if (glyph instanceof EmojiGlyph) {
-                if (emojis == null) {
-                    emojis = new ArrayList<>();
-                }
-                emojis.add(new AbstractGlyphRun.PaintableEmoji(
-                        (EmojiGlyph) glyph,
-                        new AffineTransform(glyphTransform)));
-            } else {
-                Shape glyphOutline = glyph.glyphOutline();
-                Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
-                glyphPath.append(renderPath, false);
-                if (DEBUG) {
-                    glyphPath.append(glyphTransform.createTransformedShape(glyphOutline.getBounds2D()), false);
+                if (glyph instanceof EmojiGlyph) {
+                    if (emojis == null) {
+                        emojis = new ArrayList<>();
+                    }
+                    emojis.add(new AbstractGlyphRun.PaintableEmoji(
+                            (EmojiGlyph) glyph,
+                            new AffineTransform(glyphTransform)));
+                } else {
+                    Shape glyphOutline = glyph.glyphOutline();
+                    Shape renderPath = glyphTransform.createTransformedShape(glyphOutline);
+                    glyphPath.append(renderPath, false);
+                    if (DEBUG) {
+                        glyphPath.append(glyphTransform.createTransformedShape(glyphOutline.getBounds2D()), false);
+                    }
                 }
             }
+
+            textOutput.codepoint(codepoint, glyphTransform, context);
         }
 
         return new GlyphRun(glyphPath, emojis != null ? emojis : Collections.emptyList());
