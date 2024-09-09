@@ -33,7 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
-import com.github.weisj.jsvg.nodes.InplaceBoxBlurFilter;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;

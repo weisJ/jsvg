@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -33,7 +33,7 @@ import com.github.weisj.jsvg.util.ImageUtil;
  * https://xmlgraphics.apache.org/batik/ by the Apache Software Foundation. It is licensed under the
  * Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
-public final class InplaceBoxBlurFilter {
+final class InplaceBoxBlurFilter {
 
     private InplaceBoxBlurFilter() {}
 
