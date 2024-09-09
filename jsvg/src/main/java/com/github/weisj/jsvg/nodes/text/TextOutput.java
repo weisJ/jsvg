@@ -36,4 +36,8 @@ public interface TextOutput {
     static @NotNull TextOutput createDefault() {
         return NullTextOutput.INSTANCE;
     }
+
+    void beginText();
+
+    void endText();
 }

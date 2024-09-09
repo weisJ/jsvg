@@ -121,12 +121,15 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
 
     protected final void renderSegment(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
             @NotNull Output output) {
-        prepareSegmentForRendering(cursor, context, output.textOutput());
+        TextOutput textOutput = output.textOutput();
+        textOutput.beginText();
+        prepareSegmentForRendering(cursor, context, textOutput);
 
         double offset = textAnchorOffset(context.fontRenderContext().textAnchor(), cursor);
         context.translate(output, -offset, 0);
 
         renderSegmentWithoutLayout(cursor, context, output);
+        textOutput.endText();
     }
 
     private double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull GlyphCursor glyphCursor) {

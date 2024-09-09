@@ -36,4 +36,14 @@ public class NullTextOutput implements TextOutput {
             @NotNull RenderContext context) {
         // Do nothing
     }
+
+    @Override
+    public void beginText() {
+        // Do nothing
+    }
+
+    @Override
+    public void endText() {
+        // Do nothing
+    }
 }
