@@ -107,7 +107,7 @@ class TextTest {
                         @Override
                         public void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform,
                                 @NotNull RenderContext context) {
-                            textBuilder.append(codepoint).append(" ");
+                            textBuilder.append(codepoint);
                         }
 
                         @Override
