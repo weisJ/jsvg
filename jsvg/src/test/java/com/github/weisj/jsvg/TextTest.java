@@ -27,6 +27,7 @@ import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.awt.geom.AffineTransform;
 import java.net.URL;
 import java.util.Objects;
 
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import com.github.weisj.jsvg.nodes.text.TextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullOutput;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
 
 class TextTest {
@@ -101,7 +103,23 @@ class TextTest {
             document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
                 @Override
                 public @NotNull TextOutput textOutput() {
-                    return (codepoint, glyphTransform, context) -> textBuilder.append(codepoint);
+                    return new TextOutput() {
+                        @Override
+                        public void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform,
+                                @NotNull RenderContext context) {
+                            textBuilder.append(codepoint).append(" ");
+                        }
+
+                        @Override
+                        public void beginText() {
+                            // Do nothing
+                        }
+
+                        @Override
+                        public void endText() {
+                            // Do nothing
+                        }
+                    };
                 }
             }, null);
 
