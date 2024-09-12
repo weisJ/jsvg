@@ -74,32 +74,39 @@ final class StringTextSegment implements TextSegment {
 
         @Override
         public char first() {
-            return codepoints.length == 0 ? DONE : codepoints[0];
+            if (codepoints.length == 0) return DONE;
+            index = getBeginIndex();
+            return codepoints[index];
         }
 
         @Override
         public char last() {
-            return codepoints.length == 0 ? DONE : codepoints[codepoints.length - 1];
+            if (codepoints.length == 0) return DONE;
+            index = getEndIndex() - 1;
+            return codepoints[index];
         }
 
         @Override
         public char current() {
-            return index == codepoints.length ? DONE : codepoints[index];
+            if (index == getEndIndex()) return DONE;
+            return codepoints[index];
         }
 
         @Override
         public char next() {
-            return index == codepoints.length ? DONE : codepoints[index++];
+            if (index == getEndIndex()) return DONE;
+            return codepoints[index++];
         }
 
         @Override
         public char previous() {
-            return index == 0 ? DONE : codepoints[--index];
+            if (index == getBeginIndex()) return DONE;
+            return codepoints[--index];
         }
 
         @Override
         public char setIndex(int position) {
-            if (position < 0 || position > codepoints.length) {
+            if (position < getBeginIndex() || position > getEndIndex()) {
                 throw new IllegalArgumentException("Invalid index");
             }
             index = position;
