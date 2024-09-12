@@ -104,6 +104,7 @@ class TextTest {
                 @Override
                 public @NotNull TextOutput textOutput() {
                     return new TextOutput() {
+
                         @Override
                         public void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform,
                                 @NotNull RenderContext context) {
@@ -112,6 +113,11 @@ class TextTest {
 
                         @Override
                         public void beginText() {
+                            // Do nothing
+                        }
+
+                        @Override
+                        public void glyphRunBreak() {
                             // Do nothing
                         }
 

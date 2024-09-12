@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -130,42 +130,70 @@ class GlyphCursor {
         x += advancement.spacingAdvancement(letterSpacing);
     }
 
+    private boolean currentGlyphHasXOverride() {
+        return xLocations != null && xOff < xLocations.length;
+    }
+
     protected float nextX(@NotNull MeasureContext measure) {
-        if (xLocations != null && xOff < xLocations.length) {
+        if (currentGlyphHasXOverride()) {
             x = xLocations[xOff].resolveWidth(measure);
             xOff++;
         }
         return x;
     }
 
+    private boolean currentGlyphHasDeltaXOverride() {
+        return xDeltas != null && dxOff < xDeltas.length;
+    }
+
     protected float nextDeltaX(@NotNull MeasureContext measure) {
-        if (xDeltas != null && dxOff < xDeltas.length) {
+        if (currentGlyphHasDeltaXOverride()) {
             return xDeltas[dxOff++].resolveWidth(measure);
         }
         return 0;
     }
 
+    private boolean currentGlyphHasYOverride() {
+        return yLocations != null && yOff < yLocations.length;
+    }
+
     protected float nextY(@NotNull MeasureContext measure) {
-        if (yLocations != null && yOff < yLocations.length) {
+        if (currentGlyphHasYOverride()) {
             y = yLocations[yOff].resolveHeight(measure);
             yOff++;
         }
         return y;
     }
 
+    private boolean currentGlyphHasDeltaYOverride() {
+        return yDeltas != null && dyOff < yDeltas.length;
+    }
+
     protected float nextDeltaY(@NotNull MeasureContext measure) {
-        if (yDeltas != null && dyOff < yDeltas.length) {
+        if (currentGlyphHasDeltaYOverride()) {
             return yDeltas[dyOff++].resolveHeight(measure);
         }
         return 0;
     }
 
+    private boolean currentGlyphHasRotationOverride() {
+        return rotations != null && rotations.length != 0;
+    }
+
     protected double nextRotation() {
-        if (rotations != null && rotations.length != 0) {
+        if (currentGlyphHasRotationOverride()) {
             float rotation = rotations[rotOff];
             rotOff = Math.min(rotations.length - 1, rotOff + 1);
             return Math.toRadians(rotation);
         }
         return 0;
+    }
+
+    public boolean isCurrentGlyphAutoLayout() {
+        return !currentGlyphHasXOverride()
+                && !currentGlyphHasDeltaXOverride()
+                && !currentGlyphHasYOverride()
+                && !currentGlyphHasDeltaYOverride()
+                && !currentGlyphHasRotationOverride();
     }
 }

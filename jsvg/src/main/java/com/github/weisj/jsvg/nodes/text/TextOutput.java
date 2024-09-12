@@ -39,5 +39,10 @@ public interface TextOutput {
 
     void beginText();
 
+    /**
+     * Signals that the next glyph has manual placement and therefore is visually separated from the previous glyph.
+     */
+    void glyphRunBreak();
+
     void endText();
 }

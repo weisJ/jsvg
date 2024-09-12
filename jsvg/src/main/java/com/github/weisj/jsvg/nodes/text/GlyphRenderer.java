@@ -104,6 +104,8 @@ final class GlyphRenderer {
         boolean isLastSegment = segment.isLastSegmentInParent();
         boolean shouldSkipLastSpacing = isLastSegment && cursor.advancement().shouldSkipLastSpacing();
 
+        textOutput.glyphRunBreak();
+
         List<String> codepoints = segment.codepoints();
         for (int i = 0, count = codepoints.size(); i < count; i++) {
             String codepoint = codepoints.get(i);
@@ -111,6 +113,11 @@ final class GlyphRenderer {
             boolean lastCodepoint = i == count - 1;
 
             Glyph glyph = font.codepointGlyph(codepoint);
+
+            if (i > 0 && !cursor.isCurrentGlyphAutoLayout()) {
+                textOutput.glyphRunBreak();
+            }
+
             AffineTransform glyphTransform = cursor.advance(measure, glyph);
 
             boolean skipSpacing = lastCodepoint && shouldSkipLastSpacing;
