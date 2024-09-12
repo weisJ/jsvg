@@ -1,0 +1,14 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+	width="400" height="400">
+	<text x="0" y="50">
+		A
+		<tspan>B</tspan>
+		<tspan>
+			C
+			<tspan>D</tspan>
+			E
+		</tspan>
+		F
+		<tspan x="10 15" y="70 75" rotate="0 0 0 0 0 0 0 10 0 0">0123456789</tspan>
+	</text>
+</svg>

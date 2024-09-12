@@ -194,6 +194,6 @@ class GlyphCursor {
                 && !currentGlyphHasDeltaXOverride()
                 && !currentGlyphHasYOverride()
                 && !currentGlyphHasDeltaYOverride()
-                && !currentGlyphHasRotationOverride();
+                && !(currentGlyphHasRotationOverride() && rotations[rotOff] % 360 != 0);
     }
 }

@@ -29,12 +29,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.geom.AffineTransform;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.nodes.text.GlyphRunTextOutput;
 import com.github.weisj.jsvg.nodes.text.TextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullOutput;
@@ -130,6 +133,33 @@ class TextTest {
             }, null);
 
             assertEquals("A B C D E F", textBuilder.toString());
+        } catch (Exception e) {
+            Assertions.fail(e);
+        }
+    }
+
+    @Test
+    void testExtractingGlyphRunsText() {
+        try {
+            String path = "text/extractText2.svg";
+            URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path), path);
+            SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
+
+            List<String> runs = new ArrayList<>();
+            document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
+                @Override
+                public @NotNull TextOutput textOutput() {
+                    return new GlyphRunTextOutput() {
+                        @Override
+                        protected void glyphRun(@NotNull String codepoints, @NotNull AffineTransform glyphTransform,
+                                @NotNull RenderContext context) {
+                            runs.add(codepoints);
+                        }
+                    };
+                }
+            }, null);
+
+            assertEquals(List.of("A ", "B", " ", "C ", "D", " E", " F ", "0", "123456", "789"), runs);
         } catch (Exception e) {
             Assertions.fail(e);
         }
