@@ -28,13 +28,13 @@ jobs:
       - name: Build & Test
         run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: windows-test-report
           path: jsvg/build/reports
       - name: Upload Test Diffs
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: windows-test-diffs
@@ -60,13 +60,13 @@ jobs:
       - name: Build & Test
         run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: macos-test-report
           path: jsvg/build/reports
       - name: Upload Test Diffs
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: macos-test-diffs
@@ -92,13 +92,13 @@ jobs:
       - name: Build & Test
         run: ./gradlew build test -PskipSpotless
       - name: Upload Test Report
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: linux-test-report
           path: jsvg/build/reports
       - name: Upload Test Diffs
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: linux-test-diffs
