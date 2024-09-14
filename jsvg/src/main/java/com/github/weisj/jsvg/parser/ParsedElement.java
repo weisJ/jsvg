@@ -41,6 +41,8 @@ public final class ParsedElement {
     }
 
     private final @Nullable String id;
+    private final @NotNull ParsedDocument document;
+    private final @Nullable ParsedElement parent;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
 
@@ -49,7 +51,11 @@ public final class ParsedElement {
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
 
-    ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
+    ParsedElement(@Nullable String id, @NotNull ParsedDocument document,
+            @Nullable ParsedElement parent, @NotNull AttributeNode element,
+            @NotNull SVGNode node) {
+        this.document = document;
+        this.parent = parent;
         this.attributeNode = element;
         this.node = node;
         this.id = id;
@@ -72,8 +78,16 @@ public final class ParsedElement {
         return id;
     }
 
+    public @NotNull ParsedDocument document() {
+        return document;
+    }
+
     public @NotNull List<ParsedElement> children() {
         return children;
+    }
+
+    public @Nullable ParsedElement parent() {
+        return parent;
     }
 
     public @NotNull SVGNode node() {
@@ -111,7 +125,7 @@ public final class ParsedElement {
         }
         buildStatus = BuildStatus.IN_PROGRESS;
 
-        attributeNode.prepareForNodeBuilding(this);
+        attributeNode.prepareForNodeBuilding();
 
         // Build depth first to ensure child nodes are processed first.
         // e.g. LinearGradient depends on its stops to be build first.

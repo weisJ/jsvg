@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
+import com.github.weisj.jsvg.nodes.Rect;
 
 public final class ParserTestUtil {
 
@@ -38,6 +39,8 @@ public final class ParserTestUtil {
 
     public static @NotNull AttributeNode createDummyAttributeNode(@NotNull Map<String, String> attrs) {
         ParsedDocument document = new ParsedDocument(null, LoaderContext.createDefault());
-        return new AttributeNode("dummy", attrs, null, document, Collections.emptyList(), LOAD_HELPER);
+        AttributeNode attributeNode = new AttributeNode("dummy", attrs, Collections.emptyList(), LOAD_HELPER);
+        attributeNode.setElement(new ParsedElement(null, document, null, attributeNode, new Rect()));
+        return attributeNode;
     }
 }

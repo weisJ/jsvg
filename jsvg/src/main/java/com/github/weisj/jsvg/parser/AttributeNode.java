@@ -61,25 +61,28 @@ public final class AttributeNode {
     private final @NotNull List<@NotNull StyleSheet> styleSheets;
 
     private final @NotNull LoadHelper loadHelper;
+    private ParsedElement element = null;
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
-            @Nullable AttributeNode parent,
-            @NotNull ParsedDocument document,
             @NotNull List<@NotNull StyleSheet> styleSheets,
             @NotNull LoadHelper loadHelper) {
         this.tagName = tagName;
         this.attributes = attributes;
-        this.parent = parent;
-        this.document = document;
         this.styleSheets = styleSheets;
         this.loadHelper = loadHelper;
     }
 
-    public @NotNull AttributeNode copy() {
-        return new AttributeNode(tagName, new HashMap<>(attributes), parent, document, styleSheets, loadHelper);
+    void setElement(ParsedElement element) {
+        this.element = element;
     }
 
-    void prepareForNodeBuilding(@NotNull ParsedElement parsedElement) {
+    public @NotNull AttributeNode copy() {
+        AttributeNode node = new AttributeNode(tagName, new HashMap<>(attributes), styleSheets, loadHelper);
+        node.setElement(element);
+        return node;
+    }
+
+    void prepareForNodeBuilding() {
         Map<String, String> styleSheetAttributes = new HashMap<>();
 
         // First process the inline styles. They have the highest priority.
@@ -90,7 +93,7 @@ public final class AttributeNode {
         // FIXME: Only use the newest *valid* definition of a property value.
         for (int i = sheets.size() - 1; i >= 0; i--) {
             StyleSheet sheet = sheets.get(i);
-            sheet.forEachMatchingRule(parsedElement, p -> {
+            sheet.forEachMatchingRule(element, p -> {
                 if (!styleSheetAttributes.containsKey(p.name())) {
                     styleSheetAttributes.put(p.name(), p.value());
                 }
@@ -116,9 +119,12 @@ public final class AttributeNode {
         }
     }
 
-    @NotNull
-    ParsedDocument document() {
-        return document;
+    public @NotNull ParsedDocument document() {
+        return element().document();
+    }
+
+    public @NotNull ParsedElement element() {
+        return element;
     }
 
     @NotNull
@@ -127,7 +133,7 @@ public final class AttributeNode {
     }
 
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
-        return loadHelper.elementLoader().loadElement(type, value, document, loadHelper.attributeParser());
+        return loadHelper.elementLoader().loadElement(type, value, document(), loadHelper.attributeParser());
     }
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @Nullable String value) {
@@ -158,10 +164,6 @@ public final class AttributeNode {
             if (tagName.equals(tag)) return true;
         }
         return false;
-    }
-
-    public @Nullable AttributeNode parent() {
-        return parent;
     }
 
     public @Nullable String getValue(@NotNull String key) {
