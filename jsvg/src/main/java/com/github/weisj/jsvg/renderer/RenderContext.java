@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.PaintOrder;
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
@@ -252,16 +251,16 @@ public final class RenderContext {
         return p != null ? p : SVGPaint.DEFAULT_PAINT;
     }
 
-    public @Percentage float rawOpacity() {
-        return paintContext.opacity;
+    public float rawOpacity() {
+        return paintContext.opacity.value();
     }
 
-    public @Percentage float fillOpacity() {
-        return paintContext.fillOpacity * paintContext.opacity;
+    public float fillOpacity() {
+        return paintContext.fillOpacity.value() * paintContext.opacity.value();
     }
 
-    public @Percentage float strokeOpacity() {
-        return paintContext.strokeOpacity * paintContext.opacity;
+    public float strokeOpacity() {
+        return paintContext.strokeOpacity.value() * paintContext.opacity.value();
     }
 
     public @NotNull Stroke stroke(float pathLengthFactor) {
