@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,7 +27,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.LengthValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -35,12 +35,12 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 public final class SVGLine implements MeasurableShape {
 
     private final @NotNull Line2D.Float line = new Line2D.Float();
-    private final Length x1;
-    private final Length y1;
-    private final Length x2;
-    private final Length y2;
+    private final LengthValue x1;
+    private final LengthValue y1;
+    private final LengthValue x2;
+    private final LengthValue y2;
 
-    public SVGLine(@NotNull Length x1, @NotNull Length y1, @NotNull Length x2, @NotNull Length y2) {
+    public SVGLine(@NotNull LengthValue x1, @NotNull LengthValue y1, @NotNull LengthValue x2, @NotNull LengthValue y2) {
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;

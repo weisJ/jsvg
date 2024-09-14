@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,15 +21,14 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-
-import com.github.weisj.jsvg.nodes.animation.Animate;
-import com.github.weisj.jsvg.nodes.prototype.Container;
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGRectangle;
 import com.github.weisj.jsvg.geometry.SVGRoundRectangle;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.LengthValue;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -47,13 +46,13 @@ public final class Rect extends ShapeNode {
 
     @Override
     protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode node) {
-        Length x = node.getLength("x", 0);
-        Length y = node.getLength("y", 0);
-        Length width = node.getLength("width", 0);
-        Length height = node.getLength("height", 0);
+        LengthValue x = node.getLength("x", Length.ZERO, Animatable.YES);
+        LengthValue y = node.getLength("y", Length.ZERO, Animatable.YES);
+        LengthValue width = node.getLength("width", Length.ZERO, Animatable.YES);
+        LengthValue height = node.getLength("height", Length.ZERO, Animatable.YES);
 
-        Length rx = node.getLength("rx", Length.UNSPECIFIED);
-        Length ry = node.getLength("ry", rx); // Use rx as fallback
+        LengthValue rx = node.getLength("rx", Length.UNSPECIFIED, Animatable.YES);
+        LengthValue ry = node.getLength("ry", rx, Animatable.YES); // Use rx as fallback
         if (rx.isUnspecified()) {
             rx = ry; // If rx is not specified use
         }
@@ -61,8 +60,8 @@ public final class Rect extends ShapeNode {
         rx = rx.coerceNonNegative().orElseIfUnspecified(0);
         ry = ry.coerceNonNegative().orElseIfUnspecified(0);
 
-
-        if (rx.isZero() && ry.isZero()) {
+        boolean isNonRounded = rx.isConstantlyZero() && ry.isConstantlyZero();
+        if (isNonRounded) {
             return new SVGRectangle(x, y, width, height);
         } else {
             return new SVGRoundRectangle(x, y, width, height, rx, ry);

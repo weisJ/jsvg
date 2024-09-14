@@ -27,10 +27,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
-import com.github.weisj.jsvg.attributes.ViewBox;
-import com.google.errorprone.annotations.Immutable;
 
-public final class Length {
+public final class Length implements LengthValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
     public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
@@ -45,6 +43,11 @@ public final class Length {
     public Length(@NotNull Unit unit, float value) {
         this.unit = unit;
         this.value = value;
+    }
+
+    public Length(@NotNull Length ry) {
+        this.unit = ry.unit;
+        this.value = ry.value;
     }
 
     public static boolean isUnspecified(float value) {
@@ -86,11 +89,7 @@ public final class Length {
         }
     }
 
-    /**
-     * Used for resolving lengths which are used as x-coordinates or width values.
-     * @param context the measuring context.
-     * @return the resolved size.
-     */
+    @Override
     public float resolveWidth(@NotNull MeasureContext context) {
         Unit u = unit();
         float raw = raw();
@@ -101,11 +100,7 @@ public final class Length {
         }
     }
 
-    /**
-     * Used for resolving lengths which are used as y-coordinates or height values.
-     * @param context the measuring context.
-     * @return the resolved size.
-     */
+    @Override
     public float resolveHeight(@NotNull MeasureContext context) {
         Unit u = unit();
         float raw = raw();
@@ -116,12 +111,7 @@ public final class Length {
         }
     }
 
-    /**
-     * Used for resolving lengths which are neither used as y/x-coordinates nor width/height values.
-     * Relative sizes are relative to the {@link ViewBox#normedDiagonalLength()}.
-     * @param context the measuring context.
-     * @return the resolved size.
-     */
+    @Override
     public float resolveLength(@NotNull MeasureContext context) {
         Unit u = unit();
         float raw = raw();
@@ -158,6 +148,11 @@ public final class Length {
         return value == 0;
     }
 
+    @Override
+    public boolean isConstantlyZero() {
+        return isZero();
+    }
+
     public float raw() {
         return value;
     }
@@ -172,14 +167,12 @@ public final class Length {
         return unit;
     }
 
+    @Override
     public boolean isUnspecified() {
         return isUnspecified(value);
     }
 
-    public final boolean isSpecified() {
-        return !isUnspecified();
-    }
-
+    @Override
     public @NotNull Length coerceNonNegative() {
         if (isSpecified() && value <= 0) return ZERO;
         return this;
@@ -191,6 +184,7 @@ public final class Length {
         return new Length(Unit.PERCENTAGE, raw() * 100);
     }
 
+    @Override
     public @NotNull Length orElseIfUnspecified(float value) {
         if (isUnspecified()) return Unit.Raw.valueOf(value);
         return this;
@@ -198,6 +192,7 @@ public final class Length {
 
     public @NotNull Length multiply(float scalingFactor) {
         if (scalingFactor == 0) return ZERO;
+        if (scalingFactor == 1) return this;
         return new Length(unit, scalingFactor * value);
     }
 

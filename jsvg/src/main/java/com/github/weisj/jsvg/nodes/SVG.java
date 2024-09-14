@@ -62,6 +62,7 @@ public final class SVG extends CommonInnerViewContainer {
 
     private boolean isTopLevel;
     private boolean inNonRootMode;
+    private long animationPeriod;
 
     @Override
     public @NotNull String tagName() {
@@ -70,6 +71,10 @@ public final class SVG extends CommonInnerViewContainer {
 
     public boolean isTopLevel() {
         return isTopLevel && !inNonRootMode;
+    }
+
+    public boolean isAnimated() {
+        return animationPeriod != 0;
     }
 
 
@@ -97,6 +102,7 @@ public final class SVG extends CommonInnerViewContainer {
     public void build(@NotNull AttributeNode attributeNode) {
         isTopLevel = attributeNode.element().parent() == null;
         super.build(attributeNode);
+        animationPeriod = attributeNode.document().animationPeriod();
     }
 
     @Override
@@ -120,7 +126,8 @@ public final class SVG extends CommonInnerViewContainer {
 
     public @NotNull FloatSize sizeForTopLevel(float em, float ex) {
         // Use a viewport of size 100x100 to interpret percentage values as raw pixels.
-        MeasureContext topLevelContext = MeasureContext.createInitial(new FloatSize(100, 100), em, ex);
+        MeasureContext topLevelContext = MeasureContext.createInitial(new FloatSize(100, 100),
+                em, ex, 0);
         return new FloatSize(
                 width.orElseIfUnspecified(viewBox != null ? viewBox.width : FALLBACK_WIDTH)
                         .resolveWidth(topLevelContext),

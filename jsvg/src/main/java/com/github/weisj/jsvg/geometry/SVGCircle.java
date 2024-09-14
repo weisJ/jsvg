@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,18 +27,18 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.LengthValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class SVGCircle implements MeasurableShape {
 
     private final @NotNull Ellipse2D.Float circle = new Ellipse2D.Float();
-    private final @NotNull Length cx;
-    private final @NotNull Length cy;
-    private final @NotNull Length r;
+    private final @NotNull LengthValue cx;
+    private final @NotNull LengthValue cy;
+    private final @NotNull LengthValue r;
 
-    public SVGCircle(@NotNull Length cx, @NotNull Length cy, @NotNull Length r) {
+    public SVGCircle(@NotNull LengthValue cx, @NotNull LengthValue cy, @NotNull LengthValue r) {
         this.cx = cx;
         this.cy = cy;
         this.r = r;
