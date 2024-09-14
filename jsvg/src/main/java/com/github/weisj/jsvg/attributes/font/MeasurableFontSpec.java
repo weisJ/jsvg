@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,9 +27,9 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.google.errorprone.annotations.Immutable;
 
@@ -40,7 +40,7 @@ public final class MeasurableFontSpec extends FontSpec {
     private final @NotNull Length currentSize;
 
     MeasurableFontSpec(@NotNull String[] families, @Nullable FontStyle style, @Nullable Length sizeAdjust,
-            float stretch, int currentWeight, @NotNull Length currentSize) {
+            @NotNull Percentage stretch, int currentWeight, @NotNull Length currentSize) {
         super(families, style, sizeAdjust, stretch);
         this.currentWeight = currentWeight;
         this.currentSize = currentSize;
@@ -65,7 +65,7 @@ public final class MeasurableFontSpec extends FontSpec {
         return style;
     }
 
-    public @Percentage float stretch() {
+    public @NotNull Percentage stretch() {
         return stretch;
     }
 
@@ -108,7 +108,7 @@ public final class MeasurableFontSpec extends FontSpec {
         Length newSizeAdjust = other.sizeAdjust != null
                 ? other.sizeAdjust
                 : this.sizeAdjust;
-        float newStretch = Length.isSpecified(other.stretch)
+        Percentage newStretch = other.stretch.isSpecified()
                 ? other.stretch
                 : this.stretch;
         return new MeasurableFontSpec(newFamilies, newStyle, newSizeAdjust, newStretch, newWeight, newSize);

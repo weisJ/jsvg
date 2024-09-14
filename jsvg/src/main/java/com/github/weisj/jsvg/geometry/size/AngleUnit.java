@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,7 +25,6 @@ import java.util.Locale;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.Radian;
 
 public enum AngleUnit {
     Deg,
@@ -56,9 +55,9 @@ public enum AngleUnit {
         return suffix;
     }
 
-    public @Radian float toRadians(float value, @NotNull AngleUnit rawReplacement) {
-        if (rawReplacement == Raw) throw new IllegalArgumentException("Cant replace raw unit with raw");
+    public float toRadians(float value) {
         switch (this) {
+            case Raw:
             case Deg:
                 return (float) Math.toRadians(value);
             case Grad:
@@ -67,8 +66,6 @@ public enum AngleUnit {
                 return value;
             case Turn:
                 return (float) (value * Math.PI * 2f);
-            case Raw:
-                return rawReplacement.toRadians(value, rawReplacement);
             default:
                 throw new IllegalArgumentException("Unknown angle unit " + this);
         }

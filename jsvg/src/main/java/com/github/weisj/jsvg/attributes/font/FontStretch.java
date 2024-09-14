@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.attributes.font;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.HasMatchName;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 
 public enum FontStretch implements HasMatchName {
     Normal(1f),
@@ -40,16 +41,16 @@ public enum FontStretch implements HasMatchName {
      */
     Percentage(-1);
 
-    private final float percentage;
+    private final @NotNull Percentage percentage;
     private final @NotNull String matchName;
 
     FontStretch(float percentage, @NotNull String matchName) {
-        this.percentage = percentage;
+        this.percentage = new Percentage(percentage);
         this.matchName = matchName;
     }
 
     FontStretch(float percentage) {
-        this.percentage = percentage;
+        this.percentage = new Percentage(percentage);
         this.matchName = name();
     }
 
@@ -58,7 +59,7 @@ public enum FontStretch implements HasMatchName {
         return matchName;
     }
 
-    public float percentage() {
+    public @NotNull Percentage percentage() {
         if (this == Percentage) {
             throw new UnsupportedOperationException("Percentage needs to be computed manually");
         }
