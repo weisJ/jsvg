@@ -24,7 +24,9 @@ package com.github.weisj.jsvg.nodes.animation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.size.AnimatedLength;
 import com.github.weisj.jsvg.animation.time.Duration;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.MetaSVGNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -37,30 +39,17 @@ import com.github.weisj.jsvg.parser.SeparatorMode;
 public final class Animate extends MetaSVGNode {
     public static final String TAG = "animate";
 
-    private String attributeName;
     private String[] values;
     private Duration duration;
-    private int repeatCount;
+    private float repeatCount;
 
     @Override
     public @NotNull String tagName() {
         return TAG;
     }
 
-    public @NotNull String @NotNull [] values() {
-        return values;
-    }
-
-    public @Nullable String attributeName() {
-        return attributeName;
-    }
-
-    public @NotNull Duration duration() {
-        return duration;
-    }
-
-    public int repeatCount() {
-        return repeatCount;
+    public static @Nullable String attributeName(@NotNull AttributeNode attributeNode) {
+        return attributeNode.getValue("attributeName");
     }
 
     @Override
@@ -73,8 +62,21 @@ public final class Animate extends MetaSVGNode {
         if ("indefinite".equals(repeatCountStr)) {
             repeatCount = Integer.MAX_VALUE;
         } else {
-            repeatCount = attributeNode.parser().parseInt(repeatCountStr, 1);
+            repeatCount = attributeNode.parser().parseFloat(repeatCountStr, 1);
         }
+    }
+
+    public @Nullable AnimatedLength animatedLength(@NotNull Length initial, @NotNull AttributeNode attributeNode) {
+        if (duration.isIndefinite()) return null;
+        if (duration.milliseconds() < 0) return null;
+        if (repeatCount <= 0) return null;
+
+        Length[] lengths = new Length[values.length];
+        for (int i = 0; i < values.length; i++) {
+            lengths[i] = attributeNode.parser().parseLength(values[i], null);
+            if (lengths[i] == null) return null;
+        }
+        return new AnimatedLength(duration, repeatCount, initial, lengths);
     }
 
 }

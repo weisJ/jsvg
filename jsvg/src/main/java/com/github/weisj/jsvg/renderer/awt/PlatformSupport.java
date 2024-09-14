@@ -54,4 +54,7 @@ public interface PlatformSupport {
         return false;
     }
 
+    default long timestamp() {
+        return System.currentTimeMillis();
+    }
 }
