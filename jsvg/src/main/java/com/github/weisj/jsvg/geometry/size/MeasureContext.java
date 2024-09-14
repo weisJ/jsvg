@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
@@ -36,25 +37,28 @@ public final class MeasureContext {
     private final float em;
     private final float rem;
     private final float ex;
+    private final long timestamp;
 
-    private MeasureContext(float vw, float vh, float em, float ex, float rem) {
+    public MeasureContext(float vw, float vh, float em, float ex, float rem, long timestamp) {
         this.vw = vw;
         this.vh = vh;
         this.em = em;
         this.rem = rem;
         this.ex = ex;
+        this.timestamp = timestamp;
     }
 
-    public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex) {
-        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, em);
+    public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex,
+            long timestamp) {
+        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, em, timestamp);
     }
 
     public @NotNull MeasureContext deriveRoot(float rem) {
-        return new MeasureContext(vw, vh, em, ex, rem);
+        return new MeasureContext(vw, vh, em, ex, rem, timestamp);
     }
 
     public @NotNull MeasureContext derive(float viewWidth, float viewHeight) {
-        return new MeasureContext(viewWidth, viewHeight, em, ex, rem);
+        return new MeasureContext(viewWidth, viewHeight, em, ex, rem, timestamp);
     }
 
     public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex) {
@@ -68,7 +72,7 @@ public final class MeasureContext {
         }
         float effectiveEm = Length.isUnspecified(em) ? this.em : em;
         float effectiveEx = Length.isUnspecified(ex) ? this.ex : ex;
-        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, rem);
+        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, rem, timestamp);
     }
 
     public float viewWidth() {
@@ -95,13 +99,19 @@ public final class MeasureContext {
         return ex;
     }
 
+    public long timestamp() {
+        return timestamp;
+    }
+
     @Override
     public String toString() {
         return "MeasureContext{" +
                 "vw=" + vw +
                 ", vh=" + vh +
                 ", em=" + em +
+                ", rem=" + rem +
                 ", ex=" + ex +
+                ", timestamp=" + timestamp +
                 '}';
     }
 
@@ -113,11 +123,14 @@ public final class MeasureContext {
         return Float.compare(that.vw, vw) == 0
                 && Float.compare(that.vh, vh) == 0
                 && Float.compare(that.em, em) == 0
-                && Float.compare(that.ex, ex) == 0;
+                && Float.compare(that.rem, rem) == 0
+                && Float.compare(that.ex, ex) == 0
+                && that.timestamp == timestamp;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vw, vh, em, ex);
+        return Objects.hash(vw, vh, em, ex, rem, timestamp);
     }
+
 }

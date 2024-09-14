@@ -28,10 +28,14 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.nodes.animation.Animate;
+
 public class ParsedDocument {
     private final Map<String, Object> namedElements = new HashMap<>();
     private final @Nullable URI rootURI;
     private final @NotNull LoaderContext loaderContext;
+
+    private long animationPeriod;
 
     public ParsedDocument(@Nullable URI rootURI, @NotNull LoaderContext loaderContext) {
         this.rootURI = rootURI;
@@ -63,5 +67,13 @@ public class ParsedDocument {
 
     public @Nullable URI rootURI() {
         return rootURI;
+    }
+
+    public long animationPeriod() {
+        return animationPeriod;
+    }
+
+    public void registerAnimatedElement(Animate animate) {
+        animationPeriod = 1;
     }
 }

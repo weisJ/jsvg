@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.size.AnimatedLength;
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
@@ -44,6 +45,7 @@ import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -53,11 +55,10 @@ public final class AttributeNode {
     private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
     private static final Length Center = new Length(Unit.PERCENTAGE, 50f);
     private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);
+    private static final Length FALLBACK_LENGTH = new Length(Unit.Raw, 0f);
 
     private final @NotNull String tagName;
     private final @NotNull Map<String, String> attributes;
-    private final @Nullable AttributeNode parent;
-    private final @NotNull ParsedDocument document;
     private final @NotNull List<@NotNull StyleSheet> styleSheets;
 
     private final @NotNull LoadHelper loadHelper;
@@ -195,15 +196,35 @@ public final class AttributeNode {
     }
 
     public @Nullable Length getLength(@NotNull String key) {
-        return getLengthInternal(key, null);
+        return getLength(key, null);
     }
 
     public @NotNull Length getLength(@NotNull String key, float fallback) {
         return getLength(key, Unit.Raw.valueOf(fallback));
     }
 
-    public @NotNull Length getLength(@NotNull String key, @NotNull Length fallback) {
-        return getLengthInternal(key, fallback);
+    @Contract("_,!null -> !null")
+    public @Nullable Length getLength(@NotNull String key, @Nullable Length fallback) {
+        return (Length) getLength(key, fallback, Animatable.NO);
+    }
+
+    @Contract("_,!null,_ -> !null")
+    public @Nullable LengthValue getLength(@NotNull String key, @Nullable LengthValue fallback, Animatable animatable) {
+        LengthValue value = getLengthInternal(key, FALLBACK_LENGTH);
+        if (value == FALLBACK_LENGTH) {
+            value = fallback;
+        }
+
+        if (animatable == Animatable.YES) {
+            if (fallback == null) throw new IllegalStateException("Fallback must not be null for animatable property");
+            Length initial = value instanceof Length
+                    ? (Length) value
+                    : ((AnimatedLength) value).initial();
+            AnimatedLength animatedLength = getAnimatedLength(key, initial);
+            if (animatedLength != null) return animatedLength;
+        }
+
+        return value;
     }
 
     public @NotNull Duration getDuration(@NotNull String key, @NotNull Duration fallback) {
@@ -342,6 +363,17 @@ public final class AttributeNode {
     }
 
     public @Nullable URI resolveResourceURI(@NotNull String url) {
-        return loadHelper.externalResourcePolicy().resolveResourceURI(document.rootURI(), url);
+        return loadHelper.externalResourcePolicy().resolveResourceURI(document().rootURI(), url);
+    }
+
+    private @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull Length initial) {
+        ParsedElement parsedElement = element.animationElements().get(property);
+        if (parsedElement == null) return null;
+        if (parsedElement.node() instanceof Animate) {
+            Animate animate = (Animate) parsedElement.nodeEnsuringBuildStatus();
+            document().registerAnimatedElement(animate);
+            return animate.animatedLength(initial, this);
+        }
+        return null;
     }
 }

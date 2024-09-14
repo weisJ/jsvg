@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,22 +27,23 @@ import java.awt.geom.RoundRectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.LengthValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class SVGRoundRectangle implements MeasurableShape {
 
     private final @NotNull RoundRectangle2D.Float rect = new RoundRectangle2D.Float();
-    private final @NotNull Length x;
-    private final @NotNull Length y;
-    private final @NotNull Length w;
-    private final @NotNull Length h;
-    private final @NotNull Length rx;
-    private final @NotNull Length ry;
+    private final @NotNull LengthValue x;
+    private final @NotNull LengthValue y;
+    private final @NotNull LengthValue w;
+    private final @NotNull LengthValue h;
+    private final @NotNull LengthValue rx;
+    private final @NotNull LengthValue ry;
 
-    public SVGRoundRectangle(@NotNull Length x, @NotNull Length y, @NotNull Length w, @NotNull Length h,
-            @NotNull Length rx, @NotNull Length ry) {
+    public SVGRoundRectangle(@NotNull LengthValue x, @NotNull LengthValue y, @NotNull LengthValue w,
+            @NotNull LengthValue h,
+            @NotNull LengthValue rx, @NotNull LengthValue ry) {
         this.x = x;
         this.y = y;
         this.w = w;
