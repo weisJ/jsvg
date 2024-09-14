@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.MarkerOrientation;
 import com.github.weisj.jsvg.attributes.PaintOrder;
-import com.github.weisj.jsvg.attributes.Radian;
 import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -280,7 +279,7 @@ public final class ShapeRenderer {
         assert type != null;
 
         MarkerOrientation orientation = marker.orientation();
-        @Radian float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
+        float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
 
         Output markerOutput = output.createChild();
         RenderContext markerContext = context.deriveForChildGraphics();
@@ -298,7 +297,7 @@ public final class ShapeRenderer {
     }
 
     private static void paintDebugMarker(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Marker marker, @Radian float rotation) {
+            @NotNull Marker marker, float rotation) {
         FloatSize size = marker.size(context);
 
         Path2D p = new Path2D.Float();

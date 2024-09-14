@@ -28,9 +28,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.PaintOrder;
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
@@ -40,16 +40,16 @@ public final class PaintContext implements Mutator<PaintContext> {
     public final @Nullable SVGPaint fillPaint;
     public final @Nullable SVGPaint strokePaint;
 
-    public final @Percentage float opacity;
-    public final @Percentage float fillOpacity;
-    public final @Percentage float strokeOpacity;
+    public final Percentage opacity;
+    public final Percentage fillOpacity;
+    public final Percentage strokeOpacity;
 
     public final @Nullable PaintOrder paintOrder;
 
     public final @Nullable StrokeContext strokeContext;
 
-    public PaintContext(@Nullable AwtSVGPaint color, @Nullable SVGPaint fillPaint, float fillOpacity,
-            @Nullable SVGPaint strokePaint, float strokeOpacity, float opacity,
+    public PaintContext(@Nullable AwtSVGPaint color, @Nullable SVGPaint fillPaint, Percentage fillOpacity,
+            @Nullable SVGPaint strokePaint, Percentage strokeOpacity, Percentage opacity,
             @Nullable PaintOrder paintOrder,
             @Nullable StrokeContext strokeContext) {
         this.color = color;
@@ -66,8 +66,8 @@ public final class PaintContext implements Mutator<PaintContext> {
     public static @NotNull PaintContext createDefault() {
         return new PaintContext(
                 SVGPaint.DEFAULT_PAINT,
-                SVGPaint.DEFAULT_PAINT, 1,
-                SVGPaint.NONE, 1, 1,
+                SVGPaint.DEFAULT_PAINT, Percentage.ONE,
+                SVGPaint.NONE, Percentage.ONE, Percentage.ONE,
                 PaintOrder.NORMAL,
                 StrokeContext.createDefault());
     }
@@ -76,10 +76,10 @@ public final class PaintContext implements Mutator<PaintContext> {
         return new PaintContext(
                 parseColorAttribute(attributeNode),
                 attributeNode.getPaint("fill"),
-                attributeNode.getPercentage("fill-opacity", 1),
+                attributeNode.getPercentage("fill-opacity", Percentage.ONE),
                 attributeNode.getPaint("stroke"),
-                attributeNode.getPercentage("stroke-opacity", 1),
-                attributeNode.getPercentage("opacity", 1),
+                attributeNode.getPercentage("stroke-opacity", Percentage.ONE),
+                attributeNode.getPercentage("opacity", Percentage.ONE),
                 PaintOrder.parse(attributeNode),
                 StrokeContext.parse(attributeNode));
     }
@@ -94,10 +94,10 @@ public final class PaintContext implements Mutator<PaintContext> {
         return new PaintContext(
                 context.color != null ? context.color : color,
                 context.fillPaint != null ? context.fillPaint : fillPaint,
-                fillOpacity * context.fillOpacity,
+                fillOpacity.multiply(context.fillOpacity),
                 context.strokePaint != null ? context.strokePaint : strokePaint,
-                strokeOpacity * context.strokeOpacity,
-                opacity * context.opacity,
+                strokeOpacity.multiply(context.strokeOpacity),
+                opacity.multiply(context.opacity),
                 context.paintOrder != null ? context.paintOrder : paintOrder,
                 strokeContext != null
                         ? strokeContext.derive(context.strokeContext)

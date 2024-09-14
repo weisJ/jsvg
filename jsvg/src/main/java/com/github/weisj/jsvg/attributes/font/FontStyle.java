@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,11 +22,13 @@
 package com.github.weisj.jsvg.attributes.font;
 
 import java.awt.geom.AffineTransform;
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Radian;
+import com.github.weisj.jsvg.geometry.size.Angle;
+import com.github.weisj.jsvg.geometry.size.AngleUnit;
 
 /**
  * This abstract class shouldn't be extended besides those constants.
@@ -51,7 +53,7 @@ abstract class FontStyle {
         return Oblique.DEFAULT;
     }
 
-    public static @NotNull FontStyle oblique(@Radian float angle) {
+    public static @NotNull FontStyle oblique(@NotNull Angle angle) {
         return new Oblique(angle);
     }
 
@@ -94,18 +96,18 @@ abstract class FontStyle {
     }
 
     static final class Oblique extends FontStyle {
-        public static final @Radian float DEFAULT_ANGLE = (float) Math.toRadians(14);
+        public static final @NotNull Angle DEFAULT_ANGLE = new Angle(AngleUnit.Deg, 14);
         public static final @NotNull FontStyle.Oblique DEFAULT = new Oblique(DEFAULT_ANGLE);
 
-        private final @Radian float angle;
+        private final @NotNull Angle angle;
 
-        public Oblique(@Radian float angle) {
+        public Oblique(@NotNull Angle angle) {
             this.angle = angle;
         }
 
         @Override
         public @NotNull AffineTransform transform() {
-            return AffineTransform.getShearInstance(-angle, 0);
+            return AffineTransform.getShearInstance(-angle.radians(), 0);
         }
 
         @Override
@@ -118,12 +120,12 @@ abstract class FontStyle {
             if (this == o) return true;
             if (!(o instanceof Oblique)) return false;
             Oblique that = (Oblique) o;
-            return Float.compare(that.angle, angle) == 0;
+            return angle.equals(that.angle);
         }
 
         @Override
         public int hashCode() {
-            return Float.hashCode(angle);
+            return Objects.hashCode(angle);
         }
     }
 }

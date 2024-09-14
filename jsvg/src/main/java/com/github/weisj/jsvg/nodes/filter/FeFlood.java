@@ -30,6 +30,7 @@ import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -48,7 +49,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
     public static final String TAG = "feflood";
 
     private SVGPaint floodColor;
-    private float floodOpacity;
+    private Percentage floodOpacity;
 
     @Override
     public @NotNull String tagName() {
@@ -59,7 +60,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         floodColor = attributeNode.getPaint("flood-color", new AwtSVGPaint(Color.BLACK));
-        floodOpacity = attributeNode.getPercentage("flood-opacity", 1);
+        floodOpacity = attributeNode.getPercentage("flood-opacity", Percentage.ONE);
     }
 
     @Override
@@ -76,9 +77,10 @@ public final class FeFlood extends AbstractFilterPrimitive {
         // and even then filters like feBlend could benefit from knowing that this is a constant color.
         Filter.FilterInfo info = filterContext.info();
         BufferedImage img = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
-        if (floodOpacity != 0) {
+        float opacity = floodOpacity.value();
+        if (opacity != 0) {
             Graphics2D graphics = GraphicsUtil.createGraphics(img);
-            graphics.setComposite(AlphaComposite.Src.derive(floodOpacity));
+            graphics.setComposite(AlphaComposite.Src.derive(opacity));
             Rectangle rect = new Rectangle(0, 0, img.getWidth(), img.getHeight());
             floodColor.fillShape(new Graphics2DOutput(graphics), context, rect, rect);
             graphics.dispose();
