@@ -37,8 +37,10 @@ import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.time.TimeUnit;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.size.Angle;
 import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
@@ -63,11 +65,14 @@ public final class AttributeParser {
         return parseSuffixUnit(value, TimeUnit.Raw, fallback);
     }
 
-    public @Percentage float parsePercentage(@Nullable String value, float fallback) {
+    @Contract("_,!null -> !null")
+    public @Nullable Percentage parsePercentage(@Nullable String value, @Nullable Percentage fallback) {
         return parsePercentage(value, fallback, 0, 1);
     }
 
-    public @Percentage float parsePercentage(@Nullable String value, float fallback, float min, float max) {
+    @Contract("_,!null,_,_ -> !null")
+    public @Nullable Percentage parsePercentage(@Nullable String value, @Nullable Percentage fallback, float min,
+            float max) {
         if (value == null) return fallback;
         try {
             float parsed;
@@ -76,7 +81,7 @@ public final class AttributeParser {
             } else {
                 parsed = Float.parseFloat(value);
             }
-            return Math.max(min, Math.min(max, parsed));
+            return new Percentage(Math.max(min, Math.min(max, parsed)));
         } catch (NumberFormatException e) {
             return fallback;
         }
@@ -136,7 +141,7 @@ public final class AttributeParser {
         }
     }
 
-    public @Radian float parseAngle(@Nullable String value, float fallback) {
+    public @NotNull Angle parseAngle(@Nullable String value, @NotNull Angle fallback) {
         if (value == null) return fallback;
         AngleUnit unit = AngleUnit.Raw;
         String lower = value.toLowerCase(Locale.ENGLISH);
@@ -148,7 +153,7 @@ public final class AttributeParser {
         }
         String str = lower.substring(0, lower.length() - unit.suffix().length());
         try {
-            return unit.toRadians(Float.parseFloat(str), AngleUnit.Deg);
+            return new Angle(unit, Float.parseFloat(str));
         } catch (NumberFormatException e) {
             return fallback;
         }

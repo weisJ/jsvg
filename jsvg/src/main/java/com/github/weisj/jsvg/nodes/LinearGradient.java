@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,9 +29,9 @@ import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
@@ -69,12 +69,13 @@ public final class LinearGradient extends AbstractGradient<LinearGradient> {
 
     @Override
     protected @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
-            @Percentage float[] gradOffsets, @NotNull Color[] gradColors) {
+            Percentage[] gradOffsets, @NotNull Color[] gradColors) {
         Point2D.Float pt1 = new Point2D.Float(x1.resolveWidth(measure), y1.resolveHeight(measure));
         Point2D.Float pt2 = new Point2D.Float(x2.resolveWidth(measure), y2.resolveHeight(measure));
         if (pt1.equals(pt2)) return gradColors[0];
 
-        return new LinearGradientPaint(pt1, pt2, gradOffsets, gradColors, spreadMethod.cycleMethod(),
+        return new LinearGradientPaint(pt1, pt2, offsetsToFractions(gradOffsets), gradColors,
+                spreadMethod.cycleMethod(),
                 MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
     }
 

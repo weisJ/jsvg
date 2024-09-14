@@ -24,17 +24,18 @@ package com.github.weisj.jsvg.nodes;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.util.Comparator;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.SpreadMethod;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.Output;
@@ -47,9 +48,11 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     protected SpreadMethod spreadMethod;
 
     private @NotNull Color[] colors;
-    private @Percentage float[] offsets;
+    private Percentage[] offsets;
 
-    public final @Percentage float[] offsets() {
+    private float[] tmpFractions;
+
+    public final Percentage[] offsets() {
         return offsets;
     }
 
@@ -88,42 +91,45 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     }
 
     private void parseStops(@NotNull List<Stop> stops) {
-        stops.sort((s1, s2) -> Float.compare(s1.offset(), s2.offset()));
+        stops.sort(Comparator.comparing(Stop::offset));
         colors = new Color[stops.size()];
-        offsets = new float[stops.size()];
+        offsets = new Percentage[stops.size()];
+
+        // TODO: Make this not be necessary by changing the gradient implementations.
+        // Makes it possible to just resort the stops once animations are supported.
 
         boolean realGradient = false;
         for (int i = 0; i < offsets.length; i++) {
             Stop stop = stops.get(i);
             // Clamp the offset
-            float stopOffset = Math.max(0, Math.min(1, stop.offset()));
+            float stopOffset = Math.max(0, Math.min(1, stop.offset().value()));
             Color stopColor = stop.color();
 
             if (i > 0) {
                 // Keep track whether the provided colors and offsets are actually different.
                 realGradient = realGradient
-                        || stopOffset > stops.get(i - 1).offset()
+                        || stopOffset > stops.get(i - 1).offset().value()
                         || !stopColor.equals(colors[i - 1]);
 
-                if (stopOffset <= offsets[i - 1]) {
+                if (stopOffset <= offsets[i - 1].value()) {
                     // The awt gradient implementations really don't like it if
                     // two offsets are equal. Hence, we use the next possible float value instead as it will produce
                     // the same effect as if the equal values were used.
-                    stopOffset = Math.nextAfter(offsets[i - 1], Double.MAX_VALUE);
+                    stopOffset = Math.nextAfter(offsets[i - 1].value(), Double.MAX_VALUE);
                 }
             }
 
-            offsets[i] = stopOffset;
+            offsets[i] = new Percentage(stopOffset);
             colors[i] = stopColor;
         }
 
         // Re-balance if nextAfter pushed us out of range.
-        if (offsets.length > 0 && offsets[offsets.length - 1] > 1f) {
-            float diff = offsets[offsets.length - 1] - 1f;
-            offsets[offsets.length - 1] = 1f;
+        if (offsets.length > 0 && offsets[offsets.length - 1].value() > 1f) {
+            float diff = offsets[offsets.length - 1].value() - 1f;
+            offsets[offsets.length - 1] = Percentage.ONE;
             int i = offsets.length - 2;
-            while (i >= 0 && offsets[i] >= offsets[i + 1]) {
-                offsets[i] -= diff;
+            while (i >= 0 && offsets[i].compareTo(offsets[i + 1]) > 0) {
+                offsets[i] = new Percentage(offsets[i].value() - diff);
             }
         }
 
@@ -131,7 +137,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             // If all stops are equal, we can just use the first color.
             // This never gets passed to the radial gradient hence we don't need to provide a second stop.
             colors = new Color[] {colors[0]};
-            offsets = new float[] {0f};
+            offsets = new Percentage[] {Percentage.ZERO};
         } else if (offsets.length > 0) {
             // To avoid copying the arrays, we just make sure that the first and last stop are 0 and 1
             // respectively here instead of in the gradient implementation.
@@ -141,33 +147,33 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             boolean fixFirst = false;
             boolean fixLast = false;
 
-            if (offsets[0] != 0f) {
+            if (offsets[0].value() != 0f) {
                 // first stop is not equal to zero, fix this condition
                 fixFirst = true;
                 offsetLength++;
                 off++;
             }
-            if (offsets[offsets.length - 1] != 1f) {
+            if (offsets[offsets.length - 1].value() != 1f) {
                 // last stop is not equal to one, fix this condition
                 fixLast = true;
                 offsetLength++;
             }
 
-            float[] oldOffsets = offsets;
+            Percentage[] oldOffsets = offsets;
             Color[] oldColors = colors;
 
-            offsets = new float[offsetLength];
+            offsets = new Percentage[offsetLength];
             colors = new Color[offsetLength];
 
             System.arraycopy(oldOffsets, 0, offsets, off, oldOffsets.length);
             System.arraycopy(oldColors, 0, colors, off, oldColors.length);
 
             if (fixFirst) {
-                offsets[0] = 0f;
+                offsets[0] = Percentage.ZERO;
                 colors[0] = oldColors[0];
             }
             if (fixLast) {
-                offsets[offsetLength - 1] = 1f;
+                offsets[offsetLength - 1] = Percentage.ONE;
                 colors[offsetLength - 1] = oldColors[oldColors.length - 1];
             }
         }
@@ -203,8 +209,19 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         return gradientForBounds(gradientUnits.deriveMeasure(context), bounds, offsets(), gradColors);
     }
 
+    protected float[] offsetsToFractions(Percentage[] gradOffsets) {
+        // NOTE: We need to recompute the fractions if a stop is animated.
+        if (tmpFractions == null || tmpFractions.length != gradOffsets.length) {
+            tmpFractions = new float[gradOffsets.length];
+            for (int i = 0; i < tmpFractions.length; i++) {
+                tmpFractions[i] = gradOffsets[i].value();
+            }
+        }
+        return tmpFractions;
+    }
+
     protected abstract @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
-            @Percentage float[] gradOffsets, @NotNull Color[] gradColors);
+            Percentage[] gradOffsets, @NotNull Color[] gradColors);
 
     protected final @NotNull AffineTransform computeViewTransform(@NotNull Rectangle2D bounds) {
         AffineTransform viewTransform = gradientUnits.viewTransform(bounds);

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,8 +27,8 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
@@ -38,10 +38,10 @@ public class FontSpec {
     protected final @NotNull String[] families;
     protected final @Nullable FontStyle style;
     protected final @Nullable Length sizeAdjust;
-    protected final @Percentage float stretch;
+    protected final @NotNull Percentage stretch;
 
     FontSpec(@NotNull String[] families, @Nullable FontStyle style, @Nullable Length sizeAdjust,
-            @Percentage float stretch) {
+            @NotNull Percentage stretch) {
         this.families = families;
         this.style = style;
         this.sizeAdjust = sizeAdjust;
@@ -63,7 +63,7 @@ public class FontSpec {
         if (this == o) return true;
         if (!(o instanceof FontSpec)) return false;
         FontSpec fontSpec = (FontSpec) o;
-        return Float.compare(fontSpec.stretch, stretch) == 0
+        return Objects.equals(stretch, fontSpec.stretch)
                 && Arrays.equals(families, fontSpec.families)
                 && Objects.equals(style, fontSpec.style)
                 && Objects.equals(sizeAdjust, fontSpec.sizeAdjust);

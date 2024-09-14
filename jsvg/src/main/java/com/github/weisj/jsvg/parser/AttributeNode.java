@@ -39,6 +39,8 @@ import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.LengthValue;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
@@ -233,8 +235,14 @@ public final class AttributeNode {
         }
     }
 
-    public @Percentage float getPercentage(@NotNull String key, @Percentage float fallback) {
+    @Contract("_,!null -> !null")
+    public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
         return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
+    }
+
+    @Deprecated
+    public float getPercentage(@NotNull String key, float fallback) {
+        return loadHelper.attributeParser().parsePercentage(getValue(key), new Percentage(fallback)).value();
     }
 
     public @NotNull Length @NotNull [] getLengthList(@NotNull String key) {
