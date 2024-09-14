@@ -69,6 +69,10 @@ public final class SVGDocument {
         return accumulator;
     }
 
+    public boolean isAnimated() {
+        return root.isAnimated();
+    }
+
     public void render(@Nullable JComponent component, @NotNull Graphics2D g) {
         render(component, g, null);
     }
@@ -125,9 +129,11 @@ public final class SVGDocument {
             @Nullable ViewBox bounds) {
         float defaultEm = computePlatformFontSize(platformSupport, output);
         float defaultEx = SVGFont.exFromEm(defaultEm);
+        long timestamp = platformSupport.timestamp();
         MeasureContext initialMeasure = bounds != null
-                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx)
-                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx);
+                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx, timestamp)
+                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx,
+                        timestamp);
         RenderContext context = RenderContext.createInitial(platformSupport, initialMeasure);
 
         root.applyTransform(output, context);

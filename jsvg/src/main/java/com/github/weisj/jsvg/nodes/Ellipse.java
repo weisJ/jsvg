@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,8 +23,10 @@ package com.github.weisj.jsvg.nodes;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGEllipse;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -43,9 +45,9 @@ public final class Ellipse extends ShapeNode {
     @Override
     protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
         return new SVGEllipse(
-                attributeNode.getLength("cx", 0),
-                attributeNode.getLength("cy", 0),
-                attributeNode.getLength("rx", 0),
-                attributeNode.getLength("ry", 0));
+                attributeNode.getLength("cx", Length.ZERO, Animatable.YES),
+                attributeNode.getLength("cy", Length.ZERO, Animatable.YES),
+                attributeNode.getLength("rx", Length.ZERO, Animatable.YES),
+                attributeNode.getLength("ry", Length.ZERO, Animatable.YES));
     }
 }

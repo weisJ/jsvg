@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,7 +37,8 @@ import com.github.weisj.jsvg.parser.ParserTestUtil;
 
 class FontTest {
 
-    private static final MeasureContext MEASURE_CONTEXT = MeasureContext.createInitial(new FloatSize(100, 100), 12, 6);
+    private static final MeasureContext MEASURE_CONTEXT =
+            MeasureContext.createInitial(new FloatSize(100, 100), 12, 6, 0);
 
     @BeforeEach
     void clearFontCache() {

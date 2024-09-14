@@ -79,7 +79,8 @@ class BlitImageTest {
                 NullPlatformSupport.INSTANCE,
                 new MeasureContext(vw, vh,
                         SVGFont.defaultFontSize(),
-                        SVGFont.exFromEm(SVGFont.defaultFontSize())));
+                        SVGFont.exFromEm(SVGFont.defaultFontSize()),
+                        0));
     }
 
     void renderThroughBlitImage(@NotNull Output output, @NotNull RenderContext context,

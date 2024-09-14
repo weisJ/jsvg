@@ -22,8 +22,11 @@
 package com.github.weisj.jsvg.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.github.weisj.jsvg.nodes.animation.Animate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +50,7 @@ public final class ParsedElement {
     private final @NotNull SVGNode node;
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
-    private final @NotNull List<@NotNull ParsedElement> animationElements = new ArrayList<>();
+    private final @NotNull Map<String, @NotNull ParsedElement> animationElements = new HashMap<>();
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
 
@@ -86,6 +89,10 @@ public final class ParsedElement {
         return children;
     }
 
+    public @NotNull Map<String, ParsedElement> animationElements() {
+        return animationElements;
+    }
+
     public @Nullable ParsedElement parent() {
         return parent;
     }
@@ -109,7 +116,7 @@ public final class ParsedElement {
 
     void addChild(ParsedElement parsedElement) {
         if (Category.hasCategory(parsedElement.node, Category.Animation)) {
-            animationElements.add(parsedElement);
+            animationElements.put(Animate.attributeName(parsedElement.attributeNode()), parsedElement);
         }
         children.add(parsedElement);
         if (node instanceof Container) {

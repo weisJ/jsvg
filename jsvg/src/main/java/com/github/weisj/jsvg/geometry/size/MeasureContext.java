@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,20 +36,23 @@ public final class MeasureContext {
     private final float vh;
     private final float em;
     private final float ex;
+    private final long timestamp;
 
-    public MeasureContext(float vw, float vh, float em, float ex) {
+    public MeasureContext(float vw, float vh, float em, float ex, long timestamp) {
         this.vw = vw;
         this.vh = vh;
         this.em = em;
         this.ex = ex;
+        this.timestamp = timestamp;
     }
 
-    public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex) {
-        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex);
+    public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex,
+            long timestamp) {
+        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, timestamp);
     }
 
     public @NotNull MeasureContext derive(float viewWidth, float viewHeight) {
-        return new MeasureContext(viewWidth, viewHeight, em, ex);
+        return new MeasureContext(viewWidth, viewHeight, em, ex, timestamp);
     }
 
     public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex) {
@@ -63,7 +66,7 @@ public final class MeasureContext {
         }
         float effectiveEm = Length.isUnspecified(em) ? this.em : em;
         float effectiveEx = Length.isUnspecified(ex) ? this.ex : ex;
-        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx);
+        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, timestamp);
     }
 
     public float viewWidth() {
@@ -90,6 +93,10 @@ public final class MeasureContext {
         return ex;
     }
 
+    public long timestamp() {
+        return timestamp;
+    }
+
     @Override
     public String toString() {
         return "MeasureContext{" +
@@ -97,6 +104,7 @@ public final class MeasureContext {
                 ", vh=" + vh +
                 ", em=" + em +
                 ", ex=" + ex +
+                ", timestamp=" + timestamp +
                 '}';
     }
 
@@ -108,11 +116,13 @@ public final class MeasureContext {
         return Float.compare(that.vw, vw) == 0
                 && Float.compare(that.vh, vh) == 0
                 && Float.compare(that.em, em) == 0
-                && Float.compare(that.ex, ex) == 0;
+                && Float.compare(that.ex, ex) == 0
+                && that.timestamp == timestamp;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vw, vh, em, ex);
+        return Objects.hash(vw, vh, em, ex, timestamp);
     }
+
 }

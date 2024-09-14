@@ -176,12 +176,15 @@ public final class SVGViewer {
         private boolean lowResolution;
         private Object maskRenderingValue = SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_DEFAULT;
 
+        private final Timer animationTimer = new Timer(1000 / 60, e -> repaint());
+
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
             setBackground(Color.WHITE);
             setOpaque(true);
             icon.setAutosize(SVGIcon.AUTOSIZE_BESTFIT);
             icon.setAntiAlias(true);
+            animationTimer.setRepeats(true);
         }
 
         private void printMemory() {
@@ -196,6 +199,7 @@ public final class SVGViewer {
         }
 
         private void selectIcon(@NotNull String name) {
+            animationTimer.stop();
             remove(jsvgCanvas);
             switch (mode) {
                 case JSVG -> document = iconCache.computeIfAbsent(name, n -> {
@@ -204,7 +208,11 @@ public final class SVGViewer {
                     LoaderContext loaderContext = LoaderContext.builder()
                             .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
                             .build();
-                    return loader.load(url, loaderContext);
+                    SVGDocument document = loader.load(url, loaderContext);
+                    if (document != null && document.isAnimated()) {
+                        SwingUtilities.invokeLater(animationTimer::start);
+                    }
+                    return document;
                 });
                 case SVG_SALAMANDER -> {
                     try {
