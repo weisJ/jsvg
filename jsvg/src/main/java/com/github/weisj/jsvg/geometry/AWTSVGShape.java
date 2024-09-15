@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,47 +27,60 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.attributes.ConstantValue;
+import com.github.weisj.jsvg.attributes.Value;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class AWTSVGShape<T extends Shape> implements MeasurableShape {
     public static final Rectangle2D EMPTY_SHAPE = new Rectangle();
-    protected final @NotNull T shape;
-    private Rectangle2D bounds;
+    protected final @NotNull Value<@NotNull T> shapeValue;
+    private Rectangle2D boundsCache;
+    private T shapeCache;
 
     private double pathLength;
 
     public AWTSVGShape(@NotNull T shape) {
-        this(shape, Double.NaN);
+        this(new ConstantValue<>(shape));
     }
 
-    private AWTSVGShape(@NotNull T shape, double pathLength) {
-        this.shape = shape;
+    public AWTSVGShape(@NotNull Value<@NotNull T> shapeValue) {
+        this(shapeValue, Double.NaN);
+    }
+
+    private AWTSVGShape(@NotNull Value<@NotNull T> shapeValue, double pathLength) {
+        this.shapeValue = shapeValue;
         this.pathLength = pathLength;
     }
 
     @Override
-    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
-        return shape;
+    public @NotNull T shape(@NotNull RenderContext context, boolean validate) {
+        if (shapeCache == null || validate) {
+            shapeCache = shapeValue.get(context.measureContext());
+        }
+        return shapeCache;
     }
 
     @Override
     public @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
-        if (bounds == null) bounds = shape.getBounds2D();
-        return bounds;
+        if (boundsCache == null || validate) {
+            Shape shape = shape(context, validate);
+            boundsCache = shape.getBounds2D();
+        }
+        return boundsCache;
     }
 
     @Override
-    public double pathLength(@NotNull MeasureContext measureContext) {
+    public double pathLength(@NotNull RenderContext context) {
         if (Double.isNaN(pathLength)) {
-            pathLength = computePathLength();
+            pathLength = computePathLength(context);
         }
         return pathLength;
     }
 
-    private double computePathLength() {
+    private double computePathLength(@NotNull RenderContext context) {
         // Optimize shapes for which the computation is simple.
+        Shape shape = shape(context, false);
         if (shape instanceof Rectangle2D) {
             Rectangle2D r = (Rectangle2D) shape;
             return 2 * (r.getWidth() + r.getHeight());
@@ -79,12 +92,7 @@ public class AWTSVGShape<T extends Shape> implements MeasurableShape {
             // General ellipse
             return SVGEllipse.ellipseCircumference(w / 2f, h / 2f);
         } else {
-            return computeGenericPathLength();
+            return GeometryUtil.pathLength(shape);
         }
     }
-
-    private double computeGenericPathLength() {
-        return GeometryUtil.pathLength(shape);
-    }
-
 }

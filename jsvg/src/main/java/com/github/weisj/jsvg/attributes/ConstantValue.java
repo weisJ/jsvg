@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,13 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.geometry;
+package com.github.weisj.jsvg.attributes;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public interface MeasurableLength {
-    double pathLength(@NotNull RenderContext context);
+public final class ConstantValue<T> implements Value<T> {
+    private final T value;
 
+    public ConstantValue(T value) {
+        this.value = value;
+    }
+
+    @Override
+    public T get(@NotNull MeasureContext context) {
+        return value;
+    }
+
+    public T get() {
+        return value;
+    }
 }
