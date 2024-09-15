@@ -29,6 +29,7 @@ import java.lang.invoke.MethodType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.ConstantValue;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
@@ -69,7 +70,24 @@ public final class PathUtil {
 
         trimPathToSize(path);
 
-        return new FillRuleAwareAWTSVGShape(path);
+        return new FillRuleAwareAWTSVGShape(new ConstantValue<>(path));
+    }
+
+    public static @NotNull Path2D setPolyLine(@Nullable Path2D path, float @NotNull [] points, boolean closed) {
+        Path2D p;
+        if (path == null) {
+            p = new Path2D.Float(Path2D.WIND_EVEN_ODD, points.length / 2);
+        } else {
+            p = path;
+            p.reset();
+        }
+
+        p.moveTo(points[0], points[1]);
+        for (int i = 2; i < points.length - 1; i += 2) {
+            p.lineTo(points[i], points[i + 1]);
+        }
+        if (closed) p.closePath();
+        return p;
     }
 
     public static void trimPathToSize(@NotNull Path2D path) {

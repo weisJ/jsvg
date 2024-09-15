@@ -68,7 +68,8 @@ public final class SVGEllipse implements MeasurableShape {
     }
 
     @Override
-    public double pathLength(@NotNull MeasureContext measureContext) {
+    public double pathLength(@NotNull RenderContext context) {
+        MeasureContext measureContext = context.measureContext();
         float a = rx.resolveWidth(measureContext);
         float b = ry.resolveHeight(measureContext);
         if (a == b) return SVGCircle.circumference(a);

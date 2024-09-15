@@ -67,7 +67,8 @@ public final class SVGRectangle implements MeasurableShape {
     }
 
     @Override
-    public double pathLength(@NotNull MeasureContext measureContext) {
+    public double pathLength(@NotNull RenderContext context) {
+        MeasureContext measureContext = context.measureContext();
         return 2 * (w.resolveWidth(measureContext) + h.resolveHeight(measureContext));
     }
 }
