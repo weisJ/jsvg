@@ -23,21 +23,19 @@ package com.github.weisj.jsvg.animation.size;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.animation.time.Duration;
+import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.LengthValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public class AnimatedLength implements LengthValue {
-    private final @NotNull Duration duration;
-    private final float repeatCount;
+    private final @NotNull Track track;
     private final @NotNull Length initial;
     private final @NotNull Length @NotNull [] values;
 
-    public AnimatedLength(@NotNull Duration duration, float repeatCount,
+    public AnimatedLength(@NotNull Track track,
             @NotNull Length initial, @NotNull Length @NotNull [] values) {
-        this.duration = duration;
-        this.repeatCount = repeatCount;
+        this.track = track;
         this.initial = initial;
         this.values = values;
     }
@@ -48,21 +46,15 @@ public class AnimatedLength implements LengthValue {
 
     @Override
     public float resolveDimension(Dimension dimension, @NotNull MeasureContext context) {
-        long durationMillis = duration.milliseconds();
-        long timestampMillis = context.timestamp();
-        int iterationCount = (int) (timestampMillis / durationMillis);
-        float iterationProgress = (float) (timestampMillis % durationMillis) / durationMillis;
-        float totalIteration = iterationCount + iterationProgress;
+        long timestamp = context.timestamp();
+        float progress = track.interpolationProgress(timestamp, values.length);
 
-        if (totalIteration > repeatCount) {
-            return initial.resolveDimension(dimension, context);
-        }
+        if (progress < 0) return initial.resolveDimension(dimension, context);
+        int i = (int) progress;
 
-        int n = values.length;
-        int i = (int) Math.floor(iterationProgress * (n - 1));
         float start = values[i].resolveDimension(dimension, context);
         float end = values[i + 1].resolveDimension(dimension, context);
-        float t = (n - 1) * iterationProgress - i;
+        float t = progress - i;
 
         return start + (end - start) * t;
     }
@@ -78,12 +70,12 @@ public class AnimatedLength implements LengthValue {
         for (int i = 0; i < newValues.length; i++) {
             newValues[i] = values[i].coerceNonNegative();
         }
-        return new AnimatedLength(duration, repeatCount, initial.coerceNonNegative(), newValues);
+        return new AnimatedLength(track, initial.coerceNonNegative(), newValues);
     }
 
     @Override
     public @NotNull LengthValue orElseIfUnspecified(float value) {
-        return new AnimatedLength(duration, repeatCount, initial.orElseIfUnspecified(value), values);
+        return new AnimatedLength(track, initial.orElseIfUnspecified(value), values);
     }
 
     @Override

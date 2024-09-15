@@ -75,7 +75,8 @@ public final class SVGRoundRectangle implements MeasurableShape {
     }
 
     @Override
-    public double pathLength(@NotNull MeasureContext measureContext) {
+    public double pathLength(@NotNull RenderContext context) {
+        MeasureContext measureContext = context.measureContext();
         float a = rx.resolveWidth(measureContext);
         float b = ry.resolveHeight(measureContext);
         double l = 2 * ((w.resolveWidth(measureContext) - 2 * a) + (h.resolveHeight(measureContext) - 2 * b));

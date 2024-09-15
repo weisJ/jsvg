@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,23 +21,23 @@
  */
 package com.github.weisj.jsvg.geometry;
 
-
-import java.awt.*;
 import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.Value;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class FillRuleAwareAWTSVGShape extends AWTSVGShape<Path2D> {
 
-    public FillRuleAwareAWTSVGShape(@NotNull Path2D shape) {
+    public FillRuleAwareAWTSVGShape(@NotNull Value<Path2D> shape) {
         super(shape);
     }
 
     @Override
-    public @NotNull Shape shape(@NotNull RenderContext context, boolean validate) {
+    public @NotNull Path2D shape(@NotNull RenderContext context, boolean validate) {
+        Path2D shape = super.shape(context, validate);
         shape.setWindingRule(context.fillRule().awtWindingRule);
-        return super.shape(context, validate);
+        return shape;
     }
 }

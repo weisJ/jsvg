@@ -39,6 +39,7 @@ import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.geometry.AnimatedFloatList;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
@@ -210,7 +211,7 @@ public final class AttributeNode {
 
     @Contract("_,!null,_ -> !null")
     public @Nullable LengthValue getLength(@NotNull String key, @Nullable LengthValue fallback, Animatable animatable) {
-        LengthValue value = getLengthInternal(key, FALLBACK_LENGTH);
+        LengthValue value = getLengthInternal(key);
         if (value == FALLBACK_LENGTH) {
             value = fallback;
         }
@@ -231,9 +232,8 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parseDuration(getValue(key), fallback);
     }
 
-    @Contract("_,!null -> !null")
-    private @Nullable Length getLengthInternal(@NotNull String key, @Nullable Length fallback) {
-        return loadHelper.attributeParser().parseLength(getValue(key), fallback);
+    private @NotNull Length getLengthInternal(@NotNull String key) {
+        return loadHelper.attributeParser().parseLength(getValue(key), FALLBACK_LENGTH);
     }
 
     public @NotNull Length getHorizontalReferenceLength(@NotNull String key) {
@@ -280,6 +280,16 @@ public final class AttributeNode {
 
     public float @NotNull [] getFloatList(@NotNull String key) {
         return loadHelper.attributeParser().parseFloatList(getValue(key));
+    }
+
+    public @NotNull Value<float @NotNull []> getFloatList(@NotNull String key, Animatable animatable) {
+        float[] initial = loadHelper.attributeParser().parseFloatList(getValue(key));
+
+        if (animatable == Animatable.YES) {
+            AnimatedFloatList animatedLength = getAnimatedFloatList(key, initial);
+            if (animatedLength != null) return animatedLength;
+        }
+        return new ConstantValue<>(initial);
     }
 
     public double @NotNull [] getDoubleList(@NotNull String key) {
@@ -366,14 +376,26 @@ public final class AttributeNode {
         return loadHelper.externalResourcePolicy().resolveResourceURI(document().rootURI(), url);
     }
 
-    private @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull Length initial) {
+    private @Nullable Animate animateNode(@NotNull String property) {
         ParsedElement parsedElement = element.animationElements().get(property);
         if (parsedElement == null) return null;
         if (parsedElement.node() instanceof Animate) {
             Animate animate = (Animate) parsedElement.nodeEnsuringBuildStatus();
             document().registerAnimatedElement(animate);
-            return animate.animatedLength(initial, this);
+            return animate;
         }
         return null;
+    }
+
+    private @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull Length initial) {
+        Animate animate = animateNode(property);
+        if (animate == null) return null;
+        return animate.animatedLength(initial, this);
+    }
+
+    private @Nullable AnimatedFloatList getAnimatedFloatList(@NotNull String property, float @NotNull [] initial) {
+        Animate animate = animateNode(property);
+        if (animate == null) return null;
+        return animate.animatedFloatList(initial, this);
     }
 }

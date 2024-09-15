@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,16 +22,17 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
-import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.ConstantValue;
 import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.geometry.AWTSVGShape;
-import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
-import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.attributes.Value;
+import com.github.weisj.jsvg.geometry.*;
 import com.github.weisj.jsvg.nodes.prototype.HasFillRule;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.util.PathUtil;
 
 public abstract class AbstractPolyShape extends ShapeNode implements HasFillRule {
 
@@ -45,15 +46,16 @@ public abstract class AbstractPolyShape extends ShapeNode implements HasFillRule
     @Override
     protected final @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
         fillRule = FillRule.parse(attributeNode);
-        float[] points = attributeNode.getFloatList("points");
-        if (points.length > 0) {
-            Path2D path = new Path2D.Float(Path2D.WIND_EVEN_ODD, points.length / 2);
-            path.moveTo(points[0], points[1]);
-            for (int i = 2; i < points.length; i += 2) {
-                path.lineTo(points[i], points[i + 1]);
-            }
-            if (doClose()) path.closePath();
-            return new FillRuleAwareAWTSVGShape(path);
+
+        Value<float[]> points = attributeNode.getFloatList("points", Animatable.YES);
+        if (points instanceof AnimatedFloatList) {
+            return new FillRuleAwareAWTSVGShape(new AnimatedPath((AnimatedFloatList) points, doClose()));
+        }
+
+        float[] pointsArray = ((ConstantValue<float[]>) points).get();
+        if (pointsArray.length > 0) {
+            return new FillRuleAwareAWTSVGShape(
+                    new ConstantValue<>(PathUtil.setPolyLine(null, pointsArray, doClose())));
         } else {
             return new AWTSVGShape<>(new Rectangle());
         }

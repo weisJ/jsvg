@@ -64,8 +64,8 @@ public final class SVGCircle implements MeasurableShape {
     }
 
     @Override
-    public double pathLength(@NotNull MeasureContext measureContext) {
-        return circumference(r.resolveLength(measureContext));
+    public double pathLength(@NotNull RenderContext context) {
+        return circumference(r.resolveLength(context.measureContext()));
     }
 
     static double circumference(double radius) {

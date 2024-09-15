@@ -24,8 +24,10 @@ package com.github.weisj.jsvg.nodes.animation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.animation.size.AnimatedLength;
 import com.github.weisj.jsvg.animation.time.Duration;
+import com.github.weisj.jsvg.geometry.AnimatedFloatList;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.MetaSVGNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -55,8 +57,27 @@ public final class Animate extends MetaSVGNode {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        attributeName = attributeNode.getValue("attributeName");
-        values = attributeNode.getStringList("values", SeparatorMode.SEMICOLON_ONLY);
+
+        String from = attributeNode.getValue("from");
+        String to = attributeNode.getValue("to");
+        String by = attributeNode.getValue("by");
+
+        if (to != null) by = null;
+
+        if (attributeNode.getValue("values") != null) {
+            values = attributeNode.getStringList("values", SeparatorMode.SEMICOLON_ONLY);
+        } else {
+            if (from != null && to != null) {
+                values = new String[] {from, to};
+            } else if (from != null && by != null) {
+                // TODO: from -> from + to, needs intermediate representation for ValueList
+            } else if (by != null) {
+                // TODO: initial -> initial + by, needs intermediate representation for ValueList
+            } else if (to != null) {
+                // TODO: initial -> to, needs intermediate representation for ValueList
+            }
+        }
+
         duration = attributeNode.getDuration("dur", Duration.INDEFINITE);
         String repeatCountStr = attributeNode.getValue("repeatCount");
         if ("indefinite".equals(repeatCountStr)) {
@@ -66,17 +87,32 @@ public final class Animate extends MetaSVGNode {
         }
     }
 
+    private boolean isInvalid() {
+        return duration.isIndefinite()
+                || duration.milliseconds() < 0
+                || repeatCount <= 0;
+    }
+
     public @Nullable AnimatedLength animatedLength(@NotNull Length initial, @NotNull AttributeNode attributeNode) {
-        if (duration.isIndefinite()) return null;
-        if (duration.milliseconds() < 0) return null;
-        if (repeatCount <= 0) return null;
+        if (isInvalid()) return null;
 
         Length[] lengths = new Length[values.length];
         for (int i = 0; i < values.length; i++) {
             lengths[i] = attributeNode.parser().parseLength(values[i], null);
             if (lengths[i] == null) return null;
         }
-        return new AnimatedLength(duration, repeatCount, initial, lengths);
+        return new AnimatedLength(new Track(duration, repeatCount), initial, lengths);
+    }
+
+    public @Nullable AnimatedFloatList animatedFloatList(float @NotNull [] initial,
+            @NotNull AttributeNode attributeNode) {
+        if (isInvalid()) return null;
+
+        float[][] lists = new float[values.length][];
+        for (int i = 0; i < values.length; i++) {
+            lists[i] = attributeNode.parser().parseFloatList(values[i]);
+        }
+        return new AnimatedFloatList(new Track(duration, repeatCount), initial, lists);
     }
 
 }
