@@ -140,7 +140,7 @@ public abstract class ShapeNode extends RenderableSVGNode
         float pathLengthFactor = 1f;
         if (pathLength.isSpecified()) {
             double effectiveLength = pathLength.resolveLength(measureContext);
-            double actualLength = shape.pathLength(measureContext);
+            double actualLength = shape.pathLength(context);
             pathLengthFactor = (float) (actualLength / effectiveLength);
         }
         return context.stroke(pathLengthFactor);
