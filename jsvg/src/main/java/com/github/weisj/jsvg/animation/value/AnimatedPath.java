@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,25 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.geometry;
+package com.github.weisj.jsvg.animation.value;
 
 import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.value.Value;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.util.PathUtil;
 
-public final class FillRuleAwareAWTSVGShape extends AWTSVGShape<Path2D> {
+public final class AnimatedPath implements Value<@NotNull Path2D> {
 
-    public FillRuleAwareAWTSVGShape(@NotNull Value<Path2D> shape) {
-        super(shape);
+    private final AnimatedFloatList list;
+    private @Nullable Path2D cache;
+    private final boolean closed;
+
+    public AnimatedPath(@NotNull AnimatedFloatList list, boolean closed) {
+        this.list = list;
+        this.closed = closed;
     }
 
     @Override
-    public @NotNull Path2D shape(@NotNull RenderContext context, boolean validate) {
-        Path2D shape = super.shape(context, validate);
-        shape.setWindingRule(context.fillRule().awtWindingRule);
-        return shape;
+    public @NotNull Path2D get(@NotNull MeasureContext context) {
+        if (cache == null || list.isDirty(context.timestamp())) {
+            cache = PathUtil.setPolyLine(cache, list.get(context), closed);
+        }
+        return cache;
     }
 }

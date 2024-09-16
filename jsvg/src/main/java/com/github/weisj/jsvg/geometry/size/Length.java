@@ -27,6 +27,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
 
 public final class Length implements LengthValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;

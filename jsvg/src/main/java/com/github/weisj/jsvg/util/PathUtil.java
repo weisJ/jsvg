@@ -29,8 +29,8 @@ import java.lang.invoke.MethodType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.ConstantValue;
 import com.github.weisj.jsvg.attributes.FillRule;
+import com.github.weisj.jsvg.attributes.value.ConstantValue;
 import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.path.BuildHistory;

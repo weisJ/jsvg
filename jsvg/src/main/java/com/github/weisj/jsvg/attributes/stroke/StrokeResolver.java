@@ -25,9 +25,9 @@ import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.renderer.StrokeContext;
 
 public final class StrokeResolver {
@@ -36,13 +36,13 @@ public final class StrokeResolver {
     // https://svgwg.org/svg2-draft/painting.html#StrokeMiterlimitProperty
     public static @NotNull Stroke resolve(float pathLengthFactor, @NotNull MeasureContext measureContext,
             @NotNull StrokeContext context) {
-        Length strokeWidth = context.strokeWidth;
+        LengthValue strokeWidth = context.strokeWidth;
         LineCap lineCap = context.lineCap;
         LineJoin lineJoin = context.lineJoin;
         float miterLimit = context.miterLimit;
 
         Length[] dashPattern = context.dashPattern;
-        Length dashOffset = context.dashOffset;
+        LengthValue dashOffset = context.dashOffset;
 
         assert strokeWidth != null;
         assert lineCap != null;
@@ -57,18 +57,12 @@ public final class StrokeResolver {
         float[] dashes = new float[dashPattern.length];
         float offsetLength = 0;
         for (int i = 0; i < dashes.length; i++) {
-            float dash = dashPattern[i].resolveLength(measureContext);
-            if (dashPattern[i].unit() != Unit.PERCENTAGE) {
-                dash *= pathLengthFactor;
-            }
+            float dash = dashPattern[i].resolveLength(measureContext) * pathLengthFactor;
             offsetLength += dash;
             dashes[i] = dash;
         }
 
-        float phase = dashOffset.resolveLength(measureContext);
-        if (dashOffset.unit() != Unit.PERCENTAGE) {
-            phase *= pathLengthFactor;
-        }
+        float phase = dashOffset.resolveLength(measureContext) * pathLengthFactor;
         if (phase < 0) phase += offsetLength;
 
         if (dashes.length == 0) {

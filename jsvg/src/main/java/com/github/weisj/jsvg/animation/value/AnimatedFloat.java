@@ -19,33 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.geometry;
-
-import java.awt.geom.Path2D;
+package com.github.weisj.jsvg.animation.value;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Value;
+import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.util.PathUtil;
 
-public final class AnimatedPath implements Value<@NotNull Path2D> {
+public final class AnimatedFloat {
 
-    private final AnimatedFloatList list;
-    private @Nullable Path2D cache;
-    private final boolean closed;
+    private final @NotNull Track track;
+    private final float initial;
+    private final float[] values;
 
-    public AnimatedPath(@NotNull AnimatedFloatList list, boolean closed) {
-        this.list = list;
-        this.closed = closed;
+    public AnimatedFloat(@NotNull Track track, float initial, float[] values) {
+        this.track = track;
+        this.initial = initial;
+        this.values = values;
     }
 
-    @Override
-    public @NotNull Path2D get(@NotNull MeasureContext context) {
-        if (cache == null || list.isDirty(context.timestamp())) {
-            cache = PathUtil.setPolyLine(cache, list.get(context), closed);
+    public float get(@NotNull MeasureContext context) {
+        long timestamp = context.timestamp();
+        Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
+
+        if (progress.isInitial()) return initial;
+        int i = progress.iterationIndex();
+
+        if (i == values.length - 1) {
+            return values[i];
         }
-        return cache;
+
+        float start = values[i];
+        float end = values[i + 1];
+
+        return start + (end - start) * progress.indexProgress();
     }
 }

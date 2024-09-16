@@ -19,25 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes;
+package com.github.weisj.jsvg.attributes.value;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public final class ConstantValue<T> implements Value<T> {
-    private final T value;
+public interface FloatValue {
 
-    public ConstantValue(T value) {
-        this.value = value;
-    }
-
-    @Override
-    public T get(@NotNull MeasureContext context) {
-        return value;
-    }
-
-    public T get() {
-        return value;
-    }
+    float get(@NotNull MeasureContext context);
 }

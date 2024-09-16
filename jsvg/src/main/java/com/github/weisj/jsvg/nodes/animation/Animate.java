@@ -25,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.animation.size.AnimatedLength;
-import com.github.weisj.jsvg.geometry.AnimatedFloatList;
+import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
+import com.github.weisj.jsvg.animation.value.AnimatedLength;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.MetaSVGNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
