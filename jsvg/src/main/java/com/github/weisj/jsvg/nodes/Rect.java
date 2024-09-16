@@ -24,11 +24,11 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGRectangle;
 import com.github.weisj.jsvg.geometry.SVGRoundRectangle;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.LengthValue;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;

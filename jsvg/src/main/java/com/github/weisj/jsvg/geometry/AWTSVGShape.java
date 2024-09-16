@@ -27,8 +27,8 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.ConstantValue;
-import com.github.weisj.jsvg.attributes.Value;
+import com.github.weisj.jsvg.attributes.value.ConstantValue;
+import com.github.weisj.jsvg.attributes.value.Value;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 

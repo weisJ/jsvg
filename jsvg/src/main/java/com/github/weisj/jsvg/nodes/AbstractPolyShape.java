@@ -25,10 +25,12 @@ import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
+import com.github.weisj.jsvg.animation.value.AnimatedPath;
 import com.github.weisj.jsvg.attributes.Animatable;
-import com.github.weisj.jsvg.attributes.ConstantValue;
 import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.attributes.Value;
+import com.github.weisj.jsvg.attributes.value.ConstantValue;
+import com.github.weisj.jsvg.attributes.value.Value;
 import com.github.weisj.jsvg.geometry.*;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.util.PathUtil;
