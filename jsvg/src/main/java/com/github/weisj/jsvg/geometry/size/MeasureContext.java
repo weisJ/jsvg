@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.renderer.AnimationState;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
@@ -37,28 +38,28 @@ public final class MeasureContext {
     private final float em;
     private final float rem;
     private final float ex;
-    private final long timestamp;
+    private final @NotNull AnimationState animationState;
 
-    public MeasureContext(float vw, float vh, float em, float ex, float rem, long timestamp) {
+    public MeasureContext(float vw, float vh, float em, float ex, float rem, @NotNull AnimationState animationState) {
         this.vw = vw;
         this.vh = vh;
         this.em = em;
         this.rem = rem;
         this.ex = ex;
-        this.timestamp = timestamp;
+        this.animationState = animationState;
     }
 
     public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex,
-            long timestamp) {
-        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, em, timestamp);
+            @NotNull AnimationState animationState) {
+        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, em, animationState);
     }
 
     public @NotNull MeasureContext deriveRoot(float rem) {
-        return new MeasureContext(vw, vh, em, ex, rem, timestamp);
+        return new MeasureContext(vw, vh, em, ex, rem, animationState);
     }
 
     public @NotNull MeasureContext derive(float viewWidth, float viewHeight) {
-        return new MeasureContext(viewWidth, viewHeight, em, ex, rem, timestamp);
+        return new MeasureContext(viewWidth, viewHeight, em, ex, rem, animationState);
     }
 
     public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex) {
@@ -72,7 +73,7 @@ public final class MeasureContext {
         }
         float effectiveEm = Length.isUnspecified(em) ? this.em : em;
         float effectiveEx = Length.isUnspecified(ex) ? this.ex : ex;
-        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, rem, timestamp);
+        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, rem, animationState);
     }
 
     public float viewWidth() {
@@ -100,7 +101,7 @@ public final class MeasureContext {
     }
 
     public long timestamp() {
-        return timestamp;
+        return animationState.timestamp();
     }
 
     @Override
@@ -111,7 +112,7 @@ public final class MeasureContext {
                 ", em=" + em +
                 ", rem=" + rem +
                 ", ex=" + ex +
-                ", timestamp=" + timestamp +
+                ", animationState=" + animationState +
                 '}';
     }
 
@@ -125,12 +126,12 @@ public final class MeasureContext {
                 && Float.compare(that.em, em) == 0
                 && Float.compare(that.rem, rem) == 0
                 && Float.compare(that.ex, ex) == 0
-                && that.timestamp == timestamp;
+                && animationState.equals(that.animationState);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vw, vh, em, ex, rem, timestamp);
+        return Objects.hash(vw, vh, em, ex, rem, animationState);
     }
 
 }
