@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,38 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.awt;
+package com.github.weisj.jsvg.animation;
 
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
+import com.github.weisj.jsvg.attributes.Default;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import com.github.weisj.jsvg.attributes.font.SVGFont;
-
-public interface PlatformSupport {
-
-    interface TargetSurface {
-        void repaint();
-    }
-
-    @Nullable
-    ImageObserver imageObserver();
-
-    @Nullable
-    TargetSurface targetSurface();
-
-    default float fontSize() {
-        return SVGFont.defaultFontSize();
-    }
-
-    default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
-        return Toolkit.getDefaultToolkit().createImage(imageProducer);
-    }
-
-    default boolean isLongLived() {
-        return false;
-    }
+public enum Fill {
+    @Default
+    REMOVE,
+    FREEZE
 }

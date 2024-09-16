@@ -47,16 +47,19 @@ public class AnimatedLength implements LengthValue {
     @Override
     public float resolveDimension(Dimension dimension, @NotNull MeasureContext context) {
         long timestamp = context.timestamp();
-        float progress = track.interpolationProgress(timestamp, values.length);
+        Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
 
-        if (progress < 0) return initial.resolveDimension(dimension, context);
-        int i = (int) progress;
+        if (progress.isInitial()) return initial.resolveDimension(dimension, context);
+        int i = progress.iterationIndex();
+
+        if (i == values.length - 1) {
+            return values[i].resolveDimension(dimension, context);
+        }
 
         float start = values[i].resolveDimension(dimension, context);
         float end = values[i + 1].resolveDimension(dimension, context);
-        float t = progress - i;
 
-        return start + (end - start) * t;
+        return start + (end - start) * progress.indexProgress();
     }
 
     @Override

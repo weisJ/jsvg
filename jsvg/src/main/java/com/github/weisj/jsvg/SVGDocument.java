@@ -104,7 +104,12 @@ public final class SVGDocument {
 
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
             @Nullable ViewBox bounds) {
-        RenderContext context = prepareRenderContext(platformSupport, output, bounds);
+        renderWithPlatform(platformSupport, output, bounds, null);
+    }
+
+    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
+            @Nullable ViewBox bounds, @Nullable AnimationState animationState) {
+        RenderContext context = prepareRenderContext(platformSupport, output, bounds, animationState);
 
         if (bounds == null) bounds = new ViewBox(root.size(context));
 
@@ -126,14 +131,15 @@ public final class SVGDocument {
     private @NotNull RenderContext prepareRenderContext(
             @NotNull PlatformSupport platformSupport,
             @NotNull Output output,
-            @Nullable ViewBox bounds) {
+            @Nullable ViewBox bounds,
+            @Nullable AnimationState animationState) {
         float defaultEm = computePlatformFontSize(platformSupport, output);
         float defaultEx = SVGFont.exFromEm(defaultEm);
-        long timestamp = platformSupport.timestamp();
+        AnimationState animState = animationState != null ? animationState : AnimationState.NO_ANIMATION;
         MeasureContext initialMeasure = bounds != null
-                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx, timestamp)
-                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx), defaultEm, defaultEx,
-                        timestamp);
+                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx, animState)
+                : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx),
+                        defaultEm, defaultEx, animState);
         RenderContext context = RenderContext.createInitial(platformSupport, initialMeasure);
 
         root.applyTransform(output, context);

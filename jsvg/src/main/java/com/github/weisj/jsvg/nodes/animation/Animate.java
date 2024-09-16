@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.animation.size.AnimatedLength;
-import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.geometry.AnimatedFloatList;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.MetaSVGNode;
@@ -42,8 +41,7 @@ public final class Animate extends MetaSVGNode {
     public static final String TAG = "animate";
 
     private String[] values;
-    private Duration duration;
-    private float repeatCount;
+    private @Nullable Track track;
 
     @Override
     public @NotNull String tagName() {
@@ -78,41 +76,29 @@ public final class Animate extends MetaSVGNode {
             }
         }
 
-        duration = attributeNode.getDuration("dur", Duration.INDEFINITE);
-        String repeatCountStr = attributeNode.getValue("repeatCount");
-        if ("indefinite".equals(repeatCountStr)) {
-            repeatCount = Integer.MAX_VALUE;
-        } else {
-            repeatCount = attributeNode.parser().parseFloat(repeatCountStr, 1);
-        }
-    }
-
-    private boolean isInvalid() {
-        return duration.isIndefinite()
-                || duration.milliseconds() < 0
-                || repeatCount <= 0;
+        track = Track.parse(attributeNode);
     }
 
     public @Nullable AnimatedLength animatedLength(@NotNull Length initial, @NotNull AttributeNode attributeNode) {
-        if (isInvalid()) return null;
+        if (track == null) return null;
 
         Length[] lengths = new Length[values.length];
         for (int i = 0; i < values.length; i++) {
             lengths[i] = attributeNode.parser().parseLength(values[i], null);
             if (lengths[i] == null) return null;
         }
-        return new AnimatedLength(new Track(duration, repeatCount), initial, lengths);
+        return new AnimatedLength(track, initial, lengths);
     }
 
     public @Nullable AnimatedFloatList animatedFloatList(float @NotNull [] initial,
             @NotNull AttributeNode attributeNode) {
-        if (isInvalid()) return null;
+        if (track == null) return null;
 
         float[][] lists = new float[values.length][];
         for (int i = 0; i < values.length; i++) {
             lists[i] = attributeNode.parser().parseFloatList(values[i]);
         }
-        return new AnimatedFloatList(new Track(duration, repeatCount), initial, lists);
+        return new AnimatedFloatList(track, initial, lists);
     }
 
 }
