@@ -39,8 +39,7 @@ public final class AnimatedFloatList implements Value<float[]> {
     private float[] cache;
 
     private long timestamp = 0;
-    private int progressIndex = -1;
-    private float progressFraction = -1;
+    private Track.InterpolationProgress progressCacheKey = null;
 
     public AnimatedFloatList(@NotNull Track track, float @NotNull [] initial, float @NotNull [] @NotNull [] values) {
         this.track = track;
@@ -61,37 +60,33 @@ public final class AnimatedFloatList implements Value<float[]> {
         long timestamp = context.timestamp();
         if (timestamp != this.timestamp) {
             this.timestamp = timestamp;
-            float progress = track.interpolationProgress(timestamp, values.length);
+            Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
 
-            if (progress < 0) {
+            if (progress.equals(progressCacheKey)) {
+                return cache;
+            }
+            progressCacheKey = progress;
+
+            if (progress.isInitial()) {
                 cache = initial;
                 return cache;
             }
 
-            int index = (int) progress;
+            int index = progress.iterationIndex();
             float[] start = values[index];
-            float[] end = values[index + 1];
+            float[] end = index == values.length - 1 ? null : values[index + 1];
 
-            float fraction;
-            if (start.length != end.length) {
+            float fraction = progress.indexProgress();
+            if (end != null && start.length != end.length) {
                 // Use discrete animation
                 fraction = 0;
-            } else {
-                fraction = progress - index;
             }
-
-            if (fraction == progressFraction && index == progressIndex) {
-                return cache;
-            }
-
-            progressIndex = index;
-            progressFraction = fraction;
 
             if (cache == null || cache.length != start.length) {
                 cache = new float[start.length];
             }
 
-            if (GeometryUtil.approximatelyEqual(fraction, 0)) {
+            if (end == null || GeometryUtil.approximatelyEqual(fraction, 0)) {
                 System.arraycopy(start, 0, cache, 0, start.length);
             } else if (GeometryUtil.approximatelyEqual(fraction, 1)) {
                 System.arraycopy(end, 0, cache, 0, end.length);
