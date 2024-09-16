@@ -40,6 +40,7 @@ import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.renderer.AnimationState;
 import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -82,7 +83,7 @@ class BlitImageTest {
                         new FloatSize(vw, vh),
                         SVGFont.defaultFontSize(),
                         SVGFont.exFromEm(SVGFont.defaultFontSize()),
-                        0));
+                        AnimationState.NO_ANIMATION));
     }
 
     void renderThroughBlitImage(@NotNull Output output, @NotNull RenderContext context,
