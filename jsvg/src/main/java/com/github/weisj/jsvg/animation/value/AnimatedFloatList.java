@@ -19,14 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.geometry;
+package com.github.weisj.jsvg.animation.value;
 
 import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.attributes.Value;
+import com.github.weisj.jsvg.attributes.value.Value;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 
