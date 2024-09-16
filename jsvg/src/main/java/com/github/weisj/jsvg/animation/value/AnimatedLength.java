@@ -19,13 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.animation.size;
+package com.github.weisj.jsvg.animation.value;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.LengthValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public class AnimatedLength implements LengthValue {
