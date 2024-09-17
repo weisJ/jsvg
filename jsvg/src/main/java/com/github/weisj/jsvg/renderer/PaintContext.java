@@ -27,6 +27,7 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.value.AnimatedColor;
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.PaintOrder;
@@ -91,9 +92,11 @@ public final class PaintContext implements Mutator<PaintContext> {
                 FillRule.parse(attributeNode));
     }
 
-    private static @Nullable AwtSVGPaint parseColorAttribute(@NotNull AttributeNode attributeNode) {
+    private static @Nullable SVGPaint parseColorAttribute(@NotNull AttributeNode attributeNode) {
         Color c = attributeNode.getColor("color", null);
         if (c == null) return null;
+        AnimatedColor animatedColor = attributeNode.getAnimatedColor("color", c);
+        if (animatedColor != null) return animatedColor;
         return new AwtSVGPaint(c);
     }
 
