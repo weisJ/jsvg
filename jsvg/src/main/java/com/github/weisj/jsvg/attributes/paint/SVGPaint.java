@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.value.AnimatedPaint;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -36,6 +37,16 @@ public interface SVGPaint {
     SVGPaint CURRENT_COLOR = new SentinelPaint("currentColor");
     SVGPaint CONTEXT_FILL = new SentinelPaint("contextFill");
     SVGPaint CONTEXT_STROKE = new SentinelPaint("contextStroke");
+    SVGPaint INHERITED = new SentinelPaint("inherited");
+
+    static @Nullable SVGPaint derive(@Nullable SVGPaint current, @Nullable SVGPaint other) {
+        if (other == null) return current;
+        if (current == null) return other;
+        if (other instanceof AnimatedPaint) {
+            return ((AnimatedPaint) other).derive(current);
+        }
+        return other;
+    }
 
     void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds);
@@ -43,7 +54,7 @@ public interface SVGPaint {
     void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds);
 
-    default boolean isVisible() {
+    default boolean isVisible(@NotNull RenderContext context) {
         return this != NONE;
     }
 }
