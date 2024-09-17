@@ -26,9 +26,11 @@ import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -49,7 +51,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
     public static final String TAG = "feflood";
 
     private SVGPaint floodColor;
-    private Percentage floodOpacity;
+    private PercentageValue floodOpacity;
 
     @Override
     public @NotNull String tagName() {
@@ -59,8 +61,8 @@ public final class FeFlood extends AbstractFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        floodColor = attributeNode.getPaint("flood-color", new AwtSVGPaint(Color.BLACK));
-        floodOpacity = attributeNode.getPercentage("flood-opacity", Percentage.ONE);
+        floodColor = attributeNode.getPaint("flood-color", new AwtSVGPaint(Color.BLACK), Animatable.YES);
+        floodOpacity = attributeNode.getPercentage("flood-opacity", Percentage.ONE, Animatable.YES);
     }
 
     @Override
@@ -77,7 +79,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
         // and even then filters like feBlend could benefit from knowing that this is a constant color.
         Filter.FilterInfo info = filterContext.info();
         BufferedImage img = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
-        float opacity = floodOpacity.value();
+        float opacity = floodOpacity.get(context.measureContext());
         if (opacity != 0) {
             Graphics2D graphics = GraphicsUtil.createGraphics(img);
             graphics.setComposite(AlphaComposite.Src.derive(opacity));
