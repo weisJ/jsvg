@@ -22,11 +22,22 @@
 package com.github.weisj.jsvg.attributes.value;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.value.AnimatedLength;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public interface LengthValue {
+
+    static @Nullable LengthValue derive(@Nullable LengthValue current, @Nullable LengthValue other) {
+        if (other == null) return current;
+        if (current == null) return other;
+        if (other instanceof AnimatedLength) {
+            return ((AnimatedLength) other).derive(current);
+        }
+        return other;
+    }
 
     boolean isUnspecified();
 

@@ -27,9 +27,11 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.parser.AttributeNode;
@@ -40,16 +42,16 @@ public final class PaintContext implements Mutator<PaintContext> {
     public final @Nullable SVGPaint fillPaint;
     public final @Nullable SVGPaint strokePaint;
 
-    public final Percentage opacity;
-    public final Percentage fillOpacity;
-    public final Percentage strokeOpacity;
+    public final PercentageValue opacity;
+    public final PercentageValue fillOpacity;
+    public final PercentageValue strokeOpacity;
 
     public final @Nullable PaintOrder paintOrder;
 
     public final @Nullable StrokeContext strokeContext;
 
-    public PaintContext(@Nullable AwtSVGPaint color, @Nullable SVGPaint fillPaint, Percentage fillOpacity,
-            @Nullable SVGPaint strokePaint, Percentage strokeOpacity, Percentage opacity,
+    public PaintContext(@Nullable AwtSVGPaint color, @Nullable SVGPaint fillPaint, PercentageValue fillOpacity,
+            @Nullable SVGPaint strokePaint, PercentageValue strokeOpacity, PercentageValue opacity,
             @Nullable PaintOrder paintOrder,
             @Nullable StrokeContext strokeContext) {
         this.color = color;
@@ -76,7 +78,7 @@ public final class PaintContext implements Mutator<PaintContext> {
         return new PaintContext(
                 parseColorAttribute(attributeNode),
                 attributeNode.getPaint("fill"),
-                attributeNode.getPercentage("fill-opacity", Percentage.ONE),
+                attributeNode.getPercentage("fill-opacity", Percentage.ONE, Animatable.YES),
                 attributeNode.getPaint("stroke"),
                 attributeNode.getPercentage("stroke-opacity", Percentage.ONE),
                 attributeNode.getPercentage("opacity", Percentage.ONE),

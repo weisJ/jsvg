@@ -19,44 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.animation.time;
-
-import java.util.Objects;
+package com.github.weisj.jsvg.animation.value;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.google.errorprone.annotations.Immutable;
+import com.github.weisj.jsvg.animation.Track;
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 
-@Immutable
-public final class Duration {
-    public static final long INDEFINITE_RAW = Long.MAX_VALUE;
-    public static final @NotNull Duration INDEFINITE = new Duration(INDEFINITE_RAW);
-    public static final Duration ZERO = new Duration(0);
+public final class AnimatedPercentage extends AnimatedFloat implements PercentageValue {
 
-    private final long milliseconds;
+    private final PercentageValue multiplier;
 
-    public Duration(long milliseconds) {
-        this.milliseconds = milliseconds;
+    public AnimatedPercentage(@NotNull Track track, float initial, float[] values) {
+        this(track, initial, values, new Percentage(1));
     }
 
-    public long milliseconds() {
-        return milliseconds;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Duration duration = (Duration) o;
-        return milliseconds == duration.milliseconds;
+    public AnimatedPercentage(@NotNull Track track, float initial, float[] values, PercentageValue multiplier) {
+        super(track, initial, values);
+        this.multiplier = multiplier;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(milliseconds);
+    public float get(@NotNull MeasureContext context) {
+        return super.get(context) * multiplier.get(context);
     }
 
-    public boolean isIndefinite() {
-        return milliseconds == INDEFINITE_RAW;
+    public @NotNull PercentageValue multiply(@NotNull PercentageValue other) {
+        return new AnimatedPercentage(track, initial, values, multiplier.multiply(other));
     }
 }

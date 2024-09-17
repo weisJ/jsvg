@@ -19,44 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.animation.time;
+package com.github.weisj.jsvg.animation;
 
-import java.util.Objects;
+public final class AnimationPeriod {
+    private final long start;
+    private final long end;
 
-import org.jetbrains.annotations.NotNull;
-
-import com.google.errorprone.annotations.Immutable;
-
-@Immutable
-public final class Duration {
-    public static final long INDEFINITE_RAW = Long.MAX_VALUE;
-    public static final @NotNull Duration INDEFINITE = new Duration(INDEFINITE_RAW);
-    public static final Duration ZERO = new Duration(0);
-
-    private final long milliseconds;
-
-    public Duration(long milliseconds) {
-        this.milliseconds = milliseconds;
+    public AnimationPeriod(long start, long end) {
+        this.start = start;
+        this.end = end;
     }
 
-    public long milliseconds() {
-        return milliseconds;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Duration duration = (Duration) o;
-        return milliseconds == duration.milliseconds;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(milliseconds);
-    }
-
-    public boolean isIndefinite() {
-        return milliseconds == INDEFINITE_RAW;
+    public long duration() {
+        return end - start;
     }
 }

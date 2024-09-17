@@ -36,12 +36,14 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
 import com.github.weisj.jsvg.animation.value.AnimatedLength;
+import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
 import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.ConstantValue;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.attributes.value.Value;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
@@ -219,10 +221,12 @@ public final class AttributeNode {
         }
 
         if (animatable == Animatable.YES) {
-            if (fallback == null) throw new IllegalStateException("Fallback must not be null for animatable property");
-            Length initial = value instanceof Length
-                    ? (Length) value
-                    : ((AnimatedLength) value).initial();
+            if (value == null) {
+                throw new IllegalStateException("Initial value is unspecified");
+            }
+            LengthValue initial = value instanceof AnimatedLength
+                    ? ((AnimatedLength) value).initial()
+                    : value;
             AnimatedLength animatedLength = getAnimatedLength(key, initial);
             if (animatedLength != null) return animatedLength;
         }
@@ -263,6 +267,17 @@ public final class AttributeNode {
     @Contract("_,!null -> !null")
     public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
         return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
+    }
+
+    public @NotNull PercentageValue getPercentage(@NotNull String key, @NotNull Percentage fallback,
+            Animatable animatable) {
+        Percentage initial = loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
+
+        if (animatable == Animatable.YES) {
+            AnimatedPercentage animatedPercentage = getAnimatedPercentage(key, initial);
+            if (animatedPercentage != null) return animatedPercentage;
+        }
+        return initial;
     }
 
     @Deprecated
@@ -389,7 +404,7 @@ public final class AttributeNode {
         return null;
     }
 
-    private @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull Length initial) {
+    private @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial) {
         Animate animate = animateNode(property);
         if (animate == null) return null;
         return animate.animatedLength(initial, this);
@@ -399,5 +414,11 @@ public final class AttributeNode {
         Animate animate = animateNode(property);
         if (animate == null) return null;
         return animate.animatedFloatList(initial, this);
+    }
+
+    private @Nullable AnimatedPercentage getAnimatedPercentage(@NotNull String property, @NotNull Percentage initial) {
+        Animate animate = animateNode(property);
+        if (animate == null) return null;
+        return animate.animatedPercentage(initial, this);
     }
 }

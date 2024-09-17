@@ -24,13 +24,14 @@ package com.github.weisj.jsvg.animation.value;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
+import com.github.weisj.jsvg.attributes.value.FloatValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public final class AnimatedFloat {
+public class AnimatedFloat implements FloatValue {
 
-    private final @NotNull Track track;
-    private final float initial;
-    private final float[] values;
+    protected final @NotNull Track track;
+    protected final float initial;
+    protected final float[] values;
 
     public AnimatedFloat(@NotNull Track track, float initial, float[] values) {
         this.track = track;
