@@ -36,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
 import com.github.weisj.jsvg.animation.value.AnimatedLength;
+import com.github.weisj.jsvg.animation.value.AnimatedPaint;
 import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
 import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
@@ -194,14 +195,41 @@ public final class AttributeNode {
     }
 
     public @Nullable SVGPaint getPaint(@NotNull String key) {
-        String value = getValue(key);
+        return getPaintInternal(key, null);
+    }
+
+    public @Nullable SVGPaint getPaint(@NotNull String key, Animatable animatable) {
+        return getPaint(key, null, animatable);
+    }
+
+    @Contract("_,!null,_ -> !null")
+    public @Nullable SVGPaint getPaint(@NotNull String key, @Nullable SVGPaint fallback, Animatable animatable) {
+        SVGPaint value = getPaintInternal(key, fallback);
+        if (animatable == Animatable.YES) {
+            SVGPaint initial = value;
+            if (initial == null) initial = SVGPaint.INHERITED;
+            AnimatedPaint animatedPaint = getAnimatedPaint(key, initial);
+            if (animatedPaint != null) return animatedPaint;
+        }
+        return value;
+    }
+
+    @Contract("_,!null -> !null")
+    private @Nullable SVGPaint getPaintInternal(@NotNull String key, @Nullable SVGPaint fallback) {
+        SVGPaint paint = parsePaint(getValue(key));
+        if (paint == null) return fallback;
+        return paint;
+    }
+
+    public @Nullable SVGPaint parsePaint(@Nullable String value) {
+        if (value == null) return null;
         SVGPaint paint = getElementByUrl(SVGPaint.class, value);
         if (paint != null) return paint;
         return loadHelper.attributeParser().parsePaint(value, this);
     }
 
     public @Nullable Length getLength(@NotNull String key) {
-        return getLength(key, null);
+        return getLength(key, (Length) null);
     }
 
     public @NotNull Length getLength(@NotNull String key, float fallback) {
@@ -213,6 +241,10 @@ public final class AttributeNode {
         return (Length) getLength(key, fallback, Animatable.NO);
     }
 
+    public @Nullable LengthValue getLength(@NotNull String key, Animatable animatable) {
+        return getLength(key, null, animatable);
+    }
+
     @Contract("_,!null,_ -> !null")
     public @Nullable LengthValue getLength(@NotNull String key, @Nullable LengthValue fallback, Animatable animatable) {
         LengthValue value = getLengthInternal(key);
@@ -221,12 +253,11 @@ public final class AttributeNode {
         }
 
         if (animatable == Animatable.YES) {
-            if (value == null) {
-                throw new IllegalStateException("Initial value is unspecified");
+            LengthValue initial = value;
+            if (initial == null) initial = Length.INHERITED;
+            if (initial instanceof AnimatedLength) {
+                initial = ((AnimatedLength) initial).initial();
             }
-            LengthValue initial = value instanceof AnimatedLength
-                    ? ((AnimatedLength) value).initial()
-                    : value;
             AnimatedLength animatedLength = getAnimatedLength(key, initial);
             if (animatedLength != null) return animatedLength;
         }
@@ -420,5 +451,11 @@ public final class AttributeNode {
         Animate animate = animateNode(property);
         if (animate == null) return null;
         return animate.animatedPercentage(initial, this);
+    }
+
+    private @Nullable AnimatedPaint getAnimatedPaint(@NotNull String property, @NotNull SVGPaint initial) {
+        Animate animate = animateNode(property);
+        if (animate == null) return null;
+        return animate.animatedPaint(initial, this);
     }
 }

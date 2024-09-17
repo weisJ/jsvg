@@ -27,7 +27,9 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
 import com.github.weisj.jsvg.animation.value.AnimatedLength;
+import com.github.weisj.jsvg.animation.value.AnimatedPaint;
 import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
+import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
@@ -109,7 +111,8 @@ public final class Animate extends MetaSVGNode {
         return new AnimatedFloatList(track, initial, lists);
     }
 
-    public @Nullable AnimatedPercentage animatedPercentage(Percentage initial, AttributeNode attributeNode) {
+    public @Nullable AnimatedPercentage animatedPercentage(@NotNull Percentage initial,
+            @NotNull AttributeNode attributeNode) {
         if (track == null) return null;
         float[] percentages = new float[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
@@ -118,5 +121,16 @@ public final class Animate extends MetaSVGNode {
             percentages[i] = p.value();
         }
         return new AnimatedPercentage(track, initial.value(), percentages);
+    }
+
+    public @Nullable AnimatedPaint animatedPaint(@NotNull SVGPaint initial, @NotNull AttributeNode attributeNode) {
+        if (track == null) return null;
+        SVGPaint[] paints = new SVGPaint[this.values.length];
+        for (int i = 0; i < this.values.length; i++) {
+            SVGPaint p = attributeNode.parsePaint(this.values[i]);
+            if (p == null) return null;
+            paints[i] = p;
+        }
+        return new AnimatedPaint(track, initial, paints);
     }
 }
