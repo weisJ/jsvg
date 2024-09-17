@@ -133,8 +133,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     }
 
     @Override
-    public boolean isVisible() {
-        return !width.isZero() && !height.isZero() && SVGPaint.super.isVisible();
+    public boolean isVisible(@NotNull RenderContext context) {
+        return !width.isZero() && !height.isZero() && SVGPaint.super.isVisible(context);
     }
 
     @Override
