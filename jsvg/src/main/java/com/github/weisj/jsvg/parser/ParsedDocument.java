@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.AnimationPeriod;
-import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 
 public class ParsedDocument {
@@ -37,8 +36,7 @@ public class ParsedDocument {
     private final @Nullable URI rootURI;
     private final @NotNull LoaderContext loaderContext;
 
-    private long animationStartTime;
-    private long animationEndTime;
+    private @NotNull AnimationPeriod animationPeriod = new AnimationPeriod(0, 0, false);
 
     public ParsedDocument(@Nullable URI rootURI, @NotNull LoaderContext loaderContext) {
         this.rootURI = rootURI;
@@ -73,22 +71,10 @@ public class ParsedDocument {
     }
 
     public @NotNull AnimationPeriod animationPeriod() {
-        return new AnimationPeriod(animationStartTime, animationEndTime);
+        return animationPeriod;
     }
 
     public void registerAnimatedElement(@NotNull Animate animate) {
-        Track track = animate.track();
-        if (track == null) return;
-        long begin = track.begin().milliseconds();
-        long duration = track.duration().milliseconds();
-        float repeatCount = track.repeatCount();
-
-        animationStartTime = Math.min(animationStartTime, begin);
-
-        if (Float.isFinite(repeatCount)) {
-            animationEndTime = Math.max(animationEndTime, (long) (begin + duration * repeatCount));
-        } else {
-            animationEndTime = Math.max(animationEndTime, begin + duration);
-        }
+        animationPeriod = animationPeriod.derive(animate.track());
     }
 }

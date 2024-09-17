@@ -41,6 +41,7 @@ import com.github.weisj.darklaf.Customization;
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.darklaf.iconset.AllIcons;
 import com.github.weisj.darklaf.ui.button.ButtonConstants;
+import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.parser.ExternalResourcePolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
@@ -165,16 +166,7 @@ public final class SVGViewer {
                 pauseAnimation.setSelected(false);
             });
             pauseAnimation.addActionListener(e -> {
-                if (pauseAnimation.isSelected()) {
-                    svgPanel.animationTimer.stop();
-                    svgPanel.animationRunning = false;
-                    svgPanel.animationElapsedBeforePause = System.currentTimeMillis() - svgPanel.animationStart;
-                } else {
-                    svgPanel.animationStart = System.currentTimeMillis() - svgPanel.animationElapsedBeforePause;
-                    svgPanel.animationElapsedBeforePause = 0;
-                    svgPanel.animationRunning = true;
-                    svgPanel.animationTimer.start();
-                }
+                svgPanel.setAnimationState(!pauseAnimation.isSelected());
             });
 
             animationControls.add(Box.createHorizontalStrut(5));
@@ -231,7 +223,7 @@ public final class SVGViewer {
         private long animationElapsedBeforePause;
 
         private boolean animationRunning = true;
-        private final Timer animationTimer = new Timer(1000 / 60, e -> repaint());
+        private final Timer animationTimer = new Timer(1 / 60, e -> animationUpdate());
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
@@ -239,7 +231,6 @@ public final class SVGViewer {
             setOpaque(true);
             icon.setAutosize(SVGIcon.AUTOSIZE_BESTFIT);
             icon.setAntiAlias(true);
-            animationTimer.setRepeats(true);
         }
 
         private void printMemory() {
@@ -254,27 +245,54 @@ public final class SVGViewer {
         }
 
         private void restartAnimation() {
+            if (document == null) return;
+            AnimationPeriod animationPeriod = document.animationPeriod();
+            animationTimer.setRepeats(true);
+            animationTimer.setInitialDelay((int) animationPeriod.startTime());
+            animationTimer.setCoalesce(true);
+
+            animationTimer.start();
             animationStart = System.currentTimeMillis();
             animationElapsedBeforePause = 0;
-            SwingUtilities.invokeLater(animationTimer::start);
+        }
+
+        public void setAnimationState(boolean playing) {
+            if (playing == animationRunning) return;
+            animationRunning = playing;
+            if (playing) {
+                animationStart = System.currentTimeMillis() - animationElapsedBeforePause;
+                animationElapsedBeforePause = 0;
+                animationTimer.start();
+            } else {
+                animationTimer.stop();
+                animationElapsedBeforePause = System.currentTimeMillis() - animationStart;
+            }
+        }
+
+        private void animationUpdate() {
+            if (System.currentTimeMillis() - animationStart > document.animationPeriod().endTime()) {
+                animationTimer.stop();
+            }
+            repaint();
         }
 
         private void selectIcon(@NotNull String name) {
             animationTimer.stop();
             remove(jsvgCanvas);
             switch (mode) {
-                case JSVG -> document = iconCache.computeIfAbsent(name, n -> {
-                    URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
-                    SVGLoader loader = new SVGLoader();
-                    LoaderContext loaderContext = LoaderContext.builder()
-                            .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
-                            .build();
-                    SVGDocument document = loader.load(url, loaderContext);
+                case JSVG -> {
+                    document = iconCache.computeIfAbsent(name, n -> {
+                        URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
+                        SVGLoader loader = new SVGLoader();
+                        LoaderContext loaderContext = LoaderContext.builder()
+                                .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
+                                .build();
+                        return loader.load(url, loaderContext);
+                    });
                     if (document != null && document.isAnimated() && animationRunning) {
                         restartAnimation();
                     }
-                    return document;
-                });
+                }
                 case SVG_SALAMANDER -> {
                     try {
                         icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
