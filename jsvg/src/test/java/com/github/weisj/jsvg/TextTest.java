@@ -155,6 +155,16 @@ class TextTest {
                                 @NotNull RenderContext context) {
                             runs.add(codepoints);
                         }
+
+                        @Override
+                        protected void onTextStart() {
+                            // Do nothing
+                        }
+
+                        @Override
+                        protected void onTextEnd() {
+                            // Do nothing
+                        }
                     };
                 }
             }, null);
