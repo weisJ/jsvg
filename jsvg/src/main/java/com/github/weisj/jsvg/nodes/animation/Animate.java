@@ -21,14 +21,13 @@
  */
 package com.github.weisj.jsvg.nodes.animation;
 
+import java.awt.*;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
-import com.github.weisj.jsvg.animation.value.AnimatedLength;
-import com.github.weisj.jsvg.animation.value.AnimatedPaint;
-import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
+import com.github.weisj.jsvg.animation.value.*;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -132,5 +131,16 @@ public final class Animate extends MetaSVGNode {
             paints[i] = p;
         }
         return new AnimatedPaint(track, initial, paints);
+    }
+
+    public @Nullable AnimatedColor animatedColor(@NotNull Color initial, @NotNull AttributeNode attributeNode) {
+        if (track == null) return null;
+        Color[] paints = new Color[this.values.length];
+        for (int i = 0; i < this.values.length; i++) {
+            Color c = attributeNode.parser().paintParser().parseColor(this.values[i], attributeNode);
+            if (c == null) return null;
+            paints[i] = c;
+        }
+        return new AnimatedColor(track, initial, paints);
     }
 }
