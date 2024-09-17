@@ -252,15 +252,15 @@ public final class RenderContext {
     }
 
     public float rawOpacity() {
-        return paintContext.opacity.value();
+        return paintContext.opacity.get(measureContext);
     }
 
     public float fillOpacity() {
-        return paintContext.fillOpacity.value() * paintContext.opacity.value();
+        return paintContext.fillOpacity.get(measureContext) * paintContext.opacity.get(measureContext);
     }
 
     public float strokeOpacity() {
-        return paintContext.strokeOpacity.value() * paintContext.opacity.value();
+        return paintContext.strokeOpacity.get(measureContext) * paintContext.opacity.get(measureContext);
     }
 
     public @NotNull Stroke stroke(float pathLengthFactor) {

@@ -73,7 +73,7 @@ public final class StrokeContext {
         if (context == null) return this;
         if (context.isTrivial()) return this;
         return new StrokeContext(
-                context.strokeWidth != null ? context.strokeWidth : strokeWidth,
+                LengthValue.derive(strokeWidth, context.strokeWidth),
                 context.lineCap != null ? context.lineCap : lineCap,
                 context.lineJoin != null ? context.lineJoin : lineJoin,
                 Length.isSpecified(context.miterLimit) ? context.miterLimit : miterLimit,
@@ -96,12 +96,12 @@ public final class StrokeContext {
 
     public static @NotNull StrokeContext parse(@NotNull AttributeNode attributeNode) {
         return new StrokeContext(
-                attributeNode.getLength("stroke-width", null, Animatable.YES),
+                attributeNode.getLength("stroke-width", Length.INHERITED, Animatable.YES),
                 attributeNode.getEnumNullable("stroke-linecap", LineCap.class),
                 attributeNode.getEnumNullable("stroke-linejoin", LineJoin.class),
                 attributeNode.getNonNegativeFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
                 attributeNode.getLengthList("stroke-dasharray", null),
-                attributeNode.getLength("stroke-dashoffset", Length.ZERO, Animatable.YES));
+                attributeNode.getLength("stroke-dashoffset", Length.INHERITED, Animatable.YES));
     }
 
     @Override

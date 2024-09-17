@@ -25,7 +25,9 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class Percentage implements Comparable<Percentage> {
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
+
+public final class Percentage implements Comparable<Percentage>, PercentageValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Percentage UNSPECIFIED = new Percentage(UNSPECIFIED_RAW);
     public static final @NotNull Percentage ZERO = new Percentage(0);
@@ -47,6 +49,22 @@ public final class Percentage implements Comparable<Percentage> {
 
     public float value() {
         return value;
+    }
+
+    @Override
+    public float get(@NotNull MeasureContext context) {
+        return value;
+    }
+
+    public @NotNull PercentageValue multiply(@NotNull PercentageValue other) {
+        if (this.value == 1) return other;
+        if (other instanceof Percentage) {
+            float otherValue = ((Percentage) other).value;
+            if (otherValue == 0 || this.value == 0) return ZERO;
+            if (otherValue == 1) return this;
+            return new Percentage(this.value * otherValue);
+        }
+        return other.multiply(this);
     }
 
     public boolean isUnspecified() {
@@ -78,13 +96,6 @@ public final class Percentage implements Comparable<Percentage> {
     @Override
     public String toString() {
         return (value * 100) + "%";
-    }
-
-    public @NotNull Percentage multiply(@NotNull Percentage other) {
-        if (other.value == 0 || this.value == 0) return ZERO;
-        if (other.value == 1) return this;
-        if (this.value == 1) return other;
-        return new Percentage(this.value * other.value);
     }
 
     @Override

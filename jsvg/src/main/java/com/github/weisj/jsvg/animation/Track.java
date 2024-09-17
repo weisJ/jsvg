@@ -31,32 +31,48 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 
 public final class Track {
     private final @NotNull Duration duration;
+    private final @NotNull Duration begin;
     private final float repeatCount;
     private final Fill fill;
 
-    private Track(@NotNull Duration duration, float repeatCount, Fill fill) {
+    private Track(@NotNull Duration duration, @NotNull Duration begin, float repeatCount, Fill fill) {
         this.duration = duration;
+        this.begin = begin;
         this.repeatCount = repeatCount;
         this.fill = fill;
     }
 
     public static @Nullable Track parse(@NotNull AttributeNode attributeNode) {
         Duration duration = attributeNode.getDuration("dur", Duration.INDEFINITE);
+        Duration begin = attributeNode.getDuration("begin", Duration.ZERO);
         String repeatCountStr = attributeNode.getValue("repeatCount");
         float repeatCount;
         if ("indefinite".equals(repeatCountStr)) {
-            repeatCount = Integer.MAX_VALUE;
+            repeatCount = Float.POSITIVE_INFINITY;
         } else {
             repeatCount = attributeNode.parser().parseFloat(repeatCountStr, 1);
         }
 
         if (duration.isIndefinite()
                 || duration.milliseconds() < 0
+                || begin.isIndefinite()
                 || repeatCount <= 0) {
             return null;
         }
 
-        return new Track(duration, repeatCount, attributeNode.getEnum("fill", Fill.REMOVE));
+        return new Track(duration, begin, repeatCount, attributeNode.getEnum("fill", Fill.REMOVE));
+    }
+
+    public @NotNull Duration duration() {
+        return duration;
+    }
+
+    public @NotNull Duration begin() {
+        return begin;
+    }
+
+    public float repeatCount() {
+        return repeatCount;
     }
 
     private int iterationCount(long timestampMillis) {
@@ -71,8 +87,11 @@ public final class Track {
 
     public @NotNull InterpolationProgress interpolationProgress(long timestamp, int valueCount) {
         if (valueCount == 0) return InterpolationProgress.INITIAL;
-        int iterationCount = iterationCount(timestamp);
-        float iterationProgress = iterationProgress(timestamp);
+        if (timestamp < begin.milliseconds()) return InterpolationProgress.INITIAL;
+
+        long time = timestamp - begin.milliseconds();
+        int iterationCount = iterationCount(time);
+        float iterationProgress = iterationProgress(time);
         float totalIteration = iterationCount + iterationProgress;
 
         if (totalIteration > repeatCount) {
