@@ -75,8 +75,8 @@ public final class SVG extends CommonInnerViewContainer {
         return isTopLevel && !inNonRootMode;
     }
 
-    public boolean isAnimated() {
-        return animationPeriod.duration() > 0;
+    public @NotNull AnimationPeriod animationPeriod() {
+        return animationPeriod;
     }
 
 

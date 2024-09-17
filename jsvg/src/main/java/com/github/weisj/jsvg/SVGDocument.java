@@ -30,6 +30,7 @@ import javax.swing.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -70,7 +71,11 @@ public final class SVGDocument {
     }
 
     public boolean isAnimated() {
-        return root.isAnimated();
+        return root.animationPeriod().duration() > 0;
+    }
+
+    public @NotNull AnimationPeriod animationPeriod() {
+        return root.animationPeriod();
     }
 
     public void render(@Nullable JComponent component, @NotNull Graphics2D g) {
