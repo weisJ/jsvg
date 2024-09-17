@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontSize;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -116,7 +117,7 @@ public abstract class ShapeNode extends RenderableSVGNode
     public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
         Rectangle2D bounds = shape.bounds(context, true);
         if (box == Box.StrokeBox) {
-            Length strokeWidth = context.strokeContext().strokeWidth;
+            LengthValue strokeWidth = context.strokeContext().strokeWidth;
             if (strokeWidth != null && strokeWidth.isSpecified()) {
                 float stroke = strokeWidth.resolveLength(context.measureContext());
                 if (stroke > 0) bounds = GeometryUtil.grow(bounds, stroke);

@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -63,7 +64,7 @@ public final class SVG extends CommonInnerViewContainer {
 
     private boolean isTopLevel;
     private boolean inNonRootMode;
-    private long animationPeriod;
+    private AnimationPeriod animationPeriod;
 
     @Override
     public @NotNull String tagName() {
@@ -75,7 +76,7 @@ public final class SVG extends CommonInnerViewContainer {
     }
 
     public boolean isAnimated() {
-        return animationPeriod != 0;
+        return animationPeriod.duration() > 0;
     }
 
 

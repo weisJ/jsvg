@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.animation.value;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
@@ -30,17 +31,22 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public class AnimatedLength implements LengthValue {
     private final @NotNull Track track;
-    private final @NotNull Length initial;
+    private final @NotNull LengthValue initial;
     private final @NotNull Length @NotNull [] values;
 
     public AnimatedLength(@NotNull Track track,
-            @NotNull Length initial, @NotNull Length @NotNull [] values) {
+            @NotNull LengthValue initial, @NotNull Length @NotNull [] values) {
         this.track = track;
         this.initial = initial;
         this.values = values;
     }
 
-    public @NotNull Length initial() {
+    public @NotNull AnimatedLength derive(@NotNull LengthValue initial) {
+        if (this.initial != Length.INHERITED) return this;
+        return new AnimatedLength(track, initial, values);
+    }
+
+    public @Nullable LengthValue initial() {
         return initial;
     }
 
