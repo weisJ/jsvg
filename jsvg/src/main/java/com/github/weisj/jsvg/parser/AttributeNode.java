@@ -34,10 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.time.Duration;
-import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
-import com.github.weisj.jsvg.animation.value.AnimatedLength;
-import com.github.weisj.jsvg.animation.value.AnimatedPaint;
-import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
+import com.github.weisj.jsvg.animation.value.*;
 import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
@@ -457,5 +454,11 @@ public final class AttributeNode {
         Animate animate = animateNode(property);
         if (animate == null) return null;
         return animate.animatedPaint(initial, this);
+    }
+
+    public @Nullable AnimatedColor getAnimatedColor(@NotNull String property, @NotNull Color initial) {
+        Animate animate = animateNode(property);
+        if (animate == null) return null;
+        return animate.animatedColor(initial, this);
     }
 }

@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.value.AnimatedColor;
 import com.github.weisj.jsvg.animation.value.AnimatedPaint;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -44,6 +45,9 @@ public interface SVGPaint {
         if (current == null) return other;
         if (other instanceof AnimatedPaint) {
             return ((AnimatedPaint) other).derive(current);
+        }
+        if (other instanceof AnimatedColor) {
+            return ((AnimatedColor) other).derive(current);
         }
         return other;
     }
