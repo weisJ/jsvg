@@ -75,6 +75,10 @@ public final class Track {
         return repeatCount;
     }
 
+    public @NotNull Fill fill() {
+        return fill;
+    }
+
     private int iterationCount(long timestampMillis) {
         long durationMillis = duration.milliseconds();
         return (int) (timestampMillis / durationMillis);
