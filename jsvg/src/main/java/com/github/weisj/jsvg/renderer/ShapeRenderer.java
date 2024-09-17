@@ -50,8 +50,8 @@ public final class ShapeRenderer {
             this.opacity = opacity;
         }
 
-        boolean isVisible() {
-            return opacity > 0 && paint.isVisible();
+        boolean isVisible(@NotNull RenderContext context) {
+            return opacity > 0 && paint.isVisible(context);
         }
     }
 
@@ -143,12 +143,12 @@ public final class ShapeRenderer {
     private static void renderShapeStroke(@NotNull RenderContext context, @NotNull Output output,
             @NotNull PaintShape paintShape, @Nullable Stroke stroke, boolean willBeFilledAfterwards) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
-        if (!(stroke != null && paintWithOpacity.isVisible())) return;
+        if (!(stroke != null && paintWithOpacity.isVisible(context))) return;
         output.applyOpacity(paintWithOpacity.opacity);
         output.setStroke(stroke);
         boolean removeFillArea = output.hasMaskedPaint()
                 && willBeFilledAfterwards
-                && context.fillPaint().isVisible()
+                && context.fillPaint().isVisible(context)
                 && context.fillOpacity() == 1
                 && output.currentOpacity() == 1;
         if (removeFillArea) {
@@ -163,7 +163,7 @@ public final class ShapeRenderer {
     private static void renderShapeFill(@NotNull RenderContext context, @NotNull Output output,
             @NotNull PaintShape paintShape) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.fillPaint(), context.fillOpacity());
-        if (!paintWithOpacity.isVisible()) return;
+        if (!paintWithOpacity.isVisible(context)) return;
         output.applyOpacity(paintWithOpacity.opacity);
         paintWithOpacity.paint.fillShape(output, context, paintShape.shape, paintShape.bounds);
     }

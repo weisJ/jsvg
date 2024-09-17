@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 
 public final class PaintContext implements Mutator<PaintContext> {
 
-    public final @Nullable AwtSVGPaint color;
+    public final @Nullable SVGPaint color;
     public final @Nullable SVGPaint fillPaint;
     public final @Nullable SVGPaint strokePaint;
 
@@ -52,7 +52,7 @@ public final class PaintContext implements Mutator<PaintContext> {
     public final @Nullable StrokeContext strokeContext;
     public final @Nullable FillRule fillRule;
 
-    public PaintContext(@Nullable AwtSVGPaint color, @Nullable SVGPaint fillPaint, PercentageValue fillOpacity,
+    public PaintContext(@Nullable SVGPaint color, @Nullable SVGPaint fillPaint, PercentageValue fillOpacity,
             @Nullable SVGPaint strokePaint, PercentageValue strokeOpacity, PercentageValue opacity,
             @Nullable PaintOrder paintOrder,
             @Nullable StrokeContext strokeContext, @Nullable FillRule fillRule) {
@@ -81,9 +81,9 @@ public final class PaintContext implements Mutator<PaintContext> {
     public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
         return new PaintContext(
                 parseColorAttribute(attributeNode),
-                attributeNode.getPaint("fill"),
+                attributeNode.getPaint("fill", Animatable.YES),
                 attributeNode.getPercentage("fill-opacity", Percentage.ONE, Animatable.YES),
-                attributeNode.getPaint("stroke"),
+                attributeNode.getPaint("stroke", Animatable.YES),
                 attributeNode.getPercentage("stroke-opacity", Percentage.ONE),
                 attributeNode.getPercentage("opacity", Percentage.ONE),
                 PaintOrder.parse(attributeNode),
@@ -99,10 +99,10 @@ public final class PaintContext implements Mutator<PaintContext> {
 
     public @NotNull PaintContext derive(@NotNull PaintContext context) {
         return new PaintContext(
-                context.color != null ? context.color : color,
-                context.fillPaint != null ? context.fillPaint : fillPaint,
+                SVGPaint.derive(color, context.color),
+                SVGPaint.derive(fillPaint, context.fillPaint),
                 fillOpacity.multiply(context.fillOpacity),
-                context.strokePaint != null ? context.strokePaint : strokePaint,
+                SVGPaint.derive(strokePaint, context.strokePaint),
                 strokeOpacity.multiply(context.strokeOpacity),
                 opacity.multiply(context.opacity),
                 context.paintOrder != null ? context.paintOrder : paintOrder,
