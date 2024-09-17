@@ -38,6 +38,10 @@ public abstract class GlyphRunTextOutput implements TextOutput {
     protected abstract void glyphRun(@NotNull String codepoints, @NotNull AffineTransform glyphTransform,
             @NotNull RenderContext context);
 
+    protected abstract void onTextStart();
+
+    protected abstract void onTextEnd();
+
     @Override
     public void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform,
             @NotNull RenderContext context) {
@@ -57,8 +61,9 @@ public abstract class GlyphRunTextOutput implements TextOutput {
     }
 
     @Override
-    public void beginText() {
+    public final void beginText() {
         reset();
+        onTextStart();
     }
 
     @Override
@@ -71,7 +76,8 @@ public abstract class GlyphRunTextOutput implements TextOutput {
     }
 
     @Override
-    public void endText() {
+    public final void endText() {
         glyphRunBreak();
+        onTextEnd();
     }
 }
