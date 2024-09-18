@@ -39,18 +39,6 @@ public interface LengthValue {
         return other;
     }
 
-    boolean isUnspecified();
-
-    default boolean isSpecified() {
-        return !isUnspecified();
-    }
-
-    @NotNull
-    LengthValue coerceNonNegative();
-
-    @NotNull
-    LengthValue orElseIfUnspecified(float value);
-
     boolean isConstantlyZero();
 
     /**

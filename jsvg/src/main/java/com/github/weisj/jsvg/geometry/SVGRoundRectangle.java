@@ -58,8 +58,8 @@ public final class SVGRoundRectangle implements MeasurableShape {
                 y.resolveHeight(measureContext),
                 w.resolveWidth(measureContext),
                 h.resolveHeight(measureContext),
-                rx.resolveWidth(measureContext) * 2,
-                ry.resolveHeight(measureContext) * 2);
+                Math.max(0, rx.resolveWidth(measureContext) * 2),
+                Math.max(0, ry.resolveHeight(measureContext) * 2));
     }
 
     @Override
