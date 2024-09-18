@@ -21,14 +21,12 @@
  */
 package com.github.weisj.jsvg.annotations.processor;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -56,14 +54,19 @@ public class SealedClassProcessor extends AbstractProcessor {
 
                     if (isSubtype(classElement, (TypeElement) type, typeUtils)) {
                         if (!isPermitted(permittedSubclasses, classElement)) {
-                            processingEnv.getMessager().printMessage(
-                                    Diagnostic.Kind.ERROR,
-                                    element.getSimpleName()
-                                            + " is not permitted to be a subclass of sealed type "
-                                            + type.getSimpleName()
-                                            + "\n"
-                                            + "Permitted subclasses: " + Arrays.toString(permittedSubclasses),
-                                    element);
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("\n");
+                            sb.append(classElement.getSimpleName());
+                            sb.append(" is not permitted to be a subclass of sealed type ");
+                            sb.append(type.getSimpleName());
+                            sb.append("\n");
+                            sb.append("Permitted subclasses are:");
+                            for (TypeElement allowedClass : permittedSubclasses) {
+                                sb.append("\n    - ");
+                                sb.append(allowedClass.getQualifiedName());
+                            }
+                            processingEnv.getMessager()
+                                    .printMessage(Diagnostic.Kind.ERROR, sb.toString(), element);
                         }
                     }
                 }
@@ -81,13 +84,9 @@ public class SealedClassProcessor extends AbstractProcessor {
 
     private boolean isSubtype(@NotNull TypeElement classElement, @NotNull TypeElement type, @NotNull Types typeUtils) {
         for (TypeMirror iface : classElement.getInterfaces()) {
-            if (type.equals(typeUtils.asElement(iface))) {
-                return true;
-            }
+            if (type.equals(typeUtils.asElement(iface))) return true;
         }
-        TypeMirror superclass = classElement.getSuperclass();
-        if (superclass.getKind() == TypeKind.NONE) return false;
-        return isSubtype((TypeElement) typeUtils.asElement(superclass), type, typeUtils);
+        return type.asType().equals(classElement.getSuperclass());
     }
 
     public TypeElement[] getPermittedClasses(@NotNull TypeElement element, @NotNull Types typeUtils) {

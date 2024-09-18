@@ -29,8 +29,9 @@ import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
 import com.github.weisj.jsvg.animation.value.AnimatedPath;
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.FillRule;
+import com.github.weisj.jsvg.attributes.value.ConstantFloatList;
 import com.github.weisj.jsvg.attributes.value.ConstantValue;
-import com.github.weisj.jsvg.attributes.value.Value;
+import com.github.weisj.jsvg.attributes.value.FloatListValue;
 import com.github.weisj.jsvg.geometry.*;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.util.PathUtil;
@@ -39,12 +40,12 @@ public abstract class AbstractPolyShape extends ShapeNode {
 
     @Override
     protected final @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
-        Value<float[]> points = attributeNode.getFloatList("points", Animatable.YES);
+        FloatListValue points = attributeNode.getFloatList("points", Animatable.YES);
         if (points instanceof AnimatedFloatList) {
             return new FillRuleAwareAWTSVGShape(new AnimatedPath((AnimatedFloatList) points, doClose()));
         }
 
-        float[] pointsArray = ((ConstantValue<float[]>) points).get();
+        float[] pointsArray = ((ConstantFloatList) points).value();
         if (pointsArray.length > 0) {
             return new FillRuleAwareAWTSVGShape(
                     new ConstantValue<>(PathUtil.setPolyLine(null, pointsArray, doClose())));
