@@ -26,11 +26,11 @@ import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.attributes.value.Value;
+import com.github.weisj.jsvg.attributes.value.FloatListValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 
-public final class AnimatedFloatList implements Value<float[]> {
+public final class AnimatedFloatList implements FloatListValue {
 
     private final @NotNull Track track;
 

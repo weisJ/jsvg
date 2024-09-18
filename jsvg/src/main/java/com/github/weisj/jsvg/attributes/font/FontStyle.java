@@ -27,12 +27,14 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.annotations.Sealed;
 import com.github.weisj.jsvg.geometry.size.Angle;
 import com.github.weisj.jsvg.geometry.size.AngleUnit;
 
 /**
  * This abstract class shouldn't be extended besides those constants.
  */
+@Sealed(permits = {FontStyle.Normal.class, FontStyle.Italic.class, FontStyle.Oblique.class})
 abstract class FontStyle {
 
     private FontStyle() {}

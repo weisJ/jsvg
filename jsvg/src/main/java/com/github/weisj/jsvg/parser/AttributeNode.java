@@ -39,10 +39,7 @@ import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-import com.github.weisj.jsvg.attributes.value.ConstantValue;
-import com.github.weisj.jsvg.attributes.value.LengthValue;
-import com.github.weisj.jsvg.attributes.value.PercentageValue;
-import com.github.weisj.jsvg.attributes.value.Value;
+import com.github.weisj.jsvg.attributes.value.*;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
@@ -327,14 +324,14 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parseFloatList(getValue(key));
     }
 
-    public @NotNull Value<float @NotNull []> getFloatList(@NotNull String key, Animatable animatable) {
+    public @NotNull FloatListValue getFloatList(@NotNull String key, Animatable animatable) {
         float[] initial = loadHelper.attributeParser().parseFloatList(getValue(key));
 
         if (animatable == Animatable.YES) {
             AnimatedFloatList animatedLength = getAnimatedFloatList(key, initial);
             if (animatedLength != null) return animatedLength;
         }
-        return new ConstantValue<>(initial);
+        return new ConstantFloatList(initial);
     }
 
     public double @NotNull [] getDoubleList(@NotNull String key) {
