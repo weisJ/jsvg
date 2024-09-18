@@ -11,6 +11,9 @@ dependencies {
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
 
+    compileOnly(projects.annotations)
+    annotationProcessor(projects.annotationsProcessor)
+
     testImplementation(testLibs.darklaf.core)
     testImplementation(testLibs.junit.api)
     testRuntimeOnly(testLibs.junit.engine)

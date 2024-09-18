@@ -303,8 +303,7 @@ allprojects {
         }
 
         configure<PublishingExtension> {
-            if (project.path == ":") {
-                // Skip the root project
+            if (project.path in listOf(":", ":annotations", ":annotations-processor")) {
                 return@configure
             }
 
