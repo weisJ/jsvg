@@ -23,16 +23,21 @@ package com.github.weisj.jsvg.attributes.value;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
-import com.github.weisj.jsvg.annotations.Sealed;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.geometry.size.Percentage;
 
-@Sealed(permits = {Percentage.class, AnimatedPercentage.class})
-public interface PercentageValue {
+public final class ConstantFloatList implements FloatListValue {
+    private final float @NotNull [] value;
 
-    float get(@NotNull MeasureContext context);
+    public ConstantFloatList(float @NotNull [] value) {
+        this.value = value;
+    }
 
-    @NotNull
-    PercentageValue multiply(@NotNull PercentageValue other);
+    @Override
+    public float @NotNull [] get(@NotNull MeasureContext context) {
+        return value;
+    }
+
+    public float[] value() {
+        return value;
+    }
 }

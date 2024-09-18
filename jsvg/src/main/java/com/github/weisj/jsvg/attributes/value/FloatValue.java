@@ -23,8 +23,11 @@ package com.github.weisj.jsvg.attributes.value;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.animation.value.AnimatedFloat;
+import com.github.weisj.jsvg.annotations.Sealed;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
+@Sealed(permits = {ConstantFloat.class, AnimatedFloat.class})
 public interface FloatValue {
 
     float get(@NotNull MeasureContext context);
