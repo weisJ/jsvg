@@ -24,11 +24,12 @@ package com.github.weisj.jsvg.animation.value;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
+import com.github.weisj.jsvg.attributes.value.Dimension;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public class AnimatedLength implements LengthValue {
+public final class AnimatedLength implements LengthValue {
     private final @NotNull Track track;
     private final @NotNull LengthValue initial;
     private final @NotNull Length @NotNull [] values;
