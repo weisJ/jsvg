@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.geometry.size;
 
 import java.util.Objects;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
@@ -61,10 +60,10 @@ public final class Length implements LengthValue {
     }
 
     private static float resolveNonPercentage(@NotNull MeasureContext context, Unit unit, float value) {
-        if (isUnspecified(value)) throw new IllegalStateException("Can't resolve size of unspecified length");
-        // If we are unspecified this will return the raw unspecified value, which we want.
-
-        if (unit == Unit.Raw) return value;
+        if (unit == Unit.Raw) {
+            // If we are unspecified this will return UNSPECIFIED_RAW as intended.
+            return value;
+        }
         assert unit != Unit.PERCENTAGE;
         switch (unit) {
             case PX:
@@ -159,22 +158,18 @@ public final class Length implements LengthValue {
         return value;
     }
 
-    @ApiStatus.Internal
-    public void setValue(float value, @NotNull Unit unit) {
-        this.value = value;
-        this.unit = unit;
-    }
-
     public @NotNull Unit unit() {
         return unit;
     }
 
-    @Override
     public boolean isUnspecified() {
         return isUnspecified(value);
     }
 
-    @Override
+    public boolean isSpecified() {
+        return isSpecified(value);
+    }
+
     public @NotNull Length coerceNonNegative() {
         if (isSpecified() && value <= 0) return ZERO;
         return this;
@@ -186,7 +181,6 @@ public final class Length implements LengthValue {
         return new Length(Unit.PERCENTAGE, raw() * 100);
     }
 
-    @Override
     public @NotNull Length orElseIfUnspecified(float value) {
         if (isUnspecified()) return Unit.Raw.valueOf(value);
         return this;

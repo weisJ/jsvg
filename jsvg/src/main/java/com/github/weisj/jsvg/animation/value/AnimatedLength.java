@@ -68,25 +68,6 @@ public class AnimatedLength implements LengthValue {
     }
 
     @Override
-    public boolean isUnspecified() {
-        return initial.isUnspecified();
-    }
-
-    @Override
-    public @NotNull LengthValue coerceNonNegative() {
-        Length[] newValues = new Length[values.length];
-        for (int i = 0; i < newValues.length; i++) {
-            newValues[i] = values[i].coerceNonNegative();
-        }
-        return new AnimatedLength(track, initial.coerceNonNegative(), newValues);
-    }
-
-    @Override
-    public @NotNull LengthValue orElseIfUnspecified(float value) {
-        return new AnimatedLength(track, initial.orElseIfUnspecified(value), values);
-    }
-
-    @Override
     public boolean isConstantlyZero() {
         for (Length value : values) {
             if (!value.isConstantlyZero()) {

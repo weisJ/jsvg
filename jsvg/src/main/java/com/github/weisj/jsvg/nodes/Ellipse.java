@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGEllipse;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -43,11 +44,24 @@ public final class Ellipse extends ShapeNode {
     }
 
     @Override
-    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
+    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode node) {
+        LengthValue initialRx = node.getLength("rx", Length.UNSPECIFIED, Animatable.NO);
+        LengthValue initialRy = node.getLength("ry", initialRx, Animatable.NO);
+
+        if (initialRy == Length.UNSPECIFIED) {
+            initialRy = Length.ZERO;
+        }
+        if (initialRx == Length.UNSPECIFIED) {
+            initialRx = initialRy;
+        }
+
+        LengthValue rx = node.getLength("rx", initialRx, Animatable.YES);
+        LengthValue ry = node.getLength("ry", initialRy, Animatable.YES);
+
         return new SVGEllipse(
-                attributeNode.getLength("cx", Length.ZERO, Animatable.YES),
-                attributeNode.getLength("cy", Length.ZERO, Animatable.YES),
-                attributeNode.getLength("rx", Length.ZERO, Animatable.YES),
-                attributeNode.getLength("ry", Length.ZERO, Animatable.YES));
+                node.getLength("cx", Length.ZERO, Animatable.YES),
+                node.getLength("cy", Length.ZERO, Animatable.YES),
+                rx,
+                ry);
     }
 }
