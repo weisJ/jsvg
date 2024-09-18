@@ -34,8 +34,8 @@ public final class Length implements LengthValue {
     public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
     public static final @NotNull Length INHERITED = new Length(Unit.Raw, 0);
 
-    private @NotNull Unit unit;
-    private float value;
+    private final @NotNull Unit unit;
+    private final float value;
 
     private static final float pixelsPerInch = 96f;
     private static final float inchesPerCm = .3936f;

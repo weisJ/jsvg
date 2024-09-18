@@ -25,9 +25,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.AnimatedLength;
+import com.github.weisj.jsvg.annotations.Sealed;
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
+@Sealed(permits = {Length.class, AnimatedLength.class})
 public interface LengthValue {
 
     static @Nullable LengthValue derive(@Nullable LengthValue current, @Nullable LengthValue other) {
@@ -74,11 +77,5 @@ public interface LengthValue {
             default:
                 throw new IllegalArgumentException("Unknown dimension: " + dimension);
         }
-    }
-
-    enum Dimension {
-        WIDTH,
-        HEIGHT,
-        LENGTH
     }
 }
