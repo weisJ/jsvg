@@ -118,7 +118,7 @@ public abstract class ShapeNode extends RenderableSVGNode
         Rectangle2D bounds = shape.bounds(context, true);
         if (box == Box.StrokeBox) {
             LengthValue strokeWidth = context.strokeContext().strokeWidth;
-            if (strokeWidth != null && strokeWidth.isSpecified()) {
+            if (strokeWidth != null) {
                 float stroke = strokeWidth.resolveLength(context.measureContext());
                 if (stroke > 0) bounds = GeometryUtil.grow(bounds, stroke);
             }
