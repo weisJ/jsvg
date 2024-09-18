@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,8 @@
  * SOFTWARE.
  *
  */
-module com.github.weisj.jsvg {
-    requires transitive java.desktop;
-    requires transitive java.logging;
-
+module com.github.weisj.jsvg.annotations {
     requires static org.jetbrains.annotations;
-    requires static com.google.errorprone.annotations;
-    requires static com.github.weisj.jsvg.annotations;
 
-    exports com.github.weisj.jsvg;
-    exports com.github.weisj.jsvg.attributes;
-    exports com.github.weisj.jsvg.attributes.paint;
-    exports com.github.weisj.jsvg.geometry.size;
-    exports com.github.weisj.jsvg.nodes;
-    exports com.github.weisj.jsvg.parser;
-    exports com.github.weisj.jsvg.parser.css;
+    exports com.github.weisj.jsvg.annotations;
 }
