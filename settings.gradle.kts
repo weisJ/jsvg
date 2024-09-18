@@ -90,4 +90,6 @@ dependencyResolutionManagement {
 
 include(
     "jsvg",
+    "annotations",
+    "annotations-processor",
 )
