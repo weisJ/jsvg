@@ -51,14 +51,18 @@ public final class Rect extends ShapeNode {
         LengthValue width = node.getLength("width", Length.ZERO, Animatable.YES);
         LengthValue height = node.getLength("height", Length.ZERO, Animatable.YES);
 
-        LengthValue rx = node.getLength("rx", Length.UNSPECIFIED, Animatable.YES);
-        LengthValue ry = node.getLength("ry", rx, Animatable.YES); // Use rx as fallback
-        if (rx.isUnspecified()) {
-            rx = ry; // If rx is not specified use
+        LengthValue initialRx = node.getLength("rx", Length.UNSPECIFIED, Animatable.NO);
+        LengthValue initialRy = node.getLength("ry", initialRx, Animatable.NO);
+
+        if (initialRy == Length.UNSPECIFIED) {
+            initialRy = Length.ZERO;
+        }
+        if (initialRx == Length.UNSPECIFIED) {
+            initialRx = initialRy;
         }
 
-        rx = rx.coerceNonNegative().orElseIfUnspecified(0);
-        ry = ry.coerceNonNegative().orElseIfUnspecified(0);
+        LengthValue rx = node.getLength("rx", initialRx, Animatable.YES);
+        LengthValue ry = node.getLength("ry", initialRy, Animatable.YES);
 
         boolean isNonRounded = rx.isConstantlyZero() && ry.isConstantlyZero();
         if (isNonRounded) {
