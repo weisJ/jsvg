@@ -28,14 +28,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.util.ColorUtil;
 
 public class AnimatedPaint implements SVGPaint {
 
@@ -76,21 +72,8 @@ public class AnimatedPaint implements SVGPaint {
 
         SVGPaint start = values[i];
         SVGPaint end = values[i + 1];
-        float t = progress.indexProgress();
 
-        if (start instanceof SimplePaintSVGPaint && end instanceof SimplePaintSVGPaint) {
-            Paint startPaint = ((SimplePaintSVGPaint) start).paint();
-            Paint endPaint = ((SimplePaintSVGPaint) end).paint();
-            if (startPaint instanceof Color && endPaint instanceof Color) {
-                Color startColor = (Color) startPaint;
-                Color endColor = (Color) endPaint;
-                return new AwtSVGPaint(ColorUtil.interpolate(t, startColor, endColor));
-            }
-        }
-
-        // Discrete animation as values don't match.
-        if (GeometryUtil.approximatelyEqual(t, 1)) return end;
-        return start;
+        return track.paintInterpolator().interpolate(initial, start, end, progress.indexProgress());
     }
 
     @Override

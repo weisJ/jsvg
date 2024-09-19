@@ -26,8 +26,10 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.AnimationValuesType;
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.animation.value.*;
+import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -44,6 +46,8 @@ import com.github.weisj.jsvg.parser.SeparatorMode;
 public final class Animate extends MetaSVGNode {
     public static final String TAG = "animate";
 
+    private static final @NotNull String INITIAL_PLACEHOLDER = "<<initial>>";
+
     private String[] values;
     private @Nullable Track track;
 
@@ -56,6 +60,10 @@ public final class Animate extends MetaSVGNode {
         return attributeNode.getValue("attributeName");
     }
 
+    private static boolean isPlaceholder(@NotNull String value) {
+        return value == INITIAL_PLACEHOLDER;
+    }
+
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
@@ -66,21 +74,30 @@ public final class Animate extends MetaSVGNode {
 
         if (to != null) by = null;
 
+        AnimationValuesType animationType = null;
+
         if (attributeNode.getValue("values") != null) {
             values = attributeNode.getStringList("values", SeparatorMode.SEMICOLON_ONLY);
+            animationType = AnimationValuesType.VALUES;
         } else {
             if (from != null && to != null) {
                 values = new String[] {from, to};
+                animationType = AnimationValuesType.FROM_TO;
             } else if (from != null && by != null) {
-                // TODO: from -> from + to, needs intermediate representation for ValueList
+                values = new String[] {from, by};
+                animationType = AnimationValuesType.FROM_BY;
             } else if (by != null) {
-                // TODO: initial -> initial + by, needs intermediate representation for ValueList
+                values = new String[] {INITIAL_PLACEHOLDER, by};
+                animationType = AnimationValuesType.BY;
             } else if (to != null) {
-                // TODO: initial -> to, needs intermediate representation for ValueList
+                values = new String[] {INITIAL_PLACEHOLDER, to};
+                animationType = AnimationValuesType.TO;
             }
         }
 
-        track = Track.parse(attributeNode);
+        if (animationType != null) {
+            track = Track.parse(attributeNode, animationType);
+        }
     }
 
     public @Nullable Track track() {
@@ -93,6 +110,10 @@ public final class Animate extends MetaSVGNode {
 
         Length[] lengths = new Length[values.length];
         for (int i = 0; i < values.length; i++) {
+            if (isPlaceholder(values[i])) {
+                lengths[i] = Length.ZERO;
+                continue;
+            }
             lengths[i] = attributeNode.parser().parseLength(values[i], null);
             if (lengths[i] == null) return null;
         }
@@ -105,6 +126,10 @@ public final class Animate extends MetaSVGNode {
 
         float[][] lists = new float[values.length][];
         for (int i = 0; i < values.length; i++) {
+            if (isPlaceholder(values[i])) {
+                lists[i] = new float[0];
+                continue;
+            }
             lists[i] = attributeNode.parser().parseFloatList(values[i]);
         }
         return new AnimatedFloatList(track, initial, lists);
@@ -115,6 +140,10 @@ public final class Animate extends MetaSVGNode {
         if (track == null) return null;
         float[] percentages = new float[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
+            if (isPlaceholder(values[i])) {
+                percentages[i] = Percentage.ZERO.value();
+                continue;
+            }
             Percentage p = attributeNode.parser().parsePercentage(this.values[i], null);
             if (p == null) return null;
             percentages[i] = p.value();
@@ -124,8 +153,14 @@ public final class Animate extends MetaSVGNode {
 
     public @Nullable AnimatedPaint animatedPaint(@NotNull SVGPaint initial, @NotNull AttributeNode attributeNode) {
         if (track == null) return null;
+        // https://www.w3.org/TR/2001/REC-smil-animation-20010904/#animateColorElement
+        // FIXME: All colors can have out of bounds values and need an own "ColorDelta" type.
         SVGPaint[] paints = new SVGPaint[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
+            if (isPlaceholder(values[i])) {
+                paints[i] = SVGPaint.NONE;
+                continue;
+            }
             SVGPaint p = attributeNode.parsePaint(this.values[i]);
             if (p == null) return null;
             paints[i] = p;
@@ -137,6 +172,10 @@ public final class Animate extends MetaSVGNode {
         if (track == null) return null;
         Color[] paints = new Color[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
+            if (isPlaceholder(values[i])) {
+                paints[i] = PaintParser.DEFAULT_COLOR;
+                continue;
+            }
             Color c = attributeNode.parser().paintParser().parseColor(this.values[i], attributeNode);
             if (c == null) return null;
             paints[i] = c;
