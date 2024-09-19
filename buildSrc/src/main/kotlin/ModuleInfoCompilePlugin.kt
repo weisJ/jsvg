@@ -19,6 +19,7 @@ class ModuleInfoCompilePlugin : Plugin<Project> {
         val infoExtension = target.extensions.create("moduleInfo", ModuleInfoExtension::class.java)
         if (!JavaVersion.current().isJava9Compatible
             || project.findProperty("skipModuleInfo") in listOf("", "true")) return@run
+
         val moduleInfoFile = file("src/main/module/module-info.java")
         if (moduleInfoFile.exists()) {
             val compileJava = tasks.named<JavaCompile>("compileJava")
@@ -45,11 +46,6 @@ class ModuleInfoCompilePlugin : Plugin<Project> {
             }
             compileJava.configure {
                 dependsOn(copyModuleInfo)
-                taskDependencies.getDependencies(this).forEach {
-                    if (it.project != this@run || it.name != "copyModuleInfo") {
-                        compileModuleInfoJava.get().dependsOn(it)
-                    }
-                }
             }
         }
     }

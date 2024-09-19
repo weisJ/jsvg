@@ -21,14 +21,12 @@
  */
 package com.github.weisj.jsvg.animation.value;
 
-import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.attributes.value.FloatListValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 
 public final class AnimatedFloatList implements FloatListValue {
 
@@ -77,24 +75,7 @@ public final class AnimatedFloatList implements FloatListValue {
             float[] end = index == values.length - 1 ? null : values[index + 1];
 
             float fraction = progress.indexProgress();
-            if (end != null && start.length != end.length) {
-                // Use discrete animation
-                fraction = 0;
-            }
-
-            if (cache == null || cache.length != start.length) {
-                cache = new float[start.length];
-            }
-
-            if (end == null || GeometryUtil.approximatelyEqual(fraction, 0)) {
-                System.arraycopy(start, 0, cache, 0, start.length);
-            } else if (GeometryUtil.approximatelyEqual(fraction, 1)) {
-                System.arraycopy(end, 0, cache, 0, end.length);
-            } else {
-                for (int i = 0; i < start.length; i++) {
-                    cache[i] = lerp(fraction, start[i], end[i]);
-                }
-            }
+            cache = track.floatListInterpolator().interpolate(initial, start, end, fraction, cache);
         }
         return cache;
     }
