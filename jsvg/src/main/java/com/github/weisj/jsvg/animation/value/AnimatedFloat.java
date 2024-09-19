@@ -55,6 +55,6 @@ public class AnimatedFloat implements FloatValue {
         float start = values[i];
         float end = values[i + 1];
 
-        return start + (end - start) * progress.indexProgress();
+        return track.floatInterpolator().interpolate(initial, start, end, progress.indexProgress());
     }
 }

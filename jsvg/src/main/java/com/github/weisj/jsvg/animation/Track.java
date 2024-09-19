@@ -26,6 +26,9 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.interpolation.FloatInterpolator;
+import com.github.weisj.jsvg.animation.interpolation.FloatListInterpolator;
+import com.github.weisj.jsvg.animation.interpolation.PaintInterpolator;
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
@@ -34,15 +37,19 @@ public final class Track {
     private final @NotNull Duration begin;
     private final float repeatCount;
     private final Fill fill;
+    private final AnimationValuesType animationType;
 
-    private Track(@NotNull Duration duration, @NotNull Duration begin, float repeatCount, Fill fill) {
+    private Track(@NotNull Duration duration, @NotNull Duration begin, float repeatCount, Fill fill,
+            AnimationValuesType animationType) {
         this.duration = duration;
         this.begin = begin;
         this.repeatCount = repeatCount;
         this.fill = fill;
+        this.animationType = animationType;
     }
 
-    public static @Nullable Track parse(@NotNull AttributeNode attributeNode) {
+    public static @Nullable Track parse(@NotNull AttributeNode attributeNode,
+            @NotNull AnimationValuesType animationType) {
         Duration duration = attributeNode.getDuration("dur", Duration.INDEFINITE);
         Duration begin = attributeNode.getDuration("begin", Duration.ZERO);
         String repeatCountStr = attributeNode.getValue("repeatCount");
@@ -52,7 +59,6 @@ public final class Track {
         } else {
             repeatCount = attributeNode.parser().parseFloat(repeatCountStr, 1);
         }
-
         if (duration.isIndefinite()
                 || duration.milliseconds() < 0
                 || begin.isIndefinite()
@@ -60,7 +66,8 @@ public final class Track {
             return null;
         }
 
-        return new Track(duration, begin, repeatCount, attributeNode.getEnum("fill", Fill.REMOVE));
+        return new Track(duration, begin, repeatCount,
+                attributeNode.getEnum("fill", Fill.REMOVE), animationType);
     }
 
     public @NotNull Duration duration() {
@@ -109,6 +116,18 @@ public final class Track {
         int i = (int) Math.floor(iterationProgress * (valueCount - 1));
         float t = (valueCount - 1) * iterationProgress - i;
         return new InterpolationProgress(i, t);
+    }
+
+    public @NotNull FloatInterpolator floatInterpolator() {
+        return animationType;
+    }
+
+    public @NotNull FloatListInterpolator floatListInterpolator() {
+        return animationType;
+    }
+
+    public @NotNull PaintInterpolator paintInterpolator() {
+        return animationType;
     }
 
     public static final class InterpolationProgress {

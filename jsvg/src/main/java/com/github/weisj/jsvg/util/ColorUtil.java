@@ -314,4 +314,12 @@ public final class ColorUtil {
         int a = (int) (c1.getAlpha() + (c2.getAlpha() - c1.getAlpha()) * t);
         return new Color(r, g, b, a);
     }
+
+    public static @NotNull Color add(@NotNull Color c1, @NotNull Color c2) {
+        int r = Math.min(255, c1.getRed() + c2.getRed());
+        int g = Math.min(255, c1.getGreen() + c2.getGreen());
+        int b = Math.min(255, c1.getBlue() + c2.getBlue());
+        int a = Math.min(255, c1.getAlpha() + c2.getAlpha());
+        return new Color(r, g, b, a);
+    }
 }
