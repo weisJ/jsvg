@@ -26,6 +26,6 @@ import org.jetbrains.annotations.Nullable;
 
 public interface FloatListInterpolator {
 
-    float[] interpolate(float @NotNull [] initial, float @NotNull [] from, float @Nullable [] to,
+    float @NotNull [] interpolate(float @NotNull [] initial, float @NotNull [] a, float @Nullable [] b,
             float progress, float @Nullable [] cache);
 }
