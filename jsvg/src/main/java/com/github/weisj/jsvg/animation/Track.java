@@ -38,14 +38,16 @@ public final class Track {
     private final float repeatCount;
     private final Fill fill;
     private final AnimationValuesType animationType;
+    private final Additive additive;
 
     private Track(@NotNull Duration duration, @NotNull Duration begin, float repeatCount, Fill fill,
-            AnimationValuesType animationType) {
+            AnimationValuesType animationType, Additive additive) {
         this.duration = duration;
         this.begin = begin;
         this.repeatCount = repeatCount;
         this.fill = fill;
         this.animationType = animationType;
+        this.additive = additive;
     }
 
     public static @Nullable Track parse(@NotNull AttributeNode attributeNode,
@@ -66,8 +68,12 @@ public final class Track {
             return null;
         }
 
+        Additive additive = attributeNode.getEnum("additive", Additive.REPLACE);
+        if (animationType.endIsBy()) additive = Additive.SUM;
+
         return new Track(duration, begin, repeatCount,
-                attributeNode.getEnum("fill", Fill.REMOVE), animationType);
+                attributeNode.getEnum("fill", Fill.REMOVE),
+                animationType, additive);
     }
 
     public @NotNull Duration duration() {
