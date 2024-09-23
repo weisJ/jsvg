@@ -135,7 +135,7 @@ public final class AttributeParser {
     }
 
     @Contract("_,!null -> !null")
-    public Length @Nullable [] parseLengthList(@Nullable String value, Length @Nullable [] fallback) {
+    public @NotNull Length @Nullable [] parseLengthList(@Nullable String value, @NotNull Length @Nullable [] fallback) {
         if (value != null && value.equalsIgnoreCase("none")) return new Length[0];
         String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE, null);
         if (values == null) return fallback;
@@ -148,7 +148,7 @@ public final class AttributeParser {
         return ret;
     }
 
-    public float[] parseFloatList(@Nullable String value) {
+    public float @NotNull [] parseFloatList(@Nullable String value) {
         String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
         float[] ret = new float[values.length];
         for (int i = 0; i < ret.length; i++) {
@@ -157,7 +157,7 @@ public final class AttributeParser {
         return ret;
     }
 
-    public double[] parseDoubleList(@Nullable String value) {
+    public double @NotNull [] parseDoubleList(@Nullable String value) {
         if (value == null || value.isEmpty()) return new double[0];
         List<Double> list = new ArrayList<>();
         ParserBase base = new ParserBase(value, 0);
@@ -168,13 +168,13 @@ public final class AttributeParser {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
-    public @NotNull String[] parseStringList(@Nullable String value, SeparatorMode separatorMode) {
+    public @NotNull String @NotNull [] parseStringList(@Nullable String value, SeparatorMode separatorMode) {
         return parseStringList(value, separatorMode, new String[0]);
     }
 
     @Contract("_,_,!null -> !null")
-    public String @Nullable [] parseStringList(@Nullable String value, SeparatorMode separatorMode,
-            String @Nullable [] fallback) {
+    public @NotNull String @Nullable [] parseStringList(@Nullable String value, SeparatorMode separatorMode,
+            @NotNull String @Nullable [] fallback) {
         if (value == null || value.isEmpty()) return fallback;
         List<String> list = new ArrayList<>();
         int max = value.length();

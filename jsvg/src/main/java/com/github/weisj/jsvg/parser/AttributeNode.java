@@ -238,15 +238,15 @@ public final class AttributeNode {
 
 
     @Contract("_,!null -> !null")
-    public @NotNull Length[] getLengthList(@NotNull String key, Length[] fallback) {
+    public @NotNull Length @Nullable [] getLengthList(@NotNull String key, @NotNull Length @Nullable [] fallback) {
         return loadHelper.attributeParser().parseLengthList(getValue(key), fallback);
     }
 
-    public float[] getFloatList(@NotNull String key) {
+    public float @NotNull [] getFloatList(@NotNull String key) {
         return loadHelper.attributeParser().parseFloatList(getValue(key));
     }
 
-    public double[] getDoubleList(@NotNull String key) {
+    public double @NotNull [] getDoubleList(@NotNull String key) {
         return loadHelper.attributeParser().parseDoubleList(getValue(key));
     }
 
@@ -284,12 +284,12 @@ public final class AttributeNode {
         return attributes.containsKey(name);
     }
 
-    public @NotNull String[] getStringList(@NotNull String name) {
+    public @NotNull String @NotNull [] getStringList(@NotNull String name) {
         return getStringList(name, SeparatorMode.COMMA_AND_WHITESPACE);
     }
 
 
-    public @NotNull String[] getStringList(@NotNull String name, SeparatorMode separatorMode) {
+    public @NotNull String @NotNull [] getStringList(@NotNull String name, SeparatorMode separatorMode) {
         return loadHelper.attributeParser().parseStringList(getValue(name), separatorMode);
     }
 
