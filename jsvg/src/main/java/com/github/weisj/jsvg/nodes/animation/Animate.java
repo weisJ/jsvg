@@ -26,6 +26,7 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.Additive;
 import com.github.weisj.jsvg.animation.AnimationValuesType;
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.animation.value.*;
@@ -46,6 +47,7 @@ import com.github.weisj.jsvg.parser.SeparatorMode;
 public final class Animate extends MetaSVGNode {
     public static final String TAG = "animate";
 
+    // Note: Needs to be replaced by the additive neutral element of the type.
     private static final @NotNull String INITIAL_PLACEHOLDER = "<<initial>>";
 
     private String[] values;
@@ -74,29 +76,31 @@ public final class Animate extends MetaSVGNode {
 
         if (to != null) by = null;
 
-        AnimationValuesType animationType = null;
-
+        AnimationValuesType valuesType = null;
         if (attributeNode.getValue("values") != null) {
             values = attributeNode.getStringList("values", SeparatorMode.SEMICOLON_ONLY);
-            animationType = AnimationValuesType.VALUES;
+            valuesType = AnimationValuesType.VALUES;
         } else {
             if (from != null && to != null) {
                 values = new String[] {from, to};
-                animationType = AnimationValuesType.FROM_TO;
+                valuesType = AnimationValuesType.FROM_TO;
             } else if (from != null && by != null) {
                 values = new String[] {from, by};
-                animationType = AnimationValuesType.FROM_BY;
+                valuesType = AnimationValuesType.FROM_BY;
             } else if (by != null) {
                 values = new String[] {INITIAL_PLACEHOLDER, by};
-                animationType = AnimationValuesType.BY;
+                valuesType = AnimationValuesType.BY;
             } else if (to != null) {
                 values = new String[] {INITIAL_PLACEHOLDER, to};
-                animationType = AnimationValuesType.TO;
+                valuesType = AnimationValuesType.TO;
             }
         }
 
-        if (animationType != null) {
-            track = Track.parse(attributeNode, animationType);
+        if (valuesType != null) {
+            Additive additive = valuesType.endIsBy()
+                    ? Additive.SUM
+                    : attributeNode.getEnum("additive", Additive.REPLACE);
+            track = Track.parse(attributeNode, valuesType, additive);
         }
     }
 
@@ -112,9 +116,9 @@ public final class Animate extends MetaSVGNode {
         for (int i = 0; i < values.length; i++) {
             if (isPlaceholder(values[i])) {
                 lengths[i] = Length.ZERO;
-                continue;
+            } else {
+                lengths[i] = attributeNode.parser().parseLength(values[i], null);
             }
-            lengths[i] = attributeNode.parser().parseLength(values[i], null);
             if (lengths[i] == null) return null;
         }
         return new AnimatedLength(track, initial, lengths);
@@ -128,9 +132,9 @@ public final class Animate extends MetaSVGNode {
         for (int i = 0; i < values.length; i++) {
             if (isPlaceholder(values[i])) {
                 lists[i] = new float[0];
-                continue;
+            } else {
+                lists[i] = attributeNode.parser().parseFloatList(values[i]);
             }
-            lists[i] = attributeNode.parser().parseFloatList(values[i]);
         }
         return new AnimatedFloatList(track, initial, lists);
     }
@@ -142,11 +146,11 @@ public final class Animate extends MetaSVGNode {
         for (int i = 0; i < this.values.length; i++) {
             if (isPlaceholder(values[i])) {
                 percentages[i] = Percentage.ZERO.value();
-                continue;
+            } else {
+                Percentage p = attributeNode.parser().parsePercentage(this.values[i], null);
+                if (p == null) return null;
+                percentages[i] = p.value();
             }
-            Percentage p = attributeNode.parser().parsePercentage(this.values[i], null);
-            if (p == null) return null;
-            percentages[i] = p.value();
         }
         return new AnimatedPercentage(track, initial.value(), percentages);
     }
@@ -159,11 +163,11 @@ public final class Animate extends MetaSVGNode {
         for (int i = 0; i < this.values.length; i++) {
             if (isPlaceholder(values[i])) {
                 paints[i] = SVGPaint.NONE;
-                continue;
+            } else {
+                SVGPaint p = attributeNode.parsePaint(this.values[i]);
+                if (p == null) return null;
+                paints[i] = p;
             }
-            SVGPaint p = attributeNode.parsePaint(this.values[i]);
-            if (p == null) return null;
-            paints[i] = p;
         }
         return new AnimatedPaint(track, initial, paints);
     }
@@ -174,11 +178,11 @@ public final class Animate extends MetaSVGNode {
         for (int i = 0; i < this.values.length; i++) {
             if (isPlaceholder(values[i])) {
                 paints[i] = PaintParser.DEFAULT_COLOR;
-                continue;
+            } else {
+                Color c = attributeNode.parser().paintParser().parseColor(this.values[i], attributeNode);
+                if (c == null) return null;
+                paints[i] = c;
             }
-            Color c = attributeNode.parser().paintParser().parseColor(this.values[i], attributeNode);
-            if (c == null) return null;
-            paints[i] = c;
         }
         return new AnimatedColor(track, initial, paints);
     }

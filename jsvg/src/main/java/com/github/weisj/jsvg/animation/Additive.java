@@ -19,16 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.animation.interpolation;
+package com.github.weisj.jsvg.animation;
 
-import java.awt.*;
-
-import org.jetbrains.annotations.NotNull;
-
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-
-public interface PaintInterpolator {
-
-    @NotNull
-    SVGPaint interpolate(@NotNull SVGPaint initial, @NotNull SVGPaint a, @NotNull SVGPaint b, float progress);
+public enum Additive {
+    SUM,
+    REPLACE;
 }
