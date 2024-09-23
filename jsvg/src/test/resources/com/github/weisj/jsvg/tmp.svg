@@ -1,6 +1,14 @@
 <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
-	<rect width="10" height="10">
-		<animate attributeName="rx" values="0;5;0" dur="10s"
+	<linearGradient id="A">
+		<stop offset="0" stop-color="red" />
+		<stop offset="1" stop-color="green" />
+	</linearGradient>
+	<rect width="10" height="10" fill="#FF0000">
+		<!-- <animate attributeName="rx" values="0;5;0" dur="10s" -->
+		<!-- repeatCount="indefinite" /> -->
+		<!-- <animate attributeName="fill" values="red;blue;red" dur="5s" -->
+		<!-- repeatCount="indefinite" /> -->
+		<animate attributeName="fill" by="url(#A)" dur="2s"
 			repeatCount="indefinite" />
 	</rect>
 </svg>

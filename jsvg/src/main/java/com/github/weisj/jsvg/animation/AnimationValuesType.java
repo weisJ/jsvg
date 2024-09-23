@@ -44,25 +44,33 @@ public enum AnimationValuesType implements FloatInterpolator, FloatListInterpola
     BY,
     TO;
 
+    public boolean startIsInitial() {
+        return this == TO || this == BY;
+    }
+
+    public boolean endIsBy() {
+        return this == FROM_BY || this == BY;
+    }
+
     @Override
     public float interpolate(float initial, float from, float to, float progress) {
         float a = from;
         float b = to;
-        if (this == TO || this == BY) {
+        if (startIsInitial()) {
             a = initial;
         }
-        if (this == BY || this == FROM_BY) {
+        if (endIsBy()) {
             b = a + b;
         }
         return a + (b - a) * progress;
     }
 
     @Override
-    public float[] interpolate(float @NotNull [] initial, float @NotNull [] from, float @Nullable [] to,
+    public float @NotNull [] interpolate(float @NotNull [] initial, float @NotNull [] from, float @Nullable [] to,
             float progress, float @Nullable [] cache) {
         float[] a = from;
         float t = progress;
-        if (this == TO || this == BY) {
+        if (startIsInitial()) {
             a = initial;
         }
 
@@ -71,7 +79,7 @@ public enum AnimationValuesType implements FloatInterpolator, FloatListInterpola
             result = new float[a.length];
         }
 
-        if (this == BY || this == FROM_BY) {
+        if (endIsBy()) {
             if (to == null) {
                 System.arraycopy(a, 0, result, 0, a.length);
             } else {
@@ -110,7 +118,7 @@ public enum AnimationValuesType implements FloatInterpolator, FloatListInterpola
     public @NotNull SVGPaint interpolate(@NotNull SVGPaint initial, @NotNull SVGPaint from, @NotNull SVGPaint to,
             float progress) {
         SVGPaint a = from;
-        if (this == TO || this == BY) {
+        if (startIsInitial()) {
             a = initial;
         }
 
@@ -126,7 +134,7 @@ public enum AnimationValuesType implements FloatInterpolator, FloatListInterpola
             return GeometryUtil.approximatelyEqual(progress, 1) ? to : a;
         }
 
-        if (this == BY || this == FROM_BY) {
+        if (endIsBy()) {
             // FIXME: This clamps the color values to 0-255 however only the final color should be clamped
             // This is important if multiple animations affect the value. Also the delta of by can have out of
             // bounds values.

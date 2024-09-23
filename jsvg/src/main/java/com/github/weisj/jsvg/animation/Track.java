@@ -26,6 +26,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.interpolation.DefaultInterpolator;
 import com.github.weisj.jsvg.animation.interpolation.FloatInterpolator;
 import com.github.weisj.jsvg.animation.interpolation.FloatListInterpolator;
 import com.github.weisj.jsvg.animation.interpolation.PaintInterpolator;
@@ -37,19 +38,19 @@ public final class Track {
     private final @NotNull Duration begin;
     private final float repeatCount;
     private final Fill fill;
-    private final AnimationValuesType animationType;
+    private final DefaultInterpolator interpolator;
 
     private Track(@NotNull Duration duration, @NotNull Duration begin, float repeatCount, Fill fill,
-            AnimationValuesType animationType) {
+            AnimationValuesType valuesType, Additive additive) {
         this.duration = duration;
         this.begin = begin;
         this.repeatCount = repeatCount;
         this.fill = fill;
-        this.animationType = animationType;
+        this.interpolator = new DefaultInterpolator(valuesType, additive);
     }
 
     public static @Nullable Track parse(@NotNull AttributeNode attributeNode,
-            @NotNull AnimationValuesType animationType) {
+            @NotNull AnimationValuesType valuesType, @NotNull Additive additive) {
         Duration duration = attributeNode.getDuration("dur", Duration.INDEFINITE);
         Duration begin = attributeNode.getDuration("begin", Duration.ZERO);
         String repeatCountStr = attributeNode.getValue("repeatCount");
@@ -67,7 +68,8 @@ public final class Track {
         }
 
         return new Track(duration, begin, repeatCount,
-                attributeNode.getEnum("fill", Fill.REMOVE), animationType);
+                attributeNode.getEnum("fill", Fill.REMOVE),
+                valuesType, additive);
     }
 
     public @NotNull Duration duration() {
@@ -119,15 +121,15 @@ public final class Track {
     }
 
     public @NotNull FloatInterpolator floatInterpolator() {
-        return animationType;
+        return interpolator;
     }
 
     public @NotNull FloatListInterpolator floatListInterpolator() {
-        return animationType;
+        return interpolator;
     }
 
     public @NotNull PaintInterpolator paintInterpolator() {
-        return animationType;
+        return interpolator;
     }
 
     public static final class InterpolationProgress {
