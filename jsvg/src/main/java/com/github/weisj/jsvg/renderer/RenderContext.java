@@ -50,7 +50,6 @@ public final class RenderContext {
     private final @NotNull FontRenderContext fontRenderContext;
     private final @NotNull MeasurableFontSpec fontSpec;
 
-    private final @NotNull FillRule fillRule;
 
     private final @Nullable ContextElementAttributes contextElementAttributes;
 
@@ -67,7 +66,6 @@ public final class RenderContext {
                 measureContext,
                 FontRenderContext.createDefault(),
                 MeasurableFontSpec.createDefault(),
-                FillRule.Nonzero,
                 null);
     }
 
@@ -78,7 +76,6 @@ public final class RenderContext {
             @NotNull MeasureContext measureContext,
             @NotNull FontRenderContext fontRenderContext,
             @NotNull MeasurableFontSpec fontSpec,
-            @NotNull FillRule fillRule,
             @Nullable ContextElementAttributes contextElementAttributes) {
         this.awtSupport = platformSupport;
         this.rootTransform = rootTransform;
@@ -87,7 +84,6 @@ public final class RenderContext {
         this.measureContext = measureContext;
         this.fontRenderContext = fontRenderContext;
         this.fontSpec = fontSpec;
-        this.fillRule = fillRule;
         this.contextElementAttributes = contextElementAttributes;
     }
 
@@ -95,20 +91,19 @@ public final class RenderContext {
     RenderContext derive(@Nullable Mutator<PaintContext> context,
             @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
-            @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes) {
-        return derive(context, attributeFontSpec, viewBox, frc, fillRule, contextAttributes, null);
+            @Nullable ContextElementAttributes contextAttributes) {
+        return derive(context, attributeFontSpec, viewBox, frc, contextAttributes, null);
     }
 
     @NotNull
     RenderContext derive(@Nullable Mutator<PaintContext> context,
             @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
-            @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes,
+            @Nullable ContextElementAttributes contextAttributes,
             @Nullable AffineTransform rootTransform) {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
-        FillRule newFillRule = fillRule != null && fillRule != FillRule.Inherit ? fillRule : this.fillRule;
 
         if (context != null) newPaintContext = context.mutate(paintContext);
         if (attributeFontSpec != null) newFontSpec = attributeFontSpec.mutate(newFontSpec);
@@ -124,16 +119,16 @@ public final class RenderContext {
         AffineTransform newRootTransform = rootTransform != null ? rootTransform : this.rootTransform;
 
         return new RenderContext(awtSupport, newRootTransform, new AffineTransform(userSpaceTransform),
-                newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newFillRule, newContextAttributes);
+                newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newContextAttributes);
     }
 
     public @NotNull RenderContext deriveForChildGraphics() {
         // Pass non-trivial context mutator to ensure userSpaceTransform gets created a different copy.
-        return derive(t -> t, null, null, null, null, null);
+        return derive(t -> t, null, null, null, null);
     }
 
     public @NotNull RenderContext deriveForSurface() {
-        return derive(t -> t, null, null, null, null, null,
+        return derive(t -> t, null, null, null, null,
                 new AffineTransform(rootTransform));
     }
 
@@ -205,7 +200,8 @@ public final class RenderContext {
     }
 
     public @NotNull FillRule fillRule() {
-        return fillRule;
+        FillRule fillRule = paintContext.fillRule;
+        return fillRule != null ? fillRule : FillRule.Nonzero;
     }
 
     public @NotNull SVGPaint strokePaint() {
@@ -271,7 +267,6 @@ public final class RenderContext {
                 ",\n fontSpec=" + fontSpec +
                 ",\n awtSupport=" + awtSupport +
                 ",\n contextElementAttributes=" + contextElementAttributes +
-                ",\n fillRule=" + fillRule +
                 ",\n baseTransform=" + rootTransform +
                 ",\n userSpaceTransform=" + userSpaceTransform +
                 "\n}";

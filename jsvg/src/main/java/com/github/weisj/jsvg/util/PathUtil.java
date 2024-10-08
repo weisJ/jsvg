@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -52,7 +52,7 @@ public final class PathUtil {
 
     private PathUtil() {}
 
-    public static @NotNull MeasurableShape parseFromPathData(@NotNull String data, @NotNull FillRule fillRule) {
+    public static @NotNull MeasurableShape parseFromPathData(@NotNull String data) {
         PathCommand[] pathCommands = new PathParser(data).parsePathCommand();
 
         int nodeCount = 2;
@@ -60,7 +60,7 @@ public final class PathUtil {
             nodeCount += pathCommand.nodeCount() - 1;
         }
 
-        Path2D path = new Path2D.Float(fillRule.awtWindingRule, nodeCount);
+        Path2D path = new Path2D.Float(FillRule.Nonzero.awtWindingRule, nodeCount);
         BuildHistory hist = new BuildHistory();
 
         for (PathCommand pathCommand : pathCommands) {

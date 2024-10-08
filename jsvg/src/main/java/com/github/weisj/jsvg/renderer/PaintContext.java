@@ -27,6 +27,7 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
@@ -47,11 +48,12 @@ public final class PaintContext implements Mutator<PaintContext> {
     public final @Nullable PaintOrder paintOrder;
 
     public final @Nullable StrokeContext strokeContext;
+    public final @Nullable FillRule fillRule;
 
     public PaintContext(@Nullable AwtSVGPaint color, @Nullable SVGPaint fillPaint, float fillOpacity,
             @Nullable SVGPaint strokePaint, float strokeOpacity, float opacity,
             @Nullable PaintOrder paintOrder,
-            @Nullable StrokeContext strokeContext) {
+            @Nullable StrokeContext strokeContext, @Nullable FillRule fillRule) {
         this.color = color;
         this.fillPaint = fillPaint;
         this.strokePaint = strokePaint;
@@ -61,6 +63,7 @@ public final class PaintContext implements Mutator<PaintContext> {
         this.paintOrder = paintOrder;
         // Avoid creating unnecessary intermediate contexts during painting.
         this.strokeContext = strokeContext == null || strokeContext.isTrivial() ? null : strokeContext;
+        this.fillRule = fillRule;
     }
 
     public static @NotNull PaintContext createDefault() {
@@ -69,7 +72,8 @@ public final class PaintContext implements Mutator<PaintContext> {
                 SVGPaint.DEFAULT_PAINT, 1,
                 SVGPaint.NONE, 1, 1,
                 PaintOrder.NORMAL,
-                StrokeContext.createDefault());
+                StrokeContext.createDefault(),
+                FillRule.Nonzero);
     }
 
     public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
@@ -81,7 +85,8 @@ public final class PaintContext implements Mutator<PaintContext> {
                 attributeNode.getPercentage("stroke-opacity", 1),
                 attributeNode.getPercentage("opacity", 1),
                 PaintOrder.parse(attributeNode),
-                StrokeContext.parse(attributeNode));
+                StrokeContext.parse(attributeNode),
+                FillRule.parse(attributeNode));
     }
 
     private static @Nullable AwtSVGPaint parseColorAttribute(@NotNull AttributeNode attributeNode) {
@@ -101,7 +106,10 @@ public final class PaintContext implements Mutator<PaintContext> {
                 context.paintOrder != null ? context.paintOrder : paintOrder,
                 strokeContext != null
                         ? strokeContext.derive(context.strokeContext)
-                        : context.strokeContext);
+                        : context.strokeContext,
+                context.fillRule != null && context.fillRule != FillRule.Inherit
+                        ? context.fillRule
+                        : this.fillRule);
     }
 
     @Override
@@ -120,6 +128,7 @@ public final class PaintContext implements Mutator<PaintContext> {
                 ", strokeOpacity=" + strokeOpacity +
                 ", strokeContext=" + strokeContext +
                 ", paintOrder=" + paintOrder +
+                ", fillRule=" + fillRule +
                 '}';
     }
 }

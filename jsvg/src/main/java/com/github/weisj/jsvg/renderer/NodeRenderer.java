@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGRenderingHints;
-import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -173,17 +172,15 @@ public final class NodeRenderer {
         @Nullable Mutator<PaintContext> paintContext = null;
         @Nullable Mutator<MeasurableFontSpec> fontSpec = null;
         @Nullable FontRenderContext fontRenderContext = null;
-        @Nullable FillRule fillRule = null;
 
         if (node instanceof HasPaintContext) paintContext = ((HasPaintContext) node).paintContext();
         if (node instanceof HasFontContext) fontSpec = ((HasFontContext) node).fontSpec();
         if (node instanceof HasFontRenderContext) fontRenderContext = ((HasFontRenderContext) node).fontRenderContext();
-        if (node instanceof HasFillRule) fillRule = ((HasFillRule) node).fillRule();
 
         @Nullable ContextElementAttributes contextElementAttributes = null;
         if (instantiator != null) contextElementAttributes = instantiator.createContextAttributes(context);
 
-        return context.derive(paintContext, fontSpec, null, fontRenderContext, fillRule, contextElementAttributes);
+        return context.derive(paintContext, fontSpec, null, fontRenderContext, contextElementAttributes);
     }
 
     public static @NotNull RenderContext setupInnerViewRenderContext(@NotNull ViewBox viewBox,
@@ -201,7 +198,6 @@ public final class NodeRenderer {
                     newMeasure,
                     FontRenderContext.createDefault(),
                     MeasurableFontSpec.createDefault(),
-                    context.fillRule(),
                     context.contextElementAttributes());
         }
     }
