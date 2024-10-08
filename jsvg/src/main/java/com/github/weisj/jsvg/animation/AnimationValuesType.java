@@ -66,7 +66,7 @@ public enum AnimationValuesType implements FloatInterpolator, FloatListInterpola
     }
 
     @Override
-    public float[] interpolate(float @NotNull [] initial, float @NotNull [] from, float @Nullable [] to,
+    public float @NotNull [] interpolate(float @NotNull [] initial, float @NotNull [] from, float @Nullable [] to,
             float progress, float @Nullable [] cache) {
         float[] a = from;
         float t = progress;

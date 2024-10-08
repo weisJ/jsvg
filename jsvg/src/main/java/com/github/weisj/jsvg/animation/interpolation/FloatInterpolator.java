@@ -23,5 +23,5 @@ package com.github.weisj.jsvg.animation.interpolation;
 
 public interface FloatInterpolator {
 
-    float interpolate(float initial, float from, float to, float progress);
+    float interpolate(float initial, float a, float b, float progress);
 }

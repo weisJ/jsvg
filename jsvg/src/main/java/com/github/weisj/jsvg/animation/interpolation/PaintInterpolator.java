@@ -30,5 +30,5 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 public interface PaintInterpolator {
 
     @NotNull
-    SVGPaint interpolate(@NotNull SVGPaint initial, @NotNull SVGPaint from, @NotNull SVGPaint to, float progress);
+    SVGPaint interpolate(@NotNull SVGPaint initial, @NotNull SVGPaint a, @NotNull SVGPaint b, float progress);
 }
