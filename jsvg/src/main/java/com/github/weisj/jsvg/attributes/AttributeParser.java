@@ -56,8 +56,16 @@ public final class AttributeParser {
         if (value == null) return fallback;
         Unit unit = Unit.Raw;
         String lower = value.toLowerCase(Locale.ENGLISH);
+        int i = lower.length() - 1;
+        for (; i >= 0; i--) {
+            char c = lower.charAt(i);
+            if (c >= '0' && c <= '9') {
+                break;
+            }
+        }
+        String suffix = lower.substring(i + 1);
         for (Unit u : Unit.units()) {
-            if (lower.endsWith(u.suffix())) {
+            if (suffix.equals(u.suffix())) {
                 unit = u;
                 break;
             }
