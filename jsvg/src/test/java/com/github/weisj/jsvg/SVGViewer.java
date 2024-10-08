@@ -61,7 +61,7 @@ public final class SVGViewer {
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("tmp.svg");
+            iconBox.setSelectedItem("tmp3.svg");
 
             JComponent contentPane = (JComponent) frame.getContentPane();
             contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
