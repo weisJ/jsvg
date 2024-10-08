@@ -36,6 +36,7 @@ tasks {
         doFirst {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
+        environment("RESVG_TEST_SUITE_PATH" to File(project.rootDir, "resvg-test-suite/tests").absolutePath)
         useJUnitPlatform()
         testLogging {
             showStandardStreams = true
