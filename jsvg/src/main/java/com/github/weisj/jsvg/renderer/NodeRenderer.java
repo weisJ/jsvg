@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
@@ -180,13 +181,18 @@ public final class NodeRenderer {
         @Nullable ContextElementAttributes contextElementAttributes = null;
         if (instantiator != null) contextElementAttributes = instantiator.createContextAttributes(context);
 
-        return context.derive(paintContext, fontSpec, null, fontRenderContext, contextElementAttributes);
+        RenderContext.EstablishRootMeasure establishRootMeasure = node instanceof SVG && ((SVG) node).isTopLevel()
+                ? RenderContext.EstablishRootMeasure.Yes
+                : RenderContext.EstablishRootMeasure.No;
+        return context.derive(paintContext, fontSpec, null, fontRenderContext, contextElementAttributes,
+                establishRootMeasure);
     }
 
     public static @NotNull RenderContext setupInnerViewRenderContext(@NotNull ViewBox viewBox,
             @NotNull RenderContext context, boolean inheritAttributes) {
         if (inheritAttributes) {
-            return context.derive(null, null, viewBox, null, null, null);
+            return context.derive(null, null, viewBox, null, null,
+                    RenderContext.EstablishRootMeasure.No);
         } else {
             MeasureContext newMeasure = context.measureContext().derive(viewBox,
                     Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);

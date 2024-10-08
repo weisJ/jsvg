@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
@@ -35,21 +34,27 @@ public final class MeasureContext {
     private final float vw;
     private final float vh;
     private final float em;
+    private final float rem;
     private final float ex;
 
-    public MeasureContext(float vw, float vh, float em, float ex) {
+    private MeasureContext(float vw, float vh, float em, float ex, float rem) {
         this.vw = vw;
         this.vh = vh;
         this.em = em;
+        this.rem = rem;
         this.ex = ex;
     }
 
     public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex) {
-        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex);
+        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, em);
+    }
+
+    public @NotNull MeasureContext deriveRoot(float rem) {
+        return new MeasureContext(vw, vh, em, ex, rem);
     }
 
     public @NotNull MeasureContext derive(float viewWidth, float viewHeight) {
-        return new MeasureContext(viewWidth, viewHeight, em, ex);
+        return new MeasureContext(viewWidth, viewHeight, em, ex, rem);
     }
 
     public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex) {
@@ -63,7 +68,7 @@ public final class MeasureContext {
         }
         float effectiveEm = Length.isUnspecified(em) ? this.em : em;
         float effectiveEx = Length.isUnspecified(ex) ? this.ex : ex;
-        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx);
+        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, rem);
     }
 
     public float viewWidth() {
@@ -83,7 +88,7 @@ public final class MeasureContext {
     }
 
     public float rem() {
-        return SVGFont.defaultFontSize();
+        return rem;
     }
 
     public float ex() {

@@ -126,11 +126,6 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     }
 
     @Override
-    public @NotNull FillRule fillRule() {
-        return fillRule;
-    }
-
-    @Override
     public boolean canInstantiate(@NotNull SVGNode node) {
         return node instanceof CommonInnerViewContainer;
     }

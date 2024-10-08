@@ -88,19 +88,28 @@ public final class RenderContext {
     }
 
     @NotNull
-    RenderContext derive(@Nullable Mutator<PaintContext> context,
-            @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
-            @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
-            @Nullable ContextElementAttributes contextAttributes) {
-        return derive(context, attributeFontSpec, viewBox, frc, contextAttributes, null);
-    }
-
-    @NotNull
-    RenderContext derive(@Nullable Mutator<PaintContext> context,
+    RenderContext derive(
+            @Nullable Mutator<PaintContext> context,
             @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
             @Nullable ContextElementAttributes contextAttributes,
-            @Nullable AffineTransform rootTransform) {
+            EstablishRootMeasure establishRootMeasure) {
+        return deriveImpl(context, attributeFontSpec, viewBox, frc, contextAttributes, null,
+                establishRootMeasure);
+    }
+
+    public enum EstablishRootMeasure {
+        Yes,
+        No
+    }
+
+    @NotNull
+    private RenderContext deriveImpl(@Nullable Mutator<PaintContext> context,
+            @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
+            @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
+            @Nullable ContextElementAttributes contextAttributes,
+            @Nullable AffineTransform rootTransform,
+            EstablishRootMeasure establishRootMeasure) {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
@@ -115,6 +124,10 @@ public final class RenderContext {
         float ex = SVGFont.exFromEm(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
 
+        if (establishRootMeasure == EstablishRootMeasure.Yes) {
+            newMeasureContext = newMeasureContext.deriveRoot(em);
+        }
+
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
         AffineTransform newRootTransform = rootTransform != null ? rootTransform : this.rootTransform;
 
@@ -124,12 +137,12 @@ public final class RenderContext {
 
     public @NotNull RenderContext deriveForChildGraphics() {
         // Pass non-trivial context mutator to ensure userSpaceTransform gets created a different copy.
-        return derive(t -> t, null, null, null, null);
+        return derive(t -> t, null, null, null, null, EstablishRootMeasure.No);
     }
 
     public @NotNull RenderContext deriveForSurface() {
-        return derive(t -> t, null, null, null, null,
-                new AffineTransform(rootTransform));
+        return deriveImpl(t -> t, null, null, null, null,
+                new AffineTransform(rootTransform), EstablishRootMeasure.No);
     }
 
     public @NotNull StrokeContext strokeContext() {

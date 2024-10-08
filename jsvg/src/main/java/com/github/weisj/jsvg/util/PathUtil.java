@@ -52,7 +52,7 @@ public final class PathUtil {
 
     private PathUtil() {}
 
-    public static @NotNull MeasurableShape parseFromPathData(@NotNull String data) {
+    public static @NotNull MeasurableShape parseFromPathData(@NotNull String data, FillRule fillRule) {
         PathCommand[] pathCommands = new PathParser(data).parsePathCommand();
 
         int nodeCount = 2;
@@ -60,7 +60,7 @@ public final class PathUtil {
             nodeCount += pathCommand.nodeCount() - 1;
         }
 
-        Path2D path = new Path2D.Float(FillRule.Nonzero.awtWindingRule, nodeCount);
+        Path2D path = new Path2D.Float(fillRule.awtWindingRule, nodeCount);
         BuildHistory hist = new BuildHistory();
 
         for (PathCommand pathCommand : pathCommands) {

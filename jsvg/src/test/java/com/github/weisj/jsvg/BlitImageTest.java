@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.Graphics2DOutput;
@@ -77,7 +78,8 @@ class BlitImageTest {
     RenderContext createTestContext(int vw, int vh) {
         return RenderContext.createInitial(
                 NullPlatformSupport.INSTANCE,
-                new MeasureContext(vw, vh,
+                MeasureContext.createInitial(
+                        new FloatSize(vw, vh),
                         SVGFont.defaultFontSize(),
                         SVGFont.exFromEm(SVGFont.defaultFontSize())));
     }

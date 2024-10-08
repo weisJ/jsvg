@@ -77,6 +77,7 @@ public final class Length {
                 return context.em() * value;
             case REM:
                 return context.rem() * value;
+            case CH:
             case EX:
                 return context.ex() * value;
             default:
@@ -139,7 +140,8 @@ public final class Length {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
+        if (isUnspecified()) return "<unspecified>";
         return value + unit.suffix();
     }
 
