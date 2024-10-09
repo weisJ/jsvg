@@ -78,4 +78,14 @@ public final class AnimatedLength implements LengthValue {
         }
         return initial.isConstantlyZero();
     }
+
+    @Override
+    public boolean isConstantlyNonNegative() {
+        for (Length value : values) {
+            if (!value.isConstantlyNonNegative()) {
+                return false;
+            }
+        }
+        return initial.isConstantlyNonNegative();
+    }
 }

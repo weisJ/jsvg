@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.util.AttributeUtil;
 
 @ElementCategories({Category.BasicShape, Category.Graphic, Category.Shape})
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})
@@ -52,18 +53,12 @@ public final class Rect extends ShapeNode {
         LengthValue width = node.getLength("width", PercentageDimension.WIDTH, Length.ZERO, Animatable.YES);
         LengthValue height = node.getLength("height", PercentageDimension.HEIGHT, Length.ZERO, Animatable.YES);
 
-        LengthValue initialRx = node.getLength("rx", PercentageDimension.WIDTH, Length.UNSPECIFIED, Animatable.NO);
-        LengthValue initialRy = node.getLength("ry", PercentageDimension.HEIGHT, initialRx, Animatable.NO);
-
-        if (initialRy == Length.UNSPECIFIED) {
-            initialRy = Length.ZERO;
-        }
-        if (initialRx == Length.UNSPECIFIED) {
-            initialRx = initialRy;
-        }
-
-        LengthValue rx = node.getLength("rx", PercentageDimension.WIDTH, initialRx, Animatable.YES);
-        LengthValue ry = node.getLength("ry", PercentageDimension.HEIGHT, initialRy, Animatable.YES);
+        AttributeUtil.AxisPair radius = AttributeUtil.parseAxisPair(node, "rx", "ry", Length.ZERO, v -> {
+            if (!v.isConstantlyNonNegative()) return null;
+            return v;
+        });
+        LengthValue rx = radius.xAxis();
+        LengthValue ry = radius.yAxis();
 
         boolean isNonRounded = rx.isConstantlyZero() && ry.isConstantlyZero();
         if (isNonRounded) {
