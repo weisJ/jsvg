@@ -31,6 +31,7 @@ import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.text.GlyphRenderMethod;
 import com.github.weisj.jsvg.attributes.text.Side;
 import com.github.weisj.jsvg.attributes.text.Spacing;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -81,7 +82,7 @@ public final class TextPath extends TextContainer {
         side = attributeNode.getEnum("side", Side.Left);
         spacing = attributeNode.getEnum("spacing", Spacing.Auto);
         // Todo: Needs to be resolved w.r.t to the paths coordinate system
-        startOffset = attributeNode.getLength("startOffset", 0);
+        startOffset = attributeNode.getLength("startOffset", PercentageDimension.CUSTOM, 0);
 
         String pathData = attributeNode.getValue("path");
         if (pathData != null) {
@@ -124,7 +125,7 @@ public final class TextPath extends TextContainer {
     private @NotNull PathGlyphCursor createCursor(@NotNull RenderContext context) {
         return new PathGlyphCursor(
                 createPathIterator(context),
-                startOffset.resolveLength(context.measureContext()));
+                startOffset.resolve(context.measureContext()));
     }
 
     private void paintDebugPath(@NotNull RenderContext context, @NotNull Graphics2D g) {
@@ -186,7 +187,7 @@ public final class TextPath extends TextContainer {
     @Override
     protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
         return new PathGlyphCursor(current,
-                startOffset.resolveLength(context.measureContext()),
+                startOffset.resolve(context.measureContext()),
                 createPathIterator(context));
     }
 

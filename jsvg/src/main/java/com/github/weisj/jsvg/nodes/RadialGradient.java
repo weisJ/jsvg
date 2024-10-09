@@ -29,6 +29,7 @@ import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
@@ -64,22 +65,28 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
 
     @Override
     protected void buildGradient(@NotNull AttributeNode attributeNode, @Nullable RadialGradient template) {
-        cx = attributeNode.getLength("cx", template != null ? template.cx : Unit.PERCENTAGE.valueOf(50));
-        cy = attributeNode.getLength("cy", template != null ? template.cy : Unit.PERCENTAGE.valueOf(50));
-        r = attributeNode.getLength("r", template != null ? template.r : Unit.PERCENTAGE.valueOf(50));
-        fr = attributeNode.getLength("fr", template != null ? template.fr : Unit.PERCENTAGE.valueOf(0));
-        fx = attributeNode.getLength("fx", template != null ? template.fx : cx);
-        fy = attributeNode.getLength("fy", template != null ? template.fy : cy);
+        cx = attributeNode.getLength("cx", PercentageDimension.WIDTH,
+                template != null ? template.cx : Unit.PERCENTAGE.valueOf(50));
+        cy = attributeNode.getLength("cy", PercentageDimension.HEIGHT,
+                template != null ? template.cy : Unit.PERCENTAGE.valueOf(50));
+        r = attributeNode.getLength("r", PercentageDimension.LENGTH,
+                template != null ? template.r : Unit.PERCENTAGE.valueOf(50));
+        fr = attributeNode.getLength("fr", PercentageDimension.LENGTH,
+                template != null ? template.fr : Unit.PERCENTAGE.valueOf(0));
+        fx = attributeNode.getLength("fx", PercentageDimension.WIDTH,
+                template != null ? template.fx : cx);
+        fy = attributeNode.getLength("fy", PercentageDimension.HEIGHT,
+                template != null ? template.fy : cy);
     }
 
     @Override
     protected @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
             Percentage[] gradOffsets, @NotNull Color[] gradColors) {
-        Point2D.Float center = new Point2D.Float(cx.resolveWidth(measure), cy.resolveHeight(measure));
-        Point2D.Float focusCenter = new Point2D.Float(fx.resolveWidth(measure), fy.resolveHeight(measure));
+        Point2D.Float center = new Point2D.Float(cx.resolve(measure), cy.resolve(measure));
+        Point2D.Float focusCenter = new Point2D.Float(fx.resolve(measure), fy.resolve(measure));
 
-        float radius = r.resolveLength(measure);
-        float focusRadius = fr.resolveLength(measure);
+        float radius = r.resolve(measure);
+        float focusRadius = fr.resolve(measure);
 
         return new SVGRadialGradientPaint(center, radius, focusCenter, focusRadius,
                 offsetsToFractions(gradOffsets), gradColors, spreadMethod.cycleMethod(),

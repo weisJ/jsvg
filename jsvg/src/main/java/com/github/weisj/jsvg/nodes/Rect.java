@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGRectangle;
 import com.github.weisj.jsvg.geometry.SVGRoundRectangle;
@@ -46,13 +47,13 @@ public final class Rect extends ShapeNode {
 
     @Override
     protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode node) {
-        LengthValue x = node.getLength("x", Length.ZERO, Animatable.YES);
-        LengthValue y = node.getLength("y", Length.ZERO, Animatable.YES);
-        LengthValue width = node.getLength("width", Length.ZERO, Animatable.YES);
-        LengthValue height = node.getLength("height", Length.ZERO, Animatable.YES);
+        LengthValue x = node.getLength("x", PercentageDimension.WIDTH, Length.ZERO, Animatable.YES);
+        LengthValue y = node.getLength("y", PercentageDimension.HEIGHT, Length.ZERO, Animatable.YES);
+        LengthValue width = node.getLength("width", PercentageDimension.WIDTH, Length.ZERO, Animatable.YES);
+        LengthValue height = node.getLength("height", PercentageDimension.HEIGHT, Length.ZERO, Animatable.YES);
 
-        LengthValue initialRx = node.getLength("rx", Length.UNSPECIFIED, Animatable.NO);
-        LengthValue initialRy = node.getLength("ry", initialRx, Animatable.NO);
+        LengthValue initialRx = node.getLength("rx", PercentageDimension.WIDTH, Length.UNSPECIFIED, Animatable.NO);
+        LengthValue initialRy = node.getLength("ry", PercentageDimension.HEIGHT, initialRx, Animatable.NO);
 
         if (initialRy == Length.UNSPECIFIED) {
             initialRy = Length.ZERO;
@@ -61,8 +62,8 @@ public final class Rect extends ShapeNode {
             initialRx = initialRy;
         }
 
-        LengthValue rx = node.getLength("rx", initialRx, Animatable.YES);
-        LengthValue ry = node.getLength("ry", initialRy, Animatable.YES);
+        LengthValue rx = node.getLength("rx", PercentageDimension.WIDTH, initialRx, Animatable.YES);
+        LengthValue ry = node.getLength("ry", PercentageDimension.HEIGHT, initialRy, Animatable.YES);
 
         boolean isNonRounded = rx.isConstantlyZero() && ry.isConstantlyZero();
         if (isNonRounded) {

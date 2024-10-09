@@ -25,6 +25,7 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +38,7 @@ import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.time.TimeUnit;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Angle;
 import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -55,14 +57,31 @@ public final class AttributeParser {
         this.paintParser = paintParser;
     }
 
-    @Contract("_,!null -> !null")
-    public @Nullable Length parseLength(@Nullable String value, @Nullable Length fallback) {
-        return parseSuffixUnit(value, Unit.Raw, fallback);
+    @Contract("_,!null,_ -> !null")
+    public @Nullable Length parseLength(@Nullable String value, @Nullable Length fallback,
+            PercentageDimension dimension) {
+        return parseSuffixUnit(value, Unit.RAW, fallback, u -> {
+            if (u == Unit.PERCENTAGE) {
+                switch (dimension) {
+                    case WIDTH:
+                        return Unit.PERCENTAGE_WIDTH;
+                    case HEIGHT:
+                        return Unit.PERCENTAGE_HEIGHT;
+                    case LENGTH:
+                        return Unit.PERCENTAGE_LENGTH;
+                    case CUSTOM:
+                        return Unit.PERCENTAGE;
+                    case NONE:
+                        return null;
+                }
+            }
+            return u;
+        });
     }
 
     @Contract("_,!null -> !null")
     public @Nullable Duration parseDuration(@Nullable String value, @Nullable Duration fallback) {
-        return parseSuffixUnit(value, TimeUnit.Raw, fallback);
+        return parseSuffixUnit(value, TimeUnit.Raw, fallback, u -> u);
     }
 
     @Contract("_,!null -> !null")
@@ -87,9 +106,10 @@ public final class AttributeParser {
         }
     }
 
-    @Contract("_,_,!null -> !null")
+    @Contract("_,_,!null,_ -> !null")
     private <U, V> @Nullable V parseSuffixUnit(@Nullable String value, @NotNull SuffixUnit<U, V> defaultUnit,
-            @Nullable V fallback) {
+            @Nullable V fallback,
+            @NotNull Function<@NotNull SuffixUnit<U, V>, @Nullable SuffixUnit<U, V>> unitMapper) {
         if (value == null) return fallback;
         SuffixUnit<U, V> unit = defaultUnit;
         String lower = value.toLowerCase(Locale.ENGLISH);
@@ -106,6 +126,8 @@ public final class AttributeParser {
                 break;
             }
         }
+        unit = unitMapper.apply(unit);
+        if (unit == null) return fallback;
         String str = lower.substring(0, lower.length() - unit.suffix().length());
         try {
             return unit.valueOf(Float.parseFloat(str));
@@ -159,14 +181,15 @@ public final class AttributeParser {
         }
     }
 
-    @Contract("_,!null -> !null")
-    public @NotNull Length @Nullable [] parseLengthList(@Nullable String value, @NotNull Length @Nullable [] fallback) {
+    @Contract("_,!null,_ -> !null")
+    public @NotNull Length @Nullable [] parseLengthList(@Nullable String value, @NotNull Length @Nullable [] fallback,
+            PercentageDimension dimension) {
         if (value != null && value.equalsIgnoreCase("none")) return new Length[0];
         String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE, null);
         if (values == null) return fallback;
         Length[] ret = new Length[values.length];
         for (int i = 0; i < ret.length; i++) {
-            Length length = parseLength(values[i], null);
+            Length length = parseLength(values[i], null, dimension);
             if (length == null) return fallback;
             ret[i] = length;
         }

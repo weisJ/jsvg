@@ -30,9 +30,9 @@ import com.github.weisj.jsvg.attributes.value.LengthValue;
 
 public final class Length implements LengthValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;
-    public static final @NotNull Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
-    public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
-    public static final @NotNull Length INHERITED = new Length(Unit.Raw, 0);
+    public static final @NotNull Length UNSPECIFIED = new Length(Unit.RAW, UNSPECIFIED_RAW);
+    public static final @NotNull Length ZERO = new Length(Unit.RAW, 0);
+    public static final @NotNull Length INHERITED = new Length(Unit.RAW, 0);
 
     private final @NotNull Unit unit;
     private final float value;
@@ -60,7 +60,7 @@ public final class Length implements LengthValue {
     }
 
     private static float resolveNonPercentage(@NotNull MeasureContext context, Unit unit, float value) {
-        if (unit == Unit.Raw) {
+        if (unit == Unit.RAW) {
             // If we are unspecified this will return UNSPECIFIED_RAW as intended.
             return value;
         }
@@ -91,35 +91,20 @@ public final class Length implements LengthValue {
     }
 
     @Override
-    public float resolveWidth(@NotNull MeasureContext context) {
+    public float resolve(@NotNull MeasureContext context) {
         Unit u = unit();
         float raw = raw();
-        if (u == Unit.PERCENTAGE) {
-            return (raw * context.viewWidth()) / 100f;
-        } else {
-            return resolveNonPercentage(context, u, raw);
-        }
-    }
-
-    @Override
-    public float resolveHeight(@NotNull MeasureContext context) {
-        Unit u = unit();
-        float raw = raw();
-        if (u == Unit.PERCENTAGE) {
-            return (raw * context.viewHeight()) / 100f;
-        } else {
-            return resolveNonPercentage(context, u, raw);
-        }
-    }
-
-    @Override
-    public float resolveLength(@NotNull MeasureContext context) {
-        Unit u = unit();
-        float raw = raw();
-        if (u == Unit.PERCENTAGE) {
-            return (raw / 100f) * context.normedDiagonalLength();
-        } else {
-            return resolveNonPercentage(context, u, raw);
+        switch (u) {
+            case PERCENTAGE_LENGTH:
+                return (raw * context.normedDiagonalLength()) / 100f;
+            case PERCENTAGE_WIDTH:
+                return (raw * context.viewWidth()) / 100f;
+            case PERCENTAGE_HEIGHT:
+                return (raw * context.viewHeight()) / 100f;
+            case PERCENTAGE:
+                return raw / 100f;
+            default:
+                return resolveNonPercentage(context, u, raw);
         }
     }
 
@@ -132,10 +117,15 @@ public final class Length implements LengthValue {
     public float resolveFontSize(@NotNull MeasureContext context) {
         Unit u = unit();
         float raw = raw();
-        if (u == Unit.PERCENTAGE) {
-            return (raw / 100f) * context.em();
-        } else {
-            return resolveNonPercentage(context, u, raw);
+        switch (u) {
+            case PERCENTAGE_LENGTH:
+            case PERCENTAGE_WIDTH:
+            case PERCENTAGE_HEIGHT:
+                throw new IllegalStateException("Can't resolve font size with geometric percentage unit");
+            case PERCENTAGE:
+                return (raw / 100f) * context.em();
+            default:
+                return resolveNonPercentage(context, u, raw);
         }
     }
 
@@ -182,7 +172,7 @@ public final class Length implements LengthValue {
     }
 
     public @NotNull Length orElseIfUnspecified(float value) {
-        if (isUnspecified()) return Unit.Raw.valueOf(value);
+        if (isUnspecified()) return Unit.RAW.valueOf(value);
         return this;
     }
 

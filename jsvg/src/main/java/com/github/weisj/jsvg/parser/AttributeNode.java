@@ -41,7 +41,6 @@ import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.*;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
@@ -55,7 +54,7 @@ public final class AttributeNode {
     private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
     private static final Length Center = new Length(Unit.PERCENTAGE, 50f);
     private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);
-    private static final Length FALLBACK_LENGTH = new Length(Unit.Raw, 0f);
+    private static final Length FALLBACK_LENGTH = new Length(Unit.RAW, 0f);
 
     private final @NotNull String tagName;
     private final @NotNull Map<String, String> attributes;
@@ -222,26 +221,27 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parsePaint(value, this);
     }
 
-    public @Nullable Length getLength(@NotNull String key) {
-        return getLength(key, (Length) null);
+    public @Nullable Length getLength(@NotNull String key, PercentageDimension dimension) {
+        return getLength(key, dimension, (Length) null);
     }
 
-    public @NotNull Length getLength(@NotNull String key, float fallback) {
-        return getLength(key, Unit.Raw.valueOf(fallback));
+    public @NotNull Length getLength(@NotNull String key, PercentageDimension dimension, float fallback) {
+        return getLength(key, dimension, Unit.RAW.valueOf(fallback));
     }
 
-    @Contract("_,!null -> !null")
-    public @Nullable Length getLength(@NotNull String key, @Nullable Length fallback) {
-        return (Length) getLength(key, fallback, Animatable.NO);
+    @Contract("_,_,!null -> !null")
+    public @Nullable Length getLength(@NotNull String key, PercentageDimension dimension, @Nullable Length fallback) {
+        return (Length) getLength(key, dimension, fallback, Animatable.NO);
     }
 
-    public @Nullable LengthValue getLength(@NotNull String key, Animatable animatable) {
-        return getLength(key, null, animatable);
+    public @Nullable LengthValue getLength(@NotNull String key, PercentageDimension dimension, Animatable animatable) {
+        return getLength(key, dimension, null, animatable);
     }
 
-    @Contract("_,!null,_ -> !null")
-    public @Nullable LengthValue getLength(@NotNull String key, @Nullable LengthValue fallback, Animatable animatable) {
-        LengthValue value = getLengthInternal(key);
+    @Contract("_,_,!null,_ -> !null")
+    public @Nullable LengthValue getLength(@NotNull String key, PercentageDimension dimension,
+            @Nullable LengthValue fallback, Animatable animatable) {
+        LengthValue value = getLengthInternal(key, dimension);
         if (value == FALLBACK_LENGTH) {
             value = fallback;
         }
@@ -252,7 +252,7 @@ public final class AttributeNode {
             if (initial instanceof AnimatedLength) {
                 initial = ((AnimatedLength) initial).initial();
             }
-            AnimatedLength animatedLength = getAnimatedLength(key, initial);
+            AnimatedLength animatedLength = getAnimatedLength(key, initial, dimension);
             if (animatedLength != null) return animatedLength;
         }
 
@@ -263,20 +263,20 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parseDuration(getValue(key), fallback);
     }
 
-    private @NotNull Length getLengthInternal(@NotNull String key) {
-        return loadHelper.attributeParser().parseLength(getValue(key), FALLBACK_LENGTH);
+    private @NotNull Length getLengthInternal(@NotNull String key, PercentageDimension dimension) {
+        return loadHelper.attributeParser().parseLength(getValue(key), FALLBACK_LENGTH, dimension);
     }
 
     public @NotNull Length getHorizontalReferenceLength(@NotNull String key) {
-        return parseReferenceLength(key, "left", "right");
+        return parseReferenceLength(key, "left", "right", PercentageDimension.WIDTH);
     }
 
     public @NotNull Length getVerticalReferenceLength(@NotNull String key) {
-        return parseReferenceLength(key, "top", "bottom");
+        return parseReferenceLength(key, "top", "bottom", PercentageDimension.HEIGHT);
     }
 
     private @NotNull Length parseReferenceLength(@NotNull String key, @NotNull String topLeft,
-            @NotNull String bottomRight) {
+            @NotNull String bottomRight, PercentageDimension dimension) {
         String value = getValue(key);
         if (topLeft.equals(value)) {
             return TopOrLeft;
@@ -285,18 +285,21 @@ public final class AttributeNode {
         } else if (bottomRight.equals(value)) {
             return BottomOrRight;
         } else {
-            return loadHelper.attributeParser().parseLength(value, Length.ZERO);
+            return loadHelper.attributeParser().parseLength(value, Length.ZERO, dimension);
         }
     }
 
     @Contract("_,!null -> !null")
-    public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
+    public @Nullable com.github.weisj.jsvg.geometry.size.Percentage getPercentage(@NotNull String key,
+            @Nullable com.github.weisj.jsvg.geometry.size.Percentage fallback) {
         return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
     }
 
-    public @NotNull PercentageValue getPercentage(@NotNull String key, @NotNull Percentage fallback,
+    public @NotNull PercentageValue getPercentage(@NotNull String key,
+            @NotNull com.github.weisj.jsvg.geometry.size.Percentage fallback,
             Animatable animatable) {
-        Percentage initial = loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
+        com.github.weisj.jsvg.geometry.size.Percentage initial =
+                loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
 
         if (animatable == Animatable.YES) {
             AnimatedPercentage animatedPercentage = getAnimatedPercentage(key, initial);
@@ -307,17 +310,19 @@ public final class AttributeNode {
 
     @Deprecated
     public float getPercentage(@NotNull String key, float fallback) {
-        return loadHelper.attributeParser().parsePercentage(getValue(key), new Percentage(fallback)).value();
+        return loadHelper.attributeParser()
+                .parsePercentage(getValue(key), new com.github.weisj.jsvg.geometry.size.Percentage(fallback)).value();
     }
 
-    public @NotNull Length @NotNull [] getLengthList(@NotNull String key) {
-        return getLengthList(key, new Length[0]);
+    public @NotNull Length @NotNull [] getLengthList(@NotNull String key, PercentageDimension dimension) {
+        return getLengthList(key, new Length[0], dimension);
     }
 
 
-    @Contract("_,!null -> !null")
-    public @NotNull Length @Nullable [] getLengthList(@NotNull String key, @NotNull Length @Nullable [] fallback) {
-        return loadHelper.attributeParser().parseLengthList(getValue(key), fallback);
+    @Contract("_,!null,_ -> !null")
+    public @NotNull Length @Nullable [] getLengthList(@NotNull String key, @NotNull Length @Nullable [] fallback,
+            PercentageDimension dimension) {
+        return loadHelper.attributeParser().parseLengthList(getValue(key), fallback, dimension);
     }
 
     public float @NotNull [] getFloatList(@NotNull String key) {
@@ -429,10 +434,11 @@ public final class AttributeNode {
         return null;
     }
 
-    private @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial) {
+    private @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial,
+            PercentageDimension dimension) {
         Animate animate = animateNode(property);
         if (animate == null) return null;
-        return animate.animatedLength(initial, this);
+        return animate.animatedLength(initial, dimension, this);
     }
 
     private @Nullable AnimatedFloatList getAnimatedFloatList(@NotNull String property, float @NotNull [] initial) {
@@ -441,7 +447,8 @@ public final class AttributeNode {
         return animate.animatedFloatList(initial, this);
     }
 
-    private @Nullable AnimatedPercentage getAnimatedPercentage(@NotNull String property, @NotNull Percentage initial) {
+    private @Nullable AnimatedPercentage getAnimatedPercentage(@NotNull String property,
+            @NotNull com.github.weisj.jsvg.geometry.size.Percentage initial) {
         Animate animate = animateNode(property);
         if (animate == null) return null;
         return animate.animatedPercentage(initial, this);

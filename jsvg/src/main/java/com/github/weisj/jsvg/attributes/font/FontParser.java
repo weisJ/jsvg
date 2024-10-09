@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.attributes.font;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.parser.AttributeNode;
@@ -72,7 +73,7 @@ public final class FontParser {
     public static @Nullable FontSize parseFontSize(@NotNull AttributeNode node) {
         FontSize fontSize = node.getEnum("font-size", PredefinedFontSize.Number);
         if (fontSize == PredefinedFontSize.Number) {
-            Length size = node.getLength("font-size", Length.UNSPECIFIED);
+            Length size = node.getLength("font-size", PercentageDimension.CUSTOM, Length.UNSPECIFIED);
             fontSize = size.isSpecified()
                     ? new LengthFontSize(size)
                     : null;
@@ -81,7 +82,7 @@ public final class FontParser {
     }
 
     public static @Nullable Length parseSizeAdjust(@NotNull AttributeNode node) {
-        return node.getLength("font-size-adjust");
+        return node.getLength("font-size-adjust", PercentageDimension.NONE);
     }
 
     static @Nullable FontStyle parseFontStyle(@NotNull AttributeNode node) {

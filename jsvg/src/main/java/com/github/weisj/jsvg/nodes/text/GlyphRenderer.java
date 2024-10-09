@@ -96,7 +96,7 @@ final class GlyphRenderer {
             @NotNull TextOutput textOutput) {
         MeasureContext measure = context.measureContext();
         FontRenderContext fontRenderContext = context.fontRenderContext();
-        float letterSpacing = fontRenderContext.letterSpacing().resolveLength(measure);
+        float letterSpacing = fontRenderContext.letterSpacing().resolve(measure);
 
         Path2D glyphPath = new Path2D.Float();
         List<AbstractGlyphRun.PaintableEmoji> emojis = null;

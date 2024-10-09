@@ -57,19 +57,19 @@ public final class StrokeResolver {
         float[] dashes = new float[dashPattern.length];
         float offsetLength = 0;
         for (int i = 0; i < dashes.length; i++) {
-            float dash = dashPattern[i].resolveLength(measureContext) * pathLengthFactor;
+            float dash = dashPattern[i].resolve(measureContext) * pathLengthFactor;
             offsetLength += dash;
             dashes[i] = dash;
         }
 
-        float phase = dashOffset.resolveLength(measureContext) * pathLengthFactor;
+        float phase = dashOffset.resolve(measureContext) * pathLengthFactor;
         if (phase < 0) phase += offsetLength;
 
         if (dashes.length == 0) {
-            return new BasicStroke(strokeWidth.resolveLength(measureContext), lineCap.awtCode(), lineJoin.awtCode(),
+            return new BasicStroke(strokeWidth.resolve(measureContext), lineCap.awtCode(), lineJoin.awtCode(),
                     miterLimit);
         } else {
-            return new BasicStroke(strokeWidth.resolveLength(measureContext), lineCap.awtCode(), lineJoin.awtCode(),
+            return new BasicStroke(strokeWidth.resolve(measureContext), lineCap.awtCode(), lineJoin.awtCode(),
                     miterLimit, dashes, phase);
         }
     }

@@ -53,7 +53,7 @@ public final class MeasurableFontSpec extends FontSpec {
                 null,
                 FontStretch.Normal.percentage(),
                 PredefinedFontWeight.NORMAL_WEIGHT,
-                Unit.Raw.valueOf(SVGFont.defaultFontSize()));
+                Unit.RAW.valueOf(SVGFont.defaultFontSize()));
     }
 
     public @NotNull String[] families() {
