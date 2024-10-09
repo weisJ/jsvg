@@ -100,9 +100,11 @@ public final class Length implements LengthValue {
             case PERCENTAGE_LENGTH:
                 return (raw * context.normedDiagonalLength()) / 100f;
             case VW:
+            case VI:
             case PERCENTAGE_WIDTH:
                 return (raw * context.viewWidth()) / 100f;
             case VH:
+            case VB:
             case PERCENTAGE_HEIGHT:
                 return (raw * context.viewHeight()) / 100f;
             case PERCENTAGE:

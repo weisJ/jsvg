@@ -41,6 +41,8 @@ public enum Unit implements SuffixUnit<Unit, Length> {
     PC,
     VW,
     VH,
+    VI,
+    VB,
     V_MIN("vmin"),
     V_MAX("vmax"),
     PERCENTAGE("%"),
