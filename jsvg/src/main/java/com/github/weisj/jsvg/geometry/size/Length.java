@@ -99,12 +99,18 @@ public final class Length implements LengthValue {
         switch (u) {
             case PERCENTAGE_LENGTH:
                 return (raw * context.normedDiagonalLength()) / 100f;
+            case VW:
             case PERCENTAGE_WIDTH:
                 return (raw * context.viewWidth()) / 100f;
+            case VH:
             case PERCENTAGE_HEIGHT:
                 return (raw * context.viewHeight()) / 100f;
             case PERCENTAGE:
                 return raw / 100f;
+            case V_MIN:
+                return (raw * Math.min(context.viewWidth(), context.viewHeight())) / 100f;
+            case V_MAX:
+                return (raw * Math.max(context.viewWidth(), context.viewHeight())) / 100f;
             default:
                 return resolveNonPercentage(context, u, raw);
         }
