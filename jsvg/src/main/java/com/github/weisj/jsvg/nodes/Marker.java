@@ -30,6 +30,7 @@ import com.github.weisj.jsvg.attributes.MarkerUnitType;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -81,7 +82,7 @@ public final class Marker extends BaseInnerViewContainer {
 
     @Override
     protected @NotNull Point2D anchorLocation(@NotNull MeasureContext context) {
-        return new Point2D.Float(-refX.resolveWidth(context), -refY.resolveHeight(context));
+        return new Point2D.Float(-refX.resolve(context), -refY.resolve(context));
     }
 
     @Override
@@ -95,10 +96,10 @@ public final class Marker extends BaseInnerViewContainer {
         if (markerUnits == MarkerUnitType.StrokeWidth) {
             LengthValue strokeWidthLength = context.strokeContext().strokeWidth;
             assert strokeWidthLength != null;
-            float strokeWidth = strokeWidthLength.resolveLength(measure);
+            float strokeWidth = strokeWidthLength.resolve(measure);
             return new FloatSize(markerWidth.raw() * strokeWidth, markerHeight.raw() * strokeWidth);
         } else {
-            return new FloatSize(markerWidth.resolveWidth(measure), markerHeight.resolveHeight(measure));
+            return new FloatSize(markerWidth.resolve(measure), markerHeight.resolve(measure));
         }
     }
 
@@ -111,8 +112,8 @@ public final class Marker extends BaseInnerViewContainer {
         orientation = MarkerOrientation.parse(attributeNode.getValue("orient"), attributeNode.parser());
 
         markerUnits = attributeNode.getEnum("markerUnits", MarkerUnitType.StrokeWidth);
-        markerWidth = attributeNode.getLength("markerWidth", 3);
-        markerHeight = attributeNode.getLength("markerHeight", 3);
+        markerWidth = attributeNode.getLength("markerWidth", PercentageDimension.WIDTH, 3);
+        markerHeight = attributeNode.getLength("markerHeight", PercentageDimension.HEIGHT, 3);
     }
 
     @Override

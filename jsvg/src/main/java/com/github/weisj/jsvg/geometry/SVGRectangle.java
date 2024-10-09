@@ -48,10 +48,10 @@ public final class SVGRectangle implements MeasurableShape {
 
     private void validateShape(@NotNull MeasureContext measureContext) {
         rect.setRect(
-                x.resolveWidth(measureContext),
-                y.resolveHeight(measureContext),
-                w.resolveWidth(measureContext),
-                h.resolveHeight(measureContext));
+                x.resolve(measureContext),
+                y.resolve(measureContext),
+                w.resolve(measureContext),
+                h.resolve(measureContext));
     }
 
     @Override
@@ -69,6 +69,6 @@ public final class SVGRectangle implements MeasurableShape {
     @Override
     public double pathLength(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
-        return 2 * (w.resolveWidth(measureContext) + h.resolveHeight(measureContext));
+        return 2 * (w.resolve(measureContext) + h.resolve(measureContext));
     }
 }

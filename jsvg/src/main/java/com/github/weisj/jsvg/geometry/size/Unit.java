@@ -39,7 +39,10 @@ public enum Unit implements SuffixUnit<Unit, Length> {
     PT,
     PC,
     PERCENTAGE("%"),
-    Raw("");
+    PERCENTAGE_LENGTH("%"),
+    PERCENTAGE_WIDTH("%"),
+    PERCENTAGE_HEIGHT("%"),
+    RAW("");
 
     private static final Unit[] units = values();
 
@@ -67,5 +70,9 @@ public enum Unit implements SuffixUnit<Unit, Length> {
     @Override
     public @NotNull String suffix() {
         return suffix;
+    }
+
+    public boolean isPercentage() {
+        return this == PERCENTAGE;
     }
 }

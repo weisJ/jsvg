@@ -28,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
 import com.github.weisj.jsvg.animation.value.AnimatedPath;
 import com.github.weisj.jsvg.attributes.Animatable;
-import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.value.ConstantFloatList;
 import com.github.weisj.jsvg.attributes.value.ConstantValue;
 import com.github.weisj.jsvg.attributes.value.FloatListValue;

@@ -136,7 +136,7 @@ class GlyphCursor {
 
     protected float nextX(@NotNull MeasureContext measure) {
         if (currentGlyphHasXOverride()) {
-            x = xLocations[xOff].resolveWidth(measure);
+            x = xLocations[xOff].resolve(measure);
             xOff++;
         }
         return x;
@@ -148,7 +148,7 @@ class GlyphCursor {
 
     protected float nextDeltaX(@NotNull MeasureContext measure) {
         if (currentGlyphHasDeltaXOverride()) {
-            return xDeltas[dxOff++].resolveWidth(measure);
+            return xDeltas[dxOff++].resolve(measure);
         }
         return 0;
     }
@@ -159,7 +159,7 @@ class GlyphCursor {
 
     protected float nextY(@NotNull MeasureContext measure) {
         if (currentGlyphHasYOverride()) {
-            y = yLocations[yOff].resolveHeight(measure);
+            y = yLocations[yOff].resolve(measure);
             yOff++;
         }
         return y;
@@ -171,7 +171,7 @@ class GlyphCursor {
 
     protected float nextDeltaY(@NotNull MeasureContext measure) {
         if (currentGlyphHasDeltaYOverride()) {
-            return yDeltas[dyOff++].resolveHeight(measure);
+            return yDeltas[dyOff++].resolve(measure);
         }
         return 0;
     }

@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
@@ -103,13 +104,13 @@ public final class Filter extends ContainerNode {
         filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
         colorInterpolation = attributeNode.getEnum("color-interpolation-filters", ColorInterpolation.LinearRGB);
 
-        x = attributeNode.getLength("x", DEFAULT_FILTER_COORDINATE)
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, DEFAULT_FILTER_COORDINATE)
                 .coercePercentageToCorrectUnit(filterUnits);
-        y = attributeNode.getLength("y", DEFAULT_FILTER_COORDINATE)
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, DEFAULT_FILTER_COORDINATE)
                 .coercePercentageToCorrectUnit(filterUnits);
-        width = attributeNode.getLength("width", DEFAULT_FILTER_SIZE)
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, DEFAULT_FILTER_SIZE)
                 .coercePercentageToCorrectUnit(filterUnits);
-        height = attributeNode.getLength("height", DEFAULT_FILTER_SIZE)
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, DEFAULT_FILTER_SIZE)
                 .coercePercentageToCorrectUnit(filterUnits);
     }
 

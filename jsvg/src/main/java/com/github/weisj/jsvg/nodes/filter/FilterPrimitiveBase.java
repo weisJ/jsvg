@@ -28,6 +28,7 @@ import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.AttributeNode;
@@ -44,10 +45,10 @@ public final class FilterPrimitiveBase {
     private final ColorInterpolation colorInterpolation;
 
     public FilterPrimitiveBase(@NotNull AttributeNode attributeNode) {
-        x = attributeNode.getLength("x", Unit.PERCENTAGE.valueOf(0));
-        y = attributeNode.getLength("y", Unit.PERCENTAGE.valueOf(0));
-        width = attributeNode.getLength("width", Unit.PERCENTAGE.valueOf(100));
-        height = attributeNode.getLength("height", Unit.PERCENTAGE.valueOf(100));
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE.valueOf(0));
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Unit.PERCENTAGE.valueOf(0));
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Unit.PERCENTAGE.valueOf(100));
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Unit.PERCENTAGE.valueOf(100));
 
         inputChannel = attributeNode.getFilterChannelKey("in", DefaultFilterChannel.LastResult);
         resultChannel = attributeNode.getFilterChannelKey("result", DefaultFilterChannel.LastResult);

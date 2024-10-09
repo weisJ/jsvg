@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,6 +27,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -44,7 +45,7 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
 
     @Override
     protected @NotNull Point2D outerLocation(@NotNull MeasureContext context) {
-        return new Point2D.Float(x.resolveWidth(context), y.resolveHeight(context));
+        return new Point2D.Float(x.resolve(context), y.resolve(context));
     }
 
     @Override
@@ -57,8 +58,8 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
     public @NotNull FloatSize size(@NotNull RenderContext context) {
         MeasureContext measure = context.measureContext();
         return new FloatSize(
-                width.orElseIfUnspecified(measure.viewWidth()).resolveWidth(measure),
-                height.orElseIfUnspecified(measure.viewHeight()).resolveHeight(measure));
+                width.orElseIfUnspecified(measure.viewWidth()).resolve(measure),
+                height.orElseIfUnspecified(measure.viewHeight()).resolve(measure));
     }
 
     @Override
@@ -70,9 +71,9 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        x = attributeNode.getLength("x", 0);
-        y = attributeNode.getLength("y", 0);
-        width = attributeNode.getLength("width", Length.UNSPECIFIED);
-        height = attributeNode.getLength("height", Length.UNSPECIFIED);
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, 0);
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, 0);
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED);
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED);
     }
 }
