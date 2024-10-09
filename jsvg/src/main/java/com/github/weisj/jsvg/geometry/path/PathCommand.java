@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,6 +26,7 @@ import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 
+
 public abstract class PathCommand {
 
     private final boolean isRelative;
@@ -48,15 +49,18 @@ public abstract class PathCommand {
         }
     }
 
-    protected Point2D.Float lastKnotReflection(@NotNull BuildHistory hist) {
-        float oldKx = hist.lastKnot.x;
-        float oldKy = hist.lastKnot.y;
-        float oldX = hist.lastPoint.x;
-        float oldY = hist.lastPoint.y;
+    protected @NotNull Point2D.Float lastKnotReflectionCubic(@NotNull BuildHistory hist) {
+        return lastKnotReflection(hist.lastPoint, hist.lastCubicKnot);
+    }
 
+    protected @NotNull Point2D.Float lastKnotReflectionQuadratic(@NotNull BuildHistory hist) {
+        return lastKnotReflection(hist.lastPoint, hist.lastQuadraticKnot);
+    }
+
+    private @NotNull Point2D.Float lastKnotReflection(@NotNull Point2D.Float point, @NotNull Point2D.Float knot) {
         // Calc knot as reflection of old knot
-        float kx = oldX * 2f - oldKx;
-        float ky = oldY * 2f - oldKy;
+        float kx = point.x * 2f - knot.x;
+        float ky = point.y * 2f - knot.y;
         return new Point2D.Float(kx, ky);
     }
 
