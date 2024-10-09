@@ -111,6 +111,30 @@ class ReSvgTestSuite {
                 "rlh-values.svg"));
     }
 
+    @TestFactory
+    Collection<DynamicTest> color() {
+        return checkDirectory("painting/color");
+    }
+
+    @TestFactory
+    Collection<DynamicTest> fillOpacity() {
+        return checkDirectory("painting/fill-opacity", Set.of(
+                // We don't do proper kerning
+                "on-text.svg",
+                // Needs investigation
+                "with-linearGradient.svg",
+                "with-opacity.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> strokeOpacity() {
+        return checkDirectory("painting/stroke-opacity", Set.of(
+                // We don't do proper kerning
+                "on-text.svg",
+                // Needs investigation
+                "with-linearGradient.svg",
+                "with-opacity.svg"));
+    }
 
     private record ReSVGRefTest(@NotNull Path testFile) implements Executable {
 

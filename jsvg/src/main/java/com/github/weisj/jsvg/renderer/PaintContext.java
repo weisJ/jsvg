@@ -45,16 +45,16 @@ public final class PaintContext implements Mutator<PaintContext> {
     public final @Nullable SVGPaint strokePaint;
 
     public final PercentageValue opacity;
-    public final PercentageValue fillOpacity;
-    public final PercentageValue strokeOpacity;
+    public final @Nullable PercentageValue fillOpacity;
+    public final @Nullable PercentageValue strokeOpacity;
 
     public final @Nullable PaintOrder paintOrder;
 
     public final @Nullable StrokeContext strokeContext;
     public final @Nullable FillRule fillRule;
 
-    public PaintContext(@Nullable SVGPaint color, @Nullable SVGPaint fillPaint, PercentageValue fillOpacity,
-            @Nullable SVGPaint strokePaint, PercentageValue strokeOpacity, PercentageValue opacity,
+    public PaintContext(@Nullable SVGPaint color, @Nullable SVGPaint fillPaint, @Nullable PercentageValue fillOpacity,
+            @Nullable SVGPaint strokePaint, @Nullable PercentageValue strokeOpacity, PercentageValue opacity,
             @Nullable PaintOrder paintOrder,
             @Nullable StrokeContext strokeContext, @Nullable FillRule fillRule) {
         this.color = color;
@@ -83,9 +83,10 @@ public final class PaintContext implements Mutator<PaintContext> {
         return new PaintContext(
                 parseColorAttribute(attributeNode),
                 attributeNode.getPaint("fill", Animatable.YES),
-                attributeNode.getPercentage("fill-opacity", Percentage.ONE, Animatable.YES),
+                attributeNode.getPercentage("fill-opacity", null, Animatable.YES), // TODO: Needs to inherit initial
+                                                                                   // from context
                 attributeNode.getPaint("stroke", Animatable.YES),
-                attributeNode.getPercentage("stroke-opacity", Percentage.ONE),
+                attributeNode.getPercentage("stroke-opacity", null),
                 attributeNode.getPercentage("opacity", Percentage.ONE),
                 PaintOrder.parse(attributeNode),
                 StrokeContext.parse(attributeNode),
@@ -104,9 +105,9 @@ public final class PaintContext implements Mutator<PaintContext> {
         return new PaintContext(
                 SVGPaint.derive(color, context.color),
                 SVGPaint.derive(fillPaint, context.fillPaint),
-                fillOpacity.multiply(context.fillOpacity),
+                context.fillOpacity != null ? context.fillOpacity : fillOpacity,
                 SVGPaint.derive(strokePaint, context.strokePaint),
-                strokeOpacity.multiply(context.strokeOpacity),
+                context.strokeOpacity != null ? context.strokeOpacity : strokeOpacity,
                 opacity.multiply(context.opacity),
                 context.paintOrder != null ? context.paintOrder : paintOrder,
                 strokeContext != null
