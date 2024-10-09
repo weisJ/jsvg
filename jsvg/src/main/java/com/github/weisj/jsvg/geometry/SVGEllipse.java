@@ -48,10 +48,10 @@ public final class SVGEllipse implements MeasurableShape {
     }
 
     private void validateShape(@NotNull MeasureContext measureContext) {
-        float x = cx.resolveWidth(measureContext);
-        float y = cy.resolveHeight(measureContext);
-        float rrx = rx.resolveWidth(measureContext);
-        float rry = ry.resolveHeight(measureContext);
+        float x = cx.resolve(measureContext);
+        float y = cy.resolve(measureContext);
+        float rrx = rx.resolve(measureContext);
+        float rry = ry.resolve(measureContext);
         ellipse.setFrame(x - rrx, y - rry, 2 * rrx, 2 * rry);
     }
 
@@ -70,8 +70,8 @@ public final class SVGEllipse implements MeasurableShape {
     @Override
     public double pathLength(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
-        float a = rx.resolveWidth(measureContext);
-        float b = ry.resolveHeight(measureContext);
+        float a = rx.resolve(measureContext);
+        float b = ry.resolve(measureContext);
         if (a == b) return SVGCircle.circumference(a);
         return ellipseCircumference(a, b);
     }

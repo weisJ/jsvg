@@ -54,8 +54,8 @@ public final class SVGLine implements MeasurableShape {
 
     private void validateShape(@NotNull MeasureContext measureContext) {
         line.setLine(
-                x1.resolveWidth(measureContext), y1.resolveHeight(measureContext),
-                x2.resolveWidth(measureContext), y2.resolveHeight(measureContext));
+                x1.resolve(measureContext), y1.resolve(measureContext),
+                x2.resolve(measureContext), y2.resolve(measureContext));
     }
 
     @Override
@@ -74,7 +74,7 @@ public final class SVGLine implements MeasurableShape {
     public double pathLength(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
         return GeometryUtil.lineLength(
-                x1.resolveWidth(measureContext), y1.resolveHeight(measureContext),
-                x2.resolveWidth(measureContext), y2.resolveHeight(measureContext));
+                x1.resolve(measureContext), y1.resolve(measureContext),
+                x2.resolve(measureContext), y2.resolve(measureContext));
     }
 }

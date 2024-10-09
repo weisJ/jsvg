@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.renderer.AnimationState;
 import com.google.errorprone.annotations.Immutable;
 

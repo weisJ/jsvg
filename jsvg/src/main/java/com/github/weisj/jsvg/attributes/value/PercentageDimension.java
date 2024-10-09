@@ -21,8 +21,10 @@
  */
 package com.github.weisj.jsvg.attributes.value;
 
-public enum Dimension {
+public enum PercentageDimension {
     WIDTH,
     HEIGHT,
-    LENGTH
+    LENGTH,
+    CUSTOM,
+    NONE
 }

@@ -45,9 +45,9 @@ public final class SVGCircle implements MeasurableShape {
     }
 
     private void validateShape(@NotNull MeasureContext measureContext) {
-        float x = cx.resolveWidth(measureContext);
-        float y = cy.resolveHeight(measureContext);
-        float rr = r.resolveLength(measureContext);
+        float x = cx.resolve(measureContext);
+        float y = cy.resolve(measureContext);
+        float rr = r.resolve(measureContext);
         circle.setFrame(x - rr, y - rr, 2 * rr, 2 * rr);
     }
 
@@ -65,7 +65,7 @@ public final class SVGCircle implements MeasurableShape {
 
     @Override
     public double pathLength(@NotNull RenderContext context) {
-        return circumference(r.resolveLength(context.measureContext()));
+        return circumference(r.resolve(context.measureContext()));
     }
 
     static double circumference(double radius) {

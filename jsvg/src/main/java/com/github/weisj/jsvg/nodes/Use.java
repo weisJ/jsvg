@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -77,10 +78,10 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        x = attributeNode.getLength("x", 0);
-        y = attributeNode.getLength("y", 0);
-        width = attributeNode.getLength("width", Length.UNSPECIFIED);
-        height = attributeNode.getLength("height", Length.UNSPECIFIED);
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, 0);
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, 0);
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED);
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED);
 
         String href = attributeNode.getValue("href");
         if (href == null) href = attributeNode.getValue("xlink:href");
@@ -134,14 +135,14 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     public void render(@NotNull RenderContext context, @NotNull Output output) {
         if (referencedNode == null) return;
         MeasureContext measureContext = context.measureContext();
-        context.translate(output, x.resolveWidth(measureContext), y.resolveHeight(measureContext));
+        context.translate(output, x.resolve(measureContext), y.resolve(measureContext));
 
         // Todo: Vector Effects
 
         if (referencedNode instanceof CommonInnerViewContainer) {
             FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
-            if (width.isSpecified()) targetViewBox.width = width.resolveWidth(measureContext);
-            if (height.isSpecified()) targetViewBox.height = height.resolveHeight(measureContext);
+            if (width.isSpecified()) targetViewBox.width = width.resolve(measureContext);
+            if (height.isSpecified()) targetViewBox.height = height.resolve(measureContext);
             CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
             NodeRenderer.renderWithSize(view, targetViewBox, context, output, this);
         } else {

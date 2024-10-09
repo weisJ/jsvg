@@ -91,7 +91,7 @@ public final class StrokeContext {
     }
 
     public static @NotNull StrokeContext createDefault() {
-        return new StrokeContext(Unit.Raw.valueOf(1), LineCap.Butt, LineJoin.Miter, 4f, new Length[0], Length.ZERO);
+        return new StrokeContext(Unit.RAW.valueOf(1), LineCap.Butt, LineJoin.Miter, 4f, new Length[0], Length.ZERO);
     }
 
     public static @NotNull StrokeContext parse(@NotNull AttributeNode attributeNode) {

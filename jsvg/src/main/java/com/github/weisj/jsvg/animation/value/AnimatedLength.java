@@ -24,7 +24,6 @@ package com.github.weisj.jsvg.animation.value;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.attributes.value.Dimension;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -51,22 +50,22 @@ public final class AnimatedLength implements LengthValue {
     }
 
     @Override
-    public float resolveDimension(Dimension dimension, @NotNull MeasureContext context) {
+    public float resolve(@NotNull MeasureContext context) {
         long timestamp = context.timestamp();
         Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
 
-        if (progress.isInitial()) return initial.resolveDimension(dimension, context);
+        if (progress.isInitial()) return initial.resolve(context);
         int i = progress.iterationIndex();
 
         if (i == values.length - 1) {
-            return values[i].resolveDimension(dimension, context);
+            return values[i].resolve(context);
         }
 
-        float start = values[i].resolveDimension(dimension, context);
-        float end = values[i + 1].resolveDimension(dimension, context);
+        float start = values[i].resolve(context);
+        float end = values[i + 1].resolve(context);
 
         return track.floatInterpolator().interpolate(
-                initial.resolveDimension(dimension, context),
+                initial.resolve(context),
                 start, end, progress.indexProgress());
     }
 
@@ -78,20 +77,5 @@ public final class AnimatedLength implements LengthValue {
             }
         }
         return initial.isConstantlyZero();
-    }
-
-    @Override
-    public float resolveWidth(@NotNull MeasureContext context) {
-        return resolveDimension(Dimension.WIDTH, context);
-    }
-
-    @Override
-    public float resolveHeight(@NotNull MeasureContext context) {
-        return resolveDimension(Dimension.HEIGHT, context);
-    }
-
-    @Override
-    public float resolveLength(@NotNull MeasureContext context) {
-        return resolveDimension(Dimension.LENGTH, context);
     }
 }

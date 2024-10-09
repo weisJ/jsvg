@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -94,8 +95,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     @Override
     public @NotNull FloatSize size(@NotNull RenderContext context) {
         return new FloatSize(
-                width.resolveWidth(context.measureContext()),
-                height.resolveHeight(context.measureContext()));
+                width.resolve(context.measureContext()),
+                height.resolve(context.measureContext()));
     }
 
     @Override
@@ -111,15 +112,19 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         patternContentUnits = attributeNode.getEnum("patternContentUnits",
                 template != null ? template.patternContentUnits : UnitType.UserSpaceOnUse);
 
-        x = attributeNode.getLength("x", template != null ? template.x : Length.ZERO)
+        x = attributeNode
+                .getLength("x", PercentageDimension.WIDTH, template != null ? template.x : Length.ZERO)
                 .coercePercentageToCorrectUnit(patternUnits);
-        y = attributeNode.getLength("y", template != null ? template.y : Length.ZERO)
+        y = attributeNode
+                .getLength("y", PercentageDimension.HEIGHT, template != null ? template.y : Length.ZERO)
                 .coercePercentageToCorrectUnit(patternUnits);
         // Note: width == 0 || height == 0 implies nothing should be painted.
-        width = attributeNode.getLength("width", template != null ? template.width : Length.ZERO)
+        width = attributeNode
+                .getLength("width", PercentageDimension.WIDTH, template != null ? template.width : Length.ZERO)
                 .coerceNonNegative()
                 .coercePercentageToCorrectUnit(patternUnits);
-        height = attributeNode.getLength("height", template != null ? template.height : Length.ZERO)
+        height = attributeNode
+                .getLength("height", PercentageDimension.HEIGHT, template != null ? template.height : Length.ZERO)
                 .coerceNonNegative()
                 .coercePercentageToCorrectUnit(patternUnits);
 

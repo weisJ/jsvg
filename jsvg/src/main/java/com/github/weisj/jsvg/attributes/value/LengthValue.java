@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.AnimatedLength;
 import com.github.weisj.jsvg.annotations.Sealed;
-import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
@@ -45,37 +44,9 @@ public interface LengthValue {
     boolean isConstantlyZero();
 
     /**
-     * Used for resolving lengths which are used as x-coordinates or width values.
+     * Resolve the length to its effective value.
      * @param context the measuring context.
      * @return the resolved size.
      */
-    float resolveWidth(@NotNull MeasureContext context);
-
-    /**
-     * Used for resolving lengths which are used as y-coordinates or height values.
-     * @param context the measuring context.
-     * @return the resolved size.
-     */
-    float resolveHeight(@NotNull MeasureContext context);
-
-    /**
-     * Used for resolving lengths which are neither used as y/x-coordinates nor width/height values.
-     * Relative sizes are relative to the {@link ViewBox#normedDiagonalLength()}.
-     * @param context the measuring context.
-     * @return the resolved size.
-     */
-    float resolveLength(@NotNull MeasureContext context);
-
-    default float resolveDimension(Dimension dimension, @NotNull MeasureContext context) {
-        switch (dimension) {
-            case WIDTH:
-                return resolveWidth(context);
-            case HEIGHT:
-                return resolveHeight(context);
-            case LENGTH:
-                return resolveLength(context);
-            default:
-                throw new IllegalArgumentException("Unknown dimension: " + dimension);
-        }
-    }
+    float resolve(@NotNull MeasureContext context);
 }

@@ -54,12 +54,12 @@ public final class SVGRoundRectangle implements MeasurableShape {
 
     private void validateShape(@NotNull MeasureContext measureContext) {
         rect.setRoundRect(
-                x.resolveWidth(measureContext),
-                y.resolveHeight(measureContext),
-                w.resolveWidth(measureContext),
-                h.resolveHeight(measureContext),
-                Math.max(0, rx.resolveWidth(measureContext) * 2),
-                Math.max(0, ry.resolveHeight(measureContext) * 2));
+                x.resolve(measureContext),
+                y.resolve(measureContext),
+                w.resolve(measureContext),
+                h.resolve(measureContext),
+                Math.max(0, rx.resolve(measureContext) * 2),
+                Math.max(0, ry.resolve(measureContext) * 2));
     }
 
     @Override
@@ -77,9 +77,9 @@ public final class SVGRoundRectangle implements MeasurableShape {
     @Override
     public double pathLength(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
-        float a = rx.resolveWidth(measureContext);
-        float b = ry.resolveHeight(measureContext);
-        double l = 2 * ((w.resolveWidth(measureContext) - 2 * a) + (h.resolveHeight(measureContext) - 2 * b));
+        float a = rx.resolve(measureContext);
+        float b = ry.resolve(measureContext);
+        double l = 2 * ((w.resolve(measureContext) - 2 * a) + (h.resolve(measureContext) - 2 * b));
         if (a == b) {
             // All 4 corners together form a circle
             return l + SVGCircle.circumference(a);

@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.animation.value.*;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.MetaSVGNode;
@@ -108,7 +109,9 @@ public final class Animate extends MetaSVGNode {
         return track;
     }
 
-    public @Nullable AnimatedLength animatedLength(@NotNull LengthValue initial,
+    public @Nullable AnimatedLength animatedLength(
+            @NotNull LengthValue initial,
+            PercentageDimension dimension,
             @NotNull AttributeNode attributeNode) {
         if (track == null) return null;
 
@@ -117,7 +120,7 @@ public final class Animate extends MetaSVGNode {
             if (isPlaceholder(values[i])) {
                 lengths[i] = Length.ZERO;
             } else {
-                lengths[i] = attributeNode.parser().parseLength(values[i], null);
+                lengths[i] = attributeNode.parser().parseLength(values[i], null, dimension);
             }
             if (lengths[i] == null) return null;
         }

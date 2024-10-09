@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVGNode;
@@ -67,8 +68,8 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        x = attributeNode.getLength("x", 0);
-        y = attributeNode.getLength("y", 0);
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, 0);
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, 0);
         gradientUnits = attributeNode.getEnum("gradientUnits", UnitType.ObjectBoundingBox);
         MeshBuilder.buildMesh(this, new Point2D.Float(x.raw(), y.raw()));
         // Todo: type bilinear|bicubic
@@ -78,7 +79,7 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
 
     public void renderMesh(@NotNull MeasureContext measure, @NotNull Output output) {
         Output meshOutput = output.createChild();
-        // meshGraphics.translate(x.resolveWidth(measure), y.resolveHeight(measure));
+        // meshGraphics.translate(x.resolve(measure), y.resolve(measure));
 
         meshOutput.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         for (SVGNode child : children()) {

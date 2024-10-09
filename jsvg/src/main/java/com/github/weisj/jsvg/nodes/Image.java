@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -78,10 +79,10 @@ public final class Image extends RenderableSVGNode {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        x = attributeNode.getLength("x", 0);
-        y = attributeNode.getLength("y", 0);
-        width = attributeNode.getLength("width", Length.UNSPECIFIED);
-        height = attributeNode.getLength("height", Length.UNSPECIFIED);
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, 0);
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, 0);
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED);
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED);
         preserveAspectRatio = PreserveAspectRatio.parse(
                 attributeNode.getValue("preserveAspectRatio"), attributeNode.parser());
         overflow = attributeNode.getEnum("overflow", Overflow.Hidden);
@@ -121,10 +122,10 @@ public final class Image extends RenderableSVGNode {
         float resourceHeight = intrinsicResourceSize.height;
         if (resourceWidth == 0 || resourceHeight == 0) return;
 
-        float viewWidth = width.orElseIfUnspecified(resourceWidth).resolveWidth(measure);
-        float viewHeight = height.orElseIfUnspecified(resourceHeight).resolveHeight(measure);
+        float viewWidth = width.orElseIfUnspecified(resourceWidth).resolve(measure);
+        float viewHeight = height.orElseIfUnspecified(resourceHeight).resolve(measure);
 
-        output.translate(x.resolveWidth(measure), y.resolveHeight(measure));
+        output.translate(x.resolve(measure), y.resolve(measure));
 
         if (overflow.establishesClip()) output.applyClip(new ViewBox(viewWidth, viewHeight));
         // Todo: Vector Effects

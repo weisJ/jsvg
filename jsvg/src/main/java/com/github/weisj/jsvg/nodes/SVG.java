@@ -117,8 +117,8 @@ public final class SVG extends CommonInnerViewContainer {
     public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
         if (!isTopLevel) return super.transformOrigin(context);
         return new Point2D.Float(
-                TOP_LEVEL_TRANSFORM_ORIGIN.resolveWidth(context),
-                TOP_LEVEL_TRANSFORM_ORIGIN.resolveHeight(context));
+                TOP_LEVEL_TRANSFORM_ORIGIN.resolve(context),
+                TOP_LEVEL_TRANSFORM_ORIGIN.resolve(context));
     }
 
     @Override
@@ -132,9 +132,9 @@ public final class SVG extends CommonInnerViewContainer {
                 em, ex, AnimationState.NO_ANIMATION);
         return new FloatSize(
                 width.orElseIfUnspecified(viewBox != null ? viewBox.width : FALLBACK_WIDTH)
-                        .resolveWidth(topLevelContext),
+                        .resolve(topLevelContext),
                 height.orElseIfUnspecified(viewBox != null ? viewBox.height : FALLBACK_HEIGHT)
-                        .resolveHeight(topLevelContext));
+                        .resolve(topLevelContext));
     }
 
     @Override
