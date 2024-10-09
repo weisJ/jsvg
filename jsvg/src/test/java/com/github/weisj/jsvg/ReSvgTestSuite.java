@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
@@ -37,17 +38,17 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.github.weisj.jsvg.ReferenceTest.RenderType;
 
-@Disabled
 class ReSvgTestSuite {
 
     private static final String RESVG_TEST_SUITE_PATH = System.getenv("RESVG_TEST_SUITE_PATH");
 
-    static Collection<DynamicTest> checkDirectory(@NotNull String name) {
+    static Collection<DynamicTest> checkDirectory(@NotNull String name, Collection<String> exclude) {
         Path basePath = Path.of(RESVG_TEST_SUITE_PATH);
         Path tests = basePath.resolve(name);
         try (var files = Files.walk(tests)) {
             return files
                     .filter(p -> p.toString().endsWith(".svg"))
+                    .filter(p -> !exclude.contains(p.getFileName().toString()))
                     .map(p -> {
                         String testName = basePath.relativize(p).toString();
                         return DynamicTest.dynamicTest(testName, new ReSVGRefTest(p));
@@ -61,7 +62,17 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> rect() {
-        return checkDirectory("shapes/rect");
+        return checkDirectory("shapes/rect", Set.of(
+                // Excluded because we don't support them
+                "ch-values.svg",
+                // Excluded because the expected result is incorrect
+                "cap-values.svg",
+                "vw-and-vh-values.svg",
+                "vmin-and-vmax-values.svg",
+                "vi-and-vb-values.svg",
+                "ic-values.svg",
+                "lh-values.svg",
+                "rlh-values.svg"));
     }
 
     private static final class ReSVGRefTest implements Executable {
