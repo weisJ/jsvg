@@ -41,6 +41,7 @@ import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.*;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
@@ -290,15 +291,14 @@ public final class AttributeNode {
     }
 
     @Contract("_,!null -> !null")
-    public @Nullable com.github.weisj.jsvg.geometry.size.Percentage getPercentage(@NotNull String key,
-            @Nullable com.github.weisj.jsvg.geometry.size.Percentage fallback) {
+    public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
         return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
     }
 
     public @NotNull PercentageValue getPercentage(@NotNull String key,
-            @NotNull com.github.weisj.jsvg.geometry.size.Percentage fallback,
+            @NotNull Percentage fallback,
             Animatable animatable) {
-        com.github.weisj.jsvg.geometry.size.Percentage initial =
+        Percentage initial =
                 loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
 
         if (animatable == Animatable.YES) {
@@ -311,7 +311,7 @@ public final class AttributeNode {
     @Deprecated
     public float getPercentage(@NotNull String key, float fallback) {
         return loadHelper.attributeParser()
-                .parsePercentage(getValue(key), new com.github.weisj.jsvg.geometry.size.Percentage(fallback)).value();
+                .parsePercentage(getValue(key), new Percentage(fallback)).value();
     }
 
     public @NotNull Length @NotNull [] getLengthList(@NotNull String key, PercentageDimension dimension) {
@@ -448,7 +448,7 @@ public final class AttributeNode {
     }
 
     private @Nullable AnimatedPercentage getAnimatedPercentage(@NotNull String property,
-            @NotNull com.github.weisj.jsvg.geometry.size.Percentage initial) {
+            @NotNull Percentage initial) {
         Animate animate = animateNode(property);
         if (animate == null) return null;
         return animate.animatedPercentage(initial, this);
