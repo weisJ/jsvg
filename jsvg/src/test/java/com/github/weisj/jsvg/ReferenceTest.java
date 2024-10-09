@@ -65,6 +65,7 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.ExternalResourcePolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.util.ColorUtil;
 import com.google.errorprone.annotations.CheckReturnValue;
 
 @CheckReturnValue
@@ -181,7 +182,14 @@ public final class ReferenceTest {
                     }
                     yield renderJsvg(source, graphicsMutator, loaderContext, size);
                 }
-                case DiskImage() -> ImageIO.read(source.openStream());
+                case DiskImage() -> {
+                    var img = ImageIO.read(source.openStream());
+                    var refImg = new ReferenceImage(img.getWidth(), img.getHeight());
+                    var g = refImg.createGraphics();
+                    g.drawImage(img, 0, 0, null);
+                    g.dispose();
+                    yield refImg;
+                }
             };
         }
     }
@@ -351,8 +359,10 @@ public final class ReferenceTest {
             size = new FloatSize(sizeHint.width, sizeHint.height);
         }
 
-        BufferedImage image = new ReferenceImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new ReferenceImage((int) size.width, (int) size.height);
         Graphics2D g = image.createGraphics();
+        g.setColor(ColorUtil.withAlpha(Color.WHITE, 0));
+        g.fillRect(0, 0, image.getWidth(), image.getHeight());
         if (graphicsMutator != null) graphicsMutator.accept(g);
         document.render((Component) null, g, new ViewBox(size));
         g.dispose();
@@ -374,7 +384,7 @@ public final class ReferenceTest {
 
                 @Override
                 public BufferedImage createImage(int w, int h) {
-                    return new ReferenceImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    return new ReferenceImage(w, h);
                 }
 
                 @Override
@@ -392,8 +402,8 @@ public final class ReferenceTest {
 
     private static class ReferenceImage extends BufferedImage {
 
-        public ReferenceImage(int width, int height, int imageType) {
-            super(width, height, imageType);
+        public ReferenceImage(int width, int height) {
+            super(width, height, TYPE_INT_ARGB);
         }
 
         @Override
