@@ -43,6 +43,8 @@ public interface LengthValue {
 
     boolean isConstantlyZero();
 
+    boolean isConstantlyNonNegative();
+
     /**
      * Resolve the length to its effective value.
      * @param context the measuring context.
