@@ -74,6 +74,8 @@ public final class Length implements LengthValue {
                 return inchesPerCm * pixelsPerInch * value;
             case MM:
                 return 0.1f * inchesPerCm * pixelsPerInch * value;
+            case Q:
+                return 0.025f * inchesPerCm * pixelsPerInch * value;
             case PT:
                 return (1f / 72f) * pixelsPerInch * value;
             case PC:
