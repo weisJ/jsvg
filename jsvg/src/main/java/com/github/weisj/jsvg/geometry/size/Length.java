@@ -154,6 +154,11 @@ public final class Length implements LengthValue {
         return isZero();
     }
 
+    @Override
+    public boolean isConstantlyNonNegative() {
+        return raw() >= 0;
+    }
+
     public float raw() {
         return value;
     }

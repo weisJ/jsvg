@@ -434,7 +434,7 @@ public final class AttributeNode {
         return null;
     }
 
-    private @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial,
+    public @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial,
             PercentageDimension dimension) {
         Animate animate = animateNode(property);
         if (animate == null) return null;
