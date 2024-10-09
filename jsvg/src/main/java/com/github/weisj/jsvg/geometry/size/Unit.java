@@ -30,6 +30,7 @@ import com.github.weisj.jsvg.attributes.SuffixUnit;
 public enum Unit implements SuffixUnit<Unit, Length> {
     PX,
     CM,
+    Q,
     MM,
     IN,
     EM,
