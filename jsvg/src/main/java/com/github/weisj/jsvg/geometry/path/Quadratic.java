@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Mark McKay
  * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
+ * @author Jannis Weis
  */
 final class Quadratic extends PathCommand {
 
@@ -56,7 +57,6 @@ final class Quadratic extends PathCommand {
         Point2D.Float offset = offset(hist);
 
         path.quadTo(kx + offset.x, ky + offset.y, x + offset.x, y + offset.y);
-        hist.setLastPoint(path.getCurrentPoint());
-        hist.setLastKnot(kx + offset.x, ky + offset.y);
+        hist.setLastQuadratic(path.getCurrentPoint(), kx + offset.x, ky + offset.y);
     }
 }

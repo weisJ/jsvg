@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -56,8 +56,7 @@ final class Cubic extends PathCommand {
         path.curveTo(k1x + offset.x, k1y + offset.y,
                 k2x + offset.x, k2y + offset.y,
                 x + offset.x, y + offset.y);
-        hist.setLastPoint(path.getCurrentPoint());
-        hist.setLastKnot(k2x + offset.x, k2y + offset.y);
+        hist.setLastCubic(path.getCurrentPoint(), k2x + offset.x, k2y + offset.y);
     }
 
     @Override

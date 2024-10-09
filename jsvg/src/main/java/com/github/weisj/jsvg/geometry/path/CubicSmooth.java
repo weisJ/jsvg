@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Mark McKay
  * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
+ * @author Jannis Weis
  */
 final class CubicSmooth extends PathCommand {
 
@@ -39,6 +40,7 @@ final class CubicSmooth extends PathCommand {
 
     public CubicSmooth(boolean isRelative, float k2x, float k2y, float x, float y) {
         super(isRelative, 6);
+        System.out.println(k2x + " " + k2y + " " + x + " " + y);
         this.k2x = k2x;
         this.k2y = k2y;
         this.x = x;
@@ -48,11 +50,13 @@ final class CubicSmooth extends PathCommand {
     @Override
     public void appendPath(@NotNull Path2D path, @NotNull BuildHistory hist) {
         Point2D.Float offset = offset(hist);
-        Point2D.Float knot = lastKnotReflection(hist);
+        Point2D.Float knot = lastKnotReflectionCubic(hist);
 
-        path.curveTo(knot.x, knot.y, k2x + offset.x, k2y + offset.y, x + offset.x, y + offset.y);
-        hist.setLastPoint(path.getCurrentPoint());
-        hist.setLastKnot(k2x + offset.x, k2y + offset.y);
+        path.curveTo(
+                knot.x, knot.y,
+                k2x + offset.x, k2y + offset.y,
+                x + offset.x, y + offset.y);
+        hist.setLastCubic(path.getCurrentPoint(), k2x + offset.x, k2y + offset.y);
     }
 
     @Override

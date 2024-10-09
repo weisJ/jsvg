@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,21 +37,32 @@ public final class BuildHistory {
 
     final @NotNull Point2D.Float startPoint = new Point2D.Float();
     final @NotNull Point2D.Float lastPoint = new Point2D.Float();
-    final @NotNull Point2D.Float lastKnot = new Point2D.Float();
+    final @NotNull Point2D.Float lastCubicKnot = new Point2D.Float();
+    final @NotNull Point2D.Float lastQuadraticKnot = new Point2D.Float();
 
     public void setStartPoint(@NotNull Point2D point) {
         startPoint.setLocation(point);
     }
 
-    public void setLastPoint(@NotNull Point2D point) {
+    public void setLast(@NotNull Point2D point) {
         lastPoint.setLocation(point);
+        lastQuadraticKnot.setLocation(point);
+        lastCubicKnot.setLocation(point);
     }
 
-    public void setLastKnot(float x, float y) {
-        lastKnot.setLocation(x, y);
+    public void setLastQuadratic(@NotNull Point2D point, float knotX, float knotY) {
+        setLastQuadratic(point, new Point2D.Float(knotX, knotY));
     }
 
-    public void setLastKnot(@NotNull Point2D point) {
-        lastKnot.setLocation(point);
+    public void setLastQuadratic(@NotNull Point2D point, @NotNull Point2D knot) {
+        lastPoint.setLocation(point);
+        lastQuadraticKnot.setLocation(knot);
+        lastCubicKnot.setLocation(point);
+    }
+
+    public void setLastCubic(@NotNull Point2D current, float x, float y) {
+        lastPoint.setLocation(current);
+        lastQuadraticKnot.setLocation(current);
+        lastCubicKnot.setLocation(x, y);
     }
 }
