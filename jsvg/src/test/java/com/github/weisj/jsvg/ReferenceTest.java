@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -276,6 +277,20 @@ public final class ReferenceTest {
         if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
             return ReferenceTestResult.SUCCESS;
         }
+
+        String baseName = name.replaceAll("[- /]", "_");
+        File diffFile = new File(baseName + "_diff.png");
+        File expectedFile = new File(baseName + "_expected.png");
+        File actualFile = new File(baseName + "_actual.png");
+
+        try {
+            Files.deleteIfExists(diffFile.toPath());
+            Files.deleteIfExists(expectedFile.toPath());
+            Files.deleteIfExists(actualFile.toPath());
+        } catch (IOException ignore) {
+        }
+
+
         return new ReferenceTestResult(state, () -> {
             StringBuilder sb = new StringBuilder();
             sb.append("Image: ").append(name).append('\n');
@@ -314,12 +329,9 @@ public final class ReferenceTest {
                     printPixel.accept(actualPixel);
                     sb.append('\n');
                 }
-                ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_diff.png"),
-                        comparison.getResult());
-                ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_expected.png"),
-                        comparison.getExpected());
-                ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_actual.png"),
-                        comparison.getActual());
+                ImageComparisonUtil.saveImage(diffFile, comparison.getResult());
+                ImageComparisonUtil.saveImage(expectedFile, comparison.getExpected());
+                ImageComparisonUtil.saveImage(actualFile, comparison.getActual());
             }
             return sb.toString();
         });
