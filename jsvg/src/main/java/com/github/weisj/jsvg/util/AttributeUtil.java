@@ -21,8 +21,10 @@
  */
 package com.github.weisj.jsvg.util;
 
+import java.util.Objects;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -94,6 +96,14 @@ public final class AttributeUtil {
         if (ry == Length.UNSPECIFIED) ry = fallback;
 
         return new AxisPair(rx, ry);
+    }
+
+    @Contract(pure = true)
+    public static <T> boolean arrayContains(T @NotNull [] arr, T element) {
+        for (T t : arr) {
+            if (Objects.equals(t, element)) return true;
+        }
+        return false;
     }
 
     public static final class AxisPair {
