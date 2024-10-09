@@ -105,6 +105,7 @@ public final class ShapeRenderer {
                 shapePaintContext.context, shapePaintContext.transform);
         Output.SafeState safeState = output.safeState();
 
+        // FIXME: Opacity should be uniform on fill and stroke. Fill shouldn't be visible beneath stroke.
         boolean fillPainted = false;
         for (PaintOrder.Phase phase : paintOrder.phases()) {
             RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
