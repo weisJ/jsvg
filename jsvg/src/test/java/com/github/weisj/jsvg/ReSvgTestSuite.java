@@ -42,6 +42,10 @@ class ReSvgTestSuite {
 
     private static final String RESVG_TEST_SUITE_PATH = System.getenv("RESVG_TEST_SUITE_PATH");
 
+    static Collection<DynamicTest> checkDirectory(@NotNull String name) {
+        return checkDirectory(name, Collections.emptySet());
+    }
+
     static Collection<DynamicTest> checkDirectory(@NotNull String name, Collection<String> exclude) {
         Path basePath = Path.of(RESVG_TEST_SUITE_PATH);
         Path tests = basePath.resolve(name);
@@ -61,6 +65,38 @@ class ReSvgTestSuite {
     }
 
     @TestFactory
+    Collection<DynamicTest> circle() {
+        return checkDirectory("shapes/circle");
+    }
+
+    @TestFactory
+    Collection<DynamicTest> ellipse() {
+        return checkDirectory("shapes/ellipse");
+    }
+
+    @TestFactory
+    Collection<DynamicTest> line() {
+        return checkDirectory("shapes/line", Set.of(
+                // We don't handle transforms of strokes correctly
+                "with-transform.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> path() {
+        return checkDirectory("shapes/path");
+    }
+
+    @TestFactory
+    Collection<DynamicTest> polygon() {
+        return checkDirectory("shapes/polygon");
+    }
+
+    @TestFactory
+    Collection<DynamicTest> polyline() {
+        return checkDirectory("shapes/polyline");
+    }
+
+    @TestFactory
     Collection<DynamicTest> rect() {
         return checkDirectory("shapes/rect", Set.of(
                 // Excluded because we don't support them
@@ -75,12 +111,8 @@ class ReSvgTestSuite {
                 "rlh-values.svg"));
     }
 
-    private static final class ReSVGRefTest implements Executable {
-        private final @NotNull Path testFile;
 
-        private ReSVGRefTest(@NotNull Path testFile) {
-            this.testFile = testFile;
-        }
+    private record ReSVGRefTest(@NotNull Path testFile) implements Executable {
 
         @Override
         public void execute() throws Throwable {
@@ -91,8 +123,7 @@ class ReSvgTestSuite {
                             RenderType.DiskImage),
                     new ReferenceTest.ImageInfo(
                             new UrlImageSource(testFile.toUri().toURL()),
-                            RenderType.JSVG),
-                    1f, 10f));
+                            RenderType.JSVG)));
             assertEquals(SUCCESS, result);
         }
     }
