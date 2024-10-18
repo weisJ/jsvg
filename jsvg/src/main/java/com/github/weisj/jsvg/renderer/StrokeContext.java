@@ -97,11 +97,11 @@ public final class StrokeContext {
 
     public static @NotNull StrokeContext parse(@NotNull AttributeNode attributeNode) {
         return new StrokeContext(
-                attributeNode.getLength("stroke-width", PercentageDimension.CUSTOM, Animatable.YES),
+                attributeNode.getLength("stroke-width", PercentageDimension.LENGTH, Animatable.YES),
                 attributeNode.getEnumNullable("stroke-linecap", LineCap.class),
                 attributeNode.getEnumNullable("stroke-linejoin", LineJoin.class),
                 attributeNode.getNonNegativeFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
-                attributeNode.getLengthList("stroke-dasharray", PercentageDimension.CUSTOM),
+                attributeNode.getLengthList("stroke-dasharray", PercentageDimension.LENGTH),
                 attributeNode.getLength("stroke-dashoffset", PercentageDimension.CUSTOM, Animatable.YES));
     }
 
