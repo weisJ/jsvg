@@ -28,25 +28,54 @@ import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 
-public final class AnimatedPercentage extends AnimatedFloat implements PercentageValue {
+public final class AnimatedPercentage implements PercentageValue {
 
+    private final @NotNull Track track;
+    private final PercentageValue initial;
+    private final float[] values;
     private final PercentageValue multiplier;
 
-    public AnimatedPercentage(@NotNull Track track, float initial, float[] values) {
-        this(track, initial, values, new Percentage(1));
-    }
-
-    public AnimatedPercentage(@NotNull Track track, float initial, float[] values, PercentageValue multiplier) {
-        super(track, initial, values);
+    public AnimatedPercentage(@NotNull Track track, PercentageValue initial, float[] values,
+            PercentageValue multiplier) {
+        this.track = track;
+        this.initial = initial;
+        this.values = values;
         this.multiplier = multiplier;
     }
 
-    @Override
-    public float get(@NotNull MeasureContext context) {
-        return super.get(context) * multiplier.get(context);
+    public @NotNull AnimatedPercentage derive(@NotNull PercentageValue initial) {
+        if (this.initial != Percentage.INHERITED) return this;
+        return new AnimatedPercentage(track, initial, values, multiplier);
     }
 
     public @NotNull PercentageValue multiply(@NotNull PercentageValue other) {
         return new AnimatedPercentage(track, initial, values, multiplier.multiply(other));
     }
+
+    public @NotNull PercentageValue initial() {
+        return initial;
+    }
+
+    private float getBase(@NotNull MeasureContext context) {
+        long timestamp = context.timestamp();
+        Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
+
+        if (progress.isInitial()) return initial.get(context);
+        int i = progress.iterationIndex();
+
+        if (i == values.length - 1) {
+            return values[i];
+        }
+
+        float start = values[i];
+        float end = values[i + 1];
+
+        return track.floatInterpolator().interpolate(initial.get(context), start, end, progress.indexProgress());
+    }
+
+    @Override
+    public float get(@NotNull MeasureContext context) {
+        return getBase(context) * multiplier.get(context);
+    }
+
 }

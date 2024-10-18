@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.MetaSVGNode;
@@ -142,7 +143,7 @@ public final class Animate extends MetaSVGNode {
         return new AnimatedFloatList(track, initial, lists);
     }
 
-    public @Nullable AnimatedPercentage animatedPercentage(@NotNull Percentage initial,
+    public @Nullable AnimatedPercentage animatedPercentage(@NotNull PercentageValue initial,
             @NotNull AttributeNode attributeNode) {
         if (track == null) return null;
         float[] percentages = new float[this.values.length];
@@ -155,7 +156,7 @@ public final class Animate extends MetaSVGNode {
                 percentages[i] = p.value();
             }
         }
-        return new AnimatedPercentage(track, initial.value(), percentages);
+        return new AnimatedPercentage(track, initial, percentages, Percentage.ONE);
     }
 
     public @Nullable AnimatedPaint animatedPaint(@NotNull SVGPaint initial, @NotNull AttributeNode attributeNode) {

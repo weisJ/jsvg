@@ -56,6 +56,7 @@ public final class AttributeNode {
     private static final Length Center = new Length(Unit.PERCENTAGE, 50f);
     private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);
     private static final Length FALLBACK_LENGTH = new Length(Unit.RAW, 0f);
+    private static final Percentage FALLBACK_PERCENTAGE = new Percentage(1f);
 
     private final @NotNull String tagName;
     private final @NotNull Map<String, String> attributes;
@@ -295,17 +296,30 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
     }
 
-    public @NotNull PercentageValue getPercentage(@NotNull String key,
-            @NotNull Percentage fallback,
+    public @Nullable PercentageValue getPercentage(@NotNull String key, Animatable animatable) {
+        return getPercentage(key, null, animatable);
+    }
+
+    @Contract("_,!null,_ -> !null")
+    public @Nullable PercentageValue getPercentage(@NotNull String key,
+            @Nullable PercentageValue fallback,
             Animatable animatable) {
-        Percentage initial =
-                loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
+        PercentageValue value =
+                loadHelper.attributeParser().parsePercentage(getValue(key), FALLBACK_PERCENTAGE);
+        if (value == FALLBACK_PERCENTAGE) {
+            value = fallback;
+        }
 
         if (animatable == Animatable.YES) {
+            PercentageValue initial = value;
+            if (initial == null) initial = Percentage.INHERITED;
+            if (initial instanceof AnimatedPercentage) {
+                initial = ((AnimatedPercentage) initial).initial();
+            }
             AnimatedPercentage animatedPercentage = getAnimatedPercentage(key, initial);
             if (animatedPercentage != null) return animatedPercentage;
         }
-        return initial;
+        return value;
     }
 
     @Deprecated
@@ -448,7 +462,7 @@ public final class AttributeNode {
     }
 
     private @Nullable AnimatedPercentage getAnimatedPercentage(@NotNull String property,
-            @NotNull Percentage initial) {
+            @NotNull PercentageValue initial) {
         Animate animate = animateNode(property);
         if (animate == null) return null;
         return animate.animatedPercentage(initial, this);
