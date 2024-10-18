@@ -45,10 +45,10 @@ public final class FilterPrimitiveBase {
     private final ColorInterpolation colorInterpolation;
 
     public FilterPrimitiveBase(@NotNull AttributeNode attributeNode) {
-        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE.valueOf(0));
-        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Unit.PERCENTAGE.valueOf(0));
-        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Unit.PERCENTAGE.valueOf(100));
-        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Unit.PERCENTAGE.valueOf(100));
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(0));
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(0));
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(100));
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(100));
 
         inputChannel = attributeNode.getFilterChannelKey("in", DefaultFilterChannel.LastResult);
         resultChannel = attributeNode.getFilterChannelKey("result", DefaultFilterChannel.LastResult);

@@ -114,19 +114,19 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
 
         x = attributeNode
                 .getLength("x", PercentageDimension.WIDTH, template != null ? template.x : Length.ZERO)
-                .coercePercentageToCorrectUnit(patternUnits);
+                .coercePercentageToCorrectUnit(patternUnits, PercentageDimension.WIDTH);
         y = attributeNode
                 .getLength("y", PercentageDimension.HEIGHT, template != null ? template.y : Length.ZERO)
-                .coercePercentageToCorrectUnit(patternUnits);
+                .coercePercentageToCorrectUnit(patternUnits, PercentageDimension.HEIGHT);
         // Note: width == 0 || height == 0 implies nothing should be painted.
         width = attributeNode
                 .getLength("width", PercentageDimension.WIDTH, template != null ? template.width : Length.ZERO)
                 .coerceNonNegative()
-                .coercePercentageToCorrectUnit(patternUnits);
+                .coercePercentageToCorrectUnit(patternUnits, PercentageDimension.WIDTH);
         height = attributeNode
                 .getLength("height", PercentageDimension.HEIGHT, template != null ? template.height : Length.ZERO)
                 .coerceNonNegative()
-                .coercePercentageToCorrectUnit(patternUnits);
+                .coercePercentageToCorrectUnit(patternUnits, PercentageDimension.HEIGHT);
 
         patternTransform = attributeNode.parseTransform("patternTransform");
         if (patternTransform == null && template != null) patternTransform = template.patternTransform;
