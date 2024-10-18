@@ -59,7 +59,7 @@ public final class AttributeParser {
 
     @Contract("_,!null,_ -> !null")
     public @Nullable Length parseLength(@Nullable String value, @Nullable Length fallback,
-            PercentageDimension dimension) {
+            @NotNull PercentageDimension dimension) {
         return parseSuffixUnit(value, Unit.RAW, fallback, u -> {
             if (u == Unit.PERCENTAGE) {
                 switch (dimension) {
@@ -183,7 +183,7 @@ public final class AttributeParser {
 
     @Contract("_,!null,_ -> !null")
     public @NotNull Length @Nullable [] parseLengthList(@Nullable String value, @NotNull Length @Nullable [] fallback,
-            PercentageDimension dimension) {
+            @NotNull PercentageDimension dimension) {
         if (value != null && value.equalsIgnoreCase("none")) return new Length[0];
         String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE, null);
         if (values == null) return fallback;
