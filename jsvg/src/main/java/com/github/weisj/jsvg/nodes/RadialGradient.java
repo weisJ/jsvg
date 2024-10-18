@@ -66,13 +66,13 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
     @Override
     protected void buildGradient(@NotNull AttributeNode attributeNode, @Nullable RadialGradient template) {
         cx = attributeNode.getLength("cx", PercentageDimension.WIDTH,
-                template != null ? template.cx : Unit.PERCENTAGE.valueOf(50));
+                template != null ? template.cx : Unit.PERCENTAGE_WIDTH.valueOf(50));
         cy = attributeNode.getLength("cy", PercentageDimension.HEIGHT,
-                template != null ? template.cy : Unit.PERCENTAGE.valueOf(50));
+                template != null ? template.cy : Unit.PERCENTAGE_HEIGHT.valueOf(50));
         r = attributeNode.getLength("r", PercentageDimension.LENGTH,
-                template != null ? template.r : Unit.PERCENTAGE.valueOf(50));
+                template != null ? template.r : Unit.PERCENTAGE_LENGTH.valueOf(50));
         fr = attributeNode.getLength("fr", PercentageDimension.LENGTH,
-                template != null ? template.fr : Unit.PERCENTAGE.valueOf(0));
+                template != null ? template.fr : Unit.PERCENTAGE_LENGTH.valueOf(0));
         fx = attributeNode.getLength("fx", PercentageDimension.WIDTH,
                 template != null ? template.fx : cx);
         fy = attributeNode.getLength("fy", PercentageDimension.HEIGHT,

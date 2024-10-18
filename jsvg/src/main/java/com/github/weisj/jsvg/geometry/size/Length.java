@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 
 public final class Length implements LengthValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;
@@ -64,7 +65,7 @@ public final class Length implements LengthValue {
             // If we are unspecified this will return UNSPECIFIED_RAW as intended.
             return value;
         }
-        assert unit != Unit.PERCENTAGE;
+        assert !unit.isPercentage();
         switch (unit) {
             case PX:
                 return value;
@@ -94,9 +95,8 @@ public final class Length implements LengthValue {
 
     @Override
     public float resolve(@NotNull MeasureContext context) {
-        Unit u = unit();
         float raw = raw();
-        switch (u) {
+        switch (unit) {
             case PERCENTAGE_LENGTH:
                 return (raw * context.normedDiagonalLength()) / 100f;
             case VW:
@@ -114,7 +114,7 @@ public final class Length implements LengthValue {
             case V_MAX:
                 return (raw * Math.max(context.viewWidth(), context.viewHeight())) / 100f;
             default:
-                return resolveNonPercentage(context, u, raw);
+                return resolveNonPercentage(context, unit, raw);
         }
     }
 
@@ -125,9 +125,8 @@ public final class Length implements LengthValue {
      * @return the resolved size.
      */
     public float resolveFontSize(@NotNull MeasureContext context) {
-        Unit u = unit();
         float raw = raw();
-        switch (u) {
+        switch (unit) {
             case PERCENTAGE_LENGTH:
             case PERCENTAGE_WIDTH:
             case PERCENTAGE_HEIGHT:
@@ -135,7 +134,7 @@ public final class Length implements LengthValue {
             case PERCENTAGE:
                 return (raw / 100f) * context.em();
             default:
-                return resolveNonPercentage(context, u, raw);
+                return resolveNonPercentage(context, unit, raw);
         }
     }
 
@@ -180,10 +179,28 @@ public final class Length implements LengthValue {
         return this;
     }
 
-    public @NotNull Length coercePercentageToCorrectUnit(@NotNull UnitType unitType) {
+    public @NotNull Length coercePercentageToCorrectUnit(@NotNull UnitType unitType,
+            @NotNull PercentageDimension dimension) {
         if (unitType == UnitType.UserSpaceOnUse) return this;
-        if (unit() == Unit.PERCENTAGE) return this;
-        return new Length(Unit.PERCENTAGE, raw() * 100);
+        if (unit.isPercentage()) return this;
+        Unit u;
+        switch (dimension) {
+            case WIDTH:
+                u = Unit.PERCENTAGE_WIDTH;
+                break;
+            case HEIGHT:
+                u = Unit.PERCENTAGE_HEIGHT;
+                break;
+            case LENGTH:
+                u = Unit.PERCENTAGE_LENGTH;
+                break;
+            case CUSTOM:
+                u = Unit.PERCENTAGE;
+                break;
+            default:
+                throw new IllegalStateException("Can't coerce to percentage with no dimension");
+        }
+        return new Length(u, raw() * 100);
     }
 
     public @NotNull Length orElseIfUnspecified(float value) {

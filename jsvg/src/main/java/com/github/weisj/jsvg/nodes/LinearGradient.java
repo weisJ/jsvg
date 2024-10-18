@@ -63,13 +63,13 @@ public final class LinearGradient extends AbstractGradient<LinearGradient> {
     @Override
     protected void buildGradient(@NotNull AttributeNode attributeNode, @Nullable LinearGradient template) {
         x1 = attributeNode.getLength("x1", PercentageDimension.WIDTH,
-                template != null ? template.x1 : Unit.PERCENTAGE.valueOf(0));
+                template != null ? template.x1 : Unit.PERCENTAGE_WIDTH.valueOf(0));
         x2 = attributeNode.getLength("x2", PercentageDimension.WIDTH,
-                template != null ? template.x2 : Unit.PERCENTAGE.valueOf(100));
+                template != null ? template.x2 : Unit.PERCENTAGE_WIDTH.valueOf(100));
         y1 = attributeNode.getLength("y1", PercentageDimension.HEIGHT,
-                template != null ? template.y1 : Unit.PERCENTAGE.valueOf(0));
+                template != null ? template.y1 : Unit.PERCENTAGE_HEIGHT.valueOf(0));
         y2 = attributeNode.getLength("y2", PercentageDimension.HEIGHT,
-                template != null ? template.y2 : Unit.PERCENTAGE.valueOf(0));
+                template != null ? template.y2 : Unit.PERCENTAGE_HEIGHT.valueOf(0));
     }
 
     @Override

@@ -101,7 +101,7 @@ public final class StrokeContext {
                 attributeNode.getEnumNullable("stroke-linecap", LineCap.class),
                 attributeNode.getEnumNullable("stroke-linejoin", LineJoin.class),
                 attributeNode.getNonNegativeFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
-                attributeNode.getLengthList("stroke-dasharray", PercentageDimension.LENGTH),
+                attributeNode.getLengthList("stroke-dasharray", null, PercentageDimension.LENGTH),
                 attributeNode.getLength("stroke-dashoffset", PercentageDimension.CUSTOM, Animatable.YES));
     }
 

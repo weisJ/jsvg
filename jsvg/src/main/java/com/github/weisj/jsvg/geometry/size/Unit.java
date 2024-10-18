@@ -80,6 +80,14 @@ public enum Unit implements SuffixUnit<Unit, Length> {
     }
 
     public boolean isPercentage() {
-        return this == PERCENTAGE;
+        switch (this) {
+            case PERCENTAGE:
+            case PERCENTAGE_LENGTH:
+            case PERCENTAGE_WIDTH:
+            case PERCENTAGE_HEIGHT:
+                return true;
+            default:
+                return false;
+        }
     }
 }

@@ -84,14 +84,14 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         maskContentUnits = attributeNode.getEnum("maskContentUnits", UnitType.UserSpaceOnUse);
         maskUnits = attributeNode.getEnum("maskUnits", UnitType.ObjectBoundingBox);
 
-        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE.valueOf(-10))
-                .coercePercentageToCorrectUnit(maskUnits);
-        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Unit.PERCENTAGE.valueOf(-10))
-                .coercePercentageToCorrectUnit(maskUnits);
-        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Unit.PERCENTAGE.valueOf(120))
-                .coercePercentageToCorrectUnit(maskUnits);
-        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Unit.PERCENTAGE.valueOf(120))
-                .coercePercentageToCorrectUnit(maskUnits);
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(-10))
+                .coercePercentageToCorrectUnit(maskUnits, PercentageDimension.WIDTH);
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(-10))
+                .coercePercentageToCorrectUnit(maskUnits, PercentageDimension.HEIGHT);
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(120))
+                .coercePercentageToCorrectUnit(maskUnits, PercentageDimension.WIDTH);
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(120))
+                .coercePercentageToCorrectUnit(maskUnits, PercentageDimension.HEIGHT);
     }
 
     public @NotNull Paint createMaskPaint(@NotNull Output output, @NotNull RenderContext context,

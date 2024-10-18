@@ -58,7 +58,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 public final class SVG extends CommonInnerViewContainer {
     public static final String TAG = "svg";
 
-    private static final @NotNull Length TOP_LEVEL_TRANSFORM_ORIGIN = Unit.PERCENTAGE.valueOf(50);
+    private static final @NotNull Length TOP_LEVEL_TRANSFORM_ORIGIN_X = Unit.PERCENTAGE_WIDTH.valueOf(50);
+    private static final @NotNull Length TOP_LEVEL_TRANSFORM_ORIGIN_Y = Unit.PERCENTAGE_HEIGHT.valueOf(50);
     private static final float FALLBACK_WIDTH = 300;
     private static final float FALLBACK_HEIGHT = 150;
 
@@ -117,8 +118,8 @@ public final class SVG extends CommonInnerViewContainer {
     public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
         if (!isTopLevel) return super.transformOrigin(context);
         return new Point2D.Float(
-                TOP_LEVEL_TRANSFORM_ORIGIN.resolve(context),
-                TOP_LEVEL_TRANSFORM_ORIGIN.resolve(context));
+                TOP_LEVEL_TRANSFORM_ORIGIN_X.resolve(context),
+                TOP_LEVEL_TRANSFORM_ORIGIN_Y.resolve(context));
     }
 
     @Override
