@@ -83,10 +83,9 @@ public final class PaintContext implements Mutator<PaintContext> {
         return new PaintContext(
                 parseColorAttribute(attributeNode),
                 attributeNode.getPaint("fill", Animatable.YES),
-                attributeNode.getPercentage("fill-opacity", null, Animatable.YES), // TODO: Needs to inherit initial
-                                                                                   // from context
+                attributeNode.getPercentage("fill-opacity", Animatable.YES),
                 attributeNode.getPaint("stroke", Animatable.YES),
-                attributeNode.getPercentage("stroke-opacity", null),
+                attributeNode.getPercentage("stroke-opacity", Animatable.YES),
                 attributeNode.getPercentage("opacity", Percentage.ONE),
                 PaintOrder.parse(attributeNode),
                 StrokeContext.parse(attributeNode),

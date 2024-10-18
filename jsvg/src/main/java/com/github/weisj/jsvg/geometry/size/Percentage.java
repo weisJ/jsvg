@@ -32,6 +32,7 @@ public final class Percentage implements Comparable<Percentage>, PercentageValue
     public static final @NotNull Percentage UNSPECIFIED = new Percentage(UNSPECIFIED_RAW);
     public static final @NotNull Percentage ZERO = new Percentage(0);
     public static final @NotNull Percentage ONE = new Percentage(1);
+    public static final @NotNull Percentage INHERITED = new Percentage(1);
 
     private final float value;
 

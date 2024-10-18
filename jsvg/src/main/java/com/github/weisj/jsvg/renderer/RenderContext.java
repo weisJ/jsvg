@@ -256,10 +256,12 @@ public final class RenderContext {
     }
 
     public float fillOpacity() {
+        assert paintContext.fillOpacity != null;
         return paintContext.fillOpacity.get(measureContext) * paintContext.opacity.get(measureContext);
     }
 
     public float strokeOpacity() {
+        assert paintContext.strokeOpacity != null;
         return paintContext.strokeOpacity.get(measureContext) * paintContext.opacity.get(measureContext);
     }
 

@@ -24,18 +24,16 @@ package com.github.weisj.jsvg.animation.value;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.annotations.Sealed;
 import com.github.weisj.jsvg.attributes.value.FloatValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-@Sealed(permits = {AnimatedPercentage.class})
-public class AnimatedFloat implements FloatValue {
+public final class AnimatedFloat implements FloatValue {
 
-    protected final @NotNull Track track;
-    protected final float initial;
-    protected final float[] values;
+    private final @NotNull Track track;
+    private final FloatValue initial;
+    private final float[] values;
 
-    AnimatedFloat(@NotNull Track track, float initial, float[] values) {
+    AnimatedFloat(@NotNull Track track, FloatValue initial, float[] values) {
         this.track = track;
         this.initial = initial;
         this.values = values;
@@ -45,7 +43,7 @@ public class AnimatedFloat implements FloatValue {
         long timestamp = context.timestamp();
         Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
 
-        if (progress.isInitial()) return initial;
+        if (progress.isInitial()) return initial.get(context);
         int i = progress.iterationIndex();
 
         if (i == values.length - 1) {
@@ -55,6 +53,6 @@ public class AnimatedFloat implements FloatValue {
         float start = values[i];
         float end = values[i + 1];
 
-        return track.floatInterpolator().interpolate(initial, start, end, progress.indexProgress());
+        return track.floatInterpolator().interpolate(initial.get(context), start, end, progress.indexProgress());
     }
 }

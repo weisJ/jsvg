@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.attributes.value;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
 import com.github.weisj.jsvg.annotations.Sealed;
@@ -30,6 +31,15 @@ import com.github.weisj.jsvg.geometry.size.Percentage;
 
 @Sealed(permits = {Percentage.class, AnimatedPercentage.class})
 public interface PercentageValue {
+
+    static @Nullable PercentageValue derive(@Nullable PercentageValue current, @Nullable PercentageValue other) {
+        if (other == null) return current;
+        if (current == null) return other;
+        if (other instanceof AnimatedPercentage) {
+            return ((AnimatedPercentage) other).derive(current);
+        }
+        return other;
+    }
 
     float get(@NotNull MeasureContext context);
 
