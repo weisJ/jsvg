@@ -223,25 +223,27 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parsePaint(value, this);
     }
 
-    public @Nullable Length getLength(@NotNull String key, PercentageDimension dimension) {
+    public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension) {
         return getLength(key, dimension, (Length) null);
     }
 
-    public @NotNull Length getLength(@NotNull String key, PercentageDimension dimension, float fallback) {
+    public @NotNull Length getLength(@NotNull String key, @NotNull PercentageDimension dimension, float fallback) {
         return getLength(key, dimension, Unit.RAW.valueOf(fallback));
     }
 
     @Contract("_,_,!null -> !null")
-    public @Nullable Length getLength(@NotNull String key, PercentageDimension dimension, @Nullable Length fallback) {
+    public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension,
+            @Nullable Length fallback) {
         return (Length) getLength(key, dimension, fallback, Animatable.NO);
     }
 
-    public @Nullable LengthValue getLength(@NotNull String key, PercentageDimension dimension, Animatable animatable) {
+    public @Nullable LengthValue getLength(@NotNull String key, @NotNull PercentageDimension dimension,
+            Animatable animatable) {
         return getLength(key, dimension, null, animatable);
     }
 
     @Contract("_,_,!null,_ -> !null")
-    public @Nullable LengthValue getLength(@NotNull String key, PercentageDimension dimension,
+    public @Nullable LengthValue getLength(@NotNull String key, @NotNull PercentageDimension dimension,
             @Nullable LengthValue fallback, Animatable animatable) {
         LengthValue value = getLengthInternal(key, dimension);
         if (value == FALLBACK_LENGTH) {
@@ -265,7 +267,7 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parseDuration(getValue(key), fallback);
     }
 
-    private @NotNull Length getLengthInternal(@NotNull String key, PercentageDimension dimension) {
+    private @NotNull Length getLengthInternal(@NotNull String key, @NotNull PercentageDimension dimension) {
         return loadHelper.attributeParser().parseLength(getValue(key), FALLBACK_LENGTH, dimension);
     }
 
@@ -278,7 +280,7 @@ public final class AttributeNode {
     }
 
     private @NotNull Length parseReferenceLength(@NotNull String key, @NotNull String topLeft,
-            @NotNull String bottomRight, PercentageDimension dimension) {
+            @NotNull String bottomRight, @NotNull PercentageDimension dimension) {
         String value = getValue(key);
         if (topLeft.equals(value)) {
             return TopOrLeft;
@@ -328,14 +330,14 @@ public final class AttributeNode {
                 .parsePercentage(getValue(key), new Percentage(fallback)).value();
     }
 
-    public @NotNull Length @NotNull [] getLengthList(@NotNull String key, PercentageDimension dimension) {
+    public @NotNull Length @NotNull [] getLengthList(@NotNull String key, @NotNull PercentageDimension dimension) {
         return getLengthList(key, new Length[0], dimension);
     }
 
 
     @Contract("_,!null,_ -> !null")
     public @NotNull Length @Nullable [] getLengthList(@NotNull String key, @NotNull Length @Nullable [] fallback,
-            PercentageDimension dimension) {
+            @NotNull PercentageDimension dimension) {
         return loadHelper.attributeParser().parseLengthList(getValue(key), fallback, dimension);
     }
 
@@ -449,7 +451,7 @@ public final class AttributeNode {
     }
 
     public @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial,
-            PercentageDimension dimension) {
+            @NotNull PercentageDimension dimension) {
         Animate animate = animateNode(property);
         if (animate == null) return null;
         return animate.animatedLength(initial, dimension, this);

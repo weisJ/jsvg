@@ -31,6 +31,7 @@ import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.stroke.LineCap;
 import com.github.weisj.jsvg.attributes.stroke.LineJoin;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.AttributeNode;
@@ -96,12 +97,12 @@ public final class StrokeContext {
 
     public static @NotNull StrokeContext parse(@NotNull AttributeNode attributeNode) {
         return new StrokeContext(
-                attributeNode.getLength("stroke-width", null, Animatable.YES),
+                attributeNode.getLength("stroke-width", PercentageDimension.CUSTOM, Animatable.YES),
                 attributeNode.getEnumNullable("stroke-linecap", LineCap.class),
                 attributeNode.getEnumNullable("stroke-linejoin", LineJoin.class),
                 attributeNode.getNonNegativeFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
-                attributeNode.getLengthList("stroke-dasharray", null),
-                attributeNode.getLength("stroke-dashoffset", null, Animatable.YES));
+                attributeNode.getLengthList("stroke-dasharray", PercentageDimension.CUSTOM),
+                attributeNode.getLength("stroke-dashoffset", PercentageDimension.CUSTOM, Animatable.YES));
     }
 
     @Override
