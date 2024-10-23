@@ -28,7 +28,9 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.google.errorprone.annotations.Immutable;
 
+@Immutable
 public final class Length implements LengthValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Length UNSPECIFIED = new Length(Unit.RAW, UNSPECIFIED_RAW);

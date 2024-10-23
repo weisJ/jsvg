@@ -25,7 +25,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +35,6 @@ import com.github.weisj.jsvg.util.ImageUtil;
 import com.github.weisj.jsvg.util.SystemUtil;
 
 public class AbstractGlyphRun<T extends Shape> {
-    private static final Logger LOGGER = Logger.getLogger(AbstractGlyphRun.class.getName());
     private final @NotNull T shape;
     private final @NotNull List<@NotNull PaintableEmoji> emojis;
 

@@ -26,7 +26,9 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
+import com.google.errorprone.annotations.Immutable;
 
+@Immutable
 public final class Percentage implements Comparable<Percentage>, PercentageValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Percentage UNSPECIFIED = new Percentage(UNSPECIFIED_RAW);
@@ -57,6 +59,7 @@ public final class Percentage implements Comparable<Percentage>, PercentageValue
         return value;
     }
 
+    @Override
     public @NotNull PercentageValue multiply(@NotNull PercentageValue other) {
         if (this.value == 1) return other;
         if (other instanceof Percentage) {

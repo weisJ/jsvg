@@ -95,7 +95,7 @@ allprojects {
         resolutionStrategy.cacheChangingModulesFor(0, "seconds")
     }
 
-    if (!skipSpotless) {
+    if (!skipSpotless && !enableErrorProne) {
         apply(plugin = "com.diffplug.spotless")
         spotless {
             val spotlessRatchet by props(default = true)
@@ -230,6 +230,7 @@ allprojects {
                         "StringSplitter",
                         "InlineMeSuggester",
                         "MissingSummary",
+                        "MultipleNullnessAnnotations",
                     )
                 }
             }

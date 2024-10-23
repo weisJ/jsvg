@@ -34,6 +34,7 @@ public final class NullPlatformSupport implements PlatformSupport {
     @Deprecated
     public NullPlatformSupport() {}
 
+    @SuppressWarnings("UnusedVariable")
     private NullPlatformSupport(boolean noDeprecation) {}
 
     @Override
