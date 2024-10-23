@@ -72,7 +72,7 @@ public class SealedClassProcessor extends AbstractProcessor {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private boolean isPermitted(@NotNull TypeElement @NotNull [] permittedSubclasses, @NotNull TypeElement subclass) {
@@ -86,7 +86,7 @@ public class SealedClassProcessor extends AbstractProcessor {
         for (TypeMirror iface : classElement.getInterfaces()) {
             if (type.equals(typeUtils.asElement(iface))) return true;
         }
-        return type.asType().equals(classElement.getSuperclass());
+        return typeUtils.isSameType(type.asType(), classElement.getSuperclass());
     }
 
     public TypeElement[] getPermittedClasses(@NotNull TypeElement element, @NotNull Types typeUtils) {
