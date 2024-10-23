@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 public final class ParsedElement {
 
+
     private enum BuildStatus {
         NOT_BUILT,
         IN_PROGRESS,
@@ -51,6 +52,7 @@ public final class ParsedElement {
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
     private final @NotNull Map<String, @NotNull ParsedElement> animationElements = new HashMap<>();
+    private String[] classList;
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
 
@@ -81,6 +83,13 @@ public final class ParsedElement {
         return id;
     }
 
+    public @NotNull String[] classList() {
+        if (classList == null) {
+            classList = attributeNode.getStringList("class", SeparatorMode.WHITESPACE_ONLY);
+        }
+        return classList;
+    }
+
     public @NotNull ParsedDocument document() {
         return document;
     }
@@ -95,6 +104,14 @@ public final class ParsedElement {
 
     public @Nullable ParsedElement parent() {
         return parent;
+    }
+
+    public @Nullable ParsedElement previousSibling() {
+        if (parent == null) return null;
+        List<ParsedElement> siblings = parent.children;
+        int index = siblings.indexOf(this);
+        if (index <= 0) return null;
+        return siblings.get(index - 1);
     }
 
     public @NotNull SVGNode node() {

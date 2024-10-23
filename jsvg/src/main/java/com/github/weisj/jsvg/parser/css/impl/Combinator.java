@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,17 +21,42 @@
  */
 package com.github.weisj.jsvg.parser.css.impl;
 
-public enum TokenType {
-    START,
-    CURLY_OPEN,
-    CURLY_CLOSE,
-    COMMENT,
-    COLON,
-    COMMA,
-    SEMICOLON,
-    RAW_DATA,
-    CLASS_NAME,
-    ID_NAME,
-    IDENTIFIER,
-    EOF
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
+
+enum Combinator {
+    CURRENT(""),
+    DESCENDANT(" "),
+    CHILD(">"),
+    ADJACENT_SIBLING("+"),
+    GENERAL_SIBLING("~");
+
+    private final @NotNull String symbol;
+
+    Combinator(@NotNull String symbol) {
+        this.symbol = symbol;
+    }
+
+    public @NotNull String symbol() {
+        return symbol;
+    }
+
+    @Contract(pure = true)
+    public static Combinator fromSymbol(@NotNull String symbol) {
+        switch (symbol) {
+            case ">":
+                return CHILD;
+            case "+":
+                return ADJACENT_SIBLING;
+            case "~":
+                return GENERAL_SIBLING;
+            case " ":
+                return DESCENDANT;
+            case "":
+                return CURRENT;
+            default:
+                throw new IllegalArgumentException("Unknown combinator symbol: " + symbol);
+        }
+    }
 }

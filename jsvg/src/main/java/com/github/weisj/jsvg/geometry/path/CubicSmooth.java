@@ -40,7 +40,6 @@ final class CubicSmooth extends PathCommand {
 
     public CubicSmooth(boolean isRelative, float k2x, float k2y, float x, float y) {
         super(isRelative, 6);
-        System.out.println(k2x + " " + k2y + " " + x + " " + y);
         this.k2x = k2x;
         this.k2y = k2y;
         this.x = x;

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,5 +21,36 @@
  */
 package com.github.weisj.jsvg.parser.css.impl;
 
-final class ParserException extends RuntimeException {
+import org.jetbrains.annotations.NotNull;
+
+import com.google.errorprone.annotations.Immutable;
+
+@Immutable
+final class SelectorPart {
+    private final @NotNull SelectorType type;
+    private final @NotNull String value;
+    private final @NotNull Combinator combinator;
+
+    public SelectorPart(@NotNull SelectorType type, @NotNull String value, @NotNull Combinator combinator) {
+        this.type = type;
+        this.value = value;
+        this.combinator = combinator;
+    }
+
+    public @NotNull SelectorType type() {
+        return type;
+    }
+
+    public @NotNull String value() {
+        return value;
+    }
+
+    public @NotNull Combinator combinator() {
+        return combinator;
+    }
+
+    @Override
+    public String toString() {
+        return combinator.symbol() + value + " (" + type + ")";
+    }
 }
