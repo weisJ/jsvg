@@ -205,6 +205,10 @@ allprojects {
             }
         }
 
+        if (!enableErrorProne) {
+            apply(plugin = "module-info-compile")
+        }
+
         if (enableErrorProne) {
             apply(plugin = "net.ltgt.errorprone")
             dependencies {

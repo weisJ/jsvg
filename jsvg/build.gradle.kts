@@ -2,7 +2,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
     `java-library`
-    `module-info-compile`
     id("me.champeau.jmh")
     jacoco
 }
