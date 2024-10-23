@@ -218,9 +218,9 @@ public final class AttributeNode {
 
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
-        SVGPaint paint = getElementByUrl(SVGPaint.class, value);
+        SVGPaint paint = loadHelper.attributeParser().parsePaint(value, this);
         if (paint != null) return paint;
-        return loadHelper.attributeParser().parsePaint(value, this);
+        return getElementByUrl(SVGPaint.class, value);
     }
 
     public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension) {
