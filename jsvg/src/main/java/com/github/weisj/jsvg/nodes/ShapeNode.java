@@ -32,6 +32,8 @@ import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontSize;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -87,7 +89,7 @@ public abstract class ShapeNode extends RenderableSVGNode
         fontSizeAdjust = FontParser.parseSizeAdjust(attributeNode);
 
         shape = buildShape(attributeNode);
-        pathLength = attributeNode.getLength("pathLength", Length.UNSPECIFIED);
+        pathLength = attributeNode.getLength("pathLength", PercentageDimension.NONE, Length.UNSPECIFIED);
 
         // Todo: These are actually inheritable and hence have to go into the RenderContext
         // Todo: The marker shorthand is a bit more complicated than just being a template.
@@ -116,9 +118,9 @@ public abstract class ShapeNode extends RenderableSVGNode
     public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
         Rectangle2D bounds = shape.bounds(context, true);
         if (box == Box.StrokeBox) {
-            Length strokeWidth = context.strokeContext().strokeWidth;
-            if (strokeWidth != null && strokeWidth.isSpecified()) {
-                float stroke = strokeWidth.resolveLength(context.measureContext());
+            LengthValue strokeWidth = context.strokeContext().strokeWidth;
+            if (strokeWidth != null) {
+                float stroke = strokeWidth.resolve(context.measureContext());
                 if (stroke > 0) bounds = GeometryUtil.grow(bounds, stroke);
             }
         }
@@ -139,8 +141,8 @@ public abstract class ShapeNode extends RenderableSVGNode
         MeasureContext measureContext = context.measureContext();
         float pathLengthFactor = 1f;
         if (pathLength.isSpecified()) {
-            double effectiveLength = pathLength.resolveLength(measureContext);
-            double actualLength = shape.pathLength(measureContext);
+            double effectiveLength = pathLength.resolve(measureContext);
+            double actualLength = shape.pathLength(context);
             pathLengthFactor = (float) (actualLength / effectiveLength);
         }
         return context.stroke(pathLengthFactor);

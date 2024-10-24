@@ -53,5 +53,4 @@ public interface PlatformSupport {
     default boolean isLongLived() {
         return false;
     }
-
 }

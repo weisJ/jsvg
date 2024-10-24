@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.util.GraphicsResetHelper;
 import com.github.weisj.jsvg.util.Provider;
 
@@ -188,6 +189,7 @@ public class Graphics2DOutput implements Output {
 
     @Override
     public void applyOpacity(float opacity) {
+        if (GeometryUtil.approximatelyEqual(opacity, 1)) return;
         g.setComposite(GraphicsUtil.deriveComposite(g, opacity));
     }
 

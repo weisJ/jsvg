@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
+import com.github.weisj.jsvg.util.AttributeUtil;
 
 public final class PaintOrder {
 
@@ -64,8 +65,11 @@ public final class PaintOrder {
         int phasesIndex = 0;
         int rawPhasesIndex = 0;
         while (phasesIndex < length && rawPhasesIndex < length) {
-            phases[phasesIndex] = parser.parseEnum(rawPhases[rawPhasesIndex], Phase.class);
-            if (phases[phasesIndex] != null) phasesIndex++;
+            Phase phase = parser.parseEnum(rawPhases[rawPhasesIndex], Phase.class);
+            if (phase != null && !AttributeUtil.arrayContains(phases, phase)) {
+                phases[phasesIndex] = phase;
+                phasesIndex++;
+            }
             rawPhasesIndex++;
         }
         while (phasesIndex < 3) {

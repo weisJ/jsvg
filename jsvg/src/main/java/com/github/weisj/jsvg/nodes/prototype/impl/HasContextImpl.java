@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.nodes.prototype.impl;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
@@ -38,27 +37,19 @@ public final class HasContextImpl implements HasContext {
     private final @NotNull PaintContext paintContext;
     private final @NotNull FontRenderContext fontRenderContext;
     private final @NotNull AttributeFontSpec fontSpec;
-    private final @NotNull FillRule fillRule;
 
     private HasContextImpl(@NotNull PaintContext paintContext, @NotNull FontRenderContext fontRenderContext,
-            @NotNull AttributeFontSpec fontSpec, @NotNull FillRule fillRule) {
+            @NotNull AttributeFontSpec fontSpec) {
         this.paintContext = paintContext;
         this.fontRenderContext = fontRenderContext;
         this.fontSpec = fontSpec;
-        this.fillRule = fillRule;
     }
 
     public static @NotNull HasContext parse(@NotNull AttributeNode attributeNode) {
         return new HasContextImpl(
                 PaintContext.parse(attributeNode),
                 FontRenderContext.parse(attributeNode),
-                FontParser.parseFontSpec(attributeNode),
-                FillRule.parse(attributeNode));
-    }
-
-    @Override
-    public @NotNull FillRule fillRule() {
-        return fillRule;
+                FontParser.parseFontSpec(attributeNode));
     }
 
     @Override

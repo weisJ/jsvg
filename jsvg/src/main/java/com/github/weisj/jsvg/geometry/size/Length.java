@@ -26,14 +26,16 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
-import com.github.weisj.jsvg.attributes.ViewBox;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
-public final class Length {
+public final class Length implements LengthValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;
-    public static final @NotNull Length UNSPECIFIED = new Length(Unit.Raw, UNSPECIFIED_RAW);
-    public static final @NotNull Length ZERO = new Length(Unit.Raw, 0);
+    public static final @NotNull Length UNSPECIFIED = new Length(Unit.RAW, UNSPECIFIED_RAW);
+    public static final @NotNull Length ZERO = new Length(Unit.RAW, 0);
+    public static final @NotNull Length INHERITED = new Length(Unit.RAW, 0);
 
     private final @NotNull Unit unit;
     private final float value;
@@ -47,6 +49,11 @@ public final class Length {
         this.value = value;
     }
 
+    public Length(@NotNull Length ry) {
+        this.unit = ry.unit;
+        this.value = ry.value;
+    }
+
     public static boolean isUnspecified(float value) {
         return Float.isNaN(value);
     }
@@ -55,11 +62,12 @@ public final class Length {
         return !isUnspecified(value);
     }
 
-    private float resolveNonPercentage(@NotNull MeasureContext context) {
-        if (isUnspecified()) throw new IllegalStateException("Can't resolve size of unspecified length");
-        // If we are unspecified this will return the raw unspecified value, which we want.
-        if (unit == Unit.Raw) return value;
-        assert unit != Unit.PERCENTAGE;
+    private static float resolveNonPercentage(@NotNull MeasureContext context, Unit unit, float value) {
+        if (unit == Unit.RAW) {
+            // If we are unspecified this will return UNSPECIFIED_RAW as intended.
+            return value;
+        }
+        assert !unit.isPercentage();
         switch (unit) {
             case PX:
                 return value;
@@ -69,6 +77,8 @@ public final class Length {
                 return inchesPerCm * pixelsPerInch * value;
             case MM:
                 return 0.1f * inchesPerCm * pixelsPerInch * value;
+            case Q:
+                return 0.025f * inchesPerCm * pixelsPerInch * value;
             case PT:
                 return (1f / 72f) * pixelsPerInch * value;
             case PC:
@@ -77,6 +87,7 @@ public final class Length {
                 return context.em() * value;
             case REM:
                 return context.rem() * value;
+            case CH:
             case EX:
                 return context.ex() * value;
             default:
@@ -84,43 +95,28 @@ public final class Length {
         }
     }
 
-    /**
-     * Used for resolving lengths which are used as x-coordinates or width values.
-     * @param context the measuring context.
-     * @return the resolved size.
-     */
-    public float resolveWidth(@NotNull MeasureContext context) {
-        if (unit == Unit.PERCENTAGE) {
-            return (value * context.viewWidth()) / 100f;
-        } else {
-            return resolveNonPercentage(context);
-        }
-    }
-
-    /**
-     * Used for resolving lengths which are used as y-coordinates or height values.
-     * @param context the measuring context.
-     * @return the resolved size.
-     */
-    public float resolveHeight(@NotNull MeasureContext context) {
-        if (unit == Unit.PERCENTAGE) {
-            return (value * context.viewHeight()) / 100f;
-        } else {
-            return resolveNonPercentage(context);
-        }
-    }
-
-    /**
-     * Used for resolving lengths which are neither used as y/x-coordinates nor width/height values.
-     * Relative sizes are relative to the {@link ViewBox#normedDiagonalLength()}.
-     * @param context the measuring context.
-     * @return the resolved size.
-     */
-    public float resolveLength(@NotNull MeasureContext context) {
-        if (unit == Unit.PERCENTAGE) {
-            return (value / 100f) * context.normedDiagonalLength();
-        } else {
-            return resolveNonPercentage(context);
+    @Override
+    public float resolve(@NotNull MeasureContext context) {
+        float raw = raw();
+        switch (unit) {
+            case PERCENTAGE_LENGTH:
+                return (raw * context.normedDiagonalLength()) / 100f;
+            case VW:
+            case VI:
+            case PERCENTAGE_WIDTH:
+                return (raw * context.viewWidth()) / 100f;
+            case VH:
+            case VB:
+            case PERCENTAGE_HEIGHT:
+                return (raw * context.viewHeight()) / 100f;
+            case PERCENTAGE:
+                return raw / 100f;
+            case V_MIN:
+                return (raw * Math.min(context.viewWidth(), context.viewHeight())) / 100f;
+            case V_MAX:
+                return (raw * Math.max(context.viewWidth(), context.viewHeight())) / 100f;
+            default:
+                return resolveNonPercentage(context, unit, raw);
         }
     }
 
@@ -131,20 +127,37 @@ public final class Length {
      * @return the resolved size.
      */
     public float resolveFontSize(@NotNull MeasureContext context) {
-        if (unit == Unit.PERCENTAGE) {
-            return (value / 100f) * context.em();
-        } else {
-            return resolveNonPercentage(context);
+        float raw = raw();
+        switch (unit) {
+            case PERCENTAGE_LENGTH:
+            case PERCENTAGE_WIDTH:
+            case PERCENTAGE_HEIGHT:
+                throw new IllegalStateException("Can't resolve font size with geometric percentage unit");
+            case PERCENTAGE:
+                return (raw / 100f) * context.em();
+            default:
+                return resolveNonPercentage(context, unit, raw);
         }
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
+        if (isUnspecified()) return "<unspecified>";
         return value + unit.suffix();
     }
 
     public boolean isZero() {
         return value == 0;
+    }
+
+    @Override
+    public boolean isConstantlyZero() {
+        return isZero();
+    }
+
+    @Override
+    public boolean isConstantlyNonNegative() {
+        return raw() >= 0;
     }
 
     public float raw() {
@@ -156,32 +169,51 @@ public final class Length {
     }
 
     public boolean isUnspecified() {
-        return isUnspecified(raw());
+        return isUnspecified(value);
     }
 
     public boolean isSpecified() {
-        return !isUnspecified();
+        return isSpecified(value);
     }
 
     public @NotNull Length coerceNonNegative() {
-        if (isSpecified() && raw() <= 0) return ZERO;
+        if (isSpecified() && value <= 0) return ZERO;
         return this;
     }
 
-    public @NotNull Length coercePercentageToCorrectUnit(@NotNull UnitType unitType) {
+    public @NotNull Length coercePercentageToCorrectUnit(@NotNull UnitType unitType,
+            @NotNull PercentageDimension dimension) {
         if (unitType == UnitType.UserSpaceOnUse) return this;
-        if (unit() == Unit.PERCENTAGE) return this;
-        return new Length(Unit.PERCENTAGE, raw() * 100);
+        if (unit.isPercentage()) return this;
+        Unit u;
+        switch (dimension) {
+            case WIDTH:
+                u = Unit.PERCENTAGE_WIDTH;
+                break;
+            case HEIGHT:
+                u = Unit.PERCENTAGE_HEIGHT;
+                break;
+            case LENGTH:
+                u = Unit.PERCENTAGE_LENGTH;
+                break;
+            case CUSTOM:
+                u = Unit.PERCENTAGE;
+                break;
+            default:
+                throw new IllegalStateException("Can't coerce to percentage with no dimension");
+        }
+        return new Length(u, raw() * 100);
     }
 
-    public Length orElseIfUnspecified(float value) {
-        if (isUnspecified()) return Unit.Raw.valueOf(value);
+    public @NotNull Length orElseIfUnspecified(float value) {
+        if (isUnspecified()) return Unit.RAW.valueOf(value);
         return this;
     }
 
-    public Length multiply(float scalingFactor) {
+    public @NotNull Length multiply(float scalingFactor) {
         if (scalingFactor == 0) return ZERO;
-        return new Length(unit(), scalingFactor * raw());
+        if (scalingFactor == 1) return this;
+        return new Length(unit, scalingFactor * value);
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.FillRule;
+import com.github.weisj.jsvg.attributes.value.ConstantValue;
 import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.path.BuildHistory;
@@ -52,7 +53,7 @@ public final class PathUtil {
 
     private PathUtil() {}
 
-    public static @NotNull MeasurableShape parseFromPathData(@NotNull String data, @NotNull FillRule fillRule) {
+    public static @NotNull MeasurableShape parseFromPathData(@NotNull String data, FillRule fillRule) {
         PathCommand[] pathCommands = new PathParser(data).parsePathCommand();
 
         int nodeCount = 2;
@@ -69,7 +70,24 @@ public final class PathUtil {
 
         trimPathToSize(path);
 
-        return new FillRuleAwareAWTSVGShape(path);
+        return new FillRuleAwareAWTSVGShape(new ConstantValue<>(path));
+    }
+
+    public static @NotNull Path2D setPolyLine(@Nullable Path2D path, float @NotNull [] points, boolean closed) {
+        Path2D p;
+        if (path == null) {
+            p = new Path2D.Float(Path2D.WIND_EVEN_ODD, points.length / 2);
+        } else {
+            p = path;
+            p.reset();
+        }
+
+        p.moveTo(points[0], points[1]);
+        for (int i = 2; i < points.length - 1; i += 2) {
+            p.lineTo(points[i], points[i + 1]);
+        }
+        if (closed) p.closePath();
+        return p;
     }
 
     public static void trimPathToSize(@NotNull Path2D path) {

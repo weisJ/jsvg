@@ -2,7 +2,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
     `java-library`
-    `module-info-compile`
     id("me.champeau.jmh")
     jacoco
 }
@@ -10,6 +9,9 @@ plugins {
 dependencies {
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
+
+    compileOnly(projects.annotations)
+    annotationProcessor(projects.annotationsProcessor)
 
     testImplementation(testLibs.darklaf.core)
     testImplementation(testLibs.junit.api)
@@ -36,6 +38,7 @@ tasks {
         doFirst {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
+        environment("RESVG_TEST_SUITE_PATH" to File(project.rootDir, "resvg-test-suite/tests").absolutePath)
         useJUnitPlatform()
         testLogging {
             showStandardStreams = true

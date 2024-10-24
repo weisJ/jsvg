@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
@@ -58,11 +59,13 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
     }
 
     public static @NotNull HasGeometryContext parse(@NotNull AttributeNode attributeNode) {
-        Length[] transformOrigin = attributeNode.getLengthList("transform-origin");
+        String[] transformOrigin = attributeNode.getStringList("transform-origin");
+        String originX = transformOrigin.length > 0 ? transformOrigin[0] : null;
+        String originY = transformOrigin.length > 1 ? transformOrigin[1] : null;
         return new HasGeometryContextImpl(
                 attributeNode.parseTransform("transform"),
-                transformOrigin.length > 0 ? transformOrigin[0] : Length.ZERO,
-                transformOrigin.length > 1 ? transformOrigin[1] : Length.ZERO,
+                attributeNode.parser().parseLength(originX, Length.ZERO, PercentageDimension.WIDTH),
+                attributeNode.parser().parseLength(originY, Length.ZERO, PercentageDimension.HEIGHT),
                 attributeNode.getClipPath(),
                 attributeNode.getMask(),
                 attributeNode.getFilter());
@@ -91,7 +94,7 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
     @Override
     public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
         return new Point2D.Float(
-                transformOriginX.resolveWidth(context),
-                transformOriginY.resolveHeight(context));
+                transformOriginX.resolve(context),
+                transformOriginY.resolve(context));
     }
 }

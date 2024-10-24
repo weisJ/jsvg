@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.MarkerOrientation;
 import com.github.weisj.jsvg.attributes.PaintOrder;
-import com.github.weisj.jsvg.attributes.Radian;
 import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
@@ -51,8 +50,8 @@ public final class ShapeRenderer {
             this.opacity = opacity;
         }
 
-        boolean isVisible() {
-            return opacity > 0 && paint.isVisible();
+        boolean isVisible(@NotNull RenderContext context) {
+            return opacity > 0 && paint.isVisible(context);
         }
     }
 
@@ -106,6 +105,7 @@ public final class ShapeRenderer {
                 shapePaintContext.context, shapePaintContext.transform);
         Output.SafeState safeState = output.safeState();
 
+        // FIXME: Opacity should be uniform on fill and stroke. Fill shouldn't be visible beneath stroke.
         boolean fillPainted = false;
         for (PaintOrder.Phase phase : paintOrder.phases()) {
             RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
@@ -144,12 +144,12 @@ public final class ShapeRenderer {
     private static void renderShapeStroke(@NotNull RenderContext context, @NotNull Output output,
             @NotNull PaintShape paintShape, @Nullable Stroke stroke, boolean willBeFilledAfterwards) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
-        if (!(stroke != null && paintWithOpacity.isVisible())) return;
+        if (!(stroke != null && paintWithOpacity.isVisible(context))) return;
         output.applyOpacity(paintWithOpacity.opacity);
         output.setStroke(stroke);
         boolean removeFillArea = output.hasMaskedPaint()
                 && willBeFilledAfterwards
-                && context.fillPaint().isVisible()
+                && context.fillPaint().isVisible(context)
                 && context.fillOpacity() == 1
                 && output.currentOpacity() == 1;
         if (removeFillArea) {
@@ -164,7 +164,7 @@ public final class ShapeRenderer {
     private static void renderShapeFill(@NotNull RenderContext context, @NotNull Output output,
             @NotNull PaintShape paintShape) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.fillPaint(), context.fillOpacity());
-        if (!paintWithOpacity.isVisible()) return;
+        if (!paintWithOpacity.isVisible(context)) return;
         output.applyOpacity(paintWithOpacity.opacity);
         paintWithOpacity.paint.fillShape(output, context, paintShape.shape, paintShape.bounds);
     }
@@ -280,7 +280,7 @@ public final class ShapeRenderer {
         assert type != null;
 
         MarkerOrientation orientation = marker.orientation();
-        @Radian float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
+        float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
 
         Output markerOutput = output.createChild();
         RenderContext markerContext = context.deriveForChildGraphics();
@@ -298,7 +298,7 @@ public final class ShapeRenderer {
     }
 
     private static void paintDebugMarker(@NotNull RenderContext context, @NotNull Graphics2D g,
-            @NotNull Marker marker, @Radian float rotation) {
+            @NotNull Marker marker, float rotation) {
         FloatSize size = marker.size(context);
 
         Path2D p = new Path2D.Float();

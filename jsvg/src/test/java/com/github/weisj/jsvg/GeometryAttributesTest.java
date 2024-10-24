@@ -34,7 +34,7 @@ class GeometryAttributesTest {
     void testPathLength() {
         // Compare with reference as batik doesn't handle pathLength here
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource("pathLength/pathLength.svg"), RenderType.JSVG),
-                new ImageInfo(new ImageSource.PathImageSource("pathLength/pathLength_ref.svg"), RenderType.JSVG))));
+                new ImageInfo(new ImageSource.PathImageSource("pathLength/pathLength_ref.svg"), RenderType.JSVG),
+                new ImageInfo(new ImageSource.PathImageSource("pathLength/pathLength.svg"), RenderType.JSVG))));
     }
 }

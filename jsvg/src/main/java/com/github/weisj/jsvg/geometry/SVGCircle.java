@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,27 +27,27 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class SVGCircle implements MeasurableShape {
 
     private final @NotNull Ellipse2D.Float circle = new Ellipse2D.Float();
-    private final @NotNull Length cx;
-    private final @NotNull Length cy;
-    private final @NotNull Length r;
+    private final @NotNull LengthValue cx;
+    private final @NotNull LengthValue cy;
+    private final @NotNull LengthValue r;
 
-    public SVGCircle(@NotNull Length cx, @NotNull Length cy, @NotNull Length r) {
+    public SVGCircle(@NotNull LengthValue cx, @NotNull LengthValue cy, @NotNull LengthValue r) {
         this.cx = cx;
         this.cy = cy;
         this.r = r;
     }
 
     private void validateShape(@NotNull MeasureContext measureContext) {
-        float x = cx.resolveWidth(measureContext);
-        float y = cy.resolveHeight(measureContext);
-        float rr = r.resolveLength(measureContext);
+        float x = cx.resolve(measureContext);
+        float y = cy.resolve(measureContext);
+        float rr = r.resolve(measureContext);
         circle.setFrame(x - rr, y - rr, 2 * rr, 2 * rr);
     }
 
@@ -64,8 +64,8 @@ public final class SVGCircle implements MeasurableShape {
     }
 
     @Override
-    public double pathLength(@NotNull MeasureContext measureContext) {
-        return circumference(r.resolveLength(measureContext));
+    public double pathLength(@NotNull RenderContext context) {
+        return circumference(r.resolve(context.measureContext()));
     }
 
     static double circumference(double radius) {

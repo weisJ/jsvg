@@ -111,6 +111,10 @@ public final class PathParser extends ParserBase {
             }
             consumeWhiteSpaceOrSeparator();
 
+            if (currentCommand != 'M' && currentCommand != 'm' && commands.isEmpty()) {
+                throw new IllegalArgumentException("Path must start with a move command " + currentLocation());
+            }
+
             PathCommand cmd;
             switch (currentCommand) {
                 case 'M':

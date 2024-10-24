@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.RenderType.*;
 import static com.github.weisj.jsvg.ReferenceTest.RenderType.Batik;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,13 +31,18 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import javax.imageio.ImageIO;
 
 import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.transcoder.TranscoderException;
@@ -60,6 +66,7 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.ExternalResourcePolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.util.ColorUtil;
 import com.google.errorprone.annotations.CheckReturnValue;
 
 @CheckReturnValue
@@ -74,10 +81,14 @@ public final class ReferenceTest {
         JSVGType JSVG = new JSVGType(LoaderContext.builder()
                 .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
                 .build());
+        DiskImage DiskImage = new DiskImage();
 
         record BatikType() implements RenderType {
         }
         record JSVGType(@NotNull LoaderContext loaderContext) implements RenderType {
+        }
+
+        record DiskImage() implements RenderType {
         }
     }
 
@@ -90,6 +101,23 @@ public final class ReferenceTest {
 
         @Nullable
         URL url();
+
+        record UrlImageSource(@NotNull URL url) implements ImageSource {
+
+            @Override
+            public @NotNull String name() {
+                try {
+                    return Path.of(url.toURI()).getFileName().toString();
+                } catch (URISyntaxException e) {
+                    return url.toString();
+                }
+            }
+
+            @Override
+            public @NotNull InputStream openStream() throws IOException {
+                return url.openStream();
+            }
+        }
 
         record PathImageSource(@NotNull String path) implements ImageSource {
 
@@ -145,11 +173,24 @@ public final class ReferenceTest {
         }
 
         @NotNull
-        BufferedImage render() throws IOException {
+        BufferedImage render(@Nullable BufferedImage expectedHint) throws IOException {
             return switch (renderType) {
-                case RenderType.BatikType() -> renderBatik(source.openStream());
-                case RenderType.JSVGType(LoaderContext loaderContext) ->
-                    renderJsvg(source, graphicsMutator, loaderContext);
+                case BatikType() -> renderBatik(source.openStream());
+                case JSVGType(LoaderContext loaderContext) -> {
+                    Dimension size = null;
+                    if (expectedHint != null) {
+                        size = new Dimension(expectedHint.getWidth(), expectedHint.getHeight());
+                    }
+                    yield renderJsvg(source, graphicsMutator, loaderContext, size);
+                }
+                case DiskImage() -> {
+                    var img = ImageIO.read(source.openStream());
+                    var refImg = new ReferenceImage(img.getWidth(), img.getHeight());
+                    var g = refImg.createGraphics();
+                    g.drawImage(img, 0, 0, null);
+                    g.dispose();
+                    yield refImg;
+                }
             };
         }
     }
@@ -197,7 +238,7 @@ public final class ReferenceTest {
             double pixelTolerance) {
         return compareImages(new CompareInfo(
                 new ImageInfo(new ImageSource.PathImageSource(fileName), Batik),
-                new ImageInfo(new ImageSource.PathImageSource(fileName), RenderType.JSVG),
+                new ImageInfo(new ImageSource.PathImageSource(fileName), JSVG),
                 tolerance, pixelTolerance));
     }
 
@@ -207,8 +248,8 @@ public final class ReferenceTest {
 
     static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull CompareInfo compareInfo) {
         try {
-            BufferedImage expected = compareInfo.expected.render();
-            BufferedImage actual = compareInfo.actual.render();
+            BufferedImage expected = compareInfo.expected.render(null);
+            BufferedImage actual = compareInfo.actual.render(expected);
             return compareImageRasterization(expected, actual, compareInfo.name(),
                     compareInfo.tolerance(), compareInfo.pixelTolerance());
         } catch (Exception e) {
@@ -221,7 +262,7 @@ public final class ReferenceTest {
             double tolerance) {
         return compareImages(new CompareInfo(
                 new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), Batik),
-                new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), RenderType.JSVG),
+                new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), JSVG),
                 tolerance, DEFAULT_PIXEL_TOLERANCE));
     }
 
@@ -236,6 +277,20 @@ public final class ReferenceTest {
         if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
             return ReferenceTestResult.SUCCESS;
         }
+
+        String baseName = name.replaceAll("[- /]", "_");
+        File diffFile = new File(baseName + "_diff.png");
+        File expectedFile = new File(baseName + "_expected.png");
+        File actualFile = new File(baseName + "_actual.png");
+
+        try {
+            Files.deleteIfExists(diffFile.toPath());
+            Files.deleteIfExists(expectedFile.toPath());
+            Files.deleteIfExists(actualFile.toPath());
+        } catch (IOException ignore) {
+        }
+
+
         return new ReferenceTestResult(state, () -> {
             StringBuilder sb = new StringBuilder();
             sb.append("Image: ").append(name).append('\n');
@@ -274,12 +329,9 @@ public final class ReferenceTest {
                     printPixel.accept(actualPixel);
                     sb.append('\n');
                 }
-                ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_diff.png"),
-                        comparison.getResult());
-                ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_expected.png"),
-                        comparison.getExpected());
-                ImageComparisonUtil.saveImage(new File(name.replaceAll("[- /]", "_") + "_actual.png"),
-                        comparison.getActual());
+                ImageComparisonUtil.saveImage(diffFile, comparison.getResult());
+                ImageComparisonUtil.saveImage(expectedFile, comparison.getExpected());
+                ImageComparisonUtil.saveImage(actualFile, comparison.getActual());
             }
             return sb.toString();
         });
@@ -287,13 +339,13 @@ public final class ReferenceTest {
 
     public static @NotNull BufferedImage renderJsvg(@NotNull String path) {
         try {
-            return renderJsvg(new ImageSource.PathImageSource(path), null, RenderType.JSVG.loaderContext());
+            return renderJsvg(new ImageSource.PathImageSource(path), null, JSVG.loaderContext(), null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static @NotNull RenderingHints referenceHintSet() {
+    public static @NotNull RenderingHints referenceHintSet() {
         return new RenderingHints(Map.of(
                 RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON,
                 RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE,
@@ -303,7 +355,8 @@ public final class ReferenceTest {
     }
 
     private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
-            @Nullable Consumer<Graphics2D> graphicsMutator, LoaderContext loaderContext) throws IOException {
+            @Nullable Consumer<Graphics2D> graphicsMutator, LoaderContext loaderContext,
+            @Nullable Dimension sizeHint) throws IOException {
         SVGDocument document;
 
         URL url = imageSource.url();
@@ -314,8 +367,14 @@ public final class ReferenceTest {
         }
 
         FloatSize size = document.size();
-        BufferedImage image = new ReferenceImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
+        if (sizeHint != null) {
+            size = new FloatSize(sizeHint.width, sizeHint.height);
+        }
+
+        BufferedImage image = new ReferenceImage((int) size.width, (int) size.height);
         Graphics2D g = image.createGraphics();
+        g.setColor(ColorUtil.withAlpha(Color.WHITE, 0));
+        g.fillRect(0, 0, image.getWidth(), image.getHeight());
         if (graphicsMutator != null) graphicsMutator.accept(g);
         document.render((Component) null, g, new ViewBox(size));
         g.dispose();
@@ -337,7 +396,7 @@ public final class ReferenceTest {
 
                 @Override
                 public BufferedImage createImage(int w, int h) {
-                    return new ReferenceImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    return new ReferenceImage(w, h);
                 }
 
                 @Override
@@ -355,8 +414,8 @@ public final class ReferenceTest {
 
     private static class ReferenceImage extends BufferedImage {
 
-        public ReferenceImage(int width, int height, int imageType) {
-            super(width, height, imageType);
+        public ReferenceImage(int width, int height) {
+            super(width, height, TYPE_INT_ARGB);
         }
 
         @Override

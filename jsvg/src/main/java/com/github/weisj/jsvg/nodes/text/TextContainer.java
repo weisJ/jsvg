@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.text.LengthAdjust;
 import com.github.weisj.jsvg.attributes.text.TextAnchor;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseContainerNode;
@@ -67,7 +68,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         super.build(attributeNode);
         fontSpec = FontParser.parseFontSpec(attributeNode);
         lengthAdjust = attributeNode.getEnum("lengthAdjust", LengthAdjust.Spacing);
-        textLength = attributeNode.getLength("textLength", Length.UNSPECIFIED);
+        textLength = attributeNode.getLength("textLength", PercentageDimension.NONE, Length.UNSPECIFIED);
         if (textLength.raw() < 0) textLength = Length.UNSPECIFIED;
 
         isVisible = parseIsVisible(attributeNode);
@@ -177,11 +178,11 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
             @NotNull UseTextLengthForCalculation flag) {
         if (flag == UseTextLengthForCalculation.YES && hasFixedLength()) {
             return new TextMetrics(0, 0, 0,
-                    textLength.resolveLength(context.measureContext()), 0);
+                    textLength.resolve(context.measureContext()), 0);
         }
 
         SVGFont font = context.font();
-        float letterSpacing = context.fontRenderContext().letterSpacing().resolveLength(context.measureContext());
+        float letterSpacing = context.fontRenderContext().letterSpacing().resolve(context.measureContext());
 
         IntermediateTextMetrics metrics = new IntermediateTextMetrics();
 
@@ -283,7 +284,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         if (hasFixedLength()) {
             return new GlyphAdvancement(
                     computeTextMetrics(context, UseTextLengthForCalculation.NO),
-                    textLength.resolveWidth(context.measureContext()), lengthAdjust);
+                    textLength.resolve(context.measureContext()), lengthAdjust);
         }
         return cursor.advancement();
     }

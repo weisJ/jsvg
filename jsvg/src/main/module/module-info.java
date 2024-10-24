@@ -28,6 +28,7 @@ module com.github.weisj.jsvg {
 
     requires static org.jetbrains.annotations;
     requires static com.google.errorprone.annotations;
+    requires static com.github.weisj.jsvg.annotations;
 
     exports com.github.weisj.jsvg;
     exports com.github.weisj.jsvg.attributes;

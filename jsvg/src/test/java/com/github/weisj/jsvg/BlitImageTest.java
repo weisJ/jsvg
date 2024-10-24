@@ -37,8 +37,10 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.renderer.AnimationState;
 import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -77,9 +79,11 @@ class BlitImageTest {
     RenderContext createTestContext(int vw, int vh) {
         return RenderContext.createInitial(
                 NullPlatformSupport.INSTANCE,
-                new MeasureContext(vw, vh,
+                MeasureContext.createInitial(
+                        new FloatSize(vw, vh),
                         SVGFont.defaultFontSize(),
-                        SVGFont.exFromEm(SVGFont.defaultFontSize())));
+                        SVGFont.exFromEm(SVGFont.defaultFontSize()),
+                        AnimationState.NO_ANIMATION));
     }
 
     void renderThroughBlitImage(@NotNull Output output, @NotNull RenderContext context,

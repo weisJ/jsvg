@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.PaintOrder;
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
@@ -50,7 +49,6 @@ public final class RenderContext {
     private final @NotNull FontRenderContext fontRenderContext;
     private final @NotNull MeasurableFontSpec fontSpec;
 
-    private final @NotNull FillRule fillRule;
 
     private final @Nullable ContextElementAttributes contextElementAttributes;
 
@@ -67,7 +65,6 @@ public final class RenderContext {
                 measureContext,
                 FontRenderContext.createDefault(),
                 MeasurableFontSpec.createDefault(),
-                FillRule.Nonzero,
                 null);
     }
 
@@ -78,7 +75,6 @@ public final class RenderContext {
             @NotNull MeasureContext measureContext,
             @NotNull FontRenderContext fontRenderContext,
             @NotNull MeasurableFontSpec fontSpec,
-            @NotNull FillRule fillRule,
             @Nullable ContextElementAttributes contextElementAttributes) {
         this.awtSupport = platformSupport;
         this.rootTransform = rootTransform;
@@ -87,28 +83,35 @@ public final class RenderContext {
         this.measureContext = measureContext;
         this.fontRenderContext = fontRenderContext;
         this.fontSpec = fontSpec;
-        this.fillRule = fillRule;
         this.contextElementAttributes = contextElementAttributes;
     }
 
     @NotNull
-    RenderContext derive(@Nullable Mutator<PaintContext> context,
+    RenderContext derive(
+            @Nullable Mutator<PaintContext> context,
             @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
-            @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes) {
-        return derive(context, attributeFontSpec, viewBox, frc, fillRule, contextAttributes, null);
+            @Nullable ContextElementAttributes contextAttributes,
+            EstablishRootMeasure establishRootMeasure) {
+        return deriveImpl(context, attributeFontSpec, viewBox, frc, contextAttributes, null,
+                establishRootMeasure);
+    }
+
+    public enum EstablishRootMeasure {
+        Yes,
+        No
     }
 
     @NotNull
-    RenderContext derive(@Nullable Mutator<PaintContext> context,
+    private RenderContext deriveImpl(@Nullable Mutator<PaintContext> context,
             @Nullable Mutator<MeasurableFontSpec> attributeFontSpec,
             @Nullable ViewBox viewBox, @Nullable FontRenderContext frc,
-            @Nullable FillRule fillRule, @Nullable ContextElementAttributes contextAttributes,
-            @Nullable AffineTransform rootTransform) {
+            @Nullable ContextElementAttributes contextAttributes,
+            @Nullable AffineTransform rootTransform,
+            EstablishRootMeasure establishRootMeasure) {
         if (context == null && viewBox == null && attributeFontSpec == null && frc == null) return this;
         PaintContext newPaintContext = paintContext;
         MeasurableFontSpec newFontSpec = fontSpec;
-        FillRule newFillRule = fillRule != null && fillRule != FillRule.Inherit ? fillRule : this.fillRule;
 
         if (context != null) newPaintContext = context.mutate(paintContext);
         if (attributeFontSpec != null) newFontSpec = attributeFontSpec.mutate(newFontSpec);
@@ -120,21 +123,25 @@ public final class RenderContext {
         float ex = SVGFont.exFromEm(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
 
+        if (establishRootMeasure == EstablishRootMeasure.Yes) {
+            newMeasureContext = newMeasureContext.deriveRoot(em);
+        }
+
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
         AffineTransform newRootTransform = rootTransform != null ? rootTransform : this.rootTransform;
 
         return new RenderContext(awtSupport, newRootTransform, new AffineTransform(userSpaceTransform),
-                newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newFillRule, newContextAttributes);
+                newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newContextAttributes);
     }
 
     public @NotNull RenderContext deriveForChildGraphics() {
         // Pass non-trivial context mutator to ensure userSpaceTransform gets created a different copy.
-        return derive(t -> t, null, null, null, null, null);
+        return derive(t -> t, null, null, null, null, EstablishRootMeasure.No);
     }
 
     public @NotNull RenderContext deriveForSurface() {
-        return derive(t -> t, null, null, null, null, null,
-                new AffineTransform(rootTransform));
+        return deriveImpl(t -> t, null, null, null, null,
+                new AffineTransform(rootTransform), EstablishRootMeasure.No);
     }
 
     public @NotNull StrokeContext strokeContext() {
@@ -205,7 +212,8 @@ public final class RenderContext {
     }
 
     public @NotNull FillRule fillRule() {
-        return fillRule;
+        FillRule fillRule = paintContext.fillRule;
+        return fillRule != null ? fillRule : FillRule.Nonzero;
     }
 
     public @NotNull SVGPaint strokePaint() {
@@ -243,16 +251,18 @@ public final class RenderContext {
         return p != null ? p : SVGPaint.DEFAULT_PAINT;
     }
 
-    public @Percentage float rawOpacity() {
-        return paintContext.opacity;
+    public float rawOpacity() {
+        return paintContext.opacity.get(measureContext);
     }
 
-    public @Percentage float fillOpacity() {
-        return paintContext.fillOpacity * paintContext.opacity;
+    public float fillOpacity() {
+        assert paintContext.fillOpacity != null;
+        return paintContext.fillOpacity.get(measureContext) * paintContext.opacity.get(measureContext);
     }
 
-    public @Percentage float strokeOpacity() {
-        return paintContext.strokeOpacity * paintContext.opacity;
+    public float strokeOpacity() {
+        assert paintContext.strokeOpacity != null;
+        return paintContext.strokeOpacity.get(measureContext) * paintContext.opacity.get(measureContext);
     }
 
     public @NotNull Stroke stroke(float pathLengthFactor) {
@@ -271,7 +281,6 @@ public final class RenderContext {
                 ",\n fontSpec=" + fontSpec +
                 ",\n awtSupport=" + awtSupport +
                 ",\n contextElementAttributes=" + contextElementAttributes +
-                ",\n fillRule=" + fillRule +
                 ",\n baseTransform=" + rootTransform +
                 ",\n userSpaceTransform=" + userSpaceTransform +
                 "\n}";

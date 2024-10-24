@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
@@ -60,8 +61,10 @@ public final class Filter extends ContainerNode {
     private static final Logger LOGGER = Logger.getLogger(Filter.class.getName());
     public static final String TAG = "filter";
 
-    private static final Length DEFAULT_FILTER_COORDINATE = Unit.PERCENTAGE.valueOf(-10);
-    private static final Length DEFAULT_FILTER_SIZE = Unit.PERCENTAGE.valueOf(120);
+    private static final Length DEFAULT_FILTER_COORDINATE_X = Unit.PERCENTAGE_WIDTH.valueOf(-10);
+    private static final Length DEFAULT_FILTER_COORDINATE_Y = Unit.PERCENTAGE_HEIGHT.valueOf(-10);
+    private static final Length DEFAULT_FILTER_WIDTH = Unit.PERCENTAGE_WIDTH.valueOf(120);
+    private static final Length DEFAULT_FILTER_HEIGHT = Unit.PERCENTAGE_HEIGHT.valueOf(120);
     private static final Rectangle2D.Double NO_CLIP_BOUNDS = new Rectangle2D.Double(
             -(Double.MAX_VALUE / 3), -(Double.MAX_VALUE / 3),
             2 * (Double.MAX_VALUE / 3), 2 * (Double.MAX_VALUE / 3));
@@ -103,14 +106,14 @@ public final class Filter extends ContainerNode {
         filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
         colorInterpolation = attributeNode.getEnum("color-interpolation-filters", ColorInterpolation.LinearRGB);
 
-        x = attributeNode.getLength("x", DEFAULT_FILTER_COORDINATE)
-                .coercePercentageToCorrectUnit(filterUnits);
-        y = attributeNode.getLength("y", DEFAULT_FILTER_COORDINATE)
-                .coercePercentageToCorrectUnit(filterUnits);
-        width = attributeNode.getLength("width", DEFAULT_FILTER_SIZE)
-                .coercePercentageToCorrectUnit(filterUnits);
-        height = attributeNode.getLength("height", DEFAULT_FILTER_SIZE)
-                .coercePercentageToCorrectUnit(filterUnits);
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, DEFAULT_FILTER_COORDINATE_X)
+                .coercePercentageToCorrectUnit(filterUnits, PercentageDimension.WIDTH);
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, DEFAULT_FILTER_COORDINATE_Y)
+                .coercePercentageToCorrectUnit(filterUnits, PercentageDimension.HEIGHT);
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, DEFAULT_FILTER_WIDTH)
+                .coercePercentageToCorrectUnit(filterUnits, PercentageDimension.WIDTH);
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, DEFAULT_FILTER_HEIGHT)
+                .coercePercentageToCorrectUnit(filterUnits, PercentageDimension.HEIGHT);
     }
 
     public @Nullable FilterBounds createFilterBounds(@Nullable Output output, @NotNull RenderContext context,

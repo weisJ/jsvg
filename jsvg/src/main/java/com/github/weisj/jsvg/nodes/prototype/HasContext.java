@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.nodes.prototype;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.renderer.FontRenderContext;
 import com.github.weisj.jsvg.renderer.PaintContext;
@@ -33,17 +32,12 @@ import com.github.weisj.jsvg.renderer.PaintContext;
  * <p>
  * Umbrella interface for all available contexts.
  */
-public interface HasContext extends HasPaintContext, HasFontContext, HasFontRenderContext, HasFillRule {
+public interface HasContext extends HasPaintContext, HasFontContext, HasFontRenderContext {
 
     interface ByDelegate extends HasContext {
 
         @NotNull
         HasContext contextDelegate();
-
-        @Override
-        default @NotNull FillRule fillRule() {
-            return contextDelegate().fillRule();
-        }
 
         @Override
         default @NotNull Mutator<MeasurableFontSpec> fontSpec() {

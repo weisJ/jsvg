@@ -22,16 +22,21 @@
 package com.github.weisj.jsvg.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.prototype.Container;
+import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 public final class ParsedElement {
+
 
     private enum BuildStatus {
         NOT_BUILT,
@@ -40,14 +45,22 @@ public final class ParsedElement {
     }
 
     private final @Nullable String id;
+    private final @NotNull ParsedDocument document;
+    private final @Nullable ParsedElement parent;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
+    private final @NotNull Map<String, @NotNull ParsedElement> animationElements = new HashMap<>();
+    private String[] classList;
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
 
-    ParsedElement(@Nullable String id, @NotNull AttributeNode element, @NotNull SVGNode node) {
+    ParsedElement(@Nullable String id, @NotNull ParsedDocument document,
+            @Nullable ParsedElement parent, @NotNull AttributeNode element,
+            @NotNull SVGNode node) {
+        this.document = document;
+        this.parent = parent;
         this.attributeNode = element;
         this.node = node;
         this.id = id;
@@ -70,8 +83,35 @@ public final class ParsedElement {
         return id;
     }
 
+    public @NotNull String[] classList() {
+        if (classList == null) {
+            classList = attributeNode.getStringList("class", SeparatorMode.WHITESPACE_ONLY);
+        }
+        return classList;
+    }
+
+    public @NotNull ParsedDocument document() {
+        return document;
+    }
+
     public @NotNull List<ParsedElement> children() {
         return children;
+    }
+
+    public @NotNull Map<String, ParsedElement> animationElements() {
+        return animationElements;
+    }
+
+    public @Nullable ParsedElement parent() {
+        return parent;
+    }
+
+    public @Nullable ParsedElement previousSibling() {
+        if (parent == null) return null;
+        List<ParsedElement> siblings = parent.children;
+        int index = siblings.indexOf(this);
+        if (index <= 0) return null;
+        return siblings.get(index - 1);
     }
 
     public @NotNull SVGNode node() {
@@ -92,6 +132,9 @@ public final class ParsedElement {
     }
 
     void addChild(ParsedElement parsedElement) {
+        if (Category.hasCategory(parsedElement.node, Category.Animation)) {
+            animationElements.put(Animate.attributeName(parsedElement.attributeNode()), parsedElement);
+        }
         children.add(parsedElement);
         if (node instanceof Container) {
             ((Container<?>) node).addChild(parsedElement.id, parsedElement.node);
@@ -106,7 +149,7 @@ public final class ParsedElement {
         }
         buildStatus = BuildStatus.IN_PROGRESS;
 
-        attributeNode.prepareForNodeBuilding(this);
+        attributeNode.prepareForNodeBuilding();
 
         // Build depth first to ensure child nodes are processed first.
         // e.g. LinearGradient depends on its stops to be build first.

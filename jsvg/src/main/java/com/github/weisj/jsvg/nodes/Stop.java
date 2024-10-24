@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,10 +26,10 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.geometry.path.BezierPathCommand;
 import com.github.weisj.jsvg.geometry.path.PathParser;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -46,7 +46,7 @@ public final class Stop extends AbstractSVGNode {
     public static final String TAG = "stop";
 
     private @NotNull Color color = PaintParser.DEFAULT_COLOR;
-    private @Percentage float offset;
+    private Percentage offset;
     private @Nullable BezierPathCommand path;
 
     @Override
@@ -58,7 +58,7 @@ public final class Stop extends AbstractSVGNode {
         return color;
     }
 
-    public float offset() {
+    public @NotNull Percentage offset() {
         return offset;
     }
 
@@ -70,9 +70,9 @@ public final class Stop extends AbstractSVGNode {
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         Color c = attributeNode.getColor("stop-color");
-        float opacity = attributeNode.getPercentage("stop-opacity", c.getAlpha() / 255f);
+        float opacity = attributeNode.getPercentage("stop-opacity", new Percentage(c.getAlpha() / 255f)).value();
         color = ColorUtil.withAlpha(c, opacity);
-        offset = attributeNode.getPercentage("offset", 0);
+        offset = attributeNode.getPercentage("offset", Percentage.ZERO);
         String pathData = attributeNode.getValue("path");
         path = pathData != null ? new PathParser(pathData).parseMeshCommand() : null;
     }

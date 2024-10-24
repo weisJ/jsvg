@@ -27,6 +27,7 @@ import java.awt.geom.AffineTransform;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.Output;
@@ -43,10 +44,10 @@ abstract class LinearTextContainer extends TextContainer {
     @MustBeInvokedByOverriders
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        x = attributeNode.getLengthList("x");
-        y = attributeNode.getLengthList("y");
-        dx = attributeNode.getLengthList("dx");
-        dy = attributeNode.getLengthList("dy");
+        x = attributeNode.getLengthList("x", PercentageDimension.WIDTH);
+        y = attributeNode.getLengthList("y", PercentageDimension.HEIGHT);
+        dx = attributeNode.getLengthList("dx", PercentageDimension.WIDTH);
+        dy = attributeNode.getLengthList("dy", PercentageDimension.HEIGHT);
         rotate = attributeNode.getFloatList("rotate");
     }
 

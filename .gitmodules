@@ -1,0 +1,3 @@
+[submodule "resvg-test-suite"]
+	path = resvg-test-suite
+	url = https://github.com/RazrFalcon/resvg-test-suite.git

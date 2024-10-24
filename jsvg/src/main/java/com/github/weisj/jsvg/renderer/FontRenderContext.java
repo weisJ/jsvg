@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.text.DominantBaseline;
 import com.github.weisj.jsvg.attributes.text.TextAnchor;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
@@ -88,7 +89,7 @@ public final class FontRenderContext {
             dominantBaseline = null;
         }
         return new FontRenderContext(
-                attributeNode.getLength("letter-spacing"),
+                attributeNode.getLength("letter-spacing", PercentageDimension.NONE),
                 dominantBaseline,
                 attributeNode.getEnumNullable("text-anchor", TextAnchor.class));
     }

@@ -37,11 +37,18 @@ import org.apache.batik.swing.JSVGCanvas;
 import org.ehcache.sizeof.SizeOf;
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.darklaf.Customization;
 import com.github.weisj.darklaf.LafManager;
+import com.github.weisj.darklaf.iconset.AllIcons;
+import com.github.weisj.darklaf.ui.button.ButtonConstants;
+import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.parser.ExternalResourcePolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.renderer.AnimationState;
+import com.github.weisj.jsvg.renderer.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.kitfox.svg.app.beans.SVGIcon;
 
 public final class SVGViewer {
@@ -54,7 +61,7 @@ public final class SVGViewer {
             JFrame frame = new JFrame("SVGViewer");
 
             JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("tmp.svg");
+            iconBox.setSelectedItem("tmp3.svg");
 
             JComponent contentPane = (JComponent) frame.getContentPane();
             contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
@@ -90,6 +97,8 @@ public final class SVGViewer {
             frame.add(box, BorderLayout.NORTH);
             frame.add(svgPanel, BorderLayout.CENTER);
 
+            Box controls = Box.createVerticalBox();
+
             Box renderingMode = Box.createHorizontalBox();
             JRadioButton jsvg = new JRadioButton(RenderingMode.JSVG.name());
             jsvg.setSelected(true);
@@ -98,7 +107,6 @@ public final class SVGViewer {
             svgSalamander.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.SVG_SALAMANDER));
             JRadioButton batik = new JRadioButton(RenderingMode.BATIK.name());
             batik.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.BATIK));
-
 
             ButtonGroup bg = new ButtonGroup();
             bg.add(jsvg);
@@ -134,8 +142,43 @@ public final class SVGViewer {
             resourceInfo.addActionListener(e -> svgPanel.printMemory());
             renderingMode.add(resourceInfo);
 
+            controls.add(renderingMode);
 
-            frame.add(renderingMode, BorderLayout.SOUTH);
+            Box animationControls = Box.createHorizontalBox();
+
+            JButton restartAnimation = new JButton(AllIcons.Action.Refresh.get());
+            restartAnimation.putClientProperty(Customization.Button.KEY_SQUARE, true);
+            restartAnimation.putClientProperty(Customization.Button.KEY_VARIANT, ButtonConstants.VARIANT_BORDERLESS);
+            restartAnimation.setDisabledIcon(AllIcons.Action.Refresh.disabled());
+
+            JToggleButton pauseAnimation = new JToggleButton(AllIcons.Action.Pause.get());
+            pauseAnimation.putClientProperty(Customization.Button.KEY_SQUARE, true);
+            pauseAnimation.putClientProperty(Customization.Button.KEY_VARIANT, ButtonConstants.VARIANT_BORDERLESS);
+
+            pauseAnimation.setDisabledIcon(AllIcons.Action.Pause.disabled());
+            pauseAnimation.setSelectedIcon(AllIcons.Action.Play.get());
+            pauseAnimation.setDisabledSelectedIcon(AllIcons.Action.Play.disabled());
+            pauseAnimation.setSelected(false);
+
+            restartAnimation.addActionListener(e -> {
+                svgPanel.animationRunning = true;
+                svgPanel.restartAnimation();
+                pauseAnimation.setSelected(false);
+            });
+            pauseAnimation.addActionListener(e -> {
+                svgPanel.setAnimationState(!pauseAnimation.isSelected());
+            });
+
+            animationControls.add(Box.createHorizontalStrut(5));
+            animationControls.add(restartAnimation);
+            animationControls.add(Box.createHorizontalStrut(5));
+            animationControls.add(pauseAnimation);
+            animationControls.add(Box.createHorizontalGlue());
+
+            controls.add(animationControls);
+            controls.add(Box.createVerticalStrut(5));
+
+            frame.add(controls, BorderLayout.SOUTH);
 
             frame.pack();
             frame.setLocationRelativeTo(null);
@@ -176,6 +219,12 @@ public final class SVGViewer {
         private boolean lowResolution;
         private Object maskRenderingValue = SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_DEFAULT;
 
+        private long animationStart;
+        private long animationElapsedBeforePause;
+
+        private boolean animationRunning = true;
+        private final Timer animationTimer = new Timer(1 / 60, e -> animationUpdate());
+
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
             setBackground(Color.WHITE);
@@ -195,17 +244,55 @@ public final class SVGViewer {
             }
         }
 
+        private void restartAnimation() {
+            if (document == null) return;
+            AnimationPeriod animationPeriod = document.animationPeriod();
+            animationTimer.setRepeats(true);
+            animationTimer.setInitialDelay((int) animationPeriod.startTime());
+            animationTimer.setCoalesce(true);
+
+            animationTimer.start();
+            animationStart = System.currentTimeMillis();
+            animationElapsedBeforePause = 0;
+        }
+
+        public void setAnimationState(boolean playing) {
+            if (playing == animationRunning) return;
+            animationRunning = playing;
+            if (playing) {
+                animationStart = System.currentTimeMillis() - animationElapsedBeforePause;
+                animationElapsedBeforePause = 0;
+                animationTimer.start();
+            } else {
+                animationTimer.stop();
+                animationElapsedBeforePause = System.currentTimeMillis() - animationStart;
+            }
+        }
+
+        private void animationUpdate() {
+            if (System.currentTimeMillis() - animationStart > document.animationPeriod().endTime()) {
+                animationTimer.stop();
+            }
+            repaint();
+        }
+
         private void selectIcon(@NotNull String name) {
+            animationTimer.stop();
             remove(jsvgCanvas);
             switch (mode) {
-                case JSVG -> document = iconCache.computeIfAbsent(name, n -> {
-                    URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
-                    SVGLoader loader = new SVGLoader();
-                    LoaderContext loaderContext = LoaderContext.builder()
-                            .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
-                            .build();
-                    return loader.load(url, loaderContext);
-                });
+                case JSVG -> {
+                    document = iconCache.computeIfAbsent(name, n -> {
+                        URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
+                        SVGLoader loader = new SVGLoader();
+                        LoaderContext loaderContext = LoaderContext.builder()
+                                .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
+                                .build();
+                        return loader.load(url, loaderContext);
+                    });
+                    if (document != null && document.isAnimated() && animationRunning) {
+                        restartAnimation();
+                    }
+                }
                 case SVG_SALAMANDER -> {
                     try {
                         icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
@@ -291,7 +378,11 @@ public final class SVGViewer {
                         renderGraphics.setColor(Color.MAGENTA);
                         renderGraphics.fill(shape);
                     } else {
-                        document.render((Component) this, renderGraphics, viewBox);
+                        document.renderWithPlatform(
+                                new AwtComponentPlatformSupport(this),
+                                new Graphics2DOutput(renderGraphics),
+                                viewBox,
+                                new AnimationState(animationStart, System.currentTimeMillis()));
                     }
 
                     if (img != null) {

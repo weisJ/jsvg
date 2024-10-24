@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,8 +27,8 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 
 public final class AttributeFontSpec extends FontSpec implements Mutator<MeasurableFontSpec> {
@@ -36,7 +36,7 @@ public final class AttributeFontSpec extends FontSpec implements Mutator<Measura
     private final @Nullable FontWeight weight;
 
     AttributeFontSpec(@NotNull String[] families, @Nullable FontStyle style, @Nullable Length sizeAdjust,
-            @Percentage float stretch, @Nullable FontSize size, @Nullable FontWeight weight) {
+            @NotNull Percentage stretch, @Nullable FontSize size, @Nullable FontWeight weight) {
         super(families, style, sizeAdjust, stretch);
         this.size = size;
         this.weight = weight;

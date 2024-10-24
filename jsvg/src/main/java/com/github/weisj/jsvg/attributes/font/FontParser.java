@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,8 +24,9 @@ package com.github.weisj.jsvg.attributes.font;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.Percentage;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
 
@@ -41,7 +42,7 @@ public final class FontParser {
         @Nullable FontSize size = parseFontSize(node);
         @Nullable Length sizeAdjust = parseSizeAdjust(node);
         @Nullable FontStyle style = parseFontStyle(node);
-        @Percentage float stretch = parseStretch(node);
+        @NotNull Percentage stretch = parseStretch(node);
 
         return new AttributeFontSpec(fontFamilies, style, sizeAdjust, stretch, size, weight);
     }
@@ -61,18 +62,18 @@ public final class FontParser {
         return weight;
     }
 
-    public static @Percentage float parseStretch(@NotNull AttributeNode node) {
+    public static @NotNull Percentage parseStretch(@NotNull AttributeNode node) {
         FontStretch stretch = node.getEnum("font-stretch", FontStretch.Percentage);
         return stretch == FontStretch.Percentage
                 ? node.parser().parsePercentage(node.getValue("font-stretch"),
-                        Length.UNSPECIFIED_RAW, 0.5f, 2f)
+                        Percentage.UNSPECIFIED, 0.5f, 2f)
                 : stretch.percentage();
     }
 
     public static @Nullable FontSize parseFontSize(@NotNull AttributeNode node) {
         FontSize fontSize = node.getEnum("font-size", PredefinedFontSize.Number);
         if (fontSize == PredefinedFontSize.Number) {
-            Length size = node.getLength("font-size", Length.UNSPECIFIED);
+            Length size = node.getLength("font-size", PercentageDimension.CUSTOM, Length.UNSPECIFIED);
             fontSize = size.isSpecified()
                     ? new LengthFontSize(size)
                     : null;
@@ -81,10 +82,10 @@ public final class FontParser {
     }
 
     public static @Nullable Length parseSizeAdjust(@NotNull AttributeNode node) {
-        return node.getLength("font-size-adjust");
+        return node.getLength("font-size-adjust", PercentageDimension.NONE);
     }
 
-    public static @Nullable FontStyle parseFontStyle(@NotNull AttributeNode node) {
+    static @Nullable FontStyle parseFontStyle(@NotNull AttributeNode node) {
         FontStyle style = null;
         String styleStr = node.getValue("font-style");
         if ("normal".equalsIgnoreCase(styleStr)) {

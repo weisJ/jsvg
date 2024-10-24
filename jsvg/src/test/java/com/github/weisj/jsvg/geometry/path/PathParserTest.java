@@ -29,25 +29,28 @@ class PathParserTest {
 
     @Test
     void testAdjacentFlags() {
-        PathCommand[] cmds = new PathParser("a1 2 3 10 6 7").parsePathCommand();
-        Assertions.assertEquals(1, cmds.length);
-        Assertions.assertEquals(6, cmds[0].nodeCount());
+        PathCommand[] cmds = new PathParser("M0 0 a1 2 3 10 6 7").parsePathCommand();
+        Assertions.assertEquals(2, cmds.length);
+        Assertions.assertTrue(cmds[0] instanceof MoveTo);
+        Assertions.assertEquals(6, cmds[1].nodeCount());
     }
 
     @Test
     void testDotInExponent() {
-        PathCommand[] cmds = new PathParser("L 1e5.5").parsePathCommand();
-        Assertions.assertEquals(1, cmds.length);
-        Assertions.assertTrue(cmds[0] instanceof LineTo);
-        LineTo cmd = (LineTo) cmds[0];
+        PathCommand[] cmds = new PathParser("M0 0 L 1e5.5").parsePathCommand();
+        Assertions.assertEquals(2, cmds.length);
+        Assertions.assertTrue(cmds[0] instanceof MoveTo);
+        Assertions.assertTrue(cmds[1] instanceof LineTo);
+        LineTo cmd = (LineTo) cmds[1];
         Assertions.assertEquals(cmd.x(), 1e5);
         Assertions.assertEquals(cmd.y(), .5);
     }
 
     @Test
     void testRepeatedArcs() {
-        PathCommand[] cmds = new PathParser("a1 2 3 10 6 7 1 2 3 10 6 7 1 2 3 10 6 7 1 2 3 10 6 7").parsePathCommand();
-        Assertions.assertEquals(4, cmds.length);
-        Assertions.assertEquals(6, cmds[0].nodeCount());
+        PathCommand[] cmds =
+                new PathParser("M0 0 a1 2 3 10 6 7 1 2 3 10 6 7 1 2 3 10 6 7 1 2 3 10 6 7").parsePathCommand();
+        Assertions.assertEquals(5, cmds.length);
+        Assertions.assertEquals(6, cmds[1].nodeCount());
     }
 }

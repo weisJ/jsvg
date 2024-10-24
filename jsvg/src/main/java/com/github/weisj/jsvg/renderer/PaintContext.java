@@ -27,31 +27,36 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.value.AnimatedColor;
+import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.PaintOrder;
-import com.github.weisj.jsvg.attributes.Percentage;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
 public final class PaintContext implements Mutator<PaintContext> {
 
-    public final @Nullable AwtSVGPaint color;
+    public final @Nullable SVGPaint color;
     public final @Nullable SVGPaint fillPaint;
     public final @Nullable SVGPaint strokePaint;
 
-    public final @Percentage float opacity;
-    public final @Percentage float fillOpacity;
-    public final @Percentage float strokeOpacity;
+    public final PercentageValue opacity;
+    public final @Nullable PercentageValue fillOpacity;
+    public final @Nullable PercentageValue strokeOpacity;
 
     public final @Nullable PaintOrder paintOrder;
 
     public final @Nullable StrokeContext strokeContext;
+    public final @Nullable FillRule fillRule;
 
-    public PaintContext(@Nullable AwtSVGPaint color, @Nullable SVGPaint fillPaint, float fillOpacity,
-            @Nullable SVGPaint strokePaint, float strokeOpacity, float opacity,
+    public PaintContext(@Nullable SVGPaint color, @Nullable SVGPaint fillPaint, @Nullable PercentageValue fillOpacity,
+            @Nullable SVGPaint strokePaint, @Nullable PercentageValue strokeOpacity, PercentageValue opacity,
             @Nullable PaintOrder paintOrder,
-            @Nullable StrokeContext strokeContext) {
+            @Nullable StrokeContext strokeContext, @Nullable FillRule fillRule) {
         this.color = color;
         this.fillPaint = fillPaint;
         this.strokePaint = strokePaint;
@@ -61,47 +66,55 @@ public final class PaintContext implements Mutator<PaintContext> {
         this.paintOrder = paintOrder;
         // Avoid creating unnecessary intermediate contexts during painting.
         this.strokeContext = strokeContext == null || strokeContext.isTrivial() ? null : strokeContext;
+        this.fillRule = fillRule;
     }
 
     public static @NotNull PaintContext createDefault() {
         return new PaintContext(
                 SVGPaint.DEFAULT_PAINT,
-                SVGPaint.DEFAULT_PAINT, 1,
-                SVGPaint.NONE, 1, 1,
+                SVGPaint.DEFAULT_PAINT, Percentage.ONE,
+                SVGPaint.NONE, Percentage.ONE, Percentage.ONE,
                 PaintOrder.NORMAL,
-                StrokeContext.createDefault());
+                StrokeContext.createDefault(),
+                FillRule.Nonzero);
     }
 
     public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
         return new PaintContext(
                 parseColorAttribute(attributeNode),
-                attributeNode.getPaint("fill"),
-                attributeNode.getPercentage("fill-opacity", 1),
-                attributeNode.getPaint("stroke"),
-                attributeNode.getPercentage("stroke-opacity", 1),
-                attributeNode.getPercentage("opacity", 1),
+                attributeNode.getPaint("fill", Animatable.YES),
+                attributeNode.getPercentage("fill-opacity", Animatable.YES),
+                attributeNode.getPaint("stroke", Animatable.YES),
+                attributeNode.getPercentage("stroke-opacity", Animatable.YES),
+                attributeNode.getPercentage("opacity", Percentage.ONE),
                 PaintOrder.parse(attributeNode),
-                StrokeContext.parse(attributeNode));
+                StrokeContext.parse(attributeNode),
+                FillRule.parse(attributeNode));
     }
 
-    private static @Nullable AwtSVGPaint parseColorAttribute(@NotNull AttributeNode attributeNode) {
+    private static @Nullable SVGPaint parseColorAttribute(@NotNull AttributeNode attributeNode) {
         Color c = attributeNode.getColor("color", null);
         if (c == null) return null;
+        AnimatedColor animatedColor = attributeNode.getAnimatedColor("color", c);
+        if (animatedColor != null) return animatedColor;
         return new AwtSVGPaint(c);
     }
 
     public @NotNull PaintContext derive(@NotNull PaintContext context) {
         return new PaintContext(
-                context.color != null ? context.color : color,
-                context.fillPaint != null ? context.fillPaint : fillPaint,
-                fillOpacity * context.fillOpacity,
-                context.strokePaint != null ? context.strokePaint : strokePaint,
-                strokeOpacity * context.strokeOpacity,
-                opacity * context.opacity,
+                SVGPaint.derive(color, context.color),
+                SVGPaint.derive(fillPaint, context.fillPaint),
+                context.fillOpacity != null ? context.fillOpacity : fillOpacity,
+                SVGPaint.derive(strokePaint, context.strokePaint),
+                context.strokeOpacity != null ? context.strokeOpacity : strokeOpacity,
+                opacity.multiply(context.opacity),
                 context.paintOrder != null ? context.paintOrder : paintOrder,
                 strokeContext != null
                         ? strokeContext.derive(context.strokeContext)
-                        : context.strokeContext);
+                        : context.strokeContext,
+                context.fillRule != null && context.fillRule != FillRule.Inherit
+                        ? context.fillRule
+                        : this.fillRule);
     }
 
     @Override
@@ -120,6 +133,7 @@ public final class PaintContext implements Mutator<PaintContext> {
                 ", strokeOpacity=" + strokeOpacity +
                 ", strokeContext=" + strokeContext +
                 ", paintOrder=" + paintOrder +
+                ", fillRule=" + fillRule +
                 '}';
     }
 }

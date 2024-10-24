@@ -95,7 +95,7 @@ allprojects {
         resolutionStrategy.cacheChangingModulesFor(0, "seconds")
     }
 
-    if (!skipSpotless) {
+    if (!skipSpotless && !enableErrorProne) {
         apply(plugin = "com.diffplug.spotless")
         spotless {
             val spotlessRatchet by props(default = true)
@@ -205,6 +205,10 @@ allprojects {
             }
         }
 
+        if (!enableErrorProne) {
+            apply(plugin = "module-info-compile")
+        }
+
         if (enableErrorProne) {
             apply(plugin = "net.ltgt.errorprone")
             dependencies {
@@ -226,6 +230,7 @@ allprojects {
                         "StringSplitter",
                         "InlineMeSuggester",
                         "MissingSummary",
+                        "MultipleNullnessAnnotations",
                     )
                 }
             }
@@ -303,8 +308,7 @@ allprojects {
         }
 
         configure<PublishingExtension> {
-            if (project.path == ":") {
-                // Skip the root project
+            if (project.path in listOf(":", ":annotations", ":annotations-processor")) {
                 return@configure
             }
 

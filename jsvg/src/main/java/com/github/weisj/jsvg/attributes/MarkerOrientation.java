@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.attributes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.Angle;
 
 public abstract class MarkerOrientation {
 
@@ -40,19 +40,19 @@ public abstract class MarkerOrientation {
         if (value == null) return AngleOrientation.DEFAULT;
         if ("auto".equals(value)) return AutoOrientation.INSTANCE;
         if ("auto-start-reverse".equals(value)) return AutoStartReverseOrientation.INSTANCE;
-        @Radian float angle = parser.parseAngle(value, Length.UNSPECIFIED_RAW);
-        if (Length.isSpecified(angle)) return new AngleOrientation(angle);
+        Angle angle = parser.parseAngle(value, Angle.UNSPECIFIED);
+        if (angle.isSpecified()) return new AngleOrientation(angle);
         return AngleOrientation.DEFAULT;
     }
 
-    public abstract @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
+    public abstract float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
             float dyOut);
 
     private static final class AutoOrientation extends MarkerOrientation {
         private static final @NotNull AutoOrientation INSTANCE = new AutoOrientation();
 
         @Override
-        public @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
+        public float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
                 float dyOut) {
             switch (type) {
                 case START:
@@ -71,7 +71,7 @@ public abstract class MarkerOrientation {
         private static final @NotNull AutoStartReverseOrientation INSTANCE = new AutoStartReverseOrientation();
 
         @Override
-        public @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
+        public float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
                 float dyOut) {
             switch (type) {
                 case START:
@@ -87,17 +87,17 @@ public abstract class MarkerOrientation {
     }
 
     private static final class AngleOrientation extends MarkerOrientation {
-        private static final @NotNull AngleOrientation DEFAULT = new AngleOrientation(0);
-        private final @Radian float angle;
+        private static final @NotNull AngleOrientation DEFAULT = new AngleOrientation(Angle.ZERO);
+        private final @NotNull Angle angle;
 
-        private AngleOrientation(@Radian float angle) {
+        private AngleOrientation(@NotNull Angle angle) {
             this.angle = angle;
         }
 
         @Override
-        public @Radian float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
+        public float orientationFor(@NotNull MarkerType type, float dxIn, float dyIn, float dxOut,
                 float dyOut) {
-            return angle;
+            return angle.radians();
         }
     }
 }

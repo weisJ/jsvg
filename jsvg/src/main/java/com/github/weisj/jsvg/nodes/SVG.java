@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -39,6 +40,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.renderer.AnimationState;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -56,12 +58,14 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 public final class SVG extends CommonInnerViewContainer {
     public static final String TAG = "svg";
 
-    private static final @NotNull Length TOP_LEVEL_TRANSFORM_ORIGIN = Unit.PERCENTAGE.valueOf(50);
+    private static final @NotNull Length TOP_LEVEL_TRANSFORM_ORIGIN_X = Unit.PERCENTAGE_WIDTH.valueOf(50);
+    private static final @NotNull Length TOP_LEVEL_TRANSFORM_ORIGIN_Y = Unit.PERCENTAGE_HEIGHT.valueOf(50);
     private static final float FALLBACK_WIDTH = 300;
     private static final float FALLBACK_HEIGHT = 150;
 
     private boolean isTopLevel;
     private boolean inNonRootMode;
+    private AnimationPeriod animationPeriod;
 
     @Override
     public @NotNull String tagName() {
@@ -70,6 +74,10 @@ public final class SVG extends CommonInnerViewContainer {
 
     public boolean isTopLevel() {
         return isTopLevel && !inNonRootMode;
+    }
+
+    public @NotNull AnimationPeriod animationPeriod() {
+        return animationPeriod;
     }
 
 
@@ -95,8 +103,9 @@ public final class SVG extends CommonInnerViewContainer {
 
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
-        isTopLevel = attributeNode.parent() == null;
+        isTopLevel = attributeNode.element().parent() == null;
         super.build(attributeNode);
+        animationPeriod = attributeNode.document().animationPeriod();
     }
 
     @Override
@@ -109,8 +118,8 @@ public final class SVG extends CommonInnerViewContainer {
     public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
         if (!isTopLevel) return super.transformOrigin(context);
         return new Point2D.Float(
-                TOP_LEVEL_TRANSFORM_ORIGIN.resolveWidth(context),
-                TOP_LEVEL_TRANSFORM_ORIGIN.resolveHeight(context));
+                TOP_LEVEL_TRANSFORM_ORIGIN_X.resolve(context),
+                TOP_LEVEL_TRANSFORM_ORIGIN_Y.resolve(context));
     }
 
     @Override
@@ -120,12 +129,13 @@ public final class SVG extends CommonInnerViewContainer {
 
     public @NotNull FloatSize sizeForTopLevel(float em, float ex) {
         // Use a viewport of size 100x100 to interpret percentage values as raw pixels.
-        MeasureContext topLevelContext = MeasureContext.createInitial(new FloatSize(100, 100), em, ex);
+        MeasureContext topLevelContext = MeasureContext.createInitial(new FloatSize(100, 100),
+                em, ex, AnimationState.NO_ANIMATION);
         return new FloatSize(
                 width.orElseIfUnspecified(viewBox != null ? viewBox.width : FALLBACK_WIDTH)
-                        .resolveWidth(topLevelContext),
+                        .resolve(topLevelContext),
                 height.orElseIfUnspecified(viewBox != null ? viewBox.height : FALLBACK_HEIGHT)
-                        .resolveHeight(topLevelContext));
+                        .resolve(topLevelContext));
     }
 
     @Override

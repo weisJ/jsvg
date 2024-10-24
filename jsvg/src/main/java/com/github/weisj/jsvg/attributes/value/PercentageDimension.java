@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,19 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl;
+package com.github.weisj.jsvg.attributes.value;
 
-public enum TokenType {
-    START,
-    CURLY_OPEN,
-    CURLY_CLOSE,
-    COMMENT,
-    COLON,
-    COMMA,
-    SEMICOLON,
-    RAW_DATA,
-    CLASS_NAME,
-    ID_NAME,
-    IDENTIFIER,
-    EOF
+public enum PercentageDimension {
+    WIDTH,
+    HEIGHT,
+    LENGTH,
+    CUSTOM,
+    NONE
 }

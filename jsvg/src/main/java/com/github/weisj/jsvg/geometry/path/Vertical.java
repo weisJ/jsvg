@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Mark McKay
  * @author <a href="mailto:mark@kitfox.com">Mark McKay</a>
+ * @author Jannis Weis
  */
 final class Vertical extends PathCommand {
 
@@ -44,8 +45,7 @@ final class Vertical extends PathCommand {
         float yOff = isRelative() ? hist.lastPoint.y : 0f;
 
         path.lineTo(xOff, y + yOff);
-        hist.setLastPoint(path.getCurrentPoint());
-        hist.setLastKnot(path.getCurrentPoint());
+        hist.setLast(path.getCurrentPoint());
     }
 
     @Override

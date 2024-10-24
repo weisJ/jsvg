@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,22 +25,36 @@ import java.util.Locale;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum Unit {
+import com.github.weisj.jsvg.attributes.SuffixUnit;
+
+public enum Unit implements SuffixUnit<Unit, Length> {
     PX,
     CM,
+    Q,
     MM,
     IN,
     EM,
     REM,
     EX,
+    CH,
     PT,
     PC,
+    VW,
+    VH,
+    VI,
+    VB,
+    V_MIN("vmin"),
+    V_MAX("vmax"),
     PERCENTAGE("%"),
-    Raw("");
+    PERCENTAGE_LENGTH("%"),
+    PERCENTAGE_WIDTH("%"),
+    PERCENTAGE_HEIGHT("%"),
+    RAW("");
 
     private static final Unit[] units = values();
 
-    public static Unit[] units() {
+    @Override
+    public @NotNull Unit @NotNull [] units() {
         return units;
     }
 
@@ -54,13 +68,26 @@ public enum Unit {
         this.suffix = name().toLowerCase(Locale.ENGLISH);
     }
 
-    @NotNull
-    public Length valueOf(float value) {
+    @Override
+    public @NotNull Length valueOf(float value) {
         if (value == 0) return Length.ZERO;
         return new Length(this, value);
     }
 
+    @Override
     public @NotNull String suffix() {
         return suffix;
+    }
+
+    public boolean isPercentage() {
+        switch (this) {
+            case PERCENTAGE:
+            case PERCENTAGE_LENGTH:
+            case PERCENTAGE_WIDTH:
+            case PERCENTAGE_HEIGHT:
+                return true;
+            default:
+                return false;
+        }
     }
 }

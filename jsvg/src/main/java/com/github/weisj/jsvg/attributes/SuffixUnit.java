@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,40 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl;
+package com.github.weisj.jsvg.attributes;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.google.errorprone.annotations.Immutable;
+public interface SuffixUnit<T, V> {
 
-@Immutable
-public final class Token {
-    private final @NotNull TokenType type;
-    private final @Nullable String data;
+    @NotNull
+    String suffix();
 
-    public Token(@NotNull TokenType type) {
-        this(type, null);
-    }
+    @NotNull
+    SuffixUnit<T, V> @NotNull [] units();
 
-    public Token(@NotNull TokenType type, @Nullable String data) {
-        this.type = type;
-        this.data = data;
-    }
-
-    public @NotNull TokenType type() {
-        return type;
-    }
-
-    public @Nullable String data() {
-        return data;
-    }
-
-    @Override
-    public String toString() {
-        return "Token{" +
-                "type=" + type +
-                ", data='" + data + '\'' +
-                '}';
-    }
+    @NotNull
+    V valueOf(float value);
 }

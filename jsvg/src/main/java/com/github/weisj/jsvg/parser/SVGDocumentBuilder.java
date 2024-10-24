@@ -96,19 +96,16 @@ public final class SVGDocumentBuilder {
         ParsedElement parentElement = !currentNodeStack.isEmpty()
                 ? currentNodeStack.peek()
                 : null;
-        AttributeNode parentAttributeNode = parentElement != null
-                ? parentElement.attributeNode()
-                : null;
 
         if (parentElement != null) flushText(parentElement, true);
 
         @Nullable SVGNode newNode = nodeSupplier.create(tagName);
         if (newNode == null) return false;
 
-        AttributeNode attributeNode = new AttributeNode(tagName, attributes, parentAttributeNode,
-                parsedDocument, styleSheets, loadHelper);
+        AttributeNode attributeNode = new AttributeNode(tagName, attributes, styleSheets, loadHelper);
         String id = attributes.get("id");
-        ParsedElement parsedElement = new ParsedElement(id, attributeNode, newNode);
+        ParsedElement parsedElement = new ParsedElement(id, parsedDocument, parentElement, attributeNode, newNode);
+        attributeNode.setElement(parsedElement);
 
         if (id != null && !parsedDocument.hasElementWithId(id)) {
             parsedDocument.registerNamedElement(id, parsedElement);
