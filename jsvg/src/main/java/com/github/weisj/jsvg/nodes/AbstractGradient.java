@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -180,7 +181,8 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     }
 
     private @Nullable AbstractGradient<?> parseTemplate(@NotNull AttributeNode attributeNode) {
-        AbstractGradient<?> template = attributeNode.getElementByHref(AbstractGradient.class, attributeNode.getHref());
+        AbstractGradient<?> template = attributeNode.getElementByHref(AbstractGradient.class, attributeNode.getHref(),
+                ElementRelation.TEMPLATE);
         return template != this ? template : null;
     }
 

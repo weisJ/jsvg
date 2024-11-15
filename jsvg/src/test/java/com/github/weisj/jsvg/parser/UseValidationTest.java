@@ -58,4 +58,9 @@ class UseValidationTest {
     void detectDeepNesting() {
         assertThrows(IllegalStateException.class, () -> tryLoad("useNesting.svg"));
     }
+
+    @Test
+    void detectManyImplicitPaths() {
+        assertThrows(IllegalStateException.class, () -> tryLoad("manyImplicitPathsThroughUse.svg"));
+    }
 }

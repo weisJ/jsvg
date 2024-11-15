@@ -21,53 +21,33 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+public class DocumentLimits {
+    public static int DEFAULT_MAX_USE_NESTING_DEPTH = 15;
+    public static int DEFAULT_MAX_NESTING_DEPTH = 30;
+    public static int DEFAULT_MAX_PATH_COUNT = 2000;
 
-public interface LoaderContext {
-    @NotNull
-    ParserProvider parserProvider();
+    public static DocumentLimits DEFAULT = new DocumentLimits(
+            DEFAULT_MAX_NESTING_DEPTH, DEFAULT_MAX_USE_NESTING_DEPTH, DEFAULT_MAX_PATH_COUNT);
 
-    @NotNull
-    ResourceLoader resourceLoader();
+    private final int maxNestingDepth;
+    private final int maxUseNestingDepth;
+    private final int maxPathCount;
 
-    @NotNull
-    ElementLoader elementLoader();
-
-    @NotNull
-    ExternalResourcePolicy externalResourcePolicy();
-
-    @NotNull
-    DocumentLimits documentLimits();
-
-    static @NotNull Builder builder() {
-        return MutableLoaderContext.createDefault();
+    public DocumentLimits(int maxNestingDepth, int maxUseNestingDepth, int maxPathCount) {
+        this.maxNestingDepth = maxNestingDepth;
+        this.maxUseNestingDepth = maxUseNestingDepth;
+        this.maxPathCount = maxPathCount;
     }
 
-    static @NotNull LoaderContext createDefault() {
-        return builder().build();
+    public int maxNestingDepth() {
+        return maxNestingDepth;
     }
 
-    interface Builder {
-        @NotNull
-        Builder parserProvider(@NotNull ParserProvider parserProvider);
+    public int maxUseNestingDepth() {
+        return maxUseNestingDepth;
+    }
 
-        @NotNull
-        Builder resourceLoader(@NotNull ResourceLoader resourceLoader);
-
-        @NotNull
-        Builder elementLoader(@NotNull ElementLoader elementLoader);
-
-        @ApiStatus.Experimental
-        @NotNull
-        Builder externalResourcePolicy(@NotNull ExternalResourcePolicy policy);
-
-        @ApiStatus.Experimental
-        @NotNull
-        Builder documentLimits(@NotNull DocumentLimits documentLimits);
-
-
-        @NotNull
-        LoaderContext build();
+    public int maxPathCount() {
+        return maxPathCount;
     }
 }

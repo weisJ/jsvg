@@ -36,9 +36,6 @@ import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 public final class SVGDocumentBuilder {
-
-    private static final int MAX_USE_NESTING_DEPTH = 15;
-
     private final @NotNull ParsedDocument parsedDocument;
     private final @NotNull List<@NotNull Use> useElements = new ArrayList<>();
     private final @NotNull List<@NotNull Style> styleElements = new ArrayList<>();
@@ -175,9 +172,10 @@ public final class SVGDocumentBuilder {
 
     public @NotNull SVGDocument build() {
         preProcess(parsedDocument.rootURI());
-        rootNode.build();
+        rootNode.build(0);
         postProcess();
-        validateUseElements();
+        validatePathCount();
+        validateUseElementsDepth();
         return new SVGDocument((SVG) rootNode.node());
     }
 
@@ -190,24 +188,46 @@ public final class SVGDocumentBuilder {
         }
     }
 
-    private void validateUseElements() {
-        if (useElements.isEmpty()) return;
-        for (Use useElement : useElements) {
-            checkNestingDepth(useElement, MAX_USE_NESTING_DEPTH);
+    private void validatePathCount() {
+        int pathCount = rootNode.outgoingPaths();
+        int maxPathCount = parsedDocument.loaderContext().documentLimits().maxPathCount();
+        if (pathCount > maxPathCount) {
+            throw new IllegalStateException(
+                    String.format("Maximum path count exceeded %d > %d", pathCount, maxPathCount));
         }
     }
 
-    private void checkNestingDepth(@NotNull SVGNode node, int allowed_depth) {
-        if (allowed_depth <= 0) {
-            throw new IllegalStateException("Maximum nesting depth exceeded");
-        }
-        if (node instanceof Use) {
-            SVGNode referenced = ((Use) node).referencedNode();
-            if (referenced != null) checkNestingDepth(referenced, allowed_depth - 1);
-        } else if (node instanceof CommonRenderableContainerNode) {
-            for (SVGNode child : ((CommonRenderableContainerNode) node).children()) {
-                checkNestingDepth(child, allowed_depth);
+    private void validateUseElementsDepth() {
+        if (useElements.isEmpty()) return;
+        Map<SVGNode, Integer> checkedNodes = new HashMap<>();
+        int useNestingLimit = parsedDocument.loaderContext().documentLimits().maxUseNestingDepth();
+        for (Use useElement : useElements) {
+            int depth = nestingDepthOf(useElement, checkedNodes);
+            if (depth > useNestingLimit) {
+                throw new IllegalStateException(String.format(
+                        "Maximum nesting depth for <use> exceeded %d > %d starting from node with id '%s'",
+                        depth, useNestingLimit, useElement.id()));
             }
         }
+    }
+
+    private int nestingDepthOf(@NotNull SVGNode node, @NotNull Map<SVGNode, Integer> checkedNodes) {
+        int cached = checkedNodes.getOrDefault(node, -1);
+        if (cached >= 0) return cached;
+
+        int depth = 0;
+        if (node instanceof Use) {
+            SVGNode referenced = ((Use) node).referencedNode();
+            if (referenced != null) {
+                depth = nestingDepthOf(referenced, checkedNodes) + 1;
+            }
+        } else if (node instanceof CommonRenderableContainerNode) {
+            for (SVGNode child : ((CommonRenderableContainerNode) node).children()) {
+                depth = Math.max(depth, nestingDepthOf(child, checkedNodes));
+            }
+        }
+        checkedNodes.put(node, depth);
+
+        return depth;
     }
 }

@@ -40,6 +40,7 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.PaintContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -94,14 +95,18 @@ public abstract class ShapeNode extends RenderableSVGNode
         // Todo: These are actually inheritable and hence have to go into the RenderContext
         // Todo: The marker shorthand is a bit more complicated than just being a template.
         // https://www.w3.org/TR/svg-markers/#MarkerShorthand
-        Marker template = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker"));
-        markerStart = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-start"));
+        Marker template = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker"),
+                ElementRelation.TEMPLATE);
+        markerStart = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-start"),
+                ElementRelation.TEMPLATE);
         if (markerStart == null) markerStart = template;
 
-        markerMid = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-mid"));
+        markerMid = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-mid"),
+                ElementRelation.TEMPLATE);
         if (markerMid == null) markerMid = template;
 
-        markerEnd = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-end"));
+        markerEnd = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-end"),
+                ElementRelation.TEMPLATE);
         if (markerEnd == null) markerEnd = template;
 
         vectorEffects = VectorEffect.parse(attributeNode);

@@ -25,6 +25,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +36,7 @@ public class ParsedDocument {
     private final Map<String, Object> namedElements = new HashMap<>();
     private final @Nullable URI rootURI;
     private final @NotNull LoaderContext loaderContext;
+    private int currentDepth;
 
     private @NotNull AnimationPeriod animationPeriod = new AnimationPeriod(0, 0, false);
 
@@ -51,13 +53,21 @@ public class ParsedDocument {
         namedElements.put(name, element);
     }
 
+    @ApiStatus.Internal
+    int currentNestingDepth() {
+        return currentDepth;
+    }
+
+    @ApiStatus.Internal
+    void setCurrentNestingDepth(int depth) {
+        this.currentDepth = depth;
+    }
+
     public <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id) {
         if (id == null) return null;
         Object node = namedElements.get(id);
-        if (node instanceof ParsedElement) {
-            node = ((ParsedElement) node).nodeEnsuringBuildStatus();
-            // Ensure we aren't holding ParsedElement longer than needed.
-            namedElements.put(id, node);
+        if (!type.equals(ParsedElement.class) && node instanceof ParsedElement) {
+            node = ((ParsedElement) node).nodeEnsuringBuildStatus(currentNestingDepth());
         }
         return type.isInstance(node) ? type.cast(node) : null;
     }
