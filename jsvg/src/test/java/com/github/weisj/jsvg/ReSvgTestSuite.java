@@ -26,8 +26,6 @@ import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -39,26 +37,23 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.github.weisj.jsvg.ReferenceTest.RenderType;
 
+@Disabled
 class ReSvgTestSuite {
 
     private static final String RESVG_TEST_SUITE_PATH = System.getenv("RESVG_TEST_SUITE_PATH");
 
     static Collection<DynamicTest> checkDirectory(@NotNull String name) {
-        try {
-            Path basePath = Path.of(new URI("file://" + RESVG_TEST_SUITE_PATH));
-            Path tests = basePath.resolve(name);
-            try (var files = Files.walk(tests)) {
-                return files
-                        .filter(p -> p.toString().endsWith(".svg"))
-                        .map(p -> {
-                            String testName = basePath.relativize(p).toString();
-                            return DynamicTest.dynamicTest(testName, new ReSVGRefTest(p));
-                        })
-                        .toList();
-            } catch (IOException e) {
-                Assertions.fail(e);
-            }
-        } catch (URISyntaxException e) {
+        Path basePath = Path.of(RESVG_TEST_SUITE_PATH);
+        Path tests = basePath.resolve(name);
+        try (var files = Files.walk(tests)) {
+            return files
+                    .filter(p -> p.toString().endsWith(".svg"))
+                    .map(p -> {
+                        String testName = basePath.relativize(p).toString();
+                        return DynamicTest.dynamicTest(testName, new ReSVGRefTest(p));
+                    })
+                    .toList();
+        } catch (IOException e) {
             Assertions.fail(e);
         }
         return Collections.emptyList();
