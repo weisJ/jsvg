@@ -3,6 +3,8 @@
 [![CI](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml/badge.svg)](https://github.com/weisJ/jsvg/actions/workflows/gradle.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.weisj/jsvg?label=Maven%20Central)](https://search.maven.org/artifact/com.github.weisj/jsvg)
 
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/weisj)
+
 # JSVG - A Java SVG implementation
 
 <p align="center">
