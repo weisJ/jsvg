@@ -41,6 +41,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.PaintContext;
 
@@ -85,7 +86,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
 
         String href = attributeNode.getValue("href");
         if (href == null) href = attributeNode.getValue("xlink:href");
-        referencedNode = attributeNode.getElementByHref(SVGNode.class, href);
+        referencedNode = attributeNode.getElementByHref(SVGNode.class, href, ElementRelation.PAINTED_CHILD);
 
         paintContext = PaintContext.parse(attributeNode);
         fontRenderContext = FontRenderContext.parse(attributeNode);

@@ -46,6 +46,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
@@ -133,7 +134,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     }
 
     private @Nullable Pattern parseTemplate(@NotNull AttributeNode attributeNode) {
-        Pattern template = attributeNode.getElementByHref(Pattern.class, attributeNode.getHref());
+        Pattern template =
+                attributeNode.getElementByHref(Pattern.class, attributeNode.getHref(), ElementRelation.TEMPLATE);
         return template != this ? template : null;
     }
 

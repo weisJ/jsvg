@@ -24,10 +24,8 @@ package com.github.weisj.jsvg.parser;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.net.URI;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +50,13 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
 
 public final class AttributeNode {
+
+    public enum ElementRelation {
+        GEOMETRY_DATA,
+        PAINTED_CHILD,
+        TEMPLATE
+    }
+
     private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
     private static final Length Center = new Length(Unit.PERCENTAGE, 50f);
     private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);
@@ -135,20 +140,30 @@ public final class AttributeNode {
     }
 
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
+        if (value == null) return null;
         return loadHelper.elementLoader().loadElement(type, value, document(), loadHelper.attributeParser());
     }
 
-    public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @Nullable String value) {
-        if (value == null) return null;
-        return getElementByUrl(type, value);
+    private <T> T recordIndirectChild(T child, String value, ElementRelation relation) {
+        if (child != null && relation == ElementRelation.PAINTED_CHILD) {
+            ParsedElement containingElement = getElementByUrl(ParsedElement.class, value);
+            if (containingElement != null) {
+                element().addIndirectChild(containingElement);
+            }
+        }
+        return child;
+    }
+
+    public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @Nullable String value, ElementRelation relation) {
+        return recordIndirectChild(getElementByUrl(type, value), value, relation);
     }
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @NotNull Category category,
-            @Nullable String value) {
-        T element = getElementByHref(type, value);
+            @Nullable String value, ElementRelation relation) {
+        T element = getElementByUrl(type, value);
         if (element == null) return null;
         for (Category cat : element.getClass().getAnnotation(ElementCategories.class).value()) {
-            if (cat == category) return element;
+            if (cat == category) return recordIndirectChild(element, value, relation);
         }
         return null;
     }
@@ -443,7 +458,7 @@ public final class AttributeNode {
         ParsedElement parsedElement = element.animationElements().get(property);
         if (parsedElement == null) return null;
         if (parsedElement.node() instanceof Animate) {
-            Animate animate = (Animate) parsedElement.nodeEnsuringBuildStatus();
+            Animate animate = (Animate) parsedElement.nodeEnsuringBuildStatus(document().currentNestingDepth());
             document().registerAnimatedElement(animate);
             return animate;
         }

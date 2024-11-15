@@ -50,9 +50,11 @@ public final class ParsedElement {
     private final @NotNull SVGNode node;
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
+    private final @NotNull List<@NotNull ParsedElement> indirectChildren = new ArrayList<>();
     private final @NotNull Map<String, @NotNull ParsedElement> animationElements = new HashMap<>();
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
+    private int outgoingPaths = -1;
 
     ParsedElement(@Nullable String id, @NotNull ParsedDocument document,
             @Nullable ParsedElement parent, @NotNull AttributeNode element,
@@ -101,11 +103,11 @@ public final class ParsedElement {
         return node;
     }
 
-    public @NotNull SVGNode nodeEnsuringBuildStatus() {
+    public @NotNull SVGNode nodeEnsuringBuildStatus(int depth) {
         if (buildStatus == BuildStatus.IN_PROGRESS) {
             cyclicDependencyDetected();
         } else if (buildStatus == BuildStatus.NOT_BUILT) {
-            build();
+            build(depth);
         }
         return node;
     }
@@ -114,7 +116,7 @@ public final class ParsedElement {
         return attributeNode;
     }
 
-    void addChild(ParsedElement parsedElement) {
+    void addChild(@NotNull ParsedElement parsedElement) {
         if (Category.hasCategory(parsedElement.node, Category.Animation)) {
             animationElements.put(Animate.attributeName(parsedElement.attributeNode()), parsedElement);
         }
@@ -124,7 +126,11 @@ public final class ParsedElement {
         }
     }
 
-    void build() {
+    void addIndirectChild(@NotNull ParsedElement parsedElement) {
+        indirectChildren.add(parsedElement);
+    }
+
+    void build(int depth) {
         if (buildStatus == BuildStatus.FINISHED) return;
         if (buildStatus == BuildStatus.IN_PROGRESS) {
             cyclicDependencyDetected();
@@ -132,15 +138,40 @@ public final class ParsedElement {
         }
         buildStatus = BuildStatus.IN_PROGRESS;
 
+        if (depth >= attributeNode.document().loaderContext().documentLimits().maxNestingDepth()) {
+            throw new IllegalStateException("Maximum nesting depth reached.");
+        }
+
         attributeNode.prepareForNodeBuilding();
 
         // Build depth first to ensure child nodes are processed first.
         // e.g. LinearGradient depends on its stops to be build first.
         for (ParsedElement child : children) {
-            child.build();
+            child.build(depth + 1);
         }
+
+        document().setCurrentNestingDepth(depth);
         node.build(attributeNode);
         buildStatus = BuildStatus.FINISHED;
+    }
+
+    /*
+     * Returns the number of outgoing paths from this node terminating in a leaf node.
+     */
+    int outgoingPaths() {
+        if (outgoingPaths == -1) {
+            outgoingPaths = 0;
+            for (ParsedElement child : children) {
+                outgoingPaths += child.outgoingPaths();
+            }
+
+            for (ParsedElement child : indirectChildren) {
+                outgoingPaths += child.outgoingPaths();
+            }
+
+            outgoingPaths = Math.max(outgoingPaths, 1);
+        }
+        return outgoingPaths;
     }
 
     @Override

@@ -33,6 +33,7 @@ public class MutableLoaderContext implements LoaderContext, LoaderContext.Builde
     private @NotNull ResourceLoader resourceLoader = DEFAULT_RESOURCE_LOADER;
     private @NotNull ElementLoader elementLoader = DEFAULT_ELEMENT_LOADER;
     private @NotNull ExternalResourcePolicy externalResourcePolicy = ExternalResourcePolicy.DENY;
+    private @NotNull DocumentLimits documentLimits = DocumentLimits.DEFAULT;
 
     static @NotNull MutableLoaderContext createDefault() {
         return new MutableLoaderContext();
@@ -59,6 +60,11 @@ public class MutableLoaderContext implements LoaderContext, LoaderContext.Builde
     }
 
     @Override
+    public @NotNull DocumentLimits documentLimits() {
+        return documentLimits;
+    }
+
+    @Override
     public @NotNull Builder parserProvider(@NotNull ParserProvider parserProvider) {
         this.parserProvider = parserProvider;
         return this;
@@ -79,6 +85,11 @@ public class MutableLoaderContext implements LoaderContext, LoaderContext.Builde
     @Override
     public @NotNull Builder externalResourcePolicy(@NotNull ExternalResourcePolicy policy) {
         this.externalResourcePolicy = policy;
+        return this;
+    }
+
+    public @NotNull Builder documentLimits(@NotNull DocumentLimits documentLimits) {
+        this.documentLimits = documentLimits;
         return this;
     }
 
