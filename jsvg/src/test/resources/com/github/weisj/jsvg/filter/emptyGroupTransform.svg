@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+	<defs>
+		<filter id="A">
+			<feColorMatrix type="saturate" values="0" />
+		</filter>
+	</defs>
+	<g filter="url(#A)">
+		<rect fill="red" x="0%" y="0%" width="100%" height="100%" />
+		<g transform="" />
+	</g>
+</svg>

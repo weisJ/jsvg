@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -51,7 +52,7 @@ public interface ShapedContainer<E> extends Container<E>, HasShape {
             if (!(child instanceof HasShape)) continue;
             RenderContext childContext = NodeRenderer.setupRenderContext(child, context);
             Rectangle2D childBounds = ((HasShape) child).elementBounds(childContext, box);
-            if (childBounds.isEmpty()) continue;
+            if (!GeometryUtil.isValidRect(childBounds) || childBounds.isEmpty()) continue;
             if (bounds == null) {
                 bounds = childBounds;
             } else {

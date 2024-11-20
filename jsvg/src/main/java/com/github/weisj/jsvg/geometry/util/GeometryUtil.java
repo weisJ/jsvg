@@ -248,4 +248,11 @@ public final class GeometryUtil {
     public static @NotNull Point2D getLocation(@NotNull Rectangle2D r) {
         return new Point2D.Double(r.getX(), r.getY());
     }
+
+    public static boolean isValidRect(@NotNull Rectangle2D r) {
+        return !Double.isNaN(r.getX())
+                && !Double.isNaN(r.getY())
+                && !Double.isNaN(r.getWidth())
+                && !Double.isNaN(r.getHeight());
+    }
 }

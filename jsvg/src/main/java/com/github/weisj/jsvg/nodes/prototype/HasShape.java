@@ -26,6 +26,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface HasShape {
@@ -49,6 +50,7 @@ public interface HasShape {
 
     default @NotNull Rectangle2D elementBounds(@NotNull RenderContext context, Box box) {
         Rectangle2D shape = untransformedElementBounds(context, box);
+        if (!GeometryUtil.isValidRect(shape)) return shape;
         if (this instanceof Transformable) {
             return ((Transformable) this).transformShape(shape, context.measureContext()).getBounds2D();
         }
