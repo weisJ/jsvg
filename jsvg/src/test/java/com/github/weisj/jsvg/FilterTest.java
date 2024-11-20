@@ -185,4 +185,10 @@ class FilterTest {
                 new ImageInfo(new PathImageSource("filter/dropShadow_ref.svg"), RenderType.JSVG),
                 new ImageInfo(new PathImageSource("filter/dropShadow.svg"), RenderType.JSVG))));
     }
+
+    @Test
+    void testEmptyGroup() {
+        assertEquals(SUCCESS, compareImages("filter/emptyGroupNoTransform.svg"));
+        assertEquals(SUCCESS, compareImages("filter/emptyGroupTransform.svg"));
+    }
 }
