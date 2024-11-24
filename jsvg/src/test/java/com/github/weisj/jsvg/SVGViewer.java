@@ -41,14 +41,13 @@ import com.github.weisj.darklaf.Customization;
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.darklaf.iconset.AllIcons;
 import com.github.weisj.darklaf.ui.button.ButtonConstants;
-import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.parser.ExternalResourcePolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
-import com.github.weisj.jsvg.renderer.AnimationState;
 import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
+import com.github.weisj.jsvg.ui.AnimationPlayer;
 import com.kitfox.svg.app.beans.SVGIcon;
 
 public final class SVGViewer {
@@ -161,7 +160,6 @@ public final class SVGViewer {
             pauseAnimation.setSelected(false);
 
             restartAnimation.addActionListener(e -> {
-                svgPanel.animationRunning = true;
                 svgPanel.restartAnimation();
                 pauseAnimation.setSelected(false);
             });
@@ -219,11 +217,8 @@ public final class SVGViewer {
         private boolean lowResolution;
         private Object maskRenderingValue = SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_DEFAULT;
 
-        private long animationStart;
-        private long animationElapsedBeforePause;
+        private final @NotNull AnimationPlayer animationPlayer = new AnimationPlayer((e) -> repaint());
 
-        private boolean animationRunning = true;
-        private final Timer animationTimer = new Timer(1 / 60, e -> animationUpdate());
 
         public SVGPanel(@NotNull String iconName) {
             selectIcon(iconName);
@@ -246,38 +241,21 @@ public final class SVGViewer {
 
         private void restartAnimation() {
             if (document == null) return;
-            AnimationPeriod animationPeriod = document.animationPeriod();
-            animationTimer.setRepeats(true);
-            animationTimer.setInitialDelay((int) animationPeriod.startTime());
-            animationTimer.setCoalesce(true);
-
-            animationTimer.start();
-            animationStart = System.currentTimeMillis();
-            animationElapsedBeforePause = 0;
+            animationPlayer.stop();
+            animationPlayer.start();
         }
 
         public void setAnimationState(boolean playing) {
-            if (playing == animationRunning) return;
-            animationRunning = playing;
+            if (playing == animationPlayer.isRunning()) return;
             if (playing) {
-                animationStart = System.currentTimeMillis() - animationElapsedBeforePause;
-                animationElapsedBeforePause = 0;
-                animationTimer.start();
+                animationPlayer.resume();
             } else {
-                animationTimer.stop();
-                animationElapsedBeforePause = System.currentTimeMillis() - animationStart;
+                animationPlayer.pause();
             }
-        }
-
-        private void animationUpdate() {
-            if (System.currentTimeMillis() - animationStart > document.animationPeriod().endTime()) {
-                animationTimer.stop();
-            }
-            repaint();
         }
 
         private void selectIcon(@NotNull String name) {
-            animationTimer.stop();
+            animationPlayer.stop();
             remove(jsvgCanvas);
             switch (mode) {
                 case JSVG -> {
@@ -289,7 +267,8 @@ public final class SVGViewer {
                                 .build();
                         return loader.load(url, loaderContext);
                     });
-                    if (document != null && document.isAnimated() && animationRunning) {
+                    if (document != null) {
+                        animationPlayer.setAnimationPeriod(document.animationPeriod());
                         restartAnimation();
                     }
                 }
@@ -382,7 +361,7 @@ public final class SVGViewer {
                                 new AwtComponentPlatformSupport(this),
                                 new Graphics2DOutput(renderGraphics),
                                 viewBox,
-                                new AnimationState(animationStart, System.currentTimeMillis()));
+                                animationPlayer.animationState());
                     }
 
                     if (img != null) {
