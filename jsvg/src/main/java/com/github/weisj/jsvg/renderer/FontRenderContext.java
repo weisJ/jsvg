@@ -33,9 +33,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.google.errorprone.annotations.Immutable;
 
-@Immutable
 public final class FontRenderContext {
     // Note: An unspecified value is different from 0.
     // Unlike 0 it allows us to use spacing different from 0 if needed.

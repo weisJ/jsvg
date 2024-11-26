@@ -48,6 +48,7 @@ public final class AnimatedPercentage implements PercentageValue {
         return new AnimatedPercentage(track, initial, values, multiplier);
     }
 
+    @Override
     public @NotNull PercentageValue multiply(@NotNull PercentageValue other) {
         return new AnimatedPercentage(track, initial, values, multiplier.multiply(other));
     }

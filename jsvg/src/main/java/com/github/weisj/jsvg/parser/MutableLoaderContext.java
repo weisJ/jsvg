@@ -88,6 +88,7 @@ public class MutableLoaderContext implements LoaderContext, LoaderContext.Builde
         return this;
     }
 
+    @Override
     public @NotNull Builder documentLimits(@NotNull DocumentLimits documentLimits) {
         this.documentLimits = documentLimits;
         return this;

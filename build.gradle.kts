@@ -226,6 +226,7 @@ allprojects {
                         "StringSplitter",
                         "InlineMeSuggester",
                         "MissingSummary",
+                        "MultipleNullnessAnnotations",
                     )
                 }
             }

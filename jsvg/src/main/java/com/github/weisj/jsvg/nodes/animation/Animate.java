@@ -64,6 +64,7 @@ public final class Animate extends MetaSVGNode {
         return attributeNode.getValue("attributeName");
     }
 
+    @SuppressWarnings("ReferenceEquality")
     private static boolean isPlaceholder(@NotNull String value) {
         return value == INITIAL_PLACEHOLDER;
     }

@@ -26,9 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.HasMatchName;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
-import com.google.errorprone.annotations.Immutable;
 
-@Immutable
 public enum PredefinedFontSize implements HasMatchName, FontSize {
     xxSmall("xx-small", 3f / 5f),
     xSmall("x-small", 3f / 4f),

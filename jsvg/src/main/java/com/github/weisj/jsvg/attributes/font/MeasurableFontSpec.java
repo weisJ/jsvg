@@ -31,9 +31,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
-import com.google.errorprone.annotations.Immutable;
 
-@Immutable
 public final class MeasurableFontSpec extends FontSpec {
     public static final @NotNull String DEFAULT_FONT_FAMILY_NAME = "Default";
     private final int currentWeight;

@@ -39,6 +39,7 @@ public final class AnimatedFloat implements FloatValue {
         this.values = values;
     }
 
+    @Override
     public float get(@NotNull MeasureContext context) {
         long timestamp = context.timestamp();
         Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);

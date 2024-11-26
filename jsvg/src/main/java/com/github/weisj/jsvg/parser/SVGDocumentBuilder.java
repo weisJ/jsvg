@@ -93,9 +93,6 @@ public final class SVGDocumentBuilder {
         ParsedElement parentElement = !currentNodeStack.isEmpty()
                 ? currentNodeStack.peek()
                 : null;
-        AttributeNode parentAttributeNode = parentElement != null
-                ? parentElement.attributeNode()
-                : null;
 
         if (parentElement != null) flushText(parentElement, true);
 

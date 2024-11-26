@@ -72,7 +72,7 @@ public class SealedClassProcessor extends AbstractProcessor {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private boolean isPermitted(@NotNull TypeElement @NotNull [] permittedSubclasses, @NotNull TypeElement subclass) {
