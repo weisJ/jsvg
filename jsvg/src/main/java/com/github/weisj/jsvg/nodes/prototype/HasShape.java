@@ -39,7 +39,7 @@ public interface HasShape {
     default @NotNull Shape elementShape(@NotNull RenderContext context) {
         Shape shape = untransformedElementShape(context);
         if (this instanceof Transformable) {
-            return ((Transformable) this).transformShape(shape, context.measureContext());
+            return ((Transformable) this).transformShape(shape, context);
         }
         return shape;
     }
@@ -52,7 +52,7 @@ public interface HasShape {
         Rectangle2D shape = untransformedElementBounds(context, box);
         if (!GeometryUtil.isValidRect(shape)) return shape;
         if (this instanceof Transformable) {
-            return ((Transformable) this).transformShape(shape, context.measureContext()).getBounds2D();
+            return ((Transformable) this).transformShape(shape, context).getBounds2D();
         }
         return shape;
     }

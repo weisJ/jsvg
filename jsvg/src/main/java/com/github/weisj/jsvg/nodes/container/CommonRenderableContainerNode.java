@@ -51,7 +51,7 @@ public abstract class CommonRenderableContainerNode extends BaseContainerNode<SV
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         isVisible = parseIsVisible(attributeNode);
-        geometryContext = HasGeometryContextImpl.parse(attributeNode);
+        geometryContext = HasGeometryContextImpl.parse(attributeNode, this);
         context = HasContextImpl.parse(attributeNode);
     }
 

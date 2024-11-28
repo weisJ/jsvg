@@ -51,7 +51,7 @@ public final class Text extends LinearTextContainer implements HasGeometryContex
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        geometryContext = HasGeometryContextImpl.parse(attributeNode);
+        geometryContext = HasGeometryContextImpl.parse(attributeNode, this);
     }
 
     @Override
