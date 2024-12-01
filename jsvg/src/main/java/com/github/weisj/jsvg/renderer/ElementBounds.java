@@ -69,6 +69,10 @@ public class ElementBounds {
         return strokeBox;
     }
 
+    public @NotNull Rectangle2D fillBox() {
+        return boundingBox();
+    }
+
     private static @NotNull Rectangle2D elementBounds(@NotNull Object node, @NotNull RenderContext context,
             HasShape.Box box) {
         Rectangle2D elementBounds;

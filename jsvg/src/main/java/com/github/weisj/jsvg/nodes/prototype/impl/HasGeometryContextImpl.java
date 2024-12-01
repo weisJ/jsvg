@@ -104,16 +104,24 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
 
     @Override
     public @NotNull Point2D transformOrigin(@NotNull RenderContext context) {
-        if (transformBox == TransformBox.ViewBox) {
-            MeasureContext measureContext = context.measureContext();
-            return new Point2D.Float(
-                    transformOriginX.resolve(measureContext),
-                    transformOriginY.resolve(measureContext));
+        Rectangle2D box;
+        ElementBounds elementBounds = new ElementBounds(node, context);
+        switch (transformBox) {
+            case ViewBox:
+                MeasureContext measureContext = context.measureContext();
+                return new Point2D.Float(
+                        transformOriginX.resolve(measureContext),
+                        transformOriginY.resolve(measureContext));
+            case FillBox:
+                box = elementBounds.fillBox();
+                break;
+            case StrokeBox:
+                box = elementBounds.strokeBox();
+                break;
+            default:
+                throw new IllegalStateException("Invalid transform-box value: " + transformBox);
         }
-
-        @NotNull ElementBounds bounds = new ElementBounds(node, context);
-        @NotNull Rectangle2D box = transformBox == TransformBox.FillBox ? bounds.boundingBox() : bounds.strokeBox();
-        @NotNull MeasureContext boundsMeasureContext =
+        MeasureContext boundsMeasureContext =
                 context.measureContext().derive((float) box.getWidth(), (float) box.getHeight());
 
         return new Point2D.Float(
