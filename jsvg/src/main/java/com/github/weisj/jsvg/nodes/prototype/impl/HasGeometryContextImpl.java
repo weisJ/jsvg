@@ -25,6 +25,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import com.github.weisj.jsvg.nodes.SVGNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,11 +52,11 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
     private final @Nullable Mask mask;
     private final @Nullable Filter filter;
 
-    private final @NotNull Object node;
+    private final @NotNull SVGNode node;
 
     private HasGeometryContextImpl(@Nullable AffineTransform transform, @NotNull Length transformOriginX,
             @NotNull Length transformOriginY, @NotNull TransformBox transformBox, @Nullable ClipPath clipPath,
-            @Nullable Mask mask, @Nullable Filter filter, @NotNull Object node) {
+            @Nullable Mask mask, @Nullable Filter filter, @NotNull SVGNode node) {
         this.transform = transform;
         this.transformOriginX = transformOriginX;
         this.transformOriginY = transformOriginY;
@@ -66,7 +67,7 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
         this.node = node;
     }
 
-    public static @NotNull HasGeometryContext parse(@NotNull AttributeNode attributeNode, @NotNull Object node) {
+    public static @NotNull HasGeometryContext parse(@NotNull AttributeNode attributeNode, @NotNull SVGNode node) {
         String[] transformOrigin = attributeNode.getStringList("transform-origin");
         String originX = transformOrigin.length > 0 ? transformOrigin[0] : null;
         String originY = transformOrigin.length > 1 ? transformOrigin[1] : null;
