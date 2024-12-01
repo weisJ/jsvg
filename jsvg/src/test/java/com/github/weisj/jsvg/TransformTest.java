@@ -21,8 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.*;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -42,5 +42,13 @@ class TransformTest {
 
         // Batik does not implement transform on <svg> elements
         assertDoesNotThrow(() -> compareImages("transform/SVGinSVG.svg"));
+    }
+
+    @Test
+    void testTransfromBox() {
+        // Compare with reference as batik doesn't support transform-box
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                new ImageInfo(new ImageSource.PathImageSource("transform/transformBox_ref.svg"), RenderType.JSVG),
+                new ImageInfo(new ImageSource.PathImageSource("transform/transformBox.svg"), RenderType.JSVG))));
     }
 }
