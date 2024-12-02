@@ -45,10 +45,18 @@ class TransformTest {
     }
 
     @Test
-    void testTransfromBox() {
+    void testTransfromBoxFill() {
         // Compare with reference as batik doesn't support transform-box
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBox_ref.svg"), RenderType.JSVG),
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBox.svg"), RenderType.JSVG))));
+                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxFill_ref.svg"), RenderType.JSVG),
+                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxFill.svg"), RenderType.JSVG))));
+    }
+
+    @Test
+    void testTransfromBoxStroke() {
+        // Compare with reference as batik doesn't support transform-box
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+            new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStroke_ref.svg"), RenderType.JSVG),
+            new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStroke.svg"), RenderType.JSVG))));
     }
 }
