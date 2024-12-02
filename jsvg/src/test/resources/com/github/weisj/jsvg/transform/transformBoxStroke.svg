@@ -2,11 +2,12 @@
 	xmlns="http://www.w3.org/2000/svg">
 	<style>
 		path {
-        transform-box: stroke-box;
+		transform-box: stroke-box;
 		transform-origin: 50% 50%;
 		transform: scale(-1, -1);
 		}
 	</style>
 
-    <path d="M10 200 A 100 100 180 0 1 210 200" stroke="black" fill="red" stroke-width="20" />
+	<path d="M10 200 A 100 100 180 0 1 210 200" stroke="black"
+		fill="red" stroke-width="20" />
 </svg>
