@@ -33,13 +33,6 @@ import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface SVGPaint {
-    AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
-    SVGPaint NONE = new NonePaint();
-    SVGPaint CURRENT_COLOR = new SentinelPaint("currentColor");
-    SVGPaint CONTEXT_FILL = new SentinelPaint("contextFill");
-    SVGPaint CONTEXT_STROKE = new SentinelPaint("contextStroke");
-    SVGPaint INHERITED = new SentinelPaint("inherited");
-
     static @Nullable SVGPaint derive(@Nullable SVGPaint current, @Nullable SVGPaint other) {
         if (other == null) return current;
         if (current == null) return other;
@@ -59,6 +52,6 @@ public interface SVGPaint {
             @Nullable Rectangle2D bounds);
 
     default boolean isVisible(@NotNull RenderContext context) {
-        return this != NONE;
+        return this != PredefinedPaints.NONE;
     }
 }

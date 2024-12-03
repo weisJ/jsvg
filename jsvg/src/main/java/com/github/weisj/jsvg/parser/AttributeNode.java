@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.animation.value.*;
 import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
+import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.*;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -160,10 +161,10 @@ public final class AttributeNode {
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @NotNull Category category,
             @Nullable String value, ElementRelation relation) {
-        T element = getElementByUrl(type, value);
-        if (element == null) return null;
-        for (Category cat : element.getClass().getAnnotation(ElementCategories.class).value()) {
-            if (cat == category) return recordIndirectChild(element, value, relation);
+        T e = getElementByUrl(type, value);
+        if (e == null) return null;
+        for (Category cat : e.getClass().getAnnotation(ElementCategories.class).value()) {
+            if (cat == category) return recordIndirectChild(e, value, relation);
         }
         return null;
     }
@@ -217,7 +218,7 @@ public final class AttributeNode {
         SVGPaint value = getPaintInternal(key, fallback);
         if (animatable == Animatable.YES) {
             SVGPaint initial = value;
-            if (initial == null) initial = SVGPaint.INHERITED;
+            if (initial == null) initial = PredefinedPaints.INHERITED;
             AnimatedPaint animatedPaint = getAnimatedPaint(key, initial);
             if (animatedPaint != null) return animatedPaint;
         }

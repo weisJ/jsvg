@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
+import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 
 class PaintParserTest {
@@ -99,11 +100,11 @@ class PaintParserTest {
 
     @Test
     void testSpecialColors() {
-        assertEquals(SVGPaint.NONE, parsePaint("none"));
-        assertEquals(SVGPaint.NONE, parsePaint("transparent"));
-        assertEquals(SVGPaint.CURRENT_COLOR, parsePaint("currentcolor"));
-        assertEquals(SVGPaint.CONTEXT_FILL, parsePaint("context-fill"));
-        assertEquals(SVGPaint.CONTEXT_STROKE, parsePaint("context-stroke"));
+        assertEquals(PredefinedPaints.NONE, parsePaint("none"));
+        assertEquals(PredefinedPaints.NONE, parsePaint("transparent"));
+        assertEquals(PredefinedPaints.CURRENT_COLOR, parsePaint("currentcolor"));
+        assertEquals(PredefinedPaints.CONTEXT_FILL, parsePaint("context-fill"));
+        assertEquals(PredefinedPaints.CONTEXT_STROKE, parsePaint("context-stroke"));
     }
 
     @Test

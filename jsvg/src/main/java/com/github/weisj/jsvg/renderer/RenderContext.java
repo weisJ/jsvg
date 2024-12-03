@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.stroke.StrokeResolver;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -230,25 +231,25 @@ public final class RenderContext {
     }
 
     private @NotNull SVGPaint resolvePaint(@Nullable SVGPaint p) {
-        if (p == SVGPaint.DEFAULT_PAINT || p == SVGPaint.CURRENT_COLOR) {
+        if (p == PredefinedPaints.DEFAULT_PAINT || p == PredefinedPaints.CURRENT_COLOR) {
             // color can only hold resolved values being declared as literals
             return coerceNonNull(paintContext.color);
         }
-        if (p == SVGPaint.CONTEXT_STROKE) {
+        if (p == PredefinedPaints.CONTEXT_STROKE) {
             // value is already absolute hence needs no special treatment.
-            if (contextElementAttributes == null) return SVGPaint.NONE;
+            if (contextElementAttributes == null) return PredefinedPaints.NONE;
             return contextElementAttributes.strokePaint;
         }
-        if (p == SVGPaint.CONTEXT_FILL) {
+        if (p == PredefinedPaints.CONTEXT_FILL) {
             // value is already absolute hence needs no special treatment.
-            if (contextElementAttributes == null) return SVGPaint.NONE;
+            if (contextElementAttributes == null) return PredefinedPaints.NONE;
             return contextElementAttributes.fillPaint;
         }
         return coerceNonNull(p);
     }
 
     private @NotNull SVGPaint coerceNonNull(@Nullable SVGPaint p) {
-        return p != null ? p : SVGPaint.DEFAULT_PAINT;
+        return p != null ? p : PredefinedPaints.DEFAULT_PAINT;
     }
 
     public float rawOpacity() {

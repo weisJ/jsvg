@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
+import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
@@ -71,9 +72,9 @@ public final class PaintContext implements Mutator<PaintContext> {
 
     public static @NotNull PaintContext createDefault() {
         return new PaintContext(
-                SVGPaint.DEFAULT_PAINT,
-                SVGPaint.DEFAULT_PAINT, Percentage.ONE,
-                SVGPaint.NONE, Percentage.ONE, Percentage.ONE,
+                PredefinedPaints.DEFAULT_PAINT,
+                PredefinedPaints.DEFAULT_PAINT, Percentage.ONE,
+                PredefinedPaints.NONE, Percentage.ONE, Percentage.ONE,
                 PaintOrder.NORMAL,
                 StrokeContext.createDefault(),
                 FillRule.Nonzero);

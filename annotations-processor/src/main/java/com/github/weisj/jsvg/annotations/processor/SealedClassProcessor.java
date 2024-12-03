@@ -50,29 +50,34 @@ public class SealedClassProcessor extends AbstractProcessor {
 
             for (Element element : roundEnv.getRootElements()) {
                 if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE) {
-                    TypeElement classElement = (TypeElement) element;
-
-                    if (isSubtype(classElement, (TypeElement) type, typeUtils)) {
-                        if (!isPermitted(permittedSubclasses, classElement)) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("\n");
-                            sb.append(classElement.getSimpleName());
-                            sb.append(" is not permitted to be a subclass of sealed type ");
-                            sb.append(type.getSimpleName());
-                            sb.append("\n");
-                            sb.append("Permitted subclasses are:");
-                            for (TypeElement allowedClass : permittedSubclasses) {
-                                sb.append("\n    - ");
-                                sb.append(allowedClass.getQualifiedName());
-                            }
-                            processingEnv.getMessager()
-                                    .printMessage(Diagnostic.Kind.ERROR, sb.toString(), element);
-                        }
-                    }
+                    checkAnnotatedElement(type, element, typeUtils, permittedSubclasses);
                 }
             }
         }
         return false;
+    }
+
+    private void checkAnnotatedElement(@NotNull Element sealedType, @NotNull Element annotatedElement,
+            @NotNull Types typeUtils,
+            @NotNull TypeElement @NotNull [] permittedSubclasses) {
+        TypeElement classElement = (TypeElement) annotatedElement;
+
+        if (isSubtype(classElement, (TypeElement) sealedType, typeUtils)
+                && !isPermitted(permittedSubclasses, classElement)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("\n");
+            sb.append(classElement.getSimpleName());
+            sb.append(" is not permitted to be a subclass of sealed type ");
+            sb.append(sealedType.getSimpleName());
+            sb.append("\n");
+            sb.append("Permitted subclasses are:");
+            for (TypeElement allowedClass : permittedSubclasses) {
+                sb.append("\n    - ");
+                sb.append(allowedClass.getQualifiedName());
+            }
+            processingEnv.getMessager()
+                    .printMessage(Diagnostic.Kind.ERROR, sb.toString(), annotatedElement);
+        }
     }
 
     private boolean isPermitted(@NotNull TypeElement @NotNull [] permittedSubclasses, @NotNull TypeElement subclass) {
@@ -91,9 +96,9 @@ public class SealedClassProcessor extends AbstractProcessor {
 
     public TypeElement[] getPermittedClasses(@NotNull TypeElement element, @NotNull Types typeUtils) {
         AnnotationMirror am = getAnnotationMirror(element, Sealed.class);
-        if (am == null) return null;
+        if (am == null) return new TypeElement[] {};
         AnnotationValue av = getAnnotationValue(am, "permits");
-        if (av == null) return null;
+        if (av == null) return new TypeElement[] {};
         @SuppressWarnings("unchecked") List<AnnotationValue> values = (List<AnnotationValue>) av.getValue();
         TypeElement[] result = new TypeElement[values.size()];
         for (int i = 0; i < values.size(); i++) {

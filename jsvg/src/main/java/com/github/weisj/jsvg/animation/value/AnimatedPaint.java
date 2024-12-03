@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
+import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
@@ -49,7 +50,7 @@ public class AnimatedPaint implements SVGPaint {
     }
 
     public @NotNull AnimatedPaint derive(@NotNull SVGPaint value) {
-        if (this.initial != SVGPaint.INHERITED) return this;
+        if (this.initial != PredefinedPaints.INHERITED) return this;
         return new AnimatedPaint(track, value, values);
     }
 

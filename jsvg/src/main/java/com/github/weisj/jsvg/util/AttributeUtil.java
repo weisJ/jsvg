@@ -45,7 +45,7 @@ public final class AttributeUtil {
             @NotNull AttributeNode node,
             @NotNull String xAttr, @NotNull String yAttr,
             @NotNull Length fallback,
-            Function<@NotNull LengthValue, @Nullable LengthValue> validator) {
+            @NotNull Function<@NotNull LengthValue, @Nullable LengthValue> validator) {
         LengthValue initialRx = node.getLength(xAttr, PercentageDimension.WIDTH, Length.UNSPECIFIED, Animatable.NO);
         initialRx = validator.apply(initialRx);
         if (initialRx == null) initialRx = Length.UNSPECIFIED;

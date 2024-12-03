@@ -31,6 +31,7 @@ import com.github.weisj.jsvg.animation.AnimationValuesType;
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.animation.value.*;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
+import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
@@ -167,7 +168,7 @@ public final class Animate extends MetaSVGNode {
         SVGPaint[] paints = new SVGPaint[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
             if (isPlaceholder(values[i])) {
-                paints[i] = SVGPaint.NONE;
+                paints[i] = PredefinedPaints.NONE;
             } else {
                 SVGPaint p = attributeNode.parsePaint(this.values[i]);
                 if (p == null) return null;

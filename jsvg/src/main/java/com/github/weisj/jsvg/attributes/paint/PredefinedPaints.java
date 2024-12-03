@@ -19,18 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.animation;
+package com.github.weisj.jsvg.attributes.paint;
+
+public final class PredefinedPaints {
+    public static final AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
+    public static final SVGPaint NONE = new NonePaint();
+    public static final SVGPaint CURRENT_COLOR = new SentinelPaint("currentColor");
+    public static final SVGPaint CONTEXT_FILL = new SentinelPaint("contextFill");
+    public static final SVGPaint CONTEXT_STROKE = new SentinelPaint("contextStroke");
+    public static final SVGPaint INHERITED = new SentinelPaint("inherited");
 
 
-public enum AnimationValuesType {
-    VALUES,
-    FROM_TO,
-    FROM_BY,
-    BY,
-    TO;
-
-    public boolean endIsBy() {
-        return this == FROM_BY || this == BY;
-    }
-
+    private PredefinedPaints() {}
 }

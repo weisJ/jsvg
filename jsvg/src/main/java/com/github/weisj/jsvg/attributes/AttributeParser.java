@@ -25,7 +25,7 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -109,7 +109,7 @@ public final class AttributeParser {
     @Contract("_,_,!null,_ -> !null")
     private <U, V> @Nullable V parseSuffixUnit(@Nullable String value, @NotNull SuffixUnit<U, V> defaultUnit,
             @Nullable V fallback,
-            @NotNull Function<@NotNull SuffixUnit<U, V>, @Nullable SuffixUnit<U, V>> unitMapper) {
+            @NotNull UnaryOperator<@Nullable SuffixUnit<U, V>> unitMapper) {
         if (value == null) return fallback;
         SuffixUnit<U, V> unit = defaultUnit;
         String lower = value.toLowerCase(Locale.ENGLISH);

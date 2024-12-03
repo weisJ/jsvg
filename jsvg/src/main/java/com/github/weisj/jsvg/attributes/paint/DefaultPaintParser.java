@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -103,10 +103,10 @@ public final class DefaultPaintParser implements PaintParser {
     public @Nullable SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode node) {
         if (value == null) return null;
         String lower = value.toLowerCase(Locale.ENGLISH);
-        if ("none".equals(lower) || "transparent".equals(lower)) return SVGPaint.NONE;
-        if ("currentcolor".equals(lower)) return SVGPaint.CURRENT_COLOR;
-        if ("context-fill".equals(lower)) return SVGPaint.CONTEXT_FILL;
-        if ("context-stroke".equals(lower)) return SVGPaint.CONTEXT_STROKE;
+        if ("none".equals(lower) || "transparent".equals(lower)) return PredefinedPaints.NONE;
+        if ("currentcolor".equals(lower)) return PredefinedPaints.CURRENT_COLOR;
+        if ("context-fill".equals(lower)) return PredefinedPaints.CONTEXT_FILL;
+        if ("context-stroke".equals(lower)) return PredefinedPaints.CONTEXT_STROKE;
         Color color = parseColor(lower, node);
         if (color == null) return null;
         return new AwtSVGPaint(color);
