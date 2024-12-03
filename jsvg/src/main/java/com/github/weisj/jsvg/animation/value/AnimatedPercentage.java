@@ -64,8 +64,9 @@ public final class AnimatedPercentage implements PercentageValue {
         if (progress.isInitial()) return initial.get(context);
         int i = progress.iterationIndex();
 
-        if (i == values.length - 1) {
-            return values[i];
+        assert i >= 0;
+        if (i >= values.length - 1) {
+            return values[values.length - 1];
         }
 
         float start = values[i];

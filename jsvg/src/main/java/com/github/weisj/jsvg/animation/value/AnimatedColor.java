@@ -79,8 +79,9 @@ public class AnimatedColor implements SVGPaint {
         if (progress.isInitial()) return Objects.requireNonNull(initial);
         int i = progress.iterationIndex();
 
-        if (i == values.length - 1) {
-            return values[i];
+        assert i >= 0;
+        if (i >= values.length - 1) {
+            return values[values.length - 1];
         }
 
         Color start = values[i];

@@ -115,6 +115,8 @@ public final class DefaultInterpolator implements FloatInterpolator, FloatListIn
         float[] result = ensureCacheCapacity(cache, b.length);
         System.arraycopy(b, 0, result, 0, b.length);
 
+        if (x == null) return b;
+
         int n = Math.min(result.length, x.length);
         for (int i = 0; i < n; i++) {
             result[i] += a * x[i];
@@ -164,11 +166,7 @@ public final class DefaultInterpolator implements FloatInterpolator, FloatListIn
         Color colorB = extractColor(b);
 
         if (colorA == null || colorB == null) {
-            // Discrete animation
-            if (additive != Additive.REPLACE) {
-                return initial;
-            }
-            return GeometryUtil.approximatelyEqual(progress, 1) ? b : a;
+            return discreteAnimation(initial, a, b, progress);
         }
 
         switch (valuesType) {
@@ -198,5 +196,13 @@ public final class DefaultInterpolator implements FloatInterpolator, FloatListIn
                 return new AwtSVGPaint(result);
             }
         }
+    }
+
+    private SVGPaint discreteAnimation(@NotNull SVGPaint initial, @NotNull SVGPaint a, @NotNull SVGPaint b,
+            float progress) {
+        if (additive != Additive.REPLACE) {
+            return initial;
+        }
+        return GeometryUtil.approximatelyEqual(progress, 1) ? b : a;
     }
 }

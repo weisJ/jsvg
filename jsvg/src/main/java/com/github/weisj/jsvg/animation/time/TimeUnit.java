@@ -27,11 +27,11 @@ import com.github.weisj.jsvg.attributes.SuffixUnit;
 
 
 public enum TimeUnit implements SuffixUnit<TimeUnit, Duration> {
-    Hour(60 * 60 * 1000, "h"),
-    Minute(60 * 1000, "min"),
-    Second(1000, "s"),
-    Millisecond(1, "ms"),
-    Raw(1000, ""); // Same as seconds
+    Hour(60 * 60 * 1000L, "h"),
+    Minute(60 * 1000L, "min"),
+    Second(1000L, "s"),
+    Millisecond(1L, "ms"),
+    Raw(1000L, ""); // Same as seconds
 
     private static final TimeUnit[] units = values();
 

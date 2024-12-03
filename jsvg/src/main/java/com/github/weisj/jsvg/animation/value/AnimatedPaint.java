@@ -66,8 +66,9 @@ public class AnimatedPaint implements SVGPaint {
         if (progress.isInitial()) return initial;
         int i = progress.iterationIndex();
 
-        if (i == values.length - 1) {
-            return values[i];
+        assert i >= 0;
+        if (i >= values.length - 1) {
+            return values[values.length - 1];
         }
 
         SVGPaint start = values[i];
