@@ -19,38 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.attributes;
 
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
-import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
-import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.RenderContext;
+/**
+ * Represents possible values of the transform-box rule. It determines the box relative to which a transform-origin
+ * is computed.
+ */
+public enum TransformBox implements HasMatchName {
+    FillBox("fill-box"),
+    StrokeBox("stroke-box"),
+    ViewBox("view-box"),
+    // Other permitted values content-box and border-box pertain only to HTML elements.
+    ;
 
-public abstract class RenderableSVGNode extends AbstractSVGNode
-        implements Renderable, HasGeometryContext.ByDelegate {
+    private final @NotNull String matchName;
 
-    private boolean isVisible;
-    private HasGeometryContext geometryContext;
-
-    @Override
-    public boolean isVisible(@NotNull RenderContext context) {
-        return isVisible && (context.rawOpacity() > 0);
+    private TransformBox(@NotNull String matchName) {
+        this.matchName = matchName;
     }
 
     @Override
-    public @NotNull HasGeometryContext geometryContextDelegate() {
-        return geometryContext;
-    }
-
-    @Override
-    @MustBeInvokedByOverriders
-    public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
-        isVisible = parseIsVisible(attributeNode);
-        geometryContext = HasGeometryContextImpl.parse(attributeNode, this);
+    public @NotNull String matchName() {
+        return matchName;
     }
 }

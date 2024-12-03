@@ -28,7 +28,6 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -42,12 +41,12 @@ public interface Transformable {
     AffineTransform transform();
 
     @NotNull
-    Point2D transformOrigin(@NotNull MeasureContext context);
+    Point2D transformOrigin(@NotNull RenderContext context);
 
     default void applyTransform(@NotNull Output output, @NotNull RenderContext context) {
         AffineTransform transform = transform();
         if (transform != null) {
-            Point2D transformOrigin = transformOrigin(context.measureContext());
+            Point2D transformOrigin = transformOrigin(context);
 
             AffineTransform conjugate =
                     AffineTransform.getTranslateInstance(transformOrigin.getX(), transformOrigin.getY());
@@ -59,10 +58,10 @@ public interface Transformable {
         }
     }
 
-    default Shape transformShape(@NotNull Shape shape, @NotNull MeasureContext measureContext) {
+    default Shape transformShape(@NotNull Shape shape, @NotNull RenderContext renderContext) {
         AffineTransform transform = transform();
         if (transform != null) {
-            Point2D transformOrigin = transformOrigin(measureContext);
+            Point2D transformOrigin = transformOrigin(renderContext);
             AffineTransform at = new AffineTransform();
             at.translate(transformOrigin.getX(), transformOrigin.getY());
             at.concatenate(transform);

@@ -115,11 +115,11 @@ public final class SVG extends CommonInnerViewContainer {
     }
 
     @Override
-    public @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
+    public @NotNull Point2D transformOrigin(@NotNull RenderContext context) {
         if (!isTopLevel) return super.transformOrigin(context);
         return new Point2D.Float(
-                TOP_LEVEL_TRANSFORM_ORIGIN_X.resolve(context),
-                TOP_LEVEL_TRANSFORM_ORIGIN_Y.resolve(context));
+                TOP_LEVEL_TRANSFORM_ORIGIN_X.resolve(context.measureContext()),
+                TOP_LEVEL_TRANSFORM_ORIGIN_Y.resolve(context.measureContext()));
     }
 
     @Override

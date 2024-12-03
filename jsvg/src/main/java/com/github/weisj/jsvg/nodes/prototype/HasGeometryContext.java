@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,10 +27,10 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface HasGeometryContext extends Transformable, HasClip, HasFilter {
 
@@ -60,7 +60,7 @@ public interface HasGeometryContext extends Transformable, HasClip, HasFilter {
         }
 
         @Override
-        default @NotNull Point2D transformOrigin(@NotNull MeasureContext context) {
+        default @NotNull Point2D transformOrigin(@NotNull RenderContext context) {
             return geometryContextDelegate().transformOrigin(context);
         }
     }
