@@ -68,13 +68,16 @@ println("  Gradle: " + gradle.gradleVersion)
 
 sonarqube {
     properties {
-        properties["sonar.issue.ignore.multicriteria"] = "e1"
+        properties["sonar.issue.ignore.multicriteria"] = "e1,e2"
 
         // java:S115: Disable checking of constants names: We follow the nomenclature of the standard which
         // results in enums being camel case instead of upper snake case
-        // java:S107: Some of the context classes need all of their content passed in a constructor.
-        properties["sonar.issue.ignore.multicriteria.e1.ruleKey"] = "java:S115,java:S107"
+        properties["sonar.issue.ignore.multicriteria.e1.ruleKey"] = "java:S115"
         properties["sonar.issue.ignore.multicriteria.e1.resourceKey"] = "**/*.java"
+
+        // java:S107: Some of the context classes need all of their content passed in a constructor.
+        properties["sonar.issue.ignore.multicriteria.e2.ruleKey"] = "java:S107"
+        properties["sonar.issue.ignore.multicriteria.e2.resourceKey"] = "**/*.java"
     }
 }
 
