@@ -175,24 +175,24 @@ final class Arc extends PathCommand {
         // Ensure radii are large enough
         rx = Math.abs(rx);
         ry = Math.abs(ry);
-        double Prx = rx * rx;
-        double Pry = ry * ry;
-        double Px1 = x1 * x1;
-        double Py1 = y1 * y1;
+        double pRx = rx * rx;
+        double pRy = ry * ry;
+        double pX1 = x1 * x1;
+        double pY1 = y1 * y1;
         // check that radii are large enough
-        double radiiCheck = Px1 / Prx + Py1 / Pry;
+        double radiiCheck = pX1 / pRx + pY1 / pRy;
         if (radiiCheck > 1) {
             rx = Math.sqrt(radiiCheck) * rx;
             ry = Math.sqrt(radiiCheck) * ry;
-            Prx = rx * rx;
-            Pry = ry * ry;
+            pRx = rx * rx;
+            pRy = ry * ry;
         }
 
         //
         // Step 2 : Compute (cx1, cy1)
         //
         double sign = largeArcFlag == sweepFlag ? -1 : 1;
-        double sq = ((Prx * Pry) - (Prx * Py1) - (Pry * Px1)) / ((Prx * Py1) + (Pry * Px1));
+        double sq = ((pRx * pRy) - (pRx * pY1) - (pRy * pX1)) / ((pRx * pY1) + (pRy * pX1));
         sq = sq < 0 ? 0 : sq;
         double coefficient = sign * Math.sqrt(sq);
         double cx1 = coefficient * ((rx * y1) / ry);
@@ -213,7 +213,8 @@ final class Arc extends PathCommand {
         double uy = (y1 - cy1) / ry;
         double vx = (-x1 - cx1) / rx;
         double vy = (-y1 - cy1) / ry;
-        double p, n;
+        double p;
+        double n;
         // Compute the angle start
         n = Math.sqrt((ux * ux) + (uy * uy));
         p = ux; // (1 * ux) + (0 * uy)

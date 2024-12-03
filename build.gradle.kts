@@ -70,9 +70,10 @@ sonarqube {
     properties {
         properties["sonar.issue.ignore.multicriteria"] = "e1"
 
-        // Disable checking of constants names: We follow the nomenclature of the standard which
+        // java:S115: Disable checking of constants names: We follow the nomenclature of the standard which
         // results in enums being camel case instead of upper snake case
-        properties["sonar.issue.ignore.multicriteria.e1.ruleKey"] = "java:S115"
+        // java:S107: Some of the context classes need all of their content passed in a constructor.
+        properties["sonar.issue.ignore.multicriteria.e1.ruleKey"] = "java:S115,java:S107"
         properties["sonar.issue.ignore.multicriteria.e1.resourceKey"] = "**/*.java"
     }
 }

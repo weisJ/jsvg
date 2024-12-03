@@ -56,7 +56,7 @@ class BlitImageTest {
         private final int scaleH;
 
         private ImageSurface(int vw, int vh, int scaleW, int scaleH) {
-            this.image = ImageUtil.createCompatibleTransparentImage(scaleW * vw, scaleH * vh);;
+            this.image = ImageUtil.createCompatibleTransparentImage(scaleW * vw, scaleH * vh);
             this.scaleW = scaleW;
             this.scaleH = scaleH;
         }

@@ -79,8 +79,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         for (SVGNode child : children()) {
             if (!(child instanceof Use)) continue;
             SVGNode referenced = ((Use) child).referencedNode();
-            if (referenced == null) continue;
-            if (!isAcceptableType(referenced)) {
+            if (referenced != null && !isAcceptableType(referenced)) {
                 return false;
             }
         }

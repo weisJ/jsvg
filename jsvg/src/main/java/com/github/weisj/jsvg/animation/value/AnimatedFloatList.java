@@ -55,10 +55,10 @@ public final class AnimatedFloatList implements FloatListValue {
 
     @Override
     public float @NotNull [] get(@NotNull MeasureContext context) {
-        long timestamp = context.timestamp();
-        if (timestamp != this.timestamp) {
-            this.timestamp = timestamp;
-            Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
+        long ts = context.timestamp();
+        if (ts != this.timestamp) {
+            this.timestamp = ts;
+            Track.InterpolationProgress progress = track.interpolationProgress(ts, values.length);
 
             if (progress.equals(progressCacheKey)) {
                 return cache;

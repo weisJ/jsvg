@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,10 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import java.util.logging.Logger;
+
 final class CharacterDataParser {
+    private static final Logger LOGGER = Logger.getLogger(CharacterDataParser.class.getName());
     private static final boolean DEBUG = false;
 
     private enum State {
@@ -48,7 +51,7 @@ final class CharacterDataParser {
     public void append(char[] ch, int offset, int length) {
         if (length == 0) return;
         if (DEBUG) {
-            System.out.println("Append: [" + new String(ch, offset, length).replace("\n", "\\n") + "]");
+            LOGGER.info(() -> String.format("Append: [%s]", new String(ch, offset, length).replace("\n", "\\n")));
         }
         data = ch;
         begin = offset;
@@ -73,7 +76,7 @@ final class CharacterDataParser {
         }
         if (begin >= end) return;
         if (DEBUG) {
-            System.out.println("Portion: [" + new String(ch, begin, end - begin).replace("\n", "\\n") + "]");
+            LOGGER.info(() -> String.format("Portion: [%s]", new String(ch, begin, end - begin).replace("\n", "\\n")));
         }
 
         buffer.ensureCapacity(buffer.length() + end - begin);
@@ -130,7 +133,7 @@ final class CharacterDataParser {
         char[] ch = new char[buffer.length()];
         buffer.getChars(0, ch.length, ch, 0);
         if (DEBUG) {
-            System.out.println("Flush segBreak=" + dueToSegmentBreak + "[" + buffer + "]");
+            LOGGER.info(() -> String.format("Flush segBreak=%s[%s]", dueToSegmentBreak, buffer));
         }
         buffer = new StringBuilder();
         return ch;
