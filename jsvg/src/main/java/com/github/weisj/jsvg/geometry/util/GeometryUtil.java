@@ -27,7 +27,9 @@ import java.awt.geom.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class GeometryUtil {
@@ -202,6 +204,12 @@ public final class GeometryUtil {
         } catch (NoninvertibleTransformException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public static @Nullable AffineTransform toAwtTransform(@NotNull MeasureContext measure,
+            @Nullable TransformValue transform) {
+        if (transform == null) return null;
+        return transform.get(measure);
     }
 
     public enum Space {

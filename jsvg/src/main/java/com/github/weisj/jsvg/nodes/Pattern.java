@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -34,6 +33,7 @@ import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -71,7 +71,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
 
     private UnitType patternUnits;
     private UnitType patternContentUnits;
-    private AffineTransform patternTransform;
+    private TransformValue patternTransform;
 
     @Override
     public @NotNull String tagName() {
@@ -183,7 +183,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
 
         // Fixme: When patternTransform != null antialiasing is broken
         return patternTransform != null
-                ? new TransformedPaint(new TexturePaint(blittableImage.image(), patternBounds), patternTransform)
+                ? new TransformedPaint(new TexturePaint(blittableImage.image(), patternBounds),
+                        patternTransform.get(measure))
                 : new TexturePaint(blittableImage.image(), patternBounds);
     }
 

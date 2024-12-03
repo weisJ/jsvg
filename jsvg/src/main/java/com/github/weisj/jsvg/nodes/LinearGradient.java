@@ -81,7 +81,7 @@ public final class LinearGradient extends AbstractGradient<LinearGradient> {
 
         return new LinearGradientPaint(pt1, pt2, offsetsToFractions(gradOffsets), gradColors,
                 spreadMethod.cycleMethod(),
-                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
+                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(measure, bounds));
     }
 
     @Override

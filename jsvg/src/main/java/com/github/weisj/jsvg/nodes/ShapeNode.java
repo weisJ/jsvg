@@ -162,7 +162,8 @@ public abstract class ShapeNode extends RenderableSVGNode
 
         Stroke effectiveStroke = computeEffectiveStroke(context);
         ShapeRenderer.renderWithPaintOrder(output, shape.canBeFilled(), context.paintOrder(),
-                new ShapeRenderer.ShapePaintContext(context, vectorEffects(), effectiveStroke, transform()),
+                new ShapeRenderer.ShapePaintContext(context, vectorEffects(), effectiveStroke,
+                        GeometryUtil.toAwtTransform(context.measureContext(), transform())),
                 new ShapeRenderer.PaintShape(paintShape, bounds),
                 new ShapeRenderer.ShapeMarkerInfo(this, markerStart, markerMid, markerEnd,
                         shouldPaintStartEndMarkersInMiddle()));

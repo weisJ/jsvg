@@ -21,12 +21,12 @@
  */
 package com.github.weisj.jsvg.nodes.prototype;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
@@ -55,7 +55,7 @@ public interface HasGeometryContext extends Transformable, HasClip, HasFilter {
         }
 
         @Override
-        default @Nullable AffineTransform transform() {
+        default @Nullable TransformValue transform() {
             return geometryContextDelegate().transform();
         }
 

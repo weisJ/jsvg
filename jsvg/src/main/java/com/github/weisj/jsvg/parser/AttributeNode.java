@@ -400,8 +400,10 @@ public final class AttributeNode {
         return new FilterChannelKey.StringKey(in);
     }
 
-    public @Nullable AffineTransform parseTransform(@NotNull String key) {
-        return loadHelper.attributeParser().parseTransform(getValue(key));
+    public @Nullable TransformValue parseTransform(@NotNull String key) {
+        AffineTransform transform = loadHelper.attributeParser().parseTransform(getValue(key));
+        if (transform == null) return null;
+        return new ConstantTransform(transform);
     }
 
     public boolean hasAttribute(@NotNull String name) {

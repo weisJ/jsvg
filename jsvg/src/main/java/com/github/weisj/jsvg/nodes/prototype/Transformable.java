@@ -28,6 +28,7 @@ import java.awt.geom.Point2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -38,19 +39,19 @@ public interface Transformable {
     }
 
     @Nullable
-    AffineTransform transform();
+    TransformValue transform();
 
     @NotNull
     Point2D transformOrigin(@NotNull RenderContext context);
 
     default void applyTransform(@NotNull Output output, @NotNull RenderContext context) {
-        AffineTransform transform = transform();
+        TransformValue transform = transform();
         if (transform != null) {
             Point2D transformOrigin = transformOrigin(context);
 
             AffineTransform conjugate =
                     AffineTransform.getTranslateInstance(transformOrigin.getX(), transformOrigin.getY());
-            conjugate.concatenate(transform);
+            conjugate.concatenate(transform.get(context.measureContext()));
             conjugate.translate(-transformOrigin.getX(), -transformOrigin.getY());
 
             output.applyTransform(conjugate);
@@ -59,12 +60,12 @@ public interface Transformable {
     }
 
     default Shape transformShape(@NotNull Shape shape, @NotNull RenderContext renderContext) {
-        AffineTransform transform = transform();
+        TransformValue transform = transform();
         if (transform != null) {
             Point2D transformOrigin = transformOrigin(renderContext);
             AffineTransform at = new AffineTransform();
             at.translate(transformOrigin.getX(), transformOrigin.getY());
-            at.concatenate(transform);
+            at.concatenate(transform.get(renderContext.measureContext()));
             at.translate(-transformOrigin.getX(), -transformOrigin.getY());
             return at.createTransformedShape(shape);
         }

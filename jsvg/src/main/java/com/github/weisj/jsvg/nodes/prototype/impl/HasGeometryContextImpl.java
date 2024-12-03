@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.prototype.impl;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -30,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.TransformBox;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
@@ -43,7 +43,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class HasGeometryContextImpl implements HasGeometryContext {
 
-    private final @Nullable AffineTransform transform;
+    private final @Nullable TransformValue transform;
     private final @NotNull Length transformOriginX;
     private final @NotNull Length transformOriginY;
     private final @NotNull TransformBox transformBox;
@@ -54,7 +54,7 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
 
     private final @NotNull SVGNode node;
 
-    private HasGeometryContextImpl(@Nullable AffineTransform transform, @NotNull Length transformOriginX,
+    private HasGeometryContextImpl(@Nullable TransformValue transform, @NotNull Length transformOriginX,
             @NotNull Length transformOriginY, @NotNull TransformBox transformBox, @Nullable ClipPath clipPath,
             @Nullable Mask mask, @Nullable Filter filter, @NotNull SVGNode node) {
         this.transform = transform;
@@ -98,7 +98,7 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
     }
 
     @Override
-    public @Nullable AffineTransform transform() {
+    public @Nullable TransformValue transform() {
         return transform;
     }
 

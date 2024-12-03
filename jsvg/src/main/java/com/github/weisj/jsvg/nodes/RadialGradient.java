@@ -90,7 +90,7 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
 
         return new SVGRadialGradientPaint(center, radius, focusCenter, focusRadius,
                 offsetsToFractions(gradOffsets), gradColors, spreadMethod.cycleMethod(),
-                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(bounds));
+                MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(measure, bounds));
     }
 
     @Override
