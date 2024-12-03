@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.renderer;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
@@ -81,7 +80,7 @@ public final class NodeRenderer {
 
         RenderContext childContext = createChildContext(renderable, context, instantiator);
         Output childOutput = output.createChild();
-        ElementBounds elementBounds = new ElementBounds(renderable, childContext);
+        ElementBounds elementBounds = new ElementBounds(node, childContext);
 
         applyTransform(renderable, childOutput, childContext);
 
@@ -139,7 +138,6 @@ public final class NodeRenderer {
             RenderContext childContext) {
         Mask mask = renderable.mask();
         if (mask == null) return null;
-        // Todo: Proper object bounding box
 
         Rectangle2D bounds = elementBounds.geometryBox();
         if (bounds.isEmpty()) return null;

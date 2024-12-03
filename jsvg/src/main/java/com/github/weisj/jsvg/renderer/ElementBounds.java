@@ -27,23 +27,24 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasFilter;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 
 public class ElementBounds {
 
-    public ElementBounds(Object node, RenderContext context) {
-        this.node = node;
-        this.context = context;
-    }
-
-    private final Object node;
+    private final @NotNull SVGNode node;
     private final RenderContext context;
 
     private Rectangle2D boundingBox;
     private Rectangle2D strokeBox;
     private Rectangle2D geometryBox;
+
+    public ElementBounds(@NotNull SVGNode node, RenderContext context) {
+        this.node = node;
+        this.context = context;
+    }
 
     public @NotNull Rectangle2D boundingBox() {
         if (boundingBox == null) {
