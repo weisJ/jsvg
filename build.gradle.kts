@@ -7,6 +7,7 @@ import com.github.vlsi.gradle.properties.dsl.toBool
 import com.github.vlsi.gradle.publishing.dsl.simplifyXml
 import com.github.vlsi.gradle.publishing.dsl.versionFromResolution
 import net.ltgt.gradle.errorprone.errorprone
+import aQute.bnd.gradle.Bundle
 
 plugins {
     idea
@@ -16,6 +17,13 @@ plugins {
     id("com.github.vlsi.gradle-extensions")
     id("com.github.vlsi.stage-vote-release")
     id("net.ltgt.errorprone") apply false
+	id("biz.aQute.bnd.builder")
+}
+//sourceSets {
+//  bundle
+//}
+tasks.register<Bundle>("bundle") {
+    //from(sourceSets.bundle.output)
 }
 
 val skipJavadoc by props()
@@ -265,6 +273,10 @@ allprojects {
                     attributes["Specification-Title"] = "JSVG"
                     attributes["Implementation-Vendor"] = "JSVG"
                     attributes["Implementation-Vendor-Id"] = "com.github.weisj"
+                }
+                bundle {
+                  bnd["-exportcontents"] = "*"
+                  bnd["-sources"] = "true"
                 }
 
                 CrLfSpec(LineEndings.LF).run {
