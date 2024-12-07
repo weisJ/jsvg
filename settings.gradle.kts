@@ -18,6 +18,7 @@ pluginManagement {
         idv("net.ltgt.errorprone")
         idv("me.champeau.jmh")
         idv("org.sonarqube")
+        idv("biz.aQute.bnd.builder", "biz.aQute.bnd.lib")
     }
 }
 
