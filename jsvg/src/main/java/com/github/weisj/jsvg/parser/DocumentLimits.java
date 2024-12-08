@@ -22,11 +22,11 @@
 package com.github.weisj.jsvg.parser;
 
 public class DocumentLimits {
-    public static int DEFAULT_MAX_USE_NESTING_DEPTH = 15;
-    public static int DEFAULT_MAX_NESTING_DEPTH = 30;
-    public static int DEFAULT_MAX_PATH_COUNT = 2000;
+    public static final int DEFAULT_MAX_USE_NESTING_DEPTH = 15;
+    public static final int DEFAULT_MAX_NESTING_DEPTH = 30;
+    public static final int DEFAULT_MAX_PATH_COUNT = 2000;
 
-    public static DocumentLimits DEFAULT = new DocumentLimits(
+    public static final DocumentLimits DEFAULT = new DocumentLimits(
             DEFAULT_MAX_NESTING_DEPTH, DEFAULT_MAX_USE_NESTING_DEPTH, DEFAULT_MAX_PATH_COUNT);
 
     private final int maxNestingDepth;
