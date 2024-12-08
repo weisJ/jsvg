@@ -68,7 +68,7 @@ println("  Gradle: " + gradle.gradleVersion)
 
 sonarqube {
     properties {
-        properties["sonar.issue.ignore.multicriteria"] = "e1,e2,e3"
+        properties["sonar.issue.ignore.multicriteria"] = "e1,e2,e3,e4"
 
         // java:S115: Disable checking of constants names: We follow the nomenclature of the standard which
         // results in enums being camel case instead of upper snake case
@@ -79,9 +79,11 @@ sonarqube {
         properties["sonar.issue.ignore.multicriteria.e2.ruleKey"] = "java:S107"
         properties["sonar.issue.ignore.multicriteria.e2.resourceKey"] = "**/*.java"
 
-        // javaarchitecture:S7091: Circularity in the same package is allowed
+        // javaarchitecture:S7091,javaarchitecture:S7027: Circularity in classes is allowed
         properties["sonar.issue.ignore.multicriteria.e3.ruleKey"] = "javaarchitecture:S7091"
         properties["sonar.issue.ignore.multicriteria.e3.resourceKey"] = "**/*.java"
+        properties["sonar.issue.ignore.multicriteria.e4.ruleKey"] = "javaarchitecture:S7027"
+        properties["sonar.issue.ignore.multicriteria.e4.resourceKey"] = "**/*.java"
     }
 }
 
