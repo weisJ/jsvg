@@ -1,3 +1,4 @@
+import aQute.bnd.gradle.Bundle
 import com.diffplug.spotless.extra.wtp.EclipseWtpFormatterStep
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
@@ -16,6 +17,7 @@ plugins {
     id("com.github.vlsi.gradle-extensions")
     id("com.github.vlsi.stage-vote-release")
     id("net.ltgt.errorprone") apply false
+    id("biz.aQute.bnd.builder") apply false
 }
 
 val skipJavadoc by props()
@@ -258,6 +260,12 @@ allprojects {
                     duplicatesStrategy = DuplicatesStrategy.INCLUDE
                     // apply native2ascii conversion since Java 8 expects properties to have ascii symbols only
                     filter(org.apache.tools.ant.filters.EscapeUnicode::class)
+                }
+            }
+
+            apply(plugin = "biz.aQute.bnd.builder")
+            register<Bundle>("bundle") {
+                bundle {
                 }
             }
 
