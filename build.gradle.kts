@@ -68,7 +68,7 @@ println("  Gradle: " + gradle.gradleVersion)
 
 sonarqube {
     properties {
-        properties["sonar.issue.ignore.multicriteria"] = "e1,e2,e3,e4"
+        properties["sonar.issue.ignore.multicriteria"] = "e1,e2,e3,e4,e5"
 
         // java:S115: Disable checking of constants names: We follow the nomenclature of the standard which
         // results in enums being camel case instead of upper snake case
@@ -83,6 +83,10 @@ sonarqube {
         properties["sonar.issue.ignore.multicriteria.e3.ruleKey"] = "javaarchitecture:S7091"
         properties["sonar.issue.ignore.multicriteria.e3.resourceKey"] = "**/*.java"
         properties["sonar.issue.ignore.multicriteria.e4.ruleKey"] = "javaarchitecture:S7027"
+        properties["sonar.issue.ignore.multicriteria.e4.resourceKey"] = "**/*.java"
+
+        // java:S6548: Singleton detection. We use singletons in some cases.
+        properties["sonar.issue.ignore.multicriteria.e4.ruleKey"] = "java:S6548"
         properties["sonar.issue.ignore.multicriteria.e4.resourceKey"] = "**/*.java"
     }
 }
