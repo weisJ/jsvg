@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.*;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
