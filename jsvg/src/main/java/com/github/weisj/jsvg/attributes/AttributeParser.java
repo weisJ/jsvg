@@ -168,15 +168,6 @@ public final class AttributeParser {
         }
     }
 
-    public double parseDouble(@Nullable String value, double fallback) {
-        if (value == null) return fallback;
-        try {
-            return Double.parseDouble(value);
-        } catch (NumberFormatException e) {
-            return fallback;
-        }
-    }
-
     public @NotNull Angle parseAngle(@Nullable String value, @NotNull Angle fallback) {
         if (value == null) return fallback;
         AngleUnit unit = AngleUnit.Raw;

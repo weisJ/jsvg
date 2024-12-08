@@ -204,15 +204,6 @@ public final class AttributeNode {
         return c != null ? c : fallback;
     }
 
-    public @NotNull SVGPaint getPaint(@NotNull String key, @NotNull SVGPaint fallback) {
-        SVGPaint paint = getPaint(key);
-        return paint != null ? paint : fallback;
-    }
-
-    public @Nullable SVGPaint getPaint(@NotNull String key) {
-        return getPaintInternal(key, null);
-    }
-
     public @Nullable SVGPaint getPaint(@NotNull String key, Animatable animatable) {
         return getPaint(key, null, animatable);
     }
@@ -342,12 +333,6 @@ public final class AttributeNode {
             if (animatedPercentage != null) return animatedPercentage;
         }
         return value;
-    }
-
-    @Deprecated
-    public float getPercentage(@NotNull String key, float fallback) {
-        return loadHelper.attributeParser()
-                .parsePercentage(getValue(key), new Percentage(fallback)).value();
     }
 
     public @NotNull Length @NotNull [] getLengthList(@NotNull String key, @NotNull PercentageDimension dimension) {
