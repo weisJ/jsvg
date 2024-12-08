@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,29 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes;
+package com.github.weisj.jsvg.attributes.value;
+
+import java.awt.geom.AffineTransform;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Represents possible values of the transform-box rule. It determines the box relative to which a transform-origin
- * is computed.
- */
-public enum TransformBox implements HasMatchName {
-    FillBox("fill-box"),
-    StrokeBox("stroke-box"),
-    ViewBox("view-box"),
-    // Other permitted values content-box and border-box pertain only to HTML elements.
-    ;
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-    private final @NotNull String matchName;
+public final class ConstantLengthTransform implements TransformValue {
+    private final @NotNull List<@NotNull TransformPart> parts;
 
-    private TransformBox(@NotNull String matchName) {
-        this.matchName = matchName;
+    public ConstantLengthTransform(@NotNull List<@NotNull TransformPart> parts) {
+        this.parts = parts;
     }
 
     @Override
-    public @NotNull String matchName() {
-        return matchName;
+    public @NotNull AffineTransform get(@NotNull MeasureContext context) {
+        AffineTransform transform = new AffineTransform();
+        for (TransformPart part : parts) {
+            part.applyToTransform(transform, context);
+        }
+        return transform;
     }
 }

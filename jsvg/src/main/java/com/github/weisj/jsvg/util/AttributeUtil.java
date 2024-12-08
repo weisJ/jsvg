@@ -37,6 +37,15 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 public final class AttributeUtil {
     private AttributeUtil() {}
 
+    @SafeVarargs
+    public static <T> @NotNull T @Nullable [] toNonnullArray(@Nullable T... values) {
+        for (T value : values) {
+            if (value == null) return null;
+        }
+        // noinspection NullableProblems
+        return values;
+    }
+
     public static <T> @NotNull T notNullOrElse(@Nullable T value, @NotNull T defaultValue) {
         return value != null ? value : defaultValue;
     }

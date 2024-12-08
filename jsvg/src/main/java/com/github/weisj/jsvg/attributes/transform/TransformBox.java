@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2021-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,18 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.value;
-
-import java.awt.geom.AffineTransform;
+package com.github.weisj.jsvg.attributes.transform;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.animation.value.AnimatedTransform;
-import com.github.weisj.jsvg.annotations.Sealed;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.attributes.HasMatchName;
 
-@Sealed(permits = {AnimatedTransform.class, ConstantTransform.class, ConstantLengthTransform.class})
-public interface TransformValue {
-    @NotNull
-    AffineTransform get(@NotNull MeasureContext context);
+/**
+ * Represents possible values of the transform-box rule. It determines the box relative to which a transform-origin
+ * is computed.
+ */
+public enum TransformBox implements HasMatchName {
+    FillBox("fill-box"),
+    StrokeBox("stroke-box"),
+    ViewBox("view-box"),
+    // Other permitted values content-box and border-box pertain only to HTML elements.
+    ;
+
+    private final @NotNull String matchName;
+
+    private TransformBox(@NotNull String matchName) {
+        this.matchName = matchName;
+    }
+
+    @Override
+    public @NotNull String matchName() {
+        return matchName;
+    }
 }

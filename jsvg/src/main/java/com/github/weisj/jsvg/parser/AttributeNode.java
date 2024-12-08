@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.parser;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.net.URI;
 import java.util.*;
 import java.util.List;
@@ -38,8 +37,10 @@ import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.*;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
@@ -49,6 +50,7 @@ import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
+import com.github.weisj.jsvg.renderer.AnimationState;
 
 public final class AttributeNode {
 
@@ -63,6 +65,8 @@ public final class AttributeNode {
     private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);
     private static final Length FALLBACK_LENGTH = new Length(Unit.RAW, 0f);
     private static final Percentage FALLBACK_PERCENTAGE = new Percentage(1f);
+    private static final MeasureContext DUMMY_MEASURE_CONTEXT =
+            new MeasureContext(0, 0, 0, 0, 0, new AnimationState(0, 0));
 
     private final @NotNull String tagName;
     private final @NotNull Map<String, String> attributes;
@@ -402,9 +406,13 @@ public final class AttributeNode {
     }
 
     public @Nullable TransformValue parseTransform(@NotNull String key) {
-        AffineTransform transform = loadHelper.attributeParser().parseTransform(getValue(key));
-        if (transform == null) return null;
-        return new ConstantTransform(transform);
+        List<TransformPart> parts = loadHelper.attributeParser().parseTransform(getValue(key));
+        if (parts == null) return null;
+        for (TransformPart part : parts) {
+            if (!part.canBeFlattened()) return new ConstantLengthTransform(parts);
+        }
+        // Optimization: If all parts can be flattened we can just return a single AffineTransform.
+        return new ConstantTransform(new ConstantLengthTransform(parts).get(DUMMY_MEASURE_CONTEXT));
     }
 
     public boolean hasAttribute(@NotNull String name) {

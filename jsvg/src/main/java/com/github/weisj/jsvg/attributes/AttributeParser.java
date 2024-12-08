@@ -21,7 +21,8 @@
  */
 package com.github.weisj.jsvg.attributes;
 
-import java.awt.geom.AffineTransform;
+import static com.github.weisj.jsvg.util.AttributeUtil.toNonnullArray;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +39,7 @@ import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.time.TimeUnit;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Angle;
 import com.github.weisj.jsvg.geometry.size.AngleUnit;
@@ -47,6 +49,7 @@ import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
 import com.github.weisj.jsvg.util.ParserBase;
+
 
 public final class AttributeParser {
 
@@ -140,6 +143,17 @@ public final class AttributeParser {
         if (value == null) return fallback;
         try {
             return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+
+    @Contract("_,!null -> !null")
+    public @Nullable Length parseNumber(@Nullable String value, @Nullable Length fallback) {
+        if (value == null) return fallback;
+        try {
+            return Unit.RAW.valueOf(Float.parseFloat(value));
         } catch (NumberFormatException e) {
             return fallback;
         }
@@ -284,75 +298,116 @@ public final class AttributeParser {
 
     private static final Pattern TRANSFORM_PATTERN = Pattern.compile("\\w+\\([^)]*\\)");
 
-    public @Nullable AffineTransform parseTransform(@Nullable String value) {
+    public @Nullable List<@NotNull TransformPart> parseTransform(@Nullable String value) {
         if (value == null) return null;
         if ("none".equals(value)) return null;
         final Matcher transformMatcher = TRANSFORM_PATTERN.matcher(value);
-        AffineTransform transform = new AffineTransform();
+        List<TransformPart> parts = new ArrayList<>();
         while (transformMatcher.find()) {
             String group = transformMatcher.group();
-            if (!parseSingleTransform(group, transform)) {
+            TransformPart part = parseSingleTransformPart(group);
+            if (part == null) {
                 LOGGER.warning(
                         () -> String.format("Illegal transform definition '%s' encountered error while parsing '%s'",
                                 value, group));
                 return null;
             }
+            parts.add(part);
         }
-        return transform;
+        return parts;
     }
 
-    private boolean parseSingleTransform(@NotNull String value, @NotNull AffineTransform tx) {
+    private @Nullable TransformPart parseSingleTransformPart(@NotNull String value) {
         int first = value.indexOf('(');
         int last = value.lastIndexOf(')');
         String command = value.substring(0, value.indexOf('(')).toLowerCase(Locale.ENGLISH);
-        double[] values = parseDoubleList(value.substring(first + 1, last));
-        switch (command) {
-            case "matrix":
-                tx.concatenate(new AffineTransform(values));
-                break;
-            case "translate":
-                if (values.length == 1) {
-                    tx.translate(values[0], 0);
+        TransformPart.TransformType type = parseEnum(command, TransformPart.TransformType.class);
+        if (type == null) return null;
+
+        String[] values = parseStringList(value.substring(first + 1, last), SeparatorMode.COMMA_AND_WHITESPACE);
+        Length[] lengths = parseTransformLengths(type, values);
+        if (lengths == null) return null;
+        return new TransformPart(type, lengths);
+    }
+
+    @Nullable
+    private Length[] parseTransformLengths(TransformPart.@NotNull TransformType type,
+            @NotNull String @NotNull [] values) {
+        Length[] lengths;
+        switch (type) {
+            case MATRIX:
+                if (values.length == 4) {
+                    lengths = toNonnullArray(
+                            parseNumber(values[0], null),
+                            parseNumber(values[1], null),
+                            parseNumber(values[2], null),
+                            parseNumber(values[3], null),
+                            Length.ZERO,
+                            Length.ZERO);
+                } else if (values.length == 6) {
+                    lengths = toNonnullArray(
+                            parseNumber(values[0], null),
+                            parseNumber(values[1], null),
+                            parseNumber(values[2], null),
+                            parseNumber(values[3], null),
+                            parseNumber(values[4], null),
+                            parseNumber(values[5], null));
                 } else {
-                    tx.translate(values[0], values[1]);
+                    lengths = null;
                 }
                 break;
-            case "translatex":
-                tx.translate(values[0], 0);
-                break;
-            case "translatey":
-                tx.translate(0, values[0]);
-                break;
-            case "scale":
+            case TRANSLATE:
                 if (values.length == 1) {
-                    tx.scale(values[0], values[0]);
+                    lengths = toNonnullArray(
+                            parseLength(values[0], null, PercentageDimension.WIDTH),
+                            Length.ZERO);
                 } else {
-                    tx.scale(values[0], values[1]);
+                    lengths = toNonnullArray(
+                            parseLength(values[0], null, PercentageDimension.WIDTH),
+                            parseLength(values[1], null, PercentageDimension.HEIGHT));
                 }
                 break;
-            case "scalex":
-                tx.scale(values[0], 1);
+            case TRANSLATE_X:
+                lengths = toNonnullArray(
+                        parseLength(values[0], null, PercentageDimension.WIDTH));
                 break;
-            case "scaley":
-                tx.scale(1, values[0]);
+            case TRANSLATE_Y:
+                lengths = toNonnullArray(
+                        parseLength(values[0], null, PercentageDimension.HEIGHT));
                 break;
-            case "rotate":
+            case ROTATE:
                 if (values.length > 2) {
-                    tx.rotate(Math.toRadians(values[0]), values[1], values[2]);
+                    lengths = toNonnullArray(
+                            parseNumber(values[0], null),
+                            parseLength(values[1], null, PercentageDimension.WIDTH),
+                            parseLength(values[2], null, PercentageDimension.HEIGHT));
                 } else {
-                    tx.rotate(Math.toRadians(values[0]));
+                    lengths = toNonnullArray(
+                            parseNumber(values[0], null));
                 }
                 break;
-            case "skewx":
-                tx.shear(Math.tan(Math.toRadians(values[0])), 0);
+            case SCALE:
+            case SKEW:
+                if (values.length == 1) {
+                    lengths = toNonnullArray(
+                            parseNumber(values[0], null));
+                } else {
+                    lengths = toNonnullArray(
+                            parseNumber(values[0], null),
+                            parseNumber(values[1], null));
+                }
                 break;
-            case "skewy":
-                tx.shear(0, Math.tan(Math.toRadians(values[0])));
+            case SCALE_X:
+            case SCALE_Y:
+            case SKEW_X:
+            case SKEW_Y:
+                lengths = toNonnullArray(
+                        parseLength(values[0], null, PercentageDimension.NONE));
                 break;
             default:
-                return false;
+                lengths = null;
         }
-        return true;
+        return lengths;
     }
 
     public @NotNull PaintParser paintParser() {

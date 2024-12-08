@@ -38,8 +38,8 @@ public final class Length implements LengthValue {
     private final @NotNull Unit unit;
     private final float value;
 
-    private static final float pixelsPerInch = 96f;
-    private static final float inchesPerCm = .3936f;
+    private static final float PIXELS_PER_INCH = 96f;
+    private static final float INCHES_PER_CM = .3936f;
 
 
     public Length(@NotNull Unit unit, float value) {
@@ -70,17 +70,17 @@ public final class Length implements LengthValue {
             case PX:
                 return value;
             case IN:
-                return pixelsPerInch * value;
+                return PIXELS_PER_INCH * value;
             case CM:
-                return inchesPerCm * pixelsPerInch * value;
+                return INCHES_PER_CM * PIXELS_PER_INCH * value;
             case MM:
-                return 0.1f * inchesPerCm * pixelsPerInch * value;
+                return 0.1f * INCHES_PER_CM * PIXELS_PER_INCH * value;
             case Q:
-                return 0.025f * inchesPerCm * pixelsPerInch * value;
+                return 0.025f * INCHES_PER_CM * PIXELS_PER_INCH * value;
             case PT:
-                return (1f / 72f) * pixelsPerInch * value;
+                return (1f / 72f) * PIXELS_PER_INCH * value;
             case PC:
-                return (1f / 6f) * pixelsPerInch * value;
+                return (1f / 6f) * PIXELS_PER_INCH * value;
             case EM:
                 return context.em() * value;
             case REM:
@@ -158,6 +158,22 @@ public final class Length implements LengthValue {
         return raw() >= 0;
     }
 
+    public boolean isAbsolute() {
+        switch (unit) {
+            case RAW:
+            case PX:
+            case IN:
+            case CM:
+            case MM:
+            case Q:
+            case PT:
+            case PC:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public float raw() {
         return value;
     }
@@ -226,4 +242,5 @@ public final class Length implements LengthValue {
     public int hashCode() {
         return Objects.hash(unit, value);
     }
+
 }
