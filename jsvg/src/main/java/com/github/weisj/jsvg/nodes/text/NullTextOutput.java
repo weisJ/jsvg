@@ -27,8 +27,10 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public class NullTextOutput implements TextOutput {
+public final class NullTextOutput implements TextOutput {
     public static final NullTextOutput INSTANCE = new NullTextOutput();
+
+    private NullTextOutput() {}
 
     @Override
     public void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform,
