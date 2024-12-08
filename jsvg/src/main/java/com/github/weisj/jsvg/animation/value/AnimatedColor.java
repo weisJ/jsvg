@@ -29,23 +29,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
+import com.github.weisj.jsvg.attributes.paint.ColorValue;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.util.ColorUtil;
 
-public class AnimatedColor implements SVGPaint {
+public final class AnimatedColor implements SVGPaint {
 
     private final Track track;
-    private final @Nullable Color initial;
-    private final Color[] values;
+    private final @Nullable ColorValue initial;
+    private final ColorValue[] values;
 
-    private Color current;
+    private ColorValue current;
     private long currentTimestamp = -1;
 
-    public AnimatedColor(@NotNull Track track, @Nullable Color initial, @NotNull Color[] values) {
+    public AnimatedColor(@NotNull Track track, @Nullable ColorValue initial, @NotNull ColorValue[] values) {
         this.track = track;
         this.initial = initial;
         this.values = values;
@@ -53,11 +53,13 @@ public class AnimatedColor implements SVGPaint {
 
     public @NotNull AnimatedColor derive(@NotNull SVGPaint value) {
         if (this.initial != null) return this;
-        Color c = null;
+        ColorValue c = null;
         if (value instanceof SimplePaintSVGPaint) {
             Paint p = ((SimplePaintSVGPaint) value).paint();
             if (p instanceof Color) {
-                c = (Color) p;
+                c = new ColorValue((Color) p);
+            } else if (p instanceof ColorValue) {
+                c = (ColorValue) p;
             }
         } else if (value instanceof AnimatedColor) {
             c = ((AnimatedColor) value).initial;
@@ -66,7 +68,7 @@ public class AnimatedColor implements SVGPaint {
         return new AnimatedColor(track, c, values);
     }
 
-    private @NotNull Color current(@NotNull MeasureContext context) {
+    private @NotNull ColorValue current(@NotNull MeasureContext context) {
         long timestamp = context.timestamp();
         if (currentTimestamp == timestamp) return current;
         currentTimestamp = timestamp;
@@ -74,7 +76,7 @@ public class AnimatedColor implements SVGPaint {
         return current;
     }
 
-    private @NotNull Color computeCurrent(long timestamp) {
+    private @NotNull ColorValue computeCurrent(long timestamp) {
         Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
         if (progress.isInitial()) return Objects.requireNonNull(initial);
         int i = progress.iterationIndex();
@@ -84,28 +86,28 @@ public class AnimatedColor implements SVGPaint {
             return values[values.length - 1];
         }
 
-        Color start = values[i];
-        Color end = values[i + 1];
+        ColorValue start = values[i];
+        ColorValue end = values[i + 1];
         float t = progress.indexProgress();
-        return ColorUtil.interpolate(t, start, end);
+        return ColorValue.interpolate(t, start, end);
     }
 
     @Override
     public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        output.setPaint(current(context.measureContext()));
+        output.setPaint(current(context.measureContext()).toColor());
         output.fillShape(shape);
     }
 
     @Override
     public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        output.setPaint(current(context.measureContext()));
+        output.setPaint(current(context.measureContext()).toColor());
         output.drawShape(shape);
     }
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return current(context.measureContext()).getAlpha() > 0;
+        return current(context.measureContext()).isVisible();
     }
 }

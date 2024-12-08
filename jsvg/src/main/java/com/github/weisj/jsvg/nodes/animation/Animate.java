@@ -26,10 +26,8 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.animation.Additive;
-import com.github.weisj.jsvg.animation.AnimationValuesType;
-import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.animation.value.*;
+import com.github.weisj.jsvg.attributes.paint.ColorValue;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
@@ -38,79 +36,21 @@ import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
-import com.github.weisj.jsvg.nodes.MetaSVGNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.parser.SeparatorMode;
 
 @ElementCategories(Category.Animation)
 @PermittedContent(categories = {Category.Descriptive})
-public final class Animate extends MetaSVGNode {
+public final class Animate extends BaseAnimationNode {
     public static final String TAG = "animate";
-
-    // Note: Needs to be replaced by the additive neutral element of the type.
-    private static final @NotNull String INITIAL_PLACEHOLDER = "<<initial>>";
-
-    private String[] values;
-    private @Nullable Track track;
 
     @Override
     public @NotNull String tagName() {
         return TAG;
     }
 
-    public static @Nullable String attributeName(@NotNull AttributeNode attributeNode) {
-        return attributeNode.getValue("attributeName");
-    }
-
-    @SuppressWarnings("ReferenceEquality")
-    private static boolean isPlaceholder(@NotNull String value) {
-        return value == INITIAL_PLACEHOLDER;
-    }
-
-    @Override
-    public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
-
-        String from = attributeNode.getValue("from");
-        String to = attributeNode.getValue("to");
-        String by = attributeNode.getValue("by");
-
-        if (to != null) by = null;
-
-        AnimationValuesType valuesType = null;
-        if (attributeNode.getValue("values") != null) {
-            values = attributeNode.getStringList("values", SeparatorMode.SEMICOLON_ONLY);
-            valuesType = AnimationValuesType.VALUES;
-        } else {
-            if (from != null && to != null) {
-                values = new String[] {from, to};
-                valuesType = AnimationValuesType.FROM_TO;
-            } else if (from != null && by != null) {
-                values = new String[] {from, by};
-                valuesType = AnimationValuesType.FROM_BY;
-            } else if (by != null) {
-                values = new String[] {INITIAL_PLACEHOLDER, by};
-                valuesType = AnimationValuesType.BY;
-            } else if (to != null) {
-                values = new String[] {INITIAL_PLACEHOLDER, to};
-                valuesType = AnimationValuesType.TO;
-            }
-        }
-
-        if (valuesType != null) {
-            Additive additive = valuesType.endIsBy()
-                    ? Additive.SUM
-                    : attributeNode.getEnum("additive", Additive.REPLACE);
-            track = Track.parse(attributeNode, valuesType, additive);
-        }
-    }
-
-    public @Nullable Track track() {
-        return track;
-    }
 
     public @Nullable AnimatedLength animatedLength(
             @NotNull LengthValue initial,
@@ -163,8 +103,6 @@ public final class Animate extends MetaSVGNode {
 
     public @Nullable AnimatedPaint animatedPaint(@NotNull SVGPaint initial, @NotNull AttributeNode attributeNode) {
         if (track == null) return null;
-        // https://www.w3.org/TR/2001/REC-smil-animation-20010904/#animateColorElement
-        // FIXME: All colors can have out of bounds values and need an own "ColorDelta" type.
         SVGPaint[] paints = new SVGPaint[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
             if (isPlaceholder(values[i])) {
@@ -180,16 +118,16 @@ public final class Animate extends MetaSVGNode {
 
     public @Nullable AnimatedColor animatedColor(@NotNull Color initial, @NotNull AttributeNode attributeNode) {
         if (track == null) return null;
-        Color[] paints = new Color[this.values.length];
+        ColorValue[] paints = new ColorValue[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
             if (isPlaceholder(values[i])) {
-                paints[i] = PaintParser.DEFAULT_COLOR;
+                paints[i] = new ColorValue(PaintParser.DEFAULT_COLOR);
             } else {
                 Color c = attributeNode.parser().paintParser().parseColor(this.values[i], attributeNode);
                 if (c == null) return null;
-                paints[i] = c;
+                paints[i] = new ColorValue(c);
             }
         }
-        return new AnimatedColor(track, initial, paints);
+        return new AnimatedColor(track, new ColorValue(initial), paints);
     }
 }

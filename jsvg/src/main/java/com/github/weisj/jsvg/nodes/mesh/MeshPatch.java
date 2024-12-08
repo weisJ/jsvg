@@ -38,6 +38,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.util.ColorUtil;
 
 @ElementCategories({ /* None */})
 @PermittedContent(
@@ -105,6 +106,6 @@ public final class MeshPatch extends ContainerNode {
     }
 
     private int clampColor(float v) {
-        return Math.max(Math.min(255, (int) v), 0);
+        return ColorUtil.clampColor((int) v);
     }
 }

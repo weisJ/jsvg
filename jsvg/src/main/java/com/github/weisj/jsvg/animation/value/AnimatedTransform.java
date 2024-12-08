@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public class AnimatedTransform implements TransformValue {
+public final class AnimatedTransform implements TransformValue {
 
     @Override
     public @NotNull AffineTransform get(@NotNull MeasureContext context) {

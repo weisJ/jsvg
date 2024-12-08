@@ -31,10 +31,10 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.animation.Additive;
 import com.github.weisj.jsvg.animation.AnimationValuesType;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
+import com.github.weisj.jsvg.attributes.paint.ColorValue;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
-import com.github.weisj.jsvg.util.ColorUtil;
 
 public final class DefaultInterpolator implements FloatInterpolator, FloatListInterpolator, PaintInterpolator {
     private final Additive additive;
@@ -153,17 +153,19 @@ public final class DefaultInterpolator implements FloatInterpolator, FloatListIn
         }
     }
 
-    private static @Nullable Color extractColor(@NotNull SVGPaint p) {
+    private static @Nullable ColorValue extractColor(@NotNull SVGPaint p) {
         if (!(p instanceof SimplePaintSVGPaint)) return null;
         Paint paint = ((SimplePaintSVGPaint) p).paint();
-        return paint instanceof Color ? (Color) paint : null;
+        if (paint instanceof Color) return new ColorValue((Color) paint);
+        if (paint instanceof ColorValue) return (ColorValue) paint;
+        return null;
     }
 
     @Override
     public @NotNull SVGPaint interpolate(@NotNull SVGPaint initial, @NotNull SVGPaint a, @NotNull SVGPaint b,
             float progress) {
-        Color colorA = extractColor(a);
-        Color colorB = extractColor(b);
+        ColorValue colorA = extractColor(a);
+        ColorValue colorB = extractColor(b);
 
         if (colorA == null || colorB == null) {
             return discreteAnimation(initial, a, b, progress);
@@ -171,27 +173,27 @@ public final class DefaultInterpolator implements FloatInterpolator, FloatListIn
 
         switch (valuesType) {
             case FROM_BY: {
-                return new AwtSVGPaint(ColorUtil.saxpy(progress, colorA, colorB));
+                return new AwtSVGPaint(ColorValue.saxpy(progress, colorA, colorB));
             }
             case BY: {
-                Color initialColor = extractColor(initial);
+                ColorValue initialColor = extractColor(initial);
                 if (initialColor == null) return initial;
-                return new AwtSVGPaint(ColorUtil.saxpy(progress, initialColor, colorB));
+                return new AwtSVGPaint(ColorValue.saxpy(progress, initialColor, colorB));
             }
             case TO: {
-                Color initialColor = extractColor(initial);
+                ColorValue initialColor = extractColor(initial);
                 if (initialColor == null) return initial;
-                return new AwtSVGPaint(ColorUtil.interpolate(progress, initialColor, colorB));
+                return new AwtSVGPaint(ColorValue.interpolate(progress, initialColor, colorB));
             }
             case FROM_TO:
             case VALUES:
             default: {
-                Color result = ColorUtil.interpolate(progress, colorA, colorB);
+                ColorValue result = ColorValue.interpolate(progress, colorA, colorB);
 
                 if (additive == Additive.SUM) {
-                    Color initialColor = extractColor(initial);
+                    ColorValue initialColor = extractColor(initial);
                     if (initialColor == null) return initial;
-                    result = ColorUtil.add(initialColor, result);
+                    result = ColorValue.add(initialColor, result);
                 }
                 return new AwtSVGPaint(result);
             }

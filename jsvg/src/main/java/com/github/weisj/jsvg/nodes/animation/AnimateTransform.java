@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,14 +23,13 @@ package com.github.weisj.jsvg.nodes.animation;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.MetaSVGNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 @ElementCategories(Category.Animation)
 @PermittedContent(categories = {Category.Descriptive})
-public final class AnimateTransform extends MetaSVGNode {
+public final class AnimateTransform extends BaseAnimationNode {
     public static final String TAG = "animatetransform";
 
     @Override
