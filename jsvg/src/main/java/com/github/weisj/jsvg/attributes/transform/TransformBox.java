@@ -38,7 +38,7 @@ public enum TransformBox implements HasMatchName {
 
     private final @NotNull String matchName;
 
-    private TransformBox(@NotNull String matchName) {
+    TransformBox(@NotNull String matchName) {
         this.matchName = matchName;
     }
 
