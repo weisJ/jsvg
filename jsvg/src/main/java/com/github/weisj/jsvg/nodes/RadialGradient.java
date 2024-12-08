@@ -88,6 +88,13 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
         float radius = r.resolve(measure);
         float focusRadius = fr.resolve(measure);
 
+        if (focusRadius == 0) {
+            // If possible use built-in RadialGradientPaint as it profits from hardware acceleration
+            return new RadialGradientPaint(center, radius, focusCenter,
+                    offsetsToFractions(gradOffsets), gradColors, spreadMethod.cycleMethod(),
+                    MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(measure, bounds));
+        }
+
         return new SVGRadialGradientPaint(center, radius, focusCenter, focusRadius,
                 offsetsToFractions(gradOffsets), gradColors, spreadMethod.cycleMethod(),
                 MultipleGradientPaint.ColorSpaceType.SRGB, computeViewTransform(measure, bounds));
