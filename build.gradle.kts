@@ -86,8 +86,8 @@ sonarqube {
         properties["sonar.issue.ignore.multicriteria.e4.resourceKey"] = "**/*.java"
 
         // java:S6548: Singleton detection. We use singletons in some cases.
-        properties["sonar.issue.ignore.multicriteria.e4.ruleKey"] = "java:S6548"
-        properties["sonar.issue.ignore.multicriteria.e4.resourceKey"] = "**/*.java"
+        properties["sonar.issue.ignore.multicriteria.e5.ruleKey"] = "java:S6548"
+        properties["sonar.issue.ignore.multicriteria.e5.resourceKey"] = "**/*.java"
     }
 }
 
