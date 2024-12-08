@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -94,91 +95,81 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
 
     private void parseStops(@NotNull List<Stop> stops) {
         stops.sort(Comparator.comparing(Stop::offset));
-        colors = new Color[stops.size()];
-        offsets = new Percentage[stops.size()];
-
-        // TODO: Make this not be necessary by changing the gradient implementations.
-        // Makes it possible to just resort the stops once animations are supported.
+        List<Color> colorsList = new ArrayList<>();
+        List<Percentage> offsetsList = new ArrayList<>();
 
         boolean realGradient = false;
-        for (int i = 0; i < offsets.length; i++) {
-            Stop stop = stops.get(i);
+        for (Stop stop : stops) {
             // Clamp the offset
             float stopOffset = Math.max(0, Math.min(1, stop.offset().value()));
             Color stopColor = stop.color();
 
-            if (i > 0) {
-                // Keep track whether the provided colors and offsets are actually different.
-                realGradient = realGradient
-                        || stopOffset > stops.get(i - 1).offset().value()
-                        || !stopColor.equals(colors[i - 1]);
+            boolean isFirstStop = offsetsList.isEmpty();
+            boolean effectiveStop = isFirstStop
+                    || isEffectiveStop(stopOffset, stopColor, offsetsList, colorsList);
+            realGradient = !isFirstStop && effectiveStop;
 
-                if (stopOffset <= offsets[i - 1].value()) {
-                    // The awt gradient implementations really don't like it if
-                    // two offsets are equal. Hence, we use the next possible float value instead as it will produce
-                    // the same effect as if the equal values were used.
-                    stopOffset = Math.nextAfter(offsets[i - 1].value(), Double.MAX_VALUE);
-                }
+            if (isFirstStop && stopOffset != 0) {
+                // If the first stop is not at 0, we need to add a transparent color at the beginning.
+                offsetsList.add(Percentage.ZERO);
+                colorsList.add(stopColor);
             }
 
-            offsets[i] = new Percentage(stopOffset);
-            colors[i] = stopColor;
-        }
-
-        // Re-balance if nextAfter pushed us out of range.
-        if (offsets.length > 0 && offsets[offsets.length - 1].value() > 1f) {
-            float diff = offsets[offsets.length - 1].value() - 1f;
-            offsets[offsets.length - 1] = Percentage.ONE;
-            int i = offsets.length - 2;
-            while (i >= 0 && offsets[i].compareTo(offsets[i + 1]) > 0) {
-                offsets[i] = new Percentage(offsets[i].value() - diff);
+            if (effectiveStop) {
+                offsetsList.add(new Percentage(stopOffset));
+                colorsList.add(stopColor);
             }
         }
 
-        if (!realGradient && colors.length > 0) {
+        if (!offsetsList.isEmpty() && offsetsList.get(offsetsList.size() - 1).value() != 1f) {
+            // If the last stop is not at 1, we need to add a transparent color at the end.
+            offsetsList.add(Percentage.ONE);
+            colorsList.add(colorsList.get(colorsList.size() - 1));
+        }
+
+        if (!realGradient && !colorsList.isEmpty()) {
             // If all stops are equal, we can just use the first color.
             // This never gets passed to the radial gradient hence we don't need to provide a second stop.
             colors = new Color[] {colors[0]};
             offsets = new Percentage[] {Percentage.ZERO};
-        } else if (offsets.length > 0) {
-            // To avoid copying the arrays, we just make sure that the first and last stop are 0 and 1
-            // respectively here instead of in the gradient implementation.
-            int offsetLength = offsets.length;
-            int off = 0;
+        } else {
+            colors = colorsList.toArray(new Color[0]);
+            offsets = offsetsList.toArray(new Percentage[0]);
+            makeStrictlyIncreasing(offsets);
+        }
+    }
 
-            boolean fixFirst = false;
-            boolean fixLast = false;
-
-            if (offsets[0].value() != 0f) {
-                // first stop is not equal to zero, fix this condition
-                fixFirst = true;
-                offsetLength++;
-                off++;
-            }
-            if (offsets[offsets.length - 1].value() != 1f) {
-                // last stop is not equal to one, fix this condition
-                fixLast = true;
-                offsetLength++;
-            }
-
-            Percentage[] oldOffsets = offsets;
-            Color[] oldColors = colors;
-
-            offsets = new Percentage[offsetLength];
-            colors = new Color[offsetLength];
-
-            System.arraycopy(oldOffsets, 0, offsets, off, oldOffsets.length);
-            System.arraycopy(oldColors, 0, colors, off, oldColors.length);
-
-            if (fixFirst) {
-                offsets[0] = Percentage.ZERO;
-                colors[0] = oldColors[0];
-            }
-            if (fixLast) {
-                offsets[offsetLength - 1] = Percentage.ONE;
-                colors[offsetLength - 1] = oldColors[oldColors.length - 1];
+    private static void makeStrictlyIncreasing(@NotNull Percentage @NotNull [] offsets) {
+        // Round up equal values to the next float value.
+        for (int i = 1; i < offsets.length; i++) {
+            if (offsets[i].value() <= offsets[i - 1].value()) {
+                offsets[i] = new Percentage(Math.nextUp(offsets[i - 1].value()));
             }
         }
+
+        // Values have possibly exceeded 1 now. Clamp them back down.
+        for (int i = offsets.length - 1; i >= 0; i--) {
+            if (offsets[i].value() >= 1) {
+                offsets[i] = Percentage.ONE;
+            }
+        }
+
+        // Now round values down as in step one but from top to bottom.
+        // Note: As there are 126 x 2^23 + 1 floats between 0 and 1 and we don't expect input array to be
+        // that large we can safely assume that now all values are distinct (as there will be a gap with
+        // enough space to shift all offsets to).
+        for (int i = offsets.length - 2; i >= 0; i--) {
+            if (offsets[i].value() >= offsets[i + 1].value()) {
+                offsets[i - 1] = new Percentage(Math.nextDown(offsets[i + 1].value()));
+            }
+        }
+    }
+
+    private static boolean isEffectiveStop(float stopOffset, @NotNull Color stopColor,
+            @NotNull List<@NotNull Percentage> offsetsList,
+            @NotNull List<@NotNull Color> colorsList) {
+        return stopOffset > offsetsList.get(offsetsList.size() - 1).value()
+                || !stopColor.equals(colorsList.get(colorsList.size() - 1));
     }
 
     private @Nullable AbstractGradient<?> parseTemplate(@NotNull AttributeNode attributeNode) {
