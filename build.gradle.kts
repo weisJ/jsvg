@@ -1,3 +1,4 @@
+import aQute.bnd.gradle.Bundle
 import com.diffplug.spotless.extra.wtp.EclipseWtpFormatterStep
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
@@ -7,7 +8,6 @@ import com.github.vlsi.gradle.properties.dsl.toBool
 import com.github.vlsi.gradle.publishing.dsl.simplifyXml
 import com.github.vlsi.gradle.publishing.dsl.versionFromResolution
 import net.ltgt.gradle.errorprone.errorprone
-import aQute.bnd.gradle.Bundle
 
 plugins {
     idea
@@ -17,13 +17,7 @@ plugins {
     id("com.github.vlsi.gradle-extensions")
     id("com.github.vlsi.stage-vote-release")
     id("net.ltgt.errorprone") apply false
-	id("biz.aQute.bnd.builder")
-}
-//sourceSets {
-//  bundle
-//}
-tasks.register<Bundle>("bundle") {
-    //from(sourceSets.bundle.output)
+    id("biz.aQute.bnd.builder") apply false
 }
 
 val skipJavadoc by props()
@@ -263,6 +257,12 @@ allprojects {
                 }
             }
 
+            apply(plugin = "biz.aQute.bnd.builder")
+            register<Bundle>("bundle") {
+                bundle {
+                }
+            }
+
             withType<Jar>().configureEach {
                 manifest {
                     attributes["Bundle-License"] = "MIT"
@@ -273,10 +273,6 @@ allprojects {
                     attributes["Specification-Title"] = "JSVG"
                     attributes["Implementation-Vendor"] = "JSVG"
                     attributes["Implementation-Vendor-Id"] = "com.github.weisj"
-                }
-                bundle {
-                  bnd["-exportcontents"] = "*"
-                  bnd["-sources"] = "true"
                 }
 
                 CrLfSpec(LineEndings.LF).run {
