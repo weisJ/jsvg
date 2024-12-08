@@ -51,7 +51,7 @@ import com.github.weisj.jsvg.util.ColorUtil;
  * General Public License version 2 for more details (a copy is included in the LICENSE file that
  * accompanied this code).
  *
- * You should have received a copy of the GNU General Public License version 2 along with this work;
+ * You should have received a copy of the GNU General Public License version 2 along with this work
  * if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  *
@@ -111,7 +111,12 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
     /**
      * Elements of the inverse transform matrix.
      */
-    protected float a00, a01, a10, a11, a02, a12;
+    protected float a00;
+    protected float a01;
+    protected float a10;
+    protected float a11;
+    protected float a02;
+    protected float a12;
 
     /**
      * This boolean specifies whether we are in simple lookup mode, where an
@@ -209,12 +214,12 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         // note that only one of these values can ever be non-null (we either
         // store the fast gradient array or the slow one, but never both
         // at the same time)
-        int[] gradient =
+        int[] grad =
                 (mgp.gradient != null) ? mgp.gradient.get() : null;
-        int[][] gradients =
+        int[][] grads =
                 (mgp.gradients != null) ? mgp.gradients.get() : null;
 
-        if (gradient == null && gradients == null) {
+        if (grad == null && grads == null) {
             // we need to (re)create the appropriate values
             calculateLookupData(colors);
 
@@ -236,9 +241,9 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
             this.model = mgp.model;
             this.normalizedIntervals = mgp.normalizedIntervals;
             this.isSimpleLookup = mgp.isSimpleLookup;
-            this.gradient = gradient;
+            this.gradient = grad;
             this.fastGradientArraySize = mgp.fastGradientArraySize;
-            this.gradients = gradients;
+            this.gradients = grads;
         }
     }
 
@@ -279,10 +284,10 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         gradients = new int[normalizedIntervals.length][];
 
         // find smallest interval
-        float Imin = 1;
+        float minInterval = 1;
         for (float interval : normalizedIntervals) {
             if (interval > MIN_INTERVAL_LENGTH) {
-                Imin = Math.min(Imin, interval);
+                minInterval = Math.min(minInterval, interval);
             }
         }
 
@@ -293,7 +298,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         // look-up time.
         int estimatedSize = 0;
         for (float normalizedInterval : normalizedIntervals) {
-            estimatedSize += (int) ((normalizedInterval / Imin) * GRADIENT_SIZE);
+            estimatedSize += (int) ((normalizedInterval / minInterval) * GRADIENT_SIZE);
         }
 
         if (estimatedSize > MAX_GRADIENT_ARRAY_SIZE) {
@@ -301,7 +306,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
             calculateMultipleArrayGradient(normalizedColors);
         } else {
             // fast method
-            calculateSingleArrayGradient(normalizedColors, Imin);
+            calculateSingleArrayGradient(normalizedColors, minInterval);
         }
 
         // use the most "economical" model
@@ -333,14 +338,15 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * intervals will be allocated huge space, but much of that data is
      * redundant.  We thus need to use the space conserving scheme below.
      *
-     * @param Imin the size of the smallest interval
+     * @param minInterval the size of the smallest interval
      */
-    private void calculateSingleArrayGradient(Color[] colors, float Imin) {
+    private void calculateSingleArrayGradient(Color[] colors, float minInterval) {
         // set the flag, so we know later it is a simple (fast) lookup
         isSimpleLookup = true;
 
         // 2 colors to interpolate
-        int rgb1, rgb2;
+        int rgb1;
+        int rgb2;
 
         // the eventual size of the single array
         int gradientsTot = 1;
@@ -349,7 +355,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         for (int i = 0; i < gradients.length; i++) {
             // create an array whose size is based on the ratio to the
             // smallest interval
-            int nGradients = (int) ((normalizedIntervals[i] / Imin) * 255f);
+            int nGradients = (int) ((normalizedIntervals[i] / minInterval) * 255f);
             gradientsTot += nGradients;
             gradients[i] = new int[nGradients];
 
@@ -409,7 +415,8 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         isSimpleLookup = false;
 
         // 2 colors to interpolate
-        int rgb1, rgb2;
+        int rgb1;
+        int rgb2;
 
         // for every interval (transition between 2 colors)
         for (int i = 0; i < gradients.length; i++) {
@@ -450,23 +457,20 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * @param output the output array of colors; must not be null
      */
     private void interpolate(int rgb1, int rgb2, int[] output) {
-        // color components
-        int a1, r1, g1, b1, da, dr, dg, db;
-
         // step between interpolated values
         float stepSize = 1.0f / output.length;
 
         // extract color components from packed integer
-        a1 = (rgb1 >> 24) & 0xff;
-        r1 = (rgb1 >> 16) & 0xff;
-        g1 = (rgb1 >> 8) & 0xff;
-        b1 = rgb1 & 0xff;
+        int a1 = (rgb1 >> 24) & 0xff;
+        int r1 = (rgb1 >> 16) & 0xff;
+        int g1 = (rgb1 >> 8) & 0xff;
+        int b1 = rgb1 & 0xff;
 
         // calculate the total change in alpha, red, green, blue
-        da = ((rgb2 >> 24) & 0xff) - a1;
-        dr = ((rgb2 >> 16) & 0xff) - r1;
-        dg = ((rgb2 >> 8) & 0xff) - g1;
-        db = (rgb2 & 0xff) - b1;
+        int da = ((rgb2 >> 24) & 0xff) - a1;
+        int dr = ((rgb2 >> 16) & 0xff) - r1;
+        int dg = ((rgb2 >> 8) & 0xff) - g1;
+        int db = (rgb2 & 0xff) - b1;
 
         // for each step in the interval calculate the in-between color by
         // multiplying the normalized current position by the total color
@@ -477,6 +481,25 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
                     ((int) ((g1 + i * dg * stepSize) + 0.5) << 8) |
                     ((int) ((b1 + i * db * stepSize) + 0.5));
         }
+    }
+
+    private static float mod1(float x) {
+        float result = x - (int) x;
+        if (result < 0) {
+            result += 1;
+        }
+        return result;
+    }
+
+    private static float mod1Reflect(float x) {
+        float result = Math.abs(x);
+        int part = (int) x;
+        result = result - part;
+        if (part % 2 == 1) {
+            // integer part is odd, get reflected color instead
+            result = 1 - result;
+        }
+        return result;
     }
 
     /**
@@ -492,39 +515,12 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
     protected final int indexIntoGradientsArrays(float position) {
         // first, manipulate position value depending on the cycle method
         if (cycleMethod == MultipleGradientPaint.CycleMethod.NO_CYCLE) {
-            if (position > 1) {
-                // upper bound is 1
-                position = 1;
-            } else if (position < 0) {
-                // lower bound is 0
-                position = 0;
-            }
+            position = Math.min(1, Math.max(0, position));
         } else if (cycleMethod == MultipleGradientPaint.CycleMethod.REPEAT) {
             // get the fractional part
-            // (modulo behavior discards integer component)
-            position = position - (int) position;
-
-            // position should now be between -1 and 1
-            if (position < 0) {
-                // force it to be in the range 0-1
-                position = position + 1;
-            }
+            position = mod1(position);
         } else { // cycleMethod == CycleMethod.REFLECT
-            if (position < 0) {
-                // take absolute value
-                position = -position;
-            }
-
-            // get the integer part
-            int part = (int) position;
-
-            // get the fractional part
-            position = position - part;
-
-            if ((part & 1) == 1) {
-                // integer part is odd, get reflected color instead
-                position = 1 - position;
-            }
+            position = mod1Reflect(position);
         }
 
         // now, get the color based on this 0-1 position...
@@ -589,15 +585,14 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * large.
      */
     private static synchronized Raster getCachedRaster(ColorModel cm, int w, int h) {
-        if (Objects.equals(cm, cachedModel)) {
-            if (cached != null) {
-                Raster ras = cached.get();
-                if (ras != null && ras.getWidth() >= w && ras.getHeight() >= h) {
-                    cached = null;
-                    return ras;
-                }
+        if (Objects.equals(cm, cachedModel) && cached != null) {
+            Raster ras = cached.get();
+            if (ras != null && ras.getWidth() >= w && ras.getHeight() >= h) {
+                cached = null;
+                return ras;
             }
         }
+
         return cm.createCompatibleWritableRaster(w, h);
     }
 

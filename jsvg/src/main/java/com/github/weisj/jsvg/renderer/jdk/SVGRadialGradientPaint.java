@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -228,7 +228,6 @@ public final class SVGRadialGradientPaint extends SVGMultipleGradientPaint {
             throw new IllegalArgumentException("Radius must be greater than zero");
         }
 
-        // copy parameters
         this.center = new Point2D.Double(center.getX(), center.getY());
         this.focus = new Point2D.Double(focus.getX(), focus.getY());
         this.radius = radius;

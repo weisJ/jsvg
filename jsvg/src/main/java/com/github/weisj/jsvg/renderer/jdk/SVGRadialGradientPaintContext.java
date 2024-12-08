@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -211,7 +211,7 @@ final class SVGRadialGradientPaintContext extends SVGMultipleGradientPaintContex
         float rowY = (a10 * x) + (a11 * y) + constB;
 
         // second order delta calculated in constructor
-        float gDeltaDelta = this.gDeltaDelta;
+        float deltaDelta = this.gDeltaDelta;
 
         // adjust is (scan-w) of pixels array, we need (scan)
         adjust += w;
@@ -223,7 +223,7 @@ final class SVGRadialGradientPaintContext extends SVGMultipleGradientPaintContex
             // these values depend on the coordinates of the start of the row
             float gRel = (rowX * rowX + rowY * rowY) / radiusSq;
             float gDelta = (2 * (a00 * rowX + a10 * rowY) / radiusSq +
-                    gDeltaDelta / 2);
+                    deltaDelta / 2);
 
             /*
              * Use optimized loops for any cases where gRel >= 1. We do not need to calculate sqrt(gRel) for
@@ -239,7 +239,7 @@ final class SVGRadialGradientPaintContext extends SVGMultipleGradientPaintContex
             while (i < w && gRel >= 1.0f) {
                 pixels[off + i] = rgbclip;
                 gRel += gDelta;
-                gDelta += gDeltaDelta;
+                gDelta += deltaDelta;
                 i++;
             }
             // Slow fill for "in the heart"
@@ -262,7 +262,7 @@ final class SVGRadialGradientPaintContext extends SVGMultipleGradientPaintContex
 
                 // incremental calculation
                 gRel += gDelta;
-                gDelta += gDeltaDelta;
+                gDelta += deltaDelta;
                 i++;
             }
             // Quick fill to end of line for "out to the right"
@@ -309,15 +309,6 @@ final class SVGRadialGradientPaintContext extends SVGMultipleGradientPaintContex
         // constant part of the C factor of the quadratic equation
         final double constC = -radiusSq + (centerX * centerX) + (centerY * centerY);
 
-        // coefficients of the quadratic equation (Ax^2 + Bx + C = 0)
-        double A, B, C;
-
-        // slope and y-intercept of the focus-perimeter line
-        double slope, yIntercept;
-
-        // intersection with circle X,Y coordinate
-        double solutionX, solutionY;
-
         // constant parts of X, Y coordinates
         final float constX = (a00 * x) + (a01 * y) + a02;
         final float constY = (a10 * x) + (a11 * y) + a12;
@@ -326,114 +317,107 @@ final class SVGRadialGradientPaintContext extends SVGMultipleGradientPaintContex
         final float precalc2 = 2 * centerY;
         final float precalc3 = -2 * centerX;
 
-        // value between 0 and 1 specifying position in the gradient
-        float g;
-
-        // determinant of quadratic formula (should always be > 0)
-        float det;
-
-        // sq distance from the current point to focus
-        float currentToFocusSq;
-
-        // sq distance from the intersect point to focus
-        float intersectToFocusSq;
-
-        // temp variables for change in X,Y squared
-        float deltaXSq, deltaYSq;
-
         // used to index pixels array
         int indexer = off;
 
         // incremental index change for pixels array
-        int pixInc = w + adjust;
+        final int pixInc = w + adjust;
 
         // for every row
         for (int j = 0; j < h; j++) {
 
             // user space point; these are constant from column to column
-            float X = (a01 * j) + constX;
-            float Y = (a11 * j) + constY;
+            float userX = (a01 * j) + constX;
+            float userY = (a11 * j) + constY;
 
             // for every column (inner loop begins here)
             for (int i = 0; i < w; i++) {
 
-                if (X == focusX) {
+                // intersection with circle X,Y coordinate
+                double solutionX;
+                double solutionY;
+                if (userX == focusX) {
                     // special case to avoid divide by zero
                     solutionX = focusX;
                     solutionY = centerY;
-                    solutionY += (Y > focusY) ? trivial : -trivial;
+                    solutionY += (userY > focusY) ? trivial : -trivial;
                 } else {
                     // slope and y-intercept of the focus-perimeter line
-                    slope = (Y - focusY) / (X - focusX);
-                    yIntercept = Y - (slope * X);
+                    float slope = (userY - focusY) / (userX - focusX);
+                    float yIntercept = userY - (slope * userX);
 
                     // use the quadratic formula to calculate the
                     // intersection point
-                    A = (slope * slope) + 1;
-                    B = precalc3 + (-2 * slope * (centerY - yIntercept));
-                    C = constC + (yIntercept * (yIntercept - precalc2));
+                    double a = (slope * slope) + 1;
+                    double b = precalc3 + (-2 * slope * (centerY - yIntercept));
+                    double c = constC + (yIntercept * (yIntercept - precalc2));
 
-                    det = (float) Math.sqrt((B * B) - (4 * A * C));
-                    solutionX = -B;
+                    // determinant of quadratic formula (should always be > 0)
+                    float det = (float) Math.sqrt((b * b) - (4 * a * c));
+                    solutionX = -b;
 
                     // choose the positive or negative root depending
                     // on where the X coord lies with respect to the focus
-                    solutionX += (X < focusX) ? -det : det;
-                    solutionX = solutionX / (2 * A); // divisor
+                    solutionX += (userX < focusX) ? -det : det;
+                    solutionX = solutionX / (2 * a); // divisor
                     solutionY = (slope * solutionX) + yIntercept;
                 }
 
-                // Calculate the square of the distance from the current point
-                // to the focus and the square of the distance from the
-                // intersection point to the focus. Want the squares so we can
-                // do 1 square root after division instead of 2 before.
-
-                deltaXSq = X - focusX;
-                deltaXSq = deltaXSq * deltaXSq;
-
-                deltaYSq = Y - focusY;
-                deltaYSq = deltaYSq * deltaYSq;
-
-                currentToFocusSq = deltaXSq + deltaYSq;
-
-                int colorAtPoint;
-                if (currentToFocusSq <= focusRadiusSq) {
-                    // If we are inside the focus circle use the first color stop.
-                    colorAtPoint = indexIntoGradientsArrays(0);
-                } else {
-                    // Otherwise remap the interval (0-1) which usually span from the focus to the circle boundary
-                    // to the line from the outside of the focus circle to the outside.
-                    deltaXSq = (float) solutionX - focusX;
-                    deltaXSq = deltaXSq * deltaXSq;
-
-                    deltaYSq = (float) solutionY - focusY;
-                    deltaYSq = deltaYSq * deltaYSq;
-
-                    intersectToFocusSq = deltaXSq + deltaYSq;
-
-                    // get the percentage (0-1) of the current point along the focus-circumference line
-                    // Adjust for the focus radius
-
-                    if (focusRadius > 0) {
-                        float currentToFocus = (float) Math.sqrt(currentToFocusSq);
-                        float intersectToFocus = (float) Math.sqrt(intersectToFocusSq);
-                        g = (currentToFocus - focusRadius) / (intersectToFocus - focusRadius);
-                    } else {
-                        g = (float) Math.sqrt(currentToFocusSq / intersectToFocusSq);
-                    }
-
-                    colorAtPoint = indexIntoGradientsArrays(g);
-                }
+                int colorAtPoint = getColorAtPoint(userX, userY, (float) solutionX, (float) solutionY);
 
                 // store the color at this point
                 pixels[indexer + i] = colorAtPoint;
 
                 // incremental change in X, Y
-                X += a00;
-                Y += a10;
+                userX += a00;
+                userY += a10;
             } // end inner loop
 
             indexer += pixInc;
         } // end outer loop
+    }
+
+    private int getColorAtPoint(float userX, float userY, float solutionX, float solutionY) {
+        float currentToFocusSq = getCurrentToFocusSq(userX, userY);
+        if (currentToFocusSq <= focusRadiusSq) {
+            // If we are inside the focus circle use the first color stop.
+            return indexIntoGradientsArrays(0);
+        } else {
+            return getColorAtPointOutsideFocusCircle(solutionX, solutionY, currentToFocusSq);
+        }
+    }
+
+    private float getCurrentToFocusSq(float x, float y) {
+        float deltaXSq = x - focusX;
+        deltaXSq = deltaXSq * deltaXSq;
+
+        float deltaYSq = y - focusY;
+        deltaYSq = deltaYSq * deltaYSq;
+
+        // sq distance from the current point to focus
+        return deltaXSq + deltaYSq;
+    }
+
+    private int getColorAtPointOutsideFocusCircle(float solutionX, float solutionY, float currentToFocusSq) {
+        // Otherwise remap the interval (0-1) which usually span from the focus to the circle boundary
+        // to the line from the outside of the focus circle to the outside.
+        float intersectToFocusSq = getCurrentToFocusSq(solutionX, solutionY);
+
+        float gradientPosition = computeGradientPosition(currentToFocusSq, intersectToFocusSq);
+        return indexIntoGradientsArrays(gradientPosition);
+    }
+
+    private float computeGradientPosition(float currentToFocusSq, float intersectToFocusSq) {
+        // get the percentage (0-1) of the current point along the focus-circumference line
+        // Adjust for the focus radius
+        float gradientPosition;
+        if (focusRadius > 0) {
+            float currentToFocus = (float) Math.sqrt(currentToFocusSq);
+            float intersectToFocus = (float) Math.sqrt(intersectToFocusSq);
+            gradientPosition = (currentToFocus - focusRadius) / (intersectToFocus - focusRadius);
+        } else {
+            gradientPosition = (float) Math.sqrt(currentToFocusSq / intersectToFocusSq);
+        }
+        return gradientPosition;
     }
 }
