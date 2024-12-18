@@ -1,4 +1,3 @@
-import aQute.bnd.gradle.Bundle
 import com.diffplug.spotless.extra.wtp.EclipseWtpFormatterStep
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
@@ -17,7 +16,6 @@ plugins {
     id("com.github.vlsi.gradle-extensions")
     id("com.github.vlsi.stage-vote-release")
     id("net.ltgt.errorprone") apply false
-    id("biz.aQute.bnd.builder") apply false
 }
 
 val skipJavadoc by props()
@@ -263,12 +261,6 @@ allprojects {
                 }
             }
 
-            apply(plugin = "biz.aQute.bnd.builder")
-            register<Bundle>("bundle") {
-                bundle {
-                }
-            }
-
             withType<Jar>().configureEach {
                 manifest {
                     attributes["Bundle-License"] = "MIT"
@@ -279,10 +271,6 @@ allprojects {
                     attributes["Specification-Title"] = "JSVG"
                     attributes["Implementation-Vendor"] = "JSVG"
                     attributes["Implementation-Vendor-Id"] = "com.github.weisj"
-                    // bnd instructions to generate OSGi metadata
-                    attributes["Bundle-SymbolicName"] = "com.github.weisj.jsvg"
-                    attributes["-exportcontents"] = "!*.impl.*,*"
-                    attributes["-removeheaders"] = "Private-Package,Tool"
                 }
 
                 CrLfSpec(LineEndings.LF).run {
