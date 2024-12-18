@@ -5,6 +5,7 @@ plugins {
     `module-info-compile`
     id("me.champeau.jmh")
     jacoco
+    id("biz.aQute.bnd.builder")
 }
 
 dependencies {
@@ -27,11 +28,22 @@ dependencies {
     jmh(testLibs.svgSalamander)
     jmh(testLibs.batik)
 }
+
 tasks {
 
     compileTestJava {
         sourceCompatibility = JavaVersion.VERSION_21.toString()
         targetCompatibility = JavaVersion.VERSION_21.toString()
+    }
+
+    jar {
+        bundle {
+            bnd(
+                "Bundle-SymbolicName: com.github.weisj.jsvg2",
+                "-exportcontents: !*.impl.*,*",
+                "-removeheaders: Private-Package,Tool",
+            )
+        }
     }
 
     test {
