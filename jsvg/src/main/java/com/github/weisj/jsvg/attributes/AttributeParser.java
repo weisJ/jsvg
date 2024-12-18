@@ -50,6 +50,8 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
 import com.github.weisj.jsvg.util.ParserBase;
 
+import javax.xml.crypto.dsig.Transform;
+
 
 public final class AttributeParser {
 
@@ -315,14 +317,17 @@ public final class AttributeParser {
         TransformPart.TransformType type = parseEnum(command, TransformPart.TransformType.class);
         if (type == null) return null;
 
-        String[] values = parseStringList(value.substring(first + 1, last), SeparatorMode.COMMA_AND_WHITESPACE);
+        return parseTransformPart(type, value.substring(first + 1, last));
+    }
+
+    public @Nullable TransformPart parseTransformPart(TransformPart.TransformType type, @NotNull String value) {
+        String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
         Length[] lengths = parseTransformLengths(type, values);
         if (lengths == null) return null;
         return new TransformPart(type, lengths);
     }
 
-    @Nullable
-    private Length[] parseTransformLengths(TransformPart.@NotNull TransformType type,
+    private Length @Nullable [] parseTransformLengths(TransformPart.@NotNull TransformType type,
             @NotNull String @NotNull [] values) {
         Length[] lengths;
         switch (type) {

@@ -32,8 +32,8 @@ public final class AnimatedFloatList implements FloatListValue {
 
     private final @NotNull Track track;
 
-    private final float[] initial;
-    private final float[][] values;
+    private final float @NotNull [] initial;
+    private final float @NotNull [] @NotNull [] values;
     private float[] cache;
 
     private long timestamp = 0;

@@ -23,13 +23,12 @@ package com.github.weisj.jsvg.animation;
 
 import java.util.Objects;
 
+import com.github.weisj.jsvg.animation.interpolation.*;
+import com.github.weisj.jsvg.attributes.paint.ColorValue;
+import com.github.weisj.jsvg.attributes.value.ConstantLengthTransform;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.animation.interpolation.DefaultInterpolator;
-import com.github.weisj.jsvg.animation.interpolation.FloatInterpolator;
-import com.github.weisj.jsvg.animation.interpolation.FloatListInterpolator;
-import com.github.weisj.jsvg.animation.interpolation.PaintInterpolator;
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.parser.AttributeNode;
 
@@ -129,6 +128,10 @@ public final class Track {
     }
 
     public @NotNull PaintInterpolator paintInterpolator() {
+        return interpolator;
+    }
+
+    public @NotNull TransformInterpolator transformInterpolator() {
         return interpolator;
     }
 

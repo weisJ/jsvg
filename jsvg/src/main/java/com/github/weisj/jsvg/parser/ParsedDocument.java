@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.AnimationPeriod;
-import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 
 public class ParsedDocument {
     private final Map<String, Object> namedElements = new HashMap<>();
@@ -84,7 +84,7 @@ public class ParsedDocument {
         return animationPeriod;
     }
 
-    public void registerAnimatedElement(@NotNull Animate animate) {
+    public void registerAnimatedElement(@NotNull BaseAnimationNode animate) {
         animationPeriod = animationPeriod.derive(animate.track());
     }
 }

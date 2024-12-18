@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -118,7 +118,7 @@ public final class ParsedElement {
 
     void addChild(@NotNull ParsedElement parsedElement) {
         if (Category.hasCategory(parsedElement.node, Category.Animation)) {
-            animationElements.put(Animate.attributeName(parsedElement.attributeNode()), parsedElement);
+            animationElements.put(BaseAnimationNode.attributeName(parsedElement.attributeNode()), parsedElement);
         }
         children.add(parsedElement);
         if (node instanceof Container) {

@@ -31,11 +31,11 @@ import com.github.weisj.jsvg.geometry.size.Percentage;
 public final class AnimatedPercentage implements PercentageValue {
 
     private final @NotNull Track track;
-    private final PercentageValue initial;
-    private final float[] values;
+    private final @NotNull PercentageValue initial;
+    private final float @NotNull [] values;
     private final PercentageValue multiplier;
 
-    public AnimatedPercentage(@NotNull Track track, PercentageValue initial, float[] values,
+    public AnimatedPercentage(@NotNull Track track, @NotNull PercentageValue initial, float @NotNull [] values,
             PercentageValue multiplier) {
         this.track = track;
         this.initial = initial;

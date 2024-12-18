@@ -24,7 +24,11 @@ package com.github.weisj.jsvg.animation.interpolation;
 import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
+import com.github.weisj.jsvg.attributes.value.TransformValue;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +40,8 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 
-public final class DefaultInterpolator implements FloatInterpolator, FloatListInterpolator, PaintInterpolator {
+public final class DefaultInterpolator
+        implements FloatInterpolator, FloatListInterpolator, PaintInterpolator, TransformInterpolator {
     private final Additive additive;
     private final AnimationValuesType valuesType;
 
@@ -206,5 +211,42 @@ public final class DefaultInterpolator implements FloatInterpolator, FloatListIn
             return initial;
         }
         return GeometryUtil.approximatelyEqual(progress, 1) ? b : a;
+    }
+
+    private @NotNull AffineTransform interpolate(@NotNull AffineTransform transform, float progress) {
+        // TODO: Use unmatrix to interpolate
+        return new AffineTransform(
+                progress * transform.getScaleX(), progress * transform.getShearY(),
+                progress * -transform.getShearX(), progress * transform.getScaleY(),
+                progress * transform.getTranslateX(), progress * transform.getTranslateY());
+    }
+
+    @Override
+    public @NotNull AffineTransform interpolate(@NotNull MeasureContext context, @NotNull TransformValue initial,
+            @NotNull TransformPart a, @NotNull TransformPart b, float progress) {
+        switch (valuesType) {
+            case FROM_BY: {
+                return b.applyToTransform(a.applyToTransform(new AffineTransform(), context), context, progress);
+            }
+            case BY: {
+                return b.applyToTransform(initial.get(context), context, progress);
+            }
+            case TO: {
+                // NOTE: This is undefined by the specification
+                return b.applyToTransform(interpolate(initial.get(context), 1 - progress), context, progress);
+            }
+            case FROM_TO:
+            case VALUES:
+            default: {
+                AffineTransform result = b.applyToTransform(
+                        a.applyToTransform(new AffineTransform(), context, 1 - progress),
+                        context, progress);
+
+                if (additive == Additive.SUM) {
+                    result.preConcatenate(initial.get(context));
+                }
+                return result;
+            }
+        }
     }
 }

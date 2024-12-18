@@ -30,10 +30,10 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 public final class AnimatedFloat implements FloatValue {
 
     private final @NotNull Track track;
-    private final FloatValue initial;
-    private final float[] values;
+    private final @NotNull FloatValue initial;
+    private final float @NotNull [] values;
 
-    AnimatedFloat(@NotNull Track track, FloatValue initial, float[] values) {
+    AnimatedFloat(@NotNull Track track, @NotNull FloatValue initial, float @NotNull [] values) {
         this.track = track;
         this.initial = initial;
         this.values = values;

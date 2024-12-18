@@ -46,6 +46,8 @@ import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
+import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -391,6 +393,10 @@ public final class AttributeNode {
     }
 
     public @Nullable TransformValue parseTransform(@NotNull String key) {
+        return parseTransform(key, Animatable.NO);
+    }
+
+    public @Nullable TransformValue parseTransform(@NotNull String key, Animatable animatable) {
         List<TransformPart> parts = loadHelper.attributeParser().parseTransform(getValue(key));
         if (parts == null) return null;
         for (TransformPart part : parts) {
@@ -450,11 +456,11 @@ public final class AttributeNode {
         return loadHelper.externalResourcePolicy().resolveResourceURI(document().rootURI(), url);
     }
 
-    private @Nullable Animate animateNode(@NotNull String property) {
+    private <T extends BaseAnimationNode> @Nullable T animateNode(@NotNull String property, Class<T> type) {
         ParsedElement parsedElement = element.animationElements().get(property);
         if (parsedElement == null) return null;
-        if (parsedElement.node() instanceof Animate) {
-            Animate animate = (Animate) parsedElement.nodeEnsuringBuildStatus(document().currentNestingDepth());
+        if (type.isInstance(parsedElement.node())) {
+            T animate = type.cast(parsedElement.nodeEnsuringBuildStatus(document().currentNestingDepth()));
             document().registerAnimatedElement(animate);
             return animate;
         }
@@ -463,33 +469,40 @@ public final class AttributeNode {
 
     public @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial,
             @NotNull PercentageDimension dimension) {
-        Animate animate = animateNode(property);
+        Animate animate = animateNode(property, Animate.class);
         if (animate == null) return null;
         return animate.animatedLength(initial, dimension, this);
     }
 
     private @Nullable AnimatedFloatList getAnimatedFloatList(@NotNull String property, float @NotNull [] initial) {
-        Animate animate = animateNode(property);
+        Animate animate = animateNode(property, Animate.class);
         if (animate == null) return null;
         return animate.animatedFloatList(initial, this);
     }
 
     private @Nullable AnimatedPercentage getAnimatedPercentage(@NotNull String property,
             @NotNull PercentageValue initial) {
-        Animate animate = animateNode(property);
+        Animate animate = animateNode(property, Animate.class);
         if (animate == null) return null;
         return animate.animatedPercentage(initial, this);
     }
 
     private @Nullable AnimatedPaint getAnimatedPaint(@NotNull String property, @NotNull SVGPaint initial) {
-        Animate animate = animateNode(property);
+        Animate animate = animateNode(property, Animate.class);
         if (animate == null) return null;
         return animate.animatedPaint(initial, this);
     }
 
     public @Nullable AnimatedColor getAnimatedColor(@NotNull String property, @NotNull Color initial) {
-        Animate animate = animateNode(property);
+        Animate animate = animateNode(property, Animate.class);
         if (animate == null) return null;
         return animate.animatedColor(initial, this);
+    }
+
+    public @Nullable AnimatedTransform getAnimatedTransform(@NotNull String property,
+            @NotNull ConstantLengthTransform initial) {
+        AnimateTransform animate = animateNode(property, AnimateTransform.class);
+        if (animate == null) return null;
+        return animate.animatedTransform(initial, this);
     }
 }

@@ -22,16 +22,69 @@
 package com.github.weisj.jsvg.animation.value;
 
 import java.awt.geom.AffineTransform;
+import java.util.Objects;
 
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
+import com.github.weisj.jsvg.attributes.value.ConstantTransform;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.Track;
+import com.github.weisj.jsvg.attributes.paint.ColorValue;
+import com.github.weisj.jsvg.attributes.value.ConstantLengthTransform;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public final class AnimatedTransform implements TransformValue {
 
+    private final @NotNull Track track;
+    private final @NotNull TransformValue initial;
+    private final @NotNull TransformPart @NotNull [] values;
+
+    private AffineTransform current;
+    private long currentTimestamp = -1;
+
+    public AnimatedTransform(@NotNull Track track, @NotNull TransformValue initial,
+            @NotNull TransformPart @NotNull [] values) {
+        this.track = track;
+        this.initial = initial;
+        this.values = values;
+    }
+
+    public @NotNull AnimatedTransform derive(@NotNull TransformValue value) {
+        if (this.initial != ConstantLengthTransform.INHERITED) return this;
+        throw new IllegalStateException("Not implemented");
+    }
+
+    private @NotNull AffineTransform current(@NotNull MeasureContext context) {
+        long timestamp = context.timestamp();
+        if (currentTimestamp == timestamp) return current;
+        currentTimestamp = timestamp;
+        current = computeCurrent(context, timestamp);
+        return current;
+    }
+
+    private @NotNull AffineTransform computeCurrent(@NotNull MeasureContext context, long timestamp) {
+        Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
+        if (progress.isInitial()) return Objects.requireNonNull(initial).get(context);
+        int i = progress.iterationIndex();
+
+        assert i >= 0;
+        if (i >= values.length - 1) {
+            AffineTransform transform = new AffineTransform();
+            values[values.length - 1].applyToTransform(transform, context);
+            return transform;
+        }
+
+        TransformPart start = values[i];
+        TransformPart end = values[i + 1];
+        float t = progress.indexProgress();
+        return track.transformInterpolator().interpolate(context, initial, start, end, t);
+    }
+
     @Override
     public @NotNull AffineTransform get(@NotNull MeasureContext context) {
-        return null;
+        return current(context);
     }
 }

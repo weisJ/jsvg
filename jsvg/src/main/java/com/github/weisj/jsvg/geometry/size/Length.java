@@ -33,6 +33,7 @@ public final class Length implements LengthValue {
     public static final float UNSPECIFIED_RAW = Float.NaN;
     public static final @NotNull Length UNSPECIFIED = new Length(Unit.RAW, UNSPECIFIED_RAW);
     public static final @NotNull Length ZERO = new Length(Unit.RAW, 0);
+    public static final @NotNull Length ONE = new Length(Unit.RAW, 1);
     public static final @NotNull Length INHERITED = new Length(Unit.RAW, 0);
 
     private final @NotNull Unit unit;

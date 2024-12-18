@@ -38,14 +38,14 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class AnimatedColor implements SVGPaint {
 
-    private final Track track;
+    private final @NotNull Track track;
     private final @Nullable ColorValue initial;
-    private final ColorValue[] values;
+    private final @NotNull ColorValue @NotNull [] values;
 
     private ColorValue current;
     private long currentTimestamp = -1;
 
-    public AnimatedColor(@NotNull Track track, @Nullable ColorValue initial, @NotNull ColorValue[] values) {
+    public AnimatedColor(@NotNull Track track, @Nullable ColorValue initial, @NotNull ColorValue @NotNull [] values) {
         this.track = track;
         this.initial = initial;
         this.values = values;

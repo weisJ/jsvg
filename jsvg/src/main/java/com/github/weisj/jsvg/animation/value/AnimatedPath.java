@@ -32,7 +32,7 @@ import com.github.weisj.jsvg.util.PathUtil;
 
 public final class AnimatedPath implements Value<@NotNull Path2D> {
 
-    private final AnimatedFloatList list;
+    private final @NotNull AnimatedFloatList list;
     private @Nullable Path2D cache;
     private final boolean closed;
 

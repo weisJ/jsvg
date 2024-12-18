@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.attributes.transform;
 
 import java.awt.geom.AffineTransform;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.HasMatchName;
@@ -30,18 +31,6 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public final class TransformPart {
-
-    public TransformPart(TransformType type, Length[] values) {
-        this.type = type;
-        this.values = values;
-    }
-
-    public boolean canBeFlattened() {
-        for (Length value : values) {
-            if (!value.isAbsolute()) return false;
-        }
-        return true;
-    }
 
     public enum TransformType implements HasMatchName {
         MATRIX,
@@ -72,10 +61,67 @@ public final class TransformPart {
         }
     }
 
+    private static final TransformPart IDENTITY_MATRIX = new TransformPart(TransformType.MATRIX, new Length[] {
+            Length.ONE, Length.ZERO, Length.ZERO,
+            Length.ONE, Length.ZERO, Length.ZERO
+    });
+    private static final TransformPart IDENTITY_TRANSLATE =
+            new TransformPart(TransformType.TRANSLATE, new Length[] {Length.ZERO, Length.ZERO});
+    private static final TransformPart IDENTITY_SCALE =
+            new TransformPart(TransformType.SCALE, new Length[] {Length.ONE, Length.ONE});
+
+    private static final TransformPart IDENTITY_ROTATE =
+            new TransformPart(TransformType.ROTATE, new Length[] {Length.ZERO, Length.ZERO, Length.ZERO});
+
+    private static final TransformPart IDENTITY_SKEW =
+            new TransformPart(TransformType.ROTATE, new Length[] {Length.ZERO, Length.ZERO});
+
     private final TransformType type;
     private final Length[] values;
 
-    public void applyToTransform(@NotNull AffineTransform transform, @NotNull MeasureContext measureContext) {
+    public TransformPart(TransformType type, @NotNull Length @NotNull [] values) {
+        this.type = type;
+        this.values = values;
+    }
+
+    public static @NotNull TransformPart identityOfType(@NotNull TransformType type) {
+        switch (type) {
+            case MATRIX:
+                return IDENTITY_MATRIX;
+            case TRANSLATE:
+            case TRANSLATE_X:
+            case TRANSLATE_Y:
+                return IDENTITY_TRANSLATE;
+            case SCALE:
+            case SCALE_X:
+            case SCALE_Y:
+                return IDENTITY_SCALE;
+            case ROTATE:
+                return IDENTITY_ROTATE;
+            case SKEW:
+            case SKEW_X:
+            case SKEW_Y:
+                return IDENTITY_SKEW;
+            default:
+                throw new IllegalArgumentException("Unknown transform type: " + type);
+        }
+    }
+
+    public boolean canBeFlattened() {
+        for (Length value : values) {
+            if (!value.isAbsolute()) return false;
+        }
+        return true;
+    }
+
+    @Contract(value = "_,_ -> param1", pure = true)
+    public @NotNull AffineTransform applyToTransform(@NotNull AffineTransform transform, @NotNull MeasureContext measureContext) {
+        return applyToTransform(transform, measureContext, 1);
+    }
+
+    @Contract(value = "_,_,_ -> param1", pure = true)
+    public @NotNull AffineTransform applyToTransform(@NotNull AffineTransform transform, @NotNull MeasureContext measureContext,
+            float progress) {
         switch (type) {
             case MATRIX:
                 transform.concatenate(new AffineTransform(
@@ -88,8 +134,8 @@ public final class TransformPart {
                 break;
             case TRANSLATE:
                 transform.translate(
-                        values[0].resolve(measureContext),
-                        values[1].resolve(measureContext));
+                    progress * values[0].resolve(measureContext),
+                    progress * values[1].resolve(measureContext));
                 break;
             case TRANSLATE_X:
                 transform.translate(values[0].resolve(measureContext), 0);
@@ -135,5 +181,6 @@ public final class TransformPart {
                 transform.shear(0, Math.tan(values[0].resolve(measureContext)));
                 break;
         }
+        return transform;
     }
 }

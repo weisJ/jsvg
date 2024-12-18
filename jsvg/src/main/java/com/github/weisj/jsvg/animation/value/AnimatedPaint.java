@@ -36,14 +36,14 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class AnimatedPaint implements SVGPaint {
 
-    private final Track track;
-    private final SVGPaint initial;
-    private final SVGPaint[] values;
+    private final @NotNull Track track;
+    private final @NotNull SVGPaint initial;
+    private final @NotNull SVGPaint @NotNull [] values;
 
     private SVGPaint current;
     private long currentTimestamp = -1;
 
-    public AnimatedPaint(Track track, SVGPaint initial, SVGPaint[] values) {
+    public AnimatedPaint(@NotNull Track track, @NotNull SVGPaint initial, @NotNull SVGPaint @NotNull [] values) {
         this.track = track;
         this.initial = initial;
         this.values = values;

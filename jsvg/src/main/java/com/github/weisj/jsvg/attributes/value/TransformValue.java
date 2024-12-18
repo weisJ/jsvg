@@ -28,9 +28,20 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.animation.value.AnimatedTransform;
 import com.github.weisj.jsvg.annotations.Sealed;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import org.jetbrains.annotations.Nullable;
 
 @Sealed(permits = {AnimatedTransform.class, ConstantTransform.class, ConstantLengthTransform.class})
 public interface TransformValue {
+
+    static @Nullable TransformValue derive(@Nullable TransformValue current, @Nullable TransformValue other) {
+        if (other == null) return current;
+        if (current == null) return other;
+        if (other instanceof AnimatedTransform) {
+            return ((AnimatedTransform) other).derive(current);
+        }
+        return other;
+    }
+
     @NotNull
     AffineTransform get(@NotNull MeasureContext context);
 }

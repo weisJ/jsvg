@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.attributes.value;
 
 import java.awt.geom.AffineTransform;
+import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,9 @@ import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public final class ConstantLengthTransform implements TransformValue {
+    public static final ConstantLengthTransform IDENTITY = new ConstantLengthTransform(Collections.emptyList());
+    public static final ConstantLengthTransform INHERITED = new ConstantLengthTransform(Collections.emptyList());
+
     private final @NotNull List<@NotNull TransformPart> parts;
 
     public ConstantLengthTransform(@NotNull List<@NotNull TransformPart> parts) {
