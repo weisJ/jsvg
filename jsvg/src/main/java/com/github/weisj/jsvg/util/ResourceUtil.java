@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -41,7 +41,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.parser.*;
 import com.github.weisj.jsvg.parser.resources.ImageResource;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.parser.resources.SVGResource;
@@ -57,14 +57,21 @@ public final class ResourceUtil {
             .map(s -> "image/" + s.toLowerCase(Locale.ENGLISH))
             .collect(Collectors.toSet());
 
-    public static @Nullable RenderableResource loadImage(@NotNull URI uri) throws IOException {
-        String path = uri.getPath();
+    public static @Nullable RenderableResource loadImage(@NotNull ParsedDocument document, @NotNull URI uri)
+            throws IOException {
+        URI resourceUri = document
+                .loaderContext()
+                .externalResourcePolicy()
+                .resolveResourceURI(document.rootURI(), uri);
+        if (resourceUri == null) return null;
+
+        String path = resourceUri.getPath();
         if (path != null && path.endsWith(".svg")) {
             SVGLoader loader = new SVGLoader();
             try {
-                SVGDocument document = loader.load(uri.toURL());
-                if (document != null) {
-                    return new SVGResource(document);
+                SVGDocument imageDocument = loader.load(uri.toURL(), document.loaderContext());
+                if (imageDocument != null) {
+                    return new SVGResource(imageDocument);
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Could not load svg resource", e);

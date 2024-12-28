@@ -43,27 +43,30 @@ class DefaultResourcePolicy implements ExternalResourcePolicy {
 
     @Override
     public @Nullable URI resolveResourceURI(@Nullable URI baseURI, @NotNull String path) {
-        URI child;
         try {
-            child = new URI(path);
+            return resolveResourceURI(baseURI, new URI(path));
         } catch (URISyntaxException e) {
             LOGGER.info("Failed to resolve URI: " + path);
             return null;
         }
+    }
 
-        if (child.isAbsolute()) {
+    @Override
+    public @Nullable URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull URI resourceUri) {
+        if (resourceUri.isAbsolute()) {
             if ((flags & FLAG_ALLOW_ABSOLUTE) == 0) {
-                LOGGER.info(() -> String.format("Rejected URI %s because absolute paths are not allowed", child));
+                LOGGER.info(() -> String.format("Rejected URI %s because absolute paths are not allowed", resourceUri));
                 return null;
             }
-            if (!"file".equals(child.getScheme()) && (flags & FLAG_ALLOW_NON_LOCAL) == 0) {
-                LOGGER.info(() -> String.format("Rejected URI %s because non-local paths are not allowed", child));
+            if (!"file".equals(resourceUri.getScheme()) && (flags & FLAG_ALLOW_NON_LOCAL) == 0) {
+                LOGGER.info(
+                        () -> String.format("Rejected URI %s because non-local paths are not allowed", resourceUri));
                 return null;
             }
-            return child;
+            return resourceUri;
         } else {
-            if (baseURI == null) return null;
-            return baseURI.resolve(child);
+            if (baseDocumentUri == null) return null;
+            return baseDocumentUri.resolve(resourceUri);
         }
     }
 }

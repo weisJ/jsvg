@@ -93,10 +93,10 @@ public final class Image extends RenderableSVGNode {
         if (resolvedUri == null) return;
 
         try {
-            imgResource = attributeNode.resourceLoader().loadImage(resolvedUri);
+            imgResource = attributeNode.resourceLoader().loadImage(attributeNode.document(), resolvedUri);
         } catch (IOException e) {
             LOGGER.log(Level.INFO, e.getMessage(), e);
-            imgResource = null; // Image didn't load. TODO: Maybe we should show a missing image instead.
+            imgResource = null;
         }
     }
 

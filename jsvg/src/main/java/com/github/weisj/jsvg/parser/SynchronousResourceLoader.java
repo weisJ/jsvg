@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -31,7 +31,8 @@ import com.github.weisj.jsvg.util.ResourceUtil;
 
 public final class SynchronousResourceLoader implements ResourceLoader {
     @Override
-    public @NotNull UIFuture<RenderableResource> loadImage(@NotNull URI uri) throws IOException {
-        return new ValueUIFuture<>(ResourceUtil.loadImage(uri));
+    public @NotNull UIFuture<RenderableResource> loadImage(@NotNull ParsedDocument document, @NotNull URI uri)
+            throws IOException {
+        return new ValueUIFuture<>(ResourceUtil.loadImage(document, uri));
     }
 }

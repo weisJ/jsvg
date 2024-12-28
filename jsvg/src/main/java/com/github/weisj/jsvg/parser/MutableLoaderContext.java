@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.parser;
 import org.jetbrains.annotations.NotNull;
 
 
-public class MutableLoaderContext implements LoaderContext, LoaderContext.Builder {
+final class MutableLoaderContext implements LoaderContext, LoaderContext.Builder {
     private static final ParserProvider DEFAULT_PARSER_PROVIDER = new DefaultParserProvider();
     private static final ResourceLoader DEFAULT_RESOURCE_LOADER = new SynchronousResourceLoader();
     private static final ElementLoader DEFAULT_ELEMENT_LOADER =

@@ -32,7 +32,17 @@ public interface ExternalResourcePolicy {
     /**
      * Deny loading of external resources.
      */
-    ExternalResourcePolicy DENY = (base, path) -> null;
+    ExternalResourcePolicy DENY = new ExternalResourcePolicy() {
+        @Override
+        public @Nullable URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull String resourcePath) {
+            return null;
+        }
+
+        @Override
+        public @Nullable URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull URI resourceUri) {
+            return null;
+        }
+    };
     /**
      * Allow external resources to be loaded relative to the base document.
      */
@@ -45,4 +55,7 @@ public interface ExternalResourcePolicy {
 
     @Nullable
     URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull String resourcePath);
+
+    @Nullable
+    URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull URI resourceUri);
 }
