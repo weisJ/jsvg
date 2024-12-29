@@ -37,4 +37,6 @@ module com.github.weisj.jsvg {
     exports com.github.weisj.jsvg.nodes;
     exports com.github.weisj.jsvg.parser;
     exports com.github.weisj.jsvg.parser.css;
+    exports com.github.weisj.jsvg.parser.resources;
+    exports com.github.weisj.jsvg.ui;
 }
