@@ -49,9 +49,9 @@ public class AnimatedPaint implements SVGPaint {
         this.values = values;
     }
 
-    public @NotNull AnimatedPaint derive(@NotNull SVGPaint value) {
+    public @NotNull AnimatedPaint derive(@NotNull SVGPaint initialValue) {
         if (this.initial != PredefinedPaints.INHERITED) return this;
-        return new AnimatedPaint(track, value, values);
+        return new AnimatedPaint(track, initialValue, values);
     }
 
     private @NotNull SVGPaint current(@NotNull MeasureContext context) {

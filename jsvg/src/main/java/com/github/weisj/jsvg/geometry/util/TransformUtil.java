@@ -19,23 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.value;
+package com.github.weisj.jsvg.geometry.util;
+
+import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
 
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+final class TransformUtil {
 
-public final class ConstantTransform implements TransformValue {
-    private final @NotNull AffineTransform value;
+    private TransformUtil() {}
 
-    public ConstantTransform(@NotNull AffineTransform value) {
-        this.value = value;
-    }
-
-    @Override
-    public @NotNull AffineTransform get(@NotNull MeasureContext context) {
-        return value;
+    static @NotNull AffineTransform interpolate(@NotNull AffineTransform a, @NotNull AffineTransform b, float t) {
+        double[] aEntries = new double[6];
+        double[] bEntries = new double[6];
+        a.getMatrix(aEntries);
+        b.getMatrix(bEntries);
+        for (int i = 0; i < aEntries.length; i++) {
+            aEntries[i] = lerp(t, aEntries[i], bEntries[i]);
+        }
+        return new AffineTransform(aEntries);
     }
 }

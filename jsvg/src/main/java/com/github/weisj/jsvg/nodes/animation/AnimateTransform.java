@@ -21,15 +21,13 @@
  */
 package com.github.weisj.jsvg.nodes.animation;
 
-import java.util.List;
 
-import com.github.weisj.jsvg.attributes.value.TransformValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.AnimatedTransform;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
-import com.github.weisj.jsvg.attributes.value.ConstantLengthTransform;
+import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;

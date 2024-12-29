@@ -32,43 +32,48 @@ import java.util.Objects;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public final class ColorValue implements Paint {
+import com.github.weisj.jsvg.attributes.value.ColorValue;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
+
+public final class RGBColor implements Paint, ColorValue {
+    public static final RGBColor INHERITED = new RGBColor(0, 0, 0, 0);
+    public static final RGBColor DEFAULT = new RGBColor(0, 0, 0, 255);
     private final int r;
     private final int g;
     private final int b;
     private final int a;
     private Color color;
 
-    public ColorValue(int r, int g, int b, int a) {
+    public RGBColor(int r, int g, int b, int a) {
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
     }
 
-    public ColorValue(@NotNull Color color) {
+    public RGBColor(@NotNull Color color) {
         this(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
         this.color = color;
     }
 
-    public static @NotNull ColorValue interpolate(float t, @NotNull ColorValue a, @NotNull ColorValue b) {
-        return new ColorValue(
+    public static @NotNull RGBColor interpolate(float t, @NotNull RGBColor a, @NotNull RGBColor b) {
+        return new RGBColor(
                 Math.round(a.r + (b.r - a.r) * t),
                 Math.round(a.g + (b.g - a.g) * t),
                 Math.round(a.b + (b.b - a.b) * t),
                 Math.round(a.a + (b.a - a.a) * t));
     }
 
-    public static @NotNull ColorValue saxpy(float t, @NotNull ColorValue a, @NotNull ColorValue b) {
-        return new ColorValue(
+    public static @NotNull RGBColor saxpy(float t, @NotNull RGBColor a, @NotNull RGBColor b) {
+        return new RGBColor(
                 Math.round(a.r + t * b.r),
                 Math.round(a.g + t * b.g),
                 Math.round(a.b + t * b.b),
                 Math.round(a.a + t * b.a));
     }
 
-    public static @NotNull ColorValue add(@NotNull ColorValue a, @NotNull ColorValue b) {
-        return new ColorValue(
+    public static @NotNull RGBColor add(@NotNull RGBColor a, @NotNull RGBColor b) {
+        return new RGBColor(
                 a.r + b.r,
                 a.g + b.g,
                 a.b + b.b,
@@ -87,6 +92,9 @@ public final class ColorValue implements Paint {
         return a > 0;
     }
 
+    public static boolean isVisible(@NotNull Color c) {
+        return c.getAlpha() > 0;
+    }
 
     @Override
     @Contract(pure = true)
@@ -103,7 +111,7 @@ public final class ColorValue implements Paint {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ColorValue that = (ColorValue) o;
+        RGBColor that = (RGBColor) o;
         return r == that.r && g == that.g && b == that.b && a == that.a;
     }
 
@@ -121,5 +129,10 @@ public final class ColorValue implements Paint {
     @Override
     public int getTransparency() {
         return toColor().getTransparency();
+    }
+
+    @Override
+    public @NotNull Color get(@NotNull MeasureContext context) {
+        return toColor();
     }
 }

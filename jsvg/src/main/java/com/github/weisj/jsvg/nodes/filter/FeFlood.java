@@ -27,6 +27,7 @@ import java.awt.image.BufferedImage;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
@@ -61,8 +62,10 @@ public final class FeFlood extends AbstractFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        floodColor = attributeNode.getPaint("flood-color", new AwtSVGPaint(Color.BLACK), Animatable.YES);
-        floodOpacity = attributeNode.getPercentage("flood-opacity", Percentage.ONE, Animatable.YES);
+        floodColor = attributeNode.getPaint("flood-color", new AwtSVGPaint(Color.BLACK),
+                Inherited.NO, Animatable.YES);
+        floodOpacity = attributeNode.getPercentage("flood-opacity", Percentage.ONE,
+                Inherited.NO, Animatable.YES);
     }
 
     @Override

@@ -19,23 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.value;
-
-import java.awt.geom.AffineTransform;
+package com.github.weisj.jsvg.animation.value;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.attributes.value.*;
+import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 
-public final class ConstantTransform implements TransformValue {
-    private final @NotNull AffineTransform value;
+public final class NeutralElements {
 
-    public ConstantTransform(@NotNull AffineTransform value) {
-        this.value = value;
-    }
+    private NeutralElements() {}
 
-    @Override
-    public @NotNull AffineTransform get(@NotNull MeasureContext context) {
-        return value;
-    }
+    public static final @NotNull LengthValue NEUTRAL_LENGTH = Length.ZERO;
+    public static final @NotNull PercentageValue NEUTRAL_PERCENTAGE = Percentage.ONE;
+    public static final @NotNull TransformValue NEUTRAL_TRANSFORM = ConstantLengthTransform.IDENTITY;
+    public static final @NotNull FloatListValue NEUTRAL_FLOAT_LIST = ConstantFloatList.EMPTY;
 }

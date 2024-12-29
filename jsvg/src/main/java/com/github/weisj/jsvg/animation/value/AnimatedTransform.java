@@ -24,14 +24,10 @@ package com.github.weisj.jsvg.animation.value;
 import java.awt.geom.AffineTransform;
 import java.util.Objects;
 
-import com.github.weisj.jsvg.attributes.transform.TransformPart;
-import com.github.weisj.jsvg.attributes.value.ConstantTransform;
-import com.github.weisj.jsvg.geometry.size.Percentage;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.attributes.paint.ColorValue;
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.ConstantLengthTransform;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
@@ -52,9 +48,13 @@ public final class AnimatedTransform implements TransformValue {
         this.values = values;
     }
 
-    public @NotNull AnimatedTransform derive(@NotNull TransformValue value) {
+    public @NotNull TransformValue initial() {
+        return initial;
+    }
+
+    public @NotNull AnimatedTransform derive(@NotNull TransformValue initialValue) {
         if (this.initial != ConstantLengthTransform.INHERITED) return this;
-        throw new IllegalStateException("Not implemented");
+        return new AnimatedTransform(track, initialValue, values);
     }
 
     private @NotNull AffineTransform current(@NotNull MeasureContext context) {

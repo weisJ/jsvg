@@ -40,9 +40,9 @@ public final class AnimatedLength implements LengthValue {
         this.values = values;
     }
 
-    public @NotNull AnimatedLength derive(@NotNull LengthValue initial) {
+    public @NotNull AnimatedLength derive(@NotNull LengthValue initialValue) {
         if (this.initial != Length.INHERITED) return this;
-        return new AnimatedLength(track, initial, values);
+        return new AnimatedLength(track, initialValue, values);
     }
 
     public @NotNull LengthValue initial() {

@@ -30,9 +30,11 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.animation.value.AnimatedColor;
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.FillRule;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
 import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
+import com.github.weisj.jsvg.attributes.paint.RGBColor;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
@@ -83,11 +85,11 @@ public final class PaintContext implements Mutator<PaintContext> {
     public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
         return new PaintContext(
                 parseColorAttribute(attributeNode),
-                attributeNode.getPaint("fill", Animatable.YES),
-                attributeNode.getPercentage("fill-opacity", Animatable.YES),
-                attributeNode.getPaint("stroke", Animatable.YES),
-                attributeNode.getPercentage("stroke-opacity", Animatable.YES),
-                attributeNode.getPercentage("opacity", Percentage.ONE),
+                attributeNode.getPaint("fill", Inherited.YES, Animatable.YES),
+                attributeNode.getPercentage("fill-opacity", Inherited.YES, Animatable.YES),
+                attributeNode.getPaint("stroke", Inherited.YES, Animatable.YES),
+                attributeNode.getPercentage("stroke-opacity", Inherited.YES, Animatable.YES),
+                attributeNode.getPercentage("opacity", Percentage.ONE, Inherited.NO, Animatable.YES),
                 PaintOrder.parse(attributeNode),
                 StrokeContext.parse(attributeNode),
                 FillRule.parse(attributeNode));
@@ -96,7 +98,7 @@ public final class PaintContext implements Mutator<PaintContext> {
     private static @Nullable SVGPaint parseColorAttribute(@NotNull AttributeNode attributeNode) {
         Color c = attributeNode.getColor("color", null);
         if (c == null) return null;
-        AnimatedColor animatedColor = attributeNode.getAnimatedColor("color", c);
+        AnimatedColor animatedColor = attributeNode.getAnimatedColor("color", new RGBColor(c));
         if (animatedColor != null) return animatedColor;
         return new AwtSVGPaint(c);
     }

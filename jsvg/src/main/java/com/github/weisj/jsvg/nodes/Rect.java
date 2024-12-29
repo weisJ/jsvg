@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
@@ -48,15 +49,21 @@ public final class Rect extends ShapeNode {
 
     @Override
     protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode node) {
-        LengthValue x = node.getLength("x", PercentageDimension.WIDTH, Length.ZERO, Animatable.YES);
-        LengthValue y = node.getLength("y", PercentageDimension.HEIGHT, Length.ZERO, Animatable.YES);
-        LengthValue width = node.getLength("width", PercentageDimension.WIDTH, Length.ZERO, Animatable.YES);
-        LengthValue height = node.getLength("height", PercentageDimension.HEIGHT, Length.ZERO, Animatable.YES);
+        LengthValue x = node.getLength("x", PercentageDimension.WIDTH, Length.ZERO,
+                Inherited.NO, Animatable.YES);
+        LengthValue y = node.getLength("y", PercentageDimension.HEIGHT, Length.ZERO,
+                Inherited.NO, Animatable.YES);
+        LengthValue width = node.getLength("width", PercentageDimension.WIDTH, Length.ZERO,
+                Inherited.NO, Animatable.YES);
+        LengthValue height = node.getLength("height", PercentageDimension.HEIGHT, Length.ZERO,
+                Inherited.NO, Animatable.YES);
 
-        AttributeUtil.AxisPair radius = AttributeUtil.parseAxisPair(node, "rx", "ry", Length.ZERO, v -> {
-            if (!v.isConstantlyNonNegative()) return null;
-            return v;
-        });
+        AttributeUtil.AxisPair radius = AttributeUtil.parseAxisPair(node, "rx", "ry",
+                Length.ZERO, Inherited.NO,
+                v -> {
+                    if (!v.isConstantlyNonNegative()) return null;
+                    return v;
+                });
         LengthValue rx = radius.xAxis();
         LengthValue ry = radius.yAxis();
 

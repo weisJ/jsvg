@@ -90,7 +90,7 @@ public final class BlittableImage {
         GeometryUtil.adjustForAliasing(boundsInDeviceSpace);
 
         Rectangle2D adjustedBoundsInRootSpace = GeometryUtil.convertBounds(context, boundsInDeviceSpace,
-                GeometryUtil.Space.Device, GeometryUtil.Space.Root);
+                GeometryUtil.Space.DEVICE, GeometryUtil.Space.ROOT);
 
         BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null,
                 boundsInDeviceSpace.getWidth(),

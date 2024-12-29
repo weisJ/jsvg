@@ -27,13 +27,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.*;
-import com.github.weisj.jsvg.attributes.paint.ColorValue;
 import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
+import com.github.weisj.jsvg.attributes.paint.RGBColor;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-import com.github.weisj.jsvg.attributes.value.LengthValue;
-import com.github.weisj.jsvg.attributes.value.PercentageDimension;
-import com.github.weisj.jsvg.attributes.value.PercentageValue;
+import com.github.weisj.jsvg.attributes.value.*;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -70,7 +68,7 @@ public final class Animate extends BaseAnimationNode {
         return new AnimatedLength(track, initial, lengths);
     }
 
-    public @Nullable AnimatedFloatList animatedFloatList(float @NotNull [] initial,
+    public @Nullable AnimatedFloatList animatedFloatList(@NotNull FloatListValue initial,
             @NotNull AttributeNode attributeNode) {
         if (track == null) return null;
 
@@ -116,18 +114,18 @@ public final class Animate extends BaseAnimationNode {
         return new AnimatedPaint(track, initial, paints);
     }
 
-    public @Nullable AnimatedColor animatedColor(@NotNull Color initial, @NotNull AttributeNode attributeNode) {
+    public @Nullable AnimatedColor animatedColor(@NotNull ColorValue initial, @NotNull AttributeNode attributeNode) {
         if (track == null) return null;
-        ColorValue[] paints = new ColorValue[this.values.length];
+        RGBColor[] paints = new RGBColor[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
             if (isPlaceholder(values[i])) {
-                paints[i] = new ColorValue(PaintParser.DEFAULT_COLOR);
+                paints[i] = new RGBColor(PaintParser.DEFAULT_COLOR);
             } else {
                 Color c = attributeNode.parser().paintParser().parseColor(this.values[i], attributeNode);
                 if (c == null) return null;
-                paints[i] = new ColorValue(c);
+                paints[i] = new RGBColor(c);
             }
         }
-        return new AnimatedColor(track, new ColorValue(initial), paints);
+        return new AnimatedColor(track, initial, paints);
     }
 }

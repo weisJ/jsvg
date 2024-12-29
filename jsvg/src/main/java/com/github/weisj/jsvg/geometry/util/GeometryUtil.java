@@ -79,6 +79,10 @@ public final class GeometryUtil {
         return (1 - t) * a + t * b;
     }
 
+    public static double lerp(float t, double a, double b) {
+        return (1 - t) * a + t * b;
+    }
+
     public static double distanceSquared(@NotNull Point2D.Float p1, @NotNull Point2D.Float p2, float scaleX,
             float scaleY) {
         return distanceSquared(scaleX * p1.x, scaleY * p1.y, scaleX * p2.x, scaleY * p2.y);
@@ -213,35 +217,35 @@ public final class GeometryUtil {
     }
 
     public enum Space {
-        User,
-        Root,
-        Device
+        USER,
+        ROOT,
+        DEVICE
     }
 
     public static @NotNull Rectangle2D convertBounds(@NotNull RenderContext context, @NotNull Rectangle2D r,
             @NotNull Space from, @NotNull Space to) {
         if (from == to) return r;
         Rectangle2D out = r;
-        if (from == Space.User) {
-            if (to == Space.Root) {
+        if (from == Space.USER) {
+            if (to == Space.ROOT) {
                 out = containingBoundsAfterTransform(context.userSpaceTransform(), r);
-            } else if (to == Space.Device) {
+            } else if (to == Space.DEVICE) {
                 out = containingBoundsAfterTransform(context.userSpaceTransform(), r);
                 out = containingBoundsAfterTransform(context.rootTransform(), out);
             }
         }
-        if (from == Space.Root) {
-            if (to == Space.User) {
+        if (from == Space.ROOT) {
+            if (to == Space.USER) {
                 out = containingBoundsAfterTransform(createInverse(context.rootTransform()), r);
-            } else if (to == Space.Device) {
+            } else if (to == Space.DEVICE) {
                 out = containingBoundsAfterTransform(context.rootTransform(), r);
             }
         }
-        if (from == Space.Device) {
-            if (to == Space.User) {
+        if (from == Space.DEVICE) {
+            if (to == Space.USER) {
                 out = containingBoundsAfterTransform(createInverse(context.rootTransform()), r);
                 out = containingBoundsAfterTransform(createInverse(context.userSpaceTransform()), out);
-            } else if (to == Space.Root) {
+            } else if (to == Space.ROOT) {
                 out = containingBoundsAfterTransform(createInverse(context.rootTransform()), r);
             }
         }
@@ -250,7 +254,7 @@ public final class GeometryUtil {
 
     public static @NotNull Rectangle2D userBoundsToDeviceBounds(@NotNull RenderContext context,
             @NotNull Rectangle2D r) {
-        return convertBounds(context, r, Space.User, Space.Device);
+        return convertBounds(context, r, Space.USER, Space.DEVICE);
     }
 
     public static @NotNull Point2D getLocation(@NotNull Rectangle2D r) {
@@ -262,5 +266,10 @@ public final class GeometryUtil {
                 && !Double.isNaN(r.getY())
                 && !Double.isNaN(r.getWidth())
                 && !Double.isNaN(r.getHeight());
+    }
+
+    public static @NotNull AffineTransform interpolate(@NotNull AffineTransform a, @NotNull AffineTransform b,
+            float t) {
+        return TransformUtil.interpolate(a, b, t);
     }
 }

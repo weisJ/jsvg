@@ -27,6 +27,8 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.transform.TransformBox;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
@@ -72,7 +74,7 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
         String originX = transformOrigin.length > 0 ? transformOrigin[0] : null;
         String originY = transformOrigin.length > 1 ? transformOrigin[1] : null;
         return new HasGeometryContextImpl(
-                attributeNode.parseTransform("transform"),
+                attributeNode.parseTransform("transform", Inherited.NO, Animatable.YES),
                 attributeNode.parser().parseLength(originX, Length.ZERO, PercentageDimension.WIDTH),
                 attributeNode.parser().parseLength(originY, Length.ZERO, PercentageDimension.HEIGHT),
                 attributeNode.getEnum("transform-box", TransformBox.ViewBox),

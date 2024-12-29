@@ -29,85 +29,93 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.attributes.paint.ColorValue;
+import com.github.weisj.jsvg.attributes.paint.RGBColor;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public final class AnimatedColor implements SVGPaint {
+public final class AnimatedColor implements SVGPaint, ColorValue {
 
     private final @NotNull Track track;
-    private final @Nullable ColorValue initial;
-    private final @NotNull ColorValue @NotNull [] values;
+    private final @NotNull ColorValue initial;
+    private final @NotNull RGBColor @NotNull [] values;
 
-    private ColorValue current;
+    private Color current;
     private long currentTimestamp = -1;
 
-    public AnimatedColor(@NotNull Track track, @Nullable ColorValue initial, @NotNull ColorValue @NotNull [] values) {
+    public AnimatedColor(@NotNull Track track, @NotNull ColorValue initial, @NotNull RGBColor @NotNull [] values) {
         this.track = track;
         this.initial = initial;
         this.values = values;
     }
 
     public @NotNull AnimatedColor derive(@NotNull SVGPaint value) {
-        if (this.initial != null) return this;
+        if (this.initial != RGBColor.INHERITED) return this;
         ColorValue c = null;
-        if (value instanceof SimplePaintSVGPaint) {
+        if (value instanceof ColorValue) {
+            c = (ColorValue) value;
+        } else if (value instanceof SimplePaintSVGPaint) {
             Paint p = ((SimplePaintSVGPaint) value).paint();
             if (p instanceof Color) {
-                c = new ColorValue((Color) p);
-            } else if (p instanceof ColorValue) {
-                c = (ColorValue) p;
+                c = new RGBColor((Color) p);
+            } else if (p instanceof RGBColor) {
+                c = (RGBColor) p;
             }
-        } else if (value instanceof AnimatedColor) {
-            c = ((AnimatedColor) value).initial;
+        } else {
+            c = RGBColor.DEFAULT;
         }
         if (c == null) return this;
         return new AnimatedColor(track, c, values);
     }
 
-    private @NotNull ColorValue current(@NotNull MeasureContext context) {
+    @Override
+    public @NotNull Color get(@NotNull MeasureContext context) {
+        return current(context);
+    }
+
+    private @NotNull Color current(@NotNull MeasureContext context) {
         long timestamp = context.timestamp();
         if (currentTimestamp == timestamp) return current;
         currentTimestamp = timestamp;
-        current = computeCurrent(timestamp);
+        current = computeCurrent(context, timestamp);
         return current;
     }
 
-    private @NotNull ColorValue computeCurrent(long timestamp) {
+    private @NotNull Color computeCurrent(@NotNull MeasureContext context, long timestamp) {
         Track.InterpolationProgress progress = track.interpolationProgress(timestamp, values.length);
-        if (progress.isInitial()) return Objects.requireNonNull(initial);
+        if (progress.isInitial()) return Objects.requireNonNull(initial).get(context);
         int i = progress.iterationIndex();
 
         assert i >= 0;
         if (i >= values.length - 1) {
-            return values[values.length - 1];
+            return values[values.length - 1].toColor();
         }
 
-        ColorValue start = values[i];
-        ColorValue end = values[i + 1];
+        RGBColor start = values[i];
+        RGBColor end = values[i + 1];
         float t = progress.indexProgress();
-        return ColorValue.interpolate(t, start, end);
+        return RGBColor.interpolate(t, start, end).toColor();
     }
 
     @Override
     public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        output.setPaint(current(context.measureContext()).toColor());
+        output.setPaint(current(context.measureContext()));
         output.fillShape(shape);
     }
 
     @Override
     public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        output.setPaint(current(context.measureContext()).toColor());
+        output.setPaint(current(context.measureContext()));
         output.drawShape(shape);
     }
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return current(context.measureContext()).isVisible();
+        return RGBColor.isVisible(current(context.measureContext()));
     }
 }

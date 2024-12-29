@@ -25,6 +25,8 @@ import java.awt.*;
 import java.net.URI;
 import java.util.*;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -206,16 +208,21 @@ public final class AttributeNode {
         return c != null ? c : fallback;
     }
 
-    public @Nullable SVGPaint getPaint(@NotNull String key, Animatable animatable) {
-        return getPaint(key, null, animatable);
+    public @Nullable SVGPaint getPaint(@NotNull String key, Inherited inherited, Animatable animatable) {
+        return getPaint(key, null, inherited, animatable);
     }
 
-    @Contract("_,!null,_ -> !null")
-    public @Nullable SVGPaint getPaint(@NotNull String key, @Nullable SVGPaint fallback, Animatable animatable) {
+    @Contract("_,!null,_,_ -> !null")
+    public @Nullable SVGPaint getPaint(@NotNull String key, @Nullable SVGPaint fallback,
+            Inherited inherited, Animatable animatable) {
         SVGPaint value = getPaintInternal(key, fallback);
         if (animatable == Animatable.YES) {
             SVGPaint initial = value;
-            if (initial == null) initial = PredefinedPaints.INHERITED;
+            if (initial == null) {
+                initial = inherited == Inherited.YES
+                        ? PredefinedPaints.INHERITED
+                        : PredefinedPaints.DEFAULT_PAINT;
+            }
             AnimatedPaint animatedPaint = getAnimatedPaint(key, initial);
             if (animatedPaint != null) return animatedPaint;
         }
@@ -247,17 +254,17 @@ public final class AttributeNode {
     @Contract("_,_,!null -> !null")
     public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension,
             @Nullable Length fallback) {
-        return (Length) getLength(key, dimension, fallback, Animatable.NO);
+        return (Length) getLength(key, dimension, fallback, Inherited.NO, Animatable.NO);
     }
 
     public @Nullable LengthValue getLength(@NotNull String key, @NotNull PercentageDimension dimension,
-            Animatable animatable) {
-        return getLength(key, dimension, null, animatable);
+            Inherited inherited, Animatable animatable) {
+        return getLength(key, dimension, null, inherited, animatable);
     }
 
-    @Contract("_,_,!null,_ -> !null")
+    @Contract("_,_,!null,_,_ -> !null")
     public @Nullable LengthValue getLength(@NotNull String key, @NotNull PercentageDimension dimension,
-            @Nullable LengthValue fallback, Animatable animatable) {
+            @Nullable LengthValue fallback, Inherited inherited, Animatable animatable) {
         LengthValue value = getLengthInternal(key, dimension);
         if (value == FALLBACK_LENGTH) {
             value = fallback;
@@ -265,7 +272,11 @@ public final class AttributeNode {
 
         if (animatable == Animatable.YES) {
             LengthValue initial = value;
-            if (initial == null) initial = Length.INHERITED;
+            if (initial == null) {
+                initial = inherited == Inherited.YES
+                        ? Length.INHERITED
+                        : NeutralElements.NEUTRAL_LENGTH;
+            }
             if (initial instanceof AnimatedLength) {
                 initial = ((AnimatedLength) initial).initial();
             }
@@ -306,19 +317,24 @@ public final class AttributeNode {
         }
     }
 
+    @Deprecated
+    public float getPercentage(@NotNull String key, float fallback) {
+        return loadHelper.attributeParser()
+                .parsePercentage(getValue(key), new Percentage(fallback)).value();
+    }
+
     @Contract("_,!null -> !null")
     public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
         return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
     }
 
-    public @Nullable PercentageValue getPercentage(@NotNull String key, Animatable animatable) {
-        return getPercentage(key, null, animatable);
+    public @Nullable PercentageValue getPercentage(@NotNull String key, Inherited inherited, Animatable animatable) {
+        return getPercentage(key, null, inherited, animatable);
     }
 
-    @Contract("_,!null,_ -> !null")
-    public @Nullable PercentageValue getPercentage(@NotNull String key,
-            @Nullable PercentageValue fallback,
-            Animatable animatable) {
+    @Contract("_,!null,_,_ -> !null")
+    public @Nullable PercentageValue getPercentage(@NotNull String key, @Nullable PercentageValue fallback,
+            Inherited inherited, Animatable animatable) {
         PercentageValue value =
                 loadHelper.attributeParser().parsePercentage(getValue(key), FALLBACK_PERCENTAGE);
         if (value == FALLBACK_PERCENTAGE) {
@@ -327,7 +343,11 @@ public final class AttributeNode {
 
         if (animatable == Animatable.YES) {
             PercentageValue initial = value;
-            if (initial == null) initial = Percentage.INHERITED;
+            if (initial == null) {
+                initial = inherited == Inherited.YES
+                        ? Percentage.INHERITED
+                        : NeutralElements.NEUTRAL_PERCENTAGE;
+            }
             if (initial instanceof AnimatedPercentage) {
                 initial = ((AnimatedPercentage) initial).initial();
             }
@@ -352,14 +372,25 @@ public final class AttributeNode {
         return loadHelper.attributeParser().parseFloatList(getValue(key));
     }
 
-    public @NotNull FloatListValue getFloatList(@NotNull String key, Animatable animatable) {
-        float[] initial = loadHelper.attributeParser().parseFloatList(getValue(key));
+    public @NotNull FloatListValue getFloatList(@NotNull String key, Inherited inherited, Animatable animatable) {
+        String value = getValue(key);
+        float[] initialRaw = loadHelper.attributeParser().parseFloatList(getValue(key));
+
+        FloatListValue initial = value != null
+                ? new ConstantFloatList(initialRaw)
+                : null;
 
         if (animatable == Animatable.YES) {
+            if (initial == null) {
+                if (inherited == Inherited.YES) {
+                    throw new IllegalStateException("Inherited values for float lists aren't implemented yet");
+                }
+                initial = NeutralElements.NEUTRAL_FLOAT_LIST;
+            }
             AnimatedFloatList animatedLength = getAnimatedFloatList(key, initial);
             if (animatedLength != null) return animatedLength;
         }
-        return new ConstantFloatList(initial);
+        return initial != null ? initial : ConstantFloatList.EMPTY;
     }
 
     public double @NotNull [] getDoubleList(@NotNull String key) {
@@ -393,17 +424,38 @@ public final class AttributeNode {
     }
 
     public @Nullable TransformValue parseTransform(@NotNull String key) {
-        return parseTransform(key, Animatable.NO);
+        return parseTransform(key, Inherited.NO, Animatable.NO);
     }
 
-    public @Nullable TransformValue parseTransform(@NotNull String key, Animatable animatable) {
-        List<TransformPart> parts = loadHelper.attributeParser().parseTransform(getValue(key));
-        if (parts == null) return null;
+    private @NotNull TransformValue createTransformValueFromParts(@NotNull List<TransformPart> parts) {
         for (TransformPart part : parts) {
             if (!part.canBeFlattened()) return new ConstantLengthTransform(parts);
         }
         // Optimization: If all parts can be flattened we can just return a single AffineTransform.
         return new ConstantTransform(new ConstantLengthTransform(parts).get(DUMMY_MEASURE_CONTEXT));
+    }
+
+    public @Nullable TransformValue parseTransform(@NotNull String key, Inherited inherited, Animatable animatable) {
+        List<TransformPart> parts = loadHelper.attributeParser().parseTransform(getValue(key));
+        TransformValue value = parts != null
+                ? createTransformValueFromParts(parts)
+                : null;
+
+        if (animatable == Animatable.YES) {
+            TransformValue initial = value;
+            if (initial == null) {
+                initial = inherited == Inherited.YES
+                        ? ConstantLengthTransform.INHERITED
+                        : NeutralElements.NEUTRAL_TRANSFORM;
+            }
+            if (initial instanceof AnimatedTransform) {
+                initial = ((AnimatedTransform) initial).initial();
+            }
+            AnimatedTransform animatedTransform = getAnimatedTransform(key, initial);
+            if (animatedTransform != null) return animatedTransform;
+        }
+
+        return value;
     }
 
     public boolean hasAttribute(@NotNull String name) {
@@ -456,53 +508,77 @@ public final class AttributeNode {
         return loadHelper.externalResourcePolicy().resolveResourceURI(document().rootURI(), url);
     }
 
-    private <T extends BaseAnimationNode> @Nullable T animateNode(@NotNull String property, Class<T> type) {
-        ParsedElement parsedElement = element.animationElements().get(property);
-        if (parsedElement == null) return null;
-        if (type.isInstance(parsedElement.node())) {
-            T animate = type.cast(parsedElement.nodeEnsuringBuildStatus(document().currentNestingDepth()));
-            document().registerAnimatedElement(animate);
-            return animate;
+    private <T extends BaseAnimationNode> List<@NotNull T> animateNodes(@NotNull String property, Class<T> type) {
+        List<ParsedElement> parsedElements = element.animationElements().get(property);
+        if (parsedElements == null || parsedElements.isEmpty()) return Collections.emptyList();
+
+        List<T> animateNodes = parsedElements
+                .stream()
+                .filter(n -> type.isInstance(n.node()))
+                .map(n -> type.cast(n.nodeEnsuringBuildStatus(document().currentNestingDepth())))
+                .collect(Collectors.toList());
+        for (T animateNode : animateNodes) {
+            document().registerAnimatedElement(animateNode);
         }
-        return null;
+        return animateNodes;
+    }
+
+    private static <T, A extends T, N extends BaseAnimationNode> @Nullable A makeAnimated(
+            @NotNull List<N> animationNodes,
+            @NotNull T initial,
+            @NotNull BiFunction<N, T, A> factory) {
+        if (animationNodes.isEmpty()) return null;
+
+        @NotNull T currentInitial = initial;
+        @Nullable A lastAnimationValue = null;
+        for (N animate : animationNodes) {
+            A animated = factory.apply(animate, currentInitial);
+            if (animated != null) {
+                currentInitial = animated;
+                lastAnimationValue = animated;
+            }
+        }
+        return lastAnimationValue;
     }
 
     public @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial,
             @NotNull PercentageDimension dimension) {
-        Animate animate = animateNode(property, Animate.class);
-        if (animate == null) return null;
-        return animate.animatedLength(initial, dimension, this);
+        return makeAnimated(
+                animateNodes(property, Animate.class), initial,
+                (animate, currentInitial) -> animate.animatedLength(currentInitial, dimension, this));
     }
 
-    private @Nullable AnimatedFloatList getAnimatedFloatList(@NotNull String property, float @NotNull [] initial) {
-        Animate animate = animateNode(property, Animate.class);
-        if (animate == null) return null;
-        return animate.animatedFloatList(initial, this);
+    private @Nullable AnimatedFloatList getAnimatedFloatList(@NotNull String property,
+            @NotNull FloatListValue initial) {
+        return makeAnimated(
+                animateNodes(property, Animate.class), initial,
+                // NOTE: For some reason on some configurations the compiler needs these type hints here
+                (Animate animate, FloatListValue currentInitial) -> animate.animatedFloatList(currentInitial, this));
     }
 
     private @Nullable AnimatedPercentage getAnimatedPercentage(@NotNull String property,
             @NotNull PercentageValue initial) {
-        Animate animate = animateNode(property, Animate.class);
-        if (animate == null) return null;
-        return animate.animatedPercentage(initial, this);
+        return makeAnimated(
+                animateNodes(property, Animate.class), initial,
+                (animate, currentInitial) -> animate.animatedPercentage(currentInitial, this));
     }
 
     private @Nullable AnimatedPaint getAnimatedPaint(@NotNull String property, @NotNull SVGPaint initial) {
-        Animate animate = animateNode(property, Animate.class);
-        if (animate == null) return null;
-        return animate.animatedPaint(initial, this);
+        return makeAnimated(
+                animateNodes(property, Animate.class), initial,
+                (animate, currentInitial) -> animate.animatedPaint(currentInitial, this));
     }
 
-    public @Nullable AnimatedColor getAnimatedColor(@NotNull String property, @NotNull Color initial) {
-        Animate animate = animateNode(property, Animate.class);
-        if (animate == null) return null;
-        return animate.animatedColor(initial, this);
+    public @Nullable AnimatedColor getAnimatedColor(@NotNull String property, @NotNull ColorValue initial) {
+        return makeAnimated(
+                animateNodes(property, Animate.class), initial,
+                (animate, currentInitial) -> animate.animatedColor(currentInitial, this));
     }
 
     public @Nullable AnimatedTransform getAnimatedTransform(@NotNull String property,
-            @NotNull ConstantLengthTransform initial) {
-        AnimateTransform animate = animateNode(property, AnimateTransform.class);
-        if (animate == null) return null;
-        return animate.animatedTransform(initial, this);
+            @NotNull TransformValue initial) {
+        return makeAnimated(
+                animateNodes(property, AnimateTransform.class), initial,
+                (animate, currentInitial) -> animate.animatedTransform(currentInitial, this));
     }
 }

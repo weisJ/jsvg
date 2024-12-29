@@ -26,18 +26,18 @@ import static com.github.weisj.jsvg.geometry.util.GeometryUtil.lerp;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
-import com.github.weisj.jsvg.attributes.transform.TransformPart;
-import com.github.weisj.jsvg.attributes.value.TransformValue;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Additive;
 import com.github.weisj.jsvg.animation.AnimationValuesType;
 import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
-import com.github.weisj.jsvg.attributes.paint.ColorValue;
+import com.github.weisj.jsvg.attributes.paint.RGBColor;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
+import com.github.weisj.jsvg.attributes.value.TransformValue;
+import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 
 public final class DefaultInterpolator
@@ -158,19 +158,19 @@ public final class DefaultInterpolator
         }
     }
 
-    private static @Nullable ColorValue extractColor(@NotNull SVGPaint p) {
+    private static @Nullable RGBColor extractColor(@NotNull SVGPaint p) {
         if (!(p instanceof SimplePaintSVGPaint)) return null;
         Paint paint = ((SimplePaintSVGPaint) p).paint();
-        if (paint instanceof Color) return new ColorValue((Color) paint);
-        if (paint instanceof ColorValue) return (ColorValue) paint;
+        if (paint instanceof Color) return new RGBColor((Color) paint);
+        if (paint instanceof RGBColor) return (RGBColor) paint;
         return null;
     }
 
     @Override
     public @NotNull SVGPaint interpolate(@NotNull SVGPaint initial, @NotNull SVGPaint a, @NotNull SVGPaint b,
             float progress) {
-        ColorValue colorA = extractColor(a);
-        ColorValue colorB = extractColor(b);
+        RGBColor colorA = extractColor(a);
+        RGBColor colorB = extractColor(b);
 
         if (colorA == null || colorB == null) {
             return discreteAnimation(initial, a, b, progress);
@@ -178,27 +178,27 @@ public final class DefaultInterpolator
 
         switch (valuesType) {
             case FROM_BY: {
-                return new AwtSVGPaint(ColorValue.saxpy(progress, colorA, colorB));
+                return new AwtSVGPaint(RGBColor.saxpy(progress, colorA, colorB));
             }
             case BY: {
-                ColorValue initialColor = extractColor(initial);
+                RGBColor initialColor = extractColor(initial);
                 if (initialColor == null) return initial;
-                return new AwtSVGPaint(ColorValue.saxpy(progress, initialColor, colorB));
+                return new AwtSVGPaint(RGBColor.saxpy(progress, initialColor, colorB));
             }
             case TO: {
-                ColorValue initialColor = extractColor(initial);
+                RGBColor initialColor = extractColor(initial);
                 if (initialColor == null) return initial;
-                return new AwtSVGPaint(ColorValue.interpolate(progress, initialColor, colorB));
+                return new AwtSVGPaint(RGBColor.interpolate(progress, initialColor, colorB));
             }
             case FROM_TO:
             case VALUES:
             default: {
-                ColorValue result = ColorValue.interpolate(progress, colorA, colorB);
+                RGBColor result = RGBColor.interpolate(progress, colorA, colorB);
 
                 if (additive == Additive.SUM) {
-                    ColorValue initialColor = extractColor(initial);
+                    RGBColor initialColor = extractColor(initial);
                     if (initialColor == null) return initial;
-                    result = ColorValue.add(initialColor, result);
+                    result = RGBColor.add(initialColor, result);
                 }
                 return new AwtSVGPaint(result);
             }
@@ -213,14 +213,6 @@ public final class DefaultInterpolator
         return GeometryUtil.approximatelyEqual(progress, 1) ? b : a;
     }
 
-    private @NotNull AffineTransform interpolate(@NotNull AffineTransform transform, float progress) {
-        // TODO: Use unmatrix to interpolate
-        return new AffineTransform(
-                progress * transform.getScaleX(), progress * transform.getShearY(),
-                progress * -transform.getShearX(), progress * transform.getScaleY(),
-                progress * transform.getTranslateX(), progress * transform.getTranslateY());
-    }
-
     @Override
     public @NotNull AffineTransform interpolate(@NotNull MeasureContext context, @NotNull TransformValue initial,
             @NotNull TransformPart a, @NotNull TransformPart b, float progress) {
@@ -233,14 +225,12 @@ public final class DefaultInterpolator
             }
             case TO: {
                 // NOTE: This is undefined by the specification
-                return b.applyToTransform(interpolate(initial.get(context), 1 - progress), context, progress);
+                return GeometryUtil.interpolate(initial.get(context), b.toTransform(context), progress);
             }
             case FROM_TO:
             case VALUES:
             default: {
-                AffineTransform result = b.applyToTransform(
-                        a.applyToTransform(new AffineTransform(), context, 1 - progress),
-                        context, progress);
+                AffineTransform result = TransformPart.interpolate(a, b, context, progress);
 
                 if (additive == Additive.SUM) {
                     result.preConcatenate(initial.get(context));

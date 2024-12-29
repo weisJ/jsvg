@@ -51,7 +51,7 @@ public final class ParsedElement {
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
     private final @NotNull List<@NotNull ParsedElement> indirectChildren = new ArrayList<>();
-    private final @NotNull Map<String, @NotNull ParsedElement> animationElements = new HashMap<>();
+    private final @NotNull Map<String, @NotNull List<@NotNull ParsedElement>> animationElements = new HashMap<>();
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
     private int outgoingPaths = -1;
@@ -91,7 +91,7 @@ public final class ParsedElement {
         return children;
     }
 
-    public @NotNull Map<String, ParsedElement> animationElements() {
+    public @NotNull Map<String, List<ParsedElement>> animationElements() {
         return animationElements;
     }
 
@@ -118,7 +118,8 @@ public final class ParsedElement {
 
     void addChild(@NotNull ParsedElement parsedElement) {
         if (Category.hasCategory(parsedElement.node, Category.Animation)) {
-            animationElements.put(BaseAnimationNode.attributeName(parsedElement.attributeNode()), parsedElement);
+            String attributeName = BaseAnimationNode.attributeName(parsedElement.attributeNode());
+            animationElements.computeIfAbsent(attributeName, k -> new ArrayList<>()).add(parsedElement);
         }
         children.add(parsedElement);
         if (node instanceof Container) {

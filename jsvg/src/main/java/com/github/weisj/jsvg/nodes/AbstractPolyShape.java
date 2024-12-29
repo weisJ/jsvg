@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
 import com.github.weisj.jsvg.animation.value.AnimatedPath;
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.value.ConstantFloatList;
 import com.github.weisj.jsvg.attributes.value.ConstantValue;
 import com.github.weisj.jsvg.attributes.value.FloatListValue;
@@ -39,7 +40,7 @@ public abstract class AbstractPolyShape extends ShapeNode {
 
     @Override
     protected final @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
-        FloatListValue points = attributeNode.getFloatList("points", Animatable.YES);
+        FloatListValue points = attributeNode.getFloatList("points", Inherited.NO, Animatable.YES);
         if (points instanceof AnimatedFloatList) {
             return new FillRuleAwareAWTSVGShape(new AnimatedPath((AnimatedFloatList) points, doClose()));
         }

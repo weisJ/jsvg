@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.stroke.LineCap;
 import com.github.weisj.jsvg.attributes.stroke.LineJoin;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
@@ -97,12 +98,13 @@ public final class StrokeContext {
 
     public static @NotNull StrokeContext parse(@NotNull AttributeNode attributeNode) {
         return new StrokeContext(
-                attributeNode.getLength("stroke-width", PercentageDimension.LENGTH, Animatable.YES),
+                attributeNode.getLength("stroke-width", PercentageDimension.LENGTH, Inherited.YES, Animatable.YES),
                 attributeNode.getEnumNullable("stroke-linecap", LineCap.class),
                 attributeNode.getEnumNullable("stroke-linejoin", LineJoin.class),
                 attributeNode.getNonNegativeFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
                 attributeNode.getLengthList("stroke-dasharray", null, PercentageDimension.LENGTH),
-                attributeNode.getLength("stroke-dashoffset", PercentageDimension.CUSTOM, Animatable.YES));
+                attributeNode.getLength("stroke-dashoffset", PercentageDimension.CUSTOM,
+                        Inherited.YES, Animatable.YES));
     }
 
     @Override

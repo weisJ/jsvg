@@ -19,23 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.value;
+package com.github.weisj.jsvg.attributes;
 
-import java.awt.geom.AffineTransform;
-
-import org.jetbrains.annotations.NotNull;
-
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
-
-public final class ConstantTransform implements TransformValue {
-    private final @NotNull AffineTransform value;
-
-    public ConstantTransform(@NotNull AffineTransform value) {
-        this.value = value;
-    }
-
-    @Override
-    public @NotNull AffineTransform get(@NotNull MeasureContext context) {
-        return value;
-    }
+public enum Inherited {
+    YES,
+    NO
 }

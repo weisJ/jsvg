@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.attributes.transform;
 
 import java.awt.geom.AffineTransform;
+import java.util.Arrays;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +30,9 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.HasMatchName;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 
+// TODO: This needs to use transform-box for transform origin measure resolution
 public final class TransformPart {
 
     public enum TransformType implements HasMatchName {
@@ -58,6 +61,22 @@ public final class TransformPart {
         @Override
         public @NotNull String matchName() {
             return matchName;
+        }
+
+        TransformType interpolationType() {
+            switch (this) {
+                case TRANSLATE_X:
+                case TRANSLATE_Y:
+                    return TRANSLATE;
+                case SCALE_X:
+                case SCALE_Y:
+                    return SCALE;
+                case SKEW_X:
+                case SKEW_Y:
+                    return SKEW;
+                default:
+                    return this;
+            }
         }
     }
 
@@ -107,6 +126,70 @@ public final class TransformPart {
         }
     }
 
+    private static float getEntry(@NotNull TransformPart part, int index, float fallback,
+            @NotNull MeasureContext context) {
+        if (part.values.length > index) return part.values[index].resolve(context);
+        return fallback;
+    }
+
+    public static @NotNull AffineTransform interpolate(@NotNull TransformPart a, @NotNull TransformPart b,
+            @NotNull MeasureContext measureContext, float t) {
+        TransformType aType = a.type.interpolationType();
+        TransformType bType = b.type.interpolationType();
+        if (aType != bType) {
+            return GeometryUtil.interpolate(a.toTransform(measureContext), b.toTransform(measureContext), t);
+        }
+        switch (aType) {
+            case MATRIX:
+                return GeometryUtil.interpolate(a.toTransform(measureContext), b.toTransform(measureContext), t);
+            case TRANSLATE:
+            case TRANSLATE_X:
+            case TRANSLATE_Y:
+                return AffineTransform.getTranslateInstance(
+                        GeometryUtil.lerp(t,
+                                a.values[0].resolve(measureContext),
+                                b.values[0].resolve(measureContext)),
+                        GeometryUtil.lerp(t,
+                                getEntry(a, 1, 0f, measureContext),
+                                getEntry(b, 1, 0f, measureContext)));
+            case SCALE:
+            case SCALE_X:
+            case SCALE_Y:
+                float aScaleX = a.values[0].resolve(measureContext);
+                float aScaleY = getEntry(a, 1, aScaleX, measureContext);
+                float bScaleX = b.values[0].resolve(measureContext);
+                float bScaleY = getEntry(a, 1, bScaleX, measureContext);
+                return AffineTransform.getScaleInstance(
+                        GeometryUtil.lerp(t, aScaleX, bScaleX),
+                        GeometryUtil.lerp(t, aScaleY, bScaleY));
+            case ROTATE:
+                return AffineTransform.getRotateInstance(
+                        Math.toRadians(GeometryUtil.lerp(t,
+                                a.values[0].resolve(measureContext),
+                                b.values[0].resolve(measureContext))),
+                        GeometryUtil.lerp(t,
+                                getEntry(a, 1, 0, measureContext),
+                                getEntry(b, 1, 0, measureContext)),
+                        GeometryUtil.lerp(t,
+                                getEntry(a, 2, 0, measureContext),
+                                getEntry(b, 2, 0, measureContext)));
+            case SKEW:
+            case SKEW_X:
+            case SKEW_Y:
+                return AffineTransform.getShearInstance(
+                        Math.tan(Math.toRadians(
+                                GeometryUtil.lerp(t,
+                                        a.values[0].resolve(measureContext),
+                                        b.values[0].resolve(measureContext)))),
+                        Math.tan(Math.toRadians(
+                                GeometryUtil.lerp(t,
+                                        getEntry(a, 1, 0, measureContext),
+                                        getEntry(b, 1, 0, measureContext)))));
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
     public boolean canBeFlattened() {
         for (Length value : values) {
             if (!value.isAbsolute()) return false;
@@ -114,13 +197,20 @@ public final class TransformPart {
         return true;
     }
 
+    @Contract(value = "_ -> new", pure = true)
+    public @NotNull AffineTransform toTransform(@NotNull MeasureContext measureContext) {
+        return applyToTransform(new AffineTransform(), measureContext);
+    }
+
     @Contract(value = "_,_ -> param1", pure = true)
-    public @NotNull AffineTransform applyToTransform(@NotNull AffineTransform transform, @NotNull MeasureContext measureContext) {
+    public @NotNull AffineTransform applyToTransform(@NotNull AffineTransform transform,
+            @NotNull MeasureContext measureContext) {
         return applyToTransform(transform, measureContext, 1);
     }
 
     @Contract(value = "_,_,_ -> param1", pure = true)
-    public @NotNull AffineTransform applyToTransform(@NotNull AffineTransform transform, @NotNull MeasureContext measureContext,
+    public @NotNull AffineTransform applyToTransform(@NotNull AffineTransform transform,
+            @NotNull MeasureContext measureContext,
             float progress) {
         switch (type) {
             case MATRIX:
@@ -134,8 +224,8 @@ public final class TransformPart {
                 break;
             case TRANSLATE:
                 transform.translate(
-                    progress * values[0].resolve(measureContext),
-                    progress * values[1].resolve(measureContext));
+                        progress * values[0].resolve(measureContext),
+                        progress * values[1].resolve(measureContext));
                 break;
             case TRANSLATE_X:
                 transform.translate(values[0].resolve(measureContext), 0);
@@ -182,5 +272,13 @@ public final class TransformPart {
                 break;
         }
         return transform;
+    }
+
+    @Override
+    public String toString() {
+        return "TransformPart{" +
+                "type=" + type +
+                ", values=" + Arrays.toString(values) +
+                '}';
     }
 }

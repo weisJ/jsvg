@@ -23,12 +23,10 @@ package com.github.weisj.jsvg.animation;
 
 import java.util.Objects;
 
-import com.github.weisj.jsvg.animation.interpolation.*;
-import com.github.weisj.jsvg.attributes.paint.ColorValue;
-import com.github.weisj.jsvg.attributes.value.ConstantLengthTransform;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.interpolation.*;
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.parser.AttributeNode;
 

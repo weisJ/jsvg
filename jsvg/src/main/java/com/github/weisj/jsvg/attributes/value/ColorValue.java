@@ -21,21 +21,17 @@
  */
 package com.github.weisj.jsvg.attributes.value;
 
-import java.awt.geom.AffineTransform;
+import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.animation.value.AnimatedColor;
+import com.github.weisj.jsvg.annotations.Sealed;
+import com.github.weisj.jsvg.attributes.paint.RGBColor;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
-public final class ConstantTransform implements TransformValue {
-    private final @NotNull AffineTransform value;
-
-    public ConstantTransform(@NotNull AffineTransform value) {
-        this.value = value;
-    }
-
-    @Override
-    public @NotNull AffineTransform get(@NotNull MeasureContext context) {
-        return value;
-    }
+@Sealed(permits = {RGBColor.class, AnimatedColor.class})
+public interface ColorValue {
+    @NotNull
+    Color get(@NotNull MeasureContext context);
 }

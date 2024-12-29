@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.MeasurableShape;
 import com.github.weisj.jsvg.geometry.SVGCircle;
@@ -46,8 +47,11 @@ public final class Circle extends ShapeNode {
     @Override
     protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
         return new SVGCircle(
-                attributeNode.getLength("cx", PercentageDimension.WIDTH, Length.ZERO, Animatable.YES),
-                attributeNode.getLength("cy", PercentageDimension.HEIGHT, Length.ZERO, Animatable.YES),
-                attributeNode.getLength("r", PercentageDimension.LENGTH, Length.ZERO, Animatable.YES));
+                attributeNode.getLength("cx", PercentageDimension.WIDTH, Length.ZERO,
+                        Inherited.NO, Animatable.YES),
+                attributeNode.getLength("cy", PercentageDimension.HEIGHT, Length.ZERO,
+                        Inherited.NO, Animatable.YES),
+                attributeNode.getLength("r", PercentageDimension.LENGTH, Length.ZERO,
+                        Inherited.NO, Animatable.YES));
     }
 }

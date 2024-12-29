@@ -50,9 +50,6 @@ import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.SeparatorMode;
 import com.github.weisj.jsvg.util.ParserBase;
 
-import javax.xml.crypto.dsig.Transform;
-
-
 public final class AttributeParser {
 
     private static final Logger LOGGER = Logger.getLogger(AttributeParser.class.getName());

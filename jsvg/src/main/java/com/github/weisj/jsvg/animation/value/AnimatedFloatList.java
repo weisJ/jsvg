@@ -32,20 +32,21 @@ public final class AnimatedFloatList implements FloatListValue {
 
     private final @NotNull Track track;
 
-    private final float @NotNull [] initial;
+    private final @NotNull FloatListValue initial;
     private final float @NotNull [] @NotNull [] values;
     private float[] cache;
 
     private long timestamp = 0;
     private Track.InterpolationProgress progressCacheKey = null;
 
-    public AnimatedFloatList(@NotNull Track track, float @NotNull [] initial, float @NotNull [] @NotNull [] values) {
+    public AnimatedFloatList(@NotNull Track track, @NotNull FloatListValue initial,
+            float @NotNull [] @NotNull [] values) {
         this.track = track;
         this.initial = initial;
         this.values = values;
     }
 
-    public float @NotNull [] initial() {
+    public @NotNull FloatListValue initial() {
         return initial;
     }
 
@@ -66,7 +67,7 @@ public final class AnimatedFloatList implements FloatListValue {
             progressCacheKey = progress;
 
             if (progress.isInitial()) {
-                cache = initial;
+                cache = initial.get(context);
                 return cache;
             }
 
@@ -75,7 +76,7 @@ public final class AnimatedFloatList implements FloatListValue {
             float[] end = index == values.length - 1 ? null : values[index + 1];
 
             float fraction = progress.indexProgress();
-            cache = track.floatListInterpolator().interpolate(initial, start, end, fraction, cache);
+            cache = track.floatListInterpolator().interpolate(initial.get(context), start, end, fraction, cache);
         }
         return cache;
     }

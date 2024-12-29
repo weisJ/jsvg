@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -53,13 +54,17 @@ public final class AttributeUtil {
     public static @NotNull AxisPair parseAxisPair(
             @NotNull AttributeNode node,
             @NotNull String xAttr, @NotNull String yAttr,
-            @NotNull Length fallback,
+            @NotNull Length fallback, Inherited inherited,
             @NotNull Function<@NotNull LengthValue, @Nullable LengthValue> validator) {
-        LengthValue initialRx = node.getLength(xAttr, PercentageDimension.WIDTH, Length.UNSPECIFIED, Animatable.NO);
+        LengthValue initialRx =
+                node.getLength(xAttr, PercentageDimension.WIDTH, Length.UNSPECIFIED,
+                        inherited, Animatable.NO);
         initialRx = validator.apply(initialRx);
         if (initialRx == null) initialRx = Length.UNSPECIFIED;
 
-        LengthValue initialRy = node.getLength(yAttr, PercentageDimension.HEIGHT, initialRx, Animatable.NO);
+        LengthValue initialRy =
+                node.getLength(yAttr, PercentageDimension.HEIGHT, initialRx,
+                        inherited, Animatable.NO);
         initialRy = validator.apply(initialRy);
         if (initialRy == null) initialRy = Length.UNSPECIFIED;
 

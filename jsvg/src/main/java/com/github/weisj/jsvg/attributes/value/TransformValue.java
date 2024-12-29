@@ -24,11 +24,11 @@ package com.github.weisj.jsvg.attributes.value;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.AnimatedTransform;
 import com.github.weisj.jsvg.annotations.Sealed;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import org.jetbrains.annotations.Nullable;
 
 @Sealed(permits = {AnimatedTransform.class, ConstantTransform.class, ConstantLengthTransform.class})
 public interface TransformValue {

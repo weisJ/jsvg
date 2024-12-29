@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 public final class ConstantFloatList implements FloatListValue {
+    public static final @NotNull FloatListValue EMPTY = new ConstantFloatList(new float[0]);
     private final float @NotNull [] value;
 
     public ConstantFloatList(float @NotNull [] value) {
