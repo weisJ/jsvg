@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2024 Jannis Weis
+ * Copyright (c) 2022-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -58,5 +58,25 @@ class TransformTest {
         assertEquals(SUCCESS, compareImages(new CompareInfo(
                 new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStroke_ref.svg"), RenderType.JSVG),
                 new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStroke.svg"), RenderType.JSVG))));
+    }
+
+    @Test
+    void testTransformBoxFillTransform() {
+        // Compare with reference as batik doesn't support transform-box
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxFillTranslate_ref.svg"),
+                        RenderType.JSVG),
+                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxFillTranslate.svg"),
+                        RenderType.JSVG))));
+    }
+
+    @Test
+    void testTransformBoxStrokeTransform() {
+        // Compare with reference as batik doesn't support transform-box
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStrokeTranslate_ref.svg"),
+                        RenderType.JSVG),
+                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStrokeTranslate.svg"),
+                        RenderType.JSVG))));
     }
 }

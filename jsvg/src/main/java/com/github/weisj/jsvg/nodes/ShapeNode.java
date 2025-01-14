@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.util.Set;
 
@@ -115,26 +116,37 @@ public abstract class ShapeNode extends RenderableSVGNode
     protected abstract @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode);
 
     @Override
-    public @NotNull Shape untransformedElementShape(@NotNull RenderContext context) {
-        return shape.shape(context);
+    public @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {
+        Shape realShape = shape.shape(context);
+        switch (box) {
+            case BoundingBox:
+                return realShape;
+            case StrokeBox:
+                Area area = new Area(realShape);
+                area.add(new Area(computeEffectiveStroke(context).createStrokedShape(realShape)));
+                return area;
+            default:
+                throw new IllegalStateException("Unexpected value: " + box);
+        }
     }
 
     @Override
     public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
         Rectangle2D bounds = shape.bounds(context, true);
-        if (box == Box.StrokeBox) {
-            LengthValue strokeWidth = context.strokeContext().strokeWidth;
-            if (strokeWidth != null) {
-                float stroke = strokeWidth.resolve(context.measureContext());
-                if (stroke > 0) bounds = GeometryUtil.grow(bounds, stroke);
+        switch (box) {
+            case BoundingBox:
+                return bounds;
+            case StrokeBox: {
+                LengthValue strokeWidth = context.strokeContext().strokeWidth;
+                if (strokeWidth != null) {
+                    float stroke = strokeWidth.resolve(context.measureContext());
+                    if (stroke > 0) bounds = GeometryUtil.grow(bounds, stroke);
+                }
+                return bounds;
             }
+            default:
+                throw new IllegalStateException("Unexpected value: " + box);
         }
-        return bounds;
-    }
-
-    @Override
-    public boolean isVisible(@NotNull RenderContext context) {
-        return super.isVisible(context);
     }
 
     @Override
@@ -163,7 +175,7 @@ public abstract class ShapeNode extends RenderableSVGNode
         Stroke effectiveStroke = computeEffectiveStroke(context);
         ShapeRenderer.renderWithPaintOrder(output, shape.canBeFilled(), context.paintOrder(),
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects(), effectiveStroke,
-                        GeometryUtil.toAwtTransform(context.measureContext(), transform())),
+                        GeometryUtil.toAwtTransform(context, transform())),
                 new ShapeRenderer.PaintShape(paintShape, bounds),
                 new ShapeRenderer.ShapeMarkerInfo(this, markerStart, markerMid, markerEnd,
                         shouldPaintStartEndMarkersInMiddle()));

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -47,7 +47,7 @@ public final class PaintContext implements Mutator<PaintContext> {
     public final @Nullable SVGPaint fillPaint;
     public final @Nullable SVGPaint strokePaint;
 
-    public final PercentageValue opacity;
+    public final @NotNull PercentageValue opacity;
     public final @Nullable PercentageValue fillOpacity;
     public final @Nullable PercentageValue strokeOpacity;
 
@@ -57,7 +57,7 @@ public final class PaintContext implements Mutator<PaintContext> {
     public final @Nullable FillRule fillRule;
 
     public PaintContext(@Nullable SVGPaint color, @Nullable SVGPaint fillPaint, @Nullable PercentageValue fillOpacity,
-            @Nullable SVGPaint strokePaint, @Nullable PercentageValue strokeOpacity, PercentageValue opacity,
+            @Nullable SVGPaint strokePaint, @Nullable PercentageValue strokeOpacity, @NotNull PercentageValue opacity,
             @Nullable PaintOrder paintOrder,
             @Nullable StrokeContext strokeContext, @Nullable FillRule fillRule) {
         this.color = color;

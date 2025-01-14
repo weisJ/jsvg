@@ -32,7 +32,6 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 
-// TODO: This needs to use transform-box for transform origin measure resolution
 public final class TransformPart {
 
     public enum TransformType implements HasMatchName {

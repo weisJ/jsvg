@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,38 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.attributes;
 
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
+import java.util.Objects;
+
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
-import com.github.weisj.jsvg.nodes.prototype.Renderable;
-import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
-import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.RenderContext;
+public final class Coordinate<T> {
+    private final @NotNull T x;
+    private final @NotNull T y;
 
-public abstract class RenderableSVGNode extends AbstractSVGNode
-        implements Renderable, HasGeometryContext.ByDelegate {
 
-    private boolean isVisible;
-    private HasGeometryContext geometryContext;
+    public Coordinate(@NotNull T x, @NotNull T y) {
+        this.x = x;
+        this.y = y;
+    }
 
-    @Override
-    public boolean isVisible(@NotNull RenderContext context) {
-        return isVisible && (context.rawOpacity() > 0);
+    public @NotNull T x() {
+        return x;
+    }
+
+    public @NotNull T y() {
+        return y;
     }
 
     @Override
-    public @NotNull HasGeometryContext geometryContextDelegate() {
-        return geometryContext;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Coordinate<?> that = (Coordinate<?>) o;
+        return Objects.equals(x, that.x) && Objects.equals(y, that.y);
     }
 
     @Override
-    @MustBeInvokedByOverriders
-    public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
-        isVisible = parseIsVisible(attributeNode);
-        geometryContext = HasGeometryContextImpl.parse(attributeNode);
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "Coordinate{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
     }
 }

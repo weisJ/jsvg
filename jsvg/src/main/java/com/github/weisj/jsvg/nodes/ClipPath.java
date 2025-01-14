@@ -90,7 +90,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
     public @NotNull Shape clipShape(@NotNull RenderContext context, @NotNull ElementBounds elementBounds,
             boolean useSoftClip) {
         // Todo: Handle bounding-box stuff as well (i.e. combined stroke etc.)
-        Shape shape = ShapedContainer.super.elementShape(context);
+        Shape shape = ShapedContainer.super.elementShape(context, Box.BoundingBox);
         if (!useSoftClip && clipPathUnits == UnitType.ObjectBoundingBox) {
             shape = ShapeUtil.transformShape(shape, clipPathUnits.viewTransform(elementBounds.boundingBox()));
         }

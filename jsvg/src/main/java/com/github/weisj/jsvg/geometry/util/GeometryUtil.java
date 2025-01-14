@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class GeometryUtil {
@@ -210,10 +209,10 @@ public final class GeometryUtil {
         }
     }
 
-    public static @Nullable AffineTransform toAwtTransform(@NotNull MeasureContext measure,
+    public static @Nullable AffineTransform toAwtTransform(@NotNull RenderContext context,
             @Nullable TransformValue transform) {
         if (transform == null) return null;
-        return transform.get(measure);
+        return transform.get(context.measureContext());
     }
 
     public enum Space {

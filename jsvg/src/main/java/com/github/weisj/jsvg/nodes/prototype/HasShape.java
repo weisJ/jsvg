@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,32 +27,36 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.renderer.ElementBounds;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-public interface HasShape {
+public interface HasShape extends SVGNode {
 
     enum Box {
         BoundingBox,
         StrokeBox
     }
 
-    default @NotNull Shape elementShape(@NotNull RenderContext context) {
-        Shape shape = untransformedElementShape(context);
+    default @NotNull Shape elementShape(@NotNull RenderContext context, Box box) {
+        Shape shape = untransformedElementShape(context, box);
         if (this instanceof Transformable) {
-            return ((Transformable) this).transformShape(shape, context);
+            return ((Transformable) this).transformShape(shape, context,
+                    ElementBounds.fromUntransformedBounds(this, context, shape.getBounds2D(), box));
         }
         return shape;
     }
 
 
     @NotNull
-    Shape untransformedElementShape(@NotNull RenderContext context);
+    Shape untransformedElementShape(@NotNull RenderContext context, Box box);
 
     default @NotNull Rectangle2D elementBounds(@NotNull RenderContext context, Box box) {
         Rectangle2D shape = untransformedElementBounds(context, box);
         if (!GeometryUtil.isValidRect(shape)) return shape;
         if (this instanceof Transformable) {
-            return ((Transformable) this).transformShape(shape, context).getBounds2D();
+            return ((Transformable) this).transformShape(shape, context,
+                    ElementBounds.fromUntransformedBounds(this, context, shape, box)).getBounds2D();
         }
         return shape;
     }

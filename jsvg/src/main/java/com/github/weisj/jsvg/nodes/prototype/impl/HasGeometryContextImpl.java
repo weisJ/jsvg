@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2024 Jannis Weis
+ * Copyright (c) 2022-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,67 +21,57 @@
  */
 package com.github.weisj.jsvg.nodes.prototype.impl;
 
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Coordinate;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.transform.TransformBox;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
-import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.ElementBounds;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class HasGeometryContextImpl implements HasGeometryContext {
 
     private final @Nullable TransformValue transform;
-    private final @NotNull Length transformOriginX;
-    private final @NotNull Length transformOriginY;
+    private final @NotNull Coordinate<LengthValue> transformOrigin;
     private final @NotNull TransformBox transformBox;
 
     private final @Nullable ClipPath clipPath;
     private final @Nullable Mask mask;
     private final @Nullable Filter filter;
 
-    private final @NotNull SVGNode node;
-
-    private HasGeometryContextImpl(@Nullable TransformValue transform, @NotNull Length transformOriginX,
-            @NotNull Length transformOriginY, @NotNull TransformBox transformBox, @Nullable ClipPath clipPath,
-            @Nullable Mask mask, @Nullable Filter filter, @NotNull SVGNode node) {
+    private HasGeometryContextImpl(@Nullable TransformValue transform, @NotNull Coordinate<LengthValue> transformOrigin,
+            @NotNull TransformBox transformBox, @Nullable ClipPath clipPath,
+            @Nullable Mask mask, @Nullable Filter filter) {
         this.transform = transform;
-        this.transformOriginX = transformOriginX;
-        this.transformOriginY = transformOriginY;
+        this.transformOrigin = transformOrigin;
         this.transformBox = transformBox;
         this.clipPath = clipPath;
         this.mask = mask;
         this.filter = filter;
-        this.node = node;
     }
 
-    public static @NotNull HasGeometryContext parse(@NotNull AttributeNode attributeNode, @NotNull SVGNode node) {
+    public static @NotNull HasGeometryContext parse(@NotNull AttributeNode attributeNode) {
         String[] transformOrigin = attributeNode.getStringList("transform-origin");
         String originX = transformOrigin.length > 0 ? transformOrigin[0] : null;
         String originY = transformOrigin.length > 1 ? transformOrigin[1] : null;
         return new HasGeometryContextImpl(
                 attributeNode.parseTransform("transform", Inherited.NO, Animatable.YES),
-                attributeNode.parser().parseLength(originX, Length.ZERO, PercentageDimension.WIDTH),
-                attributeNode.parser().parseLength(originY, Length.ZERO, PercentageDimension.HEIGHT),
+                new Coordinate<>(
+                        attributeNode.parser().parseLength(originX, Length.ZERO, PercentageDimension.WIDTH),
+                        attributeNode.parser().parseLength(originY, Length.ZERO, PercentageDimension.HEIGHT)),
                 attributeNode.getEnum("transform-box", TransformBox.ViewBox),
                 attributeNode.getClipPath(),
                 attributeNode.getMask(),
-                attributeNode.getFilter(),
-                node);
+                attributeNode.getFilter());
     }
 
     @Override
@@ -105,29 +95,12 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
     }
 
     @Override
-    public @NotNull Point2D transformOrigin(@NotNull RenderContext context) {
-        Rectangle2D box;
-        ElementBounds elementBounds = new ElementBounds(node, context);
-        switch (transformBox) {
-            case ViewBox:
-                MeasureContext measureContext = context.measureContext();
-                return new Point2D.Float(
-                        transformOriginX.resolve(measureContext),
-                        transformOriginY.resolve(measureContext));
-            case FillBox:
-                box = elementBounds.fillBox();
-                break;
-            case StrokeBox:
-                box = elementBounds.strokeBox();
-                break;
-            default:
-                throw new IllegalStateException("Invalid transform-box value: " + transformBox);
-        }
-        MeasureContext boundsMeasureContext =
-                context.measureContext().derive((float) box.getWidth(), (float) box.getHeight());
+    public @NotNull TransformBox transformBox() {
+        return transformBox;
+    }
 
-        return new Point2D.Float(
-                transformOriginX.resolve(boundsMeasureContext) + (float) box.getX(),
-                transformOriginY.resolve(boundsMeasureContext) + (float) box.getY());
+    @Override
+    public @NotNull Coordinate<LengthValue> transformOrigin() {
+        return transformOrigin;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -53,7 +53,7 @@ abstract class LinearTextContainer extends TextContainer {
 
 
     @Override
-    public @NotNull Shape untransformedElementShape(@NotNull RenderContext context) {
+    protected @NotNull Shape glyphShape(@NotNull RenderContext context) {
         MutableGlyphRun glyphRun = new MutableGlyphRun();
         appendTextShape(createCursor(), glyphRun, context);
         return glyphRun.shape();

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
+import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,6 +114,23 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     @Override
     public List<? extends @NotNull TextSegment> children() {
         return segments;
+    }
+
+    abstract @NotNull Shape glyphShape(@NotNull RenderContext context);
+
+    @Override
+    public final @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {
+        Shape shape = glyphShape(context);
+        switch (box) {
+            case BoundingBox:
+                return shape;
+            case StrokeBox:
+                Area area = new Area(shape);
+                area.add(new Area(context.stroke(1).createStrokedShape(shape)));
+                return area;
+            default:
+                throw new IllegalStateException("Unexpected value: " + box);
+        }
     }
 
     protected abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);
@@ -292,7 +311,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     @Override
     public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
         // TODO: Bounding-box is specified by the character box.
-        return untransformedElementShape(context).getBounds2D();
+        return untransformedElementShape(context, box).getBounds2D();
     }
 
     @Override

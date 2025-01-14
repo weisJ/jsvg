@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -46,6 +46,22 @@ public class ElementBounds {
         this.context = context;
     }
 
+    public static @NotNull ElementBounds fromUntransformedBounds(@NotNull SVGNode node, @NotNull RenderContext context,
+            @NotNull Rectangle2D bounds, HasShape.Box box) {
+        ElementBounds elementBounds = new ElementBounds(node, context);
+        switch (box) {
+            case BoundingBox:
+                elementBounds.boundingBox = bounds;
+                break;
+            case StrokeBox:
+                elementBounds.strokeBox = bounds;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + box);
+        }
+        return elementBounds;
+    }
+
     public @NotNull Rectangle2D boundingBox() {
         if (boundingBox == null) {
             boundingBox = elementBounds(node, context, HasShape.Box.BoundingBox);
@@ -74,7 +90,7 @@ public class ElementBounds {
         return boundingBox();
     }
 
-    private static @NotNull Rectangle2D elementBounds(@NotNull Object node, @NotNull RenderContext context,
+    private static @NotNull Rectangle2D elementBounds(@NotNull SVGNode node, @NotNull RenderContext context,
             HasShape.Box box) {
         Rectangle2D elementBounds;
         if (node instanceof HasShape) {
