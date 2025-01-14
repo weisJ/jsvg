@@ -317,6 +317,9 @@ public final class AttributeNode {
         }
     }
 
+    /**
+     * @deprecated Use {{@link #getPercentage(String, Percentage)} instead.
+     */
     @Deprecated
     public float getPercentage(@NotNull String key, float fallback) {
         return loadHelper.attributeParser()

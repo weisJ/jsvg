@@ -58,6 +58,7 @@ public final class AnimatedLength implements LengthValue {
         int i = progress.iterationIndex();
 
         assert i >= 0;
+        assert values.length > 0;
         if (i >= values.length - 1) {
             return values[values.length - 1].resolve(context);
         }

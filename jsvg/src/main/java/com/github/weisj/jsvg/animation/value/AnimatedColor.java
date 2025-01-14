@@ -90,6 +90,7 @@ public final class AnimatedColor implements SVGPaint, ColorValue {
         int i = progress.iterationIndex();
 
         assert i >= 0;
+        assert values.length > 0;
         if (i >= values.length - 1) {
             return values[values.length - 1].toColor();
         }

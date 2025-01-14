@@ -71,6 +71,7 @@ public final class AnimatedTransform implements TransformValue {
         int i = progress.iterationIndex();
 
         assert i >= 0;
+        assert values.length > 0;
         if (i >= values.length - 1) {
             AffineTransform transform = new AffineTransform();
             values[values.length - 1].applyToTransform(transform, context);
