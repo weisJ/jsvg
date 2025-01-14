@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -265,10 +265,10 @@ public final class TransformPart {
                 }
                 break;
             case SKEW_X:
-                transform.shear(Math.tan(values[0].resolve(measureContext)), 0);
+                transform.shear(Math.tan(Math.toRadians(values[0].resolve(measureContext))), 0);
                 break;
             case SKEW_Y:
-                transform.shear(0, Math.tan(values[0].resolve(measureContext)));
+                transform.shear(0, Math.tan(Math.toRadians(values[0].resolve(measureContext))));
                 break;
         }
         return transform;
