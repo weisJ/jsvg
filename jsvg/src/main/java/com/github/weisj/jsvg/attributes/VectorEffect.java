@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2024 Jannis Weis
+ * Copyright (c) 2022-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ShapeUtil;
 
 
 public enum VectorEffect implements HasMatchName {
@@ -98,7 +99,7 @@ public enum VectorEffect implements HasMatchName {
         // For the stroke not to be scaled we have to pre-multiply the shape by the transform and then paint
         // in the non-transformed coordinate system.
         output.setTransform(context.rootTransform());
-        return context.userSpaceTransform().createTransformedShape(shape);
+        return ShapeUtil.transformShape(shape, context.userSpaceTransform());
     }
 
     private static void updateTransformForFlags(int flags, @NotNull AffineTransform transform, double x0, double y0) {

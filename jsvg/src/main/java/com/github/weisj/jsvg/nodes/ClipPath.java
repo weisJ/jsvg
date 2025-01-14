@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -43,6 +43,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
 import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.util.ShapeUtil;
 
 @ElementCategories({/* None */})
 @PermittedContent(
@@ -91,7 +92,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         // Todo: Handle bounding-box stuff as well (i.e. combined stroke etc.)
         Shape shape = ShapedContainer.super.elementShape(context);
         if (!useSoftClip && clipPathUnits == UnitType.ObjectBoundingBox) {
-            shape = clipPathUnits.viewTransform(elementBounds.boundingBox()).createTransformedShape(shape);
+            shape = ShapeUtil.transformShape(shape, clipPathUnits.viewTransform(elementBounds.boundingBox()));
         }
         Area areaShape = new Area(shape);
         if (areaShape.isRectangular()) {

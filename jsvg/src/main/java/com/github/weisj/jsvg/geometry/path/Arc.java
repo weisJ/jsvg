@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,6 +28,8 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.util.ShapeUtil;
 
 /**
  * This is a little used SVG function, as most editors will save curves as
@@ -123,7 +125,7 @@ final class Arc extends PathCommand {
 
         AffineTransform t = AffineTransform.getRotateInstance(
                 Math.toRadians(angle), arc.getCenterX(), arc.getCenterY());
-        Shape s = t.createTransformedShape(arc);
+        Shape s = ShapeUtil.transformShape(arc, t);
         path.append(s, true);
     }
 
