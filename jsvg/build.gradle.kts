@@ -2,7 +2,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
     `java-library`
-    `module-info-compile`
     id("me.champeau.jmh")
     jacoco
     id("biz.aQute.bnd.builder")
@@ -54,16 +53,16 @@ tasks {
                   com.github.weisj.jsvg.renderer,\
                   com.github.weisj.jsvg.renderer.awt,\
                   com.github.weisj.jsvg.ui,\
-                
+
                 Import-Package: !com.google.errorprone.annotations,\
                   *
-                
+
                 -jpms-module-info
                 -jpms-module-info-options: \
                   com.google.errorprone.annotations;static="true";transitive="false",\
                   org.jetbrains.annotations;static="true";transitive="false",\
                   com.github.weisj.jsvg.annotations;static="true";transitive="false",
-                
+
                 -removeheaders: Private-Package,Tool
             """,
             )
