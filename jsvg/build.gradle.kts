@@ -10,19 +10,21 @@ plugins {
 dependencies {
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
-
     compileOnly(projects.annotations)
+
     annotationProcessor(projects.annotationsProcessor)
 
     testImplementation(testLibs.darklaf.core)
     testImplementation(testLibs.junit.api)
-    testRuntimeOnly(testLibs.junit.engine)
-    testCompileOnly(libs.nullabilityAnnotations)
-    testCompileOnly(toolLibs.errorprone.annotations)
     testImplementation(testLibs.svgSalamander)
     testImplementation(testLibs.batik)
     testImplementation(testLibs.imageCompare)
     testImplementation(testLibs.sizeof)
+
+    testRuntimeOnly(testLibs.junit.engine)
+
+    testCompileOnly(libs.nullabilityAnnotations)
+    testCompileOnly(toolLibs.errorprone.annotations)
 
     jmh(testLibs.svgSalamander)
     jmh(testLibs.batik)
