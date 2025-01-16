@@ -16,7 +16,7 @@ tasks {
                 -exportcontents: \
                   com.github.weisj.jsvg.annoations
 
-                -jpms-module-info
+                -jpms-module-info:
                 -removeheaders: Private-Package,Tool
             """,
             )

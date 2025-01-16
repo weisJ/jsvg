@@ -32,8 +32,14 @@ dependencies {
 tasks {
 
     compileTestJava {
-        sourceCompatibility = JavaVersion.VERSION_21.toString()
-        targetCompatibility = JavaVersion.VERSION_21.toString()
+        javaToolchains {
+            javaCompiler.set(
+                compilerFor {
+                    languageVersion.set(JavaLanguageVersion.of(21))
+                },
+            )
+        }
+        options.release.set(21)
     }
 
     jar {
@@ -59,7 +65,7 @@ tasks {
                 Import-Package: !com.google.errorprone.annotations,\
                   *
 
-                -jpms-module-info
+                -jpms-module-info:
                 -jpms-module-info-options: \
                   com.google.errorprone.annotations;static="true";transitive="false",\
                   org.jetbrains.annotations;static="true";transitive="false",\

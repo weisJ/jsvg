@@ -15,7 +15,7 @@ tasks {
                 """
                 Bundle-SymbolicName: com.github.weisj.jsvg.annotations.processor
 
-                -jpms-module-info
+                -jpms-module-info:
                 -removeheaders: Private-Package,Tool
             """,
             )
