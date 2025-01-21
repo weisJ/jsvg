@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,11 +28,12 @@ import org.jetbrains.annotations.NotNull;
 
 class MutableGlyphRun extends AbstractGlyphRun<Path2D> {
     public MutableGlyphRun() {
-        super(new Path2D.Float(), new ArrayList<>());
+        super(new Path2D.Float(), Metrics.createDefault(), new ArrayList<>());
     }
 
     public void append(@NotNull GlyphRun glyphRun) {
         shape().append(glyphRun.shape(), false);
+        metrics().union(glyphRun.metrics());
         emojis().addAll(glyphRun.emojis());
     }
 }

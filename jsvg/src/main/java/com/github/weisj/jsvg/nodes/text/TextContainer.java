@@ -158,9 +158,9 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
             case Start:
                 return 0;
             case Middle:
-                return glyphCursor.completeGlyphRunBounds.getWidth() / 2f;
+                return glyphCursor.completeGlyphRunMetrics.layoutBounds.getWidth() / 2f;
             case End:
-                return glyphCursor.completeGlyphRunBounds.getWidth();
+                return glyphCursor.completeGlyphRunMetrics.layoutBounds.getWidth();
         }
     }
 
@@ -262,8 +262,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         forEachSegment(context,
                 (segment, ctx) -> {
                     if (!isVisible(ctx)) return;
-                    GlyphRenderer.renderGlyphRun(output, context.paintOrder(), vectorEffects(), segment,
-                            cursor.completeGlyphRunBounds);
+                    GlyphRenderer.renderGlyphRun(output, context.paintOrder(), vectorEffects(), segment);
                 },
                 (segment, ctx) -> segment.renderSegmentWithoutLayout(cursor, ctx, output));
     }

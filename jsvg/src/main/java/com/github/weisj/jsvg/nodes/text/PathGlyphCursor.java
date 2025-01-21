@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -92,6 +93,13 @@ final class PathGlyphCursor extends GlyphCursor {
         // needed.
         segmentIterator.setMaxLookBehindLength(
                 Math.max(advancement.maxLookBehind(), segmentIterator.maxLookBehindLength()));
+    }
+
+    @Override
+    @NotNull
+    Point2D.Float currentLocation(@NotNull MeasureContext measure) {
+        // Note: This will be valid before advance is called due to setupInitialData.
+        return new Point2D.Float(x, y);
     }
 
     @Override

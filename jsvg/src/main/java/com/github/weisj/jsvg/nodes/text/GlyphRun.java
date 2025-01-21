@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 class GlyphRun extends AbstractGlyphRun<Shape> {
 
-    GlyphRun(@NotNull Shape shape, @NotNull java.util.List<@NotNull PaintableEmoji> emojis) {
-        super(shape, emojis);
+    GlyphRun(@NotNull Shape shape, @NotNull Metrics metrics, @NotNull java.util.List<@NotNull PaintableEmoji> emojis) {
+        super(shape, metrics, emojis);
     }
 }

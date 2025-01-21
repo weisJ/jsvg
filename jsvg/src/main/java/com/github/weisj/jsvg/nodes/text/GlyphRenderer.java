@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes.text;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +36,6 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
-import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.util.ShapeUtil;
@@ -48,26 +48,21 @@ final class GlyphRenderer {
     static void prepareGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor, @NotNull SVGFont font,
             @NotNull RenderContext context, @NotNull TextOutput textOutput) {
         GlyphRun glyphRun = layoutGlyphRun(segment, cursor, font, context, textOutput);
-        Rectangle2D bounds = glyphRun.shape().getBounds2D();
 
-        if (Length.isUnspecified((float) cursor.completeGlyphRunBounds.getX())) {
-            cursor.completeGlyphRunBounds.setRect(bounds);
-        } else {
-            Rectangle2D.union(cursor.completeGlyphRunBounds, bounds, cursor.completeGlyphRunBounds);
-        }
-
+        cursor.completeGlyphRunMetrics.union(glyphRun.metrics());
         segment.currentGlyphRun = glyphRun;
         segment.currentRenderContext = context;
     }
 
     static void renderGlyphRun(@NotNull Output output, @NotNull PaintOrder paintOrder,
-            @NotNull Set<VectorEffect> vectorEffects, @NotNull StringTextSegment segment,
-            @NotNull Rectangle2D completeGlyphRunBounds) {
+            @NotNull Set<VectorEffect> vectorEffects, @NotNull StringTextSegment segment) {
         RenderContext context = segment.currentRenderContext;
         assert context != null;
 
         GlyphRun glyphRun = segment.currentGlyphRun;
         assert glyphRun != null;
+
+        AbstractGlyphRun.Metrics metrics = glyphRun.metrics();
 
         // Use pathLengthFactor of 1 as pathLength isn't allowed on text
         // Otherwise we would have to do expensive computations for the length of a text outline.
@@ -76,7 +71,7 @@ final class GlyphRenderer {
         // Todo: Vector-Effects
         ShapeRenderer.renderWithPaintOrder(output, true, paintOrder,
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects, stroke, null),
-                new ShapeRenderer.PaintShape(glyphRun.shape(), completeGlyphRunBounds),
+                new ShapeRenderer.PaintShape(glyphRun.shape(), metrics.paintBounds),
                 null);
 
         // Experimental Emoji rendering
@@ -100,6 +95,7 @@ final class GlyphRenderer {
         float letterSpacing = fontRenderContext.letterSpacing().resolve(measure);
 
         Path2D glyphPath = new Path2D.Float();
+        Point2D.Float layoutStart = cursor.currentLocation(measure);
         List<AbstractGlyphRun.PaintableEmoji> emojis = null;
 
         boolean isLastSegment = segment.isLastSegmentInParent();
@@ -142,6 +138,7 @@ final class GlyphRenderer {
                     Shape glyphOutline = glyph.glyphOutline();
                     Shape renderPath = ShapeUtil.transformShape(glyphOutline, glyphTransform);
                     glyphPath.append(renderPath, false);
+
                     if (DEBUG) {
                         glyphPath.append(
                                 ShapeUtil.transformShape(glyphOutline.getBounds2D(), glyphTransform), false);
@@ -152,7 +149,14 @@ final class GlyphRenderer {
             textOutput.codepoint(codepoint, glyphTransform, context);
         }
 
-        return new GlyphRun(glyphPath, emojis != null ? emojis : Collections.emptyList());
+        Rectangle2D paintBounds = glyphPath.getBounds2D();
+        Point2D.Float layoutEnd = cursor.currentLocation(measure);
+        Rectangle2D layoutBounds = new Rectangle2D.Double(
+                layoutStart.x, paintBounds.getY(),
+                layoutEnd.x - layoutStart.x, paintBounds.getHeight());
+        return new GlyphRun(glyphPath,
+                new AbstractGlyphRun.Metrics(paintBounds, layoutBounds),
+                emojis != null ? emojis : Collections.emptyList());
     }
 
     private static float computeBaselineOffset(@NotNull SVGFont font, @NotNull FontRenderContext fontRenderContext) {

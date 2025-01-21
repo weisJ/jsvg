@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,7 +22,7 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,8 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 
 class GlyphCursor {
-    protected final Rectangle2D completeGlyphRunBounds;
+
+    public final @NotNull AbstractGlyphRun.Metrics completeGlyphRunMetrics;
     protected @NotNull GlyphAdvancement advancement = GlyphAdvancement.defaultAdvancement();
 
     protected float x;
@@ -55,19 +56,20 @@ class GlyphCursor {
     protected int rotOff;
 
     GlyphCursor(float x, float y, @NotNull AffineTransform transform) {
-        this(x, y, transform, new Rectangle2D.Float(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW, 0, 0));
+        this(x, y, transform, AbstractGlyphRun.Metrics.createDefault());
     }
 
-    private GlyphCursor(float x, float y, @NotNull AffineTransform transform, @NotNull Rectangle2D glyphBounds) {
+    private GlyphCursor(float x, float y, @NotNull AffineTransform transform,
+            @NotNull AbstractGlyphRun.Metrics metrics) {
         this.x = x;
         this.y = y;
         this.transform = transform;
-        this.completeGlyphRunBounds = glyphBounds;
+        this.completeGlyphRunMetrics = metrics;
         this.glyphOffset = 0;
     }
 
     GlyphCursor(@NotNull GlyphCursor c) {
-        this(c.x, c.y, c.transform, c.completeGlyphRunBounds);
+        this(c.x, c.y, c.transform, c.completeGlyphRunMetrics);
         this.advancement = c.advancement;
         this.glyphOffset = 0;
         this.xLocations = c.xLocations;
@@ -97,6 +99,13 @@ class GlyphCursor {
 
     public GlyphAdvancement advancement() {
         return advancement;
+    }
+
+    @NotNull
+    Point2D.Float currentLocation(@NotNull MeasureContext measure) {
+        return new Point2D.Float(
+                currentX(measure) + currentXDelta(measure),
+                currentY(measure) + currentYDelta(measure));
     }
 
     /*
@@ -134,7 +143,35 @@ class GlyphCursor {
         return xLocations != null && xOff < xLocations.length;
     }
 
-    protected float nextX(@NotNull MeasureContext measure) {
+    private float currentX(@NotNull MeasureContext measure) {
+        if (currentGlyphHasXOverride()) {
+            return xLocations[xOff].resolve(measure);
+        }
+        return x;
+    }
+
+    private float currentXDelta(@NotNull MeasureContext measure) {
+        if (currentGlyphHasDeltaXOverride()) {
+            return xDeltas[dxOff].resolve(measure);
+        }
+        return 0;
+    }
+
+    private float currentY(@NotNull MeasureContext measure) {
+        if (currentGlyphHasYOverride()) {
+            return yLocations[yOff].resolve(measure);
+        }
+        return y;
+    }
+
+    private float currentYDelta(@NotNull MeasureContext measure) {
+        if (currentGlyphHasDeltaYOverride()) {
+            return yDeltas[dyOff].resolve(measure);
+        }
+        return 0;
+    }
+
+    private float nextX(@NotNull MeasureContext measure) {
         if (currentGlyphHasXOverride()) {
             x = xLocations[xOff].resolve(measure);
             xOff++;
@@ -146,7 +183,7 @@ class GlyphCursor {
         return xDeltas != null && dxOff < xDeltas.length;
     }
 
-    protected float nextDeltaX(@NotNull MeasureContext measure) {
+    protected final float nextDeltaX(@NotNull MeasureContext measure) {
         if (currentGlyphHasDeltaXOverride()) {
             return xDeltas[dxOff++].resolve(measure);
         }
@@ -157,7 +194,7 @@ class GlyphCursor {
         return yLocations != null && yOff < yLocations.length;
     }
 
-    protected float nextY(@NotNull MeasureContext measure) {
+    private float nextY(@NotNull MeasureContext measure) {
         if (currentGlyphHasYOverride()) {
             y = yLocations[yOff].resolve(measure);
             yOff++;
@@ -169,7 +206,7 @@ class GlyphCursor {
         return yDeltas != null && dyOff < yDeltas.length;
     }
 
-    protected float nextDeltaY(@NotNull MeasureContext measure) {
+    protected final float nextDeltaY(@NotNull MeasureContext measure) {
         if (currentGlyphHasDeltaYOverride()) {
             return yDeltas[dyOff++].resolve(measure);
         }
@@ -180,7 +217,7 @@ class GlyphCursor {
         return rotations != null && rotations.length != 0;
     }
 
-    protected double nextRotation() {
+    private double nextRotation() {
         if (currentGlyphHasRotationOverride()) {
             float rotation = rotations[rotOff];
             rotOff = Math.min(rotations.length - 1, rotOff + 1);
