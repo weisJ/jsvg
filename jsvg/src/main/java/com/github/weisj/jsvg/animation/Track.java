@@ -21,26 +21,27 @@
  */
 package com.github.weisj.jsvg.animation;
 
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.interpolation.*;
 import com.github.weisj.jsvg.animation.time.Duration;
+import com.github.weisj.jsvg.animation.time.Interval;
 import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.SeparatorMode;
 
 public final class Track {
-    private final @NotNull Duration duration;
-    private final @NotNull Duration begin;
+    private final @NotNull List<@NotNull Interval> intervals;
     private final float repeatCount;
     private final Fill fill;
     private final DefaultInterpolator interpolator;
 
-    private Track(@NotNull Duration duration, @NotNull Duration begin, float repeatCount, Fill fill,
+    private Track(@NotNull List<@NotNull Interval> intervals, float repeatCount, Fill fill,
             AnimationValuesType valuesType, Additive additive) {
-        this.duration = duration;
-        this.begin = begin;
+        this.intervals = intervals;
         this.repeatCount = repeatCount;
         this.fill = fill;
         this.interpolator = new DefaultInterpolator(valuesType, additive);
@@ -48,8 +49,15 @@ public final class Track {
 
     public static @Nullable Track parse(@NotNull AttributeNode attributeNode,
             @NotNull AnimationValuesType valuesType, @NotNull Additive additive) {
+        List<Duration> begins = parseBegin(attributeNode);
         Duration duration = attributeNode.getDuration("dur", Duration.INDEFINITE);
-        Duration begin = attributeNode.getDuration("begin", Duration.ZERO);
+
+        List<Interval> intervals = begins.stream()
+                .map(b -> new Interval(b, b.plus(duration)))
+                .filter(Interval::isValid)
+                .sorted(Comparator.comparing(Interval::begin))
+                .collect(Collectors.toList());
+
         String repeatCountStr = attributeNode.getValue("repeatCount");
         float repeatCount;
         if ("indefinite".equals(repeatCountStr)) {
@@ -57,24 +65,33 @@ public final class Track {
         } else {
             repeatCount = attributeNode.parser().parseFloat(repeatCountStr, 1);
         }
-        if (duration.isIndefinite()
-                || duration.milliseconds() < 0
-                || begin.isIndefinite()
-                || repeatCount <= 0) {
+        if (intervals.isEmpty() || repeatCount <= 0) {
             return null;
         }
 
-        return new Track(duration, begin, repeatCount,
-                attributeNode.getEnum("fill", Fill.REMOVE),
+        return new Track(intervals, repeatCount, attributeNode.getEnum("fill", Fill.REMOVE),
                 valuesType, additive);
     }
 
-    public @NotNull Duration duration() {
-        return duration;
+    @NotNull
+    private static List<Duration> parseBegin(@NotNull AttributeNode attributeNode) {
+        String[] beginsRaw = attributeNode.getStringList("begin", SeparatorMode.SEMICOLON_ONLY);
+        List<Duration> begins;
+
+        if (beginsRaw.length > 0) {
+            begins = new ArrayList<>(beginsRaw.length);
+            for (String s : beginsRaw) {
+                Duration b = attributeNode.parser().parseDuration(s, null);
+                if (b != null) begins.add(b);
+            }
+        } else {
+            begins = Collections.singletonList(Duration.ZERO);
+        }
+        return begins;
     }
 
-    public @NotNull Duration begin() {
-        return begin;
+    public @NotNull List<@NotNull Interval> intervals() {
+        return intervals;
     }
 
     public float repeatCount() {
@@ -85,23 +102,34 @@ public final class Track {
         return fill;
     }
 
-    private int iterationCount(long timestampMillis) {
+    private int iterationCount(@NotNull Duration duration, long timestampMillis) {
         long durationMillis = duration.milliseconds();
         return (int) (timestampMillis / durationMillis);
     }
 
-    private float iterationProgress(long timestampMillis) {
+    private float iterationProgress(@NotNull Duration duration, long timestampMillis) {
         long durationMillis = duration.milliseconds();
         return (float) (timestampMillis % durationMillis) / durationMillis;
     }
 
+    private @Nullable Interval currentInterval(long timestamp) {
+        for (Interval interval : intervals.reversed()) {
+            if (interval.begin().milliseconds() <= timestamp) {
+                return interval;
+            }
+        }
+        return null;
+    }
+
     public @NotNull InterpolationProgress interpolationProgress(long timestamp, int valueCount) {
         if (valueCount == 0) return InterpolationProgress.INITIAL;
-        if (timestamp < begin.milliseconds()) return InterpolationProgress.INITIAL;
+        Interval currentInterval = currentInterval(timestamp);
+        if (currentInterval == null) return InterpolationProgress.INITIAL;
 
-        long time = timestamp - begin.milliseconds();
-        int iterationCount = iterationCount(time);
-        float iterationProgress = iterationProgress(time);
+        long time = timestamp - currentInterval.begin().milliseconds();
+        Duration duration = currentInterval.duration();
+        int iterationCount = iterationCount(duration, time);
+        float iterationProgress = iterationProgress(duration, time);
         float totalIteration = iterationCount + iterationProgress;
 
         if (totalIteration > repeatCount) {

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,8 +21,12 @@
  */
 package com.github.weisj.jsvg.animation;
 
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.animation.time.Interval;
 
 public final class AnimationPeriod {
     private final long start;
@@ -37,14 +41,20 @@ public final class AnimationPeriod {
 
     public @NotNull AnimationPeriod derive(@Nullable Track track) {
         if (track == null) return this;
-        long begin = track.begin().milliseconds();
-        long duration = track.duration().milliseconds();
-        float repeatCount = track.repeatCount();
 
-        long animationStartTime = Math.min(this.start, begin);
+
+        // Compute the begin and total duration
+        List<@NotNull Interval> intervals = track.intervals();
+        float repeatCount = track.repeatCount();
+        long intervalsBegin = intervals.get(0).begin().milliseconds();
+        Interval lastInterval = intervals.get(intervals.size() - 1);
+        long intervalsEnd =
+                (long) (lastInterval.begin().milliseconds() + repeatCount * lastInterval.duration().milliseconds());
+
+        long animationStartTime = Math.min(this.start, intervalsBegin);
         long animationEndTime;
         if (Float.isFinite(repeatCount)) {
-            animationEndTime = Math.max(this.end, (long) (begin + duration * repeatCount));
+            animationEndTime = Math.max(this.end, intervalsEnd);
         } else {
             animationEndTime = Long.MAX_VALUE;
         }

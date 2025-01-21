@@ -288,7 +288,7 @@ public final class AttributeNode {
     }
 
     public @NotNull Duration getDuration(@NotNull String key, @NotNull Duration fallback) {
-        return loadHelper.attributeParser().parseDuration(getValue(key), fallback);
+        return loadHelper.attributeParser().parseTimeOffsetValue(getValue(key), fallback);
     }
 
     private @NotNull Length getLengthInternal(@NotNull String key, @NotNull PercentageDimension dimension) {

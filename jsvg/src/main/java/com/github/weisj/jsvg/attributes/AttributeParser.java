@@ -82,8 +82,27 @@ public final class AttributeParser {
     }
 
     @Contract("_,!null -> !null")
-    public @Nullable Duration parseDuration(@Nullable String value, @Nullable Duration fallback) {
+    public @Nullable Duration parseTimeOffsetValue(@Nullable String value, @Nullable Duration fallback) {
+        // Parse clock-value
+        // https://developer.mozilla.org/en-US/docs/Web/SVG/Content_type#clock-value
+
+        // Parse Timecount-value
         return parseSuffixUnit(value, TimeUnit.Raw, fallback, u -> u);
+    }
+
+    @Contract("_,!null -> !null")
+    public @Nullable Duration parseDuration(@Nullable String value, @Nullable Duration fallback) {
+        if (value == null) return fallback;
+        if ("indefinite".equals(value)) return Duration.INDEFINITE;
+
+        // Parse clock-value
+        // https://developer.mozilla.org/en-US/docs/Web/SVG/Content_type#clock-value
+
+        // Parse Timecount-value
+        Duration timeCount = parseSuffixUnit(value, TimeUnit.Raw, null, u -> u);
+        if (timeCount != null) return timeCount;
+
+        return fallback;
     }
 
     @Contract("_,!null -> !null")
