@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,12 +23,14 @@ package com.github.weisj.jsvg.ui;
 
 import javax.swing.*;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.renderer.AnimationState;
 
+@ApiStatus.Experimental
 public class AnimationPlayer {
     private static final AnimationPeriod NO_ANIMATION = new AnimationPeriod(0, 0, false);
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -217,7 +217,7 @@ public final class SVGViewer {
         private boolean lowResolution;
         private Object maskRenderingValue = SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_DEFAULT;
 
-        private final @NotNull AnimationPlayer animationPlayer = new AnimationPlayer((e) -> repaint());
+        private final @NotNull AnimationPlayer animationPlayer = new AnimationPlayer(e -> repaint());
 
 
         public SVGPanel(@NotNull String iconName) {

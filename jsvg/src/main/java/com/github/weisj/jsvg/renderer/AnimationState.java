@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,8 +23,11 @@ package com.github.weisj.jsvg.renderer;
 
 import java.util.Objects;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import com.google.errorprone.annotations.Immutable;
 
+@ApiStatus.Experimental
 @Immutable
 public final class AnimationState {
     public static final AnimationState NO_ANIMATION = new AnimationState(0, 0);

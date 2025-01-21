@@ -27,6 +27,7 @@ import java.awt.geom.Path2D;
 
 import javax.swing.*;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -112,6 +113,7 @@ public final class SVGDocument {
         renderWithPlatform(platformSupport, output, bounds, null);
     }
 
+    @ApiStatus.Experimental
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
             @Nullable ViewBox bounds, @Nullable AnimationState animationState) {
         RenderContext context = prepareRenderContext(platformSupport, output, bounds, animationState);

@@ -31,7 +31,7 @@ The library is available on maven central:
 
 ````kotlin
 dependencies {
-    implementation("com.github.weisj:jsvg:1.6.0")
+    implementation("com.github.weisj:jsvg:1.7.0")
 }
 ````
 
@@ -67,7 +67,17 @@ URL svgUrl = MyClass.class.getResource("mySvgFile.svg");
 SVGDocument svgDocument = loader.load(svgUrl);
 ````
 
-Note that `SVGLoader` is not guaranteed to be thread safe hence shouldn't be used across multiple threads.
+If you need more control over the loading process you can pass a `LoaderContext` for configuration purposes.
+
+````java
+SVGDocument svgDocument = loader.load(svgUrl,
+    LoaderContext.builder()
+                 // configure the context
+                 // ...
+                 .build());
+````
+
+Note that `SVGLoader` is not guaranteed to be thread safe, hence shouldn't be used across multiple threads.
 
 ### Rendering
 
@@ -135,6 +145,18 @@ Supported custom rendering hints are:
 
 All are exposed through the `SVGRenderingHints`class.
 
+### Animations
+
+The current support for animations is limited and in an experimental state.
+Only basic timing mechanisms and interpolation methods are supported.
+Moreover most animatable properties aren't yet supported.
+Please beware that the API for animations is subject to change.
+
+Animations can be controlled on a per frame basis by supplying an `AnimationState` to `SVGDocument#renderWithPlatform`.
+In particular this means that animations need to be driven by the user code.
+See below for examples on how to do this.
+
+
 ## Supported features
 
 For supported elements most of the attributes which apply to them are implemented.
@@ -196,15 +218,15 @@ For supported elements most of the attributes which apply to them are implemente
 
 ## Animation elements
 
-| Element               | Status |
-|-----------------------|--------|
-| animate               | :x:    |
-| :warning:animateColor | :x:    |
-| animateMotion         | :x:    |
-| animateTransform      | :x:    |
-| mpath                 | :x:    |
-| set                   | :x:    |
-| switch                | :x:    |
+| Element               | Status                  |
+|-----------------------|-------------------------|
+| animate               | :ballot_box_with_check: |
+| :warning:animateColor | :x:                     |
+| animateMotion         | :x:                     |
+| animateTransform      | :ballot_box_with_check: |
+| mpath                 | :x:                     |
+| set                   | :x:                     |
+| switch                | :x:                     |
 
 ## Filter elements
 
@@ -271,6 +293,7 @@ For supported elements most of the attributes which apply to them are implemente
 
 ## Usage examples
 
+### Basic
 To render an SVG to a swing component you can start from the following example:
 
 ````java
@@ -327,6 +350,7 @@ public class RenderExample {
 }
 ````
 
+### DOM manipulation
 You can even change the color of svg elements by using a suitable `DomProcessor` together with a custom implementation
 of `SVGPaint`. Lets take the following SVG as an example:
 
@@ -450,4 +474,42 @@ JPanel content = new JPanel(new BorderLayout());
 content.add(panel, BorderLayout.CENTER);
 content.add(button, BorderLayout.SOUTH);
 frame.setContentPane(content);
+````
+### Animations
+
+JSVG provides a helper class `AnimationPlayer` for implementing animations in Swing components.
+The following example demonstrates how to use the `AnimationPlayer` to animate an SVG element:
+
+````java
+import javax.swing.*;
+
+public class AnimationPanel extends JComponent {
+    private final @NotNull SVGDocument document;
+    private final @NotNull AnimationPlayer player;
+
+    public AnimationPanel(@NotNull SVGDocument document) {
+        this.document = document;
+        this.player = new AnimationPlayer(e -> repaint());
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        // Setup rendering hints (see above)
+        // ...
+        document.renderWithPlatform(
+            new AwtComponentPlatformSupport(this),
+            new Graphics2DOutput((Graphics2D) g),
+            new ViewBox(0, 0, getWidth(), getHeight()),
+            animationPlayer.animationState());
+    }
+
+    public void startAnimation() {
+        player.start();
+    }
+
+    public void stopAnimation() {
+        player.stop();
+    }
+}
 ````
