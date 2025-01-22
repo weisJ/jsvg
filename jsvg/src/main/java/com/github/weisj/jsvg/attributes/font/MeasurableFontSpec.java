@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -33,7 +34,6 @@ import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 
 public final class MeasurableFontSpec extends FontSpec {
-    public static final @NotNull String DEFAULT_FONT_FAMILY_NAME = "Default";
     private final int currentWeight;
     private final @NotNull Length currentSize;
 
@@ -46,7 +46,8 @@ public final class MeasurableFontSpec extends FontSpec {
 
     public static @NotNull MeasurableFontSpec createDefault() {
         return new MeasurableFontSpec(
-                new String[] {DEFAULT_FONT_FAMILY_NAME},
+                // Ensure there is always a valid family available.
+                new String[] {SVGFont.defaultFontFamily()},
                 FontStyle.normal(),
                 null,
                 FontStretch.Normal.percentage(),
