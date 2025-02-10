@@ -23,7 +23,11 @@ scripting languages or interaction. Animations aren't currently implemented but 
 This library aims to be as lightweight as possible. Generally JSVG uses ~50% less memory than svgSalamander and
 ~98% less than Batik.
 
-JSVG is used by the [Jetbrains IDEA IDE](https://github.com/JetBrains/intellij-community) suite for rendering their interface icons.
+## Projects using JSVG
+* The [Jetbrains IDEA IDE](https://github.com/JetBrains/intellij-community) suite ([YouTrack Ticket](https://youtrack.jetbrains.com/issue/IJPL-81/Switch-to-JSVG-for-SVG-icon-rendering?reloaded=true)).
+* [Apache NetBeans](https://netbeans.apache.org/front/main/index.html) ([PR #7941](https://github.com/apache/netbeans/pull/7941))
+* [Eclipse SWT](https://github.com/eclipse-platform/eclipse.platform.swt) (Upcoming [PR #1638](https://github.com/eclipse-platform/eclipse.platform.swt/pull/1638))
+* [FlatLaf](https://github.com/JFormDesigner/FlatLaf) for [FlatSVGIcon](https://github.com/JFormDesigner/FlatLaf/tree/main/flatlaf-extras) ([PR #684](https://github.com/JFormDesigner/FlatLaf/pull/684))
 
 ## How to use
 
@@ -53,6 +57,7 @@ dependencies {
     implementation("com.github.weisj:jsvg:latest.integration")
 }
 ````
+JSVG provides OSGi metadata in the manifest file.
 
 ### Loading
 
