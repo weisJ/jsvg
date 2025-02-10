@@ -154,9 +154,8 @@ public final class DefaultPaintParser implements PaintParser {
 
             private final Map<String, Color> colorMap;
 
-            {
+            Cache() {
                 Map<String, Color> map = new HashMap<>(144);
-
                 map.put("aliceblue", new Color(0xf0f8ff));
                 map.put("antiquewhite", new Color(0xfaebd7));
                 map.put("aqua", new Color(0x00ffff));

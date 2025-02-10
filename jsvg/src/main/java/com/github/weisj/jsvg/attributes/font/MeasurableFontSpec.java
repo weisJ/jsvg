@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 

@@ -47,7 +47,9 @@ public final class AnimatedFloat implements FloatValue {
         if (progress.isInitial()) return initial.get(context);
         int i = progress.iterationIndex();
 
-        if (i == values.length - 1) {
+        assert i >= 0;
+        assert values.length > 0;
+        if (i >= values.length - 1) {
             return values[i];
         }
 
