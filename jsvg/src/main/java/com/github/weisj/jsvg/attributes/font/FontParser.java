@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,9 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
+import java.awt.*;
+import java.util.Locale;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +39,7 @@ public final class FontParser {
     // Todo: font-variant
     public static @NotNull AttributeFontSpec parseFontSpec(@NotNull AttributeNode node) {
         String[] fontFamilies = node.getStringList("font-family", SeparatorMode.COMMA_ONLY);
+        canonicalizeFontFamily(fontFamilies);
 
         // Todo: https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#fallback_weights
         @Nullable FontWeight weight = parseWeight(node);
@@ -45,6 +49,26 @@ public final class FontParser {
         @NotNull Percentage stretch = parseStretch(node);
 
         return new AttributeFontSpec(fontFamilies, style, sizeAdjust, stretch, size, weight);
+    }
+
+    private static void canonicalizeFontFamily(@NotNull String[] fontFamilies) {
+        for (int i = 0; i < fontFamilies.length; i++) {
+            String family = fontFamilies[i].toLowerCase(Locale.US);
+            switch (family) {
+                case "sans-serif":
+                    family = Font.SANS_SERIF;
+                    break;
+                case "serif":
+                    family = Font.SERIF;
+                    break;
+                case "monospace":
+                    family = Font.MONOSPACED;
+                    break;
+                default:
+                    break;
+            }
+            fontFamilies[i] = family;
+        }
     }
 
     public static @Nullable FontWeight parseWeight(@NotNull AttributeNode node) {
