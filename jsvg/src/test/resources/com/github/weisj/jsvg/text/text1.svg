@@ -11,7 +11,7 @@
 		<line x1="75%" y1="0" x2="75%" y2="100%" />
 	</g>
 
-	<text y="20" fill="red" font-family="Arial" font-size="20">
+	<text y="20" fill="red" font-size="20">
 		<!-- x with a single value -->
 		<tspan>Test</tspan>
 		<tspan y="40%" x="50%">SVG</tspan>

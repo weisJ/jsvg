@@ -13,8 +13,7 @@
 			stroke="grey" />
 
 		<!-- Anchors in action -->
-		<g font-weight="bold" font-size="30px"
-			font-family="Verdana, Helvetica, Arial, sans-serif">
+		<g font-weight="bold" font-size="30px" font-family="sans-serif">
 			<text dominant-baseline="auto" x="70" y="20">ÜAx- auto</text>
 			<text dominant-baseline="middle" x="70" y="70">ÜAx- middle</text>
 			<text dominant-baseline="mathematical" x="70" y="120">ÜAx-

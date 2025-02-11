@@ -5,7 +5,7 @@
 		Example tspan05 - propagation of rotation values to nested tspan
 		elements.
 	</desc>
-	<text id="parent" font-family="Arial, sans-serif" font-size="32"
+	<text id="parent" font-family="sans-serif" font-size="32"
 		fill="red" x="40" y="40" rotate="5,15,25,35,45,55">
 		Not
 

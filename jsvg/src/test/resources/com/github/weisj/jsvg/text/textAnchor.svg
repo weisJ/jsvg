@@ -6,8 +6,7 @@
 		stroke="grey" />
 
 	<!-- Anchors in action -->
-	<g font-family="Verdana, Helvetica, Arial, sans-serif"
-		font-weight="bold" font-size="36px">
+	<g font-weight="bold" font-size="36px">
 		<text text-anchor="start" x="60" y="40">A</text>
 		<text text-anchor="middle" x="60" y="75">A</text>
 		<text text-anchor="end" x="60" y="110">A</text>

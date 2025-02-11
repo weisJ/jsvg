@@ -25,53 +25,53 @@
 	</g>
 	<!-- </defs> -->
 
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#N">N</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#NE">NE</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#E">E</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#SE">SE</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#S">S</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#SW">SW</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#W">W</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#NW">NW</textPath>
 	</text>
 
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#Np">I</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#NEp">I</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#Ep">I</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#SEp">I</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#Sp">I</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#SWp">I</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#Wp">I</textPath>
 	</text>
-	<text font-family="Arial" font-size="12">
+	<text font-size="12">
 		<textPath xlink:href="#NWp">I</textPath>
 	</text>
 
