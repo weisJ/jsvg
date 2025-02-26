@@ -32,7 +32,7 @@ final class MutableLoaderContext implements LoaderContext, LoaderContext.Builder
     private @NotNull ParserProvider parserProvider = DEFAULT_PARSER_PROVIDER;
     private @NotNull ResourceLoader resourceLoader = DEFAULT_RESOURCE_LOADER;
     private @NotNull ElementLoader elementLoader = DEFAULT_ELEMENT_LOADER;
-    private @NotNull ExternalResourcePolicy externalResourcePolicy = ExternalResourcePolicy.DENY;
+    private @NotNull ResourcePolicy resourcePolicy = ResourcePolicy.DENY_EXTERNAL;
     private @NotNull DocumentLimits documentLimits = DocumentLimits.DEFAULT;
 
     static @NotNull MutableLoaderContext createDefault() {
@@ -55,8 +55,8 @@ final class MutableLoaderContext implements LoaderContext, LoaderContext.Builder
     }
 
     @Override
-    public @NotNull ExternalResourcePolicy externalResourcePolicy() {
-        return externalResourcePolicy;
+    public @NotNull ResourcePolicy externalResourcePolicy() {
+        return resourcePolicy;
     }
 
     @Override
@@ -83,8 +83,8 @@ final class MutableLoaderContext implements LoaderContext, LoaderContext.Builder
     }
 
     @Override
-    public @NotNull Builder externalResourcePolicy(@NotNull ExternalResourcePolicy policy) {
-        this.externalResourcePolicy = policy;
+    public @NotNull Builder externalResourcePolicy(@NotNull ResourcePolicy policy) {
+        this.resourcePolicy = policy;
         return this;
     }
 
@@ -96,8 +96,9 @@ final class MutableLoaderContext implements LoaderContext, LoaderContext.Builder
 
     @Override
     public @NotNull LoaderContext build() {
-        // Check if policy changed. This avoid instantiating the heavier external loader.
-        if (this.externalResourcePolicy != ExternalResourcePolicy.DENY) {
+        // Check if policy changed. This avoids instantiating the heavier external loader.
+        if (!(this.resourcePolicy instanceof DefaultResourcePolicy)
+                || ((DefaultResourcePolicy) this.resourcePolicy).allowsExternalResources()) {
             this.elementLoader = new DefaultElementLoader(DefaultElementLoader.AllowExternalResources.ALLOW);
         }
         return this;

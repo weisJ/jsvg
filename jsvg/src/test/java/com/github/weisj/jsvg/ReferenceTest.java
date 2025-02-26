@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -63,8 +63,8 @@ import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.parser.ExternalResourcePolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
+import com.github.weisj.jsvg.parser.ResourcePolicy;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.util.ColorUtil;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -79,7 +79,7 @@ public final class ReferenceTest {
     public sealed interface RenderType {
         BatikType Batik = new BatikType();
         JSVGType JSVG = new JSVGType(LoaderContext.builder()
-                .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
+                .externalResourcePolicy(ResourcePolicy.ALLOW_ALL)
                 .build());
         DiskImage DiskImage = new DiskImage();
 

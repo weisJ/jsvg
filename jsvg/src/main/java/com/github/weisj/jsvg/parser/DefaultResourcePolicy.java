@@ -28,17 +28,22 @@ import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-class DefaultResourcePolicy implements ExternalResourcePolicy {
+class DefaultResourcePolicy implements ResourcePolicy {
     private static final Logger LOGGER = Logger.getLogger(DefaultResourcePolicy.class.getName());
 
     static final int FLAG_ALLOW_RELATIVE = 1;
-    static final int FLAG_ALLOW_ABSOLUTE = 2;
-    static final int FLAG_ALLOW_NON_LOCAL = 4;
+    static final int FLAG_ALLOW_ABSOLUTE = 1 << 1;
+    static final int FLAG_ALLOW_NON_LOCAL = 1 << 2;
+    static final int FLAG_ALLOW_EMBEDDED_DATA = 1 << 3;
 
     private final int flags;
 
     DefaultResourcePolicy(int flags) {
         this.flags = flags;
+    }
+
+    boolean allowsExternalResources() {
+        return (flags & FLAG_ALLOW_RELATIVE) != 0 || (flags & FLAG_ALLOW_ABSOLUTE) != 0;
     }
 
     @Override
@@ -53,7 +58,13 @@ class DefaultResourcePolicy implements ExternalResourcePolicy {
 
     @Override
     public @Nullable URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull URI resourceUri) {
-        if (resourceUri.isAbsolute()) {
+        if ("data".equals(resourceUri.getScheme())) {
+            if ((flags & FLAG_ALLOW_EMBEDDED_DATA) == 0) {
+                LOGGER.info(() -> String.format("Rejected URI %s because embedded data is not allowed", resourceUri));
+                return null;
+            }
+            return resourceUri;
+        } else if (resourceUri.isAbsolute()) {
             if ((flags & FLAG_ALLOW_ABSOLUTE) == 0) {
                 LOGGER.info(() -> String.format("Rejected URI %s because absolute paths are not allowed", resourceUri));
                 return null;

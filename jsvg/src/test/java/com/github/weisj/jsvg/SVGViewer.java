@@ -42,8 +42,8 @@ import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.darklaf.iconset.AllIcons;
 import com.github.weisj.darklaf.ui.button.ButtonConstants;
 import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.parser.ExternalResourcePolicy;
 import com.github.weisj.jsvg.parser.LoaderContext;
+import com.github.weisj.jsvg.parser.ResourcePolicy;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
@@ -263,7 +263,7 @@ public final class SVGViewer {
                         URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
                         SVGLoader loader = new SVGLoader();
                         LoaderContext loaderContext = LoaderContext.builder()
-                                .externalResourcePolicy(ExternalResourcePolicy.ALLOW_ALL)
+                                .externalResourcePolicy(ResourcePolicy.ALLOW_ALL)
                                 .build();
                         return loader.load(url, loaderContext);
                     });

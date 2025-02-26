@@ -28,29 +28,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Experimental
-public interface ExternalResourcePolicy {
+public interface ResourcePolicy {
     /**
      * Deny loading of external resources.
      */
-    ExternalResourcePolicy DENY = new ExternalResourcePolicy() {
-        @Override
-        public @Nullable URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull String resourcePath) {
-            return null;
-        }
-
-        @Override
-        public @Nullable URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull URI resourceUri) {
-            return null;
-        }
-    };
+    ResourcePolicy DENY_ALL = new DefaultResourcePolicy(0);
+    ResourcePolicy DENY_EXTERNAL = new DefaultResourcePolicy(DefaultResourcePolicy.FLAG_ALLOW_EMBEDDED_DATA);
     /**
      * Allow external resources to be loaded relative to the base document.
      */
-    ExternalResourcePolicy ALLOW_RELATIVE = new DefaultResourcePolicy(DefaultResourcePolicy.FLAG_ALLOW_RELATIVE);
-    ExternalResourcePolicy ALLOW_ALL = new DefaultResourcePolicy(
+    ResourcePolicy ALLOW_RELATIVE = new DefaultResourcePolicy(
+            DefaultResourcePolicy.FLAG_ALLOW_RELATIVE
+                    | DefaultResourcePolicy.FLAG_ALLOW_EMBEDDED_DATA);
+    ResourcePolicy ALLOW_ALL = new DefaultResourcePolicy(
             DefaultResourcePolicy.FLAG_ALLOW_RELATIVE
                     | DefaultResourcePolicy.FLAG_ALLOW_ABSOLUTE
-                    | DefaultResourcePolicy.FLAG_ALLOW_NON_LOCAL);
+                    | DefaultResourcePolicy.FLAG_ALLOW_NON_LOCAL
+                    | DefaultResourcePolicy.FLAG_ALLOW_EMBEDDED_DATA);
 
 
     @Nullable

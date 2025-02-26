@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2023-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -54,7 +54,7 @@ public final class LoadHelper {
         return loaderContext.elementLoader();
     }
 
-    public @NotNull ExternalResourcePolicy externalResourcePolicy() {
+    public @NotNull ResourcePolicy externalResourcePolicy() {
         return loaderContext.externalResourcePolicy();
     }
 }
