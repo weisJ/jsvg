@@ -226,11 +226,15 @@ class GlyphCursor {
         return 0;
     }
 
-    public boolean isCurrentGlyphAutoLayout() {
+    boolean isCurrentGlyphAutoLayout() {
         return !currentGlyphHasXOverride()
                 && !currentGlyphHasDeltaXOverride()
                 && !currentGlyphHasYOverride()
                 && !currentGlyphHasDeltaYOverride()
                 && !(currentGlyphHasRotationOverride() && rotations[rotOff] % 360 != 0);
+    }
+
+    boolean shouldRenderCurrentGlyph() {
+        return true;
     }
 }

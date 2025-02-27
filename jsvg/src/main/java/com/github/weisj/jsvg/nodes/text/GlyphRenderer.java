@@ -120,6 +120,8 @@ final class GlyphRenderer {
             boolean skipSpacing = lastCodepoint && shouldSkipLastSpacing;
             if (!skipSpacing) cursor.advanceSpacing(letterSpacing);
 
+            if (!cursor.shouldRenderCurrentGlyph()) continue;
+
             // If null no more characters should be processed.
             if (glyphTransform == null) break;
 

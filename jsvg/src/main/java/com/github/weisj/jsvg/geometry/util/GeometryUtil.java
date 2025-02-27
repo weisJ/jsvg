@@ -52,6 +52,10 @@ public final class GeometryUtil {
         return a < EPS;
     }
 
+    public static boolean approximatelyPositive(double a) {
+        return a > -EPS;
+    }
+
     public static double scaleXOfTransform(@Nullable AffineTransform at) {
         if (at == null) return 1;
         double sx = at.getScaleX();

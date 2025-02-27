@@ -36,6 +36,8 @@ final class PathGlyphCursor extends GlyphCursor {
 
     private float remainingSegmentLength;
     private float segmentLength;
+    private float retainedLengthAtStart;
+    private boolean shouldRenderCurrentGlyph;
     private SegmentIteratorWithLookBehind.Segment currentSegment;
 
     private final @NotNull SegmentIteratorWithLookBehind segmentIterator;
@@ -47,7 +49,7 @@ final class PathGlyphCursor extends GlyphCursor {
         advance(startOffset);
     }
 
-    PathGlyphCursor(@NotNull GlyphCursor cursor, float startOffset, @NotNull PathIterator pathIterator) {
+    PathGlyphCursor(@NotNull GlyphCursor cursor, @NotNull PathIterator pathIterator, float startOffset) {
         super(cursor);
         this.segmentIterator = new SegmentIteratorWithLookBehind(pathIterator, 0);
         setupInitialData();
@@ -125,6 +127,7 @@ final class PathGlyphCursor extends GlyphCursor {
         float anchorY = y - slopeY;
 
         // The glyph midpoint is outside the path and should not be made visible. Abort
+        shouldRenderCurrentGlyph = GeometryUtil.approximatelyNegative(retainedLengthAtStart);
         if (segmentIterator.isDone() && GeometryUtil.approximatelyNegative(remainingSegmentLength)) return null;
         advance(halfAdvance);
 
@@ -149,9 +152,14 @@ final class PathGlyphCursor extends GlyphCursor {
         advance(advancement.spacingAdvancement(letterSpacing));
     }
 
+    @Override
+    boolean shouldRenderCurrentGlyph() {
+        return shouldRenderCurrentGlyph;
+    }
+
     private void advance(float distance) {
         if (distance >= 0) {
-            advanceInsideSegment(advanceIntoSegment(distance));
+            advanceInsideSegment(advanceIntoSegment(adjustForRetainedLength(distance)));
         } else {
             advanceInsideSegment(-reverseIntoSegment(-distance));
         }
@@ -159,6 +167,15 @@ final class PathGlyphCursor extends GlyphCursor {
 
     private float travelledSegmentLength() {
         return segmentLength - remainingSegmentLength;
+    }
+
+    private float adjustForRetainedLength(float distance) {
+        if (distance > 0 && GeometryUtil.approximatelyPositive(retainedLengthAtStart)) {
+            float delta = Math.min(distance, retainedLengthAtStart);
+            retainedLengthAtStart -= delta;
+            return distance - delta;
+        }
+        return distance;
     }
 
 
@@ -187,17 +204,15 @@ final class PathGlyphCursor extends GlyphCursor {
             segmentLength = (float) currentSegment.length();
             remainingSegmentLength = 0;
         }
-        if (GeometryUtil.notablyGreater(distance, travelledSegmentLength())) {
-            throw new IllegalStateException("Not enough buffer " + distance + " > " + travelledSegmentLength());
-        }
         return distance;
     }
 
     private void advanceInsideSegment(float distance) {
         if (GeometryUtil.approximatelyZero(distance)) return;
         if (distance < 0 && -distance > travelledSegmentLength()) {
-            throw new IllegalStateException(
-                    "Distance too large " + distance + " of maximum " + travelledSegmentLength());
+            // We cannot move the distance backwards. Retain the given amount of text from being displayed.
+            retainedLengthAtStart += -1 * distance;
+            return;
         }
         float fractionWalked = distance / segmentLength;
         x += (currentSegment.xEnd - currentSegment.xStart) * fractionWalked;
