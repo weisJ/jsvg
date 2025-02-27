@@ -124,10 +124,22 @@ public final class TextPath extends TextContainer {
         }
     }
 
+    private float computeStartOffset(@NotNull RenderContext context) {
+        float offset = startOffset.resolve(context.measureContext());
+        if (startOffset.unit().isPercentage()) {
+            if (pathShape.isClosed(context)) {
+                // Modulo 1 to obtain value inside [0, 1]
+                offset = (offset % 1 + 1) % 1;
+            }
+            return (float) (offset * pathShape.pathLength(context));
+        }
+        return offset;
+    }
+
     private @NotNull PathGlyphCursor createCursor(@NotNull RenderContext context) {
         return new PathGlyphCursor(
                 createPathIterator(context),
-                startOffset.resolve(context.measureContext()));
+                computeStartOffset(context));
     }
 
     private void paintDebugPath(@NotNull RenderContext context, @NotNull Graphics2D g) {
@@ -189,8 +201,8 @@ public final class TextPath extends TextContainer {
     @Override
     protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
         return new PathGlyphCursor(current,
-                startOffset.resolve(context.measureContext()),
-                createPathIterator(context));
+                createPathIterator(context),
+                computeStartOffset(context));
     }
 
     @Override
