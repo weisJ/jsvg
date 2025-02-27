@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,8 +22,7 @@
 package com.github.weisj.jsvg.geometry;
 
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -93,6 +92,18 @@ public class AWTSVGShape<T extends Shape> implements MeasurableShape {
             return SVGEllipse.ellipseCircumference(w / 2f, h / 2f);
         } else {
             return GeometryUtil.pathLength(shape);
+        }
+    }
+
+    @Override
+    public boolean isClosed(@NotNull RenderContext context) {
+        Shape shape = shape(context, false);
+        if (shape instanceof Rectangle2D) {
+            return true;
+        } else if (shape instanceof Ellipse2D) {
+            return true;
+        } else {
+            return GeometryUtil.isSingleClosedPath(shape);
         }
     }
 }

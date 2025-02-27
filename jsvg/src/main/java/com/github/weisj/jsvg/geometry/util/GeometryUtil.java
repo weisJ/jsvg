@@ -109,6 +109,27 @@ public final class GeometryUtil {
         return length;
     }
 
+    public static boolean isSingleClosedPath(@NotNull Shape shape) {
+        PathIterator pathIterator = shape.getPathIterator(null);
+        int numPaths = 0;
+        int numClosedPaths = 0;
+        float[] segment = new float[6];
+        while (!pathIterator.isDone()) {
+            switch (pathIterator.currentSegment(segment)) {
+                case PathIterator.SEG_MOVETO:
+                    numPaths++;
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    numClosedPaths++;
+                    break;
+                default:
+                    break;
+            }
+            pathIterator.next();
+        }
+        return numPaths == 1 && numClosedPaths == 1;
+    }
+
     public static double lineLength(double x1, double y1, double x2, double y2) {
         return Math.sqrt(GeometryUtil.distanceSquared(x1, y1, x2, y2));
     }
