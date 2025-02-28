@@ -32,13 +32,6 @@ dependencies {
 tasks {
 
     compileTestJava {
-        javaToolchains {
-            javaCompiler.set(
-                compilerFor {
-                    languageVersion.set(JavaLanguageVersion.of(21))
-                },
-            )
-        }
         options.release.set(21)
     }
 

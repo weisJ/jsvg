@@ -113,8 +113,10 @@ public final class Track {
     }
 
     private @Nullable Interval currentInterval(long timestamp) {
-        for (Interval interval : intervals.reversed()) {
-            if (interval.begin().milliseconds() <= timestamp) {
+        ListIterator<@NotNull Interval> iterator = intervals.listIterator();
+        while (iterator.hasPrevious()) {
+            Interval interval = iterator.previous();
+            if (interval.end().milliseconds() <= timestamp) {
                 return interval;
             }
         }

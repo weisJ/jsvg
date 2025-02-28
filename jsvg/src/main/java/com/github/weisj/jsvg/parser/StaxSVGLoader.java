@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2023-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +35,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
@@ -120,8 +122,13 @@ public final class StaxSVGLoader {
                             break;
                         }
                         Map<String, String> attributes = new HashMap<>();
-                        element.getAttributes().forEachRemaining(
-                                attr -> attributes.put(qualifiedName(attr.getName()), attr.getValue().trim()));
+                        Iterator<Attribute> attrs = element.getAttributes();
+                        while (attrs.hasNext()) {
+                            Attribute attr = attrs.next();
+                            attributes.put(
+                                    qualifiedName(attr.getName()),
+                                    attr.getValue().trim());
+                        }
                         if (!builder.startElement(qualifiedName(element.getName()), attributes)) {
                             skipElement(reader);
                         }
