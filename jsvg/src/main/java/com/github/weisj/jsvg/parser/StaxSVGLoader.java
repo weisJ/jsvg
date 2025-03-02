@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -129,13 +130,13 @@ public final class StaxSVGLoader {
                                     qualifiedName(attr.getName()),
                                     attr.getValue().trim());
                         }
-                        if (!builder.startElement(qualifiedName(element.getName()), attributes)) {
+                        if (!builder.startElement(qualifiedName(element.getName(), MakeLowerCase.YES), attributes)) {
                             skipElement(reader);
                         }
                         break;
 
                     case XMLStreamConstants.END_ELEMENT:
-                        builder.endElement(qualifiedName(event.asEndElement().getName()));
+                        builder.endElement(qualifiedName(event.asEndElement().getName(), MakeLowerCase.YES));
                         break;
 
                     case XMLStreamConstants.CDATA:
@@ -190,7 +191,22 @@ public final class StaxSVGLoader {
         }
     }
 
-    private static String qualifiedName(@NotNull QName name) {
+    private enum MakeLowerCase {
+        YES,
+        NO
+    }
+
+    private static @NotNull String qualifiedName(@NotNull QName name, MakeLowerCase makeLowerCase) {
+        String qName = qualifiedNameImpl(name);
+        if (makeLowerCase == MakeLowerCase.YES) return qName.toLowerCase(Locale.ROOT);
+        return qName;
+    }
+
+    private static @NotNull String qualifiedName(@NotNull QName name) {
+        return qualifiedName(name, MakeLowerCase.NO);
+    }
+
+    private static @NotNull String qualifiedNameImpl(@NotNull QName name) {
         String prefix = name.getPrefix();
         String localName = name.getLocalPart();
         if (prefix == null) return localName;
