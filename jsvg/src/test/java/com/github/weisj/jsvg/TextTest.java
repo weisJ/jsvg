@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
@@ -37,6 +39,9 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.ReferenceTest.CompareInfo;
+import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ReferenceTest.RenderType;
 import com.github.weisj.jsvg.nodes.text.GlyphRunTextOutput;
 import com.github.weisj.jsvg.nodes.text.TextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;

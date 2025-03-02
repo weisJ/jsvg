@@ -22,11 +22,15 @@
 package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ReferenceTest.*;
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+
+import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
 
 class TransformTest {
 
@@ -48,25 +52,25 @@ class TransformTest {
     void testTransformBoxFill() {
         // Compare with reference as batik doesn't support transform-box
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxFill_ref.svg"), RenderType.JSVG),
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxFill.svg"), RenderType.JSVG))));
+                expected(new PathImageSource("transform/transformBoxFill_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("transform/transformBoxFill.svg"), RenderType.JSVG))));
     }
 
     @Test
     void testTransformBoxStroke() {
         // Compare with reference as batik doesn't support transform-box
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStroke_ref.svg"), RenderType.JSVG),
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStroke.svg"), RenderType.JSVG))));
+                expected(new PathImageSource("transform/transformBoxStroke_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("transform/transformBoxStroke.svg"), RenderType.JSVG))));
     }
 
     @Test
     void testTransformBoxFillTransform() {
         // Compare with reference as batik doesn't support transform-box
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxFillTranslate_ref.svg"),
+                expected(new PathImageSource("transform/transformBoxFillTranslate_ref.svg"),
                         RenderType.JSVG),
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxFillTranslate.svg"),
+                actual(new PathImageSource("transform/transformBoxFillTranslate.svg"),
                         RenderType.JSVG))));
     }
 
@@ -74,9 +78,9 @@ class TransformTest {
     void testTransformBoxStrokeTransform() {
         // Compare with reference as batik doesn't support transform-box
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStrokeTranslate_ref.svg"),
+                expected(new PathImageSource("transform/transformBoxStrokeTranslate_ref.svg"),
                         RenderType.JSVG),
-                new ImageInfo(new ImageSource.PathImageSource("transform/transformBoxStrokeTranslate.svg"),
+                actual(new PathImageSource("transform/transformBoxStrokeTranslate.svg"),
                         RenderType.JSVG))));
     }
 }

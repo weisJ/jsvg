@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.ReferenceTest.CompareInfo;
-import com.github.weisj.jsvg.ReferenceTest.ImageInfo;
 import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.ReferenceTest.RenderType;
 
@@ -37,7 +38,7 @@ class ElementLoaderTest {
     @Test
     void testLoadingExternalResource() {
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                new ImageInfo(new PathImageSource("externalResource/externalFromClassPath_ref.svg"), RenderType.JSVG),
-                new ImageInfo(new PathImageSource("externalResource/externalFromClassPath.svg"), RenderType.JSVG))));
+                expected(new PathImageSource("externalResource/externalFromClassPath_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("externalResource/externalFromClassPath.svg"), RenderType.JSVG))));
     }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.ImageSource.*;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -142,11 +144,9 @@ class ReSvgTestSuite {
         public void execute() throws Throwable {
             var pngRef = testFile.resolveSibling(testFile.getFileName().toString().replace(".svg", ".png"));
             var result = ReferenceTest.compareImages(new ReferenceTest.CompareInfo(
-                    new ReferenceTest.ImageInfo(
-                            new UrlImageSource(pngRef.toUri().toURL()),
+                    expected(new UrlImageSource(pngRef.toUri().toURL()),
                             RenderType.DiskImage),
-                    new ReferenceTest.ImageInfo(
-                            new UrlImageSource(testFile.toUri().toURL()),
+                    actual(new UrlImageSource(testFile.toUri().toURL()),
                             RenderType.JSVG)));
             assertEquals(SUCCESS, result);
         }

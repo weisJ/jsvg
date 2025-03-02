@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.RenderType.*;
 import static com.github.weisj.jsvg.ReferenceTest.RenderType.Batik;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,6 +63,7 @@ import com.github.romankh3.image.comparison.ImageComparisonUtil;
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
+import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.LoaderContext;
@@ -156,13 +159,49 @@ public final class ReferenceTest {
         }
     }
 
-    public static class ImageInfo {
-        private final @NotNull ImageSource source;
+    public static sealed class ImageInfo permits ImageInfo.Expected, ImageInfo.Actual {
+
+        public static final class Expected extends ImageInfo {
+            public Expected(@NotNull ImageSource source, @NotNull RenderType renderType) {
+                super(source, renderType);
+            }
+
+            public Expected(@NotNull ImageSource source, @NotNull RenderType renderType,
+                    @Nullable Consumer<Graphics2D> graphicsMutator) {
+                super(source, renderType, graphicsMutator);
+            }
+        }
+
+        public static final class Actual extends ImageInfo {
+            public Actual(@NotNull ImageSource source, @NotNull RenderType renderType) {
+                super(source, renderType);
+            }
+
+            public Actual(@NotNull ImageSource source, @NotNull RenderType renderType,
+                    @Nullable Consumer<Graphics2D> graphicsMutator) {
+                super(source, renderType, graphicsMutator);
+            }
+        }
+
+        final @NotNull ImageSource source;
         private final @NotNull RenderType renderType;
         private final @Nullable Consumer<Graphics2D> graphicsMutator;
 
         public ImageInfo(@NotNull ImageSource source, @NotNull RenderType renderType) {
             this(source, renderType, null);
+        }
+
+        public static @NotNull Expected expected(@NotNull ImageSource source, @NotNull RenderType renderType) {
+            return new Expected(source, renderType);
+        }
+
+        public static @NotNull Actual actual(@NotNull ImageSource source, @NotNull RenderType renderType) {
+            return new Actual(source, renderType);
+        }
+
+        public static @NotNull Actual actual(@NotNull ImageSource source, @NotNull RenderType renderType,
+                @Nullable Consumer<Graphics2D> graphicsMutator) {
+            return new Actual(source, renderType, graphicsMutator);
         }
 
         public ImageInfo(@NotNull ImageSource source, @NotNull RenderType renderType,
@@ -195,10 +234,10 @@ public final class ReferenceTest {
         }
     }
 
-    public record CompareInfo(@NotNull ImageInfo expected, @NotNull ImageInfo actual, double tolerance,
+    public record CompareInfo(@NotNull ImageInfo.Expected expected, @NotNull ImageInfo.Actual actual, double tolerance,
             double pixelTolerance) {
 
-        public CompareInfo(@NotNull ImageInfo expected, @NotNull ImageInfo actual) {
+        public CompareInfo(@NotNull ImageInfo.Expected expected, @NotNull ImageInfo.Actual actual) {
             this(expected, actual, DEFAULT_TOLERANCE, DEFAULT_PIXEL_TOLERANCE);
         }
 
@@ -237,8 +276,8 @@ public final class ReferenceTest {
     public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance,
             double pixelTolerance) {
         return compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.PathImageSource(fileName), Batik),
-                new ImageInfo(new ImageSource.PathImageSource(fileName), JSVG),
+                expected(new PathImageSource(fileName), Batik),
+                actual(new PathImageSource(fileName), JSVG),
                 tolerance, pixelTolerance));
     }
 
@@ -261,8 +300,8 @@ public final class ReferenceTest {
     static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent,
             double tolerance) {
         return compareImages(new CompareInfo(
-                new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), Batik),
-                new ImageInfo(new ImageSource.MemoryImageSource(name, svgContent), JSVG),
+                expected(new ImageSource.MemoryImageSource(name, svgContent), Batik),
+                actual(new ImageSource.MemoryImageSource(name, svgContent), JSVG),
                 tolerance, DEFAULT_PIXEL_TOLERANCE));
     }
 
@@ -339,7 +378,7 @@ public final class ReferenceTest {
 
     public static @NotNull BufferedImage renderJsvg(@NotNull String path) {
         try {
-            return renderJsvg(new ImageSource.PathImageSource(path), null, JSVG.loaderContext(), null);
+            return renderJsvg(new PathImageSource(path), null, JSVG.loaderContext(), null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

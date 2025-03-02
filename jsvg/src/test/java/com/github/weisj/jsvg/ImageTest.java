@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
+import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
 import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -29,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.ReferenceTest.CompareInfo;
-import com.github.weisj.jsvg.ReferenceTest.ImageInfo;
 import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult;
 import com.github.weisj.jsvg.ReferenceTest.RenderType;
@@ -49,9 +50,9 @@ class ImageTest {
         // Can't compare with batik as it fails with cross origin requests
         assertEquals(ReferenceTestResult.SUCCESS, compareImages(
                 new CompareInfo(
-                        new ImageInfo(new PathImageSource("image/imageExternal.svg"), new RenderType.JSVGType(
+                        expected(new PathImageSource("image/imageExternal.svg"), new RenderType.JSVGType(
                                 LoaderContext.builder().externalResourcePolicy(ResourcePolicy.DENY_EXTERNAL).build())),
-                        new ImageInfo(new PathImageSource("image/imageExternalNoLoad.svg"), RenderType.JSVG))));
+                        actual(new PathImageSource("image/imageExternalNoLoad.svg"), RenderType.JSVG))));
     }
 
     @Test
