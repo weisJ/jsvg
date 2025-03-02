@@ -86,6 +86,9 @@ class TextTest {
     @Test
     void dominantBaselineTest() {
         assertDoesNotThrow(() -> renderJsvg("text/dominantBaseline.svg"));
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("text/baselineOnPath_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("text/baselineOnPath.svg"), RenderType.JSVG))));
     }
 
     @Test
