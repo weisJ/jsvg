@@ -51,6 +51,14 @@ public final class FontParser {
         return new AttributeFontSpec(fontFamilies, style, sizeAdjust, stretch, size, weight);
     }
 
+    private static @NotNull String stripQuotes(@NotNull String str, char quoteChar) {
+        String quoteStr = String.valueOf(quoteChar);
+        if (str.length() > 2 && str.startsWith(quoteStr) && str.endsWith(quoteStr)) {
+            return str.substring(1, str.length() - 1);
+        }
+        return str;
+    }
+
     private static void canonicalizeFontFamily(@NotNull String[] fontFamilies) {
         for (int i = 0; i < fontFamilies.length; i++) {
             String family = fontFamilies[i].toLowerCase(Locale.US);
@@ -65,6 +73,8 @@ public final class FontParser {
                     family = Font.MONOSPACED;
                     break;
                 default:
+                    family = stripQuotes(family, '\'');
+                    family = stripQuotes(family, '"');
                     break;
             }
             fontFamilies[i] = family;
