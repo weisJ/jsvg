@@ -82,11 +82,16 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
     @Override
     protected @NotNull Paint gradientForBounds(@NotNull MeasureContext measure, @NotNull Rectangle2D bounds,
             Percentage[] gradOffsets, @NotNull Color[] gradColors) {
+        assert gradColors.length > 0;
         Point2D.Float center = new Point2D.Float(cx.resolve(measure), cy.resolve(measure));
         Point2D.Float focusCenter = new Point2D.Float(fx.resolve(measure), fy.resolve(measure));
 
         float radius = r.resolve(measure);
         float focusRadius = fr.resolve(measure);
+
+        if (radius <= 0) {
+            return gradColors[gradColors.length - 1];
+        }
 
         if (focusRadius == 0) {
             // If possible use built-in RadialGradientPaint as it profits from hardware acceleration

@@ -160,7 +160,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         // enough space to shift all offsets to).
         for (int i = offsets.length - 2; i >= 0; i--) {
             if (offsets[i].value() >= offsets[i + 1].value()) {
-                offsets[i - 1] = new Percentage(Math.nextDown(offsets[i + 1].value()));
+                offsets[i] = new Percentage(Math.nextDown(offsets[i + 1].value()));
             }
         }
     }
