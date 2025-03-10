@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -130,7 +130,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         if (!realGradient && !colorsList.isEmpty()) {
             // If all stops are equal, we can just use the first color.
             // This never gets passed to the radial gradient hence we don't need to provide a second stop.
-            colors = new Color[] {colors[0]};
+            colors = new Color[] {colorsList.get(0)};
             offsets = new Percentage[] {Percentage.ZERO};
         } else {
             colors = colorsList.toArray(new Color[0]);
