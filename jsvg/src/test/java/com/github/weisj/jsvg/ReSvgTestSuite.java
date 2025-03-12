@@ -26,6 +26,7 @@ import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.ImageSource.*;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,6 +35,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.function.Executable;
@@ -42,6 +45,7 @@ import com.github.weisj.jsvg.ReferenceTest.RenderType;
 
 class ReSvgTestSuite {
 
+    private static final Logger LOGGER = Logging.getLogger(ReSvgTestSuite.class);
     private static final String RESVG_TEST_SUITE_PATH = System.getenv("RESVG_TEST_SUITE_PATH");
 
     static Collection<DynamicTest> checkDirectory(@NotNull String name) {
@@ -64,6 +68,19 @@ class ReSvgTestSuite {
             Assertions.fail(e);
         }
         return Collections.emptyList();
+    }
+
+    @BeforeAll
+    static void checkForReSVGRepository() {
+        var exists = Path.of(RESVG_TEST_SUITE_PATH).toFile().exists();
+        var message = """
+                The resvg submodule was not found. Skipping ReSVG test suite.
+                Please run `git submodule update --init --recursive` to fetch the submodule.
+                """.stripIndent();
+        if (!exists) {
+            LOGGER.warn(message);
+        }
+        assumeTrue(exists, message);
     }
 
     @TestFactory

@@ -20,6 +20,7 @@ dependencies {
     testImplementation(testLibs.batik)
     testImplementation(testLibs.imageCompare)
     testImplementation(testLibs.sizeof)
+    testImplementation(gradleApi())
 
     testRuntimeOnly(testLibs.junit.engine)
 
