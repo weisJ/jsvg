@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,30 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.awt;
+package com.github.weisj.jsvg.renderer.impl;
 
-import java.awt.image.ImageObserver;
+import java.awt.*;
+import java.awt.PaintContext;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.ColorModel;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-public final class NullPlatformSupport implements PlatformSupport {
-    public static final NullPlatformSupport INSTANCE = new NullPlatformSupport(true);
+public final class TransformedPaint implements Paint {
+    private final @NotNull Paint paint;
+    private final @NotNull AffineTransform transform;
 
-    /**
-     * @deprecated prefer {@link #INSTANCE} field usage
-     */
-    @Deprecated
-    public NullPlatformSupport() {}
-
-    private NullPlatformSupport(boolean noDeprecation) {}
-
-    @Override
-    public @Nullable ImageObserver imageObserver() {
-        return null;
+    public TransformedPaint(@NotNull Paint paint, @NotNull AffineTransform transform) {
+        this.paint = paint;
+        this.transform = transform;
     }
 
     @Override
-    public @Nullable TargetSurface targetSurface() {
-        return null;
+    public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds,
+            AffineTransform xform, RenderingHints hints) {
+        xform.concatenate(transform);
+        return paint.createContext(cm, deviceBounds, userBounds, xform, hints);
+    }
+
+    @Override
+    public int getTransparency() {
+        return paint.getTransparency();
     }
 }

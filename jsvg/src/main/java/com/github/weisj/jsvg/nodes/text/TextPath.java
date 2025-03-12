@@ -48,7 +48,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 import com.github.weisj.jsvg.util.PathUtil;
 
 @ElementCategories({Category.Graphic, Category.TextContent, Category.TextContentChild})

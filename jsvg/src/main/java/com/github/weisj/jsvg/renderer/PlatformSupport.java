@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2023-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,31 +22,35 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
-import java.awt.PaintContext;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.ColorModel;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public final class TransformedPaint implements Paint {
-    private final @NotNull Paint paint;
-    private final @NotNull AffineTransform transform;
+import com.github.weisj.jsvg.attributes.font.SVGFont;
 
-    public TransformedPaint(@NotNull Paint paint, @NotNull AffineTransform transform) {
-        this.paint = paint;
-        this.transform = transform;
+public interface PlatformSupport {
+
+    interface TargetSurface {
+        void repaint();
     }
 
-    @Override
-    public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds,
-            AffineTransform xform, RenderingHints hints) {
-        xform.concatenate(transform);
-        return paint.createContext(cm, deviceBounds, userBounds, xform, hints);
+    @Nullable
+    ImageObserver imageObserver();
+
+    @Nullable
+    TargetSurface targetSurface();
+
+    default float fontSize() {
+        return SVGFont.defaultFontSize();
     }
 
-    @Override
-    public int getTransparency() {
-        return paint.getTransparency();
+    default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
+        return Toolkit.getDefaultToolkit().createImage(imageProducer);
+    }
+
+    default boolean isLongLived() {
+        return false;
     }
 }

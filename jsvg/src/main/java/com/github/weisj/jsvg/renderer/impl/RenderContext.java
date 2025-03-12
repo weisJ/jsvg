@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer;
+package com.github.weisj.jsvg.renderer.impl;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -39,7 +39,8 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.stroke.StrokeResolver;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
-import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
+import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.PlatformSupport;
 
 public final class RenderContext {
 

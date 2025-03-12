@@ -45,9 +45,9 @@ import com.github.weisj.jsvg.ReferenceTest.RenderType;
 import com.github.weisj.jsvg.nodes.text.GlyphRunTextOutput;
 import com.github.weisj.jsvg.nodes.text.TextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;
-import com.github.weisj.jsvg.renderer.NullOutput;
-import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.impl.NullOutput;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
 class TextTest {
 

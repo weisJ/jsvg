@@ -42,7 +42,7 @@ import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
 @SuppressWarnings("java:S119") // Generic name Self is intentional
 abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends ContainerNode implements SVGPaint {

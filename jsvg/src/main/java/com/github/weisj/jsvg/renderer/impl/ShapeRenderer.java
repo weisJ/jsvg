@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer;
+package com.github.weisj.jsvg.renderer.impl;
 
 import java.awt.*;
 import java.awt.geom.*;
@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.Marker;
 import com.github.weisj.jsvg.nodes.ShapeNode;
+import com.github.weisj.jsvg.renderer.Output;
 
 public final class ShapeRenderer {
     private static final boolean DEBUG_MARKERS = false;

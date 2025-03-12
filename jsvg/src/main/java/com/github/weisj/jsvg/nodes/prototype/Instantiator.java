@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,8 +24,8 @@ package com.github.weisj.jsvg.nodes.prototype;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.renderer.ContextElementAttributes;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.ContextElementAttributes;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
 public interface Instantiator {
 

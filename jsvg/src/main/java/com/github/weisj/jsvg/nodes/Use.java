@@ -43,7 +43,10 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.*;
-import com.github.weisj.jsvg.renderer.PaintContext;
+import com.github.weisj.jsvg.renderer.impl.FontRenderContext;
+import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
+import com.github.weisj.jsvg.renderer.impl.PaintContext;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.GraphicsReferencing, Category.Structural})
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})

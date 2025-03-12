@@ -19,38 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes.paint;
+package com.github.weisj.jsvg.renderer.impl;
 
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
+import java.util.Objects;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
 
-import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.google.errorprone.annotations.Immutable;
 
-final class SentinelPaint implements SVGPaint {
-    private final String name;
+@ApiStatus.Experimental
+@Immutable
+public final class AnimationState {
+    public static final AnimationState NO_ANIMATION = new AnimationState(0, 0);
+    private final long startTime;
+    private final long currentTime;
 
-    public SentinelPaint(@NotNull String name) {
-        this.name = name;
+    public AnimationState(long startTime, long currentTime) {
+        this.startTime = startTime;
+        this.currentTime = currentTime;
     }
 
-    @Override
-    public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
-            @Nullable Rectangle2D bounds) {
-        throw new IllegalStateException("Sentinel color " + name + " shouldn't be used for painting directly");
-    }
-
-    @Override
-    public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
-            @Nullable Rectangle2D bounds) {
-        throw new IllegalStateException("Sentinel color " + name + " shouldn't be used for painting directly");
+    public long timestamp() {
+        return currentTime - startTime;
     }
 
     @Override
     public String toString() {
-        return "SVGPaint." + name;
+        return "AnimationState{" +
+                "startTime=" + startTime +
+                ", currentTime=" + currentTime +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AnimationState that = (AnimationState) o;
+        return startTime == that.startTime && currentTime == that.currentTime;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startTime, currentTime);
     }
 }

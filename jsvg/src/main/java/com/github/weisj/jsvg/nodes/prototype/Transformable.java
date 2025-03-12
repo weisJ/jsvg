@@ -33,9 +33,9 @@ import com.github.weisj.jsvg.attributes.transform.TransformBox;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.renderer.ElementBounds;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.ElementBounds;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 import com.github.weisj.jsvg.util.ShapeUtil;
 
 public interface Transformable {

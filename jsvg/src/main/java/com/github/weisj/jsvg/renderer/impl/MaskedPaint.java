@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer;
+package com.github.weisj.jsvg.renderer.impl;
 
 import static com.github.weisj.jsvg.util.ColorUtil.div255;
 
@@ -33,6 +33,7 @@ import java.awt.image.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
 
 public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, GraphicsUtil.DisposablePaint {

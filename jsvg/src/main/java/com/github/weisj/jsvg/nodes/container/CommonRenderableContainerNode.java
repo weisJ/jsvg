@@ -34,9 +34,9 @@ import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.renderer.NodeRenderer;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
 public abstract class CommonRenderableContainerNode extends BaseContainerNode<SVGNode>
         implements Renderable, HasGeometryContext.ByDelegate, HasContext.ByDelegate {

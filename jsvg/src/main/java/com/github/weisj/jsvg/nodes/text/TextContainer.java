@@ -50,6 +50,8 @@ import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.renderer.*;
+import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
 abstract class TextContainer extends BaseContainerNode<TextSegment>
         implements TextSegment.RenderableSegment, HasShape, HasContext.ByDelegate, HasVectorEffects, Renderable {

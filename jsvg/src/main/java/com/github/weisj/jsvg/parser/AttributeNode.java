@@ -54,7 +54,7 @@ import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
-import com.github.weisj.jsvg.renderer.AnimationState;
+import com.github.weisj.jsvg.renderer.impl.AnimationState;
 
 public final class AttributeNode {
 

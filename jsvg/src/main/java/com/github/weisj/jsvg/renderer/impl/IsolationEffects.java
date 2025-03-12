@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,38 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.awt;
+package com.github.weisj.jsvg.renderer.impl;
 
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
-
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.nodes.ClipPath;
+import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 
-public interface PlatformSupport {
+class IsolationEffects {
+    public final @Nullable Filter filter;
+    public final @Nullable Mask mask;
+    public final @Nullable ClipPath clipPath;
 
-    interface TargetSurface {
-        void repaint();
-    }
-
-    @Nullable
-    ImageObserver imageObserver();
-
-    @Nullable
-    TargetSurface targetSurface();
-
-    default float fontSize() {
-        return SVGFont.defaultFontSize();
-    }
-
-    default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
-        return Toolkit.getDefaultToolkit().createImage(imageProducer);
-    }
-
-    default boolean isLongLived() {
-        return false;
+    public IsolationEffects(
+            @Nullable Filter filter,
+            @Nullable Mask mask,
+            @Nullable ClipPath clipPath) {
+        this.filter = filter;
+        this.mask = mask;
+        this.clipPath = clipPath;
     }
 }

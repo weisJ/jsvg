@@ -38,9 +38,10 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.renderer.*;
+import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.PlatformSupport;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
-import com.github.weisj.jsvg.renderer.awt.NullPlatformSupport;
-import com.github.weisj.jsvg.renderer.awt.PlatformSupport;
+import com.github.weisj.jsvg.renderer.impl.*;
 
 public final class SVGDocument {
     private static final boolean DEBUG = false;

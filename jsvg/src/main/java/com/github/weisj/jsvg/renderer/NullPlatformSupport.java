@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2023-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,46 +21,28 @@
  */
 package com.github.weisj.jsvg.renderer;
 
-import java.util.Objects;
+import java.awt.image.ImageObserver;
 
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import com.google.errorprone.annotations.Immutable;
+public final class NullPlatformSupport implements PlatformSupport {
+    public static final NullPlatformSupport INSTANCE = new NullPlatformSupport(true);
 
-@ApiStatus.Experimental
-@Immutable
-public final class AnimationState {
-    public static final AnimationState NO_ANIMATION = new AnimationState(0, 0);
-    private final long startTime;
-    private final long currentTime;
+    /**
+     * @deprecated prefer {@link #INSTANCE} field usage
+     */
+    @Deprecated
+    public NullPlatformSupport() {}
 
-    public AnimationState(long startTime, long currentTime) {
-        this.startTime = startTime;
-        this.currentTime = currentTime;
-    }
+    private NullPlatformSupport(boolean noDeprecation) {}
 
-    public long timestamp() {
-        return currentTime - startTime;
+    @Override
+    public @Nullable ImageObserver imageObserver() {
+        return null;
     }
 
     @Override
-    public String toString() {
-        return "AnimationState{" +
-                "startTime=" + startTime +
-                ", currentTime=" + currentTime +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AnimationState that = (AnimationState) o;
-        return startTime == that.startTime && currentTime == that.currentTime;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(startTime, currentTime);
+    public @Nullable TargetSurface targetSurface() {
+        return null;
     }
 }

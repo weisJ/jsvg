@@ -36,6 +36,10 @@ import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
 import com.github.weisj.jsvg.renderer.*;
+import com.github.weisj.jsvg.renderer.impl.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.impl.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
 /**
  * Class that encapsulates rendering to an offscreen image.

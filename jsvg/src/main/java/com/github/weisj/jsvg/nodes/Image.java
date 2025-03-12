@@ -46,7 +46,7 @@ import com.github.weisj.jsvg.parser.ValueUIFuture;
 import com.github.weisj.jsvg.parser.resources.MissingImageResource;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
 @ElementCategories({Category.Graphic, Category.GraphicsReferencing})
 @PermittedContent(

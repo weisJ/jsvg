@@ -38,6 +38,9 @@ import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.*;
+import com.github.weisj.jsvg.renderer.impl.FontRenderContext;
+import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.ShapeRenderer;
 import com.github.weisj.jsvg.util.ShapeUtil;
 
 final class GlyphRenderer {
