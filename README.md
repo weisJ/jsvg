@@ -175,7 +175,7 @@ For supported elements most of the attributes which apply to them are implemente
 - :warning:: The element is deprecated in the spec and has a low priority of getting implemented.
 - :test_tube:: The element is an experimental part of the svg 2.* spec. It may not fully behave as expected.
 
-## Shape and container elements
+### Shape and container elements
 
 | Element       | Status              |
 |---------------|---------------------|
@@ -199,7 +199,7 @@ For supported elements most of the attributes which apply to them are implemente
 | use           | :white_check_mark:  |
 | view          | :white_check_mark:* |
 
-## Paint server elements
+### Paint server elements
 
 | Element                 | Status             |
 |-------------------------|--------------------|
@@ -212,7 +212,7 @@ For supported elements most of the attributes which apply to them are implemente
 | solidColor              | :white_check_mark: |
 | stop                    | :white_check_mark: |
 
-## Text elements
+### Text elements
 
 | Element       | Status             |
 |---------------|--------------------|
@@ -221,7 +221,7 @@ For supported elements most of the attributes which apply to them are implemente
 | :warning:tref | :x:                |
 | tspan         | :white_check_mark: |
 
-## Animation elements
+### Animation elements
 
 | Element               | Status                  |
 |-----------------------|-------------------------|
@@ -233,7 +233,7 @@ For supported elements most of the attributes which apply to them are implemente
 | set                   | :x:                     |
 | switch                | :x:                     |
 
-## Filter elements
+### Filter elements
 
 | Element             | Status                  |
 |---------------------|-------------------------|
@@ -283,7 +283,7 @@ For supported elements most of the attributes which apply to them are implemente
 | :warning:missing-glyph    | :x:    |
 | :warning:vkern            | :x:    |
 
-## Other elements
+### Other elements
 
 | Element         | Status                  |
 |-----------------|-------------------------|
