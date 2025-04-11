@@ -16,10 +16,10 @@
 </p>
 
 JSVG is an SVG user agent using AWT graphics. Its aim is to provide a small and fast implementation.
-This library is under active development and doesn't yet support all features of the SVG specification 
+This library is under active development and doesn't yet support all features of the SVG specification
 (see [Supported features](#supported-features)). However it does already cover most use cases and already supports more
 features than [svgSalamander](https://github.com/blackears/svgSalamander).
-This implementation only tries to be a static user agent meaning it won't support any scripting languages or interaction. 
+This implementation only tries to be a static user agent meaning it won't support any scripting languages or interaction.
 Partial animations exists and will be extended in future versions.
 
 This library aims to be as lightweight as possible. Generally JSVG uses ~50% less memory than svgSalamander and
