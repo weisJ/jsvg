@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
-import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 public final class PaintContext implements Mutator<PaintContext> {
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,10 +26,14 @@ import java.net.URI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.parser.css.CssParser;
+import com.github.weisj.jsvg.parser.impl.DefaultParserProvider;
 
 public interface ParserProvider {
+    static @NotNull ParserProvider createDefault() {
+        return new DefaultParserProvider();
+    }
+
     @NotNull
     PaintParser createPaintParser();
 

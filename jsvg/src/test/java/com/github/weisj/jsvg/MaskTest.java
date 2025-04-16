@@ -26,8 +26,8 @@ import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
 import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
-import static com.github.weisj.jsvg.SVGRenderingHints.KEY_MASK_CLIP_RENDERING;
-import static com.github.weisj.jsvg.SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY;
+import static com.github.weisj.jsvg.renderer.SVGRenderingHints.KEY_MASK_CLIP_RENDERING;
+import static com.github.weisj.jsvg.renderer.SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

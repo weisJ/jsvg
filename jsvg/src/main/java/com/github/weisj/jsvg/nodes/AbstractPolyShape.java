@@ -33,7 +33,7 @@ import com.github.weisj.jsvg.attributes.value.ConstantFloatList;
 import com.github.weisj.jsvg.attributes.value.ConstantValue;
 import com.github.weisj.jsvg.attributes.value.FloatListValue;
 import com.github.weisj.jsvg.geometry.*;
-import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.util.PathUtil;
 
 public abstract class AbstractPolyShape extends ShapeNode {

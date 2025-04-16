@@ -27,6 +27,7 @@ import java.net.URI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.parser.impl.ParsedDocument;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 
 @FunctionalInterface

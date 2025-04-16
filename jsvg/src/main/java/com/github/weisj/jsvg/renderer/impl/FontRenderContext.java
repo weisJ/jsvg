@@ -32,7 +32,7 @@ import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
-import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 public final class FontRenderContext {
     // Note: An unspecified value is different from 0.

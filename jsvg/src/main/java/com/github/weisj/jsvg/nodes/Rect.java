@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.util.AttributeUtil;
 
 @ElementCategories({Category.BasicShape, Category.Graphic, Category.Shape})

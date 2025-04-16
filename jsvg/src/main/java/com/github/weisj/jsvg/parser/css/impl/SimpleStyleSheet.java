@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,10 +28,10 @@ import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.parser.ParsedElement;
-import com.github.weisj.jsvg.parser.SeparatorMode;
 import com.github.weisj.jsvg.parser.css.StyleProperty;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
+import com.github.weisj.jsvg.parser.impl.ParsedElement;
+import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 public final class SimpleStyleSheet implements StyleSheet {
 

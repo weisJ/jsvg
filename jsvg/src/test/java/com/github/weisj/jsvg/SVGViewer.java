@@ -33,6 +33,7 @@ import java.util.Objects;
 
 import javax.swing.*;
 
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import org.apache.batik.swing.JSVGCanvas;
 import org.ehcache.sizeof.SizeOf;
 import org.jetbrains.annotations.NotNull;

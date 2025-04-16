@@ -30,8 +30,8 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.animation.interpolation.*;
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.time.Interval;
-import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.parser.SeparatorMode;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 public final class Track {
     private final @NotNull List<@NotNull Interval> intervals;

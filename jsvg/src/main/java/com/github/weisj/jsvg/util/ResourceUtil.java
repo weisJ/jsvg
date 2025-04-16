@@ -41,10 +41,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.parser.*;
-import com.github.weisj.jsvg.parser.resources.ImageResource;
+import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.parser.impl.ParsedDocument;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
-import com.github.weisj.jsvg.parser.resources.SVGResource;
+import com.github.weisj.jsvg.parser.resources.impl.ImageResource;
+import com.github.weisj.jsvg.parser.resources.impl.SVGResource;
 
 public final class ResourceUtil {
 

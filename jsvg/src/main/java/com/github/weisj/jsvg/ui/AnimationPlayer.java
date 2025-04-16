@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.AnimationPeriod;
-import com.github.weisj.jsvg.renderer.impl.AnimationState;
+import com.github.weisj.jsvg.renderer.AnimationState;
 
 @ApiStatus.Experimental
 public class AnimationPlayer {

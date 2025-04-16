@@ -37,7 +37,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.time.TimeUnit;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
@@ -46,8 +45,9 @@ import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
-import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.parser.SeparatorMode;
+import com.github.weisj.jsvg.parser.PaintParser;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 import com.github.weisj.jsvg.util.ParserBase;
 
 public final class AttributeParser {

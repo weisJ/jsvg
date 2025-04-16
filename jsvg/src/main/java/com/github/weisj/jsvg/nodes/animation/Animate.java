@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.*;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
 import com.github.weisj.jsvg.attributes.paint.RGBColor;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
@@ -37,7 +36,8 @@ import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.parser.AttributeNode;
+import com.github.weisj.jsvg.parser.PaintParser;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 @ElementCategories(Category.Animation)
 @PermittedContent(categories = {Category.Descriptive})

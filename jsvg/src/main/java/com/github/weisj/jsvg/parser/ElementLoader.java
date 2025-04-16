@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,5 +29,5 @@ import com.github.weisj.jsvg.attributes.AttributeParser;
 public interface ElementLoader {
 
     <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
-            @NotNull ParsedDocument document, @NotNull AttributeParser attributeParser);
+            @NotNull RawDocument document, @NotNull AttributeParser attributeParser);
 }

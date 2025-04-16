@@ -40,11 +40,11 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.parser.AttributeNode;
 import com.github.weisj.jsvg.parser.UIFuture;
-import com.github.weisj.jsvg.parser.ValueUIFuture;
-import com.github.weisj.jsvg.parser.resources.MissingImageResource;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.ValueUIFuture;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
+import com.github.weisj.jsvg.parser.resources.impl.MissingImageResource;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.impl.RenderContext;
 

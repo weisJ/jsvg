@@ -26,12 +26,13 @@ import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ReferenceTest.RenderType;
 import static com.github.weisj.jsvg.ReferenceTest.compareImages;
-import static com.github.weisj.jsvg.SVGRenderingHints.KEY_MASK_CLIP_RENDERING;
-import static com.github.weisj.jsvg.SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY;
+import static com.github.weisj.jsvg.renderer.SVGRenderingHints.KEY_MASK_CLIP_RENDERING;
+import static com.github.weisj.jsvg.renderer.SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.function.Consumer;
 
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.ReferenceTest.CompareInfo;

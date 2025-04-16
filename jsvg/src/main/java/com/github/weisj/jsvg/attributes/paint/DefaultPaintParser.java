@@ -33,8 +33,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.AttributeParser;
-import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.parser.SeparatorMode;
+import com.github.weisj.jsvg.parser.PaintParser;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 public final class DefaultPaintParser implements PaintParser {
     private static final Logger LOGGER = Logger.getLogger(DefaultPaintParser.class.getName());

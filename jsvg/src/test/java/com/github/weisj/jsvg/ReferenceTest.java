@@ -46,6 +46,7 @@ import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
 
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;

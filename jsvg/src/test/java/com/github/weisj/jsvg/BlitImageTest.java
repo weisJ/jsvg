@@ -42,7 +42,7 @@ import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.AnimationState;
+import com.github.weisj.jsvg.renderer.AnimationState;
 import com.github.weisj.jsvg.renderer.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.impl.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;

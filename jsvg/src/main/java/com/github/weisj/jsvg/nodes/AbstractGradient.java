@@ -33,14 +33,14 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.SpreadMethod;
 import com.github.weisj.jsvg.attributes.UnitType;
-import com.github.weisj.jsvg.attributes.paint.PaintParser;
 import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
-import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.parser.AttributeNode.ElementRelation;
+import com.github.weisj.jsvg.parser.PaintParser;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.impl.RenderContext;
 

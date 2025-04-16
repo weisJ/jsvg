@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,13 +27,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.impl.*;
 
 /**
  * Class for loading svg files as an {@link SVGDocument}.
@@ -108,8 +108,8 @@ public final class SVGLoader {
     public @Nullable SVGDocument load(@NotNull InputStream inputStream, @Nullable URI xmlBase,
             @NotNull LoaderContext loaderContext) {
         try {
-            return loader.load(createDocumentInputStream(inputStream), xmlBase, loaderContext);
-        } catch (Throwable e) {
+            return loader.load(StreamUtil.createDocumentInputStream(inputStream), xmlBase, loaderContext);
+        } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Could not load SVG ", e);
         }
         return null;
@@ -118,26 +118,5 @@ public final class SVGLoader {
     @ApiStatus.Internal
     StaxSVGLoader loader() {
         return loader;
-    }
-
-    static @Nullable InputStream createDocumentInputStream(@NotNull InputStream is) {
-        try {
-            BufferedInputStream bin = new BufferedInputStream(is);
-            bin.mark(2);
-            int b0 = bin.read();
-            int b1 = bin.read();
-            bin.reset();
-
-            // Check for gzip magic number
-            if ((b1 << 8 | b0) == GZIPInputStream.GZIP_MAGIC) {
-                return new GZIPInputStream(bin);
-            } else {
-                // Plain text
-                return bin;
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-        }
-        return null;
     }
 }

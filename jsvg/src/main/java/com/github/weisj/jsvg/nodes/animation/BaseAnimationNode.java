@@ -28,8 +28,8 @@ import com.github.weisj.jsvg.animation.Additive;
 import com.github.weisj.jsvg.animation.AnimationValuesType;
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.nodes.AbstractSVGNode;
-import com.github.weisj.jsvg.parser.AttributeNode;
-import com.github.weisj.jsvg.parser.SeparatorMode;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 public abstract class BaseAnimationNode extends AbstractSVGNode {
 
