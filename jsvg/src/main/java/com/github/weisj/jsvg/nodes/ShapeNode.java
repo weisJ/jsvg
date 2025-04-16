@@ -35,7 +35,7 @@ import com.github.weisj.jsvg.attributes.font.FontSize;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
-import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
@@ -55,7 +55,7 @@ public abstract class ShapeNode extends RenderableSVGNode
     private Length fontSizeAdjust;
 
     private Length pathLength;
-    private MeasurableShape shape;
+    private SVGShape shape;
 
     private Marker markerStart;
     private Marker markerMid;
@@ -73,7 +73,7 @@ public abstract class ShapeNode extends RenderableSVGNode
         return s -> s.withFontSize(fontSize, fontSizeAdjust);
     }
 
-    public @NotNull MeasurableShape shape() {
+    public @NotNull SVGShape shape() {
         return shape;
     }
 
@@ -113,7 +113,7 @@ public abstract class ShapeNode extends RenderableSVGNode
         vectorEffects = VectorEffect.parse(attributeNode);
     }
 
-    protected abstract @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode);
+    protected abstract @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode);
 
     @Override
     public @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {

@@ -27,7 +27,7 @@ import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
-import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.SVGRectangle;
 import com.github.weisj.jsvg.geometry.SVGRoundRectangle;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -48,7 +48,7 @@ public final class Rect extends ShapeNode {
     }
 
     @Override
-    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode node) {
+    protected @NotNull SVGShape buildShape(@NotNull AttributeNode node) {
         LengthValue x = node.getLength("x", PercentageDimension.WIDTH, Length.ZERO,
                 Inherited.NO, Animatable.YES);
         LengthValue y = node.getLength("y", PercentageDimension.HEIGHT, Length.ZERO,

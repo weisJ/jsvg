@@ -31,7 +31,7 @@ import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
-public final class SVGEllipse implements MeasurableShape {
+public final class SVGEllipse implements SVGShape {
 
     private final @NotNull Ellipse2D.Float ellipse = new Ellipse2D.Float();
     private final @NotNull LengthValue cx;

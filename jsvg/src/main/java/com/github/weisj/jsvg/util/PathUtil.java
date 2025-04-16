@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.value.ConstantValue;
 import com.github.weisj.jsvg.geometry.FillRuleAwareAWTSVGShape;
-import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.path.BuildHistory;
 import com.github.weisj.jsvg.geometry.path.PathCommand;
 import com.github.weisj.jsvg.geometry.path.PathParser;
@@ -53,7 +53,7 @@ public final class PathUtil {
 
     private PathUtil() {}
 
-    public static @NotNull MeasurableShape parseFromPathData(@NotNull String data, FillRule fillRule) {
+    public static @NotNull SVGShape parseFromPathData(@NotNull String data, FillRule fillRule) {
         PathCommand[] pathCommands = new PathParser(data).parsePathCommand();
 
         int nodeCount = 2;

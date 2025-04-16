@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
-import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.SVGLine;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -42,7 +42,7 @@ public final class Line extends ShapeNode {
     }
 
     @Override
-    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
+    protected @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode) {
         return new SVGLine(
                 attributeNode.getLength("x1", PercentageDimension.WIDTH, 0),
                 attributeNode.getLength("y1", PercentageDimension.HEIGHT, 0),

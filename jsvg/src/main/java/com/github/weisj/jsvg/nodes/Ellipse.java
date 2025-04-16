@@ -27,7 +27,7 @@ import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
-import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.SVGEllipse;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -47,7 +47,7 @@ public final class Ellipse extends ShapeNode {
     }
 
     @Override
-    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode node) {
+    protected @NotNull SVGShape buildShape(@NotNull AttributeNode node) {
         AttributeUtil.AxisPair radius = AttributeUtil.parseAxisPair(node, "rx", "ry",
                 Length.ZERO, Inherited.NO,
                 v -> {

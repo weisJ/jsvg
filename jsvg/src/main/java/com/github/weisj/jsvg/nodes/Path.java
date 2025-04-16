@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
-import com.github.weisj.jsvg.geometry.MeasurableShape;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -45,7 +45,7 @@ public final class Path extends ShapeNode {
     }
 
     @Override
-    protected @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
+    protected @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode) {
         String pathValue = attributeNode.getValue("d");
         if (pathValue == null) return new AWTSVGShape<>(new Rectangle());
         return PathUtil.parseFromPathData(pathValue, FillRule.Nonzero);

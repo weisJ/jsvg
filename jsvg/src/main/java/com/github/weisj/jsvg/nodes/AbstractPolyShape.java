@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.util.PathUtil;
 public abstract class AbstractPolyShape extends ShapeNode {
 
     @Override
-    protected final @NotNull MeasurableShape buildShape(@NotNull AttributeNode attributeNode) {
+    protected final @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode) {
         FloatListValue points = attributeNode.getFloatList("points", Inherited.NO, Animatable.YES);
         if (points instanceof AnimatedFloatList) {
             return new FillRuleAwareAWTSVGShape(new AnimatedPath((AnimatedFloatList) points, doClose()));

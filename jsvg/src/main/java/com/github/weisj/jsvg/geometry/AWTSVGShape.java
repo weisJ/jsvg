@@ -31,7 +31,7 @@ import com.github.weisj.jsvg.attributes.value.Value;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
-public class AWTSVGShape<T extends Shape> implements MeasurableShape {
+public class AWTSVGShape<T extends Shape> implements SVGShape {
     public static final Rectangle2D EMPTY_SHAPE = new Rectangle();
     protected final @NotNull Value<@NotNull T> shapeValue;
     private Rectangle2D boundsCache;

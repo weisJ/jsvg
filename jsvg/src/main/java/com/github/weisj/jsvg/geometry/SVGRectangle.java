@@ -30,7 +30,7 @@ import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.impl.RenderContext;
 
-public final class SVGRectangle implements MeasurableShape {
+public final class SVGRectangle implements SVGShape {
 
     private final @NotNull Rectangle2D.Float rect = new Rectangle2D.Float();
     private final @NotNull LengthValue x;
