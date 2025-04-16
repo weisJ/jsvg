@@ -152,7 +152,7 @@ public final class AttributeNode {
 
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
         if (value == null) return null;
-        return loadHelper.elementLoader().loadElement(type, value, document(), loadHelper.attributeParser());
+        return loadHelper.elementLoader().loadElement(type, value, document());
     }
 
     private <T> T recordIndirectChild(T child, String value, ElementRelation relation) {
@@ -206,7 +206,7 @@ public final class AttributeNode {
     public @Nullable Color getColor(@NotNull String key, @Nullable Color fallback) {
         String value = getValue(key);
         if (value == null) return fallback;
-        Color c = loadHelper.attributeParser().paintParser().parseColor(value.toLowerCase(Locale.ENGLISH), this);
+        Color c = loadHelper.attributeParser().paintParser().parseColor(value.toLowerCase(Locale.ENGLISH));
         return c != null ? c : fallback;
     }
 

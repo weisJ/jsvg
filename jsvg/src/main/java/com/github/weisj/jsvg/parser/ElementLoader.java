@@ -24,10 +24,8 @@ package com.github.weisj.jsvg.parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
 
 public interface ElementLoader {
 
-    <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
-            @NotNull RawDocument document, @NotNull AttributeParser attributeParser);
+    <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value, @NotNull RawDocument document);
 }

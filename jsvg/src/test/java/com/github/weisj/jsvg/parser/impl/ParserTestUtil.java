@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.nodes.Rect;
 import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.LoaderContext;

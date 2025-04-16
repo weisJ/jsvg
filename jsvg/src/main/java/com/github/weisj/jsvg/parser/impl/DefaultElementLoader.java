@@ -25,7 +25,6 @@ package com.github.weisj.jsvg.parser.impl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.parser.ElementLoader;
 import com.github.weisj.jsvg.parser.RawDocument;
 
@@ -49,9 +48,8 @@ class DefaultElementLoader implements ElementLoader {
     }
 
     @Override
-    public <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value,
-            @NotNull RawDocument document, @NotNull AttributeParser attributeParser) {
-        String url = attributeParser.parseUrl(value);
+    public <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value, @NotNull RawDocument document) {
+        String url = ParserUtil.parseUrl(value);
         if (url == null) return null;
         if (url.contains("#")) {
             String[] parts = url.split("#", 2);

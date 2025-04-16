@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.attributes;
+package com.github.weisj.jsvg.parser.impl;
 
 import static com.github.weisj.jsvg.util.AttributeUtil.toNonnullArray;
 
@@ -37,6 +37,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.time.TimeUnit;
+import com.github.weisj.jsvg.attributes.HasMatchName;
+import com.github.weisj.jsvg.attributes.SuffixUnit;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Angle;
@@ -46,9 +48,7 @@ import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
-import com.github.weisj.jsvg.parser.impl.AttributeNode;
-import com.github.weisj.jsvg.parser.impl.SeparatorMode;
-import com.github.weisj.jsvg.util.ParserBase;
+
 
 public final class AttributeParser {
 
@@ -158,33 +158,19 @@ public final class AttributeParser {
     }
 
     public int parseInt(@Nullable String value, int fallback) {
-        if (value == null) return fallback;
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return fallback;
-        }
+        return ParserUtil.parseInt(value, fallback);
     }
 
 
     @Contract("_,!null -> !null")
     public @Nullable Length parseNumber(@Nullable String value, @Nullable Length fallback) {
-        if (value == null) return fallback;
-        try {
-            return Unit.RAW.valueOf(Float.parseFloat(value));
-        } catch (NumberFormatException e) {
-            return fallback;
-        }
+        return ParserUtil.parseNumber(value, fallback);
     }
 
     public float parseFloat(@Nullable String value, float fallback) {
-        if (value == null) return fallback;
-        try {
-            return Float.parseFloat(value);
-        } catch (NumberFormatException e) {
-            return fallback;
-        }
+        return ParserUtil.parseFloat(value, fallback);
     }
+
 
     public @NotNull Angle parseAngle(@Nullable String value, @NotNull Angle fallback) {
         if (value == null) return fallback;
@@ -220,60 +206,25 @@ public final class AttributeParser {
     }
 
     public float @NotNull [] parseFloatList(@Nullable String value) {
-        String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
-        float[] ret = new float[values.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = parseFloat(values[i], 0);
-        }
-        return ret;
+        return ParserUtil.parseFloatList(value);
     }
 
     public double @NotNull [] parseDoubleList(@Nullable String value) {
-        if (value == null || value.isEmpty()) return new double[0];
-        List<Double> list = new ArrayList<>();
-        ParserBase base = new ParserBase(value, 0);
-        while (base.hasNext()) {
-            list.add(base.nextDouble());
-            base.consumeWhiteSpaceOrSeparator();
-        }
-        return list.stream().mapToDouble(Double::doubleValue).toArray();
+        return ParserUtil.parseDoubleList(value);
     }
 
     public @NotNull String @NotNull [] parseStringList(@Nullable String value, SeparatorMode separatorMode) {
-        return parseStringList(value, separatorMode, new String[0]);
+        return ParserUtil.parseStringList(value, separatorMode);
     }
 
     @Contract("_,_,!null -> !null")
     public @NotNull String @Nullable [] parseStringList(@Nullable String value, SeparatorMode separatorMode,
             @NotNull String @Nullable [] fallback) {
-        if (value == null || value.isEmpty()) return fallback;
-        List<String> list = new ArrayList<>();
-        int max = value.length();
-        int start = 0;
-        int i = 0;
-        boolean inWhiteSpace = false;
-        for (; i < max; i++) {
-            char c = value.charAt(i);
-            if (Character.isWhitespace(c)) {
-                if (!inWhiteSpace && separatorMode.allowWhitespace() && i - start > 0) {
-                    list.add(value.substring(start, i));
-                    start = i + 1;
-                }
-                inWhiteSpace = true;
-                continue;
-            }
-            inWhiteSpace = false;
-            if (separatorMode.separator() != 0 && c == separatorMode.separator()) {
-                list.add(value.substring(start, i));
-                start = i + 1;
-            }
-        }
-        if (i - start > 0) list.add(value.substring(start, i));
-        return list.toArray(new String[0]);
+        return ParserUtil.parseStringList(value, separatorMode, fallback);
     }
 
     public @Nullable SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode attributeNode) {
-        return paintParser.parsePaint(value, attributeNode);
+        return paintParser.parsePaint(value);
     }
 
     public <E extends Enum<E>> @NotNull E parseEnum(@Nullable String value, @NotNull E fallback) {
@@ -293,16 +244,8 @@ public final class AttributeParser {
         return null;
     }
 
-    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
-
-    private @NotNull String removeWhiteSpace(@NotNull String value) {
-        return WHITESPACE_PATTERN.matcher(value).replaceAll("");
-    }
-
     public @Nullable String parseUrl(@Nullable String value) {
-        if (value == null) return null;
-        if (!value.startsWith("url(") || !value.endsWith(")")) return removeWhiteSpace(value);
-        return removeWhiteSpace(value.substring(4, value.length() - 1));
+        return ParserUtil.parseUrl(value);
     }
 
     private static final Pattern TRANSFORM_PATTERN = Pattern.compile("\\w+\\([^)]*\\)");

@@ -121,7 +121,7 @@ public final class Animate extends BaseAnimationNode {
             if (isPlaceholder(values[i])) {
                 paints[i] = new RGBColor(PaintParser.DEFAULT_COLOR);
             } else {
-                Color c = attributeNode.parser().paintParser().parseColor(this.values[i], attributeNode);
+                Color c = attributeNode.parser().paintParser().parseColor(this.values[i]);
                 if (c == null) return null;
                 paints[i] = new RGBColor(c);
             }

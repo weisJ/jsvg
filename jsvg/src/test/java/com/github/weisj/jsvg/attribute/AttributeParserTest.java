@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
+import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 import com.github.weisj.jsvg.util.RandomData;
 

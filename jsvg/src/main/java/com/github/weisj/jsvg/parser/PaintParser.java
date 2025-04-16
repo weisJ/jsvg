@@ -27,14 +27,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.paint.SVGPaint;
-import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 public interface PaintParser {
     Color DEFAULT_COLOR = Color.BLACK;
 
     @Nullable
-    Color parseColor(@NotNull String value, @NotNull AttributeNode attributeNode);
+    Color parseColor(@NotNull String value);
 
     @Nullable
-    SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode attributeNode);
+    SVGPaint parsePaint(@Nullable String value);
 }

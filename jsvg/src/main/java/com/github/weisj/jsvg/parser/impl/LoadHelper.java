@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.parser.impl;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.parser.ElementLoader;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.ResourceLoader;

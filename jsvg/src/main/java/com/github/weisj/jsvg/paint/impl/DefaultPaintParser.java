@@ -32,18 +32,18 @@ import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.AttributeParser;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
-import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.ParserUtil;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
+
 
 public final class DefaultPaintParser implements PaintParser {
     private static final Logger LOGGER = Logger.getLogger(DefaultPaintParser.class.getName());
 
     // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
     @Override
-    public @Nullable Color parseColor(@NotNull String value, @NotNull AttributeNode node) {
+    public @Nullable Color parseColor(@NotNull String value) {
         if (value.isEmpty()) return null;
         try {
             if (value.charAt(0) == '#') {
@@ -84,15 +84,14 @@ public final class DefaultPaintParser implements PaintParser {
             } else if (value.length() > 3 && value.substring(0, 3).equalsIgnoreCase("rgb")) {
                 boolean isRgba = value.length() > 4 && (value.charAt(3) == 'a' || value.charAt(3) == 'A');
                 int startIndex = isRgba ? 5 : 4;
-                String[] values = node.parser().parseStringList(
+                String[] values = ParserUtil.parseStringList(
                         value.substring(startIndex, value.length() - 1), SeparatorMode.COMMA_AND_WHITESPACE);
                 isRgba = isRgba && values.length >= 4;
-                AttributeParser parser = node.parser();
                 return new Color(
-                        parseColorComponent(values[0], false, parser),
-                        parseColorComponent(values[1], false, parser),
-                        parseColorComponent(values[2], false, parser),
-                        isRgba ? parseColorComponent(values[3], true, parser) : 255);
+                        parseColorComponent(values[0], false),
+                        parseColorComponent(values[1], false),
+                        parseColorComponent(values[2], false),
+                        isRgba ? parseColorComponent(values[3], true) : 255);
             }
             return ColorLookup.colorMap().get(value.toLowerCase(Locale.ENGLISH));
         } catch (Exception e) {
@@ -102,26 +101,26 @@ public final class DefaultPaintParser implements PaintParser {
     }
 
     @Override
-    public @Nullable SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode node) {
+    public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
         String lower = value.toLowerCase(Locale.ENGLISH);
         if ("none".equals(lower) || "transparent".equals(lower)) return PredefinedPaints.NONE;
         if ("currentcolor".equals(lower)) return PredefinedPaints.CURRENT_COLOR;
         if ("context-fill".equals(lower)) return PredefinedPaints.CONTEXT_FILL;
         if ("context-stroke".equals(lower)) return PredefinedPaints.CONTEXT_STROKE;
-        Color color = parseColor(lower, node);
+        Color color = parseColor(lower);
         if (color == null) return null;
         return new AwtSVGPaint(color);
     }
 
-    private int parseColorComponent(String value, boolean percentage, @NotNull AttributeParser parser) {
+    private int parseColorComponent(String value, boolean percentage) {
         float parsed;
         if (value.endsWith("%")) {
-            parsed = parser.parseFloat(value.substring(0, value.length() - 1), 0);
+            parsed = ParserUtil.parseFloat(value.substring(0, value.length() - 1), 0);
             parsed /= 100;
             parsed *= 255;
         } else {
-            parsed = parser.parseFloat(value, 0);
+            parsed = ParserUtil.parseFloat(value, 0);
             if (percentage) parsed *= 255;
         }
         return Math.min(255, Math.max(0, (int) parsed));
