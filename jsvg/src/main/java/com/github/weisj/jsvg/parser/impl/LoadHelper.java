@@ -33,14 +33,6 @@ public final class LoadHelper {
     private final @NotNull AttributeParser attributeParser;
     private final @NotNull LoaderContext loaderContext;
 
-    /**
-     * @deprecated use {@link #LoadHelper(AttributeParser, LoaderContext)} instead
-     */
-    @Deprecated
-    public LoadHelper(@NotNull AttributeParser attributeParser, @NotNull ResourceLoader resourceLoader) {
-        this(attributeParser, LoaderContext.builder().resourceLoader(resourceLoader).build());
-    }
-
     public LoadHelper(@NotNull AttributeParser attributeParser, @NotNull LoaderContext loaderContext) {
         this.attributeParser = attributeParser;
         this.loaderContext = loaderContext;

@@ -26,15 +26,10 @@ import java.awt.image.ImageObserver;
 import org.jetbrains.annotations.Nullable;
 
 public final class NullPlatformSupport implements PlatformSupport {
-    public static final NullPlatformSupport INSTANCE = new NullPlatformSupport(true);
+    public static final NullPlatformSupport INSTANCE = new NullPlatformSupport();
 
-    /**
-     * @deprecated prefer {@link #INSTANCE} field usage
-     */
-    @Deprecated
-    public NullPlatformSupport() {}
+    private NullPlatformSupport() {}
 
-    private NullPlatformSupport(boolean noDeprecation) {}
 
     @Override
     public @Nullable ImageObserver imageObserver() {

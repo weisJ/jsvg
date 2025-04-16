@@ -46,8 +46,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
-import com.github.weisj.jsvg.parser.ParserProvider;
-import com.github.weisj.jsvg.parser.ResourceLoader;
 
 public final class StaxSVGLoader {
     private static final Logger LOGGER = Logger.getLogger(StaxSVGLoader.class.getName());
@@ -87,20 +85,6 @@ public final class StaxSVGLoader {
             LOGGER.log(Level.SEVERE, "Error while creating XMLEventReader.", e);
             return null;
         }
-    }
-
-    /**
-     * @deprecated use {@link #load(InputStream, URI, LoaderContext)} instead
-     */
-    @Deprecated
-    public @Nullable SVGDocument load(
-            @Nullable InputStream inputStream,
-            @NotNull ParserProvider parserProvider,
-            @NotNull ResourceLoader resourceLoader) throws IOException, XMLStreamException {
-        return load(inputStream, null, LoaderContext.builder()
-                .parserProvider(parserProvider)
-                .resourceLoader(resourceLoader)
-                .build());
     }
 
     @ApiStatus.Internal

@@ -35,7 +35,6 @@ import com.github.weisj.jsvg.nodes.container.CommonRenderableContainerNode;
 import com.github.weisj.jsvg.parser.DomProcessor;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.ParserProvider;
-import com.github.weisj.jsvg.parser.ResourceLoader;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
 
@@ -51,21 +50,6 @@ public final class SVGDocumentBuilder {
     private final @NotNull NodeSupplier nodeSupplier;
 
     private ParsedElement rootNode;
-
-    /**
-     * @deprecated use {@link #SVGDocumentBuilder(URI, LoaderContext, NodeSupplier)} instead
-     */
-    @Deprecated
-    public SVGDocumentBuilder(
-            @NotNull ParserProvider parserProvider,
-            @NotNull ResourceLoader resourceLoader,
-            @NotNull NodeSupplier nodeSupplier) {
-        this(null, LoaderContext.builder()
-                .parserProvider(parserProvider)
-                .resourceLoader(resourceLoader)
-                .build(),
-                nodeSupplier);
-    }
 
     public SVGDocumentBuilder(
             @Nullable URI rootURI,

@@ -319,15 +319,6 @@ public final class AttributeNode {
         }
     }
 
-    /**
-     * @deprecated Use {{@link #getPercentage(String, Percentage)} instead.
-     */
-    @Deprecated
-    public float getPercentage(@NotNull String key, float fallback) {
-        return loadHelper.attributeParser()
-                .parsePercentage(getValue(key), new Percentage(fallback)).value();
-    }
-
     @Contract("_,!null -> !null")
     public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
         return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);

@@ -61,40 +61,9 @@ public final class SVGLoader {
             URI uri = xmlBase.toURI();
             return load(xmlBase.openStream(), uri, loaderContext);
         } catch (URISyntaxException | IOException e) {
-            LOGGER.log(Level.WARNING, "Could not read " + xmlBase, e);
+            LOGGER.log(Level.WARNING, String.format("Could not read %s", xmlBase), e);
         }
         return null;
-    }
-
-    /**
-     * @deprecated use {@link #load(InputStream, URI, LoaderContext)} instead
-     */
-    @Deprecated
-    public @Nullable SVGDocument load(@NotNull InputStream inputStream) {
-        return load(inputStream, new DefaultParserProvider());
-    }
-
-    /**
-     * @deprecated use {@link #load(InputStream, URI, LoaderContext)} instead
-     */
-    @Deprecated
-    public @Nullable SVGDocument load(@NotNull InputStream inputStream, @NotNull ParserProvider parserProvider) {
-        return load(inputStream, null, LoaderContext.builder()
-                .parserProvider(parserProvider)
-                .build());
-    }
-
-    /**
-     * @deprecated use {@link #load(InputStream, URI, LoaderContext)} instead
-     */
-    @Deprecated
-    public @Nullable SVGDocument load(@NotNull InputStream inputStream,
-            @NotNull ParserProvider parserProvider,
-            @NotNull ResourceLoader resourceLoader) {
-        return load(inputStream, null, LoaderContext.builder()
-                .parserProvider(parserProvider)
-                .resourceLoader(resourceLoader)
-                .build());
     }
 
     /**
