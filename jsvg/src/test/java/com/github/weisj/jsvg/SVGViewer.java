@@ -33,7 +33,6 @@ import java.util.Objects;
 
 import javax.swing.*;
 
-import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import org.apache.batik.swing.JSVGCanvas;
 import org.ehcache.sizeof.SizeOf;
 import org.jetbrains.annotations.NotNull;
@@ -42,13 +41,14 @@ import com.github.weisj.darklaf.Customization;
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.darklaf.iconset.AllIcons;
 import com.github.weisj.darklaf.ui.button.ButtonConstants;
-import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.ResourcePolicy;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
-import com.github.weisj.jsvg.renderer.impl.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
 import com.github.weisj.jsvg.ui.AnimationPlayer;
+import com.github.weisj.jsvg.view.ViewBox;
 import com.kitfox.svg.app.beans.SVGIcon;
 
 public final class SVGViewer {

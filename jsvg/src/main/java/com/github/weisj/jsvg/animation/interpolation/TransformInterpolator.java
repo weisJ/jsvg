@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public interface TransformInterpolator {
 

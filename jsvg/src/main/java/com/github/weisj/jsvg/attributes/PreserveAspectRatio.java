@@ -27,8 +27,9 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 
 public final class PreserveAspectRatio {

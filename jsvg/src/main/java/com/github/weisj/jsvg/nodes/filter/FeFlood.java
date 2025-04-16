@@ -29,8 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.size.Percentage;
@@ -39,10 +37,12 @@ import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
-import com.github.weisj.jsvg.renderer.impl.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.impl.GraphicsUtil;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.impl.output.GraphicsUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(

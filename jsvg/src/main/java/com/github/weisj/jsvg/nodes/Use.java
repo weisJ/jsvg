@@ -32,9 +32,7 @@ import com.github.weisj.jsvg.attributes.font.AttributeFontSpec;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
 import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -43,10 +41,12 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.*;
-import com.github.weisj.jsvg.renderer.impl.FontRenderContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
-import com.github.weisj.jsvg.renderer.impl.PaintContext;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.FontRenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
+import com.github.weisj.jsvg.view.FloatSize;
 
 @ElementCategories({Category.Graphic, Category.GraphicsReferencing, Category.Structural})
 @PermittedContent(categories = {Category.Animation, Category.Descriptive})

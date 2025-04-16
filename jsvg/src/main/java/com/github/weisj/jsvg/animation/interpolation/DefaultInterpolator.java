@@ -31,14 +31,14 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Additive;
 import com.github.weisj.jsvg.animation.AnimationValuesType;
-import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
-import com.github.weisj.jsvg.attributes.paint.RGBColor;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.RGBColor;
+import com.github.weisj.jsvg.paint.impl.SimplePaintSVGPaint;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class DefaultInterpolator
         implements FloatInterpolator, FloatListInterpolator, PaintInterpolator, TransformInterpolator {

@@ -24,8 +24,8 @@ package com.github.weisj.jsvg.nodes.prototype;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.renderer.impl.ContextElementAttributes;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.ContextElementAttributes;
 
 public interface Instantiator {
 

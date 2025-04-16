@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.attributes.value.FloatListValue;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class AnimatedFloatList implements FloatListValue {
 

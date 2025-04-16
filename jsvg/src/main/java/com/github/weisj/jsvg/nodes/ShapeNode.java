@@ -37,15 +37,16 @@ import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.PaintContext;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ShapeRenderer;
+import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 
 public abstract class ShapeNode extends RenderableSVGNode
         implements HasShape, HasPaintContext, HasFontContext, HasVectorEffects, Instantiator {
@@ -137,7 +138,7 @@ public abstract class ShapeNode extends RenderableSVGNode
             case BoundingBox:
                 return bounds;
             case StrokeBox: {
-                LengthValue strokeWidth = context.strokeContext().strokeWidth;
+                LengthValue strokeWidth = RenderContextAccessor.instance().strokeContext(context).strokeWidth;
                 if (strokeWidth != null) {
                     float stroke = strokeWidth.resolve(context.measureContext());
                     if (stroke > 0) bounds = GeometryUtil.grow(bounds, stroke);
@@ -173,7 +174,8 @@ public abstract class ShapeNode extends RenderableSVGNode
                 : null;
 
         Stroke effectiveStroke = computeEffectiveStroke(context);
-        ShapeRenderer.renderWithPaintOrder(output, shape.canBeFilled(), context.paintOrder(),
+        ShapeRenderer.renderWithPaintOrder(output, shape.canBeFilled(),
+                RenderContextAccessor.instance().paintOrder(context),
                 new ShapeRenderer.ShapePaintContext(context, vectorEffects(), effectiveStroke,
                         GeometryUtil.toAwtTransform(context, transform())),
                 new ShapeRenderer.PaintShape(paintShape, bounds),

@@ -30,15 +30,16 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
-import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.*;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 public abstract class BaseInnerViewContainer extends CommonRenderableContainerNode {
 
@@ -136,8 +137,9 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
         if (this instanceof SVG && ((SVG) this).isTopLevel()) {
             // Needed for vector-effects to work properly.
-            context.setRootTransform(output.transform());
-            innerContext.setRootTransform(output.transform());
+            RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
+            accessor.setRootTransform(context, output.transform());
+            accessor.setRootTransform(innerContext, output.transform());
 
             // If this element itself specifies a viewbox we have to respect its clipping rules.
             if (viewTransform != null && overflow.establishesClip()) output.applyClip(view);

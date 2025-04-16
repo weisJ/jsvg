@@ -50,8 +50,9 @@ import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.*;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 
 abstract class TextContainer extends BaseContainerNode<TextSegment>
         implements TextSegment.RenderableSegment, HasShape, HasContext.ByDelegate, HasVectorEffects, Renderable {
@@ -147,7 +148,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         textOutput.beginText();
         prepareSegmentForRendering(cursor, context, textOutput);
 
-        double offset = textAnchorOffset(context.fontRenderContext().textAnchor(), cursor);
+        double offset = textAnchorOffset(
+                RenderContextAccessor.instance().fontRenderContext(context).textAnchor(), cursor);
         context.translate(output, -offset, 0);
 
         renderSegmentWithoutLayout(cursor, context, output);
@@ -202,8 +204,9 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
                     textLength.resolve(context.measureContext()), 0);
         }
 
-        SVGFont font = context.font();
-        float letterSpacing = context.fontRenderContext().letterSpacing().resolve(context.measureContext());
+        RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
+        SVGFont font = accessor.font(context);
+        float letterSpacing = accessor.fontRenderContext(context).letterSpacing().resolve(context.measureContext());
 
         IntermediateTextMetrics metrics = new IntermediateTextMetrics();
 
@@ -264,7 +267,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         forEachSegment(context,
                 (segment, ctx) -> {
                     if (!isVisible(ctx)) return;
-                    GlyphRenderer.renderGlyphRun(output, context.paintOrder(), vectorEffects(), segment);
+                    GlyphRenderer.renderGlyphRun(
+                            output, RenderContextAccessor.instance().paintOrder(context), vectorEffects(), segment);
                 },
                 (segment, ctx) -> segment.renderSegmentWithoutLayout(cursor, ctx, output));
     }
@@ -272,7 +276,7 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     @Override
     public void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
             @NotNull TextOutput textOutput) {
-        SVGFont font = context.font();
+        SVGFont font = RenderContextAccessor.instance().font(context);
 
         GlyphCursor localCursor = createLocalCursor(context, cursor);
         localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
@@ -287,7 +291,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     @Override
     public void appendTextShape(@NotNull GlyphCursor cursor, @NotNull MutableGlyphRun glyphRun,
             @NotNull RenderContext context) {
-        SVGFont font = context.font();
+        SVGFont font = RenderContextAccessor.instance().font(context);
+
         GlyphCursor localCursor = createLocalCursor(context, cursor);
         localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
 

@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.value.Value;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.util.PathUtil;
 
 public final class AnimatedPath implements Value<@NotNull Path2D> {

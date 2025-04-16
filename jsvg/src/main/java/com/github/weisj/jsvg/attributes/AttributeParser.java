@@ -37,7 +37,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.time.TimeUnit;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Angle;
@@ -45,6 +44,7 @@ import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;

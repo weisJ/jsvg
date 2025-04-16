@@ -31,10 +31,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.font.*;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.parser.impl.ParserTestUtil;
-import com.github.weisj.jsvg.renderer.AnimationState;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.view.FloatSize;
 
 class FontTest {
 

@@ -30,12 +30,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.UnitType;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
@@ -44,14 +41,17 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.TransformedPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.*;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
-import com.github.weisj.jsvg.renderer.impl.TransformedPaint;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.view.FloatSize;
 
 @ElementCategories(Category.Container)
 @PermittedContent(

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,8 +26,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
 import com.github.weisj.jsvg.annotations.Sealed;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 @Sealed(permits = {Percentage.class, AnimatedPercentage.class})
 public interface PercentageValue {

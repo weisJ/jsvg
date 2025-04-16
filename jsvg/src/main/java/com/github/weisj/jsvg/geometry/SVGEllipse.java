@@ -28,8 +28,8 @@ import java.awt.geom.Rectangle2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.LengthValue;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class SVGEllipse implements SVGShape {
 

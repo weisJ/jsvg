@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface Renderable {
 

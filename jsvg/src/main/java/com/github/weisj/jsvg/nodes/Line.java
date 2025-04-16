@@ -24,8 +24,8 @@ package com.github.weisj.jsvg.nodes;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
-import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.SVGLine;
+import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;

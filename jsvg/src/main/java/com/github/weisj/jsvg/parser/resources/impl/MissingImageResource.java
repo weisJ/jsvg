@@ -28,14 +28,14 @@ import java.nio.charset.StandardCharsets;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
+import com.github.weisj.jsvg.provider.impl.LazyProvider;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
-import com.github.weisj.jsvg.util.LazyProvider;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 public final class MissingImageResource implements RenderableResource {
     private static final int SIZE = 100;

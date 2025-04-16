@@ -25,7 +25,7 @@ import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class ConstantTransform implements TransformValue {
     private final @NotNull AffineTransform value;

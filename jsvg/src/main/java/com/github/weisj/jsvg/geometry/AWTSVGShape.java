@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.value.ConstantValue;
 import com.github.weisj.jsvg.attributes.value.Value;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class AWTSVGShape<T extends Shape> implements SVGShape {
     public static final Rectangle2D EMPTY_SHAPE = new Rectangle();

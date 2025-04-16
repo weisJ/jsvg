@@ -30,7 +30,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class FontResolver {
     private FontResolver() {}

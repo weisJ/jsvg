@@ -31,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.ShapeUtil;
 
 

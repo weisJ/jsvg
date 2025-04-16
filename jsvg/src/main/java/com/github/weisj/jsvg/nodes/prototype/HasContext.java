@@ -24,8 +24,8 @@ package com.github.weisj.jsvg.nodes.prototype;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
-import com.github.weisj.jsvg.renderer.impl.FontRenderContext;
-import com.github.weisj.jsvg.renderer.impl.PaintContext;
+import com.github.weisj.jsvg.renderer.impl.context.FontRenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
 
 /**
  * Informs the renderer that an element provides styling information which can be inherited by its children.

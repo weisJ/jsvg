@@ -32,8 +32,8 @@ import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
-import com.github.weisj.jsvg.renderer.impl.GraphicsUtil;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.output.GraphicsUtil;
 
 abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive {
     private FilterChannelKey inputChannel2;

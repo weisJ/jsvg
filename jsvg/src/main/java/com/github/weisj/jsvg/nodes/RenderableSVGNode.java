@@ -28,7 +28,7 @@ import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public abstract class RenderableSVGNode extends AbstractSVGNode
         implements Renderable, HasGeometryContext.ByDelegate {

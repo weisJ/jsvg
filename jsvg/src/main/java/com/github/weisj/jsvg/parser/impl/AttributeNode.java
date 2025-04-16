@@ -36,12 +36,9 @@ import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.value.*;
 import com.github.weisj.jsvg.attributes.*;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
-import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.*;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
@@ -52,10 +49,14 @@ import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.ResourceLoader;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
-import com.github.weisj.jsvg.renderer.AnimationState;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.view.ViewBox;
 
 public final class AttributeNode {
 

@@ -26,7 +26,7 @@ import java.awt.geom.AffineTransform;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 @ApiStatus.Experimental
 public interface TextOutput {

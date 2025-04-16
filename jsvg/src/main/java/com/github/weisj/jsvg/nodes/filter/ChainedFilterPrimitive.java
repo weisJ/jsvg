@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.nodes.filter;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements FilterPrimitive {
 

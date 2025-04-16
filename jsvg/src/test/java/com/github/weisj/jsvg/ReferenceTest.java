@@ -46,7 +46,6 @@ import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
 
-import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -65,12 +64,13 @@ import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
 import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
-import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.ResourcePolicy;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.util.ColorUtil;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 import com.google.errorprone.annotations.CheckReturnValue;
 
 @CheckReturnValue

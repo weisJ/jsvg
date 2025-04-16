@@ -36,10 +36,11 @@ import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
 import com.github.weisj.jsvg.renderer.*;
-import com.github.weisj.jsvg.renderer.impl.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.impl.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.impl.output.GraphicsUtil;
 
 /**
  * Class that encapsulates rendering to an offscreen image.
@@ -71,7 +72,7 @@ public final class BlittableImage {
     public static @Nullable BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
             @NotNull RenderContext context, @Nullable Rectangle2D clipBounds,
             @NotNull Rectangle2D bounds, @NotNull Rectangle2D objectBounds, @NotNull UnitType contentUnits) {
-        RenderContext imageContext = RenderContext.createInitial(context.platformSupport(),
+        RenderContext imageContext = RenderContextAccessor.instance().createInitial(context.platformSupport(),
                 contentUnits.deriveMeasure(context.measureContext()));
         return create(bufferSurfaceSupplier, context, clipBounds, bounds, objectBounds, contentUnits, imageContext);
     }
@@ -113,7 +114,7 @@ public final class BlittableImage {
 
         // Note: This should actually be the render context from the declaration site of the mask/clipPath
         // etc.
-        imageContext.setRootTransform(rootTransform, userSpaceTransform);
+        RenderContextAccessor.instance().setRootTransform(imageContext, rootTransform, userSpaceTransform);
 
         return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedBoundsInRootSpace);
     }

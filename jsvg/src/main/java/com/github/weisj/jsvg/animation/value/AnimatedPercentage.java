@@ -25,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class AnimatedPercentage implements PercentageValue {
 

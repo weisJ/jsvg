@@ -25,7 +25,7 @@ import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class NullTextOutput implements TextOutput {
     public static final NullTextOutput INSTANCE = new NullTextOutput();

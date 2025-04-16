@@ -31,12 +31,14 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.MarkerOrientation;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.VectorEffect;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.Marker;
 import com.github.weisj.jsvg.nodes.ShapeNode;
+import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.view.FloatSize;
 
 public final class ShapeRenderer {
     private static final boolean DEBUG_MARKERS = false;
@@ -110,7 +112,8 @@ public final class ShapeRenderer {
         // FIXME: Opacity should be uniform on fill and stroke. Fill shouldn't be visible beneath stroke.
         boolean fillPainted = false;
         for (PaintOrder.Phase phase : paintOrder.phases()) {
-            RenderContext phaseContext = shapePaintContext.context.deriveForChildGraphics();
+            RenderContext phaseContext =
+                    RenderContextAccessor.instance().deriveForChildGraphics(shapePaintContext.context);
             switch (phase) {
                 case FILL:
                     if (canBeFilledHint) {
@@ -293,7 +296,7 @@ public final class ShapeRenderer {
         float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
 
         Output markerOutput = output.createChild();
-        RenderContext markerContext = context.deriveForChildGraphics();
+        RenderContext markerContext = RenderContextAccessor.instance().deriveForChildGraphics(context);
 
         markerContext.translate(markerOutput, x, y);
 

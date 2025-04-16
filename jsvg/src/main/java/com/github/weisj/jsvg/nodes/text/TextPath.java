@@ -34,7 +34,6 @@ import com.github.weisj.jsvg.attributes.text.Spacing;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.ReversePathIterator;
 import com.github.weisj.jsvg.nodes.Anchor;
 import com.github.weisj.jsvg.nodes.ShapeNode;
@@ -47,8 +46,9 @@ import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.PathUtil;
 
 @ElementCategories({Category.Graphic, Category.TextContent, Category.TextContentChild})

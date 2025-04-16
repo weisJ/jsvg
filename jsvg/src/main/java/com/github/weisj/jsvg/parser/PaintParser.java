@@ -26,7 +26,7 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 public interface PaintParser {

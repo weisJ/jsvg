@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.value.AnimatedTransform;
 import com.github.weisj.jsvg.annotations.Sealed;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 @Sealed(permits = {AnimatedTransform.class, ConstantTransform.class, ConstantLengthTransform.class})
 public interface TransformValue {

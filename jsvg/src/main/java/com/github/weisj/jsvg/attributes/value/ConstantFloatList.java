@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.attributes.value;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class ConstantFloatList implements FloatListValue {
     public static final @NotNull FloatListValue EMPTY = new ConstantFloatList(new float[0]);

@@ -30,7 +30,7 @@ import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.ConstantLengthTransform;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class AnimatedTransform implements TransformValue {
 

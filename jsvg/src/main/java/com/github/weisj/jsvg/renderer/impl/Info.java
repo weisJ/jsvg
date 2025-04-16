@@ -34,6 +34,9 @@ import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
 
@@ -101,7 +104,7 @@ class Info implements AutoCloseable {
                 return null;
             }
 
-            RenderContext imageContext = context.deriveForSurface();
+            RenderContext imageContext = RenderContextAccessor.instance().deriveForSurface(context);
 
             BlittableImage blitImage = BlittableImage.create(
                     ImageUtil::createCompatibleTransparentImage, context, clipBounds,

@@ -29,13 +29,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.Track;
-import com.github.weisj.jsvg.attributes.paint.RGBColor;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
-import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.attributes.value.ColorValue;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.RGBColor;
+import com.github.weisj.jsvg.paint.impl.SimplePaintSVGPaint;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class AnimatedColor implements SVGPaint, ColorValue {
 

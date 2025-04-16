@@ -27,8 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
-import com.github.weisj.jsvg.renderer.impl.StrokeContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.impl.context.StrokeContext;
 
 public final class StrokeResolver {
     private StrokeResolver() {}

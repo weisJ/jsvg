@@ -29,8 +29,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.HasMatchName;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class TransformPart {
 

@@ -27,8 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.value.AnimatedColor;
 import com.github.weisj.jsvg.annotations.Sealed;
-import com.github.weisj.jsvg.attributes.paint.RGBColor;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
+import com.github.weisj.jsvg.paint.impl.RGBColor;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 @Sealed(permits = {RGBColor.class, AnimatedColor.class})
 public interface ColorValue {

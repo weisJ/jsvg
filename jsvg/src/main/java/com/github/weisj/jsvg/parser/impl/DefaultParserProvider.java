@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.parser.impl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.paint.DefaultPaintParser;
+import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.DomProcessor;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.ParserProvider;

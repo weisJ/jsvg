@@ -36,11 +36,12 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.renderer.*;
-import com.github.weisj.jsvg.renderer.impl.FontRenderContext;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ShapeRenderer;
+import com.github.weisj.jsvg.renderer.impl.context.FontRenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.util.ShapeUtil;
 
 final class GlyphRenderer {
@@ -78,7 +79,7 @@ final class GlyphRenderer {
                 null);
 
         // Experimental Emoji rendering
-        SVGFont font = context.font();
+        SVGFont font = RenderContextAccessor.instance().font(context);
         Output.SafeState safeState = output.safeState();
         for (AbstractGlyphRun.PaintableEmoji emoji : glyphRun.emojis()) {
             emoji.render(output, font);
@@ -94,7 +95,7 @@ final class GlyphRenderer {
             @NotNull SVGFont font, @NotNull RenderContext context,
             @NotNull TextOutput textOutput) {
         MeasureContext measure = context.measureContext();
-        FontRenderContext fontRenderContext = context.fontRenderContext();
+        FontRenderContext fontRenderContext = RenderContextAccessor.instance().fontRenderContext(context);
         float letterSpacing = fontRenderContext.letterSpacing().resolve(measure);
 
         Path2D glyphPath = new Path2D.Float();

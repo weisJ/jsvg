@@ -26,7 +26,8 @@ import java.awt.geom.Path2D;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.Value;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 
 public final class FillRuleAwareAWTSVGShape extends AWTSVGShape<Path2D> {
 
@@ -37,7 +38,7 @@ public final class FillRuleAwareAWTSVGShape extends AWTSVGShape<Path2D> {
     @Override
     public @NotNull Path2D shape(@NotNull RenderContext context, boolean validate) {
         Path2D shape = super.shape(context, validate);
-        shape.setWindingRule(context.fillRule().awtWindingRule);
+        shape.setWindingRule(RenderContextAccessor.instance().fillRule(context).awtWindingRule);
         return shape;
     }
 }

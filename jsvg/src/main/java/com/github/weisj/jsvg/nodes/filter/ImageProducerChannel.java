@@ -26,7 +26,7 @@ import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public class ImageProducerChannel implements Channel, PixelProvider {
 

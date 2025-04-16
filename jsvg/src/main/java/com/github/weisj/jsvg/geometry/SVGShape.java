@@ -26,7 +26,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public interface SVGShape {
 

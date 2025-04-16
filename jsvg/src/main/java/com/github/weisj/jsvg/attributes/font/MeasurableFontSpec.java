@@ -28,9 +28,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class MeasurableFontSpec extends FontSpec {
     private final int currentWeight;

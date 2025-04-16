@@ -32,16 +32,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.AnimationPeriod;
-import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.renderer.*;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.impl.*;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.impl.output.ShapeOutput;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 public final class SVGDocument {
     private static final boolean DEBUG = false;
@@ -148,7 +152,7 @@ public final class SVGDocument {
                 ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx, animState)
                 : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx),
                         defaultEm, defaultEx, animState);
-        RenderContext context = RenderContext.createInitial(platformSupport, initialMeasure);
+        RenderContext context = RenderContextAccessor.instance().createInitial(platformSupport, initialMeasure);
 
         root.applyTransform(output, context, new ElementBounds(root, context));
         return context;

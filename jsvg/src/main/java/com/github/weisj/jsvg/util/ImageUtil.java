@@ -33,8 +33,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.GraphicsUtil;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.output.GraphicsUtil;
 
 public final class ImageUtil {
 

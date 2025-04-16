@@ -37,16 +37,17 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.AnimationState;
-import com.github.weisj.jsvg.renderer.impl.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.view.FloatSize;
 
 class BlitImageTest {
 
@@ -77,7 +78,7 @@ class BlitImageTest {
 
     @NotNull
     RenderContext createTestContext(int vw, int vh) {
-        return RenderContext.createInitial(
+        return RenderContextAccessor.instance().createInitial(
                 NullPlatformSupport.INSTANCE,
                 MeasureContext.createInitial(
                         new FloatSize(vw, vh),
@@ -127,7 +128,7 @@ class BlitImageTest {
         ImageSurface actual = new ImageSurface(size, size, scale, scale);
         Output actualOutput = actual.output();
 
-        context.setRootTransform(actualOutput.transform());
+        RenderContextAccessor.instance().setRootTransform(context, actualOutput.transform());
         context.transform(actualOutput, transform);
         actualOutput.debugPaint(g -> {
             g.setColor(Color.GREEN);

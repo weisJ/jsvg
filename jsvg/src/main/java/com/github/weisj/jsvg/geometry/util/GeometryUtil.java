@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class GeometryUtil {
     private static final float EPS = 0.0001f;

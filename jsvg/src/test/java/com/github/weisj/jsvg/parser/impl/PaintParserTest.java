@@ -29,9 +29,9 @@ import java.util.Collections;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.attributes.paint.AwtSVGPaint;
-import com.github.weisj.jsvg.attributes.paint.PredefinedPaints;
-import com.github.weisj.jsvg.attributes.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 
 class PaintParserTest {
 

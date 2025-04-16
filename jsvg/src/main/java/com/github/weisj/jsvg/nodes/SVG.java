@@ -31,8 +31,6 @@ import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.Coordinate;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
@@ -41,10 +39,12 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.AnimationState;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.view.FloatSize;
 
 @ElementCategories({Category.Container, Category.Structural})
 @PermittedContent(

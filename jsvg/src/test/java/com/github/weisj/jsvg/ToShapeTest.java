@@ -33,13 +33,13 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.provider.Provider;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.Graphics2DOutput;
-import com.github.weisj.jsvg.util.Provider;
+import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 class ToShapeTest {
 

@@ -43,18 +43,16 @@ tasks {
                 Bundle-SymbolicName: com.github.weisj.jsvg
                 -exportcontents: \
                   com.github.weisj.jsvg,\
-                  com.github.weisj.jsvg.animation,\
-                  com.github.weisj.jsvg.attributes,\
-                  com.github.weisj.jsvg.attributes.font,\
-                  com.github.weisj.jsvg.attributes.paint,\
+                  com.github.weisj.jsvg.paint,\
                   com.github.weisj.jsvg.geometry.size,\
-                  com.github.weisj.jsvg.nodes,\
                   com.github.weisj.jsvg.parser,\
                   com.github.weisj.jsvg.parser.css,\
                   com.github.weisj.jsvg.parser.resources,\
+                  com.github.weisj.jsvg.provider,\
                   com.github.weisj.jsvg.renderer,\
                   com.github.weisj.jsvg.renderer.awt,\
                   com.github.weisj.jsvg.ui,\
+                  com.github.weisj.jsvg.view,\
 
                 Import-Package: !com.google.errorprone.annotations,\
                   *

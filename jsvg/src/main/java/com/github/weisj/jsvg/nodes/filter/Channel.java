@@ -28,7 +28,7 @@ import java.awt.image.ImageProducer;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 public interface Channel {

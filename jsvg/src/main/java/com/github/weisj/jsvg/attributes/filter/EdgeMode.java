@@ -28,8 +28,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.filter.FilterContext;
-import com.github.weisj.jsvg.renderer.impl.GraphicsUtil;
-import com.github.weisj.jsvg.renderer.impl.RenderContext;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.output.GraphicsUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 public enum EdgeMode {

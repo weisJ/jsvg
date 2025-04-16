@@ -21,26 +21,27 @@
  */
 package com.github.weisj.jsvg.renderer.impl;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.renderer.SVGRenderingHints;
-import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
-import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.MeasureContext;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
-import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
+import com.github.weisj.jsvg.renderer.impl.context.ContextElementAttributes;
+import com.github.weisj.jsvg.renderer.impl.context.FontRenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 public final class NodeRenderer {
     private NodeRenderer() {}
@@ -180,30 +181,12 @@ public final class NodeRenderer {
         @Nullable ContextElementAttributes contextElementAttributes = null;
         if (instantiator != null) contextElementAttributes = instantiator.createContextAttributes(context);
 
-        RenderContext.EstablishRootMeasure establishRootMeasure = node instanceof SVG && ((SVG) node).isTopLevel()
-                ? RenderContext.EstablishRootMeasure.Yes
-                : RenderContext.EstablishRootMeasure.No;
-        return context.derive(paintContext, fontSpec, null, fontRenderContext, contextElementAttributes,
-                establishRootMeasure);
+        return RenderContextAccessor.instance().deriveForNode(
+                context, paintContext, fontSpec, fontRenderContext, contextElementAttributes, node);
     }
 
     public static @NotNull RenderContext setupInnerViewRenderContext(@NotNull ViewBox viewBox,
             @NotNull RenderContext context, boolean inheritAttributes) {
-        if (inheritAttributes) {
-            return context.derive(null, null, viewBox, null, null,
-                    RenderContext.EstablishRootMeasure.No);
-        } else {
-            MeasureContext newMeasure = context.measureContext().derive(viewBox,
-                    Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
-            return new RenderContext(
-                    context.platformSupport(),
-                    new AffineTransform(),
-                    new AffineTransform(),
-                    PaintContext.createDefault(),
-                    newMeasure,
-                    FontRenderContext.createDefault(),
-                    MeasurableFontSpec.createDefault(),
-                    context.contextElementAttributes());
-        }
+        return RenderContextAccessor.instance().setupInnerViewRenderContext(viewBox, context, inheritAttributes);
     }
 }
