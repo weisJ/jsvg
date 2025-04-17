@@ -34,7 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.text.NullTextOutput;
-import com.github.weisj.jsvg.nodes.text.TextOutput;
 
 public interface Output {
 

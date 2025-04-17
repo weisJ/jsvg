@@ -43,10 +43,10 @@ import com.github.weisj.jsvg.ReferenceTest.CompareInfo;
 import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.ReferenceTest.RenderType;
 import com.github.weisj.jsvg.nodes.text.GlyphRunTextOutput;
-import com.github.weisj.jsvg.nodes.text.TextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.TextOutput;
 import com.github.weisj.jsvg.renderer.impl.output.NullOutput;
 
 class TextTest {

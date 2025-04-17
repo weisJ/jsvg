@@ -19,14 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.text;
+package com.github.weisj.jsvg.renderer;
 
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.nodes.text.NullTextOutput;
 
 @ApiStatus.Experimental
 public interface TextOutput {

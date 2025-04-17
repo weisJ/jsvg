@@ -21,10 +21,7 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,6 +84,11 @@ public final class ParsedElement implements RawElement {
     }
 
     @Override
+    public @NotNull List<@NotNull String> classNames() {
+        return attributeNode.classNames();
+    }
+
+    @Override
     public @NotNull ParsedDocument document() {
         return document;
     }
@@ -94,6 +96,11 @@ public final class ParsedElement implements RawElement {
     @Override
     public @NotNull List<ParsedElement> children() {
         return children;
+    }
+
+    @Override
+    public @Nullable String attribute(@NotNull String name) {
+        return attributeNode.getValue(name);
     }
 
     public @NotNull Map<String, List<ParsedElement>> animationElements() {

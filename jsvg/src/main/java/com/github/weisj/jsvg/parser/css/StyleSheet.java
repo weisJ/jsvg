@@ -23,7 +23,7 @@ package com.github.weisj.jsvg.parser.css;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.parser.impl.ParsedElement;
+import com.github.weisj.jsvg.parser.RawElement;
 
 public interface StyleSheet {
 
@@ -31,5 +31,5 @@ public interface StyleSheet {
         void applyRule(@NotNull StyleProperty property);
     }
 
-    void forEachMatchingRule(@NotNull ParsedElement element, @NotNull RuleConsumer ruleConsumer);
+    void forEachMatchingRule(@NotNull RawElement element, @NotNull RuleConsumer ruleConsumer);
 }

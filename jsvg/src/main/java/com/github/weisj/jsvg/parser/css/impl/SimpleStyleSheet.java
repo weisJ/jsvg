@@ -28,10 +28,9 @@ import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.parser.RawElement;
 import com.github.weisj.jsvg.parser.css.StyleProperty;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
-import com.github.weisj.jsvg.parser.impl.ParsedElement;
-import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 public final class SimpleStyleSheet implements StyleSheet {
 
@@ -64,14 +63,14 @@ public final class SimpleStyleSheet implements StyleSheet {
     }
 
     @Override
-    public void forEachMatchingRule(@NotNull ParsedElement element, @NotNull RuleConsumer ruleConsumer) {
-        List<@NotNull StyleProperty> rules = tagNameRules.get(element.node().tagName());
+    public void forEachMatchingRule(@NotNull RawElement element, @NotNull RuleConsumer ruleConsumer) {
+        List<@NotNull StyleProperty> rules = tagNameRules.get(element.tagName());
         if (rules != null) rules.forEach(ruleConsumer::applyRule);
         if (element.id() != null) {
             rules = idRules.get(element.id());
             if (rules != null) rules.forEach(ruleConsumer::applyRule);
         }
-        for (String className : element.attributeNode().getStringList("class", SeparatorMode.WHITESPACE_ONLY)) {
+        for (String className : element.classNames()) {
             rules = classRules.get(className);
             if (rules != null) rules.forEach(ruleConsumer::applyRule);
         }

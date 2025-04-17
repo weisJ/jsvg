@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.paint.SVGPaint;
 
 public interface PaintParser {
+    @NotNull
     Color DEFAULT_COLOR = Color.BLACK;
 
     @Nullable

@@ -35,10 +35,16 @@ public interface RawElement {
     String tagName();
 
     @NotNull
+    List<@NotNull String> classNames();
+
+    @NotNull
     RawDocument document();
 
     @NotNull
     List<? extends @NotNull RawElement> children();
+
+    @Nullable
+    String attribute(@NotNull String name);
 
     @Nullable
     RawElement parent();

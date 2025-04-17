@@ -80,6 +80,7 @@ public final class AttributeNode {
 
     private final @NotNull LoadHelper loadHelper;
     private ParsedElement element = null;
+    private List<@NotNull String> classNames = null;
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
             @NotNull List<@NotNull StyleSheet> styleSheets,
@@ -192,6 +193,15 @@ public final class AttributeNode {
             if (tagName.equals(tag)) return true;
         }
         return false;
+    }
+
+    public @NotNull List<@NotNull String> classNames() {
+        if (classNames == null) {
+            @NotNull String @NotNull [] classes = getStringList("class", SeparatorMode.WHITESPACE_ONLY);
+            if (classes.length == 0) return Collections.emptyList();
+            classNames = Arrays.asList(classes);
+        }
+        return classNames;
     }
 
     public @Nullable String getValue(@NotNull String key) {
