@@ -157,7 +157,7 @@ public final class RenderContext {
                 null);
     }
 
-    RenderContext(@NotNull PlatformSupport platformSupport,
+    private RenderContext(@NotNull PlatformSupport platformSupport,
             @NotNull AffineTransform rootTransform,
             @NotNull AffineTransform userSpaceTransform,
             @NotNull com.github.weisj.jsvg.renderer.impl.context.PaintContext paintContext,
