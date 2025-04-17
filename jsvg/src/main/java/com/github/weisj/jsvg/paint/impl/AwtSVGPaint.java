@@ -26,6 +26,8 @@ import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.paint.SimplePaintSVGPaint;
+
 
 public final class AwtSVGPaint implements SimplePaintSVGPaint {
 

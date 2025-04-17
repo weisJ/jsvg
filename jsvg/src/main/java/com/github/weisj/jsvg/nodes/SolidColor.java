@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.paint.impl.SimplePaintSVGPaint;
+import com.github.weisj.jsvg.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.util.ColorUtil;
 

@@ -35,9 +35,9 @@ import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.paint.impl.RGBColor;
-import com.github.weisj.jsvg.paint.impl.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class DefaultInterpolator
