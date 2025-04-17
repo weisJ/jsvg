@@ -2,6 +2,6 @@
 	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink">
 	<image
-		xlink:href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image/mdn_logo_only_color.png"
+		xlink:href="https://github.com/weisJ/jsvg/blob/d9b75d93b3b0c52a299e242745e8b4c1c8e2c391/images/svg_logo.png"
 		height="200" width="200" />
 </svg>
