@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.ReferenceTest;
 import com.github.weisj.jsvg.parser.LoaderContext;
 
 class UseValidationTest {
@@ -42,7 +43,7 @@ class UseValidationTest {
     private final StaxSVGLoader loader = new StaxSVGLoader(new NodeSupplier());
 
     private void tryLoad(@NotNull String path) throws IOException, XMLStreamException {
-        URL url = Objects.requireNonNull(UseValidationTest.class.getResource(path));
+        URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path));
         try (InputStream stream = url.openStream()) {
             loader.load(stream, url.toURI(), LoaderContext.createDefault());
         } catch (URISyntaxException e) {
@@ -52,17 +53,17 @@ class UseValidationTest {
 
     @Test
     void detectReferenceCycle() {
-        assertThrows(IllegalStateException.class, () -> tryLoad("useCycle.svg"));
-        assertThrows(IllegalStateException.class, () -> tryLoad("useCycleSelfReference.svg"));
+        assertThrows(IllegalStateException.class, () -> tryLoad("parser/useCycle.svg"));
+        assertThrows(IllegalStateException.class, () -> tryLoad("parser/useCycleSelfReference.svg"));
     }
 
     @Test
     void detectDeepNesting() {
-        assertThrows(IllegalStateException.class, () -> tryLoad("useNesting.svg"));
+        assertThrows(IllegalStateException.class, () -> tryLoad("parser/useNesting.svg"));
     }
 
     @Test
     void detectManyImplicitPaths() {
-        assertThrows(IllegalStateException.class, () -> tryLoad("manyImplicitPathsThroughUse.svg"));
+        assertThrows(IllegalStateException.class, () -> tryLoad("parser/manyImplicitPathsThroughUse.svg"));
     }
 }
