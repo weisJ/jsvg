@@ -2,7 +2,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
     `java-library`
-    id("me.champeau.jmh")
     jacoco
     id("biz.aQute.bnd.builder")
 }
@@ -26,9 +25,6 @@ dependencies {
 
     testCompileOnly(libs.nullabilityAnnotations)
     testCompileOnly(toolLibs.errorprone.annotations)
-
-    jmh(testLibs.svgSalamander)
-    jmh(testLibs.batik)
 }
 tasks {
 
