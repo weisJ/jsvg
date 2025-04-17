@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.parser.impl.ParsedDocument;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 
-@FunctionalInterface
 public interface ResourceLoader {
 
     @Nullable

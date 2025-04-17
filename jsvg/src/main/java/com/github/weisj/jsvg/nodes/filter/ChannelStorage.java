@@ -28,23 +28,22 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
-import com.github.weisj.jsvg.provider.Provider;
-import com.github.weisj.jsvg.provider.impl.ConstantProvider;
-import com.github.weisj.jsvg.provider.impl.LazyProvider;
+import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
+import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
 public final class ChannelStorage<T> {
-    private final @NotNull Map<@NotNull Object, @NotNull Provider<T>> storage = new HashMap<>();
+    private final @NotNull Map<@NotNull Object, @NotNull Supplier<T>> storage = new HashMap<>();
 
     public void addResult(@NotNull FilterChannelKey key, @NotNull T value) {
-        storage.put(key.key(), new ConstantProvider<>(value));
+        storage.put(key.key(), new ConstantSupplier<>(value));
     }
 
     public void addResult(@NotNull FilterChannelKey key, @NotNull Supplier<T> value) {
-        storage.put(key.key(), new LazyProvider<>(value));
+        storage.put(key.key(), new LazySupplier<>(value));
     }
 
     public @NotNull T get(@NotNull FilterChannelKey key) {
-        Provider<T> provider = storage.get(key.key());
+        Supplier<T> provider = storage.get(key.key());
         if (provider == null) throw new IllegalFilterStateException("Channel " + key + " not found.");
         return provider.get();
     }

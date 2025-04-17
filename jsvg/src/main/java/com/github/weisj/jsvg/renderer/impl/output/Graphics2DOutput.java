@@ -28,13 +28,13 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.paint.impl.MaskedPaint;
-import com.github.weisj.jsvg.provider.Provider;
 import com.github.weisj.jsvg.renderer.Output;
 
 public class Graphics2DOutput implements Output {
@@ -80,7 +80,7 @@ public class Graphics2DOutput implements Output {
     }
 
     @Override
-    public void setPaint(@NotNull Provider<Paint> paintProvider) {
+    public void setPaint(@NotNull Supplier<Paint> paintProvider) {
         setPaint(paintProvider.get());
     }
 

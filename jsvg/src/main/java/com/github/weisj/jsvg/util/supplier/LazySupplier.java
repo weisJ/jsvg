@@ -19,21 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.provider.impl;
+package com.github.weisj.jsvg.util.supplier;
+
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.provider.Provider;
+public final class LazySupplier<T> implements Supplier<T> {
+    private final @NotNull Supplier<@NotNull T> supplier;
+    private T t;
 
-public final class ConstantProvider<T> implements Provider<T> {
-    private final @NotNull T t;
-
-    public ConstantProvider(@NotNull T t) {
-        this.t = t;
+    public LazySupplier(@NotNull Supplier<@NotNull T> supplier) {
+        this.supplier = supplier;
     }
 
     @Override
     public @NotNull T get() {
+        if (t == null) t = supplier.get();
         return t;
     }
 }

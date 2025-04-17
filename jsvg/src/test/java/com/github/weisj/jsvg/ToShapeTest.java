@@ -28,13 +28,13 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.parser.SVGLoader;
-import com.github.weisj.jsvg.provider.Provider;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
@@ -206,7 +206,7 @@ class ToShapeTest {
         }
 
         @Override
-        public void setPaint(@NotNull Provider<Paint> paintProvider) {
+        public void setPaint(@NotNull Supplier<Paint> paintProvider) {
             // Only black and white allowed
         }
 

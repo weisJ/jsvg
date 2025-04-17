@@ -29,11 +29,11 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.provider.Provider;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.util.ShapeUtil;
 
@@ -109,7 +109,7 @@ public class ShapeOutput implements Output {
     }
 
     @Override
-    public void setPaint(@NotNull Provider<Paint> paintProvider) {
+    public void setPaint(@NotNull Supplier<Paint> paintProvider) {
         // Not supported. Do nothing
     }
 

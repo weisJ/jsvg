@@ -28,13 +28,13 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.text.NullTextOutput;
 import com.github.weisj.jsvg.nodes.text.TextOutput;
-import com.github.weisj.jsvg.provider.Provider;
 
 public interface Output {
 
@@ -56,7 +56,7 @@ public interface Output {
      *
      * @param paintProvider The paint provider.
      */
-    void setPaint(@NotNull Provider<Paint> paintProvider);
+    void setPaint(@NotNull Supplier<Paint> paintProvider);
 
     void setStroke(@NotNull Stroke stroke);
 

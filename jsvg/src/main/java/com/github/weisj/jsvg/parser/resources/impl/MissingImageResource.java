@@ -31,15 +31,15 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
-import com.github.weisj.jsvg.provider.impl.LazyProvider;
 import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.supplier.LazySupplier;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
 public final class MissingImageResource implements RenderableResource {
     private static final int SIZE = 100;
-    private static final LazyProvider<SVGDocument> missingImage = new LazyProvider<>(() -> {
+    private static final LazySupplier<SVGDocument> missingImage = new LazySupplier<>(() -> {
         SVGLoader loader = new SVGLoader();
         return loader.load(new ByteArrayInputStream(
                 ("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\"\n" +
