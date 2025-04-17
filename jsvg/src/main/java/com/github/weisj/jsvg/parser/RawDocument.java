@@ -31,6 +31,9 @@ public interface RawDocument {
     @NotNull
     LoaderContext loaderContext();
 
+    @NotNull
+    PaintParser paintParser();
+
     void registerNamedElement(@NotNull String name, @Nullable Object element);
 
     <T> @Nullable T getElementById(@NotNull Class<T> type, @Nullable String id);

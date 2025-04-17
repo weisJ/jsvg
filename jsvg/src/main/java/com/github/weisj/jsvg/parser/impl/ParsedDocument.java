@@ -32,24 +32,37 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.parser.LoaderContext;
+import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.RawDocument;
 
 public class ParsedDocument implements RawDocument {
     private final Map<String, Object> namedElements = new HashMap<>();
     private final @Nullable URI rootURI;
     private final @NotNull LoaderContext loaderContext;
+    private final @NotNull LoadHelper loadHelper;
     private int currentDepth;
 
     private @NotNull AnimationPeriod animationPeriod = new AnimationPeriod(0, 0, false);
 
-    public ParsedDocument(@Nullable URI rootURI, @NotNull LoaderContext loaderContext) {
+    public ParsedDocument(@Nullable URI rootURI, @NotNull LoaderContext loaderContext,
+            @NotNull LoadHelper loadHelper) {
         this.rootURI = rootURI;
         this.loaderContext = loaderContext;
+        this.loadHelper = loadHelper;
     }
 
     @Override
     public @NotNull LoaderContext loaderContext() {
         return loaderContext;
+    }
+
+    @Override
+    public @NotNull PaintParser paintParser() {
+        return loadHelper.attributeParser().paintParser();
+    }
+
+    public @NotNull LoadHelper loadHelper() {
+        return loadHelper;
     }
 
     @Override

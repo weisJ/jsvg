@@ -38,8 +38,8 @@ public final class ParserTestUtil {
     private ParserTestUtil() {}
 
     public static @NotNull AttributeNode createDummyAttributeNode(@NotNull Map<String, String> attrs) {
-        ParsedDocument document = new ParsedDocument(null, LoaderContext.createDefault());
-        AttributeNode attributeNode = new AttributeNode("dummy", attrs, Collections.emptyList(), LOAD_HELPER);
+        ParsedDocument document = new ParsedDocument(null, LoaderContext.createDefault(), LOAD_HELPER);
+        AttributeNode attributeNode = new AttributeNode("dummy", attrs, Collections.emptyList());
         attributeNode.setElement(new ParsedElement(null, document, null, attributeNode, new Rect()));
         return attributeNode;
     }

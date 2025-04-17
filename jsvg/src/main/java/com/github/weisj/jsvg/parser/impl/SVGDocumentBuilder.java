@@ -45,7 +45,6 @@ public final class SVGDocumentBuilder {
     private final @NotNull Deque<@NotNull ParsedElement> currentNodeStack = new ArrayDeque<>();
 
     private final @NotNull ParserProvider parserProvider;
-    private final @NotNull LoadHelper loadHelper;
     private final @NotNull NodeSupplier nodeSupplier;
 
     private ParsedElement rootNode;
@@ -55,11 +54,11 @@ public final class SVGDocumentBuilder {
             @NotNull LoaderContext loaderContext,
             @NotNull NodeSupplier nodeSupplier) {
         this.parserProvider = loaderContext.parserProvider();
-        this.loadHelper = new LoadHelper(
+        LoadHelper loadHelper = new LoadHelper(
                 new AttributeParser(parserProvider.createPaintParser()),
                 loaderContext);
         this.nodeSupplier = nodeSupplier;
-        this.parsedDocument = new ParsedDocument(rootURI, loaderContext);
+        this.parsedDocument = new ParsedDocument(rootURI, loaderContext, loadHelper);
     }
 
     @ApiStatus.Internal
@@ -86,7 +85,7 @@ public final class SVGDocumentBuilder {
         @Nullable SVGNode newNode = nodeSupplier.create(tagName);
         if (newNode == null) return false;
 
-        AttributeNode attributeNode = new AttributeNode(tagName, attributes, styleSheets, loadHelper);
+        AttributeNode attributeNode = new AttributeNode(tagName, attributes, styleSheets);
         String id = attributes.get("id");
         ParsedElement parsedElement = new ParsedElement(id, parsedDocument, parentElement, attributeNode, newNode);
         attributeNode.setElement(parsedElement);
@@ -148,16 +147,9 @@ public final class SVGDocumentBuilder {
         if (preProcessor != null) preProcessor.process(rootNode);
     }
 
-    void postProcess() {
-        if (rootNode == null) throw new IllegalStateException("No root node");
-        DomProcessor postProcessor = parserProvider.createPostProcessor();
-        if (postProcessor != null) postProcessor.process(rootNode);
-    }
-
     public @NotNull SVGDocument build() {
         preProcess(parsedDocument.rootURI());
         rootNode.build(0);
-        postProcess();
         validatePathCount();
         validateUseElementsDepth();
         return DocumentConstructorAccessor.constructor().create((SVG) rootNode.node());
