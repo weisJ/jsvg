@@ -41,13 +41,6 @@ public interface ParserProvider {
     CssParser createCssParser();
 
     @Nullable
-    DomProcessor createPreProcessor();
+    DomProcessor createPreProcessor(@Nullable URI documentUri);
 
-    @Nullable
-    default DomProcessor createPreProcessor(@Nullable URI documentUri) {
-        return createPreProcessor();
-    }
-
-    @Nullable
-    DomProcessor createPostProcessor();
 }

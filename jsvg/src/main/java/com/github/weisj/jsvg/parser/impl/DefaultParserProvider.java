@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
+import java.net.URI;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,12 +45,7 @@ public final class DefaultParserProvider implements ParserProvider {
     }
 
     @Override
-    public @Nullable DomProcessor createPreProcessor() {
-        return null;
-    }
-
-    @Override
-    public @Nullable DomProcessor createPostProcessor() {
+    public @Nullable DomProcessor createPreProcessor(@Nullable URI documentUri) {
         return null;
     }
 }
