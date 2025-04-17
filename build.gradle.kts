@@ -305,7 +305,7 @@ allprojects {
                     windowTitle = "JSVG ${project.name} API"
                     header = "<b>JSVG</b>"
                     addBooleanOption("Xdoclint:none", true)
-                    addStringOption("source", "8")
+                    addStringOption("release", "8")
                     if (JavaVersion.current().isJava9Compatible) {
                         addBooleanOption("html5", true)
                         links("https://docs.oracle.com/javase/9/docs/api/")
