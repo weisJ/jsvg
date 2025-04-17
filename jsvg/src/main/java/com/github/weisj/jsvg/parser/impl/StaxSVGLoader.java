@@ -151,7 +151,7 @@ public final class StaxSVGLoader {
             }
             return builder;
         } catch (XMLStreamException e) {
-            LOGGER.log(Level.SEVERE, "Error while parsing SVG.", e);
+            LOGGER.log(Level.WARNING, "Error while parsing SVG.", e);
         } finally {
             reader.close();
         }

@@ -121,7 +121,7 @@ public final class ResourceUtil {
             // as "image"
         } catch (Exception e) {
             // Ignore this exception or display a warning or similar, for exceptions happening during decoding
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
         return image;
     }
