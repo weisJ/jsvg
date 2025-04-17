@@ -28,7 +28,6 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,10 +81,5 @@ public final class SVGLoader {
             LOGGER.log(Level.WARNING, "Could not load SVG ", e);
         }
         return null;
-    }
-
-    @ApiStatus.Internal
-    StaxSVGLoader loader() {
-        return loader;
     }
 }
