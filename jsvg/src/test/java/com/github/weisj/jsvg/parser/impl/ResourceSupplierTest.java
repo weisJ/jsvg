@@ -28,13 +28,13 @@ import org.junit.jupiter.api.Test;
 import com.github.weisj.jsvg.parser.ResourceSupplier;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 
-class UIFutureTest {
+class ResourceSupplierTest {
 
     @Test
-    void testValueUiFuture() {
+    void valueResourceSupplierTest() {
         Object o = new Object();
         ResourceSupplier<Object> future = new ValueResourceSupplier<>(o);
-        assertTrue(future.checkIfReady(NullPlatformSupport.INSTANCE));
-        assertEquals(o, future.get());
+        assertTrue(future.get(NullPlatformSupport.INSTANCE).isPresent());
+        assertEquals(o, future.get(NullPlatformSupport.INSTANCE).get());
     }
 }
