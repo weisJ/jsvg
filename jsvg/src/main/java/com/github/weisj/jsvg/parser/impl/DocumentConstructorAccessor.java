@@ -35,6 +35,14 @@ public class DocumentConstructorAccessor {
 
     private static DocumentConstructor documentConstructor;
 
+    static {
+        try {
+            Class.forName(SVGDocument.class.getName());
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public static void setDocumentConstructor(@NotNull DocumentConstructor constructor) {
         if (documentConstructor != null) {
             throw new IllegalStateException("Document constructor already set");

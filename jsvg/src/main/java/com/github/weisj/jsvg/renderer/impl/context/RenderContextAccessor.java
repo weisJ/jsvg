@@ -86,6 +86,14 @@ public final class RenderContextAccessor {
 
     private static Accessor instance;
 
+    static {
+        try {
+            Class.forName(RenderContext.class.getName());
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private RenderContextAccessor() {}
 
     public static Accessor instance() {
