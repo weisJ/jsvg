@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -69,18 +70,19 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
                 cache.put(documentUri, cachedDocument);
             }
 
-            SVGDocumentBuilder builder = new StaxSVGLoader().parse(
-                    StreamUtil.createDocumentInputStream(documentUrl.openStream()),
-                    documentUri,
-                    document.loaderContext());
-            if (builder == null) return null;
-            builder.preProcess(documentUri);
+            try (InputStream is = StreamUtil.createDocumentInputStream(documentUrl.openStream())) {
+                SVGDocumentBuilder builder = new StaxSVGLoader().parse(
+                        is, documentUri, document.loaderContext());
 
-            ParsedDocument parsedDocument = builder.parsedDocument();
-            synchronized (cache) {
-                cachedDocument.document = parsedDocument;
+                if (builder == null) return null;
+                builder.preProcess(documentUri);
+
+                ParsedDocument parsedDocument = builder.parsedDocument();
+                synchronized (cache) {
+                    cachedDocument.document = parsedDocument;
+                }
+                return parsedDocument;
             }
-            return parsedDocument;
         } catch (Exception e) {
             LOGGER.warning(String.format("Failed to load external document: %s from %s - %s",
                     name, documentUri, e.getMessage()));

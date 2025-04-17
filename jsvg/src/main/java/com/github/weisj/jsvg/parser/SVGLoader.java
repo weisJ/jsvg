@@ -75,8 +75,8 @@ public final class SVGLoader {
      */
     public @Nullable SVGDocument load(@NotNull InputStream inputStream, @Nullable URI xmlBase,
             @NotNull LoaderContext loaderContext) {
-        try {
-            return loader.load(StreamUtil.createDocumentInputStream(inputStream), xmlBase, loaderContext);
+        try (InputStream is = StreamUtil.createDocumentInputStream(inputStream)) {
+            return loader.load(is, xmlBase, loaderContext);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Could not load SVG ", e);
         }

@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
@@ -40,7 +39,6 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,12 +85,11 @@ public final class StaxSVGLoader {
         }
     }
 
-    @ApiStatus.Internal
     @Nullable
     SVGDocumentBuilder parse(
             @Nullable InputStream inputStream,
             @Nullable URI xmlBase,
-            @NotNull LoaderContext loaderContext) throws IOException, XMLStreamException {
+            @NotNull LoaderContext loaderContext) throws XMLStreamException {
         if (inputStream == null) return null;
         XMLEventReader reader = createReader(inputStream);
         if (reader == null) return null;
@@ -157,7 +154,6 @@ public final class StaxSVGLoader {
             LOGGER.log(Level.SEVERE, "Error while parsing SVG.", e);
         } finally {
             reader.close();
-            inputStream.close();
         }
         return null;
     }
@@ -165,7 +161,7 @@ public final class StaxSVGLoader {
     public @Nullable SVGDocument load(
             @Nullable InputStream inputStream,
             @Nullable URI xmlBase,
-            @NotNull LoaderContext loaderContext) throws IOException, XMLStreamException {
+            @NotNull LoaderContext loaderContext) throws XMLStreamException {
         SVGDocumentBuilder builder = parse(inputStream, xmlBase, loaderContext);
         if (builder == null) return null;
         return builder.build();
