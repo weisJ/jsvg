@@ -26,15 +26,16 @@ import java.net.URI;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.parser.RawDocument;
 import com.github.weisj.jsvg.parser.ResourceLoader;
-import com.github.weisj.jsvg.parser.UIFuture;
+import com.github.weisj.jsvg.parser.ResourceSupplier;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.util.ResourceUtil;
 
 public final class SynchronousResourceLoader implements ResourceLoader {
     @Override
-    public @NotNull UIFuture<RenderableResource> loadImage(@NotNull ParsedDocument document, @NotNull URI uri)
+    public @NotNull ResourceSupplier<RenderableResource> loadImage(@NotNull RawDocument document, @NotNull URI uri)
             throws IOException {
-        return new ValueUIFuture<>(ResourceUtil.loadImage(document, uri));
+        return new ValueResourceSupplier<>(ResourceUtil.loadImage(document, uri));
     }
 }

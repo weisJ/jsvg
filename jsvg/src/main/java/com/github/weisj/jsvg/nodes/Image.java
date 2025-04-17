@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,9 +38,9 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.parser.UIFuture;
+import com.github.weisj.jsvg.parser.ResourceSupplier;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
-import com.github.weisj.jsvg.parser.impl.ValueUIFuture;
+import com.github.weisj.jsvg.parser.impl.ValueResourceSupplier;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.parser.resources.impl.MissingImageResource;
 import com.github.weisj.jsvg.renderer.MeasureContext;
@@ -63,7 +64,7 @@ public final class Image extends RenderableSVGNode {
     private PreserveAspectRatio preserveAspectRatio;
     private Overflow overflow;
 
-    private UIFuture<RenderableResource> imgResource;
+    private ResourceSupplier<RenderableResource> imgResource;
 
 
     @Override
@@ -102,10 +103,13 @@ public final class Image extends RenderableSVGNode {
 
     private @Nullable RenderableResource fetchImage(@NotNull RenderContext context) {
         if (imgResource == null) return null;
-        if (imgResource instanceof ValueUIFuture) return imgResource.get();
-        if (!imgResource.checkIfReady(context.platformSupport())) return null;
-        RenderableResource resource = imgResource.get();
-        if (resource != null) imgResource = new ValueUIFuture<>(resource);
+        if (imgResource instanceof ValueResourceSupplier) {
+            return ((ValueResourceSupplier<RenderableResource>) imgResource).get();
+        }
+        Optional<@Nullable RenderableResource> optionalResource = imgResource.get(context.platformSupport());
+        if (!optionalResource.isPresent()) return null;
+        RenderableResource resource = optionalResource.get();
+        imgResource = new ValueResourceSupplier<>(resource);
         return resource;
     }
 

@@ -19,32 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.impl;
+package com.github.weisj.jsvg.parser;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.parser.ResourceLoader;
-import com.github.weisj.jsvg.parser.UIFuture;
-import com.github.weisj.jsvg.parser.resources.RenderableResource;
-import com.github.weisj.jsvg.util.ResourceUtil;
+import com.github.weisj.jsvg.renderer.PlatformSupport;
 
-public final class AsynchronousResourceLoader implements ResourceLoader {
-    private static final Logger LOGGER = Logger.getLogger(AsynchronousResourceLoader.class.getName());
+public interface ResourceSupplier<T> {
 
-    @Override
-    public @NotNull UIFuture<RenderableResource> loadImage(@NotNull ParsedDocument document, @NotNull URI uri) {
-        return new SwingUIFuture<>(() -> {
-            try {
-                return ResourceUtil.loadImage(document, uri);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
-                return null;
-            }
-        });
-    }
+    @NotNull
+    Optional<@NotNull T> get(@NotNull PlatformSupport platformSupport);
 }

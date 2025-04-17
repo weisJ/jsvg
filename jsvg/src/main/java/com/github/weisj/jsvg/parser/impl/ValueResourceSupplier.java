@@ -21,25 +21,26 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
+import java.util.Optional;
+
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.parser.UIFuture;
+import com.github.weisj.jsvg.parser.ResourceSupplier;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 
-public final class ValueUIFuture<T> implements UIFuture<T> {
+public final class ValueResourceSupplier<T> implements ResourceSupplier<T> {
 
     private final T value;
 
-    public ValueUIFuture(T value) {
+    public ValueResourceSupplier(T value) {
         this.value = value;
     }
 
     @Override
-    public boolean checkIfReady(@NotNull PlatformSupport platformSupport) {
-        return true;
+    public @NotNull Optional<@NotNull T> get(@NotNull PlatformSupport platformSupport) {
+        return Optional.of(value);
     }
 
-    @Override
     public T get() {
         return value;
     }

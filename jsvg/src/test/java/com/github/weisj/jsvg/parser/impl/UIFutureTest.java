@@ -23,56 +23,18 @@ package com.github.weisj.jsvg.parser.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.awt.image.ImageObserver;
-import java.util.concurrent.CountDownLatch;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.parser.UIFuture;
+import com.github.weisj.jsvg.parser.ResourceSupplier;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
-import com.github.weisj.jsvg.renderer.PlatformSupport;
 
 class UIFutureTest {
 
     @Test
     void testValueUiFuture() {
         Object o = new Object();
-        UIFuture<Object> future = new ValueUIFuture<>(o);
+        ResourceSupplier<Object> future = new ValueResourceSupplier<>(o);
         assertTrue(future.checkIfReady(NullPlatformSupport.INSTANCE));
-        assertEquals(o, future.get());
-    }
-
-    @Test
-    void testSwingUIFuture() {
-        Object o = new Object();
-        CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch repaintLatch = new CountDownLatch(1);
-        PlatformSupport platformSupport = new PlatformSupport() {
-            @Override
-            public @Nullable ImageObserver imageObserver() {
-                return null;
-            }
-
-            @Override
-            public @NotNull TargetSurface targetSurface() {
-                return repaintLatch::countDown;
-            }
-        };
-
-        UIFuture<Object> future = new SwingUIFuture<>(() -> {
-            try {
-                startLatch.await();
-            } catch (InterruptedException e) {
-                return e;
-            }
-            return o;
-        });
-        assertFalse(future.checkIfReady(platformSupport));
-        startLatch.countDown();
-        assertDoesNotThrow(() -> repaintLatch.await());
-        assertTrue(future.checkIfReady(platformSupport));
         assertEquals(o, future.get());
     }
 }
