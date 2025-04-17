@@ -400,12 +400,12 @@ class CustomColorsProcessor implements DomProcessor {
     }
 
     @Override
-    public void process(@NotNull ParsedElement root) {
+    public void process(@NotNull RawElement root) {
         processImpl(root);
         root.children().forEach(this::process);
     }
 
-    private void processImpl(ParsedElement element) {
+    private void processImpl(@NotNull RawElement element) {
         // Obtain the id of the element
         // Note: There that Element also has a node() method to obtain the SVGNode. However during the pre-processing
         // phase the SVGNode is not yet fully parsed and doesn't contain any non-defaulted information.
@@ -419,7 +419,9 @@ class CustomColorsProcessor implements DomProcessor {
             DynamicAWTSvgPaint dynamicColor = customColors.get(nodeId);
 
             // This assumed that the fill attribute is a color and not a gradient or pattern.
-            Color color = attributeNode.getColor("fill");
+            Color color = element.document().paintParser()
+                .parseColor(element.attribute("fill", "black"));
+            if (color == null) color = Color.BLACK;
 
             dynamicColor.setColor(color);
 
@@ -427,10 +429,10 @@ class CustomColorsProcessor implements DomProcessor {
             String uniqueIdForDynamicColor = UUID.randomUUID().toString();
 
             // Register the dynamic color as a custom element
-            element.registerNamedElement(uniqueIdForDynamicColor, dynamicColor);
+            element.document().registerNamedElement(uniqueIdForDynamicColor, dynamicColor);
 
             // Refer to the custom element as the fill attribute
-            attributeNode.attributes().put("fill", uniqueIdForDynamicColor);
+            element.setAttribute("fill", uniqueIdForDynamicColor);
 
             // Note: This class can easily be adapted to also support changing the stroke color.
             // With a bit more work it could also support changing the color of gradients and patterns.
