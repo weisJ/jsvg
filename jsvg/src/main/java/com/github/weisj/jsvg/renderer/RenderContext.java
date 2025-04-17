@@ -175,7 +175,7 @@ public final class RenderContext {
         this.contextElementAttributes = contextElementAttributes;
     }
 
-    enum EstablishRootMeasure {
+    private enum EstablishRootMeasure {
         YES,
         NO
     }
