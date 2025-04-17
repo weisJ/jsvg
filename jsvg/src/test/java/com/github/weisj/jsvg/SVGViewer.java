@@ -269,7 +269,7 @@ public final class SVGViewer {
                         return loader.load(url, loaderContext);
                     });
                     if (document != null) {
-                        animationPlayer.setAnimationPeriod(document.animationPeriod());
+                        animationPlayer.setAnimation(document.animation());
                         restartAnimation();
                     }
                 }

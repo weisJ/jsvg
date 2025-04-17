@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.AnimationPeriod;
+import com.github.weisj.jsvg.renderer.animation.Animation;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 
 @ApiStatus.Experimental
@@ -41,23 +42,23 @@ public class AnimationPlayer {
 
     private final Timer animationTimer = new Timer(1 / 60, e -> tick());
     private final @NotNull FrameAction action;
-    private @NotNull AnimationPeriod animationPeriod;
+    private @NotNull Animation animation;
     private long startTime;
     private long elapsedTime;
 
     public AnimationPlayer(@NotNull FrameAction action) {
-        this.animationPeriod = NO_ANIMATION;
+        this.animation = NO_ANIMATION;
         this.action = action;
 
         animationTimer.setCoalesce(true);
         animationTimer.setRepeats(true);
     }
 
-    public void setAnimationPeriod(@Nullable AnimationPeriod animationPeriod) {
-        this.animationPeriod = animationPeriod != null
-                ? animationPeriod
+    public void setAnimation(@Nullable Animation animation) {
+        this.animation = animation != null
+                ? animation
                 : NO_ANIMATION;
-        animationTimer.setInitialDelay((int) this.animationPeriod.startTime());
+        animationTimer.setInitialDelay((int) this.animation.startTime());
     }
 
     public @NotNull AnimationState animationState() {
@@ -87,7 +88,7 @@ public class AnimationPlayer {
     }
 
     public void resume() {
-        if (elapsedTime() >= animationPeriod.duration()) return;
+        if (elapsedTime() >= animation.duration()) return;
         startTime = System.currentTimeMillis();
         animationTimer.start();
     }
@@ -100,7 +101,7 @@ public class AnimationPlayer {
 
     private void tick() {
         long time = elapsedTime();
-        long maxTime = animationPeriod.endTime();
+        long maxTime = animation.endTime();
         if (time >= maxTime) {
             animationTimer.stop();
             time = maxTime;

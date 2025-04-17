@@ -160,7 +160,7 @@ public final class SVGDocumentBuilder {
         postProcess();
         validatePathCount();
         validateUseElementsDepth();
-        return new SVGDocument((SVG) rootNode.node());
+        return DocumentConstructorAccessor.constructor().create((SVG) rootNode.node());
     }
 
     private void processStyleSheets() {

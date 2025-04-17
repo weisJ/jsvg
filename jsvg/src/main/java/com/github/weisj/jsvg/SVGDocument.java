@@ -31,13 +31,14 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.nodes.SVG;
+import com.github.weisj.jsvg.parser.impl.DocumentConstructorAccessor;
 import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.animation.Animation;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.impl.*;
@@ -52,7 +53,11 @@ public final class SVGDocument {
     private final @NotNull SVG root;
     private final @NotNull FloatSize size;
 
-    public SVGDocument(@NotNull SVG root) {
+    static {
+        DocumentConstructorAccessor.setDocumentConstructor(SVGDocument::new);
+    }
+
+    private SVGDocument(@NotNull SVG root) {
         this.root = root;
         float em = SVGFont.defaultFontSize();
         this.size = root.sizeForTopLevel(em, SVGFont.exFromEm(em));
@@ -77,10 +82,10 @@ public final class SVGDocument {
     }
 
     public boolean isAnimated() {
-        return root.animationPeriod().duration() > 0;
+        return animation().duration() > 0;
     }
 
-    public @NotNull AnimationPeriod animationPeriod() {
+    public @NotNull Animation animation() {
         return root.animationPeriod();
     }
 

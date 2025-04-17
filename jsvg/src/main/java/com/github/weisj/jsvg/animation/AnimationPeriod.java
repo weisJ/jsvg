@@ -27,8 +27,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.time.Interval;
+import com.github.weisj.jsvg.renderer.animation.Animation;
 
-public final class AnimationPeriod {
+public final class AnimationPeriod implements Animation {
     private final long start;
     private final long end;
     private final boolean freeze;
@@ -63,14 +64,17 @@ public final class AnimationPeriod {
         return new AnimationPeriod(animationStartTime, animationEndTime, animationFreezes);
     }
 
+    @Override
     public long duration() {
         return end - start;
     }
 
+    @Override
     public long startTime() {
         return start;
     }
 
+    @Override
     public long endTime() {
         return end;
     }
