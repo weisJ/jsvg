@@ -46,6 +46,13 @@ public interface RawElement {
     @Nullable
     String attribute(@NotNull String name);
 
+    default @NotNull String attribute(@NotNull String name, @NotNull String fallback) {
+        String value = attribute(name);
+        return value != null ? value : fallback;
+    }
+
+    void setAttribute(@NotNull String name, @Nullable String value);
+
     @Nullable
     RawElement parent();
 }

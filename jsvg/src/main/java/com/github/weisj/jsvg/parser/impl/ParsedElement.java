@@ -103,6 +103,15 @@ public final class ParsedElement implements RawElement {
         return attributeNode.getValue(name);
     }
 
+    @Override
+    public void setAttribute(@NotNull String name, @Nullable String value) {
+        if (value == null) {
+            attributeNode.attributes().remove(name);
+        } else {
+            attributeNode.attributes().put(name, value);
+        }
+    }
+
     public @NotNull Map<String, List<ParsedElement>> animationElements() {
         return animationElements;
     }

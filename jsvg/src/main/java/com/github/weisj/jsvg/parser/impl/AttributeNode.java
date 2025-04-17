@@ -78,25 +78,25 @@ public final class AttributeNode {
     private final @NotNull Map<String, String> attributes;
     private final @NotNull List<@NotNull StyleSheet> styleSheets;
 
-    private final @NotNull LoadHelper loadHelper;
     private ParsedElement element = null;
-    private List<@NotNull String> classNames = null;
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
-            @NotNull List<@NotNull StyleSheet> styleSheets,
-            @NotNull LoadHelper loadHelper) {
+            @NotNull List<@NotNull StyleSheet> styleSheets) {
         this.tagName = tagName;
         this.attributes = attributes;
         this.styleSheets = styleSheets;
-        this.loadHelper = loadHelper;
     }
 
     void setElement(ParsedElement element) {
         this.element = element;
     }
 
+    private @NotNull LoadHelper loadHelper() {
+        return document().loadHelper();
+    }
+
     public @NotNull AttributeNode copy() {
-        AttributeNode node = new AttributeNode(tagName, new HashMap<>(attributes), styleSheets, loadHelper);
+        AttributeNode node = new AttributeNode(tagName, new HashMap<>(attributes), styleSheets);
         node.setElement(element);
         return node;
     }
@@ -153,7 +153,7 @@ public final class AttributeNode {
 
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
         if (value == null) return null;
-        return loadHelper.elementLoader().loadElement(type, value, document());
+        return loadHelper().elementLoader().loadElement(type, value, document());
     }
 
     private <T> T recordIndirectChild(T child, String value, ElementRelation relation) {
@@ -196,12 +196,9 @@ public final class AttributeNode {
     }
 
     public @NotNull List<@NotNull String> classNames() {
-        if (classNames == null) {
-            @NotNull String @NotNull [] classes = getStringList("class", SeparatorMode.WHITESPACE_ONLY);
-            if (classes.length == 0) return Collections.emptyList();
-            classNames = Arrays.asList(classes);
-        }
-        return classNames;
+        @NotNull String @NotNull [] classes = getStringList("class", SeparatorMode.WHITESPACE_ONLY);
+        if (classes.length == 0) return Collections.emptyList();
+        return Arrays.asList(classes);
     }
 
     public @Nullable String getValue(@NotNull String key) {
@@ -216,7 +213,7 @@ public final class AttributeNode {
     public @Nullable Color getColor(@NotNull String key, @Nullable Color fallback) {
         String value = getValue(key);
         if (value == null) return fallback;
-        Color c = loadHelper.attributeParser().paintParser().parseColor(value.toLowerCase(Locale.ENGLISH));
+        Color c = loadHelper().attributeParser().paintParser().parseColor(value.toLowerCase(Locale.ENGLISH));
         return c != null ? c : fallback;
     }
 
@@ -252,7 +249,7 @@ public final class AttributeNode {
         if (value == null) return null;
         SVGPaint paint = getElementByUrl(SVGPaint.class, value);
         if (paint != null) return paint;
-        return loadHelper.attributeParser().parsePaint(value, this);
+        return loadHelper().attributeParser().parsePaint(value, this);
     }
 
     public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension) {
@@ -300,11 +297,11 @@ public final class AttributeNode {
     }
 
     public @NotNull Duration getDuration(@NotNull String key, @NotNull Duration fallback) {
-        return loadHelper.attributeParser().parseTimeOffsetValue(getValue(key), fallback);
+        return loadHelper().attributeParser().parseTimeOffsetValue(getValue(key), fallback);
     }
 
     private @NotNull Length getLengthInternal(@NotNull String key, @NotNull PercentageDimension dimension) {
-        return loadHelper.attributeParser().parseLength(getValue(key), FALLBACK_LENGTH, dimension);
+        return loadHelper().attributeParser().parseLength(getValue(key), FALLBACK_LENGTH, dimension);
     }
 
     public @NotNull Length getHorizontalReferenceLength(@NotNull String key) {
@@ -325,13 +322,13 @@ public final class AttributeNode {
         } else if (bottomRight.equals(value)) {
             return BottomOrRight;
         } else {
-            return loadHelper.attributeParser().parseLength(value, Length.ZERO, dimension);
+            return loadHelper().attributeParser().parseLength(value, Length.ZERO, dimension);
         }
     }
 
     @Contract("_,!null -> !null")
     public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
-        return loadHelper.attributeParser().parsePercentage(getValue(key), fallback);
+        return loadHelper().attributeParser().parsePercentage(getValue(key), fallback);
     }
 
     public @Nullable PercentageValue getPercentage(@NotNull String key, Inherited inherited, Animatable animatable) {
@@ -342,7 +339,7 @@ public final class AttributeNode {
     public @Nullable PercentageValue getPercentage(@NotNull String key, @Nullable PercentageValue fallback,
             Inherited inherited, Animatable animatable) {
         PercentageValue value =
-                loadHelper.attributeParser().parsePercentage(getValue(key), FALLBACK_PERCENTAGE);
+                loadHelper().attributeParser().parsePercentage(getValue(key), FALLBACK_PERCENTAGE);
         if (value == FALLBACK_PERCENTAGE) {
             value = fallback;
         }
@@ -371,16 +368,16 @@ public final class AttributeNode {
     @Contract("_,!null,_ -> !null")
     public @NotNull Length @Nullable [] getLengthList(@NotNull String key, @NotNull Length @Nullable [] fallback,
             @NotNull PercentageDimension dimension) {
-        return loadHelper.attributeParser().parseLengthList(getValue(key), fallback, dimension);
+        return loadHelper().attributeParser().parseLengthList(getValue(key), fallback, dimension);
     }
 
     public float @NotNull [] getFloatList(@NotNull String key) {
-        return loadHelper.attributeParser().parseFloatList(getValue(key));
+        return loadHelper().attributeParser().parseFloatList(getValue(key));
     }
 
     public @NotNull FloatListValue getFloatList(@NotNull String key, Inherited inherited, Animatable animatable) {
         String value = getValue(key);
-        float[] initialRaw = loadHelper.attributeParser().parseFloatList(getValue(key));
+        float[] initialRaw = loadHelper().attributeParser().parseFloatList(getValue(key));
 
         FloatListValue initial = value != null
                 ? new ConstantFloatList(initialRaw)
@@ -400,15 +397,15 @@ public final class AttributeNode {
     }
 
     public double @NotNull [] getDoubleList(@NotNull String key) {
-        return loadHelper.attributeParser().parseDoubleList(getValue(key));
+        return loadHelper().attributeParser().parseDoubleList(getValue(key));
     }
 
     public <E extends Enum<E>> @NotNull E getEnum(@NotNull String key, @NotNull E fallback) {
-        return loadHelper.attributeParser().parseEnum(getValue(key), fallback);
+        return loadHelper().attributeParser().parseEnum(getValue(key), fallback);
     }
 
     public <E extends Enum<E>> @Nullable E getEnumNullable(@NotNull String key, @NotNull Class<E> enumType) {
-        return loadHelper.attributeParser().parseEnum(getValue(key), enumType);
+        return loadHelper().attributeParser().parseEnum(getValue(key), enumType);
     }
 
     public @Nullable ClipPath getClipPath() {
@@ -442,7 +439,7 @@ public final class AttributeNode {
     }
 
     public @Nullable TransformValue parseTransform(@NotNull String key, Inherited inherited, Animatable animatable) {
-        List<TransformPart> parts = loadHelper.attributeParser().parseTransform(getValue(key));
+        List<TransformPart> parts = loadHelper().attributeParser().parseTransform(getValue(key));
         TransformValue value = parts != null
                 ? createTransformValueFromParts(parts)
                 : null;
@@ -474,11 +471,11 @@ public final class AttributeNode {
 
 
     public @NotNull String @NotNull [] getStringList(@NotNull String name, SeparatorMode separatorMode) {
-        return loadHelper.attributeParser().parseStringList(getValue(name), separatorMode);
+        return loadHelper().attributeParser().parseStringList(getValue(name), separatorMode);
     }
 
     public float getFloat(@NotNull String name, float fallback) {
-        return loadHelper.attributeParser().parseFloat(getValue(name), fallback);
+        return loadHelper().attributeParser().parseFloat(getValue(name), fallback);
     }
 
     public float getNonNegativeFloat(@NotNull String name, float fallback) {
@@ -488,7 +485,7 @@ public final class AttributeNode {
     }
 
     public int getInt(@NotNull String key, int fallback) {
-        return loadHelper.attributeParser().parseInt(getValue(key), fallback);
+        return loadHelper().attributeParser().parseInt(getValue(key), fallback);
     }
 
     public @Nullable String getHref() {
@@ -503,15 +500,15 @@ public final class AttributeNode {
     }
 
     public @NotNull AttributeParser parser() {
-        return loadHelper.attributeParser();
+        return loadHelper().attributeParser();
     }
 
     public @NotNull ResourceLoader resourceLoader() {
-        return loadHelper.resourceLoader();
+        return loadHelper().resourceLoader();
     }
 
     public @Nullable URI resolveResourceURI(@NotNull String url) {
-        return loadHelper.externalResourcePolicy().resolveResourceURI(document().rootURI(), url);
+        return loadHelper().externalResourcePolicy().resolveResourceURI(document().rootURI(), url);
     }
 
     private <T extends BaseAnimationNode> List<@NotNull T> animateNodes(@NotNull String property, Class<T> type) {
