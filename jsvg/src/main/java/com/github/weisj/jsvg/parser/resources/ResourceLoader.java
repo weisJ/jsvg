@@ -27,10 +27,10 @@ import java.net.URI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.parser.RawDocument;
+import com.github.weisj.jsvg.parser.DomDocument;
 
 public interface ResourceLoader {
 
     @Nullable
-    ResourceSupplier<RenderableResource> loadImage(@NotNull RawDocument document, @NotNull URI uri) throws IOException;
+    ResourceSupplier<RenderableResource> loadImage(@NotNull DomDocument document, @NotNull URI uri) throws IOException;
 }

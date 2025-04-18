@@ -400,12 +400,12 @@ class CustomColorsProcessor implements DomProcessor {
     }
 
     @Override
-    public void process(@NotNull RawElement root) {
+    public void process(@NotNull DomElement root) {
         processImpl(root);
         root.children().forEach(this::process);
     }
 
-    private void processImpl(@NotNull RawElement element) {
+    private void processImpl(@NotNull DomElement element) {
         // Obtain the id of the element
         // Note: There that Element also has a node() method to obtain the SVGNode. However during the pre-processing
         // phase the SVGNode is not yet fully parsed and doesn't contain any non-defaulted information.
@@ -413,9 +413,6 @@ class CustomColorsProcessor implements DomProcessor {
 
         // Check if this element is one of the elements we want to change the color of
         if (customColors.containsKey(nodeId)) {
-            // The attribute node contains all the attributes of the element specified in the markup
-            // Even those which aren't valid for the element
-            AttributeNode attributeNode = element.attributeNode();
             DynamicAWTSvgPaint dynamicColor = customColors.get(nodeId);
 
             // This assumed that the fill attribute is a color and not a gradient or pattern.

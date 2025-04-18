@@ -25,8 +25,8 @@ package com.github.weisj.jsvg.parser.impl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.parser.DomDocument;
 import com.github.weisj.jsvg.parser.ElementLoader;
-import com.github.weisj.jsvg.parser.RawDocument;
 
 class DefaultElementLoader implements ElementLoader {
 
@@ -48,12 +48,12 @@ class DefaultElementLoader implements ElementLoader {
     }
 
     @Override
-    public <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value, @NotNull RawDocument document) {
+    public <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value, @NotNull DomDocument document) {
         String url = ParserUtil.parseUrl(value);
         if (url == null) return null;
         if (url.contains("#")) {
             String[] parts = url.split("#", 2);
-            RawDocument parsedDocument = documentLoader.resolveDocument(document, parts[0]);
+            DomDocument parsedDocument = documentLoader.resolveDocument(document, parts[0]);
             if (parsedDocument == null) return null;
             return parsedDocument.getElementById(type, parts[1]);
         }
@@ -62,12 +62,12 @@ class DefaultElementLoader implements ElementLoader {
 
     interface DocumentLoader {
         @Nullable
-        RawDocument resolveDocument(@NotNull RawDocument document, @NotNull String name);
+        DomDocument resolveDocument(@NotNull DomDocument document, @NotNull String name);
     }
 
     private static class DefaultDocumentLoader implements DocumentLoader {
         @Override
-        public @Nullable RawDocument resolveDocument(@NotNull RawDocument document, @NotNull String name) {
+        public @Nullable DomDocument resolveDocument(@NotNull DomDocument document, @NotNull String name) {
             if (name.isEmpty()) return document;
             return null;
         }

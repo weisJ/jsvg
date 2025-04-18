@@ -31,9 +31,9 @@ import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.parser.RawElement;
+import com.github.weisj.jsvg.parser.DomElement;
 
-public final class ParsedElement implements RawElement {
+public final class ParsedElement implements DomElement {
 
     private enum BuildStatus {
         NOT_BUILT,

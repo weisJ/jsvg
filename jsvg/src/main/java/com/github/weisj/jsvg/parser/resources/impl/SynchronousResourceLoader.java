@@ -26,7 +26,7 @@ import java.net.URI;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.parser.RawDocument;
+import com.github.weisj.jsvg.parser.DomDocument;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.parser.resources.ResourceSupplier;
@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.util.ResourceUtil;
 
 public final class SynchronousResourceLoader implements ResourceLoader {
     @Override
-    public @NotNull ResourceSupplier<RenderableResource> loadImage(@NotNull RawDocument document, @NotNull URI uri)
+    public @NotNull ResourceSupplier<RenderableResource> loadImage(@NotNull DomDocument document, @NotNull URI uri)
             throws IOException {
         return new ValueResourceSupplier<>(ResourceUtil.loadImage(document, uri));
     }

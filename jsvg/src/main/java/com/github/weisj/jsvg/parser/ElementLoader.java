@@ -27,5 +27,5 @@ import org.jetbrains.annotations.Nullable;
 
 public interface ElementLoader {
 
-    <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value, @NotNull RawDocument document);
+    <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value, @NotNull DomDocument document);
 }

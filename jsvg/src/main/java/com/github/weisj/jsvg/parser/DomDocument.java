@@ -26,13 +26,10 @@ import java.net.URI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface RawDocument {
+public interface DomDocument {
 
     @NotNull
     LoaderContext loaderContext();
-
-    @NotNull
-    PaintParser paintParser();
 
     void registerNamedElement(@NotNull String name, @Nullable Object element);
 

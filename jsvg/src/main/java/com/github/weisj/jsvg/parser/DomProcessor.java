@@ -26,5 +26,5 @@ import org.jetbrains.annotations.NotNull;
 @FunctionalInterface
 public interface DomProcessor {
 
-    void process(@NotNull RawElement root);
+    void process(@NotNull DomElement root);
 }

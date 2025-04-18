@@ -31,7 +31,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.parser.RawDocument;
+import com.github.weisj.jsvg.parser.DomDocument;
 
 
 @ApiStatus.Experimental
@@ -41,12 +41,12 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
     private final @NotNull Map<URI, CachedDocument> cache = new HashMap<>();
 
     @Override
-    public @Nullable RawDocument resolveDocument(@NotNull RawDocument document, @NotNull String name) {
+    public @Nullable DomDocument resolveDocument(@NotNull DomDocument document, @NotNull String name) {
         if (name.isEmpty()) return document;
         return locateDocument(document, name);
     }
 
-    private @Nullable RawDocument locateDocument(@NotNull RawDocument document, @NotNull String name) {
+    private @Nullable DomDocument locateDocument(@NotNull DomDocument document, @NotNull String name) {
         URI documentUri = document
                 .loaderContext()
                 .externalResourcePolicy()

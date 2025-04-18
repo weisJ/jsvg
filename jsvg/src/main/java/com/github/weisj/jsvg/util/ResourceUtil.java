@@ -41,7 +41,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.parser.RawDocument;
+import com.github.weisj.jsvg.parser.DomDocument;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.parser.resources.impl.ImageResource;
@@ -58,7 +58,7 @@ public final class ResourceUtil {
             .map(s -> "image/" + s.toLowerCase(Locale.ENGLISH))
             .collect(Collectors.toSet());
 
-    public static @Nullable RenderableResource loadImage(@NotNull RawDocument document, @NotNull URI uri)
+    public static @Nullable RenderableResource loadImage(@NotNull DomDocument document, @NotNull URI uri)
             throws IOException {
         URI resourceUri = document
                 .loaderContext()

@@ -26,7 +26,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface RawElement {
+public interface DomElement {
 
     @Nullable
     String id();
@@ -38,10 +38,10 @@ public interface RawElement {
     List<@NotNull String> classNames();
 
     @NotNull
-    RawDocument document();
+    DomDocument document();
 
     @NotNull
-    List<? extends @NotNull RawElement> children();
+    List<? extends @NotNull DomElement> children();
 
     @Nullable
     String attribute(@NotNull String name);
@@ -54,5 +54,5 @@ public interface RawElement {
     void setAttribute(@NotNull String name, @Nullable String value);
 
     @Nullable
-    RawElement parent();
+    DomElement parent();
 }
