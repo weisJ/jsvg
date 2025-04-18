@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.impl;
+package com.github.weisj.jsvg.parser.resources.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.parser.ResourcePolicy;
+import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 
 public class DefaultResourcePolicy implements ResourcePolicy {
     private static final Logger LOGGER = Logger.getLogger(DefaultResourcePolicy.class.getName());
@@ -44,7 +44,7 @@ public class DefaultResourcePolicy implements ResourcePolicy {
         this.flags = flags;
     }
 
-    boolean allowsExternalResources() {
+    public boolean allowsExternalResources() {
         return (flags & FLAG_ALLOW_RELATIVE) != 0 || (flags & FLAG_ALLOW_ABSOLUTE) != 0;
     }
 

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.impl;
+package com.github.weisj.jsvg.parser.resources.impl;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,9 +27,9 @@ import java.net.URI;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.RawDocument;
-import com.github.weisj.jsvg.parser.ResourceLoader;
-import com.github.weisj.jsvg.parser.ResourceSupplier;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
+import com.github.weisj.jsvg.parser.resources.ResourceLoader;
+import com.github.weisj.jsvg.parser.resources.ResourceSupplier;
 import com.github.weisj.jsvg.util.ResourceUtil;
 
 public final class SynchronousResourceLoader implements ResourceLoader {

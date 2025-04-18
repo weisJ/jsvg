@@ -35,7 +35,7 @@ import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult;
 import com.github.weisj.jsvg.ReferenceTest.RenderType;
 import com.github.weisj.jsvg.parser.LoaderContext;
-import com.github.weisj.jsvg.parser.ResourcePolicy;
+import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 
 class ImageTest {
 

@@ -24,6 +24,10 @@ package com.github.weisj.jsvg.parser.impl;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.*;
+import com.github.weisj.jsvg.parser.resources.ResourceLoader;
+import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
+import com.github.weisj.jsvg.parser.resources.impl.DefaultResourcePolicy;
+import com.github.weisj.jsvg.parser.resources.impl.SynchronousResourceLoader;
 
 
 public final class MutableLoaderContext implements LoaderContext, LoaderContext.Builder {

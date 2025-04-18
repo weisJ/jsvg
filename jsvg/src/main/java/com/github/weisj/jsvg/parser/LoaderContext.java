@@ -25,6 +25,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.impl.*;
+import com.github.weisj.jsvg.parser.resources.ResourceLoader;
+import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 
 public interface LoaderContext {
     @NotNull

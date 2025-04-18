@@ -19,29 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.impl;
+package com.github.weisj.jsvg.parser.resources;
 
-import java.util.Optional;
+import java.io.IOException;
+import java.net.URI;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.parser.ResourceSupplier;
-import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.parser.RawDocument;
 
-public final class ValueResourceSupplier<T> implements ResourceSupplier<T> {
+public interface ResourceLoader {
 
-    private final T value;
-
-    public ValueResourceSupplier(T value) {
-        this.value = value;
-    }
-
-    @Override
-    public @NotNull Optional<@NotNull T> get(@NotNull PlatformSupport platformSupport) {
-        return Optional.of(value);
-    }
-
-    public T get() {
-        return value;
-    }
+    @Nullable
+    ResourceSupplier<RenderableResource> loadImage(@NotNull RawDocument document, @NotNull URI uri) throws IOException;
 }

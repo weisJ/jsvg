@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser;
+package com.github.weisj.jsvg.parser.resources;
 
 import java.net.URI;
 
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.parser.impl.DefaultResourcePolicy;
+import com.github.weisj.jsvg.parser.resources.impl.DefaultResourcePolicy;
 
 @ApiStatus.Experimental
 public interface ResourcePolicy {

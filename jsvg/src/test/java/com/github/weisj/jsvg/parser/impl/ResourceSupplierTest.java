@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.parser.ResourceSupplier;
+import com.github.weisj.jsvg.parser.resources.ResourceSupplier;
+import com.github.weisj.jsvg.parser.resources.impl.ValueResourceSupplier;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 
 class ResourceSupplierTest {

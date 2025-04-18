@@ -25,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.ElementLoader;
 import com.github.weisj.jsvg.parser.LoaderContext;
-import com.github.weisj.jsvg.parser.ResourceLoader;
-import com.github.weisj.jsvg.parser.ResourcePolicy;
+import com.github.weisj.jsvg.parser.resources.ResourceLoader;
+import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 
 public final class LoadHelper {
     private final @NotNull AttributeParser attributeParser;
