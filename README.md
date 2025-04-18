@@ -419,7 +419,7 @@ class CustomColorsProcessor implements DomProcessor {
             DynamicAWTSvgPaint dynamicColor = customColors.get(nodeId);
 
             // This assumed that the fill attribute is a color and not a gradient or pattern.
-            Color color = element.document().paintParser()
+            Color color = element.document().loaderContext().paintParser()
                 .parseColor(element.attribute("fill", "black"));
             if (color == null) color = Color.BLACK;
 

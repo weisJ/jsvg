@@ -45,14 +45,7 @@ public final class SVGLoader {
     private final StaxSVGLoader loader = new StaxSVGLoader(NODE_SUPPLIER);
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {
-        return load(xmlBase, new DefaultParserProvider());
-    }
-
-
-    public @Nullable SVGDocument load(@NotNull URL xmlBase, @NotNull ParserProvider parserProvider) {
-        return load(xmlBase, LoaderContext.builder()
-                .parserProvider(parserProvider)
-                .build());
+        return load(xmlBase, LoaderContext.createDefault());
     }
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase, @NotNull LoaderContext loaderContext) {

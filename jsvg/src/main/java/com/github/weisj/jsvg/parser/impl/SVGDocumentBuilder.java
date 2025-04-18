@@ -33,7 +33,6 @@ import com.github.weisj.jsvg.nodes.*;
 import com.github.weisj.jsvg.nodes.container.CommonRenderableContainerNode;
 import com.github.weisj.jsvg.parser.DomProcessor;
 import com.github.weisj.jsvg.parser.LoaderContext;
-import com.github.weisj.jsvg.parser.ParserProvider;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
 
@@ -44,7 +43,7 @@ public final class SVGDocumentBuilder {
     private final @NotNull List<@NotNull StyleSheet> styleSheets = new ArrayList<>();
     private final @NotNull Deque<@NotNull ParsedElement> currentNodeStack = new ArrayDeque<>();
 
-    private final @NotNull ParserProvider parserProvider;
+    private final @NotNull LoaderContext loaderContext;
     private final @NotNull NodeSupplier nodeSupplier;
 
     private ParsedElement rootNode;
@@ -53,10 +52,10 @@ public final class SVGDocumentBuilder {
             @Nullable URI rootURI,
             @NotNull LoaderContext loaderContext,
             @NotNull NodeSupplier nodeSupplier) {
-        this.parserProvider = loaderContext.parserProvider();
         LoadHelper loadHelper = new LoadHelper(
-                new AttributeParser(parserProvider.createPaintParser()),
+                new AttributeParser(loaderContext.paintParser()),
                 loaderContext);
+        this.loaderContext = loaderContext;
         this.nodeSupplier = nodeSupplier;
         this.parsedDocument = new ParsedDocument(rootURI, loaderContext, loadHelper);
     }
@@ -139,16 +138,16 @@ public final class SVGDocumentBuilder {
         }
     }
 
-    void preProcess(@Nullable URI documentUri) {
+    void preProcess() {
         if (rootNode == null) throw new IllegalStateException("No root node");
         processStyleSheets();
 
-        DomProcessor preProcessor = parserProvider.createPreProcessor(documentUri);
+        DomProcessor preProcessor = loaderContext.preProcessor();
         if (preProcessor != null) preProcessor.process(rootNode);
     }
 
     public @NotNull SVGDocument build() {
-        preProcess(parsedDocument.rootURI());
+        preProcess();
         rootNode.build(0);
         validatePathCount();
         validateUseElementsDepth();
@@ -157,7 +156,7 @@ public final class SVGDocumentBuilder {
 
     private void processStyleSheets() {
         if (styleElements.isEmpty()) return;
-        CssParser cssParser = parserProvider.createCssParser();
+        CssParser cssParser = loaderContext.cssParser();
         for (Style styleElement : styleElements) {
             styleElement.parseStyleSheet(cssParser);
             styleSheets.add(styleElement.styleSheet());
