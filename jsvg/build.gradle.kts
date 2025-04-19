@@ -47,6 +47,7 @@ tasks {
                   com.github.weisj.jsvg.renderer,\
                   com.github.weisj.jsvg.renderer.animation,\
                   com.github.weisj.jsvg.renderer.awt,\
+                  com.github.weisj.jsvg.renderer.output,\
                   com.github.weisj.jsvg.ui,\
                   com.github.weisj.jsvg.view,\
 
