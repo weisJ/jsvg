@@ -31,8 +31,8 @@ import com.github.weisj.jsvg.animation.Track;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.renderer.MeasureContext;
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.output.Output;
 
 public class AnimatedPaint implements SVGPaint {
 

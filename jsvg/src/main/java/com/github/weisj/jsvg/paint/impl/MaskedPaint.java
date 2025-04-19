@@ -33,8 +33,8 @@ import java.awt.image.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.output.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
 
 public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, GraphicsUtil.DisposablePaint {

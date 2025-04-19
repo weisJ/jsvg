@@ -36,8 +36,8 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
-import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 

@@ -24,9 +24,9 @@ package com.github.weisj.jsvg.nodes.text;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.TextOutput;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.TextOutput;
 
 interface TextSegment {
     default boolean isValid(@NotNull RenderContext currentContext) {

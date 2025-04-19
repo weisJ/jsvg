@@ -43,8 +43,9 @@ import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.impl.*;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
-import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.impl.output.ShapeOutput;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.output.impl.ShapeOutput;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 

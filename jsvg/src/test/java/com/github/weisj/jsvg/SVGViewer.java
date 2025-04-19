@@ -46,7 +46,7 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
-import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.ui.AnimationPlayer;
 import com.github.weisj.jsvg.view.ViewBox;
 import com.kitfox.svg.app.beans.SVGIcon;

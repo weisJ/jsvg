@@ -41,8 +41,8 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.impl.output.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(

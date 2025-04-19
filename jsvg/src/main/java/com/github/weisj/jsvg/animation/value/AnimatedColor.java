@@ -34,8 +34,8 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.SimplePaintSVGPaint;
 import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.renderer.MeasureContext;
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.output.Output;
 
 public final class AnimatedColor implements SVGPaint, ColorValue {
 

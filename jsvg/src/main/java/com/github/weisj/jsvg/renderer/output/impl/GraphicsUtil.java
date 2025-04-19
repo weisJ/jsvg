@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.impl.output;
+package com.github.weisj.jsvg.renderer.output.impl;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 

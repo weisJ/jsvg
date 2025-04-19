@@ -36,12 +36,13 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
-import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ShapeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.FontRenderContext;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.TextOutput;
 import com.github.weisj.jsvg.util.ShapeUtil;
 
 final class GlyphRenderer {

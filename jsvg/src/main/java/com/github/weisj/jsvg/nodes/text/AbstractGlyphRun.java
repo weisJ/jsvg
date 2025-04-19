@@ -31,8 +31,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.renderer.Output;
-import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.util.ImageUtil;
 import com.github.weisj.jsvg.util.SystemUtil;
 

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer;
+package com.github.weisj.jsvg.renderer.output;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.text.NullTextOutput;
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 
 public interface Output {
 

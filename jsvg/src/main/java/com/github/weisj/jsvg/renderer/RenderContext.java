@@ -41,6 +41,7 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.renderer.impl.PaintResolver;
 import com.github.weisj.jsvg.renderer.impl.context.*;
 import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.ViewBox;
 
 public final class RenderContext {

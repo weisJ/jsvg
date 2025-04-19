@@ -40,10 +40,10 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 
 @ElementCategories({Category.Container, Category.Structural})

@@ -40,12 +40,12 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
-import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.FontRenderContext;
 import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 
 @ElementCategories({Category.Graphic, Category.GraphicsReferencing, Category.Structural})

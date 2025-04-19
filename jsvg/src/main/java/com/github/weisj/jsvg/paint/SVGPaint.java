@@ -30,8 +30,8 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.animation.value.AnimatedColor;
 import com.github.weisj.jsvg.animation.value.AnimatedPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.output.Output;
 
 public interface SVGPaint {
     static @Nullable SVGPaint derive(@Nullable SVGPaint current, @Nullable SVGPaint other) {

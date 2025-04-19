@@ -44,8 +44,8 @@ import com.github.weisj.jsvg.parser.resources.ResourceSupplier;
 import com.github.weisj.jsvg.parser.resources.impl.MissingImageResource;
 import com.github.weisj.jsvg.parser.resources.impl.ValueResourceSupplier;
 import com.github.weisj.jsvg.renderer.MeasureContext;
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 

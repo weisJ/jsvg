@@ -42,11 +42,11 @@ import com.github.weisj.jsvg.nodes.prototype.*;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
-import com.github.weisj.jsvg.renderer.Output;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ShapeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
+import com.github.weisj.jsvg.renderer.output.Output;
 
 public abstract class ShapeNode extends RenderableSVGNode
         implements HasShape, HasPaintContext, HasFontContext, HasVectorEffects, Instantiator {

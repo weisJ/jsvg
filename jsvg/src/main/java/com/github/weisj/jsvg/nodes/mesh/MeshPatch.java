@@ -37,7 +37,7 @@ import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.ColorUtil;
 
 @ElementCategories({ /* None */})

@@ -19,14 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.impl.output;
+package com.github.weisj.jsvg.renderer.output.impl;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.renderer.output.Output;
 
 /**
  * A utility class that holds a {@link Graphics2D} object and is able to reset it back to its original configuration,

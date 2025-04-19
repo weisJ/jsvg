@@ -35,12 +35,12 @@ import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Instantiator;
-import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
-import com.github.weisj.jsvg.renderer.impl.output.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.impl.output.GraphicsUtil;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
 /**
  * Class that encapsulates rendering to an offscreen image.

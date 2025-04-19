@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.impl.output;
+package com.github.weisj.jsvg.renderer.output.impl;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -33,162 +33,184 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.renderer.Output;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.paint.impl.MaskedPaint;
+import com.github.weisj.jsvg.renderer.output.Output;
 
-public class NullOutput implements Output, Output.SafeState {
+public class Graphics2DOutput implements Output {
+    private final Graphics2D g;
+
+    public @NotNull Graphics2D graphics() {
+        return g;
+    }
+
+    public Graphics2DOutput(@NotNull Graphics2D g) {
+        this.g = g;
+        GraphicsUtil.preparePaint(g.getPaint());
+    }
+
     @Override
     public void fillShape(@NotNull Shape shape) {
-        /* do nothing */
+        g.fill(shape);
     }
 
     @Override
     public void drawShape(@NotNull Shape shape) {
-        /* do nothing */
+        g.draw(shape);
     }
 
     @Override
     public void drawImage(@NotNull BufferedImage image) {
-        /* do nothing */
+        g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null, null);
     }
 
     @Override
     public void drawImage(@NotNull Image image, @Nullable ImageObserver observer) {
-        /* do nothing */
+        GraphicsUtil.safelyDrawImage(this, g, image, observer);
     }
 
     @Override
     public void drawImage(@NotNull Image image, @NotNull AffineTransform at, @Nullable ImageObserver observer) {
-        /* do nothing */
+        g.drawImage(image, at, observer);
     }
 
     @Override
     public void setPaint(@NotNull Paint paint) {
-        /* do nothing */
+        GraphicsUtil.safelySetPaint(this, g, paint);
     }
 
     @Override
     public void setPaint(@NotNull Supplier<Paint> paintProvider) {
-        /* do nothing */
+        setPaint(paintProvider.get());
     }
 
     @Override
     public void setStroke(@NotNull Stroke stroke) {
-        /* do nothing */
+        g.setStroke(stroke);
     }
 
     @Override
     public @NotNull Stroke stroke() {
-        return new BasicStroke();
+        return g.getStroke();
     }
 
     @Override
     public void applyClip(@NotNull Shape clipShape) {
-        /* do nothing */
+        g.clip(clipShape);
     }
 
     @Override
     public void setClip(@Nullable Shape shape) {
-        /* do nothing */
+        g.setClip(shape);
     }
 
     @Override
     public Optional<Float> contextFontSize() {
+        Font f = g.getFont();
+        if (f != null) return Optional.of(f.getSize2D());
         return Optional.empty();
     }
 
     @Override
     public @NotNull Output createChild() {
-        return this;
+        return new Graphics2DOutput((Graphics2D) g.create());
     }
 
     @Override
     public void dispose() {
-        /* do nothing */
+        GraphicsUtil.cleanupPaint(this, g.getPaint());
+        g.dispose();
     }
 
     @Override
     public void debugPaint(@NotNull Consumer<Graphics2D> painter) {
-        /* do nothing */
+        Graphics2D debugGraphics = (Graphics2D) g.create();
+        painter.accept(debugGraphics);
+        debugGraphics.dispose();
     }
 
     @Override
     public @NotNull Rectangle2D clipBounds() {
-        return new Rectangle2D.Double();
+        return g.getClipBounds();
     }
 
     @Override
-    public @Nullable RenderingHints renderingHints() {
-        return null;
+    public @NotNull RenderingHints renderingHints() {
+        return g.getRenderingHints();
     }
 
     @Override
     public @Nullable Object renderingHint(RenderingHints.@NotNull Key key) {
-        return null;
+        return g.getRenderingHint(key);
     }
 
     @Override
     public void setRenderingHint(RenderingHints.@NotNull Key key, @Nullable Object value) {
-        /* do nothing */
+        g.setRenderingHint(key, value);
     }
 
     @Override
     public @NotNull AffineTransform transform() {
-        return new AffineTransform();
+        return g.getTransform();
     }
 
     @Override
     public void setTransform(@NotNull AffineTransform affineTransform) {
-        /* do nothing */
+        g.setTransform(affineTransform);
     }
 
     @Override
     public void applyTransform(@NotNull AffineTransform transform) {
-        /* do nothing */
+        g.transform(transform);
     }
 
     @Override
     public void rotate(double angle) {
-        /* do nothing */
+        g.rotate(angle);
     }
 
     @Override
     public void scale(double sx, double sy) {
-        /* do nothing */
+        g.scale(sx, sy);
     }
 
     @Override
     public void translate(double dx, double dy) {
-        /* do nothing */
+        g.translate(dx, dy);
     }
 
     @Override
     public float currentOpacity() {
+        Composite composite = g.getComposite();
+        if (composite instanceof AlphaComposite) {
+            return ((AlphaComposite) composite).getAlpha();
+        }
         return 1;
     }
 
     @Override
     public void applyOpacity(float opacity) {
-        /* do nothing */
+        if (GeometryUtil.approximatelyEqual(opacity, 1)) return;
+        g.setComposite(GraphicsUtil.deriveComposite(g, opacity));
+    }
+
+    @Override
+    public boolean hasMaskedPaint() {
+        return g.getPaint() instanceof MaskedPaint;
     }
 
     @Override
     public @NotNull SafeState safeState() {
-        return this;
+        return new GraphicsResetHelper(g);
     }
 
     @Override
     public boolean supportsFilters() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean supportsColors() {
-        return false;
-    }
-
-
-    @Override
-    public void restore() {
-        /* do nothing */
+        return true;
     }
 }
