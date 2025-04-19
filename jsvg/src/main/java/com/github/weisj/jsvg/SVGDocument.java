@@ -44,7 +44,6 @@ import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.impl.*;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
-import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.renderer.output.impl.ShapeOutput;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
@@ -107,9 +106,7 @@ public final class SVGDocument {
 
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Graphics2D graphics2D,
             @Nullable ViewBox bounds) {
-        Graphics2D g = (Graphics2D) graphics2D.create();
-        setupSVGRenderingHints(g);
-        Output output = new Graphics2DOutput(g);
+        Output output = Output.createForGraphics(graphics2D);
         renderWithPlatform(platformSupport, output, bounds);
         output.dispose();
     }

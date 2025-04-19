@@ -35,8 +35,23 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.nodes.text.NullTextOutput;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
+import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
+import com.github.weisj.jsvg.renderer.output.impl.RenderingHintsUtil;
 
 public interface Output {
+
+    /**
+     * Create a new output for the given graphics context. The output needs to be disposed after use.
+     *
+     * @see #dispose()
+     * @param g The graphics context to create the output for.
+     * @return The output for the given graphics context.
+     */
+    static @NotNull Output createForGraphics(@NotNull Graphics2D g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        RenderingHintsUtil.setupSVGRenderingHints(g2);
+        return new Graphics2DOutput(g2);
+    }
 
     void fillShape(@NotNull Shape shape);
 
