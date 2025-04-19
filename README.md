@@ -374,12 +374,7 @@ of the SVG elements before they are fully parsed.
 
 ````java
 CustomColorsProcessor processor = new CustomColorsProcessor(List.of("myRect"));
-document = loader.load(svgUrl, new DefaultParserProvider() {
-    @Override
-    public DomProcessor createPreProcessor() {
-        return processor;
-    }
-});
+document = loader.load(svgUrl, LoaderContext.builder().preProcessor(processor).build());
 ````
 
 The heavy lifting is done by the `CustomColorsProcessor` class which looks like this:
