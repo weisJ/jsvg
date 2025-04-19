@@ -69,9 +69,27 @@ public final class SVGLoader {
     public @Nullable SVGDocument load(@NotNull InputStream inputStream, @Nullable URI xmlBase,
             @NotNull LoaderContext loaderContext) {
         try (InputStream is = StreamUtil.createDocumentInputStream(inputStream)) {
-            return loader.load(is, xmlBase, loaderContext);
+            return load(loader.createXMLInput(is), xmlBase, loaderContext);
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Could not wrap input stream", e);
+        }
+        return null;
+    }
+
+    /**
+     * Load an SVG document from the given input stream.
+     *
+     * @param xmlInput the supplier for the xml input events
+     * @param xmlBase The uri of the document. This is used to resolve external documents (if enabled).
+     * @param loaderContext The loader context to use for loading the document.
+     * @return The loaded SVG document or null if an error occurred.
+     */
+    public @Nullable SVGDocument load(@NotNull XMLInput xmlInput, @Nullable URI xmlBase,
+            @NotNull LoaderContext loaderContext) {
+        try {
+            return loader.load(xmlInput, xmlBase, loaderContext);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Could not load SVG ", e);
+            LOGGER.log(Level.WARNING, "Could not load SVG", e);
         }
         return null;
     }

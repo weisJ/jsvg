@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
+import com.github.weisj.jsvg.parser.XMLInput;
 
 public final class StaxSVGLoader {
     private static final Logger LOGGER = Logger.getLogger(StaxSVGLoader.class.getName());
@@ -76,24 +77,22 @@ public final class StaxSVGLoader {
         this.xmlInputFactory = factory;
     }
 
-    private @Nullable XMLEventReader createReader(@Nullable InputStream inputStream) {
-        try {
-            return xmlInputFactory.createXMLEventReader(inputStream);
-        } catch (XMLStreamException e) {
-            LOGGER.log(Level.SEVERE, "Error while creating XMLEventReader.", e);
-            return null;
-        }
+    @Nullable
+    SVGDocumentBuilder parse(
+            @NotNull InputStream inputStream,
+            @Nullable URI xmlBase,
+            @NotNull LoaderContext loaderContext) throws XMLStreamException {
+        return parse(createXMLInput(inputStream), xmlBase, loaderContext);
     }
 
     @Nullable
     SVGDocumentBuilder parse(
-            @Nullable InputStream inputStream,
+            @NotNull XMLInput xmlInput,
             @Nullable URI xmlBase,
             @NotNull LoaderContext loaderContext) throws XMLStreamException {
-        if (inputStream == null) return null;
-        XMLEventReader reader = createReader(inputStream);
-        if (reader == null) return null;
+        XMLEventReader reader = null;
         try {
+            reader = xmlInput.createReader();
             SVGDocumentBuilder builder = new SVGDocumentBuilder(xmlBase, loaderContext, nodeSupplier);
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -153,16 +152,16 @@ public final class StaxSVGLoader {
         } catch (XMLStreamException e) {
             LOGGER.log(Level.WARNING, "Error while parsing SVG.", e);
         } finally {
-            reader.close();
+            if (reader != null) reader.close();
         }
         return null;
     }
 
     public @Nullable SVGDocument load(
-            @Nullable InputStream inputStream,
+            @NotNull XMLInput xmlInput,
             @Nullable URI xmlBase,
             @NotNull LoaderContext loaderContext) throws XMLStreamException {
-        SVGDocumentBuilder builder = parse(inputStream, xmlBase, loaderContext);
+        SVGDocumentBuilder builder = parse(xmlInput, xmlBase, loaderContext);
         if (builder == null) return null;
         return builder.build();
     }
@@ -178,6 +177,10 @@ public final class StaxSVGLoader {
             }
             if (elementCount == 0) return;
         }
+    }
+
+    public @NotNull XMLInput createXMLInput(@NotNull InputStream inputStream) {
+        return new InputStreamXMLInput(xmlInputFactory, inputStream);
     }
 
     private enum MakeLowerCase {
@@ -204,4 +207,5 @@ public final class StaxSVGLoader {
         if (XLINK_NAMESPACE_URI.equals(name.getNamespaceURI())) return "xlink:" + localName;
         return prefix + ":" + localName;
     }
+
 }

@@ -21,30 +21,27 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
+
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class StreamUtil {
+import com.github.weisj.jsvg.parser.XMLInput;
 
-    private StreamUtil() {}
+public final class InputStreamXMLInput implements XMLInput {
+    private final @NotNull XMLInputFactory xmlInputFactory;
+    private final @NotNull InputStream inputStream;
 
-    public static @NotNull InputStream createDocumentInputStream(@NotNull InputStream is) throws IOException {
-        BufferedInputStream bin = new BufferedInputStream(is);
-        bin.mark(2);
-        int b0 = bin.read();
-        int b1 = bin.read();
-        bin.reset();
+    public InputStreamXMLInput(@NotNull XMLInputFactory xmlInputFactory, @NotNull InputStream inputStream) {
+        this.xmlInputFactory = xmlInputFactory;
+        this.inputStream = inputStream;
+    }
 
-        // Check for gzip magic number
-        if ((b1 << 8 | b0) == GZIPInputStream.GZIP_MAGIC) {
-            return new GZIPInputStream(bin);
-        } else {
-            // Plain text
-            return bin;
-        }
+    @Override
+    public @NotNull XMLEventReader createReader() throws XMLStreamException {
+        return xmlInputFactory.createXMLEventReader(inputStream);
     }
 }
