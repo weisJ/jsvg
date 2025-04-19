@@ -500,7 +500,7 @@ public class AnimationPanel extends JComponent {
         // ...
         document.renderWithPlatform(
             new AwtComponentPlatformSupport(this),
-            (Graphics2D) g,
+            Output.createForGraphics((Graphics2D) g),
             new ViewBox(0, 0, getWidth(), getHeight()),
             animationPlayer.animationState());
     }
