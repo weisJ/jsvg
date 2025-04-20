@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,37 +46,21 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.XMLInput;
+import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
 public final class StaxSVGLoader {
     private static final Logger LOGGER = Logger.getLogger(StaxSVGLoader.class.getName());
     private static final String SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
     private static final String XLINK_NAMESPACE_URI = "http://www.w3.org/1999/xlink";
-
     private static final @NotNull NodeSupplier NODE_SUPPLIER = new NodeSupplier();
 
-    private final @NotNull NodeSupplier nodeSupplier;
-    private final @NotNull XMLInputFactory xmlInputFactory;
-
-    public StaxSVGLoader() {
-        this(NODE_SUPPLIER);
-    }
-
-    public StaxSVGLoader(@NotNull NodeSupplier nodeSupplier) {
-        this(nodeSupplier, createDefaultFactory());
-    }
-
-    private static @NotNull XMLInputFactory createDefaultFactory() {
+    private final @NotNull Supplier<@NotNull XMLInputFactory> xmlInputFactory = new LazySupplier<>(() -> {
         XMLInputFactory factory = XMLInputFactory.newFactory();
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
         factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
         return factory;
-    }
-
-    public StaxSVGLoader(@NotNull NodeSupplier nodeSupplier, @NotNull XMLInputFactory factory) {
-        this.nodeSupplier = nodeSupplier;
-        this.xmlInputFactory = factory;
-    }
+    });
 
     @Nullable
     SVGDocumentBuilder parse(
@@ -93,7 +78,7 @@ public final class StaxSVGLoader {
         XMLEventReader reader = null;
         try {
             reader = xmlInput.createReader();
-            SVGDocumentBuilder builder = new SVGDocumentBuilder(xmlBase, loaderContext, nodeSupplier);
+            SVGDocumentBuilder builder = new SVGDocumentBuilder(xmlBase, loaderContext, NODE_SUPPLIER);
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 switch (event.getEventType()) {
@@ -180,7 +165,7 @@ public final class StaxSVGLoader {
     }
 
     public @NotNull XMLInput createXMLInput(@NotNull InputStream inputStream) {
-        return new InputStreamXMLInput(xmlInputFactory, inputStream);
+        return new InputStreamXMLInput(xmlInputFactory.get(), inputStream);
     }
 
     private enum MakeLowerCase {

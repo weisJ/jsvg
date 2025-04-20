@@ -40,12 +40,12 @@ import com.github.weisj.jsvg.parser.LoaderContext;
 
 class UseValidationTest {
 
-    private final StaxSVGLoader loader = new StaxSVGLoader(new NodeSupplier());
+    private final StaxSVGLoader loader = new StaxSVGLoader();
 
     private void tryLoad(@NotNull String path) throws IOException, XMLStreamException {
         URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path));
         try (InputStream stream = url.openStream()) {
-            loader.load(stream, url.toURI(), LoaderContext.createDefault());
+            loader.load(loader.createXMLInput(stream), url.toURI(), LoaderContext.createDefault());
         } catch (URISyntaxException e) {
             Assertions.fail(e);
         }
