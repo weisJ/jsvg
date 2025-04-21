@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.nodes.text.NullTextOutput;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
-@ApiStatus.Experimental
 public interface TextOutput {
 
     void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform, @NotNull RenderContext context);

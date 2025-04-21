@@ -34,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.parser.DomDocument;
 
 
-@ApiStatus.Experimental
 class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
     private static final Logger LOGGER = Logger.getLogger(ExternalDocumentLoader.class.getName());
 

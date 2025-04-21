@@ -116,7 +116,6 @@ public final class SVGDocument {
         renderWithPlatform(platformSupport, output, bounds, null);
     }
 
-    @ApiStatus.Experimental
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
             @Nullable ViewBox bounds, @Nullable AnimationState animationState) {
         RenderContext context = prepareRenderContext(platformSupport, output, bounds, animationState);

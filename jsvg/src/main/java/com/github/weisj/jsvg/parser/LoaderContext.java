@@ -81,11 +81,9 @@ public interface LoaderContext {
         @NotNull
         Builder elementLoader(@NotNull ElementLoader elementLoader);
 
-        @ApiStatus.Experimental
         @NotNull
         Builder externalResourcePolicy(@NotNull ResourcePolicy policy);
 
-        @ApiStatus.Experimental
         @NotNull
         Builder documentLimits(@NotNull DocumentLimits documentLimits);
 

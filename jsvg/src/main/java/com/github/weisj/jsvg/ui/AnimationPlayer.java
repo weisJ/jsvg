@@ -31,7 +31,6 @@ import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.renderer.animation.Animation;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 
-@ApiStatus.Experimental
 public class AnimationPlayer {
     private static final AnimationPeriod NO_ANIMATION = new AnimationPeriod(0, 0, false);
 

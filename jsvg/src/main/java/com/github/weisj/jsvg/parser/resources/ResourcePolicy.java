@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.resources.impl.DefaultResourcePolicy;
 
-@ApiStatus.Experimental
 public interface ResourcePolicy {
     /**
      * Deny loading of external resources.
