@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.parser;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

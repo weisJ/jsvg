@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.parser.resources;
 
 import java.net.URI;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

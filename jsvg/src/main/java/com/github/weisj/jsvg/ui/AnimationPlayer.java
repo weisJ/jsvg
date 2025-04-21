@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.ui;
 
 import javax.swing.*;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

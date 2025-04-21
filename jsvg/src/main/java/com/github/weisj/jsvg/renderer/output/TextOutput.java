@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.renderer.output;
 
 import java.awt.geom.AffineTransform;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.nodes.text.NullTextOutput;
