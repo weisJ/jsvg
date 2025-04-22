@@ -86,6 +86,10 @@ SVGDocument svgDocument = loader.load(svgUrl,
 
 Note that `SVGLoader` is not guaranteed to be thread safe, hence shouldn't be used across multiple threads.
 
+Note that by default XML entities will not be replaced during parsing. If you need this behaviour you can use a
+custom XML parser by implementing the `XMLInput` interface. A usage example can be found
+[below in the examples](#using-a-custom-xml-parser).
+
 ### Rendering
 
 An `SVGDocument` can be rendered to any `Graphics2D` object you like e.g. a `BufferedImage`
@@ -513,4 +517,38 @@ public class AnimationPanel extends JComponent {
         player.stop();
     }
 }
+````
+### Using a custom XML parser
+
+If you need more control over how the XML source is parsed you can e.g. use a custom `XMLInputFactory`.
+
+````java
+public class CustomXMLInput implements XMLInput {
+    private final @NotNull XMLInputFactory factory;
+    private final @NotNull InputStream inputStream;
+
+    private CustomXMLInput(@NotNull XMLInputFactory factory, @NotNull InputStream inputStream) {
+        this.factory = factory;
+        this.inputStream = inputStream;
+    }
+
+
+    @Override
+    public @NotNull XMLEventReader createReader() throws XMLStreamException {
+        return factory.createXMLEventReader(inputStream);
+    }
+}
+
+XMLInpitFactory factory = XMLInputFactory.newFactory();
+// Set up the factory to your liking
+URL inputUrl = ...;
+SVGLoader loader = new SVGLoader();
+try (InputStream inputStream = inputUrl.openStream()){
+    SVGDocument document = loader.load(
+            new CustomXMLInput(factory,inputStream),
+            inputUrl,
+            LoaderContext.createDefault()
+    );
+}
+
 ````
