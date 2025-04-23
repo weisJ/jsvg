@@ -168,7 +168,9 @@ public final class SVGDocumentBuilder {
         int maxPathCount = parsedDocument.loaderContext().documentLimits().maxPathCount();
         if (pathCount > maxPathCount) {
             throw new IllegalStateException(
-                    String.format("Maximum path count exceeded %d > %d", pathCount, maxPathCount));
+                    String.format("Maximum count of rendered element instances exceeded %d > %d.%n",
+                            pathCount, maxPathCount)
+                            + "Note: You can configure this using LoaderContext#documentLimits()");
         }
     }
 
@@ -180,8 +182,9 @@ public final class SVGDocumentBuilder {
             int depth = nestingDepthOf(useElement, checkedNodes);
             if (depth > useNestingLimit) {
                 throw new IllegalStateException(String.format(
-                        "Maximum nesting depth for <use> exceeded %d > %d starting from node with id '%s'",
-                        depth, useNestingLimit, useElement.id()));
+                        "Maximum nesting depth for <use> exceeded %d > %d starting from node with id '%s'%n",
+                        depth, useNestingLimit, useElement.id())
+                        + "Note: You can configure this using LoaderContext#documentLimits()");
             }
         }
     }

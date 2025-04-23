@@ -39,14 +39,29 @@ public class DocumentLimits {
         this.maxPathCount = maxPathCount;
     }
 
+    /**
+     * The maximal allowed nesting depth of elements in the document.
+     *
+     * @return The maximal nesting depth of elements
+     */
     public int maxNestingDepth() {
         return maxNestingDepth;
     }
 
+    /**
+     * The maximal allowed depth of nested <use> elements.
+     *
+     * @return The maximal nesting depth of <use>
+     */
     public int maxUseNestingDepth() {
         return maxUseNestingDepth;
     }
 
+    /**
+     * The maximal allowed count of rendered instances of elements. This also counts implicit nodes created by
+     * markers or <use> elements.
+     * @return The maximal allowed count.
+     */
     public int maxPathCount() {
         return maxPathCount;
     }

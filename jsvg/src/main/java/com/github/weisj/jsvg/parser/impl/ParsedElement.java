@@ -162,8 +162,11 @@ public final class ParsedElement implements DomElement {
         }
         buildStatus = BuildStatus.IN_PROGRESS;
 
-        if (depth >= attributeNode.document().loaderContext().documentLimits().maxNestingDepth()) {
-            throw new IllegalStateException("Maximum nesting depth reached.");
+        int maxNestingDepth = attributeNode.document().loaderContext().documentLimits().maxNestingDepth();
+        if (depth > maxNestingDepth) {
+            throw new IllegalStateException(
+                    String.format("Maximum nesting depth reached %d > %d.%n", depth, maxNestingDepth)
+                            + "Note: You can configure this using LoaderContext#documentLimits()");
         }
 
         attributeNode.prepareForNodeBuilding();
