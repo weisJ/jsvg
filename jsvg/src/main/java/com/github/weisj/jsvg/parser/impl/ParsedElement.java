@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.DomElement;
@@ -185,7 +186,9 @@ public final class ParsedElement implements DomElement {
         if (outgoingPaths == -1) {
             outgoingPaths = 0;
             for (ParsedElement child : children) {
-                outgoingPaths += child.outgoingPaths();
+                if (child.node instanceof Renderable) {
+                    outgoingPaths += child.outgoingPaths();
+                }
             }
 
             for (ParsedElement child : indirectChildren) {
