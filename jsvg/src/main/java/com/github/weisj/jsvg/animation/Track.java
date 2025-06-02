@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.animation;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,14 +48,9 @@ public final class Track {
 
     public static @Nullable Track parse(@NotNull AttributeNode attributeNode,
             @NotNull AnimationValuesType valuesType, @NotNull Additive additive) {
-        List<Duration> begins = parseBegin(attributeNode);
+        List<Duration> begins = parseDurationList(attributeNode, "begin");
+        List<Duration> ends = parseDurationList(attributeNode, "end");
         Duration duration = attributeNode.getDuration("dur", Duration.INDEFINITE);
-
-        List<Interval> intervals = begins.stream()
-                .map(b -> new Interval(b, b.plus(duration)))
-                .filter(Interval::isValid)
-                .sorted(Comparator.comparing(Interval::begin))
-                .collect(Collectors.toList());
 
         String repeatCountStr = attributeNode.getValue("repeatCount");
         float repeatCount;
@@ -65,6 +59,25 @@ public final class Track {
         } else {
             repeatCount = attributeNode.parser().parseFloat(repeatCountStr, 1);
         }
+
+        Duration repeatDuration = attributeNode.parser()
+                .parseDuration(attributeNode.getValue("repeatDur"), null);
+
+        List<Interval> intervals = new ArrayList<>(begins.size());
+        for (int i = 0; i < begins.size(); i++) {
+            @NotNull Duration begin = begins.get(i);
+            @Nullable Duration end = i < ends.size() ? ends.get(i) : null;
+
+            Duration d = duration;
+            if (end != null) {
+                // d = Duration.min(d, end - begin)
+            }
+
+            Interval interval = new Interval(begin, begin.plus(d));
+            if (interval.isValid()) intervals.add(interval);
+        }
+        intervals.sort(Comparator.comparing(Interval::begin));
+
         if (intervals.isEmpty() || repeatCount <= 0) {
             return null;
         }
@@ -74,8 +87,8 @@ public final class Track {
     }
 
     @NotNull
-    private static List<Duration> parseBegin(@NotNull AttributeNode attributeNode) {
-        String[] beginsRaw = attributeNode.getStringList("begin", SeparatorMode.SEMICOLON_ONLY);
+    private static List<Duration> parseDurationList(@NotNull AttributeNode attributeNode, @NotNull String key) {
+        String[] beginsRaw = attributeNode.getStringList(key, SeparatorMode.SEMICOLON_ONLY);
         List<Duration> begins;
 
         if (beginsRaw.length > 0) {
@@ -85,6 +98,7 @@ public final class Track {
                 if (b != null) begins.add(b);
             }
         } else {
+            // TODO: Only for begins
             begins = Collections.singletonList(Duration.ZERO);
         }
         return begins;
