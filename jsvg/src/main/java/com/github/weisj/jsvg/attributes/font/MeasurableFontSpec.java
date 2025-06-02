@@ -71,12 +71,15 @@ public final class MeasurableFontSpec extends FontSpec {
         return currentWeight;
     }
 
-    public @NotNull Length currentSize() {
-        return currentSize;
+    public float emSize(@NotNull MeasureContext context) {
+        return currentSize.resolveFontSize(context);
     }
 
     public float effectiveSize(@NotNull MeasureContext context) {
-        float emSize = currentSize().resolveFontSize(context);
+        // TODO: Choose the size of the font so that its lowercase letters
+        // (as determined by the x-height of the font)
+        // are the specified number times the font-size.
+        float emSize = emSize(context);
         if (sizeAdjust != null) {
             return SVGFont.emFromEx(emSize * sizeAdjust.resolveFontSize(context));
         }

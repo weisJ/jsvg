@@ -210,7 +210,7 @@ public final class RenderContext {
         ContextElementAttributes newContextAttributes = contextElementAttributes;
         if (contextAttributes != null) newContextAttributes = contextAttributes;
 
-        float em = newFontSpec.effectiveSize(measureContext);
+        float em = newFontSpec.emSize(measureContext);
         float ex = SVGFont.exFromEm(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
 
