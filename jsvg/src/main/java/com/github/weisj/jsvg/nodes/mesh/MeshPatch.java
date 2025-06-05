@@ -67,7 +67,7 @@ public final class MeshPatch extends ContainerNode {
         }
 
         AffineTransform at = output.transform();
-        float scaleX = (float) GeometryUtil.scaleYOfTransform(at);
+        float scaleX = (float) GeometryUtil.scaleXOfTransform(at);
         float scaleY = (float) GeometryUtil.scaleYOfTransform(at);
         int depth = Math.max(
                 Math.max(coonPatch.north.estimateStepCount(scaleX, scaleY),
