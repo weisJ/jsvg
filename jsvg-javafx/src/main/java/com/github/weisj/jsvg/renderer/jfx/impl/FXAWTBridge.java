@@ -252,8 +252,9 @@ public class FXAWTBridge {
         return new RadialGradient(
                 focusAngle,
                 focusDistance,
-                centerPt.getX(),
-                centerPt.getY(),
+                //Place the focus at the center of a pixel (matches AWT more accurately)
+                centerPt.getX() + 0.5D,
+                centerPt.getY() + 0.5D,
                 radius,
                 false,
                 toGradientCycleMethod(cycleMethod),
