@@ -27,6 +27,8 @@ import java.net.URL;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.ActionEvent;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 
@@ -47,6 +49,7 @@ public class FXTestViewerController {
 
     public ScrollPane scrollPaneAWT;
     public FXSVGCanvas svgCanvasAWT;
+    public CheckBox checkBoxShowTransparentPattern;
 
     public void initialize() {
         List<String> testSVGFiles = FXTestSVGFiles.findTestSVGFiles();
@@ -57,10 +60,12 @@ public class FXTestViewerController {
 
         svgCanvasJFX.setRenderBackend(FXSVGCanvas.RenderBackend.JavaFX);
         svgCanvasJFX.documentProperty().bind(currentSVG);
+        svgCanvasJFX.showTransparentPatternProperty().bind(checkBoxShowTransparentPattern.selectedProperty());
         scrollPaneJFX.setPannable(true);
 
         svgCanvasAWT.setRenderBackend(FXSVGCanvas.RenderBackend.AWT);
         svgCanvasAWT.documentProperty().bind(currentSVG);
+        svgCanvasAWT.showTransparentPatternProperty().bind(checkBoxShowTransparentPattern.selectedProperty());
         scrollPaneAWT.setPannable(true);
 
         // Bind viewport positions
@@ -88,5 +93,19 @@ public class FXTestViewerController {
     public void refreshCanvas() {
         svgCanvasAWT.repaint();
         svgCanvasJFX.repaint();
+    }
+
+    public void previousSVG() {
+        int index = comboBoxSVGDocument.getSelectionModel().getSelectedIndex();
+        if (index > 0) {
+            comboBoxSVGDocument.getSelectionModel().select(index - 1);
+        }
+    }
+
+    public void nextSVG(ActionEvent actionEvent) {
+        int index = comboBoxSVGDocument.getSelectionModel().getSelectedIndex();
+        if (index < comboBoxSVGDocument.getItems().size() - 1) {
+            comboBoxSVGDocument.getSelectionModel().select(index + 1);
+        }
     }
 }

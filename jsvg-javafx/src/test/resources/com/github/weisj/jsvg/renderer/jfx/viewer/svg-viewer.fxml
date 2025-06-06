@@ -41,8 +41,11 @@
    <top>
        <ToolBar BorderPane.alignment="CENTER">
          <items>
-              <ComboBox fx:id="comboBoxSVGDocument" prefWidth="400.0" />
+             <ComboBox fx:id="comboBoxSVGDocument" prefWidth="400.0" />
+            <Button layoutX="414.0" layoutY="10.0" mnemonicParsing="false" onAction="#previousSVG" text="Prev" />
+            <Button layoutX="414.0" layoutY="10.0" mnemonicParsing="false" onAction="#nextSVG" text="Next" />
             <Button mnemonicParsing="false" onAction="#refreshCanvas" text="Refresh Canvas" />
+             <CheckBox fx:id="checkBoxShowTransparentPattern" text="Show Transparent Pattern" />
          </items>
        </ToolBar>
    </top>
