@@ -174,17 +174,17 @@ public class FXAWTBridge {
                 || awtPaint instanceof RGBColor;
     }
 
-    public static javafx.scene.paint.Paint convertPaint(@NotNull java.awt.Paint awtPaint) {
+    public static javafx.scene.paint.Paint convertPaint(@NotNull java.awt.Paint awtPaint, double awtGlobalOpacity) {
         if (awtPaint instanceof java.awt.Color) {
-            return convertColor((java.awt.Color) awtPaint);
+            return convertColor((java.awt.Color) awtPaint, awtGlobalOpacity);
         } else if (awtPaint instanceof java.awt.LinearGradientPaint) {
-            return convertLinearGradient((LinearGradientPaint) awtPaint);
+            return convertLinearGradient((LinearGradientPaint) awtPaint, awtGlobalOpacity);
         } else if (awtPaint instanceof java.awt.RadialGradientPaint) {
-            return convertRadialGradient((RadialGradientPaint) awtPaint);
+            return convertRadialGradient((RadialGradientPaint) awtPaint, awtGlobalOpacity);
         } else if (awtPaint instanceof java.awt.TexturePaint) {
-            return convertTexturePaint((TexturePaint) awtPaint);
+            return convertTexturePaint((TexturePaint) awtPaint, awtGlobalOpacity);
         } else if (awtPaint instanceof RGBColor) {
-            return convertRGBColor((RGBColor) awtPaint);
+            return convertRGBColor((RGBColor) awtPaint, awtGlobalOpacity);
         } else {
             return Color.WHITE;
         }
@@ -198,19 +198,20 @@ public class FXAWTBridge {
                 (int) (fxColor.getOpacity() * 255));
     }
 
-    public static javafx.scene.paint.Color convertColor(@NotNull java.awt.Color awtColor) {
+    public static javafx.scene.paint.Color convertColor(@NotNull java.awt.Color awtColor, double awtGlobalOpacity) {
         return javafx.scene.paint.Color.rgb(
                 awtColor.getRed(),
                 awtColor.getGreen(),
                 awtColor.getBlue(),
-                (double) awtColor.getAlpha() / 255.0);
+                ((double) awtColor.getAlpha() / 255.0) * awtGlobalOpacity);
     }
 
-    public static javafx.scene.paint.Color convertRGBColor(@NotNull RGBColor rgbColor) {
-        return convertColor(rgbColor.toColor());
+    public static javafx.scene.paint.Color convertRGBColor(@NotNull RGBColor rgbColor, double awtGlobalOpacity) {
+        return convertColor(rgbColor.toColor(), awtGlobalOpacity);
     }
 
-    public static LinearGradient convertLinearGradient(@NotNull LinearGradientPaint awtGradient) {
+    public static LinearGradient convertLinearGradient(@NotNull LinearGradientPaint awtGradient,
+            double awtGlobalOpacity) {
         AffineTransform transform = awtGradient.getTransform();
         Point2D start = awtGradient.getStartPoint();
         Point2D end = awtGradient.getEndPoint();
@@ -229,10 +230,11 @@ public class FXAWTBridge {
                 end.getY(),
                 false,
                 toGradientCycleMethod(cycleMethod),
-                convertGradientStops(colors, fractions));
+                convertGradientStops(colors, fractions, awtGlobalOpacity));
     }
 
-    public static RadialGradient convertRadialGradient(@NotNull RadialGradientPaint awtGradient) {
+    public static RadialGradient convertRadialGradient(@NotNull RadialGradientPaint awtGradient,
+            double awtGlobalOpacity) {
         AffineTransform transform = awtGradient.getTransform();
         Point2D centerPt = awtGradient.getCenterPoint();
         Point2D focusPt = awtGradient.getFocusPoint();
@@ -252,13 +254,13 @@ public class FXAWTBridge {
         return new RadialGradient(
                 focusAngle,
                 focusDistance,
-                //Place the focus at the center of a pixel (matches AWT more accurately)
+                // Place the focus at the center of a pixel (matches AWT more accurately)
                 centerPt.getX() + 0.5D,
                 centerPt.getY() + 0.5D,
                 radius,
                 false,
                 toGradientCycleMethod(cycleMethod),
-                convertGradientStops(colors, fractions));
+                convertGradientStops(colors, fractions, awtGlobalOpacity));
     }
 
     private static double calculateGradientFocusAngle(Point2D center, Point2D focus) {
@@ -272,10 +274,11 @@ public class FXAWTBridge {
         return Math.toDegrees(Math.atan2(dy, dx));
     }
 
-    private static java.util.List<Stop> convertGradientStops(java.awt.Color[] colors, float[] offsets) {
+    private static java.util.List<Stop> convertGradientStops(java.awt.Color[] colors, float[] offsets,
+            double awtGlobalOpacity) {
         List<Stop> stops = new ArrayList<>(colors.length);
         for (int i = 0; i < colors.length; i++) {
-            javafx.scene.paint.Color fxColor = convertColor(colors[i]);
+            javafx.scene.paint.Color fxColor = convertColor(colors[i], awtGlobalOpacity);
             stops.add(new Stop(offsets[i], fxColor));
         }
         return stops;
@@ -290,7 +293,7 @@ public class FXAWTBridge {
         return true;
     }
 
-    public static ImagePattern convertTexturePaint(@NotNull TexturePaint awtGradient) {
+    public static ImagePattern convertTexturePaint(@NotNull TexturePaint awtGradient, double awtGlobalOpacity) {
         Rectangle2D rect = awtGradient.getAnchorRect();
         return new ImagePattern(
                 convertImage(awtGradient.getImage()),
@@ -330,6 +333,17 @@ public class FXAWTBridge {
                 c.getRed() * c.getOpacity(),
                 c.getGreen() * c.getOpacity(),
                 c.getBlue() * c.getOpacity(),
+                c.getOpacity());
+    }
+
+    public static Color toUnmultipliedColor(Color c) {
+        if (c.getOpacity() == 0) {
+            return Color.color(0, 0, 0, 0);
+        }
+        return Color.color(
+                c.getRed() / c.getOpacity(),
+                c.getGreen() / c.getOpacity(),
+                c.getBlue() / c.getOpacity(),
                 c.getOpacity());
     }
 
@@ -481,8 +495,8 @@ public class FXAWTBridge {
         }
     }
 
-    public static void applyPaint(@NotNull GraphicsContext ctx, @NotNull Paint awtPaint) {
-        javafx.scene.paint.Paint jfxPaint = convertPaint(awtPaint);
+    public static void applyPaint(@NotNull GraphicsContext ctx, @NotNull Paint awtPaint, double awtGlobalOpacity) {
+        javafx.scene.paint.Paint jfxPaint = convertPaint(awtPaint, awtGlobalOpacity);
         ctx.setFill(jfxPaint);
         ctx.setStroke(jfxPaint);
     }
