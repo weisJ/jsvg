@@ -1,14 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025 Jannis Weis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
 package com.github.weisj.jsvg.ui.jfx.skin;
 
-import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.renderer.NullPlatformSupport;
-import com.github.weisj.jsvg.renderer.animation.Animation;
-import com.github.weisj.jsvg.renderer.animation.AnimationState;
-import com.github.weisj.jsvg.renderer.jfx.FXSVGRenderer;
-import com.github.weisj.jsvg.renderer.output.Output;
-import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
-import com.github.weisj.jsvg.view.FloatSize;
-import com.github.weisj.jsvg.view.ViewBox;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import javafx.animation.*;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
@@ -19,11 +33,19 @@ import javafx.scene.control.SkinBase;
 import javafx.scene.effect.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.animation.Animation;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.renderer.jfx.FXSVGRenderer;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 /**
  * Implementation of the {@link SkinBase} for {@link FXSVGCanvas}, internal use only
@@ -62,13 +84,13 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         timer.start();
     }
 
-    public void markDirty(){
+    public void markDirty() {
         timer.start();
         dirty = true;
     }
 
-    public void tick(){
-        if(!dirty){
+    public void tick() {
+        if (!dirty) {
             return;
         }
         dirty = false;
@@ -79,21 +101,21 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         ViewBox viewBox = svgCanvas.getCurrentViewBox();
         AnimationState state = new AnimationState(0, svgCanvas.getAnimationElapsedTime());
 
-        if(activeRenderer != null && activeRenderer.getBackend() != backend){
+        if (activeRenderer != null && activeRenderer.getBackend() != backend) {
             group.getChildren().remove(activeRenderer.getFXNode());
             activeRenderer.dispose();
             activeRenderer = null;
         }
 
-        if(activeRenderer == null){
+        if (activeRenderer == null) {
             activeRenderer = createRenderer(backend);
             group.getChildren().add(activeRenderer.getFXNode());
         }
 
-        if(svgDocument != null){
+        if (svgDocument != null) {
             activeRenderer.render(svgDocument, viewBox, state);
             activeRenderer.getFXNode().setVisible(true);
-        }else{
+        } else {
             activeRenderer.getFXNode().setVisible(false);
         }
     }
@@ -102,21 +124,21 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
     @Override
     public void dispose() {
         super.dispose();
-        if(activeRenderer != null){
+        if (activeRenderer != null) {
             activeRenderer.dispose();
             activeRenderer = null;
         }
         timer.stop();
     }
 
-    private static Renderer createRenderer(FXSVGCanvas.RenderBackend backend){
+    private static Renderer createRenderer(FXSVGCanvas.RenderBackend backend) {
         switch (backend) {
             case JavaFX:
                 return new JFXRenderer();
             case AWT:
                 return new AWTRenderer();
             default:
-               throw new IllegalArgumentException("Unknown render backend: " + backend);
+                throw new IllegalArgumentException("Unknown render backend: " + backend);
         }
     }
 
@@ -124,7 +146,8 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
 
         public abstract @NotNull FXSVGCanvas.RenderBackend getBackend();
 
-        public abstract void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox, @Nullable AnimationState animationState);
+        public abstract void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
+                @Nullable AnimationState animationState);
 
         public abstract void dispose();
 
@@ -136,7 +159,7 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         private final Canvas canvas;
         private final GraphicsContext graphics;
 
-        public JFXRenderer(){
+        public JFXRenderer() {
             canvas = new Canvas();
             graphics = canvas.getGraphicsContext2D();
         }
@@ -147,31 +170,32 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         }
 
         @Override
-        public void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox, @Nullable AnimationState animationState) {
+        public void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
+                @Nullable AnimationState animationState) {
             FloatSize svgSize = svgDocument.size();
             double width = svgSize.getWidth();
             double height = svgSize.getHeight();
 
-            if(canvas.getWidth() != width || canvas.getHeight() != height){
+            if (canvas.getWidth() != width || canvas.getHeight() != height) {
                 canvas.setWidth(svgSize.getWidth());
                 canvas.setHeight(svgSize.getHeight());
             }
 
             graphics.save();
-            try{
+            try {
                 graphics.setImageSmoothing(false);
                 graphics.setTransform(1, 0, 0, 1, 0, 0);
                 graphics.setGlobalAlpha(1D);
                 graphics.setGlobalBlendMode(BlendMode.SRC_OVER);
                 graphics.clearRect(0, 0, width, height);
                 FXSVGRenderer.render(svgDocument, graphics, viewBox, animationState);
-            }finally {
+            } finally {
                 graphics.restore();
             }
         }
 
         @Override
-        public void dispose(){
+        public void dispose() {
             // do nothing
         }
 
@@ -191,11 +215,11 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         private int currentRTWidth = -1;
         private int currentRTHeight = -1;
 
-        public AWTRenderer(){
+        public AWTRenderer() {
             fxImageView = new ImageView();
         }
 
-        private void setupRenderTargets(int width, int height){
+        private void setupRenderTargets(int width, int height) {
             awtImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             fxImage = new WritableImage(width, height);
             currentRTWidth = width;
@@ -203,14 +227,14 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
             fxImageView.setImage(fxImage);
         }
 
-        private void disposeRenderTargets(){
+        private void disposeRenderTargets() {
             awtImage = null;
             fxImage = null;
             currentRTWidth = -1;
             currentRTHeight = -1;
         }
 
-        private void flush(){
+        private void flush() {
             fxImage = SwingFXUtils.toFXImage(awtImage, fxImage);
         }
 
@@ -220,12 +244,13 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         }
 
         @Override
-        public void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox, @Nullable AnimationState animationState) {
+        public void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
+                @Nullable AnimationState animationState) {
             FloatSize size = svgDocument.size();
             int width = (int) size.width;
             int height = (int) size.height;
 
-            if(currentRTWidth != width || currentRTHeight != height){
+            if (currentRTWidth != width || currentRTHeight != height) {
                 disposeRenderTargets();
                 setupRenderTargets(width, height);
             }
@@ -233,19 +258,19 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
             Output output = Output.createForGraphics(g);
             FXSVGRenderer.setupDefaultJFXRenderingHints(output);
             g.setBackground(new Color(0, 0, 0, 0));
-            try{
+            try {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
                 g.clearRect(0, 0, width, height);
                 svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, viewBox, animationState);
-            }finally {
+            } finally {
                 g.dispose();
             }
             flush();
         }
 
         @Override
-        public void dispose(){
+        public void dispose() {
             disposeRenderTargets();
             fxImageView = null;
         }

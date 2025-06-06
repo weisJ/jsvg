@@ -1,10 +1,26 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025 Jannis Weis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
 package com.github.weisj.jsvg.ui.jfx;
 
-import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.animation.AnimationPeriod;
-import com.github.weisj.jsvg.renderer.animation.Animation;
-import com.github.weisj.jsvg.ui.jfx.skin.FXSVGCanvasSkin;
-import com.github.weisj.jsvg.view.ViewBox;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -15,8 +31,15 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Skin;
 import javafx.scene.control.SkinBase;
 import javafx.util.Duration;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.animation.AnimationPeriod;
+import com.github.weisj.jsvg.renderer.animation.Animation;
+import com.github.weisj.jsvg.ui.jfx.skin.FXSVGCanvasSkin;
+import com.github.weisj.jsvg.view.ViewBox;
 
 /**
  * A JavaFX node for displaying a {@link SVGDocument}}
@@ -47,23 +70,25 @@ public class FXSVGCanvas extends Control {
         });
 
         currentAnimation.bind(Bindings.createObjectBinding(() -> {
-            if(!animated.get()) return DEFAULT_ANIMATION;
-            if(animation.get() != null) return animation.get();
+            if (!animated.get()) return DEFAULT_ANIMATION;
+            if (animation.get() != null) return animation.get();
             SVGDocument document = getDocument();
             return document == null ? DEFAULT_ANIMATION : document.animation();
         }, document, animation, animated));
 
         currentViewBox.bind(Bindings.createObjectBinding(() -> {
-            if(viewBox.get() != null) return viewBox.get();
+            if (viewBox.get() != null) return viewBox.get();
             SVGDocument document = getDocument();
             return document == null ? DEFAULT_VIEW_BOX : document.viewBox();
         }, viewBox, document));
     }
 
-    private void setupAnimation(Animation animation){
+    private void setupAnimation(Animation animation) {
         timeline.getKeyFrames().clear();
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(animationElapsedTime, 0)));
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.endTime()), new KeyValue(animationElapsedTime, animation.endTime())));
+        timeline.getKeyFrames()
+                .add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(animationElapsedTime, 0)));
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.endTime()),
+                new KeyValue(animationElapsedTime, animation.endTime())));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.playFromStart();
     }
@@ -74,33 +99,34 @@ public class FXSVGCanvas extends Control {
      * Requests that the SVG Document be repainted
      * In most cases this is not necessary, as the canvas will automatically be repainted when any properties (e.g. document, view-box, backend) are changed
      */
-    public void repaint(){
+    public void repaint() {
         SkinBase<?> skin = (SkinBase<?>) getSkin();
-        if(skin != null){
+        if (skin != null) {
             FXSVGCanvasSkin fxSkin = (FXSVGCanvasSkin) skin;
             fxSkin.markDirty();
         }
     }
 
-    public void playAnimation(){
+    public void playAnimation() {
         timeline.play();
     }
 
-    public void pauseAnimation(){
+    public void pauseAnimation() {
         timeline.pause();
     }
 
-    public void restartAnimation(){
+    public void restartAnimation() {
         timeline.playFromStart();
     }
 
-    public void stopAnimation(){
+    public void stopAnimation() {
         timeline.stop();
     }
 
     ////////////////////////////////////////////////
 
-    private final ObjectProperty<@NotNull RenderBackend> renderBackend = new SimpleObjectProperty<>(DEFAULT_RENDER_BACKEND);
+    private final ObjectProperty<@NotNull RenderBackend> renderBackend =
+            new SimpleObjectProperty<>(DEFAULT_RENDER_BACKEND);
 
     public @NotNull RenderBackend getRenderBackend() {
         return renderBackend.get();
