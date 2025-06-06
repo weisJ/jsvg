@@ -1,0 +1,5 @@
+.fx-svg-canvas.show-transparent-pattern > .inner-stack-pane {
+    -fx-background-image: url("pattern-transparent.png");
+    -fx-background-repeat: repeat;
+    -fx-background-size: auto;
+}
