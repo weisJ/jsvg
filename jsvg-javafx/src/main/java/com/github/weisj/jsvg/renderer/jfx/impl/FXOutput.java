@@ -138,17 +138,15 @@ public class FXOutput implements Output {
             // Handle rendering of wrapping paints
             GraphicsUtil.WrappingPaint wrappingPaint = (GraphicsUtil.WrappingPaint) currentPaint;
             Paint inner = wrappingPaint.innerPaint();
-            Rectangle r = new Rectangle(0, 0, image.getWidth(null), image.getHeight(null));
+
+            Rectangle r = new Rectangle(0, 0, image.getWidth(observer), image.getHeight(observer));
             BufferedImage img = image instanceof BufferedImage
-                    ? (BufferedImage) image
-                    : ImageUtil.toBufferedImage(image);
+                ? (BufferedImage) image
+                : ImageUtil.toBufferedImage(image);
             TexturePaint texturePaint = new TexturePaint(img, r);
 
             wrappingPaint.setPaint(GraphicsUtil.exchangePaint(this, wrappingPaint.paint(), texturePaint, false));
-            ctx.save();
-            ctx.setFill(FXAWTBridge.convertTexturePaint(texturePaint));
-            ctx.fillRect(0, 0, r.width, r.height);
-            ctx.restore();
+            fillShape(r);
             wrappingPaint.setPaint(GraphicsUtil.exchangePaint(this, texturePaint, inner, false));
         }
     }
