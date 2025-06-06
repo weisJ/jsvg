@@ -21,8 +21,7 @@
  */
 package com.github.weisj.jsvg.renderer.jfx.junit;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 import javafx.application.Application;
@@ -32,25 +31,55 @@ import javafx.stage.Stage;
 public class JUnitHeadlessFXApplication extends Application {
 
     private static final ReentrantLock LOCK = new ReentrantLock();
-    private static final AtomicBoolean started = new AtomicBoolean();
+    private static final CountDownLatch LATCH = new CountDownLatch(1);
 
-    public static void checkJavaFXThread() {
+    private static final AtomicBoolean init = new AtomicBoolean(false);
+    private static final AtomicBoolean started = new AtomicBoolean(false);
+
+    private static final String THREAD_NAME = "JavaFX Init Thread";
+    private static final int LAUNCH_TIMEOUT_SECONDS = 10;
+
+    public static boolean checkJavaFXThread() {
         LOCK.lock();
         try {
-            if (!started.get()) {
-                ExecutorService executor = Executors.newSingleThreadExecutor();
+            if (!init.get()) {
+                init.set(true);
+
+                ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
+                    Thread thread = new Thread(r);
+                    thread.setDaemon(true);
+                    thread.setName(THREAD_NAME);
+                    return thread;
+                });
                 executor.execute(Application::launch);
-                while (!started.get()) {
-                    Thread.yield();
+
+                try {
+                    if (!LATCH.await(LAUNCH_TIMEOUT_SECONDS, TimeUnit.SECONDS) || !started.get()) {
+                        started.set(false);
+                    }
+                } catch (InterruptedException e) {
+                    executor.shutdownNow();
+                    started.set(false);
                 }
             }
         } finally {
             LOCK.unlock();
         }
+        return started.get();
+    }
+
+    public void launch() {
+        try {
+            Application.launch();
+        } catch (Exception e) {
+            started.set(false);
+            LATCH.countDown();
+        }
     }
 
     @Override
     public void start(final Stage stage) {
-        started.set(Boolean.TRUE);
+        started.set(true);
+        LATCH.countDown();
     }
 }
