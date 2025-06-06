@@ -25,10 +25,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ImageObserver;
-import java.awt.image.Raster;
+import java.awt.image.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -141,8 +138,8 @@ public class FXOutput implements Output {
 
             Rectangle r = new Rectangle(0, 0, image.getWidth(observer), image.getHeight(observer));
             BufferedImage img = image instanceof BufferedImage
-                ? (BufferedImage) image
-                : ImageUtil.toBufferedImage(image);
+                    ? (BufferedImage) image
+                    : ImageUtil.toBufferedImage(image);
             TexturePaint texturePaint = new TexturePaint(img, r);
 
             wrappingPaint.setPaint(GraphicsUtil.exchangePaint(this, wrappingPaint.paint(), texturePaint, false));
@@ -164,7 +161,7 @@ public class FXOutput implements Output {
     @Override
     public void setPaint(@NotNull Paint paint) {
         paint = GraphicsUtil.exchangePaint(this, currentPaint, paint, true);
-        FXAWTBridge.applyPaint(ctx, paint);
+        FXAWTBridge.applyPaint(ctx, paint, currentOpacity);
         currentPaint = paint;
     }
 
@@ -303,7 +300,9 @@ public class FXOutput implements Output {
 
     private void setOpacity(float opacity) {
         currentOpacity = opacity;
-        FXAWTBridge.setOpacity(ctx, opacity);
+
+        // Re-apply paint with correct opacity
+        FXAWTBridge.applyPaint(ctx, currentPaint, currentOpacity);
     }
 
     @Override
