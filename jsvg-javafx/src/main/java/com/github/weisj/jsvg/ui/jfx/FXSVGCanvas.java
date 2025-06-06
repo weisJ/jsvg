@@ -60,7 +60,7 @@ public class FXSVGCanvas extends Control {
         }, viewBox, document));
     }
 
-    public void setupAnimation(Animation animation){
+    private void setupAnimation(Animation animation){
         timeline.getKeyFrames().clear();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(animationElapsedTime, 0)));
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.endTime()), new KeyValue(animationElapsedTime, animation.endTime())));
@@ -87,7 +87,7 @@ public class FXSVGCanvas extends Control {
     }
 
     public void pauseAnimation(){
-        timeline.play();
+        timeline.pause();
     }
 
     public void restartAnimation(){

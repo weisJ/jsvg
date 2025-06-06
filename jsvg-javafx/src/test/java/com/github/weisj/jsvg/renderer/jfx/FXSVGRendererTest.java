@@ -19,7 +19,6 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
-import org.gradle.internal.impldep.org.junit.BeforeClass;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicNode;
@@ -117,11 +116,8 @@ public class FXSVGRendererTest {
             ImageComparisonUtil.saveImage(diffFile, comparison.getResult());
             ImageComparisonUtil.saveImage(expectedFile, comparison.getExpected());
             ImageComparisonUtil.saveImage(actualFile, comparison.getActual());
-            Assertions.fail("SVG Rendering does not match reference image");
+            Assertions.fail("JFX/AWT Render Comparison Failed: " + file.getAbsolutePath());
         }
-    }
-
-    public void onImageComparisonFailed(File file, ImageComparisonResult result) {
     }
 
     private BufferedImage renderJSVG(@NotNull SVGDocument svgDocument){

@@ -350,7 +350,7 @@ public class FXOutput implements Output {
 
         private final Shape shape;
         private Rectangle2D bounds;
-        private final int savePoint; // Save point after the clip has been applied
+        private final int savePoint; // Save point before the clip has been applied
 
         private ClipShape(Shape shape, int savePoint){
             this.savePoint = savePoint;
