@@ -28,7 +28,6 @@ dependencies {
     testImplementation(testLibs.imageCompare)
     testImplementation(testLibs.sizeof)
     testImplementation(gradleApi())
-    testImplementation(testFixtures(projects.jsvg))
 
     testRuntimeOnly(testLibs.junit.engine)
 
