@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.github.weisj.jsvg.ui.jfx.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane prefHeight="800" prefWidth="1200.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.weisj.jsvg.renderer.jfx.viewer.FXTestViewerController">
+   <center>
+       <HBox BorderPane.alignment="CENTER">
+           <VBox HBox.hgrow="ALWAYS">
+               <HBox alignment="CENTER">
+                   <Label alignment="CENTER" text="AWT (Reference)" textAlignment="CENTER">
+                       <font>
+                           <Font name="System Bold" size="14.0" />
+                       </font>
+                   </Label>
+               </HBox>
+               <ScrollPane fx:id="scrollPaneAWT" fitToHeight="true" fitToWidth="true" pannable="true" VBox.vgrow="ALWAYS">
+                   <StackPane>
+                       <FXSVGCanvas fx:id="svgCanvasAWT" />
+                   </StackPane>
+               </ScrollPane>
+           </VBox>
+           <VBox HBox.hgrow="ALWAYS">
+               <HBox alignment="CENTER">
+                   <Label alignment="CENTER" text="JavaFX" textAlignment="CENTER">
+                       <font>
+                           <Font name="System Bold" size="14.0" />
+                       </font>
+                   </Label>
+               </HBox>
+               <ScrollPane fx:id="scrollPaneJFX" fitToHeight="true" fitToWidth="true" pannable="true" VBox.vgrow="ALWAYS">
+                   <StackPane>
+                       <FXSVGCanvas fx:id="svgCanvasJFX" />
+                   </StackPane>
+               </ScrollPane>
+           </VBox>
+       </HBox>
+   </center>
+   <top>
+       <ToolBar BorderPane.alignment="CENTER">
+         <items>
+              <ComboBox fx:id="comboBoxSVGDocument" prefWidth="400.0" />
+            <Button mnemonicParsing="false" onAction="#refreshCanvas" text="Refresh Canvas" />
+         </items>
+       </ToolBar>
+   </top>
+</BorderPane>
