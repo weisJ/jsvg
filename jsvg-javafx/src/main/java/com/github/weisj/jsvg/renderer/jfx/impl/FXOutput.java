@@ -1,15 +1,25 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025 Jannis Weis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
 package com.github.weisj.jsvg.renderer.jfx.impl;
-
-import com.github.weisj.jsvg.geometry.util.GeometryUtil;
-import com.github.weisj.jsvg.paint.impl.MaskedPaint;
-import com.github.weisj.jsvg.renderer.output.Output;
-import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
-import com.github.weisj.jsvg.util.ImageUtil;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.shape.FillRule;
-import javafx.scene.transform.Affine;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -25,6 +35,18 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.shape.FillRule;
+import javafx.scene.transform.Affine;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.paint.impl.MaskedPaint;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 /**
  * An {@link Output} implementation that uses a {@link GraphicsContext} to draw to.
@@ -47,7 +69,7 @@ public class FXOutput implements Output {
     private Stroke currentStroke = DEFAULT_STROKE;
     private final SafeState originalState;
 
-    public FXOutput(@NotNull GraphicsContext context){
+    public FXOutput(@NotNull GraphicsContext context) {
         ctx = context;
         ctxSaveCounter = new GraphicsContextSaveCounter();
         clipStack = new ClipStack();
@@ -59,7 +81,7 @@ public class FXOutput implements Output {
         originalState = new FXOutputState(SaveClipStack.YES);
     }
 
-    private FXOutput(@NotNull FXOutput parent){
+    private FXOutput(@NotNull FXOutput parent) {
         ctx = parent.ctx;
         ctxSaveCounter = parent.ctxSaveCounter;
         clipStack = parent.clipStack;
@@ -74,19 +96,21 @@ public class FXOutput implements Output {
 
     @Override
     public void fillShape(@NotNull Shape shape) {
-        if(FXAWTBridge.supportedPaint(currentPaint)){
+        if (FXAWTBridge.supportedPaint(currentPaint)) {
             FXAWTBridge.fillShape(ctx, shape);
-        }else{
+        } else {
             // Render incompatible / custom paints with PaintContext fallback
             Rectangle2D userBounds = GeometryUtil.containingBoundsAfterTransform(transform(), shape.getBounds());
             Rectangle deviceBounds = userBounds.getBounds();
-            PaintContext context = currentPaint.createContext(ColorModel.getRGBdefault(), deviceBounds, userBounds, transform(), renderingHints);
+            PaintContext context = currentPaint.createContext(ColorModel.getRGBdefault(), deviceBounds, userBounds,
+                    transform(), renderingHints);
             Raster raster = context.getRaster(deviceBounds.x, deviceBounds.y, deviceBounds.width, deviceBounds.height);
             BufferedImage image = FXAWTBridge.convertRasterToBufferedImage(context.getColorModel(), raster);
             clipStack.pushClip(shape);
             Affine transform = ctx.getTransform();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.drawImage(FXAWTBridge.convertImage(image), userBounds.getX(), userBounds.getY(), userBounds.getWidth(), userBounds.getHeight());
+            ctx.drawImage(FXAWTBridge.convertImage(image), userBounds.getX(), userBounds.getY(), userBounds.getWidth(),
+                    userBounds.getHeight());
             ctx.setTransform(transform);
             clipStack.popClip();
         }
@@ -94,9 +118,9 @@ public class FXOutput implements Output {
 
     @Override
     public void drawShape(@NotNull Shape shape) {
-        if(FXAWTBridge.supportedPaint(currentPaint)){
+        if (FXAWTBridge.supportedPaint(currentPaint)) {
             FXAWTBridge.drawShape(ctx, shape);
-        }else{
+        } else {
             fillShape(stroke().createStrokedShape(shape));
         }
     }
@@ -108,16 +132,16 @@ public class FXOutput implements Output {
 
     @Override
     public void drawImage(@NotNull Image image, @Nullable ImageObserver observer) {
-        if(!FXAWTBridge.isWrappingPaint(currentPaint)){
+        if (!FXAWTBridge.isWrappingPaint(currentPaint)) {
             FXAWTBridge.drawImage(ctx, image);
-        }else{
+        } else {
             // Handle rendering of wrapping paints
             GraphicsUtil.WrappingPaint wrappingPaint = (GraphicsUtil.WrappingPaint) currentPaint;
             Paint inner = wrappingPaint.innerPaint();
             Rectangle r = new Rectangle(0, 0, image.getWidth(null), image.getHeight(null));
             BufferedImage img = image instanceof BufferedImage
-                ? (BufferedImage) image
-                : ImageUtil.toBufferedImage(image);
+                    ? (BufferedImage) image
+                    : ImageUtil.toBufferedImage(image);
             TexturePaint texturePaint = new TexturePaint(img, r);
 
             wrappingPaint.setPaint(GraphicsUtil.exchangePaint(this, wrappingPaint.paint(), texturePaint, false));
@@ -133,7 +157,8 @@ public class FXOutput implements Output {
     @Override
     public void drawImage(@NotNull Image image, @NotNull AffineTransform at, @Nullable ImageObserver observer) {
         Affine originalTransform = ctx.getTransform();
-        ctx.transform(at.getScaleX(), at.getShearY(), at.getShearX(), at.getScaleY(), at.getTranslateX(), at.getTranslateY());
+        ctx.transform(at.getScaleX(), at.getShearY(), at.getShearX(), at.getScaleY(), at.getTranslateX(),
+                at.getTranslateY());
         FXAWTBridge.drawImage(ctx, image);
         ctx.setTransform(originalTransform);
     }
@@ -169,14 +194,14 @@ public class FXOutput implements Output {
     @Override
     public void setClip(@Nullable Shape shape) {
         clipStack.clearClip();
-        if(shape != null){
+        if (shape != null) {
             clipStack.pushClip(shape);
         }
     }
 
     @Override
     public Optional<Float> contextFontSize() {
-        //TODO check this actually returns what we're after
+        // TODO check this actually returns what we're after
         return Optional.of((float) ctx.getFont().getSize());
     }
 
@@ -218,7 +243,7 @@ public class FXOutput implements Output {
 
     @Override
     public @NotNull Rectangle2D clipBounds() {
-        Rectangle2D bounds = canvasBounds();//clipStack.getClipBounds();
+        Rectangle2D bounds = canvasBounds();// clipStack.getClipBounds();
         return GeometryUtil.createInverse(transform()).createTransformedShape(bounds).getBounds2D();
     }
 
@@ -278,7 +303,7 @@ public class FXOutput implements Output {
         setOpacity(opacity * currentOpacity);
     }
 
-    private void setOpacity(float opacity){
+    private void setOpacity(float opacity) {
         currentOpacity = opacity;
         FXAWTBridge.setOpacity(ctx, opacity);
     }
@@ -300,7 +325,7 @@ public class FXOutput implements Output {
 
     @Override
     public boolean isSoftClippingEnabled() {
-        //JavaFX performs soft clips by default
+        // JavaFX performs soft clips by default
         return false;
     }
 
@@ -336,7 +361,7 @@ public class FXOutput implements Output {
 
         @Override
         public void restore() {
-            if(originalClipStack != null){
+            if (originalClipStack != null) {
                 clipStack.restoreClipStack(originalClipStack);
             }
             setOpacity(originalOpacity);
@@ -346,31 +371,31 @@ public class FXOutput implements Output {
         }
     }
 
-    private static class ClipShape{
+    private static class ClipShape {
 
         private final Shape shape;
         private Rectangle2D bounds;
         private final int savePoint; // Save point before the clip has been applied
 
-        private ClipShape(Shape shape, int savePoint){
+        private ClipShape(Shape shape, int savePoint) {
             this.savePoint = savePoint;
             this.shape = shape;
         }
 
-        public Rectangle2D getBounds(){
-            if(bounds == null){
-                //We need to apply the save points inverse transform to this
+        public Rectangle2D getBounds() {
+            if (bounds == null) {
+                // We need to apply the save points inverse transform to this
                 bounds = shape.getBounds2D();
             }
             return bounds;
         }
     }
 
-    private class ClipStack{
+    private class ClipStack {
 
         private final Stack<ClipShape> clipStack = new Stack<>();
 
-        private void pushClip(Shape awtClipShape){
+        private void pushClip(Shape awtClipShape) {
             PathIterator awtIterator = awtClipShape.getPathIterator(null);
             FXAWTBridge.applyPathIterator(ctx, awtIterator);
             FXAWTBridge.applyWindingRule(ctx, awtIterator.getWindingRule());
@@ -381,8 +406,8 @@ public class FXOutput implements Output {
             clipStack.add(new ClipShape(awtClipShape, savePoint));
         }
 
-        private void popClip(){
-            if(clipStack.isEmpty()){
+        private void popClip() {
+            if (clipStack.isEmpty()) {
                 return;
             }
             FXOutputState currentState = new FXOutputState(SaveClipStack.NO);
@@ -391,12 +416,12 @@ public class FXOutput implements Output {
             currentState.restore();
         }
 
-        private void clearClip(){
-            if(clipStack.isEmpty()){
+        private void clearClip() {
+            if (clipStack.isEmpty()) {
                 return;
             }
             FXOutputState currentState = new FXOutputState(SaveClipStack.NO);
-            while (!clipStack.isEmpty()){
+            while (!clipStack.isEmpty()) {
                 ClipShape clipShape = clipStack.pop();
                 ctxSaveCounter.restoreTo(clipShape.savePoint);
             }
@@ -439,16 +464,16 @@ public class FXOutput implements Output {
             }
         }
 
-        private List<Shape> snapshot(){
+        private List<Shape> snapshot() {
             List<Shape> snapshot = new ArrayList<>(this.clipStack.size());
-            for(ClipShape clipShape : this.clipStack){
+            for (ClipShape clipShape : this.clipStack) {
                 snapshot.add(clipShape.shape);
             }
             return snapshot;
         }
 
-        private Rectangle2D getClipBounds(){
-            if(clipStack.isEmpty()){
+        private Rectangle2D getClipBounds() {
+            if (clipStack.isEmpty()) {
                 return new Rectangle2D.Double(0, 0, ctx.getCanvas().getWidth(), ctx.getCanvas().getHeight());
             }
             return clipStack.peek().getBounds();
@@ -471,12 +496,12 @@ public class FXOutput implements Output {
             return saveCount;
         }
 
-        private int save(){
+        private int save() {
             ctx.save();
             return saveCount++;
         }
 
-        private void restoreTo(int count){
+        private void restoreTo(int count) {
             while (saveCount > count) {
                 ctx.restore();
                 saveCount--;
