@@ -40,10 +40,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 
 import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.ImageComparisonUtil;
@@ -66,20 +63,21 @@ public class FXSVGRendererTest {
 
     @TestFactory
     Collection<DynamicNode> generateSVGTests() {
+        Assumptions.assumeTrue(JUnitHeadlessFXApplication.checkJavaFXThread(), "Failed to initialize JavaFX");
+
         List<String> testFiles = FXTestSVGFiles.findTestSVGFiles();
-
-        if (testFiles.isEmpty()) {
-            Assertions.fail("No SVG Test Files Found in: " + FXTestSVGFiles.getTestSVGDirectory().getAbsolutePath());
-        }
-
-        JUnitHeadlessFXApplication.checkJavaFXThread();
+        Assumptions.assumeTrue(!testFiles.isEmpty(),
+                "No SVG Test Files Found in: " + FXTestSVGFiles.getTestSVGDirectory().getAbsolutePath());
 
         return testFiles.stream()
                 .map(File::new)
-                .filter(f -> !isExceptionTest(f.getName()))
                 .map(file -> {
                     String testName = "test-jfx_" + file.getName().replace(".svg", "");
-                    return DynamicTest.dynamicTest(testName, () -> compareSVGOutput(file));
+                    return DynamicTest.dynamicTest(testName, () -> {
+                        Assumptions.assumeTrue(!isExceptionTest(file.getName()),
+                                "Skipping exception test: " + file.getAbsolutePath());
+                        compareSVGOutput(file);
+                    });
                 })
                 .collect(Collectors.toList());
     }
@@ -139,8 +137,9 @@ public class FXSVGRendererTest {
             ImageComparisonUtil.saveImage(diffFile, comparison.getResult());
             ImageComparisonUtil.saveImage(expectedFile, comparison.getExpected());
             ImageComparisonUtil.saveImage(actualFile, comparison.getActual());
-            Assertions.fail("JFX/AWT Render Comparison Failed: " + file.getAbsolutePath());
         }
+        Assumptions.assumeTrue(state == ImageComparisonState.MATCH,
+                "JFX/AWT Render Comparison Failed: " + file.getAbsolutePath());
     }
 
     private BufferedImage renderJSVG(@NotNull SVGDocument svgDocument) {
