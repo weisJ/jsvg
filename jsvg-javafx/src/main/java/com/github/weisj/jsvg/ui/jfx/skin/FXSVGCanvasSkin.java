@@ -25,7 +25,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import javafx.animation.*;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -33,6 +32,7 @@ import javafx.scene.control.SkinBase;
 import javafx.scene.effect.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.StackPane;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +53,7 @@ import com.github.weisj.jsvg.view.ViewBox;
 public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
 
     private final FXSVGCanvas svgCanvas;
-    private final Group group;
+    private final StackPane innerPane;
 
     private final AnimationTimer timer;
     private Renderer activeRenderer;
@@ -64,8 +64,9 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         this.consumeMouseEvents(false);
         this.svgCanvas = svgCanvas;
 
-        group = new Group();
-        getChildren().add(group);
+        innerPane = new StackPane();
+        innerPane.getStyleClass().add("inner-stack-pane");
+        getChildren().add(innerPane);
 
         registerChangeListener(svgCanvas.documentProperty(), o -> markDirty());
         registerChangeListener(svgCanvas.renderBackendProperty(), o -> markDirty());
@@ -102,14 +103,14 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         AnimationState state = new AnimationState(0, svgCanvas.getAnimationElapsedTime());
 
         if (activeRenderer != null && activeRenderer.getBackend() != backend) {
-            group.getChildren().remove(activeRenderer.getFXNode());
+            innerPane.getChildren().remove(activeRenderer.getFXNode());
             activeRenderer.dispose();
             activeRenderer = null;
         }
 
         if (activeRenderer == null) {
             activeRenderer = createRenderer(backend);
-            group.getChildren().add(activeRenderer.getFXNode());
+            innerPane.getChildren().add(activeRenderer.getFXNode());
         }
 
         if (svgDocument != null) {
