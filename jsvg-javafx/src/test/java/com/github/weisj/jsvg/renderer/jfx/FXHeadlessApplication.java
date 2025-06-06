@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.jfx.junit;
+package com.github.weisj.jsvg.renderer.jfx;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,7 +28,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 // Based on: http://awhite.blogspot.com/2013/04/javafx-junit-testing.html
-public class JUnitHeadlessFXApplication extends Application {
+public class FXHeadlessApplication extends Application {
 
     private static final ReentrantLock LOCK = new ReentrantLock();
     private static final CountDownLatch LATCH = new CountDownLatch(1);
@@ -54,7 +54,7 @@ public class JUnitHeadlessFXApplication extends Application {
                 executor.execute(Application::launch);
 
                 try {
-                    if (!LATCH.await(LAUNCH_TIMEOUT_SECONDS, TimeUnit.SECONDS) || !started.get()) {
+                    if (!LATCH.await(LAUNCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                         started.set(false);
                     }
                 } catch (InterruptedException e) {

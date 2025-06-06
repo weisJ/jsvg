@@ -52,7 +52,6 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.FXTestSVGFiles;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
-import com.github.weisj.jsvg.renderer.jfx.junit.JUnitHeadlessFXApplication;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 
@@ -63,7 +62,7 @@ public class FXSVGRendererTest {
 
     @TestFactory
     Collection<DynamicNode> generateSVGTests() {
-        Assumptions.assumeTrue(JUnitHeadlessFXApplication.checkJavaFXThread(), "Failed to initialize JavaFX");
+        Assumptions.assumeTrue(FXHeadlessApplication.checkJavaFXThread(), "Failed to initialize JavaFX");
 
         List<String> testFiles = FXTestSVGFiles.findTestSVGFiles();
         Assumptions.assumeTrue(!testFiles.isEmpty(),
