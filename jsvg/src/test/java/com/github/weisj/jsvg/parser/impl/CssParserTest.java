@@ -48,6 +48,7 @@ class CssParserTest {
 
     @BeforeAll
     static void disableLogger() {
+        // FIXME this doesn't seem to work
         Logger.getLogger(Lexer.class.getName()).setLevel(Level.SEVERE);
         Logger.getLogger(SimpleCssParser.class.getName()).setLevel(Level.SEVERE);
     }
