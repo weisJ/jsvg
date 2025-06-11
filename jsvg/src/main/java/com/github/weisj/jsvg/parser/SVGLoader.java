@@ -22,11 +22,11 @@
 package com.github.weisj.jsvg.parser;
 
 import java.io.*;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +40,7 @@ import com.github.weisj.jsvg.parser.impl.*;
  */
 public final class SVGLoader {
 
-    static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
+    static final Logger LOGGER = System.getLogger(SVGLoader.class.getName());
     private final StaxSVGLoader loader = new StaxSVGLoader();
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {

@@ -247,7 +247,7 @@ allprojects {
         tasks {
             withType<JavaCompile>().configureEach {
                 options.encoding = "UTF-8"
-                options.release.set(8)
+                options.release.set(9)
             }
 
             withType<ProcessResources>().configureEach {

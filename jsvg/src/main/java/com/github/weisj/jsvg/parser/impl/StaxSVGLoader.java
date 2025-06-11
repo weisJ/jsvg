@@ -22,14 +22,14 @@
 package com.github.weisj.jsvg.parser.impl;
 
 import java.io.InputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -49,7 +49,7 @@ import com.github.weisj.jsvg.parser.XMLInput;
 import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
 public final class StaxSVGLoader {
-    private static final Logger LOGGER = Logger.getLogger(StaxSVGLoader.class.getName());
+    private static final Logger LOGGER = System.getLogger(StaxSVGLoader.class.getName());
     private static final String SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
     private static final String XLINK_NAMESPACE_URI = "http://www.w3.org/1999/xlink";
     private static final @NotNull NodeSupplier NODE_SUPPLIER = new NodeSupplier();

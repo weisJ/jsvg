@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes.container;
 
-import java.util.logging.Logger;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +35,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
 public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Container<E> {
     private static final boolean EXHAUSTIVE_CHECK = true;
-    private static final Logger LOGGER = Logger.getLogger(BaseContainerNode.class.getName());
+    private static final Logger LOGGER = System.getLogger(BaseContainerNode.class.getName());
 
     @Override
     public final void addChild(@Nullable String id, @NotNull SVGNode node) {
@@ -74,7 +75,7 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
             if (type.isAssignableFrom(nodeType)) return true;
         }
         if (EXHAUSTIVE_CHECK && result != CategoryCheckResult.Excluded) {
-            LOGGER.warning(() -> String.format("Element <%s> not allowed in <%s> (or not implemented)",
+            LOGGER.log(Level.WARNING, () -> String.format("Element <%s> not allowed in <%s> (or not implemented)",
                     node.tagName(), tagName()));
         }
         return false;

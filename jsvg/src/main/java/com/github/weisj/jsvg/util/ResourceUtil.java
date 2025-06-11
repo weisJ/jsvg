@@ -25,11 +25,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -49,7 +49,7 @@ import com.github.weisj.jsvg.parser.resources.impl.SVGResource;
 
 public final class ResourceUtil {
 
-    private static final Logger LOGGER = Logger.getLogger(ResourceUtil.class.getName());
+    private static final Logger LOGGER = System.getLogger(ResourceUtil.class.getName());
 
     private ResourceUtil() {}
 
