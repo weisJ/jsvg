@@ -184,7 +184,6 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
 
             graphics.save();
             try {
-                graphics.setImageSmoothing(false);
                 graphics.setTransform(1, 0, 0, 1, 0, 0);
                 graphics.setGlobalAlpha(1D);
                 graphics.setGlobalBlendMode(BlendMode.SRC_OVER);
