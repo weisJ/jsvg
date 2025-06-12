@@ -25,6 +25,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -72,8 +73,9 @@ public class FXTestViewerController {
         scrollPaneJFX.hvalueProperty().bindBidirectional(scrollPaneAWT.hvalueProperty());
         scrollPaneJFX.vvalueProperty().bindBidirectional(scrollPaneAWT.vvalueProperty());
 
-        currentSVG.bind(comboBoxSVGDocument.valueProperty().map(file -> {
-            if (!file.endsWith("svg")) {
+        currentSVG.bind(Bindings.createObjectBinding(() -> {
+            String file = comboBoxSVGDocument.getValue();
+            if (file == null || !file.endsWith("svg")) {
                 return null;
             }
             URL url;
@@ -87,7 +89,7 @@ public class FXTestViewerController {
                     .externalResourcePolicy(ResourcePolicy.ALLOW_ALL)
                     .build();
             return loader.load(url, loaderContext);
-        }));
+        }, comboBoxSVGDocument.valueProperty()));
     }
 
     public void refreshCanvas() {
