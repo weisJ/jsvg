@@ -19,6 +19,7 @@ pluginManagement {
         idv("me.champeau.jmh")
         idv("org.sonarqube")
         idv("biz.aQute.bnd.builder", "biz.aQute.bnd.lib")
+        idv("org.openjfx.javafxplugin")
     }
 }
 
@@ -91,6 +92,7 @@ dependencyResolutionManagement {
 
 include(
     "jsvg",
+    "jsvg-javafx",
     "annotations",
     "annotations-processor",
 )
