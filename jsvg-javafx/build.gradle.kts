@@ -16,17 +16,8 @@ dependencies {
     compileOnly(projects.jsvg)
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
-    compileOnly(projects.annotations)
-
-    annotationProcessor(projects.annotationsProcessor)
 
     testImplementation(projects.jsvg)
-    testImplementation(testLibs.darklaf.core)
-    testImplementation(testLibs.junit.api)
-    testImplementation(testLibs.svgSalamander)
-    testImplementation(testLibs.batik)
-    testImplementation(testLibs.imageCompare)
-    testImplementation(testLibs.sizeof)
     testImplementation(gradleApi())
 
     testRuntimeOnly(testLibs.junit.engine)
