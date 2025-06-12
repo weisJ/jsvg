@@ -18,6 +18,8 @@ dependencies {
     compileOnly(toolLibs.errorprone.annotations)
 
     testImplementation(projects.jsvg)
+    testImplementation(testLibs.junit.api)
+    testImplementation(testLibs.imageCompare)
     testImplementation(gradleApi())
 
     testRuntimeOnly(testLibs.junit.engine)
