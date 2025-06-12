@@ -4,11 +4,11 @@ plugins {
     `java-library`
     jacoco
     id("biz.aQute.bnd.builder")
-    id("org.openjfx.javafxplugin") version "0.1.0"
+    id("org.openjfx.javafxplugin")
 }
 
 javafx {
-    version = "21.0.7"
+    version = properties["javafx.version"].toString()
     modules("javafx.controls", "javafx.fxml", "javafx.swing")
 }
 
