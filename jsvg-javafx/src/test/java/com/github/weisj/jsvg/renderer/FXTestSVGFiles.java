@@ -22,9 +22,11 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
+import java.util.stream.Stream;
 
 /**
  * TODO Refactor test suite into testFixtures to allow different implementations to use the files more easily
@@ -46,7 +48,15 @@ public class FXTestSVGFiles {
     public static List<String> findTestSVGFiles() {
         File dir = getTestSVGDirectory();
         if (dir.exists() && dir.isDirectory()) {
-            return FileUtils.listFiles(dir, new String[] {"svg"}, true).stream().map(File::getAbsolutePath).toList();
+            try (Stream<Path> stream = Files.walk(dir.toPath(), 2)) {
+                return stream.map(Path::toFile)
+                        .filter(File::isFile)
+                        .filter(f -> f.getName().toLowerCase().endsWith(".svg"))
+                        .map(File::getAbsolutePath)
+                        .toList();
+            } catch (IOException e) {
+                return List.of();
+            }
         }
         return List.of();
     }
