@@ -3,7 +3,6 @@ import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
 import com.github.vlsi.gradle.properties.dsl.props
 import com.github.vlsi.gradle.properties.dsl.stringProperty
-import com.github.vlsi.gradle.properties.dsl.toBool
 import com.github.vlsi.gradle.publishing.dsl.simplifyXml
 import com.github.vlsi.gradle.publishing.dsl.versionFromResolution
 import net.ltgt.gradle.errorprone.errorprone
@@ -98,12 +97,14 @@ allprojects {
             }
             format("markdown") {
                 target("**/*.md")
+                targetExclude("resvg-test-suite/**/*.md")
                 endWithNewline()
                 trimTrailingWhitespace()
             }
             format("svg") {
                 target("**/*.svg")
                 targetExclude("**/brokenUpCharContent.svg")
+                targetExclude("resvg-test-suite/**/*.svg")
                 eclipseWtp(EclipseWtpFormatterStep.XML)
             }
             plugins.withType<JavaPlugin>().configureEach {
@@ -218,7 +219,7 @@ allprojects {
             configure<SigningExtension> {
                 sign(extensions.getByType<PublishingExtension>().publications)
                 if (!useInMemoryKey) {
-                     useGpgCmd()
+                    useGpgCmd()
                 } else {
                     useInMemoryPgpKeys(
                         project.stringProperty("signing.inMemoryKey")?.replace("#", "\n"),
