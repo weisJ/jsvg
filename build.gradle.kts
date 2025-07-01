@@ -103,8 +103,10 @@ allprojects {
             }
             format("svg") {
                 target("**/*.svg")
-                targetExclude("**/brokenUpCharContent.svg")
-                targetExclude("resvg-test-suite/**/*.svg")
+                targetExclude(
+                    "**/brokenUpCharContent.svg",
+                    "resvg-test-suite/**/*.svg",
+                )
                 eclipseWtp(EclipseWtpFormatterStep.XML)
             }
             plugins.withType<JavaPlugin>().configureEach {
