@@ -14,11 +14,11 @@ pluginManagement {
         idv("com.github.vlsi.crlf", "com.github.vlsi.vlsi-release-plugins")
         idv("com.github.vlsi.gradle-extensions", "com.github.vlsi.vlsi-release-plugins")
         idv("com.github.vlsi.license-gather", "com.github.vlsi.vlsi-release-plugins")
-        idv("com.github.vlsi.stage-vote-release", "com.github.vlsi.vlsi-release-plugins")
         idv("net.ltgt.errorprone")
         idv("me.champeau.jmh")
         idv("org.sonarqube")
         idv("biz.aQute.bnd.builder", "biz.aQute.bnd.lib")
+        idv("com.gradleup.nmcp")
     }
 }
 
