@@ -27,7 +27,7 @@ jobs:
       - name: Publish
         env:
           PROPS_RELEASE: "-Prelease=false -PskipJavadoc -PskipSpotless"
-          PROPS_NEXUS: "-PcentralPortalUsername=${{ secrets.CENTRAL_PORTAL_USERNAME }} -PcentralPortalPassword=${{ secrets.CENTRAL_PORTAL_PASSWORD }}"
+          PROPS_NEXUS: "-PcentralSnapshotUsername=${{ secrets.CENTRAL_PORTAL_USERNAME }} -PcentralSnapshotPassword=${{ secrets.CENTRAL_PORTAL_PASSWORD }}"
           PROPS_SIGNING: "-PuseInMemoryKey=true -Psigning.inMemoryKey=${{ secrets.IN_MEMORY_KEY }} -Psigning.password=${{ secrets.SIGNING_PASSWORD }}"
           PROPS_GITHUB: "-PgithubAccessToken=${{ secrets.GITHUB_TOKEN }}"
         run: ./gradlew publishAllPublicationsToCentralSnapshotsRepository $(echo $PROPS_RELEASE $PROPS_GIT $PROPS_NEXUS $PROPS_SIGNING $PROPS_GITHUB) -x test
