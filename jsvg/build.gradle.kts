@@ -26,6 +26,7 @@ dependencies {
     testCompileOnly(libs.nullabilityAnnotations)
     testCompileOnly(toolLibs.errorprone.annotations)
 }
+
 tasks {
 
     compileTestJava {
@@ -33,35 +34,32 @@ tasks {
     }
 
     jar {
+        // TODO: Export packages to jsvg.javafx module. Create consumer project to actually test this.
         bundle {
             bnd(
-                """
-                Bundle-SymbolicName: com.github.weisj.jsvg
-                -exportcontents: \
-                  com.github.weisj.jsvg,\
-                  com.github.weisj.jsvg.paint,\
-                  com.github.weisj.jsvg.parser,\
-                  com.github.weisj.jsvg.parser.css,\
-                  com.github.weisj.jsvg.parser.resources,\
-                  com.github.weisj.jsvg.provider,\
-                  com.github.weisj.jsvg.renderer,\
-                  com.github.weisj.jsvg.renderer.animation,\
-                  com.github.weisj.jsvg.renderer.awt,\
-                  com.github.weisj.jsvg.renderer.output,\
-                  com.github.weisj.jsvg.ui,\
-                  com.github.weisj.jsvg.view,\
-
-                Import-Package: !com.google.errorprone.annotations,\
-                  *
-
-                -jpms-module-info:
-                -jpms-module-info-options: \
-                  com.google.errorprone.annotations;static="true";transitive="false",\
-                  org.jetbrains.annotations;static="true";transitive="false",\
-                  com.github.weisj.jsvg.annotations;static="true";transitive="false",
-
-                -removeheaders: Private-Package,Tool
-            """,
+                bndFile(
+                    moduleName = "com.github.weisj.jsvg",
+                    requiredModules =
+                        listOf(
+                            Requires("com.google.errorprone.annotations", static = true),
+                            Requires("org.jetbrains.annotations", static = true),
+                            Requires("com.github.weisj.jsvg.annotations", static = true),
+                        ),
+                    exports =
+                        listOf(
+                            "com.github.weisj.jsvg",
+                            "com.github.weisj.jsvg.paint",
+                            "com.github.weisj.jsvg.parser",
+                            "com.github.weisj.jsvg.parser.css",
+                            "com.github.weisj.jsvg.parser.resources",
+                            "com.github.weisj.jsvg.renderer",
+                            "com.github.weisj.jsvg.renderer.animation",
+                            "com.github.weisj.jsvg.renderer.awt",
+                            "com.github.weisj.jsvg.renderer.output",
+                            "com.github.weisj.jsvg.ui",
+                            "com.github.weisj.jsvg.view",
+                        ),
+                ),
             )
         }
     }

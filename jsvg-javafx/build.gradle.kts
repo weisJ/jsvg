@@ -8,7 +8,7 @@ plugins {
 }
 
 javafx {
-    version = properties["javafx.version"].toString()
+    version = rootProject.extra["javafx.version"].toString()
     modules("javafx.controls", "javafx.fxml", "javafx.swing")
 }
 
@@ -36,26 +36,20 @@ tasks {
     jar {
         bundle {
             bnd(
-                """
-                Bundle-SymbolicName: com.github.weisj.jsvg-javafx
-                -exportcontents: \
-                  com.github.weisj.jsvg,\
-                  com.github.weisj.jsvg.renderer,\
-                  com.github.weisj.jsvg.renderer.jfx,\
-                  com.github.weisj.jsvg.ui,\
-                  com.github.weisj.jsvg.ui.jfx,\
-
-                Import-Package: !com.google.errorprone.annotations,\
-                  *
-
-                -jpms-module-info:
-                -jpms-module-info-options: \
-                  com.google.errorprone.annotations;static="true";transitive="false",\
-                  org.jetbrains.annotations;static="true";transitive="false",\
-                  com.github.weisj.jsvg.annotations;static="true";transitive="false",
-
-                -removeheaders: Private-Package,Tool
-            """,
+                bndFile(
+                    moduleName = "com.github.weisj.jsvg.javafx",
+                    requiredModules =
+                        listOf(
+                            Requires("com.github.weisj.jsvg"),
+                            Requires("org.jetbrains.annotations", static = true),
+                            Requires("com.google.errorprone.annotations", static = true),
+                        ),
+                    exports =
+                        listOf(
+                            "com.github.weisj.jsvg.renderer.jfx",
+                            "com.github.weisj.jsvg.ui.jfx",
+                        ),
+                ),
             )
         }
     }
