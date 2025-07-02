@@ -29,9 +29,8 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
+import javafx.util.Callback;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
@@ -39,6 +38,7 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.FXTestSVGFiles;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
+
 
 public class FXTestViewerController {
 
@@ -53,10 +53,22 @@ public class FXTestViewerController {
     public CheckBox checkBoxShowTransparentPattern;
 
     public void initialize() {
+        String svgDirectoryPrefix = FXTestSVGFiles.getTestSVGDirectory().toPath().toString();
         List<String> testSVGFiles = FXTestSVGFiles.findTestSVGFiles();
         comboBoxSVGDocument.getItems().addAll(testSVGFiles);
         if (!testSVGFiles.isEmpty()) {
             comboBoxSVGDocument.setValue(testSVGFiles.getFirst());
+            Callback<ListView<String>, ListCell<String>> cellFactory = view -> new ListCell<>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (item != null && item.startsWith(svgDirectoryPrefix)) {
+                        setText(item.substring(svgDirectoryPrefix.length() + 1));
+                    }
+                }
+            };
+            comboBoxSVGDocument.setCellFactory(cellFactory);
+            comboBoxSVGDocument.setButtonCell(cellFactory.call(null));
         }
 
         svgCanvasJFX.setRenderBackend(FXSVGCanvas.RenderBackend.JavaFX);

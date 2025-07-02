@@ -54,12 +54,15 @@ tasks {
         }
     }
 
+    withType<JavaExec> {
+        environment("JAVAFX_TEST_SVG_PATH" to File(project.rootDir, "jsvg/src/test/resources").absolutePath)
+    }
+
     test {
         dependsOn(jar)
         doFirst {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
-        environment("JAVAFX_TEST_SVG_PATH" to File(project.rootDir, "jsvg/src/test/resources").absolutePath)
         useJUnitPlatform()
         testLogging {
             showStandardStreams = true
