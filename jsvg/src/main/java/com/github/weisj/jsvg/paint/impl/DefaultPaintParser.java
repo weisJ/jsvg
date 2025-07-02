@@ -22,12 +22,12 @@
 package com.github.weisj.jsvg.paint.impl;
 
 import java.awt.*;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 
 public final class DefaultPaintParser implements PaintParser {
-    private static final Logger LOGGER = Logger.getLogger(DefaultPaintParser.class.getName());
+    private static final Logger LOGGER = System.getLogger(DefaultPaintParser.class.getName());
 
     // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
     @Override

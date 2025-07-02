@@ -23,9 +23,9 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,7 +58,7 @@ import com.github.weisj.jsvg.util.BlittableImage;
     anyOf = {Animate.class, Set.class}
 )
 public final class Filter extends ContainerNode {
-    private static final Logger LOGGER = Logger.getLogger(Filter.class.getName());
+    private static final Logger LOGGER = System.getLogger(Filter.class.getName());
     public static final String TAG = "filter";
 
     private static final Length DEFAULT_FILTER_COORDINATE_X = Unit.PERCENTAGE_WIDTH.valueOf(-10);
@@ -183,7 +183,7 @@ public final class Filter extends ContainerNode {
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
-                LOGGER.log(Level.FINE, "Exception during filter", e);
+                LOGGER.log(Level.DEBUG, "Exception during filter", e);
             }
             // Todo: Respect filterPrimitiveRegion
         }

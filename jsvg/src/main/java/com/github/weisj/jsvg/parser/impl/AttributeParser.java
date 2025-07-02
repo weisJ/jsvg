@@ -23,11 +23,12 @@ package com.github.weisj.jsvg.parser.impl;
 
 import static com.github.weisj.jsvg.util.AttributeUtil.toNonnullArray;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.UnaryOperator;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +53,7 @@ import com.github.weisj.jsvg.parser.PaintParser;
 
 public final class AttributeParser {
 
-    private static final Logger LOGGER = Logger.getLogger(AttributeParser.class.getName());
+    private static final Logger LOGGER = System.getLogger(AttributeParser.class.getName());
     private final @NotNull PaintParser paintParser;
 
     public AttributeParser(@NotNull PaintParser paintParser) {
@@ -259,7 +260,7 @@ public final class AttributeParser {
             String group = transformMatcher.group();
             TransformPart part = parseSingleTransformPart(group);
             if (part == null) {
-                LOGGER.warning(
+                LOGGER.log(Level.WARNING,
                         () -> String.format("Illegal transform definition '%s' encountered error while parsing '%s'",
                                 value, group));
                 return null;

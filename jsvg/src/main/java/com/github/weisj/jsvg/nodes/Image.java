@@ -23,10 +23,10 @@ package com.github.weisj.jsvg.nodes;
 
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,7 +54,7 @@ import com.github.weisj.jsvg.view.ViewBox;
     categories = {Category.Animation, Category.Descriptive}
 )
 public final class Image extends RenderableSVGNode {
-    private static final Logger LOGGER = Logger.getLogger(Image.class.getName());
+    private static final Logger LOGGER = System.getLogger(Image.class.getName());
 
     public static final String TAG = "image";
     private Length x;

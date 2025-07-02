@@ -21,10 +21,11 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.util.logging.Logger;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 
 final class CharacterDataParser {
-    private static final Logger LOGGER = Logger.getLogger(CharacterDataParser.class.getName());
+    private static final Logger LOGGER = System.getLogger(CharacterDataParser.class.getName());
     private static final boolean DEBUG = false;
 
     private enum State {
@@ -51,7 +52,8 @@ final class CharacterDataParser {
     public void append(char[] ch, int offset, int length) {
         if (length == 0) return;
         if (DEBUG) {
-            LOGGER.info(() -> String.format("Append: [%s]", new String(ch, offset, length).replace("\n", "\\n")));
+            LOGGER.log(Level.INFO,
+                    () -> String.format("Append: [%s]", new String(ch, offset, length).replace("\n", "\\n")));
         }
         data = ch;
         begin = offset;
@@ -76,7 +78,8 @@ final class CharacterDataParser {
         }
         if (begin >= end) return;
         if (DEBUG) {
-            LOGGER.info(() -> String.format("Portion: [%s]", new String(ch, begin, end - begin).replace("\n", "\\n")));
+            LOGGER.log(Level.INFO,
+                    () -> String.format("Portion: [%s]", new String(ch, begin, end - begin).replace("\n", "\\n")));
         }
 
         buffer.ensureCapacity(buffer.length() + end - begin);
@@ -133,7 +136,7 @@ final class CharacterDataParser {
         char[] ch = new char[buffer.length()];
         buffer.getChars(0, ch.length, ch, 0);
         if (DEBUG) {
-            LOGGER.info(() -> String.format("Flush segBreak=%s[%s]", dueToSegmentBreak, buffer));
+            LOGGER.log(Level.INFO, () -> String.format("Flush segBreak=%s[%s]", dueToSegmentBreak, buffer));
         }
         buffer = new StringBuilder();
         return ch;
