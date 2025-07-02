@@ -5,10 +5,9 @@ data class Requires(
     val transitive: Boolean = false,
 )
 
-fun bndFile(moduleName: String, requiredModules: List<Requires>, exports: List<String>): String {
+fun bndFile(moduleName: String, requiredModules: List<Requires>): String {
     return """
         Bundle-SymbolicName: $moduleName
-        -exportcontents: ${exports.joinToString(",")}
 
         Import-Package: ${
             requiredModules

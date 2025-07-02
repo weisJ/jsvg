@@ -10,6 +10,7 @@ dependencies {
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
     compileOnly(projects.annotations)
+    compileOnly(libs.osgiAnnotations)
 
     annotationProcessor(projects.annotationsProcessor)
 
@@ -44,20 +45,7 @@ tasks {
                             Requires("com.google.errorprone.annotations", static = true),
                             Requires("org.jetbrains.annotations", static = true),
                             Requires("com.github.weisj.jsvg.annotations", static = true),
-                        ),
-                    exports =
-                        listOf(
-                            "com.github.weisj.jsvg",
-                            "com.github.weisj.jsvg.paint",
-                            "com.github.weisj.jsvg.parser",
-                            "com.github.weisj.jsvg.parser.css",
-                            "com.github.weisj.jsvg.parser.resources",
-                            "com.github.weisj.jsvg.renderer",
-                            "com.github.weisj.jsvg.renderer.animation",
-                            "com.github.weisj.jsvg.renderer.awt",
-                            "com.github.weisj.jsvg.renderer.output",
-                            "com.github.weisj.jsvg.ui",
-                            "com.github.weisj.jsvg.view",
+                            Requires("org.osgi.annotation.bundle", static = true),
                         ),
                 ),
             )

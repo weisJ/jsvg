@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     compileOnly(libs.nullabilityAnnotations)
+    compileOnly(libs.osgiAnnotations)
 }
 
 tasks {
@@ -16,10 +17,7 @@ tasks {
                     requiredModules =
                         listOf(
                             Requires("org.jetbrains.annotations", static = true),
-                        ),
-                    exports =
-                        listOf(
-                            "com.github.weisj.jsvg.annotations",
+                            Requires("org.osgi.annotation.bundle", static = true),
                         ),
                 ),
             )

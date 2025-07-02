@@ -16,6 +16,7 @@ dependencies {
     compileOnly(projects.jsvg)
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
+    compileOnly(libs.osgiAnnotations)
 
     testImplementation(projects.jsvg)
     testImplementation(testLibs.junit.api)
@@ -43,11 +44,7 @@ tasks {
                             Requires("com.github.weisj.jsvg"),
                             Requires("org.jetbrains.annotations", static = true),
                             Requires("com.google.errorprone.annotations", static = true),
-                        ),
-                    exports =
-                        listOf(
-                            "com.github.weisj.jsvg.renderer.jfx",
-                            "com.github.weisj.jsvg.ui.jfx",
+                            Requires("org.osgi.annotation.bundle", static = true),
                         ),
                 ),
             )
