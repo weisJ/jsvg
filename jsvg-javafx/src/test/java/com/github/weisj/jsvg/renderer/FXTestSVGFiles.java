@@ -42,7 +42,7 @@ public class FXTestSVGFiles {
         }
         // Fallback
         String srcDir = System.getProperty("user.dir");
-        String testDir = srcDir + "/jsvg/src/test/resources";
+        String testDir = srcDir + "/jsvg/src/test/resources/" + PACKAGE_NAME;
         return new File(testDir);
     }
 
