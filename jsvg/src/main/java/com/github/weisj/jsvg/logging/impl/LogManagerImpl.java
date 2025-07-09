@@ -69,7 +69,7 @@ public final class LogManagerImpl {
 
         @Override
         public void log(Level level, @Nullable String message) {
-            logger.log(new LogManagerImpl.WrapperLogRecord(toJavaUtilLevel(level), message));
+            logger.log(new WrapperLogRecord(toJavaUtilLevel(level), message));
         }
 
         @Override
