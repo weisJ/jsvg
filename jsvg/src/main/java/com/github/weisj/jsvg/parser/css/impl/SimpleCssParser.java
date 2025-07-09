@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,16 +25,18 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleProperty;
 
 public final class SimpleCssParser implements CssParser {
 
-    private static final Logger LOGGER = Logger.getLogger(SimpleCssParser.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(SimpleCssParser.class);
 
     @Override
     public @NotNull SimpleStyleSheet parse(@NotNull List<char[]> input) {
@@ -62,7 +64,7 @@ public final class SimpleCssParser implements CssParser {
         }
 
         private void expected(@NotNull String type) {
-            LOGGER.warning(() -> MessageFormat.format("Expected ''{0}'' but got ''{1}''", type, current));
+            LOGGER.log(Level.WARNING, () -> MessageFormat.format("Expected ''{0}'' but got ''{1}''", type, current));
         }
 
         private void consumeOrSkipAllowedToken(TokenType type, TokenType allowedTokeToSkip) {

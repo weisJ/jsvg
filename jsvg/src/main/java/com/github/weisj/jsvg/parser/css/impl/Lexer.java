@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2023-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,13 +24,16 @@ package com.github.weisj.jsvg.parser.css.impl;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
+
 
 public final class Lexer {
-    private static final Logger LOGGER = Logger.getLogger(Lexer.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(Lexer.class);
 
     private final @NotNull List<char[]> input;
     private int listIndex = 0;
@@ -123,7 +126,8 @@ public final class Lexer {
 
     private @NotNull String readIdentifier() {
         if (!isIdentifierCharStart(current()) || !isIdentifierChar(current())) {
-            LOGGER.warning(() -> MessageFormat.format("Identifier starting with unexpected char ''{0}''", current()));
+            LOGGER.log(Level.WARNING,
+                    () -> MessageFormat.format("Identifier starting with unexpected char ''{0}''", current()));
             if (readWhile(this::isIdentifierChar).isEmpty()) {
                 next();
             }

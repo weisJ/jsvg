@@ -28,8 +28,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -41,6 +39,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.parser.DomDocument;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
@@ -49,7 +50,7 @@ import com.github.weisj.jsvg.parser.resources.impl.SVGResource;
 
 public final class ResourceUtil {
 
-    private static final Logger LOGGER = Logger.getLogger(ResourceUtil.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(ResourceUtil.class);
 
     private ResourceUtil() {}
 
