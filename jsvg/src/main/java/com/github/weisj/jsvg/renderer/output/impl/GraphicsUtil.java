@@ -24,17 +24,19 @@ package com.github.weisj.jsvg.renderer.output.impl;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 
 public final class GraphicsUtil {
-    private static final Logger LOGGER = Logger.getLogger(GraphicsUtil.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(GraphicsUtil.class);
 
     private GraphicsUtil() {}
 
@@ -88,7 +90,8 @@ public final class GraphicsUtil {
             AlphaComposite ac = (AlphaComposite) composite;
             return AlphaComposite.getInstance(ac.getRule(), ac.getAlpha() * opacity);
         } else if (composite != null) {
-            LOGGER.warning(() -> String.format("Composite %s will be overridden by opacity %s", composite, opacity));
+            LOGGER.log(Level.WARNING,
+                    () -> String.format("Composite %s will be overridden by opacity %s", composite, opacity));
         }
         return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity);
     }
