@@ -13,7 +13,7 @@ fun bndFile(moduleName: String, requiredModules: List<Requires>): String {
             requiredModules
                 .filter { it.static }
                 .map { it.module }
-                .joinToString(",") { "!${it},!{${it}}.*" }
+                .joinToString(",") { "!$it,!$it.*" }
         }, *
         -jpms-module-info: $moduleName;\
                   access="SYNTHETIC,MANDATED";\
@@ -24,8 +24,8 @@ fun bndFile(moduleName: String, requiredModules: List<Requires>): String {
             requiredModules.joinToString(",") {
                 listOfNotNull(
                     it.module,
-                    if (it.static) "static=\"${it.static}\"" else null,
-                    if (it.transitive) "transitive=\"${it.transitive}\"" else null
+                    if (it.static) "static=true" else null,
+                    if (it.transitive) "transitive=true" else null
                 ).joinToString(";")
             }
         }

@@ -11,6 +11,7 @@ dependencies {
     compileOnly(toolLibs.errorprone.annotations)
     compileOnly(projects.annotations)
     compileOnly(libs.osgiAnnotations)
+    compileOnly(libs.bndAnnotations)
 
     annotationProcessor(projects.annotationsProcessor)
 
@@ -35,7 +36,6 @@ tasks {
     }
 
     jar {
-        // TODO: Export packages to jsvg.javafx module. Create consumer project to actually test this.
         bundle {
             bnd(
                 bndFile(
@@ -46,6 +46,7 @@ tasks {
                             Requires("org.jetbrains.annotations", static = true),
                             Requires("com.github.weisj.jsvg.annotations", static = true),
                             Requires("org.osgi.annotation.bundle", static = true),
+                            Requires("biz.aQute.bndlib", static = true),
                         ),
                 ),
             )
