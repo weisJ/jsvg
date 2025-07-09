@@ -31,11 +31,14 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CallerFinder {
+final class CallerFinder {
     private static final boolean HAS_STACK_WALKER;
     private static final MethodHandle STACK_WALKER_WALK;
     private static final MethodHandle STACK_FRAME_GET_CLASS_NAME;
     private static final MethodHandle STACK_FRAME_GET_METHOD_NAME;
+
+    private final String dispatcherClassName;
+    private boolean lookingForCaller = false;
 
     static {
         MethodHandle walk = null;
@@ -71,9 +74,6 @@ public class CallerFinder {
         STACK_FRAME_GET_CLASS_NAME = getClassName;
         STACK_FRAME_GET_METHOD_NAME = getMethodName;
     }
-
-    private final String dispatcherClassName;
-    private boolean lookingForCaller = false;
 
     public CallerFinder(@NotNull String dispatcherClassName) {
         this.dispatcherClassName = dispatcherClassName;
