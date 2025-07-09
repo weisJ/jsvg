@@ -17,7 +17,7 @@ dependencies {
     testImplementation(testLibs.darklaf.core)
     testImplementation(testLibs.junit.api)
     testImplementation(testLibs.svgSalamander)
-    testImplementation(testLibs.batik)
+    testImplementation(testLibs.bundles.batik)
     testImplementation(testLibs.imageCompare)
     testImplementation(testLibs.sizeof)
     testImplementation(gradleApi())
