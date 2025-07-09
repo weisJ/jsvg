@@ -57,6 +57,8 @@ dependencyResolutionManagement {
         create("libs") {
             idv("javaxAnnotations", "javax.annotation:javax.annotation-api")
             idv("nullabilityAnnotations", "org.jetbrains:annotations")
+            idv("osgiAnnotations", "org.osgi:org.osgi.annotation.bundle")
+            idv("bndAnnotations", "biz.aQute.bnd:biz.aQute.bndlib", "biz.aQute.bnd.lib")
         }
         create("testLibs") {
             bundle("junit") {

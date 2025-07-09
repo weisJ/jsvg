@@ -11,12 +11,3 @@ repositories {
     mavenCentral()
     gradlePluginPortal()
 }
-
-gradlePlugin {
-    plugins {
-        create("module-info-compile") {
-            id = "module-info-compile"
-            implementationClass = "ModuleInfoCompilePlugin"
-        }
-    }
-}
