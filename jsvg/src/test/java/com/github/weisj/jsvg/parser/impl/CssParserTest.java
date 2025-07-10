@@ -30,27 +30,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import com.github.weisj.jsvg.parser.css.StyleProperty;
-import com.github.weisj.jsvg.parser.css.impl.Lexer;
 import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
 import com.github.weisj.jsvg.parser.css.impl.SimpleStyleSheet;
 import com.github.weisj.jsvg.util.RandomData;
 
 class CssParserTest {
-
-    @BeforeAll
-    static void disableLogger() {
-        Logger.getLogger(Lexer.class.getName()).setLevel(Level.SEVERE);
-        Logger.getLogger(SimpleCssParser.class.getName()).setLevel(Level.SEVERE);
-    }
 
     private static @NotNull List<char[]> inputFromString(@NotNull String string) {
         return List.of(string.toCharArray());

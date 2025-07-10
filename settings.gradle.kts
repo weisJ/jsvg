@@ -59,6 +59,7 @@ dependencyResolutionManagement {
             idv("nullabilityAnnotations", "org.jetbrains:annotations")
             idv("osgiAnnotations", "org.osgi:org.osgi.annotation.bundle")
             idv("bndAnnotations", "biz.aQute.bnd:biz.aQute.bndlib", "biz.aQute.bnd.lib")
+            idv("slf4jApi", "org.slf4j:slf4j-api")
         }
         create("testLibs") {
             bundle("junit") {
@@ -95,4 +96,6 @@ include(
     "jsvg",
     "annotations",
     "annotations-processor",
+    "jsvg-systemlogger",
+    "jsvg-slf4j",
 )

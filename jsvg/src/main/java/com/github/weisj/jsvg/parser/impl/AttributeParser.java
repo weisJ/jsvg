@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.UnaryOperator;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,13 +45,16 @@ import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
 
 
 public final class AttributeParser {
 
-    private static final Logger LOGGER = Logger.getLogger(AttributeParser.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(AttributeParser.class);
     private final @NotNull PaintParser paintParser;
 
     public AttributeParser(@NotNull PaintParser paintParser) {
@@ -259,7 +261,7 @@ public final class AttributeParser {
             String group = transformMatcher.group();
             TransformPart part = parseSingleTransformPart(group);
             if (part == null) {
-                LOGGER.warning(
+                LOGGER.log(Level.WARNING,
                         () -> String.format("Illegal transform definition '%s' encountered error while parsing '%s'",
                                 value, group));
                 return null;

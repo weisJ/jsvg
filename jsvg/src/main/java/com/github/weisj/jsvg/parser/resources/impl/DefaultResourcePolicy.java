@@ -23,15 +23,17 @@ package com.github.weisj.jsvg.parser.resources.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 
 public class DefaultResourcePolicy implements ResourcePolicy {
-    private static final Logger LOGGER = Logger.getLogger(DefaultResourcePolicy.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(DefaultResourcePolicy.class);
 
     public static final int FLAG_ALLOW_RELATIVE = 1;
     public static final int FLAG_ALLOW_ABSOLUTE = 1 << 1;
@@ -53,7 +55,7 @@ public class DefaultResourcePolicy implements ResourcePolicy {
         try {
             return resolveResourceURI(baseURI, new URI(path));
         } catch (URISyntaxException e) {
-            LOGGER.info("Failed to resolve URI: " + path);
+            LOGGER.log(Level.INFO, "Failed to resolve URI: " + path);
             return null;
         }
     }
@@ -62,17 +64,19 @@ public class DefaultResourcePolicy implements ResourcePolicy {
     public @Nullable URI resolveResourceURI(@Nullable URI baseDocumentUri, @NotNull URI resourceUri) {
         if ("data".equals(resourceUri.getScheme())) {
             if ((flags & FLAG_ALLOW_EMBEDDED_DATA) == 0) {
-                LOGGER.info(() -> String.format("Rejected URI %s because embedded data is not allowed", resourceUri));
+                LOGGER.log(Level.INFO,
+                        () -> String.format("Rejected URI %s because embedded data is not allowed", resourceUri));
                 return null;
             }
             return resourceUri;
         } else if (resourceUri.isAbsolute()) {
             if ((flags & FLAG_ALLOW_ABSOLUTE) == 0) {
-                LOGGER.info(() -> String.format("Rejected URI %s because absolute paths are not allowed", resourceUri));
+                LOGGER.log(Level.INFO,
+                        () -> String.format("Rejected URI %s because absolute paths are not allowed", resourceUri));
                 return null;
             }
             if (!"file".equals(resourceUri.getScheme()) && (flags & FLAG_ALLOW_NON_LOCAL) == 0) {
-                LOGGER.info(
+                LOGGER.log(Level.INFO,
                         () -> String.format("Rejected URI %s because non-local paths are not allowed", resourceUri));
                 return null;
             }

@@ -21,11 +21,12 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.util.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 
 final class CharacterDataParser {
-    private static final Logger LOGGER = Logger.getLogger(CharacterDataParser.class.getName());
-    private static final boolean DEBUG = false;
+    private static final Logger LOGGER = LogFactory.createLogger(CharacterDataParser.class);
 
     private enum State {
         SEGMENT_START(false),
@@ -50,9 +51,8 @@ final class CharacterDataParser {
 
     public void append(char[] ch, int offset, int length) {
         if (length == 0) return;
-        if (DEBUG) {
-            LOGGER.info(() -> String.format("Append: [%s]", new String(ch, offset, length).replace("\n", "\\n")));
-        }
+        LOGGER.log(Level.DEBUG,
+                () -> String.format("Append: [%s]", new String(ch, offset, length).replace("\n", "\\n")));
         data = ch;
         begin = offset;
         end = offset + length;
@@ -75,9 +75,8 @@ final class CharacterDataParser {
             end++;
         }
         if (begin >= end) return;
-        if (DEBUG) {
-            LOGGER.info(() -> String.format("Portion: [%s]", new String(ch, begin, end - begin).replace("\n", "\\n")));
-        }
+        LOGGER.log(Level.DEBUG,
+                () -> String.format("Portion: [%s]", new String(ch, begin, end - begin).replace("\n", "\\n")));
 
         buffer.ensureCapacity(buffer.length() + end - begin);
         appendData();
@@ -132,9 +131,7 @@ final class CharacterDataParser {
         if (dueToSegmentBreak) state = State.SEGMENT_BREAK;
         char[] ch = new char[buffer.length()];
         buffer.getChars(0, ch.length, ch, 0);
-        if (DEBUG) {
-            LOGGER.info(() -> String.format("Flush segBreak=%s[%s]", dueToSegmentBreak, buffer));
-        }
+        LOGGER.log(Level.DEBUG, () -> String.format("Flush segBreak=%s[%s]", dueToSegmentBreak, buffer));
         buffer = new StringBuilder();
         return ch;
     }
