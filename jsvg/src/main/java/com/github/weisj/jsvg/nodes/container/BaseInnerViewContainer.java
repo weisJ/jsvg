@@ -106,7 +106,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         if (preserveAspectRatio == null) preserveAspectRatio = this.preserveAspectRatio;
 
         AffineTransform viewTransform = view != null
-                ? preserveAspectRatio.computeViewPortTransform(useSiteSize, view)
+                ? preserveAspectRatio.computeViewportTransform(useSiteSize, view)
                 : null;
         FloatSize viewSize = view != null
                 ? view.size()
@@ -120,7 +120,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         Point2D anchorPos = anchorLocation(innerMeasure);
         if (anchorPos != null) {
             if (viewTransform != null) {
-                // This is safe to do as computeViewPortTransform will never produce shear or rotation transforms.
+                // This is safe to do as computeViewportTransform will never produce shear or rotation transforms.
                 anchorPos.setLocation(
                         anchorPos.getX() * viewTransform.getScaleX() - viewTransform.getTranslateX(),
                         anchorPos.getY() * viewTransform.getScaleY() - viewTransform.getTranslateY());

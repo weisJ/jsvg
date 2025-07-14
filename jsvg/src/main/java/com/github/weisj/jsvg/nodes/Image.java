@@ -135,7 +135,7 @@ public final class Image extends RenderableSVGNode {
         if (overflow.establishesClip()) output.applyClip(new ViewBox(viewWidth, viewHeight));
         // Todo: Vector Effects
 
-        AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(
+        AffineTransform imgTransform = preserveAspectRatio.computeViewportTransform(
                 new FloatSize(viewWidth, viewHeight),
                 new ViewBox(resourceWidth, resourceHeight));
 
