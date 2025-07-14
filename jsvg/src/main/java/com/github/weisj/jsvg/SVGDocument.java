@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 
@@ -30,6 +31,7 @@ import javax.swing.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.parser.impl.DocumentConstructorAccessor;
@@ -119,8 +121,9 @@ public final class SVGDocument {
             @Nullable ViewBox bounds, @Nullable AnimationState animationState) {
         RenderContext context = prepareRenderContext(platformSupport, output, bounds, animationState);
 
-        if (bounds == null) bounds = new ViewBox(root.size(context));
+        ViewBox rootVieBox = new ViewBox(root.size(context));
 
+        if (bounds == null) bounds = rootVieBox;
 
         if (DEBUG) {
             final ViewBox finalBounds = bounds;
@@ -130,10 +133,21 @@ public final class SVGDocument {
             });
         }
 
-        output.applyClip(bounds);
-        output.translate(bounds.x, bounds.y);
+        AffineTransform rootTransform = PreserveAspectRatio.forDisplay()
+                .computeViewportTransform(bounds.size(), rootVieBox);
 
-        NodeRenderer.renderWithSize(root, bounds.size(), context, output, null);
+        RenderContext innerContext = NodeRenderer.setupInnerViewRenderContext(rootVieBox, context, true);
+
+        output.applyClip(bounds);
+
+        innerContext.translate(output, bounds.location());
+        innerContext.transform(output, rootTransform);
+
+        // Needed for vector-effects to work properly.
+        RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
+        accessor.setRootTransform(innerContext, output.transform());
+
+        NodeRenderer.renderRootSVG(root, context, output);
     }
 
     private @NotNull RenderContext prepareRenderContext(

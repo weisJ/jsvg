@@ -39,10 +39,6 @@ public interface Renderable {
         return false;
     }
 
-    default boolean shouldEstablishChildContext() {
-        return true;
-    }
-
     boolean isVisible(@NotNull RenderContext context);
 
     void render(@NotNull RenderContext context, @NotNull Output output);

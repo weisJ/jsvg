@@ -177,6 +177,10 @@ public final class PreserveAspectRatio {
         return new PreserveAspectRatio(Align.None, MeetOrSlice.Meet);
     }
 
+    public static @NotNull PreserveAspectRatio forDisplay() {
+        return new PreserveAspectRatio(Align.xMidYMid, MeetOrSlice.Meet);
+    }
+
     public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation,
             @NotNull AttributeParser parser) {
         return parse(preserveAspectRation, null, parser);

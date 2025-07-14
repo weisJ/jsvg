@@ -25,7 +25,6 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.Coordinate;
@@ -40,10 +39,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
-import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
-import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
-import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 
 @ElementCategories({Category.Container, Category.Structural})
@@ -66,7 +62,6 @@ public final class SVG extends CommonInnerViewContainer {
     private static final float FALLBACK_HEIGHT = 150;
 
     private boolean isTopLevel;
-    private boolean inNonRootMode;
     private AnimationPeriod animationPeriod;
 
     @Override
@@ -75,26 +70,11 @@ public final class SVG extends CommonInnerViewContainer {
     }
 
     public boolean isTopLevel() {
-        return isTopLevel && !inNonRootMode;
+        return isTopLevel;
     }
 
     public @NotNull AnimationPeriod animationPeriod() {
         return animationPeriod;
-    }
-
-    @Override
-    public @Nullable ClipPath clipPath() {
-        return !isTopLevel() ? super.clipPath() : null;
-    }
-
-    @Override
-    public @Nullable Mask mask() {
-        return !isTopLevel() ? super.mask() : null;
-    }
-
-    @Override
-    public @Nullable Filter filter() {
-        return !isTopLevel() ? super.filter() : null;
     }
 
     @Override
@@ -130,35 +110,5 @@ public final class SVG extends CommonInnerViewContainer {
                         .resolve(topLevelContext),
                 height.orElseIfUnspecified(viewBox != null ? viewBox.height : FALLBACK_HEIGHT)
                         .resolve(topLevelContext));
-    }
-
-    @Override
-    public boolean shouldEstablishChildContext() {
-        // If we redispatch we can skip creating a new child context. All values have already been resolved.
-        return !isTopLevel || !inNonRootMode;
-    }
-
-    @Override
-    protected void renderWithCurrentViewBox(@NotNull RenderContext context, @NotNull Output output) {
-        boolean needsHandlingAsChildNode = super.mask() != null
-                || super.filter() != null
-                || super.clipPath() != null;
-        if (needsHandlingAsChildNode) {
-            // TODO: Handle this more elegantly
-            inNonRootMode = true;
-            NodeRenderer.renderNode(this, context, output);
-            inNonRootMode = false;
-        } else {
-            super.renderWithCurrentViewBox(context, output);
-        }
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Output output) {
-        if (inNonRootMode) {
-            super.renderWithCurrentViewBox(context, output);
-        } else {
-            renderWithSize(size(context), viewBox(context), context, output);
-        }
     }
 }

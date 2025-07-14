@@ -31,12 +31,10 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.nodes.*;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
-import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
@@ -73,13 +71,19 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         overflow = attributeNode.getEnum("overflow", defaultOverflow());
     }
 
-    protected void renderWithCurrentViewBox(@NotNull RenderContext context, @NotNull Output output) {
+    public void renderWithEstablishedViewBox(@NotNull RenderContext context, @NotNull Output output) {
         super.render(context, output);
     }
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
         renderWithSize(size(context), viewBox(context), context, output);
+    }
+
+    public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
+            @NotNull RenderContext context, @NotNull Output output) {
+        RenderContext innerContext = createInnerContextForViewBox(useSiteSize, view, context, output);
+        renderWithEstablishedViewBox(innerContext, output);
     }
 
     protected boolean inheritAttributes() {
@@ -105,8 +109,8 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         return vb;
     }
 
-    public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
-            @NotNull RenderContext context, @NotNull Output output) {
+    public final @NotNull RenderContext createInnerContextForViewBox(@NotNull FloatSize useSiteSize,
+            @Nullable ViewBox view, @NotNull RenderContext context, @NotNull Output output) {
         ViewBox outerViewBox = computeOuterViewBox(context, useSiteSize);
         ViewBox innerViewBox = view;
 
@@ -137,16 +141,6 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
             innerContext.translate(output, anchorPos);
         }
 
-        if (this instanceof SVG && ((SVG) this).isTopLevel()) {
-            // Needed for vector-effects to work properly.
-            RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
-            accessor.setRootTransform(context, output.transform());
-            accessor.setRootTransform(innerContext, output.transform());
-
-            // If this element itself specifies a viewbox we have to respect its clipping rules.
-            if (viewTransform != null && overflow.establishesClip()) output.applyClip(view);
-        }
-
-        renderWithCurrentViewBox(innerContext, output);
+        return innerContext;
     }
 }
