@@ -40,10 +40,8 @@ import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.view.FloatSize;
-import com.github.weisj.jsvg.view.ViewBox;
 
 @ElementCategories(Category.Container)
 @PermittedContent(
@@ -123,8 +121,8 @@ public final class Marker extends BaseInnerViewContainer {
     }
 
     @Override
-    protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
+    protected boolean inheritAttributes() {
         // Markers do not inherit properties from the element they are referenced by.
-        return NodeRenderer.setupInnerViewRenderContext(viewBox, context, false);
+        return false;
     }
 }

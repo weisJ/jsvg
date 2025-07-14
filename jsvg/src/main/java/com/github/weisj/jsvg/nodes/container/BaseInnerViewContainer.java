@@ -82,50 +82,59 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         renderWithSize(size(context), viewBox(context), context, output);
     }
 
-    protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
-        return NodeRenderer.setupInnerViewRenderContext(viewBox, context, true);
+    protected boolean inheritAttributes() {
+        return true;
+    }
+
+    private @NotNull RenderContext createInnerContext(@NotNull RenderContext context,
+            @NotNull ViewBox viewBox) {
+        return NodeRenderer.setupInnerViewRenderContext(viewBox, context, inheritAttributes());
+    }
+
+    private @NotNull ViewBox computeOuterViewBox(@NotNull RenderContext context, @NotNull FloatSize useSiteSize) {
+        MeasureContext measureContext = context.measureContext();
+        Point2D outerPos = outerLocation(measureContext);
+        ViewBox vb = new ViewBox(outerPos, useSiteSize);
+
+        if (Length.isUnspecified(vb.width) || Length.isUnspecified(vb.height)) {
+            FloatSize size = size(context);
+            if (Length.isUnspecified(vb.width)) vb.width = size.width;
+            if (Length.isUnspecified(vb.height)) vb.height = size.height;
+        }
+
+        return vb;
     }
 
     public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
             @NotNull RenderContext context, @NotNull Output output) {
-        MeasureContext measureContext = context.measureContext();
+        ViewBox outerViewBox = computeOuterViewBox(context, useSiteSize);
+        ViewBox innerViewBox = view;
 
-        Point2D outerPos = outerLocation(measureContext);
+        // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
+        if (overflow.establishesClip()) output.applyClip(outerViewBox);
 
-        if (Length.isUnspecified(useSiteSize.width) || Length.isUnspecified(useSiteSize.height)) {
-            FloatSize size = size(context);
-            if (Length.isUnspecified(useSiteSize.width)) useSiteSize.width = size.width;
-            if (Length.isUnspecified(useSiteSize.height)) useSiteSize.height = size.height;
+        // innerViewBox == null should behave as if it were (0,0,width,height).
+        // If no viewBox is specified we can avoid the computation of the transform.
+        AffineTransform viewTransform = innerViewBox != null
+                ? preserveAspectRatio.computeViewportTransform(outerViewBox.size(), innerViewBox)
+                : null;
+
+        if (innerViewBox == null) {
+            innerViewBox = new ViewBox(outerViewBox.size());
         }
 
-        AffineTransform viewTransform = view != null
-                ? this.preserveAspectRatio.computeViewportTransform(useSiteSize, view)
-                : null;
-        FloatSize viewSize = view != null
-                ? view.size()
-                : useSiteSize;
-
-        RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
+        RenderContext innerContext = createInnerContext(context, innerViewBox);
         MeasureContext innerMeasure = innerContext.measureContext();
 
-        innerContext.translate(output, outerPos);
+        innerContext.translate(output, outerViewBox.location());
+        if (viewTransform != null) {
+            // This also applies the translation to the inner viewbox location.
+            innerContext.transform(output, viewTransform);
+        }
 
         Point2D anchorPos = anchorLocation(innerMeasure);
         if (anchorPos != null) {
-            if (viewTransform != null) {
-                // This is safe to do as computeViewportTransform will never produce shear or rotation transforms.
-                anchorPos.setLocation(
-                        anchorPos.getX() * viewTransform.getScaleX() - viewTransform.getTranslateX(),
-                        anchorPos.getY() * viewTransform.getScaleY() - viewTransform.getTranslateY());
-            }
             innerContext.translate(output, anchorPos);
-        }
-
-        // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
-        if (overflow.establishesClip()) output.applyClip(new ViewBox(useSiteSize));
-
-        if (viewTransform != null) {
-            innerContext.transform(output, viewTransform);
         }
 
         if (this instanceof SVG && ((SVG) this).isTopLevel()) {
@@ -137,6 +146,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
             // If this element itself specifies a viewbox we have to respect its clipping rules.
             if (viewTransform != null && overflow.establishesClip()) output.applyClip(view);
         }
+
         renderWithCurrentViewBox(innerContext, output);
     }
 }
