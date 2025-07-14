@@ -79,7 +79,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderWithSize(size(context), viewBox(context), null, context, output);
+        renderWithSize(size(context), viewBox(context), context, output);
     }
 
     protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
@@ -87,12 +87,6 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
     }
 
     public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
-            @NotNull RenderContext context, @NotNull Output output) {
-        renderWithSize(useSiteSize, view, null, context, output);
-    }
-
-    public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
-            @Nullable PreserveAspectRatio preserveAspectRatio,
             @NotNull RenderContext context, @NotNull Output output) {
         MeasureContext measureContext = context.measureContext();
 
@@ -103,10 +97,9 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
             if (Length.isUnspecified(useSiteSize.width)) useSiteSize.width = size.width;
             if (Length.isUnspecified(useSiteSize.height)) useSiteSize.height = size.height;
         }
-        if (preserveAspectRatio == null) preserveAspectRatio = this.preserveAspectRatio;
 
         AffineTransform viewTransform = view != null
-                ? preserveAspectRatio.computeViewportTransform(useSiteSize, view)
+                ? this.preserveAspectRatio.computeViewportTransform(useSiteSize, view)
                 : null;
         FloatSize viewSize = view != null
                 ? view.size()

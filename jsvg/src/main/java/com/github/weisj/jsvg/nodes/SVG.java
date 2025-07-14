@@ -164,7 +164,7 @@ public final class SVG extends CommonInnerViewContainer {
         if (inNonRootMode) {
             super.renderWithCurrentViewBox(context, output);
         } else {
-            renderWithSize(size(context), viewBox(context), null, context, output);
+            renderWithSize(size(context), viewBox(context), context, output);
         }
     }
 }
