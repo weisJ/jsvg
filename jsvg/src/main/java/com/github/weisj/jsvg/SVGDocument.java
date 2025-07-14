@@ -148,10 +148,7 @@ public final class SVGDocument {
                 ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx, animState)
                 : MeasureContext.createInitial(root.sizeForTopLevel(defaultEm, defaultEx),
                         defaultEm, defaultEx, animState);
-        RenderContext context = RenderContextAccessor.instance().createInitial(platformSupport, initialMeasure);
-
-        root.applyTransform(output, context, new ElementBounds(root, context));
-        return context;
+        return RenderContextAccessor.instance().createInitial(platformSupport, initialMeasure);
     }
 
 }

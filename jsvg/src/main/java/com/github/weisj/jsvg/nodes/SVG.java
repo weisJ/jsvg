@@ -82,12 +82,6 @@ public final class SVG extends CommonInnerViewContainer {
         return animationPeriod;
     }
 
-
-    @Override
-    public boolean shouldTransform() {
-        return !isTopLevel;
-    }
-
     @Override
     public @Nullable ClipPath clipPath() {
         return !isTopLevel() ? super.clipPath() : null;
