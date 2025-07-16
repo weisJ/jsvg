@@ -59,14 +59,14 @@ public final class BlittableImage {
     private final @NotNull BufferedImage image;
     private final @NotNull RenderContext context;
     private final @NotNull Rectangle2D boundsInDeviceSpace;
-    private final @NotNull Rectangle2D userBoundsInRootSpace;
+    private final @NotNull Rectangle2D clippedUserBounds;
 
     private BlittableImage(@NotNull BufferedImage image, @NotNull RenderContext context,
-            @NotNull Rectangle2D boundsInDeviceSpace, @NotNull Rectangle2D userBoundsInRootSpace) {
+            @NotNull Rectangle2D boundsInDeviceSpace, @NotNull Rectangle2D clippedUserBounds) {
         this.image = image;
         this.context = context;
         this.boundsInDeviceSpace = boundsInDeviceSpace;
-        this.userBoundsInRootSpace = userBoundsInRootSpace;
+        this.clippedUserBounds = clippedUserBounds;
     }
 
     public static @Nullable BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
@@ -94,8 +94,9 @@ public final class BlittableImage {
         // Increase size by 1 to ensure we don't cut off any pixels used for anti-aliasing.
         GeometryUtil.adjustForAliasing(boundsInDeviceSpace);
 
-        Rectangle2D adjustedBoundsInRootSpace = GeometryUtil.convertBounds(context, boundsInDeviceSpace,
-                GeometryUtil.Space.DEVICE, GeometryUtil.Space.ROOT);
+        // Due to aliasing adjustments this cannot just be bounds intersected clipBounds.
+        Rectangle2D adjustedBoundsInUserSpace = GeometryUtil.convertBounds(context, boundsInDeviceSpace,
+                GeometryUtil.Space.DEVICE, GeometryUtil.Space.USER);
 
         BufferedImage img = bufferSurfaceSupplier.createBufferSurface(null,
                 boundsInDeviceSpace.getWidth(),
@@ -116,7 +117,7 @@ public final class BlittableImage {
         // etc.
         RenderContextAccessor.instance().setRootTransform(imageContext, rootTransform, userSpaceTransform);
 
-        return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedBoundsInRootSpace);
+        return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedBoundsInUserSpace);
     }
 
     public @NotNull RenderContext context() {
@@ -127,8 +128,8 @@ public final class BlittableImage {
         return boundsInDeviceSpace;
     }
 
-    public @NotNull Rectangle2D userBoundsInRootSpace() {
-        return userBoundsInRootSpace;
+    public @NotNull Rectangle2D clippedUserBounds() {
+        return clippedUserBounds;
     }
 
     public @NotNull BufferedImage image() {
