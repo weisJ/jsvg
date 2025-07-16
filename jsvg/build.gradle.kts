@@ -66,4 +66,11 @@ tasks {
             exceptionFormat = TestExceptionFormat.FULL
         }
     }
+
+    register<JavaExec>("SVGViewer") {
+        group = "application"
+        description = "Runs the SVG Viewer application."
+        classpath = sourceSets["test"].runtimeClasspath
+        mainClass.set("com.github.weisj.jsvg.SVGViewer")
+    }
 }
