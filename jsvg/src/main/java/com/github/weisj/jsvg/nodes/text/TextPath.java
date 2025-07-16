@@ -26,6 +26,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.text.GlyphRenderMethod;
@@ -40,6 +41,9 @@ import com.github.weisj.jsvg.nodes.ShapeNode;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
 import com.github.weisj.jsvg.nodes.animation.Set;
+import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
+import com.github.weisj.jsvg.nodes.prototype.Transformable;
+import com.github.weisj.jsvg.nodes.prototype.impl.HasGeometryContextImpl;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
@@ -48,6 +52,7 @@ import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.PathUtil;
 
@@ -57,11 +62,13 @@ import com.github.weisj.jsvg.util.PathUtil;
     anyOf = {Anchor.class, TextSpan.class, Animate.class, AnimateTransform.class, Set.class, /* <altGlyph>, <tref> */},
     charData = true
 )
-public final class TextPath extends TextContainer {
+public final class TextPath extends TextContainer implements HasGeometryContext.ByDelegate {
     public static final String TAG = "textpath";
     private static final boolean DEBUG = false;
 
+    private HasGeometryContext geometryContext;
     private SVGShape pathShape;
+    private @Nullable Transformable pathShapeTransform;
 
     @SuppressWarnings("UnusedVariable")
     private @NotImplemented Spacing spacing;
@@ -79,6 +86,8 @@ public final class TextPath extends TextContainer {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
+        geometryContext = HasGeometryContextImpl.parse(attributeNode);
+
         renderMethod = attributeNode.getEnum("method", GlyphRenderMethod.Align);
         side = attributeNode.getEnum("side", Side.Left);
         spacing = attributeNode.getEnum("spacing", Spacing.Auto);
@@ -87,16 +96,24 @@ public final class TextPath extends TextContainer {
 
         String pathData = attributeNode.getValue("path");
         if (pathData != null) {
+            // TODO: If this contains an error, we should use the href attribute instead.
             pathShape = PathUtil.parseFromPathData(pathData, FillRule.EvenOdd);
+            pathShapeTransform = null;
         } else {
             String href = attributeNode.getHref();
-            ShapeNode shaped =
+            ShapeNode shape =
                     attributeNode.getElementByHref(ShapeNode.class, Category.Shape /* BasicShape or Path */, href,
                             ElementRelation.GEOMETRY_DATA);
-            if (shaped != null) {
-                pathShape = shaped.shape();
+            if (shape != null) {
+                pathShape = shape.shape();
+                pathShapeTransform = shape;
             }
         }
+    }
+
+    @Override
+    public @NotNull HasGeometryContext geometryContextDelegate() {
+        return geometryContext;
     }
 
     @Override
@@ -186,6 +203,10 @@ public final class TextPath extends TextContainer {
     private @NotNull PathIterator createPathIterator(@NotNull RenderContext context) {
         MeasureContext measureContext = context.measureContext();
         Shape path = pathShape.shape(context);
+        if (pathShapeTransform != null) {
+            path = pathShapeTransform.transformShape(path, context,
+                    ElementBounds.fromUntransformedBounds(this, context, path.getBounds2D(), Box.BoundingBox));
+        }
         // For fonts this is a good enough approximation
         float flatness = 0.1f * measureContext.ex();
         switch (side) {
