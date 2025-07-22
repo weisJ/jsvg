@@ -297,7 +297,7 @@ public class FXAWTBridge {
     public static ImagePattern convertTexturePaint(@NotNull TexturePaint awtGradient, double awtGlobalOpacity) {
         Rectangle2D rect = awtGradient.getAnchorRect();
         return new ImagePattern(
-                convertImage(awtGradient.getImage()),
+                convertImageWithOpacity(awtGradient.getImage(), awtGlobalOpacity),
                 rect.getX(),
                 rect.getY(),
                 rect.getWidth(),
@@ -309,14 +309,19 @@ public class FXAWTBridge {
         return SwingFXUtils.toFXImage(image, null);
     }
 
-    public static WritableImage convertImage(@NotNull Image image) {
-        if (image instanceof BufferedImage) {
+    public static WritableImage convertImageWithOpacity(@NotNull Image image, double awtGlobalOpacity) {
+        boolean hasOpacity = awtGlobalOpacity < 1.0;
+        if (image instanceof BufferedImage && !hasOpacity) {
             return convertImage((BufferedImage) image);
         }
         int width = image.getWidth(null);
         int height = image.getHeight(null);
         BufferedImage dst = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = dst.createGraphics();
+        if(hasOpacity) {
+            Composite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) awtGlobalOpacity);
+            graphics.setComposite(alphaComposite);
+        }
         graphics.drawImage(image, 0, 0, null);
         graphics.dispose();
         return convertImage(dst);
@@ -359,12 +364,12 @@ public class FXAWTBridge {
         return doubles;
     }
 
-    public static void drawImage(@NotNull GraphicsContext ctx, @NotNull BufferedImage awtImage) {
-        ctx.drawImage(convertImage(awtImage), 0, 0);
+    public static void drawImage(@NotNull GraphicsContext ctx, @NotNull BufferedImage awtImage, double currentOpacity) {
+        ctx.drawImage(convertImageWithOpacity(awtImage, currentOpacity), 0, 0);
     }
 
-    public static void drawImage(@NotNull GraphicsContext ctx, @NotNull Image awtImage) {
-        ctx.drawImage(convertImage(awtImage), 0, 0);
+    public static void drawImage(@NotNull GraphicsContext ctx, @NotNull Image awtImage, double currentOpacity) {
+        ctx.drawImage(convertImageWithOpacity(awtImage, currentOpacity), 0, 0);
     }
 
     public static void drawShape(@NotNull GraphicsContext ctx, @NotNull Shape shape) {

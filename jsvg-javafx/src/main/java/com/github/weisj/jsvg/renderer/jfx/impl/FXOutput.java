@@ -122,13 +122,13 @@ public class FXOutput implements Output {
 
     @Override
     public void drawImage(@NotNull BufferedImage image) {
-        FXAWTBridge.drawImage(ctx, image);
+        FXAWTBridge.drawImage(ctx, image, currentOpacity);
     }
 
     @Override
     public void drawImage(@NotNull Image image, @Nullable ImageObserver observer) {
         if (!FXAWTBridge.isWrappingPaint(currentPaint)) {
-            FXAWTBridge.drawImage(ctx, image);
+            FXAWTBridge.drawImage(ctx, image, currentOpacity);
         } else {
             // Handle rendering of wrapping paints
             GraphicsUtil.WrappingPaint wrappingPaint = (GraphicsUtil.WrappingPaint) currentPaint;
@@ -152,7 +152,7 @@ public class FXOutput implements Output {
         Affine originalTransform = ctx.getTransform();
         ctx.transform(at.getScaleX(), at.getShearY(), at.getShearX(), at.getScaleY(), at.getTranslateX(),
                 at.getTranslateY());
-        FXAWTBridge.drawImage(ctx, image);
+        FXAWTBridge.drawImage(ctx, image, currentOpacity);
         ctx.setTransform(originalTransform);
     }
 
