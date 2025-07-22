@@ -31,12 +31,10 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.nodes.*;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
-import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
@@ -73,77 +71,76 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         overflow = attributeNode.getEnum("overflow", defaultOverflow());
     }
 
-    protected void renderWithCurrentViewBox(@NotNull RenderContext context, @NotNull Output output) {
+    public void renderWithEstablishedViewBox(@NotNull RenderContext context, @NotNull Output output) {
         super.render(context, output);
     }
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderWithSize(size(context), viewBox(context), null, context, output);
-    }
-
-    protected @NotNull RenderContext createInnerContext(@NotNull RenderContext context, @NotNull ViewBox viewBox) {
-        return NodeRenderer.setupInnerViewRenderContext(viewBox, context, true);
+        renderWithSize(size(context), viewBox(context), context, output);
     }
 
     public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
             @NotNull RenderContext context, @NotNull Output output) {
-        renderWithSize(useSiteSize, view, null, context, output);
+        RenderContext innerContext = createInnerContextForViewBox(useSiteSize, view, context, output);
+        renderWithEstablishedViewBox(innerContext, output);
     }
 
-    public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
-            @Nullable PreserveAspectRatio preserveAspectRatio,
-            @NotNull RenderContext context, @NotNull Output output) {
+    protected boolean inheritAttributes() {
+        return true;
+    }
+
+    private @NotNull RenderContext createInnerContext(@NotNull RenderContext context,
+            @NotNull ViewBox viewBox) {
+        return NodeRenderer.setupInnerViewRenderContext(viewBox, context, inheritAttributes());
+    }
+
+    private @NotNull ViewBox computeOuterViewBox(@NotNull RenderContext context, @NotNull FloatSize useSiteSize) {
         MeasureContext measureContext = context.measureContext();
-
         Point2D outerPos = outerLocation(measureContext);
+        ViewBox vb = new ViewBox(outerPos, useSiteSize);
 
-        if (Length.isUnspecified(useSiteSize.width) || Length.isUnspecified(useSiteSize.height)) {
+        if (Length.isUnspecified(vb.width) || Length.isUnspecified(vb.height)) {
             FloatSize size = size(context);
-            if (Length.isUnspecified(useSiteSize.width)) useSiteSize.width = size.width;
-            if (Length.isUnspecified(useSiteSize.height)) useSiteSize.height = size.height;
+            if (Length.isUnspecified(vb.width)) vb.width = size.width;
+            if (Length.isUnspecified(vb.height)) vb.height = size.height;
         }
-        if (preserveAspectRatio == null) preserveAspectRatio = this.preserveAspectRatio;
 
-        AffineTransform viewTransform = view != null
-                ? preserveAspectRatio.computeViewPortTransform(useSiteSize, view)
-                : null;
-        FloatSize viewSize = view != null
-                ? view.size()
-                : useSiteSize;
+        return vb;
+    }
 
-        RenderContext innerContext = createInnerContext(context, new ViewBox(viewSize));
-        MeasureContext innerMeasure = innerContext.measureContext();
-
-        innerContext.translate(output, outerPos);
-
-        Point2D anchorPos = anchorLocation(innerMeasure);
-        if (anchorPos != null) {
-            if (viewTransform != null) {
-                // This is safe to do as computeViewPortTransform will never produce shear or rotation transforms.
-                anchorPos.setLocation(
-                        anchorPos.getX() * viewTransform.getScaleX() - viewTransform.getTranslateX(),
-                        anchorPos.getY() * viewTransform.getScaleY() - viewTransform.getTranslateY());
-            }
-            innerContext.translate(output, anchorPos);
-        }
+    public final @NotNull RenderContext createInnerContextForViewBox(@NotNull FloatSize useSiteSize,
+            @Nullable ViewBox view, @NotNull RenderContext context, @NotNull Output output) {
+        ViewBox outerViewBox = computeOuterViewBox(context, useSiteSize);
+        ViewBox innerViewBox = view;
 
         // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
-        if (overflow.establishesClip()) output.applyClip(new ViewBox(useSiteSize));
+        if (overflow.establishesClip()) output.applyClip(outerViewBox);
 
+        // innerViewBox == null should behave as if it were (0,0,width,height).
+        // If no viewBox is specified we can avoid the computation of the transform.
+        AffineTransform viewTransform = innerViewBox != null
+                ? preserveAspectRatio.computeViewportTransform(outerViewBox.size(), innerViewBox)
+                : null;
+
+        if (innerViewBox == null) {
+            innerViewBox = new ViewBox(outerViewBox.size());
+        }
+
+        RenderContext innerContext = createInnerContext(context, innerViewBox);
+        MeasureContext innerMeasure = innerContext.measureContext();
+
+        innerContext.translate(output, outerViewBox.location());
         if (viewTransform != null) {
+            // This also applies the translation to the inner viewbox location.
             innerContext.transform(output, viewTransform);
         }
 
-        if (this instanceof SVG && ((SVG) this).isTopLevel()) {
-            // Needed for vector-effects to work properly.
-            RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
-            accessor.setRootTransform(context, output.transform());
-            accessor.setRootTransform(innerContext, output.transform());
-
-            // If this element itself specifies a viewbox we have to respect its clipping rules.
-            if (viewTransform != null && overflow.establishesClip()) output.applyClip(view);
+        Point2D anchorPos = anchorLocation(innerMeasure);
+        if (anchorPos != null) {
+            innerContext.translate(output, anchorPos);
         }
-        renderWithCurrentViewBox(innerContext, output);
+
+        return innerContext;
     }
 }

@@ -177,6 +177,10 @@ public final class PreserveAspectRatio {
         return new PreserveAspectRatio(Align.None, MeetOrSlice.Meet);
     }
 
+    public static @NotNull PreserveAspectRatio forDisplay() {
+        return new PreserveAspectRatio(Align.xMidYMid, MeetOrSlice.Meet);
+    }
+
     public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation,
             @NotNull AttributeParser parser) {
         return parse(preserveAspectRation, null, parser);
@@ -213,7 +217,7 @@ public final class PreserveAspectRatio {
     }
 
     // https://www.w3.org/TR/SVG2/coords.html#ComputingAViewportsTransform
-    public @NotNull AffineTransform computeViewPortTransform(@NotNull FloatSize size, @NotNull ViewBox viewBox) {
+    public @NotNull AffineTransform computeViewportTransform(@NotNull FloatSize size, @NotNull ViewBox viewBox) {
         AffineTransform viewTransform = new AffineTransform();
         if (align == Align.None) {
             viewTransform.scale(size.width / viewBox.width, size.height / viewBox.height);

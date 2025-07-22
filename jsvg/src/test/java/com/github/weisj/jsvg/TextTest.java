@@ -111,6 +111,13 @@ class TextTest {
     }
 
     @Test
+    void testTextPathHref() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("text/textPathHrefTransform_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("text/textPathHrefTransform.svg"), RenderType.JSVG))));
+    }
+
+    @Test
     void testExtractingText() {
         try {
             String path = "text/extractText.svg";

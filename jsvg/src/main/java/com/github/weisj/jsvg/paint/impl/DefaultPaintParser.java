@@ -26,12 +26,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.ParserUtil;
@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 
 public final class DefaultPaintParser implements PaintParser {
-    private static final Logger LOGGER = Logger.getLogger(DefaultPaintParser.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(DefaultPaintParser.class);
 
     // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
     @Override
@@ -95,7 +95,7 @@ public final class DefaultPaintParser implements PaintParser {
             }
             return ColorLookup.colorMap().get(value.toLowerCase(Locale.ENGLISH));
         } catch (Exception e) {
-            LOGGER.log(Level.INFO, e.getMessage(), e);
+            LOGGER.log(Logger.Level.INFO, e.getMessage(), e);
             return null;
         }
     }

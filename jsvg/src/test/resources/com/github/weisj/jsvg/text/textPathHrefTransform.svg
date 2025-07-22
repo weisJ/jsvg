@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+	<style>
+		svg {
+		font-weight: bold;
+		font-size: 16px;
+		font-family: sans-serif;
+		}
+	</style>
+	<defs>
+		<path id="my_path1"
+			d="M 50 100 Q 25 10 180 100 T 350 100 T 520 100 T 690 100" />
+		<path id="my_path2" d="M 50 100 Q 25 10 180 100 T 350 100"
+			transform="translate(0,75)" />
+	</defs>
+	<text>
+		<textPath href="#my_path1" fill="green">A B C D E F</textPath>
+		<textPath href="#my_path2" fill="red">A B C</textPath>
+	</text>
+</svg>

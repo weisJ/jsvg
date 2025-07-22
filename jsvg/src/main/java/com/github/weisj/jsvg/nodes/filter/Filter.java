@@ -24,8 +24,6 @@ package com.github.weisj.jsvg.nodes.filter;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +37,9 @@ import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -58,7 +59,7 @@ import com.github.weisj.jsvg.util.BlittableImage;
     anyOf = {Animate.class, Set.class}
 )
 public final class Filter extends ContainerNode {
-    private static final Logger LOGGER = Logger.getLogger(Filter.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(Filter.class);
     public static final String TAG = "filter";
 
     private static final Length DEFAULT_FILTER_COORDINATE_X = Unit.PERCENTAGE_WIDTH.valueOf(-10);
@@ -183,7 +184,7 @@ public final class Filter extends ContainerNode {
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
-                LOGGER.log(Level.FINE, "Exception during filter", e);
+                LOGGER.log(Level.INFO, "Exception during filter", e);
             }
             // Todo: Respect filterPrimitiveRegion
         }
@@ -241,7 +242,7 @@ public final class Filter extends ContainerNode {
         }
 
         public @NotNull Rectangle2D imageBounds() {
-            return blittableImage.userBoundsInRootSpace();
+            return blittableImage.clippedUserBounds();
         }
 
         public @NotNull Rectangle2D filterRegion() {

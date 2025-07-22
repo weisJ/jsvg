@@ -25,13 +25,14 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.parser.impl.*;
 
 /**
@@ -40,7 +41,7 @@ import com.github.weisj.jsvg.parser.impl.*;
  */
 public final class SVGLoader {
 
-    static final Logger LOGGER = Logger.getLogger(SVGLoader.class.getName());
+    static final Logger LOGGER = LogFactory.createLogger(SVGLoader.class);
     private final StaxSVGLoader loader = new StaxSVGLoader();
 
     public @Nullable SVGDocument load(@NotNull URL xmlBase) {

@@ -46,6 +46,10 @@ public final class ViewBox extends Rectangle2D.Float {
         this(size.width, size.height);
     }
 
+    public ViewBox(@NotNull Point2D location, @NotNull FloatSize size) {
+        this((float) location.getX(), (float) location.getY(), size.width, size.height);
+    }
+
     public ViewBox(@NotNull Rectangle2D bounds) {
         this((float) bounds.getX(), (float) bounds.getY(), (float) bounds.getWidth(), (float) bounds.getHeight());
     }

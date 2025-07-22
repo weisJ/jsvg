@@ -122,14 +122,17 @@ public final class ShapeRenderer {
                     fillPainted = true;
                     break;
                 case STROKE:
-                    Shape strokeShape = paintShape.shape;
+                    PaintShape strokeShape = null;
+                    Shape shape = paintShape.shape;
                     if (vectorEffects.contains(VectorEffect.NonScalingStroke)
                             && !vectorEffects.contains(VectorEffect.NonScalingSize)) {
-                        strokeShape =
-                                VectorEffect.applyNonScalingStroke(output, phaseContext, strokeShape);
+                        Shape stroked = VectorEffect.applyNonScalingStroke(
+                                output, phaseContext, shapePaintContext.stroke, paintShape.shape);
+                        strokeShape = new PaintShape(stroked, stroked.getBounds2D());
                     }
                     ShapeRenderer.renderShapeStroke(phaseContext, output,
-                            new PaintShape(strokeShape, paintShape.bounds), shapePaintContext.stroke,
+                            new PaintShape(shape, paintShape.bounds),
+                            strokeShape, shapePaintContext.stroke,
                             !fillPainted && canBeFilledHint);
                     break;
                 case MARKERS:
@@ -147,18 +150,38 @@ public final class ShapeRenderer {
     }
 
     private static void renderShapeStroke(@NotNull RenderContext context, @NotNull Output output,
-            @NotNull PaintShape paintShape, @Nullable Stroke stroke, boolean willBeFilledAfterwards) {
+            @NotNull PaintShape paintShape, @Nullable PaintShape strokeShape,
+            @Nullable Stroke stroke, boolean willBeFilledAfterwards) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
         if (!(stroke != null && paintWithOpacity.isVisible(context))) return;
         output.applyOpacity(paintWithOpacity.opacity);
         output.setStroke(stroke);
+
+        PaintShape strokeShapeToPaint =
+                computeEffectiveStrokeShape(context, output, paintShape, strokeShape, stroke, willBeFilledAfterwards);
+
+        if (strokeShapeToPaint != null) {
+            paintWithOpacity.paint.fillShape(output, context, strokeShapeToPaint.shape, strokeShapeToPaint.bounds);
+        } else {
+            paintWithOpacity.paint.drawShape(output, context, paintShape.shape, paintShape.bounds);
+        }
+
+    }
+
+    private static PaintShape computeEffectiveStrokeShape(@NotNull RenderContext context, @NotNull Output output,
+            @NotNull PaintShape paintShape, @Nullable PaintShape strokeShape, @NotNull Stroke stroke,
+            boolean willBeFilledAfterwards) {
+        PaintShape strokeShapeToPaint = strokeShape;
+
         boolean removeFillArea = output.hasMaskedPaint()
                 && willBeFilledAfterwards
                 && context.fillPaint().isVisible(context)
                 && context.fillOpacity() == 1
                 && output.currentOpacity() == 1;
         if (removeFillArea) {
-            Area s = new Area(stroke.createStrokedShape(paintShape.shape));
+            Area s = new Area(strokeShape != null
+                    ? strokeShape.shape
+                    : stroke.createStrokedShape(paintShape.shape));
             s.subtract(new Area(paintShape.shape));
             Rectangle2D strokedBounds = paintShape.bounds;
             if (strokedBounds != null) {
@@ -168,10 +191,9 @@ public final class ShapeRenderer {
                     strokedBounds = s.getBounds2D();
                 }
             }
-            paintWithOpacity.paint.fillShape(output, context, s, strokedBounds);
-            return;
+            strokeShapeToPaint = new PaintShape(s, strokedBounds);
         }
-        paintWithOpacity.paint.drawShape(output, context, paintShape.shape, paintShape.bounds);
+        return strokeShapeToPaint;
     }
 
     private static void renderShapeFill(@NotNull RenderContext context, @NotNull Output output,

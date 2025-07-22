@@ -25,8 +25,6 @@ import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +33,9 @@ import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -54,7 +55,7 @@ import com.github.weisj.jsvg.view.ViewBox;
     categories = {Category.Animation, Category.Descriptive}
 )
 public final class Image extends RenderableSVGNode {
-    private static final Logger LOGGER = Logger.getLogger(Image.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(Image.class);
 
     public static final String TAG = "image";
     private Length x;
@@ -134,7 +135,7 @@ public final class Image extends RenderableSVGNode {
         if (overflow.establishesClip()) output.applyClip(new ViewBox(viewWidth, viewHeight));
         // Todo: Vector Effects
 
-        AffineTransform imgTransform = preserveAspectRatio.computeViewPortTransform(
+        AffineTransform imgTransform = preserveAspectRatio.computeViewportTransform(
                 new FloatSize(viewWidth, viewHeight),
                 new ViewBox(resourceWidth, resourceHeight));
 

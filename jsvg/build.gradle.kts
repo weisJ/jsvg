@@ -10,15 +10,15 @@ dependencies {
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
     compileOnly(projects.annotations)
-    compileOnly(libs.osgiAnnotations)
     compileOnly(libs.bndAnnotations)
+    compileOnly(libs.osgiAnnotations)
 
     annotationProcessor(projects.annotationsProcessor)
 
     testImplementation(testLibs.darklaf.core)
     testImplementation(testLibs.junit.api)
     testImplementation(testLibs.svgSalamander)
-    testImplementation(testLibs.bundles.batik)
+    testImplementation(testLibs.batik)
     testImplementation(testLibs.imageCompare)
     testImplementation(testLibs.sizeof)
     testImplementation(gradleApi())
@@ -28,7 +28,6 @@ dependencies {
     testCompileOnly(libs.nullabilityAnnotations)
     testCompileOnly(toolLibs.errorprone.annotations)
 }
-
 tasks {
 
     compileTestJava {
@@ -66,5 +65,12 @@ tasks {
             showStackTraces = true
             exceptionFormat = TestExceptionFormat.FULL
         }
+    }
+
+    register<JavaExec>("SVGViewer") {
+        group = "application"
+        description = "Runs the SVG Viewer application."
+        classpath = sourceSets["test"].runtimeClasspath
+        mainClass.set("com.github.weisj.jsvg.SVGViewer")
     }
 }

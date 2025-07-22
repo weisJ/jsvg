@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
@@ -45,6 +46,14 @@ import com.github.weisj.jsvg.view.ViewBox;
 
 public final class NodeRenderer {
     private NodeRenderer() {}
+
+    public static void renderRootSVG(@NotNull SVG svgRoot, @NotNull RenderContext context, @NotNull Output output) {
+        RenderContext viewContext = svgRoot.createInnerContextForViewBox(
+                svgRoot.size(context), svgRoot.viewBox(context), context, output);
+        try (Info info = createRenderInfo(svgRoot, viewContext, output, null)) {
+            if (info != null) ((SVG) info.renderable()).renderWithEstablishedViewBox(info.context(), info.output());
+        }
+    }
 
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output) {
         renderNode(node, context, output, null);
@@ -67,7 +76,6 @@ public final class NodeRenderer {
 
     public static @NotNull RenderContext createChildContext(@NotNull Renderable node, @NotNull RenderContext context,
             @Nullable Instantiator instantiator) {
-        if (!node.shouldEstablishChildContext()) return context;
         return setupRenderContext(instantiator, node, context);
     }
 

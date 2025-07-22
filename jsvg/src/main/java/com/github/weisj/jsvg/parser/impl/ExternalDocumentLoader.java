@@ -25,16 +25,17 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.parser.DomDocument;
 
-
 class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
-    private static final Logger LOGGER = Logger.getLogger(ExternalDocumentLoader.class.getName());
+    private static final Logger LOGGER = LogFactory.createLogger(ExternalDocumentLoader.class);
 
     private final @NotNull Map<URI, CachedDocument> cache = new HashMap<>();
 
@@ -82,7 +83,7 @@ class ExternalDocumentLoader implements DefaultElementLoader.DocumentLoader {
                 return parsedDocument;
             }
         } catch (Exception e) {
-            LOGGER.warning(String.format("Failed to load external document: %s from %s - %s",
+            LOGGER.log(Level.WARNING, String.format("Failed to load external document: %s from %s - %s",
                     name, documentUri, e.getMessage()));
             return null;
         }

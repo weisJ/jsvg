@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"
+	viewBox="0 0 50 50">
+
+	<circle cx="25" cy="25" r="20" fill="none" stroke="green"
+		stroke-width="2" vector-effect="non-scaling-stroke" />
+
+	<path d="M25 15 L 25 35" fill="none" stroke="green"
+		stroke-width="2" stroke-linecap="round" />
+
+	<path d="M15 25 L 35 25" fill="none" stroke="green"
+		stroke-width="2" stroke-linecap="round"
+		vector-effect="non-scaling-stroke" />
+</svg>
