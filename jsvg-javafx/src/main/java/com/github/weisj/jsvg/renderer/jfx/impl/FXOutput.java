@@ -23,11 +23,9 @@ package com.github.weisj.jsvg.renderer.jfx.impl;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.*;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javafx.scene.canvas.GraphicsContext;
@@ -49,32 +47,32 @@ import com.github.weisj.jsvg.util.ImageUtil;
  */
 public class FXOutput implements Output {
 
-    private final GraphicsContext ctx;
-    private final GraphicsContextSaveCounter ctxSaveCounter;
-    private final ClipStack clipStack;
-    private final RenderingHints renderingHints;
-    private final boolean isRootOutput;
+    protected final GraphicsContext ctx;
+    protected final FXOutputSaveCounter ctxSaveCounter;
+    protected final FXOutputClipStack clipStack;
+    protected final RenderingHints renderingHints;
+    protected final boolean isRootOutput;
 
-    private static final Color DEFAULT_PAINT = Color.BLACK;
-    private static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
-    private static final float DEFAULT_OPACITY = 1F;
-    private static final FillRule DEFAULT_FILL_RULE = FillRule.NON_ZERO;
+    protected static final Color DEFAULT_PAINT = Color.BLACK;
+    protected static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
+    protected static final float DEFAULT_OPACITY = 1F;
+    protected static final FillRule DEFAULT_FILL_RULE = FillRule.NON_ZERO;
 
-    private float currentOpacity = DEFAULT_OPACITY;
-    private Paint currentPaint = DEFAULT_PAINT;
-    private Stroke currentStroke = DEFAULT_STROKE;
-    private final SafeState originalState;
+    protected float currentOpacity = DEFAULT_OPACITY;
+    protected Paint currentPaint = DEFAULT_PAINT;
+    protected Stroke currentStroke = DEFAULT_STROKE;
+    protected final SafeState originalState;
 
     private FXOutput(@NotNull GraphicsContext context) {
         ctx = context;
-        ctxSaveCounter = new GraphicsContextSaveCounter();
-        clipStack = new ClipStack();
+        ctxSaveCounter = new FXOutputSaveCounter(this);
+        clipStack = new FXOutputClipStack(this);
         isRootOutput = true;
         renderingHints = new RenderingHints(null);
         setOpacity(DEFAULT_OPACITY);
         setPaint(DEFAULT_PAINT);
         setStroke(DEFAULT_STROKE);
-        originalState = new FXOutputState(SaveClipStack.YES);
+        originalState = new FXOutputState(this, FXOutputState.SaveClipStack.YES);
     }
 
     private FXOutput(@NotNull FXOutput parent) {
@@ -87,7 +85,7 @@ public class FXOutput implements Output {
         currentOpacity = parent.currentOpacity;
         currentPaint = parent.currentPaint;
         currentStroke = parent.currentStroke;
-        originalState = new FXOutputState(SaveClipStack.YES);
+        originalState = new FXOutputState(this, FXOutputState.SaveClipStack.YES);
     }
 
     /**
@@ -323,7 +321,7 @@ public class FXOutput implements Output {
         setOpacity(opacity * currentOpacity);
     }
 
-    private void setOpacity(float opacity) {
+    protected void setOpacity(float opacity) {
         currentOpacity = opacity;
 
         // Re-apply paint with correct opacity
@@ -332,7 +330,7 @@ public class FXOutput implements Output {
 
     @Override
     public @NotNull SafeState safeState() {
-        return new FXOutputState(SaveClipStack.YES);
+        return new FXOutputState(this, FXOutputState.SaveClipStack.YES);
     }
 
     @Override
@@ -354,181 +352,6 @@ public class FXOutput implements Output {
     @Override
     public boolean hasMaskedPaint() {
         return currentPaint instanceof MaskedPaint;
-    }
-
-    private enum SaveClipStack {
-        YES,
-        NO
-    }
-
-    private class FXOutputState implements SafeState {
-
-        private final AffineTransform originalTransform;
-        private final Paint originalPaint;
-        private final Stroke originalStroke;
-        private final float originalOpacity;
-        private final List<Shape> originalClipStack;
-
-        public FXOutputState(SaveClipStack saveClip) {
-            this.originalTransform = transform();
-            this.originalPaint = currentPaint;
-            this.originalStroke = currentStroke;
-            this.originalOpacity = currentOpacity;
-            this.originalClipStack = saveClip == SaveClipStack.YES ? clipStack.snapshot() : null;
-        }
-
-        public @NotNull GraphicsContext context() {
-            return ctx;
-        }
-
-        @Override
-        public void restore() {
-            if (originalClipStack != null) {
-                clipStack.restoreClipStack(originalClipStack);
-            }
-            setOpacity(originalOpacity);
-            setTransform(originalTransform);
-            setPaint(originalPaint);
-            setStroke(originalStroke);
-        }
-    }
-
-    private static class ClipShape {
-
-        private final Shape shape;
-        private Rectangle2D bounds;
-        private final int savePoint; // Save point before the clip has been applied
-
-        private ClipShape(Shape shape, int savePoint) {
-            this.savePoint = savePoint;
-            this.shape = shape;
-        }
-
-        public Rectangle2D getBounds() {
-            if (bounds == null) {
-                // We need to apply the save points inverse transform to this
-                bounds = shape.getBounds2D();
-            }
-            return bounds;
-        }
-    }
-
-    private class ClipStack {
-
-        private final Deque<ClipShape> clipStack = new ArrayDeque<>();
-
-        private void pushClip(Shape awtClipShape) {
-            PathIterator awtIterator = awtClipShape.getPathIterator(null);
-            FXAWTBridge.applyPathIterator(ctx, awtIterator);
-            FXAWTBridge.applyWindingRule(ctx, awtIterator.getWindingRule());
-
-            int savePoint = ctxSaveCounter.save();
-            ctx.clip();
-
-            clipStack.add(new ClipShape(awtClipShape, savePoint));
-        }
-
-        private void popClip() {
-            if (clipStack.isEmpty()) {
-                return;
-            }
-            FXOutputState currentState = new FXOutputState(SaveClipStack.NO);
-            ClipShape clipShape = clipStack.removeLast();
-            ctxSaveCounter.restoreTo(clipShape.savePoint);
-            currentState.restore();
-        }
-
-        private void clearClip() {
-            if (clipStack.isEmpty()) {
-                return;
-            }
-            FXOutputState currentState = new FXOutputState(SaveClipStack.NO);
-            while (!clipStack.isEmpty()) {
-                ClipShape clipShape = clipStack.removeLast();
-                ctxSaveCounter.restoreTo(clipShape.savePoint);
-            }
-            currentState.restore();
-        }
-
-        private void restoreClipStack(@NotNull List<Shape> originalClipStack) {
-            if (clipStack.isEmpty() && originalClipStack.isEmpty()) {
-                return;
-            }
-
-            FXOutputState currentState = new FXOutputState(SaveClipStack.NO);
-
-            int validClips = 0;
-            int minSize = Math.min(clipStack.size(), originalClipStack.size());
-
-            // Compare clips in both stacks to find the first non-matching clip
-            for (ClipShape currentClip : clipStack) {
-                if (validClips >= minSize) {
-                    break;
-                }
-                Shape originalClipShape = originalClipStack.get(validClips);
-
-                if (currentClip == null || !currentClip.shape.equals(originalClipShape)) {
-                    break;
-                }
-                validClips++;
-            }
-
-            // Remove invalid clips from the current stack
-            int clipsToRemove = clipStack.size() - validClips;
-            for (int i = 0; i < clipsToRemove; i++) {
-                ClipShape clipShape = clipStack.removeLast();
-                ctxSaveCounter.restoreTo(clipShape.savePoint);
-            }
-
-            currentState.restore();
-
-            // Add missing clips from the original stack
-            for (int i = validClips; i < originalClipStack.size(); i++) {
-                Shape originalClipShape = originalClipStack.get(i);
-                applyClip(originalClipShape);
-            }
-        }
-
-        private List<Shape> snapshot() {
-            List<Shape> snapshot = new ArrayList<>(this.clipStack.size());
-            for (ClipShape clipShape : this.clipStack) {
-                snapshot.add(clipShape.shape);
-            }
-            return snapshot;
-        }
-
-        private Rectangle2D getClipBounds() {
-            if (clipStack.isEmpty()) {
-                return new Rectangle2D.Double(0, 0, ctx.getCanvas().getWidth(), ctx.getCanvas().getHeight());
-            }
-            return clipStack.peekLast().getBounds();
-        }
-    }
-
-    /**
-     * We don't have direct access to set the clip required for the setClip() method, so we must track the number of save/restore calls.
-     * Then we can pop the stack back to the correct clip.
-     */
-    private class GraphicsContextSaveCounter {
-
-        private int saveCount = 0;
-
-        private GraphicsContextSaveCounter() {
-            super();
-        }
-
-        private int save() {
-            ctx.save();
-            return saveCount++;
-        }
-
-        private void restoreTo(int count) {
-            while (saveCount > count) {
-                ctx.restore();
-                saveCount--;
-            }
-        }
-
     }
 
 }
