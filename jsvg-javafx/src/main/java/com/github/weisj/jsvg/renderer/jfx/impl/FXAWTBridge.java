@@ -312,9 +312,9 @@ public class FXAWTBridge {
         if (image instanceof BufferedImage) {
             return convertImage((BufferedImage) image);
         }
-        BufferedImage dst = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
         int width = image.getWidth(null);
         int height = image.getHeight(null);
+        BufferedImage dst = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = dst.createGraphics();
         graphics.drawImage(image, 0, 0, null);
         graphics.dispose();
