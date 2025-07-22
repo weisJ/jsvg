@@ -24,7 +24,6 @@ package com.github.weisj.jsvg.ui.jfx;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Control;
@@ -73,23 +72,9 @@ public class FXSVGCanvas extends Control {
         getStyleClass().add(STYLE_CLASS);
         if (getShowTransparentPattern()) getStyleClass().add(STYLE_CLASS_TRANSPARENT_PATTERN);
 
-        currentAnimation.addListener((observable, oldValue, newValue) -> {
+        animation.addListener((observable, oldValue, newValue) -> {
             setupAnimation(newValue);
         });
-
-        currentAnimation.bind(Bindings.createObjectBinding(() -> {
-            if (!animated.get()) return DEFAULT_ANIMATION;
-            if (animation.get() != null) return animation.get();
-            SVGDocument document = getDocument();
-            return document == null ? DEFAULT_ANIMATION : document.animation();
-        }, document, animation, animated));
-
-        currentViewBox.bind(Bindings.createObjectBinding(() -> {
-            if (viewBox.get() != null) return viewBox.get();
-            if (!useSVGViewBox.get()) return DEFAULT_VIEW_BOX;
-            SVGDocument document = getDocument();
-            return document == null ? DEFAULT_VIEW_BOX : document.viewBox();
-        }, viewBox, document, useSVGViewBox));
 
         showTransparentPatternProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue) getStyleClass().remove(STYLE_CLASS_TRANSPARENT_PATTERN);
@@ -98,7 +83,11 @@ public class FXSVGCanvas extends Control {
 
     }
 
-    private void setupAnimation(Animation animation) {
+    private void setupAnimation(@Nullable Animation animation) {
+        if (animation == null) {
+            animation = DEFAULT_ANIMATION;
+        }
+
         timeline.getKeyFrames().clear();
         timeline.getKeyFrames()
                 .add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(elapsedAnimationTime, 0)));
@@ -189,18 +178,6 @@ public class FXSVGCanvas extends Control {
 
     ////////////////////////////////////////////////
 
-    private final ObjectProperty<@Nullable ViewBox> currentViewBox = new SimpleObjectProperty<>();
-
-    public @Nullable ViewBox getCurrentViewBox() {
-        return currentViewBox.get();
-    }
-
-    public @Nullable ReadOnlyObjectProperty<@Nullable ViewBox> currentViewBoxProperty() {
-        return currentViewBox;
-    }
-
-    ////////////////////////////////////////////////
-
     private final ObjectProperty<@Nullable ViewBox> viewBox = new SimpleObjectProperty<>(DEFAULT_VIEW_BOX);
 
     public @Nullable ViewBox getViewBox() {
@@ -241,18 +218,6 @@ public class FXSVGCanvas extends Control {
 
     public @NotNull ReadOnlyLongProperty elapsedAnimationTimeProperty() {
         return elapsedAnimationTime;
-    }
-
-    ////////////////////////////////////////////////
-
-    private final ObjectProperty<@NotNull Animation> currentAnimation = new SimpleObjectProperty<>(DEFAULT_ANIMATION);
-
-    public @NotNull Animation getCurrentAnimation() {
-        return currentAnimation.get();
-    }
-
-    public @NotNull ReadOnlyObjectProperty<@NotNull Animation> currentAnimationProperty() {
-        return currentAnimation;
     }
 
     ////////////////////////////////////////////////
