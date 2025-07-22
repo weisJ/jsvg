@@ -26,10 +26,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javafx.scene.canvas.GraphicsContext;
@@ -390,7 +388,7 @@ public class FXOutput implements Output {
 
     private class ClipStack {
 
-        private final Stack<ClipShape> clipStack = new Stack<>();
+        private final Deque<ClipShape> clipStack = new ArrayDeque<>();
 
         private void pushClip(Shape awtClipShape) {
             PathIterator awtIterator = awtClipShape.getPathIterator(null);
@@ -408,7 +406,7 @@ public class FXOutput implements Output {
                 return;
             }
             FXOutputState currentState = new FXOutputState(SaveClipStack.NO);
-            ClipShape clipShape = clipStack.pop();
+            ClipShape clipShape = clipStack.removeLast();
             ctxSaveCounter.restoreTo(clipShape.savePoint);
             currentState.restore();
         }
@@ -419,7 +417,7 @@ public class FXOutput implements Output {
             }
             FXOutputState currentState = new FXOutputState(SaveClipStack.NO);
             while (!clipStack.isEmpty()) {
-                ClipShape clipShape = clipStack.pop();
+                ClipShape clipShape = clipStack.removeLast();
                 ctxSaveCounter.restoreTo(clipShape.savePoint);
             }
             currentState.restore();
@@ -436,19 +434,22 @@ public class FXOutput implements Output {
             int minSize = Math.min(clipStack.size(), originalClipStack.size());
 
             // Compare clips in both stacks to find the first non-matching clip
-            for (; validClips < minSize; validClips++) {
-                ClipShape currentClip = clipStack.get(validClips);
+            for (ClipShape currentClip : clipStack) {
+                if (validClips >= minSize) {
+                    break;
+                }
                 Shape originalClipShape = originalClipStack.get(validClips);
 
                 if (currentClip == null || !currentClip.shape.equals(originalClipShape)) {
                     break;
                 }
+                validClips++;
             }
 
             // Remove invalid clips from the current stack
             int clipsToRemove = clipStack.size() - validClips;
             for (int i = 0; i < clipsToRemove; i++) {
-                ClipShape clipShape = clipStack.pop();
+                ClipShape clipShape = clipStack.removeLast();
                 ctxSaveCounter.restoreTo(clipShape.savePoint);
             }
 
@@ -473,7 +474,7 @@ public class FXOutput implements Output {
             if (clipStack.isEmpty()) {
                 return new Rectangle2D.Double(0, 0, ctx.getCanvas().getWidth(), ctx.getCanvas().getHeight());
             }
-            return clipStack.peek().getBounds();
+            return clipStack.peekLast().getBounds();
         }
     }
 
