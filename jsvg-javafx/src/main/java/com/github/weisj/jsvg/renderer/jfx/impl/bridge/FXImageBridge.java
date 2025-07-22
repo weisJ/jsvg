@@ -31,7 +31,9 @@ import javafx.scene.image.WritableImage;
 
 import org.jetbrains.annotations.NotNull;
 
-public class FXImageBridge {
+public final class FXImageBridge {
+
+    private FXImageBridge() {}
 
     public static void drawImage(@NotNull GraphicsContext ctx, @NotNull BufferedImage awtImage, double currentOpacity) {
         ctx.drawImage(convertImageWithOpacity(awtImage, currentOpacity), 0, 0);

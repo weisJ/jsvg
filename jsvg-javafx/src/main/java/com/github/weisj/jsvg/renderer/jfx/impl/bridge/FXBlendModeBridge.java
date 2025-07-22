@@ -25,9 +25,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.effect.BlendMode;
 
-public class FXBlendModeBridge {
+public final class FXBlendModeBridge {
 
     static final Logger LOGGER = Logger.getLogger(FXBlendModeBridge.class.getName());
+
+    private FXBlendModeBridge() {}
 
     public static BlendMode toBlendMode(com.github.weisj.jsvg.attributes.filter.BlendMode jsvgBlendMode) {
         switch (jsvgBlendMode) {

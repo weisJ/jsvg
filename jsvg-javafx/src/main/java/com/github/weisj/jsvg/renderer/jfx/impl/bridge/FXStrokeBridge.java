@@ -32,9 +32,11 @@ import javafx.scene.shape.StrokeLineJoin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FXStrokeBridge {
+public final class FXStrokeBridge {
 
     static final Logger LOGGER = Logger.getLogger(FXStrokeBridge.class.getName());
+
+    private FXStrokeBridge() {}
 
     public static void applyStroke(@NotNull GraphicsContext ctx, @NotNull Stroke awtStroke) {
         if (awtStroke instanceof BasicStroke) {

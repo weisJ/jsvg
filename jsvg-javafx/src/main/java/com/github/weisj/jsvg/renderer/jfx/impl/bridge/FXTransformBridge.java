@@ -30,7 +30,9 @@ import org.jetbrains.annotations.NotNull;
 /**
  * The bridge between JavaFX and AWT.
  */
-public class FXTransformBridge {
+public final class FXTransformBridge {
+
+    private FXTransformBridge() {}
 
     public static void setTransform(@NotNull GraphicsContext ctx, @NotNull AffineTransform awtTransform) {
         ctx.setTransform(awtTransform.getScaleX(), awtTransform.getShearY(), awtTransform.getShearX(),

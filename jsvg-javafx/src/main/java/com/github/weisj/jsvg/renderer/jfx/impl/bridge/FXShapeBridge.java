@@ -29,7 +29,9 @@ import javafx.scene.shape.FillRule;
 
 import org.jetbrains.annotations.NotNull;
 
-public class FXShapeBridge {
+public final class FXShapeBridge {
+
+    private FXShapeBridge() {}
 
     public static void strokeShape(@NotNull GraphicsContext ctx, @NotNull Shape shape) {
         if (shape instanceof Line2D) {

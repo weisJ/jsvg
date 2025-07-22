@@ -40,9 +40,11 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
-public class FXPaintBridge {
+public final class FXPaintBridge {
 
     static final Logger LOGGER = Logger.getLogger(FXPaintBridge.class.getName());
+
+    private FXPaintBridge() {}
 
     public static void applyPaint(@NotNull GraphicsContext ctx, @NotNull Paint awtPaint, double globalOpacity) {
         javafx.scene.paint.Paint jfxPaint = convertPaint(awtPaint, globalOpacity);
