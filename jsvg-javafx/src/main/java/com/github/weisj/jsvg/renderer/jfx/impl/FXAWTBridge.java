@@ -203,7 +203,7 @@ public class FXAWTBridge {
                 awtColor.getRed(),
                 awtColor.getGreen(),
                 awtColor.getBlue(),
-                ((double) awtColor.getAlpha() / 255.0) * awtGlobalOpacity);
+                (awtColor.getAlpha() / 255.0) * awtGlobalOpacity);
     }
 
     public static javafx.scene.paint.Color convertRGBColor(@NotNull RGBColor rgbColor, double awtGlobalOpacity) {
