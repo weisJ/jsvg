@@ -72,7 +72,7 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         registerChangeListener(svgCanvas.renderBackendProperty(), o -> markDirty());
         registerChangeListener(svgCanvas.currentViewBoxProperty(), o -> markDirty());
         registerChangeListener(svgCanvas.currentAnimationProperty(), o -> markDirty());
-        registerChangeListener(svgCanvas.animationElapsedTimeProperty(), o -> markDirty());
+        registerChangeListener(svgCanvas.elapsedAnimationTimeProperty(), o -> markDirty());
 
         timer = new AnimationTimer() {
             @Override
@@ -100,7 +100,7 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         FXSVGCanvas.RenderBackend backend = svgCanvas.getRenderBackend();
         Animation animationPeriod = svgCanvas.getCurrentAnimation();
         ViewBox viewBox = svgCanvas.getCurrentViewBox();
-        AnimationState state = new AnimationState(0, svgCanvas.getAnimationElapsedTime());
+        AnimationState state = new AnimationState(0, svgCanvas.getElapsedAnimationTime());
 
         if (activeRenderer != null && activeRenderer.getBackend() != backend) {
             innerPane.getChildren().remove(activeRenderer.getFXNode());

@@ -101,9 +101,9 @@ public class FXSVGCanvas extends Control {
     private void setupAnimation(Animation animation) {
         timeline.getKeyFrames().clear();
         timeline.getKeyFrames()
-                .add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(animationElapsedTime, 0)));
+                .add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(elapsedAnimationTime, 0)));
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.endTime()),
-                new KeyValue(animationElapsedTime, animation.endTime())));
+                new KeyValue(elapsedAnimationTime, animation.endTime())));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.playFromStart();
     }
@@ -233,14 +233,14 @@ public class FXSVGCanvas extends Control {
 
     ////////////////////////////////////////////////
 
-    private final LongProperty animationElapsedTime = new SimpleLongProperty();
+    private final LongProperty elapsedAnimationTime = new SimpleLongProperty();
 
-    public long getAnimationElapsedTime() {
-        return animationElapsedTime.get();
+    public long getElapsedAnimationTime() {
+        return elapsedAnimationTime.get();
     }
 
-    public @NotNull ReadOnlyLongProperty animationElapsedTimeProperty() {
-        return animationElapsedTime;
+    public @NotNull ReadOnlyLongProperty elapsedAnimationTimeProperty() {
+        return elapsedAnimationTime;
     }
 
     ////////////////////////////////////////////////
