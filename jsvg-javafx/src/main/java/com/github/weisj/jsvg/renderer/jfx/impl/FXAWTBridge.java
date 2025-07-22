@@ -485,10 +485,6 @@ public class FXAWTBridge {
         }
     }
 
-    public static void setOpacity(@NotNull GraphicsContext ctx, float opacity) {
-        ctx.setGlobalAlpha(opacity);
-    }
-
     public static void applyStroke(@NotNull GraphicsContext ctx, @NotNull Stroke awtStroke) {
         if (awtStroke instanceof BasicStroke) {
             BasicStroke awtBasicStroke = (BasicStroke) awtStroke;
