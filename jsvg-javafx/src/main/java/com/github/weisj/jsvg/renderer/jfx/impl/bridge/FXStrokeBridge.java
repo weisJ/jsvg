@@ -22,6 +22,9 @@
 package com.github.weisj.jsvg.renderer.jfx.impl.bridge;
 
 import java.awt.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
@@ -30,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FXStrokeBridge {
+
+    static final Logger LOGGER = Logger.getLogger(FXStrokeBridge.class.getName());
 
     public static void applyStroke(@NotNull GraphicsContext ctx, @NotNull Stroke awtStroke) {
         if (awtStroke instanceof BasicStroke) {
@@ -40,6 +45,8 @@ public class FXStrokeBridge {
             ctx.setMiterLimit(awtBasicStroke.getMiterLimit());
             ctx.setLineDashes(convertDashArray(awtBasicStroke.getDashArray()));
             ctx.setLineDashOffset(awtBasicStroke.getDashPhase());
+        }else{
+            LOGGER.log(Level.WARNING, "Unsupported stroke type, JavaFX doesn't support: " + awtStroke);
         }
     }
 
