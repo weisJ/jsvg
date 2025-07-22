@@ -71,7 +71,7 @@ public class FXSVGCanvas extends Control {
 
     public FXSVGCanvas() {
         getStyleClass().add(STYLE_CLASS);
-        if (isShowingTransparentBackground()) getStyleClass().add(STYLE_CLASS_TRANSPARENT_PATTERN);
+        if (getShowTransparentPattern()) getStyleClass().add(STYLE_CLASS_TRANSPARENT_PATTERN);
 
         currentAnimation.addListener((observable, oldValue, newValue) -> {
             setupAnimation(newValue);
@@ -275,7 +275,7 @@ public class FXSVGCanvas extends Control {
 
     private final BooleanProperty showTransparentPattern = new SimpleBooleanProperty(DEFAULT_SHOW_TRANSPARENT_PATTERN);
 
-    public boolean isShowingTransparentBackground() {
+    public boolean getShowTransparentPattern() {
         return showTransparentPattern.get();
     }
 
