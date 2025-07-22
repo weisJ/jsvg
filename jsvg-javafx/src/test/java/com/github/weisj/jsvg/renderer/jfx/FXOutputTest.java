@@ -52,10 +52,11 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.FXTestSVGFiles;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.jfx.impl.FXOutput;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 
-public class FXSVGRendererTest {
+public class FXOutputTest {
 
     private static final double DEFAULT_TOLERANCE = 0.3;
     private static final double DEFAULT_PIXEL_TOLERANCE = 0.1;
@@ -146,7 +147,7 @@ public class FXSVGRendererTest {
         BufferedImage image = new BufferedImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
         Output output = Output.createForGraphics(g);
-        FXSVGRenderer.setupDefaultJFXRenderingHints(output);
+        FXOutput.setupDefaultJFXRenderingHints(output);
         svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null);
         g.dispose();
         return image;
@@ -159,7 +160,11 @@ public class FXSVGRendererTest {
         Platform.runLater(() -> {
             Canvas canvas = new Canvas((int) size.width, (int) size.height);
             canvas.getGraphicsContext2D().clearRect(0, 0, (int) size.width, (int) size.height);
-            FXSVGRenderer.render(svgDocument, canvas.getGraphicsContext2D());
+
+            Output output = FXOutput.createForGraphicsContext(canvas.getGraphicsContext2D());
+            svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null, null);
+            output.dispose();
+
             SnapshotParameters snapshotParameters = new SnapshotParameters();
             snapshotParameters.setFill(Color.TRANSPARENT);
             WritableImage snapshot = canvas.snapshot(snapshotParameters, null);

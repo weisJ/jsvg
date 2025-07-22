@@ -41,7 +41,7 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.animation.Animation;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
-import com.github.weisj.jsvg.renderer.jfx.FXSVGRenderer;
+import com.github.weisj.jsvg.renderer.jfx.impl.FXOutput;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 import com.github.weisj.jsvg.view.FloatSize;
@@ -188,7 +188,10 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
                 graphics.setGlobalAlpha(1D);
                 graphics.setGlobalBlendMode(BlendMode.SRC_OVER);
                 graphics.clearRect(0, 0, width, height);
-                FXSVGRenderer.render(svgDocument, graphics, viewBox, animationState);
+
+                Output output = FXOutput.createForGraphicsContext(graphics);
+                svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, viewBox, animationState);
+                output.dispose();
             } finally {
                 graphics.restore();
             }
@@ -256,7 +259,7 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
             }
             Graphics2D g = awtImage.createGraphics();
             Output output = Output.createForGraphics(g);
-            FXSVGRenderer.setupDefaultJFXRenderingHints(output);
+            FXOutput.setupDefaultJFXRenderingHints(output);
             g.setBackground(new Color(0, 0, 0, 0));
             try {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

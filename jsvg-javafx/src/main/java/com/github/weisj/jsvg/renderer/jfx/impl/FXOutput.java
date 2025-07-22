@@ -39,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.paint.impl.MaskedPaint;
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
@@ -64,7 +65,7 @@ public class FXOutput implements Output {
     private Stroke currentStroke = DEFAULT_STROKE;
     private final SafeState originalState;
 
-    public FXOutput(@NotNull GraphicsContext context) {
+    private FXOutput(@NotNull GraphicsContext context) {
         ctx = context;
         ctxSaveCounter = new GraphicsContextSaveCounter();
         clipStack = new ClipStack();
@@ -87,6 +88,32 @@ public class FXOutput implements Output {
         currentPaint = parent.currentPaint;
         currentStroke = parent.currentStroke;
         originalState = new FXOutputState(SaveClipStack.YES);
+    }
+
+    /**
+     * Example usage:
+     * <pre><code>
+     *     Output output = FXOutput.createForGraphicsContext(graphics);
+     *     svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null, null);
+     *     output.dispose();
+     * </code></pre>
+     */
+    public static @NotNull FXOutput createForGraphicsContext(@NotNull GraphicsContext context) {
+        FXOutput output = new FXOutput(context);
+        setupDefaultJFXRenderingHints(output);
+        return output;
+    }
+
+    // JFX defaults to the highest render quality
+    public static void setupDefaultJFXRenderingHints(Output output) {
+        output.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        output.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        output.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        output.setRenderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING, SVGRenderingHints.VALUE_SOFT_CLIPPING_ON);
+        output.setRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING,
+                SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF);
+        output.setRenderingHint(SVGRenderingHints.KEY_MASK_CLIP_RENDERING,
+                SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY);
     }
 
     @Override
