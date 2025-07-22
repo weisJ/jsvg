@@ -31,69 +31,23 @@ import org.jetbrains.annotations.NotNull;
 
 public class FXShapeBridge {
 
-
-    public static FillRule toFillRule(int awtWindingRule) {
-        switch (awtWindingRule) {
-            case PathIterator.WIND_EVEN_ODD:
-                return FillRule.EVEN_ODD;
-            case PathIterator.WIND_NON_ZERO:
-                return FillRule.NON_ZERO;
-            default:
-                throw new IllegalArgumentException("Unknown winding rule: " + awtWindingRule);
-        }
-    }
-
-    public static ArcType toArcType(int awtArcType) {
-        switch (awtArcType) {
-            case Arc2D.OPEN:
-                return ArcType.OPEN;
-            case Arc2D.CHORD:
-                return ArcType.CHORD;
-            case Arc2D.PIE:
-                return ArcType.ROUND;
-            default:
-                throw new IllegalArgumentException("Unknown arc type: " + awtArcType);
-        }
-    }
-
-    public static void drawShape(@NotNull GraphicsContext ctx, @NotNull Shape shape) {
+    public static void strokeShape(@NotNull GraphicsContext ctx, @NotNull Shape shape) {
         if (shape instanceof Line2D) {
-            Line2D line = (Line2D) shape;
-            ctx.strokeLine(line.getX1(), line.getY1(), line.getX2(), line.getY2());
+            strokeLine(ctx, (Line2D) shape);
         } else if (shape instanceof Rectangle2D) {
-            Rectangle2D rect = (Rectangle2D) shape;
-            ctx.strokeRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+            strokeRect(ctx, (Rectangle2D) shape);
         } else if (shape instanceof RoundRectangle2D) {
-            RoundRectangle2D roundRect = (RoundRectangle2D) shape;
-            ctx.strokeRoundRect(roundRect.getX(), roundRect.getY(), roundRect.getWidth(), roundRect.getHeight(),
-                    roundRect.getArcWidth(), roundRect.getArcHeight());
+            strokeRoundRect(ctx, (RoundRectangle2D) shape);
         } else if (shape instanceof Ellipse2D) {
-            Ellipse2D ellipse = (Ellipse2D) shape;
-            ctx.strokeOval(ellipse.getX(), ellipse.getY(), ellipse.getWidth(), ellipse.getHeight());
+            strokeEllipse(ctx, (Ellipse2D) shape);
         } else if (shape instanceof Arc2D) {
-            Arc2D arc2D = (Arc2D) shape;
-            ctx.strokeArc(arc2D.getX(), arc2D.getY(), arc2D.getWidth(), arc2D.getHeight(), arc2D.getAngleStart(),
-                    arc2D.getAngleExtent(), toArcType(arc2D.getArcType()));
+            strokeArc(ctx, (Arc2D) shape);
         } else if (shape instanceof QuadCurve2D) {
-            QuadCurve2D quad = (QuadCurve2D) shape;
-            ctx.beginPath();
-            ctx.moveTo(quad.getX1(), quad.getY1());
-            ctx.quadraticCurveTo(quad.getCtrlX(), quad.getCtrlY(), quad.getX2(), quad.getY2());
-            ctx.stroke();
+            strokeQuadCurve(ctx, (QuadCurve2D) shape);
         } else if (shape instanceof CubicCurve2D) {
-            CubicCurve2D cubic = (CubicCurve2D) shape;
-            ctx.beginPath();
-            ctx.moveTo(cubic.getX1(), cubic.getY1());
-            ctx.bezierCurveTo(cubic.getCtrlX1(), cubic.getCtrlY1(), cubic.getCtrlX2(), cubic.getCtrlY2(), cubic.getX2(),
-                    cubic.getY2());
-            ctx.stroke();
+            strokeCubicCurve(ctx, (CubicCurve2D) shape);
         } else {
-            FillRule prevFillRule = ctx.getFillRule();
-            PathIterator awtIterator = shape.getPathIterator(null);
-            applyPathIterator(ctx, awtIterator);
-            applyWindingRule(ctx, awtIterator.getWindingRule());
-            ctx.stroke();
-            ctx.setFillRule(prevFillRule);
+            strokeShapeAsPath(ctx, shape);
         }
     }
 
@@ -101,47 +55,115 @@ public class FXShapeBridge {
         if (shape instanceof Line2D) {
             // do nothing - lines can't be filled
         } else if (shape instanceof Rectangle2D) {
-            Rectangle2D rect = (Rectangle2D) shape;
-            ctx.fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+            fillRect(ctx, (Rectangle2D) shape);
         } else if (shape instanceof RoundRectangle2D) {
-            RoundRectangle2D roundRect = (RoundRectangle2D) shape;
-            ctx.fillRoundRect(roundRect.getX(), roundRect.getY(), roundRect.getWidth(), roundRect.getHeight(),
-                    roundRect.getArcWidth(), roundRect.getArcHeight());
+            fillRoundRect(ctx, (RoundRectangle2D) shape);
         } else if (shape instanceof Ellipse2D) {
-            Ellipse2D ellipse = (Ellipse2D) shape;
-            ctx.fillOval(ellipse.getX(), ellipse.getY(), ellipse.getWidth(), ellipse.getHeight());
+            fillEllipse(ctx, (Ellipse2D) shape);
         } else if (shape instanceof Arc2D) {
-            Arc2D arc2D = (Arc2D) shape;
-            ctx.fillArc(arc2D.getX(), arc2D.getY(), arc2D.getWidth(), arc2D.getHeight(), arc2D.getAngleStart(),
-                    arc2D.getAngleExtent(), toArcType(arc2D.getArcType()));
+            fillArc(ctx, (Arc2D) shape);
         } else if (shape instanceof QuadCurve2D) {
-            QuadCurve2D quad = (QuadCurve2D) shape;
-            ctx.beginPath();
-            ctx.moveTo(quad.getX1(), quad.getY1());
-            ctx.quadraticCurveTo(quad.getCtrlX(), quad.getCtrlY(), quad.getX2(), quad.getY2());
-            ctx.fill();
+            fillQuadCurve(ctx, (QuadCurve2D) shape);
         } else if (shape instanceof CubicCurve2D) {
-            CubicCurve2D cubic = (CubicCurve2D) shape;
-            ctx.beginPath();
-            ctx.moveTo(cubic.getX1(), cubic.getY1());
-            ctx.bezierCurveTo(cubic.getCtrlX1(), cubic.getCtrlY1(), cubic.getCtrlX2(), cubic.getCtrlY2(), cubic.getX2(),
-                    cubic.getY2());
-            ctx.fill();
+            fillCubicCurve(ctx, (CubicCurve2D) shape);
         } else {
-            FillRule prevFillRule = ctx.getFillRule();
-            PathIterator awtIterator = shape.getPathIterator(null);
-            applyPathIterator(ctx, awtIterator);
-            applyWindingRule(ctx, awtIterator.getWindingRule());
-            ctx.fill();
-            ctx.setFillRule(prevFillRule);
+            fillShapeAsPath(ctx, shape);
         }
+    }
+
+    public static void strokeLine(@NotNull GraphicsContext ctx, @NotNull Line2D line) {
+        ctx.strokeLine(line.getX1(), line.getY1(), line.getX2(), line.getY2());
+    }
+
+    public static void strokeRect(@NotNull GraphicsContext ctx, @NotNull Rectangle2D rect) {
+        ctx.strokeRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    }
+
+    public static void strokeRoundRect(@NotNull GraphicsContext ctx, @NotNull RoundRectangle2D roundRect) {
+        ctx.strokeRoundRect(roundRect.getX(), roundRect.getY(), roundRect.getWidth(), roundRect.getHeight(),
+                roundRect.getArcWidth(), roundRect.getArcHeight());
+    }
+
+    public static void strokeEllipse(@NotNull GraphicsContext ctx, @NotNull Ellipse2D ellipse) {
+        ctx.strokeOval(ellipse.getX(), ellipse.getY(), ellipse.getWidth(), ellipse.getHeight());
+    }
+
+    public static void strokeArc(@NotNull GraphicsContext ctx, @NotNull Arc2D arc2D) {
+        ctx.strokeArc(arc2D.getX(), arc2D.getY(), arc2D.getWidth(), arc2D.getHeight(), arc2D.getAngleStart(),
+                arc2D.getAngleExtent(), toArcType(arc2D.getArcType()));
+    }
+
+    public static void strokeQuadCurve(@NotNull GraphicsContext ctx, @NotNull QuadCurve2D quad) {
+        ctx.beginPath();
+        ctx.moveTo(quad.getX1(), quad.getY1());
+        ctx.quadraticCurveTo(quad.getCtrlX(), quad.getCtrlY(), quad.getX2(), quad.getY2());
+        ctx.stroke();
+    }
+
+    public static void strokeCubicCurve(@NotNull GraphicsContext ctx, @NotNull CubicCurve2D cubic) {
+        ctx.beginPath();
+        ctx.moveTo(cubic.getX1(), cubic.getY1());
+        ctx.bezierCurveTo(cubic.getCtrlX1(), cubic.getCtrlY1(), cubic.getCtrlX2(), cubic.getCtrlY2(), cubic.getX2(),
+                cubic.getY2());
+        ctx.stroke();
+    }
+
+    public static void strokeShapeAsPath(@NotNull GraphicsContext ctx, @NotNull Shape shape) {
+        FillRule prevFillRule = ctx.getFillRule();
+        PathIterator awtIterator = shape.getPathIterator(null);
+        appendPathIterator(ctx, awtIterator);
+        applyWindingRule(ctx, awtIterator.getWindingRule());
+        ctx.stroke();
+        ctx.setFillRule(prevFillRule);
+    }
+
+    public static void fillRect(@NotNull GraphicsContext ctx, @NotNull Rectangle2D rect) {
+        ctx.fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    }
+
+    public static void fillRoundRect(@NotNull GraphicsContext ctx, @NotNull RoundRectangle2D roundRect) {
+        ctx.fillRoundRect(roundRect.getX(), roundRect.getY(), roundRect.getWidth(), roundRect.getHeight(),
+                roundRect.getArcWidth(), roundRect.getArcHeight());
+    }
+
+    public static void fillEllipse(@NotNull GraphicsContext ctx, @NotNull Ellipse2D ellipse) {
+        ctx.fillOval(ellipse.getX(), ellipse.getY(), ellipse.getWidth(), ellipse.getHeight());
+    }
+
+    public static void fillArc(@NotNull GraphicsContext ctx, @NotNull Arc2D arc2D) {
+        ctx.fillArc(arc2D.getX(), arc2D.getY(), arc2D.getWidth(), arc2D.getHeight(), arc2D.getAngleStart(),
+                arc2D.getAngleExtent(), toArcType(arc2D.getArcType()));
+    }
+
+    public static void fillQuadCurve(@NotNull GraphicsContext ctx, @NotNull QuadCurve2D quad) {
+        ctx.beginPath();
+        ctx.moveTo(quad.getX1(), quad.getY1());
+        ctx.quadraticCurveTo(quad.getCtrlX(), quad.getCtrlY(), quad.getX2(), quad.getY2());
+        ctx.fill();
+    }
+
+    public static void fillCubicCurve(@NotNull GraphicsContext ctx, @NotNull CubicCurve2D cubic) {
+        ctx.beginPath();
+        ctx.moveTo(cubic.getX1(), cubic.getY1());
+        ctx.bezierCurveTo(cubic.getCtrlX1(), cubic.getCtrlY1(), cubic.getCtrlX2(), cubic.getCtrlY2(), cubic.getX2(),
+                cubic.getY2());
+        ctx.fill();
+    }
+
+    public static void fillShapeAsPath(@NotNull GraphicsContext ctx, @NotNull Shape shape) {
+        FillRule prevFillRule = ctx.getFillRule();
+        PathIterator awtIterator = shape.getPathIterator(null);
+        appendPathIterator(ctx, awtIterator);
+        applyWindingRule(ctx, awtIterator.getWindingRule());
+        ctx.fill();
+        ctx.setFillRule(prevFillRule);
     }
 
     public static void applyWindingRule(@NotNull GraphicsContext ctx, int awtWindingRule) {
         ctx.setFillRule(toFillRule(awtWindingRule));
     }
 
-    public static void applyPathIterator(@NotNull GraphicsContext ctx, @NotNull PathIterator awtIterator) {
+    public static void appendPathIterator(@NotNull GraphicsContext ctx, @NotNull PathIterator awtIterator) {
         ctx.beginPath();
 
         float[] segment = new float[6];
@@ -166,6 +188,30 @@ public class FXShapeBridge {
                 default:
                     throw new IllegalArgumentException("Unknown segment type: " + type);
             }
+        }
+    }
+
+    public static FillRule toFillRule(int awtWindingRule) {
+        switch (awtWindingRule) {
+            case PathIterator.WIND_EVEN_ODD:
+                return FillRule.EVEN_ODD;
+            case PathIterator.WIND_NON_ZERO:
+                return FillRule.NON_ZERO;
+            default:
+                throw new IllegalArgumentException("Unknown winding rule: " + awtWindingRule);
+        }
+    }
+
+    public static ArcType toArcType(int awtArcType) {
+        switch (awtArcType) {
+            case Arc2D.OPEN:
+                return ArcType.OPEN;
+            case Arc2D.CHORD:
+                return ArcType.CHORD;
+            case Arc2D.PIE:
+                return ArcType.ROUND;
+            default:
+                throw new IllegalArgumentException("Unknown arc type: " + awtArcType);
         }
     }
 }

@@ -141,7 +141,7 @@ public class FXOutput implements Output {
     @Override
     public void drawShape(@NotNull Shape shape) {
         if (FXPaintBridge.supportedPaint(currentPaint)) {
-            FXShapeBridge.drawShape(ctx, shape);
+            FXShapeBridge.strokeShape(ctx, shape);
         } else {
             fillShape(stroke().createStrokedShape(shape));
         }

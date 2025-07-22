@@ -44,7 +44,7 @@ public final class FXOutputClipStack {
 
     public void pushClip(Shape awtClipShape) {
         PathIterator awtIterator = awtClipShape.getPathIterator(null);
-        FXShapeBridge.applyPathIterator(fxOutput.ctx, awtIterator);
+        FXShapeBridge.appendPathIterator(fxOutput.ctx, awtIterator);
         FXShapeBridge.applyWindingRule(fxOutput.ctx, awtIterator.getWindingRule());
 
         int savePoint = fxOutput.ctxSaveCounter.save();
