@@ -34,14 +34,15 @@ import java.util.stream.Stream;
 public class FXTestSVGFiles {
 
     private static final String TEST_PATH = System.getenv("JAVAFX_TEST_SVG_PATH");
+    private static final String PACKAGE_NAME = "com/github/weisj/jsvg";
 
     public static File getTestSVGDirectory() {
         if (TEST_PATH != null) {
-            return new File(TEST_PATH);
+            return new File(TEST_PATH).toPath().resolve(PACKAGE_NAME).toFile();
         }
         // Fallback
         String srcDir = System.getProperty("user.dir");
-        String testDir = srcDir + "/jsvg/src/test/resources";
+        String testDir = srcDir + "/jsvg/src/test/resources/" + PACKAGE_NAME;
         return new File(testDir);
     }
 

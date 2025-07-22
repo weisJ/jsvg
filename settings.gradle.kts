@@ -14,11 +14,11 @@ pluginManagement {
         idv("com.github.vlsi.crlf", "com.github.vlsi.vlsi-release-plugins")
         idv("com.github.vlsi.gradle-extensions", "com.github.vlsi.vlsi-release-plugins")
         idv("com.github.vlsi.license-gather", "com.github.vlsi.vlsi-release-plugins")
-        idv("com.github.vlsi.stage-vote-release", "com.github.vlsi.vlsi-release-plugins")
         idv("net.ltgt.errorprone")
         idv("me.champeau.jmh")
         idv("org.sonarqube")
         idv("biz.aQute.bnd.builder", "biz.aQute.bnd.lib")
+        idv("com.gradleup.nmcp")
         idv("org.openjfx.javafxplugin")
     }
 }
@@ -58,6 +58,8 @@ dependencyResolutionManagement {
         create("libs") {
             idv("javaxAnnotations", "javax.annotation:javax.annotation-api")
             idv("nullabilityAnnotations", "org.jetbrains:annotations")
+            idv("osgiAnnotations", "org.osgi:org.osgi.annotation.bundle")
+            idv("bndAnnotations", "biz.aQute.bnd:biz.aQute.bndlib", "biz.aQute.bnd.lib")
         }
         create("testLibs") {
             bundle("junit") {
@@ -71,7 +73,12 @@ dependencyResolutionManagement {
                 idv("dsl", "com.github.weisj:swing-extensions-dsl")
             }
             idv("svgSalamander", "com.formdev:svgSalamander")
-            idv("batik", "org.apache.xmlgraphics:batik-all")
+            bundle("batik") {
+                idv("batikSwing", "org.apache.xmlgraphics:batik-swing")
+                idv("batikAnim", "org.apache.xmlgraphics:batik-anim")
+                idv("batikTranscoder", "org.apache.xmlgraphics:batik-transcoder")
+                idv("batikUtil", "org.apache.xmlgraphics:batik-util")
+            }
             idv("imageCompare", "com.github.weisj:image-comparison")
             idv("sizeof", "org.ehcache:sizeof")
         }

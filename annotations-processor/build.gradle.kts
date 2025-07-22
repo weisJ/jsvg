@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     compileOnly(libs.nullabilityAnnotations)
+    compileOnly(libs.osgiAnnotations)
     implementation(projects.annotations)
 }
 
@@ -12,12 +13,15 @@ tasks {
     jar {
         bundle {
             bnd(
-                """
-                Bundle-SymbolicName: com.github.weisj.jsvg.annotations.processor
-
-                -jpms-module-info:
-                -removeheaders: Private-Package,Tool
-            """,
+                bndFile(
+                    moduleName = "com.github.weisj.jsvg.annotations.processor",
+                    requiredModules =
+                        listOf(
+                            Requires("com.github.weisj.jsvg.annotations"),
+                            Requires("org.jetbrains.annotations", static = true),
+                            Requires("org.osgi.annotation.bundle", static = true),
+                        ),
+                ),
             )
         }
     }

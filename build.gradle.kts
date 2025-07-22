@@ -3,10 +3,12 @@ import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
 import com.github.vlsi.gradle.properties.dsl.props
 import com.github.vlsi.gradle.properties.dsl.stringProperty
-import com.github.vlsi.gradle.properties.dsl.toBool
 import com.github.vlsi.gradle.publishing.dsl.simplifyXml
 import com.github.vlsi.gradle.publishing.dsl.versionFromResolution
 import net.ltgt.gradle.errorprone.errorprone
+import nmcp.NmcpExtension
+import org.gradle.kotlin.dsl.provideDelegate
+import java.time.Duration
 
 plugins {
     idea
@@ -14,7 +16,7 @@ plugins {
     id("com.diffplug.spotless")
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.gradle-extensions")
-    id("com.github.vlsi.stage-vote-release")
+    id("com.gradleup.nmcp") apply false
     id("net.ltgt.errorprone") apply false
 }
 
@@ -23,7 +25,7 @@ val enableMavenLocal by props(false)
 val enableGradleMetadata by props()
 val enableErrorProne by props()
 val skipSpotless by props(false)
-val isRelease = project.stringProperty("release").toBool()
+val isRelease = props.bool(name = "release", default = false)
 val snapshotName by props("")
 
 if (isRelease && !JavaVersion.current().isJava9Compatible) {
@@ -34,34 +36,8 @@ val String.v: String get() = rootProject.extra["$this.version"] as String
 val projectVersion = "jsvg".v
 
 val snapshotIdentifier = if (!isRelease && snapshotName.isNotEmpty()) "-$snapshotName" else ""
+val buildVersion = "$projectVersion$snapshotIdentifier" + (if (isRelease) "" else "-SNAPSHOT")
 
-releaseParams {
-    tlp.set("jsvg")
-    organizationName.set("weisJ")
-    componentName.set("jsvg")
-    prefixForProperties.set("gh")
-    svnDistEnabled.set(false)
-    sitePreviewEnabled.set(false)
-    release.set(isRelease)
-    if (!isRelease) {
-        rcTag.set("v$projectVersion$snapshotIdentifier$snapshotSuffix")
-    }
-    nexus {
-        mavenCentral()
-    }
-    voteText.set {
-        """
-        ${it.componentName} v${it.version}-rc${it.rc} is ready for preview.
-
-        Git SHA: ${it.gitSha}
-        Staging repository: ${it.nexusRepositoryUri}
-        """.trimIndent()
-    }
-}
-
-tasks.closeRepository.configure { enabled = isRelease }
-
-val buildVersion = "$projectVersion$snapshotIdentifier${releaseParams.snapshotSuffix}"
 println("Building: JSVG $buildVersion")
 println("     JDK: " + System.getProperty("java.home"))
 println("  Gradle: " + gradle.gradleVersion)
@@ -121,12 +97,16 @@ allprojects {
             }
             format("markdown") {
                 target("**/*.md")
+                targetExclude("resvg-test-suite/**/*.md")
                 endWithNewline()
                 trimTrailingWhitespace()
             }
             format("svg") {
                 target("**/*.svg")
-                targetExclude("**/brokenUpCharContent.svg")
+                targetExclude(
+                    "**/brokenUpCharContent.svg",
+                    "resvg-test-suite/**/*.svg",
+                )
                 eclipseWtp(EclipseWtpFormatterStep.XML)
             }
             plugins.withType<JavaPlugin>().configureEach {
@@ -203,17 +183,51 @@ allprojects {
                 withJavadocJar()
             }
         }
+
         apply(plugin = "maven-publish")
+        apply(plugin = "com.gradleup.nmcp")
+        apply(plugin = "signing")
 
-        val useInMemoryKey by props()
-        if (useInMemoryKey) {
-            apply(plugin = "signing")
+        val useInMemoryKey by props(default = false)
+        val centralPortalPublishingType by props(default = "USER_MANAGED")
+        val centralPortalPublishingTimeout by props(default = 1)
 
-            configure<SigningExtension> {
-                useInMemoryPgpKeys(
-                    project.stringProperty("signing.inMemoryKey")?.replace("#", "\n"),
-                    project.stringProperty("signing.password"),
+        configure<NmcpExtension> {
+            centralPortal {
+                username.set(
+                    project.stringProperty("centralPortalUsername")
+                        ?: providers.environmentVariable("CENTRAL_PORTAL_USERNAME").orNull,
                 )
+                password.set(
+                    project.stringProperty("centralPortalPassword")
+                        ?: providers.environmentVariable("CENTRAL_PORTAL_PASSWORD").orNull,
+                )
+                publishingType = centralPortalPublishingType
+                verificationTimeout = Duration.ofMinutes(centralPortalPublishingTimeout.toLong())
+            }
+        }
+
+        if (!isRelease) {
+            configure<PublishingExtension> {
+                repositories {
+                    maven {
+                        name = "centralSnapshots"
+                        url = uri("https://central.sonatype.com/repository/maven-snapshots")
+                        credentials(PasswordCredentials::class)
+                    }
+                }
+            }
+        } else {
+            configure<SigningExtension> {
+                sign(extensions.getByType<PublishingExtension>().publications)
+                if (!useInMemoryKey) {
+                    useGpgCmd()
+                } else {
+                    useInMemoryPgpKeys(
+                        project.stringProperty("signing.inMemoryKey")?.replace("#", "\n"),
+                        project.stringProperty("signing.password"),
+                    )
+                }
             }
         }
 
