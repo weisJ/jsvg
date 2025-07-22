@@ -42,7 +42,7 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
 
     private final AnimationTimer timer;
     private FXSVGRenderer activeRenderer;
-    private boolean dirty;
+    private boolean dirty = true;
 
     private final Timeline timeline = new Timeline();
 
@@ -68,8 +68,6 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
                 tick();
             }
         };
-
-        markDirty();
         timer.start();
     }
 
@@ -80,6 +78,7 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
 
     public void tick() {
         if (!dirty) {
+            timer.stop();
             return;
         }
         dirty = false;
