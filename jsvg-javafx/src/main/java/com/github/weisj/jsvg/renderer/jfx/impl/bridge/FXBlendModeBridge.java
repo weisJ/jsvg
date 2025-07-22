@@ -21,13 +21,15 @@
  */
 package com.github.weisj.jsvg.renderer.jfx.impl.bridge;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.scene.effect.BlendMode;
+
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 
 public final class FXBlendModeBridge {
 
-    static final Logger LOGGER = Logger.getLogger(FXBlendModeBridge.class.getName());
+    static final Logger LOGGER = LogFactory.createLogger(FXBlendModeBridge.class);
 
     private FXBlendModeBridge() {}
 

@@ -29,19 +29,20 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
 public final class FXPaintBridge {
 
-    static final Logger LOGGER = Logger.getLogger(FXPaintBridge.class.getName());
+    static final Logger LOGGER = LogFactory.createLogger(FXPaintBridge.class);
 
     private FXPaintBridge() {}
 

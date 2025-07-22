@@ -22,8 +22,6 @@
 package com.github.weisj.jsvg.renderer.jfx.impl.bridge;
 
 import java.awt.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
@@ -31,9 +29,13 @@ import javafx.scene.shape.StrokeLineJoin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
+
 public final class FXStrokeBridge {
 
-    static final Logger LOGGER = Logger.getLogger(FXStrokeBridge.class.getName());
+    static final Logger LOGGER = LogFactory.createLogger(FXStrokeBridge.class);
 
     private FXStrokeBridge() {}
 
