@@ -490,10 +490,6 @@ public class FXOutput implements Output {
             super();
         }
 
-        private int getSaveCount() {
-            return saveCount;
-        }
-
         private int save() {
             ctx.save();
             return saveCount++;
