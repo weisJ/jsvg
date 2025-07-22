@@ -38,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.paint.impl.MaskedPaint;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
+import com.github.weisj.jsvg.renderer.jfx.impl.bridge.*;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
@@ -116,8 +117,8 @@ public class FXOutput implements Output {
 
     @Override
     public void fillShape(@NotNull Shape shape) {
-        if (FXAWTBridge.supportedPaint(currentPaint)) {
-            FXAWTBridge.fillShape(ctx, shape);
+        if (FXPaintBridge.supportedPaint(currentPaint)) {
+            FXShapeBridge.fillShape(ctx, shape);
         } else {
             // Render incompatible / custom paints with PaintContext fallback
             Rectangle2D userBounds = GeometryUtil.containingBoundsAfterTransform(transform(), shape.getBounds());
@@ -125,11 +126,12 @@ public class FXOutput implements Output {
             PaintContext context = currentPaint.createContext(ColorModel.getRGBdefault(), deviceBounds, userBounds,
                     transform(), renderingHints);
             Raster raster = context.getRaster(deviceBounds.x, deviceBounds.y, deviceBounds.width, deviceBounds.height);
-            BufferedImage image = FXAWTBridge.convertRasterToBufferedImage(context.getColorModel(), raster);
+            BufferedImage image = FXImageBridge.convertRasterToBufferedImage(context.getColorModel(), raster);
             clipStack.pushClip(shape);
             Affine transform = ctx.getTransform();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.drawImage(FXAWTBridge.convertImage(image), userBounds.getX(), userBounds.getY(), userBounds.getWidth(),
+            ctx.drawImage(FXImageBridge.convertImage(image), userBounds.getX(), userBounds.getY(),
+                    userBounds.getWidth(),
                     userBounds.getHeight());
             ctx.setTransform(transform);
             clipStack.popClip();
@@ -138,8 +140,8 @@ public class FXOutput implements Output {
 
     @Override
     public void drawShape(@NotNull Shape shape) {
-        if (FXAWTBridge.supportedPaint(currentPaint)) {
-            FXAWTBridge.drawShape(ctx, shape);
+        if (FXPaintBridge.supportedPaint(currentPaint)) {
+            FXShapeBridge.drawShape(ctx, shape);
         } else {
             fillShape(stroke().createStrokedShape(shape));
         }
@@ -147,13 +149,13 @@ public class FXOutput implements Output {
 
     @Override
     public void drawImage(@NotNull BufferedImage image) {
-        FXAWTBridge.drawImage(ctx, image, currentOpacity);
+        FXImageBridge.drawImage(ctx, image, currentOpacity);
     }
 
     @Override
     public void drawImage(@NotNull Image image, @Nullable ImageObserver observer) {
-        if (!FXAWTBridge.isWrappingPaint(currentPaint)) {
-            FXAWTBridge.drawImage(ctx, image, currentOpacity);
+        if (!FXPaintBridge.isWrappingPaint(currentPaint)) {
+            FXImageBridge.drawImage(ctx, image, currentOpacity);
         } else {
             // Handle rendering of wrapping paints
             GraphicsUtil.WrappingPaint wrappingPaint = (GraphicsUtil.WrappingPaint) currentPaint;
@@ -177,14 +179,14 @@ public class FXOutput implements Output {
         Affine originalTransform = ctx.getTransform();
         ctx.transform(at.getScaleX(), at.getShearY(), at.getShearX(), at.getScaleY(), at.getTranslateX(),
                 at.getTranslateY());
-        FXAWTBridge.drawImage(ctx, image, currentOpacity);
+        FXImageBridge.drawImage(ctx, image, currentOpacity);
         ctx.setTransform(originalTransform);
     }
 
     @Override
     public void setPaint(@NotNull Paint paint) {
         paint = GraphicsUtil.exchangePaint(this, currentPaint, paint, true);
-        FXAWTBridge.applyPaint(ctx, paint, currentOpacity);
+        FXPaintBridge.applyPaint(ctx, paint, currentOpacity);
         currentPaint = paint;
     }
 
@@ -195,7 +197,7 @@ public class FXOutput implements Output {
 
     @Override
     public void setStroke(@NotNull Stroke stroke) {
-        FXAWTBridge.applyStroke(ctx, stroke);
+        FXStrokeBridge.applyStroke(ctx, stroke);
         currentStroke = stroke;
     }
 
@@ -282,17 +284,17 @@ public class FXOutput implements Output {
 
     @Override
     public @NotNull AffineTransform transform() {
-        return FXAWTBridge.convertAffine(ctx.getTransform());
+        return FXTransformBridge.convertAffine(ctx.getTransform());
     }
 
     @Override
     public void setTransform(@NotNull AffineTransform awtTransform) {
-        FXAWTBridge.setTransform(ctx, awtTransform);
+        FXTransformBridge.setTransform(ctx, awtTransform);
     }
 
     @Override
     public void applyTransform(@NotNull AffineTransform awtTransform) {
-        FXAWTBridge.applyTransform(ctx, awtTransform);
+        FXTransformBridge.applyTransform(ctx, awtTransform);
     }
 
     @Override
@@ -325,7 +327,7 @@ public class FXOutput implements Output {
         currentOpacity = opacity;
 
         // Re-apply paint with correct opacity
-        FXAWTBridge.applyPaint(ctx, currentPaint, currentOpacity);
+        FXPaintBridge.applyPaint(ctx, currentPaint, currentOpacity);
     }
 
     @Override

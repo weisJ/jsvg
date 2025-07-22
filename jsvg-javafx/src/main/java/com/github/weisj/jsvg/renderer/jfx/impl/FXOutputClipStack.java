@@ -31,6 +31,8 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXShapeBridge;
+
 public final class FXOutputClipStack {
 
     private final FXOutput fxOutput;
@@ -42,8 +44,8 @@ public final class FXOutputClipStack {
 
     public void pushClip(Shape awtClipShape) {
         PathIterator awtIterator = awtClipShape.getPathIterator(null);
-        FXAWTBridge.applyPathIterator(fxOutput.ctx, awtIterator);
-        FXAWTBridge.applyWindingRule(fxOutput.ctx, awtIterator.getWindingRule());
+        FXShapeBridge.applyPathIterator(fxOutput.ctx, awtIterator);
+        FXShapeBridge.applyWindingRule(fxOutput.ctx, awtIterator.getWindingRule());
 
         int savePoint = fxOutput.ctxSaveCounter.save();
         fxOutput.ctx.clip();
