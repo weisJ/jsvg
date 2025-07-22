@@ -29,6 +29,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.*;
 
@@ -38,6 +41,8 @@ import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
 public class FXPaintBridge {
+
+    static final Logger LOGGER = Logger.getLogger(FXPaintBridge.class.getName());
 
     public static void applyPaint(@NotNull GraphicsContext ctx, @NotNull Paint awtPaint, double globalOpacity) {
         javafx.scene.paint.Paint jfxPaint = convertPaint(awtPaint, globalOpacity);
@@ -70,6 +75,7 @@ public class FXPaintBridge {
         } else if (awtPaint instanceof RGBColor) {
             return convertRGBColor((RGBColor) awtPaint, globalOpacity);
         } else {
+            LOGGER.log(Level.WARNING, "Unsupported paint type, JavaFX doesn't support: " + awtPaint);
             return javafx.scene.paint.Color.WHITE;
         }
     }
