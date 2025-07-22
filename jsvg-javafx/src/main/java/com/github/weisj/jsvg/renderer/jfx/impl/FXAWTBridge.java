@@ -29,6 +29,9 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.BlendMode;
@@ -51,6 +54,8 @@ import org.jetbrains.annotations.Nullable;
  * The bridge between JavaFX and AWT.
  */
 public class FXAWTBridge {
+
+    static final Logger LOGGER = Logger.getLogger(FXAWTBridge.class.getName());
 
     public static FillRule toFillRule(int awtWindingRule) {
         switch (awtWindingRule) {
@@ -132,7 +137,7 @@ public class FXAWTBridge {
             case Saturation:
             case Color:
             case Luminosity:
-                // JavaFX doesn't support these modes.
+                LOGGER.log(Level.WARNING, "Unsupported BlendMode, JavaFX doesn't support: " + jsvgBlendMode);
                 return BlendMode.SRC_OVER;
             default:
                 return BlendMode.SRC_OVER;
