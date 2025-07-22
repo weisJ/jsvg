@@ -45,6 +45,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The bridge between JavaFX and AWT.
@@ -347,13 +348,13 @@ public class FXAWTBridge {
                 c.getOpacity());
     }
 
-    public static double[] floatToDoubleArray(float[] floats) {
-        if (floats == null) {
+    public static double @Nullable [] convertDashArray(float @Nullable [] dashes) {
+        if (dashes == null) {
             return null;
         }
-        double[] doubles = new double[floats.length];
-        for (int i = 0; i < floats.length; i++) {
-            doubles[i] = floats[i];
+        double[] doubles = new double[dashes.length];
+        for (int i = 0; i < dashes.length; i++) {
+            doubles[i] = dashes[i];
         }
         return doubles;
     }
@@ -490,7 +491,7 @@ public class FXAWTBridge {
             ctx.setLineCap(toStrokeLineCap(awtBasicStroke.getEndCap()));
             ctx.setLineJoin(toStrokeLineJoin(awtBasicStroke.getLineJoin()));
             ctx.setMiterLimit(awtBasicStroke.getMiterLimit());
-            ctx.setLineDashes(floatToDoubleArray(awtBasicStroke.getDashArray()));
+            ctx.setLineDashes(convertDashArray(awtBasicStroke.getDashArray()));
             ctx.setLineDashOffset(awtBasicStroke.getDashPhase());
         }
     }
