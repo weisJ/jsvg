@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.*;
 
