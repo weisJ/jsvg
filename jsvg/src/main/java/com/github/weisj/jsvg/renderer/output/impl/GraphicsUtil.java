@@ -40,11 +40,11 @@ public final class GraphicsUtil {
 
     private GraphicsUtil() {}
 
-    static void safelySetPaint(@NotNull Output output, @NotNull Graphics2D g, @NotNull Paint paint) {
+    public static void safelySetPaint(@NotNull Output output, @NotNull Graphics2D g, @NotNull Paint paint) {
         g.setPaint(exchangePaint(output, g.getPaint(), paint, true));
     }
 
-    static void cleanupPaint(@NotNull Output output, @NotNull Paint paint) {
+    public static void cleanupPaint(@NotNull Output output, @NotNull Paint paint) {
         if (paint instanceof WrappingPaint) {
             cleanupPaint(output, ((WrappingPaint) paint).paint());
         }
@@ -53,13 +53,13 @@ public final class GraphicsUtil {
         }
     }
 
-    static void preparePaint(@NotNull Paint paint) {
+    public static void preparePaint(@NotNull Paint paint) {
         if (paint instanceof WrappingPaint) {
             preparePaint(((WrappingPaint) paint).paint());
         }
     }
 
-    private static @NotNull Paint exchangePaint(@NotNull Output output, @NotNull Paint current, @NotNull Paint paint,
+    public static @NotNull Paint exchangePaint(@NotNull Output output, @NotNull Paint current, @NotNull Paint paint,
             boolean doCleanUp) {
         if (paint instanceof WrappingPaint) {
             WrappingPaint wrappingPaint = (WrappingPaint) paint;
