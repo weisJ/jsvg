@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.renderer.jfx.impl;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.*;
@@ -49,8 +50,6 @@ import com.github.weisj.jsvg.util.ImageUtil;
 public class FXOutput implements Output {
 
     protected final GraphicsContext ctx;
-    protected final FXOutputSaveCounter ctxSaveCounter;
-    protected final FXOutputClipStack clipStack;
     protected final RenderingHints renderingHints;
     protected final boolean isRootOutput;
 
@@ -66,8 +65,6 @@ public class FXOutput implements Output {
 
     private FXOutput(@NotNull GraphicsContext context) {
         ctx = context;
-        ctxSaveCounter = new FXOutputSaveCounter(this);
-        clipStack = new FXOutputClipStack(this);
         isRootOutput = true;
         renderingHints = new RenderingHints(null);
         setOpacity(DEFAULT_OPACITY);
@@ -78,8 +75,6 @@ public class FXOutput implements Output {
 
     private FXOutput(@NotNull FXOutput parent) {
         ctx = parent.ctx;
-        ctxSaveCounter = parent.ctxSaveCounter;
-        clipStack = parent.clipStack;
         renderingHints = new RenderingHints(null);
         renderingHints.putAll(parent.renderingHints);
         isRootOutput = false;
@@ -127,14 +122,15 @@ public class FXOutput implements Output {
                     transform(), renderingHints);
             Raster raster = context.getRaster(deviceBounds.x, deviceBounds.y, deviceBounds.width, deviceBounds.height);
             BufferedImage image = FXImageBridge.convertRasterToBufferedImage(context.getColorModel(), raster);
-            clipStack.pushClip(shape);
+            ctx.save();
+            applyClip(shape);
             Affine transform = ctx.getTransform();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.drawImage(FXImageBridge.convertImage(image), userBounds.getX(), userBounds.getY(),
                     userBounds.getWidth(),
                     userBounds.getHeight());
             ctx.setTransform(transform);
-            clipStack.popClip();
+            ctx.restore();
         }
     }
 
@@ -208,15 +204,10 @@ public class FXOutput implements Output {
 
     @Override
     public void applyClip(@NotNull Shape clipShape) {
-        clipStack.pushClip(clipShape);
-    }
-
-    @Override
-    public void setClip(@Nullable Shape shape) {
-        clipStack.clearClip();
-        if (shape != null) {
-            clipStack.pushClip(shape);
-        }
+        PathIterator awtIterator = clipShape.getPathIterator(null);
+        FXShapeBridge.appendPathIterator(ctx, awtIterator);
+        FXShapeBridge.applyWindingRule(ctx, awtIterator.getWindingRule());
+        ctx.clip();
     }
 
     @Override

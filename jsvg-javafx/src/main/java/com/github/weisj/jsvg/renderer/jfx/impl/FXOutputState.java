@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.renderer.jfx.impl;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.util.List;
 import javafx.scene.canvas.GraphicsContext;
 
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +41,7 @@ public final class FXOutputState implements Output.SafeState {
     private final Paint originalPaint;
     private final Stroke originalStroke;
     private final float originalOpacity;
-    private final List<Shape> originalClipStack;
+    private final SaveClipStack saveClip;
 
     FXOutputState(FXOutput fxOutput, SaveClipStack saveClip) {
         this.fxOutput = fxOutput;
@@ -50,7 +49,10 @@ public final class FXOutputState implements Output.SafeState {
         this.originalPaint = fxOutput.currentPaint;
         this.originalStroke = fxOutput.currentStroke;
         this.originalOpacity = fxOutput.currentOpacity;
-        this.originalClipStack = saveClip == SaveClipStack.YES ? fxOutput.clipStack.snapshot() : null;
+        this.saveClip = saveClip;
+        if (saveClip == SaveClipStack.YES) {
+            fxOutput.ctx.save();
+        }
     }
 
     public @NotNull GraphicsContext context() {
@@ -59,8 +61,8 @@ public final class FXOutputState implements Output.SafeState {
 
     @Override
     public void restore() {
-        if (originalClipStack != null) {
-            fxOutput.clipStack.restoreClipStack(originalClipStack);
+        if (saveClip == SaveClipStack.YES) {
+            fxOutput.ctx.restore();
         }
         fxOutput.setOpacity(originalOpacity);
         fxOutput.setTransform(originalTransform);
