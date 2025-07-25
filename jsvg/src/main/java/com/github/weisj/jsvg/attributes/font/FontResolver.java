@@ -40,18 +40,18 @@ public final class FontResolver {
     }
 
     public static @NotNull SVGFont resolve(@NotNull MeasurableFontSpec fontSpec,
-            @NotNull MeasureContext measureContext) {
+            @NotNull MeasureContext measureContext, @NotNull String defaultFontFamily) {
         FontCache.CacheKey key = new FontCache.CacheKey(fontSpec, measureContext);
         SVGFont cachedFont = FontCache.INSTANCE.cache.get(key);
         if (cachedFont != null) return cachedFont;
-        SVGFont resolvedFont = resolveWithoutCache(fontSpec, measureContext);
+        SVGFont resolvedFont = resolveWithoutCache(fontSpec, measureContext, defaultFontFamily);
         FontCache.INSTANCE.cache.put(key, resolvedFont);
         return resolvedFont;
     }
 
     public static @NotNull SVGFont resolveWithoutCache(@NotNull MeasurableFontSpec fontSpec,
-            @NotNull MeasureContext measureContext) {
-        String family = findSupportedFontFamily(fontSpec);
+            @NotNull MeasureContext measureContext, @NotNull String defaultFontFamily) {
+        String family = findSupportedFontFamily(fontSpec, defaultFontFamily);
 
         FontStyle style = fontSpec.style();
 
@@ -93,12 +93,13 @@ public final class FontResolver {
         return currentWeight / normalWeight;
     }
 
-    private static @NotNull String findSupportedFontFamily(@NotNull MeasurableFontSpec fontSpec) {
+    private static @NotNull String findSupportedFontFamily(@NotNull MeasurableFontSpec fontSpec,
+            @NotNull String defaultFontFamily) {
         String[] families = fontSpec.families();
         for (String family : families) {
             if (FontFamiliesCache.INSTANCE.isSupportedFontFamily(family)) return family;
         }
-        return SVGFont.defaultFontFamily();
+        return defaultFontFamily;
     }
 
     public static @NotNull List<@NotNull String> supportedFonts() {

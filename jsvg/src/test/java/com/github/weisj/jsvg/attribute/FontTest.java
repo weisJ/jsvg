@@ -53,18 +53,18 @@ class FontTest {
         Supplier<MeasurableFontSpec> fontSpec = () -> createFontSpec(
                 entry("font-family", "sans-serif"),
                 entry("font-size", "11"));
-        SVGFont font1 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT);
-        SVGFont font2 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT);
+        SVGFont font1 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, SVGFont.defaultFontFamily());
+        SVGFont font2 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, SVGFont.defaultFontFamily());
         Assertions.assertSame(font1, font2);
     }
 
     @Test
     void checkFontParsing() {
-        String fontName = FontResolver.supportedFonts().get(0);
+        String fontName = FontResolver.supportedFonts().getFirst();
         MeasurableFontSpec fontSpec = createFontSpec(
                 entry("font-family", fontName),
                 entry("font-size", "3em"));
-        SVGFont font = FontResolver.resolveWithoutCache(fontSpec, MEASURE_CONTEXT);
+        SVGFont font = FontResolver.resolveWithoutCache(fontSpec, MEASURE_CONTEXT, SVGFont.defaultFontFamily());
         Assertions.assertEquals(fontName, font.family());
         Assertions.assertEquals(3 * MEASURE_CONTEXT.em(), font.size());
     }

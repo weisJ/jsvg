@@ -46,6 +46,10 @@ public interface PlatformSupport {
         return SVGFont.defaultFontSize();
     }
 
+    default @NotNull String fontFamily() {
+        return SVGFont.defaultFontFamily();
+    }
+
     default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
         return Toolkit.getDefaultToolkit().createImage(imageProducer);
     }

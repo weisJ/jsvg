@@ -44,6 +44,13 @@ public final class AwtComponentPlatformSupport implements PlatformSupport {
     }
 
     @Override
+    public @NotNull String fontFamily() {
+        Font font = component.getFont();
+        if (font != null) return font.getFamily();
+        return PlatformSupport.super.fontFamily();
+    }
+
+    @Override
     public @NotNull TargetSurface targetSurface() {
         return component::repaint;
     }
