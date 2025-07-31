@@ -19,6 +19,7 @@ pluginManagement {
         idv("org.sonarqube")
         idv("biz.aQute.bnd.builder", "biz.aQute.bnd.lib")
         idv("com.gradleup.nmcp")
+        idv("org.openjfx.javafxplugin")
     }
 }
 
@@ -99,6 +100,7 @@ dependencyResolutionManagement {
 
 include(
     "jsvg",
+    "jsvg-javafx",
     "annotations",
     "annotations-processor",
     "jsvg-systemlogger",
