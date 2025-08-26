@@ -4,23 +4,23 @@ plugins {
     `java-library`
     jacoco
     id("biz.aQute.bnd.builder")
+    id("org.openjfx.javafxplugin")
+}
+
+javafx {
+    version = rootProject.extra["javafx.version"].toString()
+    modules("javafx.controls", "javafx.fxml", "javafx.swing")
 }
 
 dependencies {
+    compileOnly(projects.jsvg)
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
-    compileOnly(projects.annotations)
-    compileOnly(libs.bndAnnotations)
     compileOnly(libs.osgiAnnotations)
 
-    annotationProcessor(projects.annotationsProcessor)
-
-    testImplementation(testLibs.darklaf.core)
+    testImplementation(projects.jsvg)
     testImplementation(testLibs.junit.api)
-    testImplementation(testLibs.svgSalamander)
-    testImplementation(testLibs.bundles.batik)
     testImplementation(testLibs.imageCompare)
-    testImplementation(testLibs.sizeof)
     testImplementation(gradleApi())
 
     testRuntimeOnly(testLibs.junit.engine)
@@ -38,18 +38,21 @@ tasks {
         bundle {
             bnd(
                 bndFile(
-                    moduleName = "com.github.weisj.jsvg",
+                    moduleName = "com.github.weisj.jsvg.javafx",
                     requiredModules =
                         listOf(
-                            Requires("com.google.errorprone.annotations", static = true),
+                            Requires("com.github.weisj.jsvg"),
                             Requires("org.jetbrains.annotations", static = true),
-                            Requires("com.github.weisj.jsvg.annotations", static = true),
+                            Requires("com.google.errorprone.annotations", static = true),
                             Requires("org.osgi.annotation.bundle", static = true),
-                            Requires("biz.aQute.bndlib", static = true),
                         ),
                 ),
             )
         }
+    }
+
+    withType<JavaExec> {
+        environment("JAVAFX_TEST_SVG_PATH" to File(project.rootDir, "jsvg/src/test/resources").absolutePath)
     }
 
     test {
@@ -57,7 +60,6 @@ tasks {
         doFirst {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
-        environment("RESVG_TEST_SUITE_PATH" to File(project.rootDir, "resvg-test-suite/tests").absolutePath)
         useJUnitPlatform()
         testLogging {
             showStandardStreams = true
@@ -65,12 +67,5 @@ tasks {
             showStackTraces = true
             exceptionFormat = TestExceptionFormat.FULL
         }
-    }
-
-    register<JavaExec>("SVGViewer") {
-        group = "application"
-        description = "Runs the SVG Viewer application."
-        classpath = sourceSets["test"].runtimeClasspath
-        mainClass.set("com.github.weisj.jsvg.SVGViewer")
     }
 }
