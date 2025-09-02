@@ -43,7 +43,4 @@ public abstract class MetaSVGNode implements SVGNode {
 
     @Override
     public void build(@NotNull AttributeNode attributeNode) {}
-
-    @Override
-    public void addContent(char[] content) {}
 }

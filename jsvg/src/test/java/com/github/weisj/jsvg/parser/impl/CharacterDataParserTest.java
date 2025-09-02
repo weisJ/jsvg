@@ -79,7 +79,7 @@ class CharacterDataParserTest {
         CharacterDataParser parser = new CharacterDataParser();
         parser.append(input.toCharArray(), 0, input.length());
         char[] expected = output.toCharArray();
-        char[] got = parser.flush(partialFlush);
+        char[] got = parser.flush(partialFlush).toCharArray();
         Assertions.assertArrayEquals(expected, got,
                 "Expected: " + Arrays.toString(expected) + " but got " + Arrays.toString(got));
     }

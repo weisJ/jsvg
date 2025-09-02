@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.Logger.Level;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
@@ -123,17 +125,16 @@ final class CharacterDataParser {
         return dueToSegmentBreak || buffer.length() > 0;
     }
 
-    public char[] flush(boolean dueToSegmentBreak) {
+    public @NotNull String flush(boolean dueToSegmentBreak) {
         if (dueToSegmentBreak && state != State.CHARACTER) {
             // We ended on a non-character and hence have to insert a whitespace
             buffer.append(' ');
         }
         if (dueToSegmentBreak) state = State.SEGMENT_BREAK;
-        char[] ch = new char[buffer.length()];
-        buffer.getChars(0, ch.length, ch, 0);
+        String result = buffer.toString();
         LOGGER.log(Level.DEBUG, () -> String.format("Flush segBreak=%s[%s]", dueToSegmentBreak, buffer));
         buffer = new StringBuilder();
-        return ch;
+        return result;
     }
 
     private int trimLeadingWhiteSpace() {

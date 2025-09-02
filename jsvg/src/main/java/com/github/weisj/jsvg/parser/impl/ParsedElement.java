@@ -51,6 +51,8 @@ public final class ParsedElement implements DomElement {
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
     private final @NotNull List<@NotNull ParsedElement> indirectChildren = new ArrayList<>();
     private final @NotNull Map<String, @NotNull List<@NotNull ParsedElement>> animationElements = new HashMap<>();
+    private TextContentImpl textContent = null;
+
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
     private int outgoingPaths = -1;
@@ -113,6 +115,14 @@ public final class ParsedElement implements DomElement {
         }
     }
 
+    @Override
+    public @NotNull TextContentImpl textContent() {
+        if (textContent == null) {
+            textContent = new TextContentImpl(this);
+        }
+        return textContent;
+    }
+
     public @NotNull Map<String, List<ParsedElement>> animationElements() {
         return animationElements;
     }
@@ -145,13 +155,36 @@ public final class ParsedElement implements DomElement {
             animationElements.computeIfAbsent(attributeName, k -> new ArrayList<>()).add(parsedElement);
         }
         children.add(parsedElement);
-        if (node instanceof Container) {
-            ((Container<?>) node).addChild(parsedElement.id, parsedElement.node);
-        }
     }
 
     void addIndirectChild(@NotNull ParsedElement parsedElement) {
         indirectChildren.add(parsedElement);
+    }
+
+    private void addChildrenAndContent() {
+        if (node instanceof Container) {
+            int contentListsSize = textContent == null ? 0 : textContent.contentLists().size();
+            for (int i = 0; i < children.size(); i++) {
+                if (i < contentListsSize) {
+                    addContentList(textContent.contentLists().get(i));
+                }
+                ParsedElement child = children.get(i);
+                ((Container<?>) node).addChild(child.id, child.node);
+            }
+            for (int i = children.size(); i < contentListsSize; i++) {
+                addContentList(textContent.contentLists().get(i));
+            }
+        } else if (textContent != null) {
+            for (List<String> contentList : textContent.contentLists()) {
+                addContentList(contentList);
+            }
+        }
+    }
+
+    private void addContentList(@NotNull List<@NotNull String> contentList) {
+        for (String text : contentList) {
+            node.addContent(text);
+        }
     }
 
     void build(int depth) {
@@ -168,6 +201,8 @@ public final class ParsedElement implements DomElement {
                     String.format("Maximum nesting depth reached %d > %d.%n", depth, maxNestingDepth)
                             + "Note: You can configure this using LoaderContext#documentLimits()");
         }
+
+        addChildrenAndContent();
 
         attributeNode.prepareForNodeBuilding();
 

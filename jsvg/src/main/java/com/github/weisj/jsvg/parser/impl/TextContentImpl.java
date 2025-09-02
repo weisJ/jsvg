@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,47 +19,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.text;
+package com.github.weisj.jsvg.parser.impl;
 
-import java.text.BreakIterator;
-import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.parser.DomElement;
 
-final class StringTextSegment implements TextSegment {
-    private final List<String> codepoints;
-    private final TextContainer parent;
-    private final int index;
+public class TextContentImpl implements DomElement.TextContent {
+    private final @NotNull ParsedElement parent;
+    private final @NotNull List<@NotNull List<String>> contentLists = new ArrayList<>();
 
-    @Nullable
-    GlyphRun currentGlyphRun = null;
-    @Nullable
-    RenderContext currentRenderContext = null;
-
-    public StringTextSegment(@NotNull TextContainer parent, int index, @NotNull String codepoints) {
+    public TextContentImpl(@NotNull ParsedElement parent) {
         this.parent = parent;
-        this.index = index;
-
-        BreakIterator it = BreakIterator.getCharacterInstance();
-        it.setText(new StringCharacterIterator(codepoints));
-        int start = it.first();
-        List<String> characters = new ArrayList<>();
-        for (int end = it.next(); end != BreakIterator.DONE; start = end, end = it.next()) {
-            characters.add(codepoints.substring(start, end));
+        for (int i = 0; i <= parent.children().size(); i++) {
+            // One before each child and one after the last child.
+            contentLists.add(new ArrayList<>());
         }
-        this.codepoints = characters;
     }
 
-    public @NotNull List<@NotNull String> codepoints() {
-        return codepoints;
+    private void ensureSize() {
+        while (contentLists.size() < parent.children().size() + 1) {
+            contentLists.add(new ArrayList<>());
+        }
     }
 
-    public boolean isLastSegmentInParent() {
-        return index == parent.children().size() - 1;
+    public @NotNull List<@NotNull List<String>> contentLists() {
+        return contentLists;
+    }
+
+    public @NotNull List<String> currentContentList() {
+        ensureSize();
+        return contentLists.get(contentLists.size() - 1);
+    }
+
+    public void addContentList() {
+        contentLists.add(new ArrayList<>());
+    }
+
+    @Override
+    public @NotNull List<@NotNull String> contentAfterChildIndex(int childIndex) {
+        ensureSize();
+        return contentLists.get(childIndex + 1);
     }
 }

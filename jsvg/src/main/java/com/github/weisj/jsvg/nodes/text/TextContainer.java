@@ -110,8 +110,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     }
 
     @Override
-    public final void addContent(char[] content) {
-        if (content.length == 0) return;
+    public final void addContent(@NotNull String content) {
+        if (content.isEmpty()) return;
         segments.add(new StringTextSegment(this, segments.size(), content));
     }
 

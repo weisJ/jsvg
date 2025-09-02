@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,7 +39,7 @@ public final class Style extends MetaSVGNode {
 
     private StyleSheet styleSheet;
 
-    private final List<char[]> data = new ArrayList<>();
+    private final List<char @NotNull []> data = new ArrayList<>();
 
     public void parseStyleSheet(@NotNull CssParser cssParser) {
         styleSheet = cssParser.parse(data);
@@ -51,8 +51,8 @@ public final class Style extends MetaSVGNode {
     }
 
     @Override
-    public void addContent(char[] content) {
-        data.add(content);
+    public void addContent(@NotNull String content) {
+        data.add(content.toCharArray());
     }
 
     @Override

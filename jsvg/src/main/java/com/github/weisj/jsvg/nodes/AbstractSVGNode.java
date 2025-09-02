@@ -43,9 +43,6 @@ public abstract class AbstractSVGNode implements SVGNode {
     }
 
     @Override
-    public void addContent(char[] content) {}
-
-    @Override
     public String toString() {
         return getClass().getSimpleName() + "{id='" + id + '\'' + '}';
     }

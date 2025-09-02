@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser;
 
 import java.util.List;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +54,24 @@ public interface DomElement {
 
     void setAttribute(@NotNull String name, @Nullable String value);
 
+    @ApiStatus.Experimental
+    @NotNull
+    TextContent textContent();
+
     @Nullable
     DomElement parent();
+
+    @ApiStatus.Experimental
+    interface TextContent {
+        /**
+         * Returns the list of text fragments after the child element at the given index.
+         * Returns the content before the first child if index is -1.
+         *
+         * @param childIndex the index of the child element
+         * @return the list of text fragments
+         */
+        @ApiStatus.Experimental
+        @NotNull
+        List<@NotNull String> contentAfterChildIndex(int childIndex);
+    }
 }

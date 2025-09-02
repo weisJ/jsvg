@@ -39,7 +39,7 @@ import com.github.weisj.jsvg.parser.css.StyleSheet;
 public final class SVGDocumentBuilder {
     private final @NotNull ParsedDocument parsedDocument;
     private final @NotNull List<@NotNull Use> useElements = new ArrayList<>();
-    private final @NotNull List<@NotNull Style> styleElements = new ArrayList<>();
+    private final @NotNull List<@NotNull ParsedElement> styleElements = new ArrayList<>();
     private final @NotNull List<@NotNull StyleSheet> styleSheets = new ArrayList<>();
     private final @NotNull Deque<@NotNull ParsedElement> currentNodeStack = new ArrayDeque<>();
 
@@ -99,7 +99,7 @@ public final class SVGDocumentBuilder {
         if (rootNode == null) rootNode = parsedElement;
 
         if (parsedElement.node() instanceof Style) {
-            styleElements.add((Style) parsedElement.node());
+            styleElements.add(parsedElement);
         }
 
         if (parsedElement.node() instanceof Use) {
@@ -134,13 +134,12 @@ public final class SVGDocumentBuilder {
 
     private void flushText(@NotNull ParsedElement element, boolean segmentBreak) {
         if (element.characterDataParser != null && element.characterDataParser.canFlush(segmentBreak)) {
-            element.node().addContent(element.characterDataParser.flush(segmentBreak));
+            element.textContent().currentContentList().add(element.characterDataParser.flush(segmentBreak));
         }
     }
 
     void preProcess() {
         if (rootNode == null) throw new IllegalStateException("No root node");
-        processStyleSheets();
 
         DomProcessor preProcessor = loaderContext.preProcessor();
         if (preProcessor != null) preProcessor.process(rootNode);
@@ -148,6 +147,7 @@ public final class SVGDocumentBuilder {
 
     public @NotNull SVGDocument build() {
         preProcess();
+        processStyleSheets();
         rootNode.build(0);
         validatePathCount();
         validateUseElementsDepth();
@@ -157,9 +157,11 @@ public final class SVGDocumentBuilder {
     private void processStyleSheets() {
         if (styleElements.isEmpty()) return;
         CssParser cssParser = loaderContext.cssParser();
-        for (Style styleElement : styleElements) {
-            styleElement.parseStyleSheet(cssParser);
-            styleSheets.add(styleElement.styleSheet());
+        for (ParsedElement styleElement : styleElements) {
+            styleElement.build(0);
+            Style styleNode = (Style) styleElement.node();
+            styleNode.parseStyleSheet(cssParser);
+            styleSheets.add(styleNode.styleSheet());
         }
     }
 

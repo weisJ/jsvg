@@ -36,5 +36,7 @@ public interface SVGNode {
 
     void build(@NotNull AttributeNode attributeNode);
 
-    void addContent(char[] content);
+    default void addContent(@NotNull String content) {
+
+    }
 }
