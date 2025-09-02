@@ -53,6 +53,7 @@ import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.FXTestSVGFiles;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.jfx.impl.FXOutput;
+import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 
@@ -147,7 +148,7 @@ public class FXOutputTest {
         BufferedImage image = new BufferedImage((int) size.width, (int) size.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
         Output output = Output.createForGraphics(g);
-        FXOutput.setupDefaultJFXRenderingHints(output);
+        FXRenderingHintsUtil.setupDefaultJFXRenderingHints(output);
         svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null);
         g.dispose();
         return image;
