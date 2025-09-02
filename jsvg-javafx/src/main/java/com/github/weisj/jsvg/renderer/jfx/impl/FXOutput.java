@@ -47,21 +47,21 @@ import com.github.weisj.jsvg.util.ImageUtil;
 /**
  * An {@link Output} implementation that uses a {@link GraphicsContext} to draw to.
  */
-public class FXOutput implements Output {
+public final class FXOutput implements Output {
 
-    protected final GraphicsContext ctx;
-    protected final RenderingHints renderingHints;
-    protected final boolean isRootOutput;
+    final GraphicsContext ctx;
+    private final RenderingHints renderingHints;
+    private final boolean isRootOutput;
 
-    protected static final Color DEFAULT_PAINT = Color.BLACK;
-    protected static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
-    protected static final float DEFAULT_OPACITY = 1F;
-    protected static final FillRule DEFAULT_FILL_RULE = FillRule.NON_ZERO;
+    private static final Color DEFAULT_PAINT = Color.BLACK;
+    private static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
+    private static final float DEFAULT_OPACITY = 1F;
+    private static final FillRule DEFAULT_FILL_RULE = FillRule.NON_ZERO;
 
-    protected float currentOpacity = DEFAULT_OPACITY;
-    protected Paint currentPaint = DEFAULT_PAINT;
-    protected Stroke currentStroke = DEFAULT_STROKE;
-    protected final SafeState originalState;
+    float currentOpacity = DEFAULT_OPACITY;
+    Paint currentPaint = DEFAULT_PAINT;
+    Stroke currentStroke = DEFAULT_STROKE;
+    private final SafeState originalState;
 
     private FXOutput(@NotNull GraphicsContext context) {
         ctx = context;
