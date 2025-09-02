@@ -43,7 +43,7 @@ public final class FXOutputState implements Output.SafeState {
     private final float originalOpacity;
     private final SaveClipStack saveClip;
 
-    FXOutputState(FXOutput fxOutput, SaveClipStack saveClip) {
+    FXOutputState(@NotNull FXOutput fxOutput, SaveClipStack saveClip) {
         this.fxOutput = fxOutput;
         this.originalTransform = fxOutput.transform();
         this.originalPaint = fxOutput.currentPaint;
