@@ -70,7 +70,7 @@ tasks {
     register<JavaExec>("SVGViewer") {
         group = "application"
         description = "Runs the SVG Viewer application."
-        classpath = sourceSets["test"].runtimeClasspath
+        classpath = sourceSets.test.get().runtimeClasspath
         mainClass.set("com.github.weisj.jsvg.SVGViewer")
     }
 }

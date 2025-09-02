@@ -68,4 +68,11 @@ tasks {
             exceptionFormat = TestExceptionFormat.FULL
         }
     }
+
+    register<JavaExec>("SVGViewerFX") {
+        group = "application"
+        description = "Runs the JavaFX SVG Viewer application."
+        classpath = sourceSets.test.get().runtimeClasspath
+        mainClass.set("com.github.weisj.jsvg.renderer.jfx.viewer.FXViewerMain")
+    }
 }
