@@ -45,21 +45,22 @@ public class FXHeadlessApplication extends Application {
             if (!init.get()) {
                 init.set(true);
 
-                ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
+                try (ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
                     Thread thread = new Thread(r);
                     thread.setDaemon(true);
                     thread.setName(THREAD_NAME);
                     return thread;
-                });
-                executor.execute(Application::launch);
+                })) {
+                    executor.execute(Application::launch);
 
-                try {
-                    if (!LATCH.await(LAUNCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    try {
+                        if (!LATCH.await(LAUNCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                            started.set(false);
+                        }
+                    } catch (InterruptedException e) {
+                        executor.shutdownNow();
                         started.set(false);
                     }
-                } catch (InterruptedException e) {
-                    executor.shutdownNow();
-                    started.set(false);
                 }
             }
         } finally {
