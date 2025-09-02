@@ -305,7 +305,7 @@ public final class FXOutput implements Output {
 
     @Override
     public @NotNull SafeState safeState() {
-        return new FXOutputState(this, FXOutputState.SaveClipStack.YES);
+        return new FXOutputState(this, SaveClipStack.YES);
     }
 
     @Override
