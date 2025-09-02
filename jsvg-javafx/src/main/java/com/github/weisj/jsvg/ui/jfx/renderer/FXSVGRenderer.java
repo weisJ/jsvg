@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.ui.jfx.skin;
+package com.github.weisj.jsvg.ui.jfx.renderer;
 
 import javafx.scene.Node;
 
