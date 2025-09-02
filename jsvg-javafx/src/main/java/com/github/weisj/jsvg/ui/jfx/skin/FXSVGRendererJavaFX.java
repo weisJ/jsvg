@@ -38,7 +38,7 @@ import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
-class FXSVGRendererJavaFX extends FXSVGRenderer {
+class FXSVGRendererJavaFX implements FXSVGRenderer {
     private final Canvas canvas;
     private final GraphicsContext graphics;
 

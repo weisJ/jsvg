@@ -31,15 +31,17 @@ import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 import com.github.weisj.jsvg.view.ViewBox;
 
-public abstract class FXSVGRenderer {
+public interface FXSVGRenderer {
 
-    public abstract @NotNull FXSVGCanvas.RenderBackend getBackend();
+    @NotNull
+    FXSVGCanvas.RenderBackend getBackend();
 
-    public abstract void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
+    void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
             @Nullable AnimationState animationState);
 
-    public abstract void dispose();
+    void dispose();
 
-    public abstract @NotNull Node getFXNode();
+    @NotNull
+    Node getFXNode();
 
 }
