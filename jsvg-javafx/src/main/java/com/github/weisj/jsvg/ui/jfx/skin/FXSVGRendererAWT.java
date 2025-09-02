@@ -34,13 +34,13 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
-import com.github.weisj.jsvg.renderer.jfx.impl.FXOutput;
+import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
-class FXSVGRendererAWT extends FXSVGRenderer {
+class FXSVGRendererAWT implements FXSVGRenderer {
 
     private ImageView fxImageView;
 
@@ -90,7 +90,7 @@ class FXSVGRendererAWT extends FXSVGRenderer {
         }
         Graphics2D g = awtImage.createGraphics();
         Output output = Output.createForGraphics(g);
-        FXOutput.setupDefaultJFXRenderingHints(output);
+        FXRenderingHintsUtil.setupDefaultJFXRenderingHints(output);
         g.setBackground(new Color(0, 0, 0, 0));
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
