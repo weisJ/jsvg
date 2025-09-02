@@ -57,7 +57,7 @@ import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 
-public class FXOutputTest {
+class FXOutputTest {
 
     private static final double DEFAULT_TOLERANCE = 0.3;
     private static final double DEFAULT_PIXEL_TOLERANCE = 0.1;
