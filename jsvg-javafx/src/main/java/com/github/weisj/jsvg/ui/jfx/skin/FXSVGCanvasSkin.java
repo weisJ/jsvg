@@ -31,6 +31,9 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
+import com.github.weisj.jsvg.ui.jfx.renderer.FXSVGRenderer;
+import com.github.weisj.jsvg.ui.jfx.renderer.FXSVGRendererAWT;
+import com.github.weisj.jsvg.ui.jfx.renderer.FXSVGRendererJavaFX;
 import com.github.weisj.jsvg.view.ViewBox;
 
 /**
