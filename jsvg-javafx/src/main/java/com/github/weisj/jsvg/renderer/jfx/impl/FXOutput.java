@@ -37,7 +37,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.paint.impl.MaskedPaint;
-import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.jfx.impl.bridge.*;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
@@ -48,16 +47,16 @@ import com.github.weisj.jsvg.util.ImageUtil;
  */
 public final class FXOutput implements Output {
 
-    final GraphicsContext ctx;
+    private final GraphicsContext ctx;
     private final RenderingHints renderingHints;
 
     private static final Color DEFAULT_PAINT = Color.BLACK;
     private static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
     private static final float DEFAULT_OPACITY = 1F;
 
-    float currentOpacity = DEFAULT_OPACITY;
-    Paint currentPaint = DEFAULT_PAINT;
-    Stroke currentStroke = DEFAULT_STROKE;
+    private float currentOpacity = DEFAULT_OPACITY;
+    private Paint currentPaint = DEFAULT_PAINT;
+    private Stroke currentStroke = DEFAULT_STROKE;
     private final SafeState originalState;
 
     private FXOutput(@NotNull GraphicsContext context) {
@@ -66,7 +65,7 @@ public final class FXOutput implements Output {
         setOpacity(DEFAULT_OPACITY);
         setPaint(DEFAULT_PAINT);
         setStroke(DEFAULT_STROKE);
-        originalState = new FXOutputState(this, FXOutputState.SaveClipStack.YES);
+        originalState = new FXOutputState(this, SaveClipStack.YES);
     }
 
     private FXOutput(@NotNull FXOutput parent) {
@@ -76,7 +75,7 @@ public final class FXOutput implements Output {
         currentOpacity = parent.currentOpacity;
         currentPaint = parent.currentPaint;
         currentStroke = parent.currentStroke;
-        originalState = new FXOutputState(this, FXOutputState.SaveClipStack.YES);
+        originalState = new FXOutputState(this, SaveClipStack.YES);
     }
 
     /**
@@ -89,20 +88,8 @@ public final class FXOutput implements Output {
      */
     public static @NotNull FXOutput createForGraphicsContext(@NotNull GraphicsContext context) {
         FXOutput output = new FXOutput(context);
-        setupDefaultJFXRenderingHints(output);
+        FXRenderingHintsUtil.setupDefaultJFXRenderingHints(output);
         return output;
-    }
-
-    // JFX defaults to the highest render quality
-    public static void setupDefaultJFXRenderingHints(Output output) {
-        output.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        output.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-        output.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        output.setRenderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING, SVGRenderingHints.VALUE_SOFT_CLIPPING_ON);
-        output.setRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING,
-                SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF);
-        output.setRenderingHint(SVGRenderingHints.KEY_MASK_CLIP_RENDERING,
-                SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY);
     }
 
     @Override
@@ -243,7 +230,7 @@ public final class FXOutput implements Output {
         ctx.setTransform(originalTransform);
     }
 
-    public Rectangle2D canvasBounds() {
+    private Rectangle2D canvasBounds() {
         return new Rectangle2D.Double(0, 0, ctx.getCanvas().getWidth(), ctx.getCanvas().getHeight());
     }
 
@@ -342,4 +329,45 @@ public final class FXOutput implements Output {
         return currentPaint instanceof MaskedPaint;
     }
 
+    private enum SaveClipStack {
+        YES,
+        NO
+    }
+
+    private static final class FXOutputState implements Output.SafeState {
+
+        private final FXOutput fxOutput;
+        private final AffineTransform originalTransform;
+        private final Paint originalPaint;
+        private final Stroke originalStroke;
+        private final float originalOpacity;
+        private final SaveClipStack saveClip;
+
+        FXOutputState(@NotNull FXOutput fxOutput, SaveClipStack saveClip) {
+            this.fxOutput = fxOutput;
+            this.originalTransform = fxOutput.transform();
+            this.originalPaint = fxOutput.currentPaint;
+            this.originalStroke = fxOutput.currentStroke;
+            this.originalOpacity = fxOutput.currentOpacity;
+            this.saveClip = saveClip;
+            if (saveClip == SaveClipStack.YES) {
+                fxOutput.ctx.save();
+            }
+        }
+
+        public @NotNull GraphicsContext context() {
+            return fxOutput.ctx;
+        }
+
+        @Override
+        public void restore() {
+            if (saveClip == SaveClipStack.YES) {
+                fxOutput.ctx.restore();
+            }
+            fxOutput.setOpacity(originalOpacity);
+            fxOutput.setTransform(originalTransform);
+            fxOutput.setPaint(originalPaint);
+            fxOutput.setStroke(originalStroke);
+        }
+    }
 }
