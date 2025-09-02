@@ -43,11 +43,11 @@ public final class FXImageBridge {
         ctx.drawImage(convertImageWithOpacity(awtImage, currentOpacity), 0, 0);
     }
 
-    public static WritableImage convertImage(@NotNull BufferedImage image) {
+    public static @NotNull WritableImage convertImage(@NotNull BufferedImage image) {
         return SwingFXUtils.toFXImage(image, null);
     }
 
-    public static WritableImage convertImageWithOpacity(@NotNull Image image, double globalOpacity) {
+    public static @NotNull WritableImage convertImageWithOpacity(@NotNull Image image, double globalOpacity) {
         boolean hasOpacity = globalOpacity < 1.0;
         if (image instanceof BufferedImage && !hasOpacity) {
             return convertImage((BufferedImage) image);
@@ -65,7 +65,8 @@ public final class FXImageBridge {
         return convertImage(dst);
     }
 
-    public static BufferedImage convertRasterToBufferedImage(@NotNull ColorModel colorModel, @NotNull Raster raster) {
+    public static @NotNull BufferedImage convertRasterToBufferedImage(@NotNull ColorModel colorModel,
+            @NotNull Raster raster) {
         BufferedImage image = new BufferedImage(colorModel, raster.createCompatibleWritableRaster(),
                 colorModel.isAlphaPremultiplied(), null);
         image.setData(raster);

@@ -25,6 +25,7 @@ import javafx.animation.*;
 import javafx.scene.control.SkinBase;
 import javafx.scene.layout.StackPane;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
@@ -124,7 +125,7 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         timer.stop();
     }
 
-    private static FXSVGRenderer createRenderer(FXSVGCanvas.RenderBackend backend) {
+    private static @NotNull FXSVGRenderer createRenderer(FXSVGCanvas.RenderBackend backend) {
         switch (backend) {
             case JavaFX:
                 return new FXSVGRendererJavaFX();

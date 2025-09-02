@@ -30,7 +30,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.shape.FillRule;
 import javafx.scene.transform.Affine;
 
 import org.jetbrains.annotations.NotNull;
@@ -51,12 +50,10 @@ public final class FXOutput implements Output {
 
     final GraphicsContext ctx;
     private final RenderingHints renderingHints;
-    private final boolean isRootOutput;
 
     private static final Color DEFAULT_PAINT = Color.BLACK;
     private static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
     private static final float DEFAULT_OPACITY = 1F;
-    private static final FillRule DEFAULT_FILL_RULE = FillRule.NON_ZERO;
 
     float currentOpacity = DEFAULT_OPACITY;
     Paint currentPaint = DEFAULT_PAINT;
@@ -65,7 +62,6 @@ public final class FXOutput implements Output {
 
     private FXOutput(@NotNull GraphicsContext context) {
         ctx = context;
-        isRootOutput = true;
         renderingHints = new RenderingHints(null);
         setOpacity(DEFAULT_OPACITY);
         setPaint(DEFAULT_PAINT);
@@ -77,7 +73,6 @@ public final class FXOutput implements Output {
         ctx = parent.ctx;
         renderingHints = new RenderingHints(null);
         renderingHints.putAll(parent.renderingHints);
-        isRootOutput = false;
         currentOpacity = parent.currentOpacity;
         currentPaint = parent.currentPaint;
         currentStroke = parent.currentStroke;
@@ -314,7 +309,7 @@ public final class FXOutput implements Output {
         setOpacity(opacity * currentOpacity);
     }
 
-    protected void setOpacity(float opacity) {
+    void setOpacity(float opacity) {
         currentOpacity = opacity;
 
         // Re-apply paint with correct opacity
