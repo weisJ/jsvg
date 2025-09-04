@@ -24,6 +24,8 @@ package com.github.weisj.jsvg.ui.jfx;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Control;
@@ -72,9 +74,10 @@ public class FXSVGCanvas extends Control {
         getStyleClass().add(STYLE_CLASS);
         if (getShowTransparentPattern()) getStyleClass().add(STYLE_CLASS_TRANSPARENT_PATTERN);
 
-        animation.addListener((observable, oldValue, newValue) -> {
-            setupAnimation(newValue);
-        });
+        InvalidationListener animationModificationListener = observable -> setupAnimation();
+        animated.addListener(animationModificationListener);
+        document.addListener(animationModificationListener);
+        animation.addListener(animationModificationListener);
 
         showTransparentPatternProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue) getStyleClass().remove(STYLE_CLASS_TRANSPARENT_PATTERN);
@@ -83,10 +86,23 @@ public class FXSVGCanvas extends Control {
 
     }
 
-    private void setupAnimation(@Nullable Animation animation) {
-        if (animation == null) {
-            animation = DEFAULT_ANIMATION;
+    private Animation currentAnimation(){
+        if(!isAnimated()){
+            return DEFAULT_ANIMATION;
         }
+        Animation userAnimation = getAnimation();
+        if(userAnimation != null){
+            return userAnimation;
+        }
+        SVGDocument document = getDocument();
+        if(document != null){
+            return document.animation();
+        }
+        return DEFAULT_ANIMATION;
+    }
+
+    private void setupAnimation() {
+        Animation animation = currentAnimation();
 
         timeline.getKeyFrames().clear();
         timeline.getKeyFrames()
