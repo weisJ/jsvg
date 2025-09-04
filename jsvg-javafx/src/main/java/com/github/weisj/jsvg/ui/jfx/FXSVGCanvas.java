@@ -25,7 +25,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Control;
@@ -86,16 +85,16 @@ public class FXSVGCanvas extends Control {
 
     }
 
-    private Animation currentAnimation(){
-        if(!isAnimated()){
+    private Animation currentAnimation() {
+        if (!isAnimated()) {
             return DEFAULT_ANIMATION;
         }
         Animation userAnimation = getAnimation();
-        if(userAnimation != null){
+        if (userAnimation != null) {
             return userAnimation;
         }
         SVGDocument document = getDocument();
-        if(document != null){
+        if (document != null) {
             return document.animation();
         }
         return DEFAULT_ANIMATION;
