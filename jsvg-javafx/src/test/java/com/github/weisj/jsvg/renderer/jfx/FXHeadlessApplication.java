@@ -45,37 +45,24 @@ public class FXHeadlessApplication extends Application {
             if (!init.get()) {
                 init.set(true);
 
-                try (ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
-                    Thread thread = new Thread(r);
-                    thread.setDaemon(true);
-                    thread.setName(THREAD_NAME);
-                    return thread;
-                })) {
-                    executor.execute(Application::launch);
+                // JavaFX needs the launcher thread to stay open for its entire lifecycle
+                Thread jfxLauncherThread = new Thread(Application::launch);
+                jfxLauncherThread.setDaemon(true);
+                jfxLauncherThread.setName(THREAD_NAME);
+                jfxLauncherThread.start();
 
-                    try {
-                        if (!LATCH.await(LAUNCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                            started.set(false);
-                        }
-                    } catch (InterruptedException e) {
-                        executor.shutdownNow();
+                try {
+                    if (!LATCH.await(LAUNCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                         started.set(false);
                     }
+                } catch (InterruptedException e) {
+                    started.set(false);
                 }
             }
         } finally {
             LOCK.unlock();
         }
         return started.get();
-    }
-
-    public void launch() {
-        try {
-            Application.launch();
-        } catch (Exception e) {
-            started.set(false);
-            LATCH.countDown();
-        }
     }
 
     @Override
