@@ -52,7 +52,9 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.parser.PaintParser;
+import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
+import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
@@ -107,6 +109,27 @@ public final class AttributeNode {
 
         // First process the inline styles. They have the highest priority.
         preprocessAttributes(attributes, styleSheetAttributes);
+        String styleStr = attributes.get("style");
+        if (styleStr != null && !isBlank(styleStr)) {
+            CssParser cssParser = element.document().loaderContext().cssParser();
+            if (cssParser instanceof SimpleCssParser) {
+                ((SimpleCssParser) cssParser).parseRules(Collections.singletonList(styleStr.toCharArray()))
+                        .forEach(p -> {
+                            styleSheetAttributes.put(p.name(), p.value());
+                        });
+            } else {
+                // Fallback for external implementations of CssParser
+                StyleSheet sheet = cssParser.parse(
+                        Arrays.asList(
+                                element.tagName().toCharArray(),
+                                new char[] {'{'},
+                                styleStr.toCharArray(),
+                                new char[] {'}'}));
+                sheet.forEachMatchingRule(element, p -> {
+                    styleSheetAttributes.put(p.name(), p.value());
+                });
+            }
+        }
 
         List<StyleSheet> sheets = styleSheets();
         // Traverse the style sheets in backwards order to only use the newest definition.
@@ -126,10 +149,12 @@ public final class AttributeNode {
         return s.trim().isEmpty();
     }
 
-    private static void preprocessAttributes(@NotNull Map<String, String> attributes,
+    private void preprocessAttributes(@NotNull Map<String, String> attributes,
             @NotNull Map<String, String> styleAttributes) {
         String styleStr = attributes.get("style");
         if (styleStr != null && !isBlank(styleStr)) {
+            CssParser cssParser = element.document().loaderContext().cssParser();
+            StyleSheet parse = cssParser.parse(Collections.singletonList(styleStr.toCharArray()));
             String[] styles = styleStr.split(";");
             for (String style : styles) {
                 if (isBlank(style)) continue;

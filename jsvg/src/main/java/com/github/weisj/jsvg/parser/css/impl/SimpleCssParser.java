@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser.css.impl;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,6 +42,10 @@ public final class SimpleCssParser implements CssParser {
     @Override
     public @NotNull SimpleStyleSheet parse(@NotNull List<char[]> input) {
         return new Parser(input).parse();
+    }
+
+    public @NotNull List<@NotNull StyleProperty> parseRules(@NotNull List<char[]> input) {
+        return new Parser(input).parseRules();
     }
 
 
@@ -121,8 +126,6 @@ public final class SimpleCssParser implements CssParser {
         private @NotNull List<StyleProperty> readProperties() {
             List<StyleProperty> list = new ArrayList<>();
 
-            consume(TokenType.CURLY_OPEN);
-
             while (current.type() != TokenType.CURLY_CLOSE && current.type() != TokenType.EOF) {
                 String name = consumeValue(TokenType.IDENTIFIER);
                 consume(TokenType.COLON);
@@ -131,7 +134,6 @@ public final class SimpleCssParser implements CssParser {
                 list.add(new StyleProperty(name, value.trim()));
             }
 
-            consume(TokenType.CURLY_CLOSE);
             return list;
         }
 
@@ -149,6 +151,18 @@ public final class SimpleCssParser implements CssParser {
         }
 
         @NotNull
+        List<@NotNull StyleProperty> parseRules() {
+            try {
+                if (current.type() == TokenType.START) {
+                    next();
+                }
+                return readProperties();
+            } catch (ParserException e) {
+                return Collections.emptyList();
+            }
+        }
+
+        @NotNull
         SimpleStyleSheet parse() {
             do {
                 try {
@@ -157,7 +171,10 @@ public final class SimpleCssParser implements CssParser {
                     }
 
                     List<Token> identifierList = readIdentifierList();
+
+                    consume(TokenType.CURLY_OPEN);
                     List<StyleProperty> properties = readProperties();
+                    consume(TokenType.CURLY_CLOSE);
 
                     for (Token token : identifierList) {
                         switch (token.type()) {
