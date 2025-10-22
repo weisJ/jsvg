@@ -108,7 +108,6 @@ public final class AttributeNode {
         Map<String, String> styleSheetAttributes = new HashMap<>();
 
         // First process the inline styles. They have the highest priority.
-        preprocessAttributes(attributes, styleSheetAttributes);
         String styleStr = attributes.get("style");
         if (styleStr != null && !isBlank(styleStr)) {
             CssParser cssParser = element.document().loaderContext().cssParser();
@@ -147,21 +146,6 @@ public final class AttributeNode {
 
     private static boolean isBlank(@NotNull String s) {
         return s.trim().isEmpty();
-    }
-
-    private void preprocessAttributes(@NotNull Map<String, String> attributes,
-            @NotNull Map<String, String> styleAttributes) {
-        String styleStr = attributes.get("style");
-        if (styleStr != null && !isBlank(styleStr)) {
-            CssParser cssParser = element.document().loaderContext().cssParser();
-            StyleSheet parse = cssParser.parse(Collections.singletonList(styleStr.toCharArray()));
-            String[] styles = styleStr.split(";");
-            for (String style : styles) {
-                if (isBlank(style)) continue;
-                String[] styleDef = style.split(":", 2);
-                styleAttributes.put(styleDef[0].trim().toLowerCase(Locale.ENGLISH), styleDef[1].trim());
-            }
-        }
     }
 
     public @NotNull ParsedDocument document() {
