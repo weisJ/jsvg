@@ -246,10 +246,6 @@ public final class AttributeParser {
         return null;
     }
 
-    public @Nullable String parseUrl(@Nullable String value) {
-        return ParserUtil.parseUrl(value);
-    }
-
     private static final Pattern TRANSFORM_PATTERN = Pattern.compile("\\w+\\([^)]*\\)");
 
     public @Nullable List<@NotNull TransformPart> parseTransform(@Nullable String value) {

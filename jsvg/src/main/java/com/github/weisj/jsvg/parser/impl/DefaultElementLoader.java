@@ -49,15 +49,14 @@ class DefaultElementLoader implements ElementLoader {
 
     @Override
     public <T> @Nullable T loadElement(@NotNull Class<T> type, @Nullable String value, @NotNull DomDocument document) {
-        String url = ParserUtil.parseUrl(value);
+        Url url = Url.parse(value, Url.RequireFragment.YES);
         if (url == null) return null;
-        if (url.contains("#")) {
-            String[] parts = url.split("#", 2);
-            DomDocument parsedDocument = documentLoader.resolveDocument(document, parts[0]);
-            if (parsedDocument == null) return null;
-            return parsedDocument.getElementById(type, parts[1]);
+        DomDocument resolutionDocument = document;
+        if (url.url() != null) {
+            resolutionDocument = documentLoader.resolveDocument(document, url.url());
+            if (resolutionDocument == null) return null;
         }
-        return document.getElementById(type, url);
+        return resolutionDocument.getElementById(type, url.fragment());
     }
 
     interface DocumentLoader {

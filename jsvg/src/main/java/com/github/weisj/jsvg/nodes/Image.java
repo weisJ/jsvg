@@ -40,6 +40,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.Url;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.parser.resources.ResourceSupplier;
 import com.github.weisj.jsvg.parser.resources.impl.MissingImageResource;
@@ -89,9 +90,9 @@ public final class Image extends RenderableSVGNode {
                 attributeNode.getValue("preserveAspectRatio"), attributeNode.parser());
         overflow = attributeNode.getEnum("overflow", Overflow.Hidden);
 
-        String url = attributeNode.parser().parseUrl(attributeNode.getHref());
+        Url url = Url.parse(attributeNode.getHref(), Url.RequireFragment.NO);
         if (url == null) return;
-        URI resolvedUri = attributeNode.resolveResourceURI(url);
+        URI resolvedUri = attributeNode.resolveResourceURI(url.rawUrl());
         if (resolvedUri == null) return;
 
         try {

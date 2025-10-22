@@ -39,14 +39,8 @@ public final class ParserUtil {
 
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
 
-    private static @NotNull String removeWhiteSpace(@NotNull String value) {
+    public static @NotNull String removeWhiteSpace(@NotNull String value) {
         return WHITESPACE_PATTERN.matcher(value).replaceAll("");
-    }
-
-    public static @Nullable String parseUrl(@Nullable String value) {
-        if (value == null) return null;
-        if (!value.startsWith("url(") || !value.endsWith(")")) return removeWhiteSpace(value);
-        return removeWhiteSpace(value.substring(4, value.length() - 1));
     }
 
     public static int parseInt(@Nullable String value, int fallback) {

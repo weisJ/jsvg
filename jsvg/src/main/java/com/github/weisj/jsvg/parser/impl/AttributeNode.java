@@ -63,7 +63,8 @@ public final class AttributeNode {
     public enum ElementRelation {
         GEOMETRY_DATA,
         PAINTED_CHILD,
-        TEMPLATE
+        TEMPLATE,
+        PAINT_SERVER
     }
 
     private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
@@ -247,7 +248,8 @@ public final class AttributeNode {
 
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
-        SVGPaint paint = getElementByUrl(SVGPaint.class, value);
+        // TODO: url(#...) allows specifying a fallback color value.
+        SVGPaint paint = getElementByHref(SVGPaint.class, value, ElementRelation.PAINT_SERVER);
         if (paint != null) return paint;
         return loadHelper().attributeParser().parsePaint(value, this);
     }

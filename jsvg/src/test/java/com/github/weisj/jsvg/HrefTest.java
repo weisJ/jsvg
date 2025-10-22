@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Jannis Weis
+ * Copyright (c) 2022-2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,5 +33,10 @@ class HrefTest {
     void testForwardReference() {
         assertEquals(SUCCESS, compareImages("href/gradientForwardReference.svg"));
         assertEquals(SUCCESS, compareImages("href/gradientForwardReference2.svg"));
+    }
+
+    @Test
+    void idEqualToColorName() {
+        assertEquals(SUCCESS, compareImages("href/idEqualToColorName_bug144.svg"));
     }
 }
