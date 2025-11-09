@@ -41,10 +41,13 @@ public final class Lexer {
 
     private boolean inRuleDefinition;
     private boolean parsingRaw;
+    private char current;
 
 
-    public Lexer(@NotNull List<char[]> input) {
+    public Lexer(@NotNull List<char[]> input, SimpleCssParser.Mode mode) {
         this.input = input;
+        this.inRuleDefinition = mode == SimpleCssParser.Mode.SINGLE_RULE;
+        this.current = 0;
     }
 
     @NotNull
@@ -145,7 +148,7 @@ public final class Lexer {
             next();
         }
         int endListIndex = isEof() ? input.size() - 1 : listIndex;
-        int endIndex = isEof() ? input.get(endListIndex).length - 1 : index;
+        int endIndex = isEof() ? input.get(endListIndex).length : index;
 
         StringBuilder builder = new StringBuilder();
         int start = startIndex;
@@ -160,6 +163,13 @@ public final class Lexer {
     }
 
     private char current() {
+        if (current == 0) {
+            current = nextChar();
+        }
+        return current;
+    }
+
+    private char nextChar() {
         if (isEof()) return 0;
         return input.get(listIndex)[index];
     }
@@ -184,5 +194,6 @@ public final class Lexer {
             index = 0;
             listIndex++;
         }
+        current = nextChar();
     }
 }

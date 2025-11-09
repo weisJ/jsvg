@@ -39,25 +39,33 @@ public final class SimpleCssParser implements CssParser {
 
     private static final Logger LOGGER = LogFactory.createLogger(SimpleCssParser.class);
 
+    public enum Mode {
+        STYLE_SHEET,
+        SINGLE_RULE
+    }
+
     @Override
     public @NotNull SimpleStyleSheet parse(@NotNull List<char[]> input) {
-        return new Parser(input).parse();
+        return new Parser(input, Mode.STYLE_SHEET).parse();
     }
 
     public @NotNull List<@NotNull StyleProperty> parseRules(@NotNull List<char[]> input) {
-        return new Parser(input).parseRules();
+        return new Parser(input, Mode.SINGLE_RULE).parseRules();
     }
-
 
     private static final class Parser {
 
         private final @NotNull Lexer lexer;
         private final @NotNull SimpleStyleSheet sheet = new SimpleStyleSheet();
+        private final TokenType ruleListEndType;
         private @NotNull Token current = new Token(TokenType.START);
 
 
-        private Parser(@NotNull List<char[]> input) {
-            this.lexer = new Lexer(input);
+        private Parser(@NotNull List<char[]> input, Mode mode) {
+            this.ruleListEndType = mode == Mode.SINGLE_RULE
+                    ? TokenType.EOF
+                    : TokenType.CURLY_CLOSE;
+            this.lexer = new Lexer(input, mode);
         }
 
         private void next() {
@@ -130,7 +138,7 @@ public final class SimpleCssParser implements CssParser {
                 String name = consumeValue(TokenType.IDENTIFIER);
                 consume(TokenType.COLON);
                 String value = consumeValue(TokenType.RAW_DATA);
-                consumeOrSkipAllowedToken(TokenType.SEMICOLON, TokenType.CURLY_CLOSE);
+                consumeOrSkipAllowedToken(TokenType.SEMICOLON, ruleListEndType);
                 list.add(new StyleProperty(name, value.trim()));
             }
 
