@@ -91,12 +91,12 @@ public final class ParserUtil {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
-    public static @NotNull String @NotNull [] parseStringList(@Nullable String value, SeparatorMode separatorMode) {
-        return parseStringList(value, separatorMode, new String[0]);
+    public static @NotNull String @NotNull [] parseStringList(@Nullable String value, @NotNull ListSplitter splitter) {
+        return parseStringList(value, splitter, new String[0]);
     }
 
     @Contract("_,_,!null -> !null")
-    public static @NotNull String @Nullable [] parseStringList(@Nullable String value, SeparatorMode separatorMode,
+    public static @NotNull String @Nullable [] parseStringList(@Nullable String value, @NotNull ListSplitter splitter,
             @NotNull String @Nullable [] fallback) {
         if (value == null || value.isEmpty()) return fallback;
         List<String> list = new ArrayList<>();
@@ -107,7 +107,7 @@ public final class ParserUtil {
         for (; i < max; i++) {
             char c = value.charAt(i);
             if (Character.isWhitespace(c)) {
-                if (!inWhiteSpace && separatorMode.allowWhitespace() && i - start > 0) {
+                if (!inWhiteSpace && splitter.splitOnWhitespace() && i - start > 0) {
                     list.add(value.substring(start, i));
                     start = i + 1;
                 }
@@ -115,9 +115,10 @@ public final class ParserUtil {
                 continue;
             }
             inWhiteSpace = false;
-            if (separatorMode.separator() != 0 && c == separatorMode.separator()) {
+            ListSplitter.SplitResult result = splitter.testChar(c, i - start);
+            if (result.shouldSplit()) {
                 list.add(value.substring(start, i));
-                start = i + 1;
+                start = result.shouldIncludeChar() ? i : i + 1;
             }
         }
         if (i - start > 0) list.add(value.substring(start, i));

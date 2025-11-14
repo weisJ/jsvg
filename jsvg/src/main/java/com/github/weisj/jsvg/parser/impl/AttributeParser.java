@@ -49,6 +49,7 @@ import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.Logger.Level;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.parser.NumberListSplitter;
 import com.github.weisj.jsvg.parser.PaintParser;
 
 
@@ -196,7 +197,7 @@ public final class AttributeParser {
     public @NotNull Length @Nullable [] parseLengthList(@Nullable String value, @NotNull Length @Nullable [] fallback,
             @NotNull PercentageDimension dimension) {
         if (value != null && value.equalsIgnoreCase("none")) return new Length[0];
-        String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE, null);
+        String[] values = parseStringList(value, NumberListSplitter.INSTANCE, null);
         if (values == null) return fallback;
         Length[] ret = new Length[values.length];
         for (int i = 0; i < ret.length; i++) {
@@ -215,14 +216,14 @@ public final class AttributeParser {
         return ParserUtil.parseDoubleList(value);
     }
 
-    public @NotNull String @NotNull [] parseStringList(@Nullable String value, SeparatorMode separatorMode) {
-        return ParserUtil.parseStringList(value, separatorMode);
+    public @NotNull String @NotNull [] parseStringList(@Nullable String value, @NotNull ListSplitter listSplitter) {
+        return ParserUtil.parseStringList(value, listSplitter);
     }
 
     @Contract("_,_,!null -> !null")
-    public @NotNull String @Nullable [] parseStringList(@Nullable String value, SeparatorMode separatorMode,
+    public @NotNull String @Nullable [] parseStringList(@Nullable String value, @NotNull ListSplitter listSplitter,
             @NotNull String @Nullable [] fallback) {
-        return ParserUtil.parseStringList(value, separatorMode, fallback);
+        return ParserUtil.parseStringList(value, listSplitter, fallback);
     }
 
     public @Nullable SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode attributeNode) {
@@ -278,7 +279,7 @@ public final class AttributeParser {
     }
 
     public @Nullable TransformPart parseTransformPart(TransformPart.TransformType type, @NotNull String value) {
-        String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
+        String[] values = parseStringList(value, NumberListSplitter.INSTANCE);
         Length[] lengths = parseTransformLengths(type, values);
         if (lengths == null) return null;
         return new TransformPart(type, lengths);

@@ -1,8 +1,0 @@
-<svg viewBox="-15 0 30 10" xmlns="http://www.w3.org/2000/svg">
-	<circle cx="0" cy="5" r="2">
-		<animate id="A1" attributeName="cx" by="-10" dur="2s"
-			fill="freeze" />
-		<animate id="A2" attributeName="cx" begin="2s" to="10"
-			dur="2s" fill="freeze" />
-	</circle>
-</svg>

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2025 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,29 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.impl;
+package com.github.weisj.jsvg.parser;
 
-public enum SeparatorMode implements ListSplitter {
-    COMMA_ONLY(',', false),
-    SEMICOLON_ONLY(';', false),
-    WHITESPACE_ONLY((char) 0, true),
-    COMMA_AND_WHITESPACE(',', true);
+import com.github.weisj.jsvg.parser.impl.ListSplitter;
+import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
-    private final boolean allowWhitespace;
-    private final char separator;
+public class NumberListSplitter implements ListSplitter {
 
-    SeparatorMode(char separator, boolean allowWhitespace) {
-        this.allowWhitespace = allowWhitespace;
-        this.separator = separator;
-    }
+    public final static NumberListSplitter INSTANCE = new NumberListSplitter();
 
     @Override
     public boolean splitOnWhitespace() {
-        return allowWhitespace;
+        return true;
     }
 
     @Override
     public SplitResult testChar(char c, int subwordIndex) {
-        return (separator != 0 && c == separator) ? SplitResult.YES : SplitResult.NO;
+        SplitResult result = SeparatorMode.COMMA_AND_WHITESPACE.testChar(c, subwordIndex);
+        if (result.shouldSplit()) return result;
+        if ((subwordIndex > 0 && "+-".indexOf(c) != -1)) return SplitResult.YES_INCLUDING_CHAR;
+        return SplitResult.NO;
     }
 }

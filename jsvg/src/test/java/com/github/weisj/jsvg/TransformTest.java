@@ -83,4 +83,9 @@ class TransformTest {
                 actual(new PathImageSource("transform/transformBoxStrokeTranslate.svg"),
                         RenderType.JSVG))));
     }
+
+    @Test
+    void testSplitNumbersWithoutSpaceIfLeadingMinus() {
+        assertEquals(SUCCESS, compareImages("transform/noSpace_bug146.svg"));
+    }
 }
