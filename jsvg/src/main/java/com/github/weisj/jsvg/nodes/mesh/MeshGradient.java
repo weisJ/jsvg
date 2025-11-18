@@ -97,7 +97,7 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
             @Nullable Rectangle2D bounds) {
         Output.SafeState safeState = output.safeState();
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setClip(shape);
+        output.applyClip(shape);
         output.translate(b.getX(), b.getY());
         renderMesh(context.measureContext(), output);
         safeState.restore();
@@ -108,7 +108,7 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
             @Nullable Rectangle2D bounds) {
         Output.SafeState safeState = output.safeState();
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setClip(output.stroke().createStrokedShape(shape));
+        output.applyClip(output.stroke().createStrokedShape(shape));
         output.translate(b.getX(), b.getY());
         renderMesh(context.measureContext(), output);
         safeState.restore();
