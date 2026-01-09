@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -38,10 +38,12 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.renderer.impl.PaintResolver;
 import com.github.weisj.jsvg.renderer.impl.context.*;
 import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
 import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.CurrentColorProvider;
 import com.github.weisj.jsvg.view.ViewBox;
 
 public final class RenderContext {
@@ -61,9 +63,9 @@ public final class RenderContext {
 
     static {
         RenderContextAccessor.setInstance(new RenderContextAccessor.Accessor() {
-            public @NotNull RenderContext createInitial(@NotNull PlatformSupport awtSupport,
+            public @NotNull RenderContext createInitial(@NotNull Output output, @NotNull PlatformSupport awtSupport,
                     @NotNull MeasureContext measureContext) {
-                return RenderContext.createInitial(awtSupport, measureContext);
+                return RenderContext.createInitial(output, awtSupport, measureContext);
             }
 
             public @NotNull RenderContext deriveForSurface(@NotNull RenderContext context) {
@@ -98,7 +100,7 @@ public final class RenderContext {
                             context.platformSupport(),
                             new AffineTransform(),
                             new AffineTransform(),
-                            PaintContext.createDefault(),
+                            PaintContext.createDefault(PredefinedPaints.DEFAULT_PAINT),
                             newMeasure,
                             FontRenderContext.createDefault(),
                             MeasurableFontSpec.createDefault(),
@@ -146,12 +148,16 @@ public final class RenderContext {
     }
 
 
-    private static @NotNull RenderContext createInitial(@NotNull PlatformSupport awtSupport,
+    private static @NotNull RenderContext createInitial(@NotNull Output output, @NotNull PlatformSupport awtSupport,
             @NotNull MeasureContext measureContext) {
+        SVGPaint currentColor = PredefinedPaints.DEFAULT_PAINT;
+        if (output instanceof CurrentColorProvider) {
+            currentColor = ((CurrentColorProvider) output).currentColor();
+        }
         return new RenderContext(awtSupport,
                 new AffineTransform(),
                 new AffineTransform(),
-                com.github.weisj.jsvg.renderer.impl.context.PaintContext.createDefault(),
+                PaintContext.createDefault(currentColor),
                 measureContext,
                 FontRenderContext.createDefault(),
                 MeasurableFontSpec.createDefault(),

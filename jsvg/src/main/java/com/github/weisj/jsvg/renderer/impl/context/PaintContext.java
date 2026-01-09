@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -72,9 +72,9 @@ public final class PaintContext implements Mutator<PaintContext> {
         this.fillRule = fillRule;
     }
 
-    public static @NotNull PaintContext createDefault() {
+    public static @NotNull PaintContext createDefault(@NotNull SVGPaint currentColor) {
         return new PaintContext(
-                PredefinedPaints.DEFAULT_PAINT,
+                currentColor,
                 PredefinedPaints.DEFAULT_PAINT, Percentage.ONE,
                 PredefinedPaints.NONE, Percentage.ONE, Percentage.ONE,
                 PaintOrder.NORMAL,

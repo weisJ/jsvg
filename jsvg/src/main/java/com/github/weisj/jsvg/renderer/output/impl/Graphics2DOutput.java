@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,10 +34,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.paint.impl.MaskedPaint;
 import com.github.weisj.jsvg.renderer.output.Output;
 
-public class Graphics2DOutput implements Output {
+public class Graphics2DOutput implements Output, CurrentColorProvider {
     private final Graphics2D g;
 
     public @NotNull Graphics2D graphics() {
@@ -47,6 +49,11 @@ public class Graphics2DOutput implements Output {
     public Graphics2DOutput(@NotNull Graphics2D g) {
         this.g = g;
         GraphicsUtil.preparePaint(g.getPaint());
+    }
+
+    @Override
+    public @NotNull SVGPaint currentColor() {
+        return new AwtSVGPaint(g.getColor());
     }
 
     @Override

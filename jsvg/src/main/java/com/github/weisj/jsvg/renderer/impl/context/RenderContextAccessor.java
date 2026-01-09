@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.ViewBox;
 
 public final class RenderContextAccessor {
@@ -41,7 +42,8 @@ public final class RenderContextAccessor {
     public interface Accessor {
 
         @NotNull
-        RenderContext createInitial(@NotNull PlatformSupport awtSupport, @NotNull MeasureContext measureContext);
+        RenderContext createInitial(@NotNull Output output, @NotNull PlatformSupport awtSupport,
+                @NotNull MeasureContext measureContext);
 
         @NotNull
         RenderContext deriveForSurface(@NotNull RenderContext context);
