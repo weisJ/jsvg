@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.AnimationPeriod;
 import com.github.weisj.jsvg.attributes.Coordinate;
@@ -41,6 +42,7 @@ import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 @ElementCategories({Category.Container, Category.Structural})
 @PermittedContent(
@@ -101,10 +103,10 @@ public final class SVG extends CommonInnerViewContainer {
         return Overflow.Hidden;
     }
 
-    public @NotNull FloatSize sizeForTopLevel(float em, float ex) {
+    public @NotNull FloatSize sizeForTopLevel(@Nullable ViewBox outerViewBox, float em, float ex) {
         // Use a viewport of size 100x100 to interpret percentage values as raw pixels.
-        MeasureContext topLevelContext = MeasureContext.createInitial(new FloatSize(100, 100),
-                em, ex, AnimationState.NO_ANIMATION);
+        FloatSize size = outerViewBox != null ? outerViewBox.size() : new FloatSize(100, 100);
+        MeasureContext topLevelContext = MeasureContext.createInitial(size, em, ex, AnimationState.NO_ANIMATION);
         return new FloatSize(
                 width.orElseIfUnspecified(viewBox != null ? viewBox.width : FALLBACK_WIDTH)
                         .resolve(topLevelContext),

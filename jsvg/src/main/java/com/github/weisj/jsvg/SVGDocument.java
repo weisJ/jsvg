@@ -60,12 +60,16 @@ public final class SVGDocument {
 
     private SVGDocument(@NotNull SVG root) {
         this.root = root;
-        float em = SVGFont.defaultFontSize();
-        this.size = root.sizeForTopLevel(em, SVGFont.exFromEm(em));
+        this.size = sizeForViewBox(null);
     }
 
     public @NotNull FloatSize size() {
         return size;
+    }
+
+    public @NotNull FloatSize sizeForViewBox(@Nullable ViewBox viewBox) {
+        float em = SVGFont.defaultFontSize();
+        return root.sizeForTopLevel(viewBox, em, SVGFont.exFromEm(em));
     }
 
     public @NotNull ViewBox viewBox() {

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,6 +48,7 @@ import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.ui.AnimationPlayer;
+import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 import com.kitfox.svg.app.beans.SVGIcon;
 
@@ -359,10 +360,16 @@ public final class SVGViewer {
                         renderGraphics.fill(shape);
                     } else {
                         Output output = Output.createForGraphics(renderGraphics);
+                        FloatSize floatSize = document.sizeForViewBox(viewBox);
+                        ViewBox vb = new ViewBox(
+                                viewBox.width / 2 - floatSize.width / 2,
+                                viewBox.height / 2 - floatSize.height / 2,
+                                floatSize.width,
+                                floatSize.height);
                         document.renderWithPlatform(
                                 new AwtComponentPlatformSupport(this),
                                 output,
-                                viewBox,
+                                vb,
                                 animationPlayer.animationState());
                         output.dispose();
                     }
