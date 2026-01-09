@@ -31,10 +31,10 @@ import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
+import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.ViewBox;
 
 public final class RenderContextAccessor {
@@ -42,7 +42,7 @@ public final class RenderContextAccessor {
     public interface Accessor {
 
         @NotNull
-        RenderContext createInitial(@NotNull Output output, @NotNull PlatformSupport awtSupport,
+        RenderContext createInitial(@Nullable SVGPaint currentColor, @NotNull PlatformSupport awtSupport,
                 @NotNull MeasureContext measureContext);
 
         @NotNull
@@ -79,6 +79,8 @@ public final class RenderContextAccessor {
         @NotNull
         SVGFont font(@NotNull RenderContext context);
 
+        @Nullable
+        SVGPaint currentColor(@NotNull RenderContext context);
 
         void setRootTransform(@NotNull RenderContext context, @NotNull AffineTransform rootTransform);
 

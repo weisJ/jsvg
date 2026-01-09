@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -72,7 +72,8 @@ public final class BlittableImage {
     public static @Nullable BlittableImage create(@NotNull BufferSurfaceSupplier bufferSurfaceSupplier,
             @NotNull RenderContext context, @Nullable Rectangle2D clipBounds,
             @NotNull Rectangle2D bounds, @NotNull Rectangle2D objectBounds, @NotNull UnitType contentUnits) {
-        RenderContext imageContext = RenderContextAccessor.instance().createInitial(context.platformSupport(),
+        RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
+        RenderContext imageContext = accessor.createInitial(accessor.currentColor(context), context.platformSupport(),
                 contentUnits.deriveMeasure(context.measureContext()));
         return create(bufferSurfaceSupplier, context, clipBounds, bounds, objectBounds, contentUnits, imageContext);
     }

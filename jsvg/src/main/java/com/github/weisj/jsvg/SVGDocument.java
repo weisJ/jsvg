@@ -34,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.nodes.SVG;
+import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.impl.DocumentConstructorAccessor;
 import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.MeasureContext;
@@ -45,6 +46,7 @@ import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.impl.*;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.CurrentColorProvider;
 import com.github.weisj.jsvg.renderer.output.impl.ShapeOutput;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
@@ -166,7 +168,11 @@ public final class SVGDocument {
                 ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx, animState)
                 : MeasureContext.createInitial(root.sizeForTopLevel(null, defaultEm, defaultEx),
                         defaultEm, defaultEx, animState);
-        return RenderContextAccessor.instance().createInitial(output, platformSupport, initialMeasure);
+        SVGPaint currentColor = null;
+        if (output instanceof CurrentColorProvider) {
+            currentColor = ((CurrentColorProvider) output).currentColor();
+        }
+        return RenderContextAccessor.instance().createInitial(currentColor, platformSupport, initialMeasure);
     }
 
 }

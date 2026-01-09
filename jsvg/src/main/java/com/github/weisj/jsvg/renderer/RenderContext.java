@@ -43,7 +43,6 @@ import com.github.weisj.jsvg.renderer.impl.PaintResolver;
 import com.github.weisj.jsvg.renderer.impl.context.*;
 import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
 import com.github.weisj.jsvg.renderer.output.Output;
-import com.github.weisj.jsvg.renderer.output.impl.CurrentColorProvider;
 import com.github.weisj.jsvg.view.ViewBox;
 
 public final class RenderContext {
@@ -63,9 +62,10 @@ public final class RenderContext {
 
     static {
         RenderContextAccessor.setInstance(new RenderContextAccessor.Accessor() {
-            public @NotNull RenderContext createInitial(@NotNull Output output, @NotNull PlatformSupport awtSupport,
+            public @NotNull RenderContext createInitial(@Nullable SVGPaint currentColor,
+                    @NotNull PlatformSupport awtSupport,
                     @NotNull MeasureContext measureContext) {
-                return RenderContext.createInitial(output, awtSupport, measureContext);
+                return RenderContext.createInitial(currentColor, awtSupport, measureContext);
             }
 
             public @NotNull RenderContext deriveForSurface(@NotNull RenderContext context) {
@@ -135,6 +135,11 @@ public final class RenderContext {
             }
 
             @Override
+            public @Nullable SVGPaint currentColor(@NotNull RenderContext context) {
+                return context.paintContext.color;
+            }
+
+            @Override
             public void setRootTransform(@NotNull RenderContext context, @NotNull AffineTransform rootTransform) {
                 context.setRootTransform(rootTransform);
             }
@@ -148,16 +153,14 @@ public final class RenderContext {
     }
 
 
-    private static @NotNull RenderContext createInitial(@NotNull Output output, @NotNull PlatformSupport awtSupport,
+    private static @NotNull RenderContext createInitial(@Nullable SVGPaint currentColor,
+            @NotNull PlatformSupport awtSupport,
             @NotNull MeasureContext measureContext) {
-        SVGPaint currentColor = PredefinedPaints.DEFAULT_PAINT;
-        if (output instanceof CurrentColorProvider) {
-            currentColor = ((CurrentColorProvider) output).currentColor();
-        }
+        SVGPaint color = currentColor != null ? currentColor : PredefinedPaints.DEFAULT_PAINT;
         return new RenderContext(awtSupport,
                 new AffineTransform(),
                 new AffineTransform(),
-                PaintContext.createDefault(currentColor),
+                PaintContext.createDefault(color),
                 measureContext,
                 FontRenderContext.createDefault(),
                 MeasurableFontSpec.createDefault(),

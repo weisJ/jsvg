@@ -134,6 +134,11 @@ public final class SVGViewer {
             renderingMode.add(lowRes);
             renderingMode.add(Box.createHorizontalStrut(5));
 
+            JCheckBox intrinsicSize = new JCheckBox("Render at intrinsic size");
+            intrinsicSize.addActionListener(e -> svgPanel.setRenderAtIntrinsicSize(intrinsicSize.isSelected()));
+            renderingMode.add(intrinsicSize);
+            renderingMode.add(Box.createHorizontalStrut(5));
+
             JCheckBox strictRendering = new JCheckBox("Strict Mask Rendering");
             strictRendering.addActionListener(e -> svgPanel.setStrictMaskRendering(strictRendering.isSelected()));
             renderingMode.add(strictRendering);
@@ -217,6 +222,7 @@ public final class SVGViewer {
         private boolean paintShape;
         private boolean softClipping;
         private boolean lowResolution;
+        private boolean intrinsicSize;
         private Object maskRenderingValue = SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_DEFAULT;
 
         private final @NotNull AnimationPlayer animationPlayer = new AnimationPlayer(e -> repaint());
@@ -321,6 +327,11 @@ public final class SVGViewer {
             repaint();
         }
 
+        public void setRenderAtIntrinsicSize(boolean intrinsicSize) {
+            this.intrinsicSize = intrinsicSize;
+            repaint();
+        }
+
         public void setStrictMaskRendering(boolean strict) {
             this.maskRenderingValue = strict
                     ? SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY
@@ -360,7 +371,9 @@ public final class SVGViewer {
                         renderGraphics.fill(shape);
                     } else {
                         Output output = Output.createForGraphics(renderGraphics);
-                        FloatSize floatSize = document.sizeForViewBox(viewBox);
+                        FloatSize floatSize = intrinsicSize
+                                ? document.sizeForViewBox(viewBox)
+                                : new FloatSize(getWidth(), getWidth());
                         ViewBox vb = new ViewBox(
                                 viewBox.width / 2 - floatSize.width / 2,
                                 viewBox.height / 2 - floatSize.height / 2,
