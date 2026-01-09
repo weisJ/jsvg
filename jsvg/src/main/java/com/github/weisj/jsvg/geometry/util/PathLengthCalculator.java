@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -117,7 +117,7 @@ public final class PathLengthCalculator {
     }
 
     private double dot2D(double x1, double y1, double x2, double y2) {
-        return x1 * x2 * y1 * y2;
+        return x1 * x2 + y1 * y2;
     }
 
 
