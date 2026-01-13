@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -35,7 +35,10 @@ public final class PaintResolver {
 
     public static @NotNull SVGPaint resolvePaint(@Nullable SVGPaint p, @NotNull PaintContext paintContext,
             @Nullable ContextElementAttributes contextElementAttributes) {
-        if (p == PredefinedPaints.DEFAULT_PAINT || p == PredefinedPaints.CURRENT_COLOR) {
+        if (p == PredefinedPaints.DEFAULT_PAINT) {
+            return PredefinedPaints.DEFAULT_PAINT;
+        }
+        if (p == PredefinedPaints.CURRENT_COLOR) {
             // color can only hold resolved values being declared as literals
             return coerceNonNull(paintContext.color);
         }

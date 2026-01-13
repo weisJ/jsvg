@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,16 +21,18 @@
  */
 package com.github.weisj.jsvg.paint.impl;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
 
 public final class PredefinedPaints {
-    public static final AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
-    public static final SVGPaint NONE = new NonePaint();
-    public static final SVGPaint CURRENT_COLOR = new SentinelPaint("currentColor");
-    public static final SVGPaint CONTEXT_FILL = new SentinelPaint("contextFill");
-    public static final SVGPaint CONTEXT_STROKE = new SentinelPaint("contextStroke");
-    public static final SVGPaint INHERITED = new SentinelPaint("inherited");
+    public static final @NotNull AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
+    public static final @NotNull SVGPaint NONE = new NonePaint();
+    public static final @NotNull SVGPaint CURRENT_COLOR = new SentinelPaint("currentColor");
+    public static final @NotNull SVGPaint CONTEXT_FILL = new SentinelPaint("contextFill");
+    public static final @NotNull SVGPaint CONTEXT_STROKE = new SentinelPaint("contextStroke");
+    public static final @NotNull SVGPaint INHERITED = new SentinelPaint("inherited");
 
 
     private PredefinedPaints() {}
