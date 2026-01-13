@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
-import com.github.weisj.jsvg.renderer.jfx.impl.FXOutput;
+import com.github.weisj.jsvg.renderer.jfx.FXOutput;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 import com.github.weisj.jsvg.view.FloatSize;

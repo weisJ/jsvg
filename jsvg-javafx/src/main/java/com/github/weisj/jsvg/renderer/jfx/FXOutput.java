@@ -19,13 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.output.impl;
+package com.github.weisj.jsvg.renderer.jfx;
 
-import org.jetbrains.annotations.Nullable;
+import javafx.scene.canvas.GraphicsContext;
 
-import com.github.weisj.jsvg.paint.SVGPaint;
+import org.jetbrains.annotations.NotNull;
 
-public interface CurrentColorProvider {
-    @Nullable
-    SVGPaint currentColor();
+import com.github.weisj.jsvg.renderer.jfx.impl.FXOutputImpl;
+import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
+import com.github.weisj.jsvg.renderer.output.Output;
+
+/**
+ * A utility class for retrieving an {@link Output} implementation that uses a {@link GraphicsContext} to draw to.
+ */
+public final class FXOutput {
+
+    private FXOutput() {}
+
+    /**
+     * Example usage:
+     * <pre><code>
+     *     Output output = FXOutput.createForGraphicsContext(graphics);
+     *     svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null, null);
+     *     output.dispose();
+     * </code></pre>
+     */
+    public static @NotNull Output createForGraphicsContext(@NotNull GraphicsContext context) {
+        FXOutputImpl output = new FXOutputImpl(context);
+        FXRenderingHintsUtil.setupDefaultJFXRenderingHints(output);
+        return output;
+    }
 }

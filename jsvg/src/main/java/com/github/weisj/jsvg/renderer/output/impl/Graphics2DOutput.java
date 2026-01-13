@@ -52,7 +52,7 @@ public class Graphics2DOutput implements Output, CurrentColorProvider {
     }
 
     @Override
-    public @NotNull SVGPaint currentColor() {
+    public @Nullable SVGPaint currentColor() {
         return new AwtSVGPaint(g.getColor());
     }
 

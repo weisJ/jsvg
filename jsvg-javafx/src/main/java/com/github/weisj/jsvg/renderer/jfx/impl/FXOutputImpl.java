@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,16 +36,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.paint.impl.MaskedPaint;
 import com.github.weisj.jsvg.renderer.jfx.impl.bridge.*;
 import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.CurrentColorProvider;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 /**
  * An {@link Output} implementation that uses a {@link GraphicsContext} to draw to.
  */
-public final class FXOutput implements Output {
+public final class FXOutputImpl implements Output, CurrentColorProvider {
 
     private final GraphicsContext ctx;
     private final RenderingHints renderingHints;
@@ -59,7 +62,7 @@ public final class FXOutput implements Output {
     private Stroke currentStroke = DEFAULT_STROKE;
     private final SafeState originalState;
 
-    private FXOutput(@NotNull GraphicsContext context) {
+    public FXOutputImpl(@NotNull GraphicsContext context) {
         ctx = context;
         renderingHints = new RenderingHints(null);
         setOpacity(DEFAULT_OPACITY);
@@ -68,7 +71,7 @@ public final class FXOutput implements Output {
         originalState = new FXOutputState(this, SaveClipStack.YES);
     }
 
-    private FXOutput(@NotNull FXOutput parent) {
+    private FXOutputImpl(@NotNull FXOutputImpl parent) {
         ctx = parent.ctx;
         renderingHints = new RenderingHints(null);
         renderingHints.putAll(parent.renderingHints);
@@ -78,18 +81,13 @@ public final class FXOutput implements Output {
         originalState = new FXOutputState(this, SaveClipStack.YES);
     }
 
-    /**
-     * Example usage:
-     * <pre><code>
-     *     Output output = FXOutput.createForGraphicsContext(graphics);
-     *     svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null, null);
-     *     output.dispose();
-     * </code></pre>
-     */
-    public static @NotNull FXOutput createForGraphicsContext(@NotNull GraphicsContext context) {
-        FXOutput output = new FXOutput(context);
-        FXRenderingHintsUtil.setupDefaultJFXRenderingHints(output);
-        return output;
+    @Override
+    public @Nullable SVGPaint currentColor() {
+        javafx.scene.paint.Paint fill = ctx.getFill();
+        if (fill instanceof javafx.scene.paint.Color) {
+            return new AwtSVGPaint(FXPaintBridge.convertColor((javafx.scene.paint.Color) fill));
+        }
+        return null;
     }
 
     @Override
@@ -200,7 +198,7 @@ public final class FXOutput implements Output {
 
     @Override
     public @NotNull Output createChild() {
-        return new FXOutput(this);
+        return new FXOutputImpl(this);
     }
 
     @Override
@@ -336,14 +334,14 @@ public final class FXOutput implements Output {
 
     private static final class FXOutputState implements Output.SafeState {
 
-        private final FXOutput fxOutput;
+        private final FXOutputImpl fxOutput;
         private final AffineTransform originalTransform;
         private final Paint originalPaint;
         private final Stroke originalStroke;
         private final float originalOpacity;
         private final SaveClipStack saveClip;
 
-        FXOutputState(@NotNull FXOutput fxOutput, SaveClipStack saveClip) {
+        FXOutputState(@NotNull FXOutputImpl fxOutput, SaveClipStack saveClip) {
             this.fxOutput = fxOutput;
             this.originalTransform = fxOutput.transform();
             this.originalPaint = fxOutput.currentPaint;
