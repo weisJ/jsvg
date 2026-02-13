@@ -117,7 +117,7 @@ public final class ParserUtil {
             inWhiteSpace = false;
             ListSplitter.SplitResult result = splitter.testChar(c, i - start);
             if (result.shouldSplit()) {
-                list.add(value.substring(start, i));
+                if (i - start > 0)  list.add(value.substring(start, i));
                 start = result.shouldIncludeChar() ? i : i + 1;
             }
         }
