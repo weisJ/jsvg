@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -101,15 +101,18 @@ public final class ParserUtil {
         if (value == null || value.isEmpty()) return fallback;
         List<String> list = new ArrayList<>();
         int max = value.length();
+        boolean splitOnWhitespace = splitter.splitOnWhitespace();
         int start = 0;
         int i = 0;
         boolean inWhiteSpace = false;
+        boolean lastSplitWasWhiteSpace = false;
         for (; i < max; i++) {
             char c = value.charAt(i);
             if (Character.isWhitespace(c)) {
-                if (!inWhiteSpace && splitter.splitOnWhitespace() && i - start > 0) {
+                if (!inWhiteSpace && splitOnWhitespace && i - start > 0) {
                     list.add(value.substring(start, i));
                     start = i + 1;
+                    lastSplitWasWhiteSpace = true;
                 }
                 inWhiteSpace = true;
                 continue;
@@ -117,9 +120,12 @@ public final class ParserUtil {
             inWhiteSpace = false;
             ListSplitter.SplitResult result = splitter.testChar(c, i - start);
             if (result.shouldSplit()) {
-                if (i - start > 0)  list.add(value.substring(start, i));
+                if (!(lastSplitWasWhiteSpace && i == start)) list.add(value.substring(start, i));
                 start = result.shouldIncludeChar() ? i : i + 1;
+                lastSplitWasWhiteSpace = false;
+                continue;
             }
+            lastSplitWasWhiteSpace = false;
         }
         if (i - start > 0) list.add(value.substring(start, i));
         return list.toArray(new String[0]);

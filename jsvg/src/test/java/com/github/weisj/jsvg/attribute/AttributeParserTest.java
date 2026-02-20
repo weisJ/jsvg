@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,11 +23,11 @@ package com.github.weisj.jsvg.attribute;
 
 import java.util.Random;
 
-import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
@@ -105,4 +105,9 @@ class AttributeParserTest {
         Assertions.assertNotNull(part);
     }
 
+    @Test
+    void testTransformCommaOnlyKeepsEmptyEntryBetweenCommas() {
+        String[] values = parser.parseStringList("1,,1", SeparatorMode.COMMA_ONLY);
+        Assertions.assertArrayEquals(new String[] {"1", "", "1"}, values);
+    }
 }
