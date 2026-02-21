@@ -22,7 +22,10 @@
 package com.github.weisj.jsvg.attribute;
 
 import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
+import com.github.weisj.jsvg.parser.NumberListSplitter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,6 +53,21 @@ class AttributeParserTest {
     @Test
     void testStringListRequiredComma() {
         testStringList(true);
+    }
+
+    @Test
+    void testNumberSplitter() {
+        BiConsumer<String, String[]> test = (str, expected) -> {
+            String[] result = parser.parseStringList(str, NumberListSplitter.INSTANCE);
+            Assertions.assertArrayEquals(expected, result);
+        };
+        test.accept("1,1", new String[] {"1", "1"});
+        test.accept("1 1", new String[] {"1", "1"});
+        test.accept("1-1", new String[] {"1", "-1"});
+        test.accept("1, 1", new String[] {"1", "1"});
+        test.accept("1,  1", new String[] {"1", "1"});
+        test.accept("1 , 1", new String[] {"1", "1"});
+        test.accept("1, ,1", new String[] {"1", "", "1"});
     }
 
     @Test
