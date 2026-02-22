@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
+import com.github.weisj.jsvg.parser.NumberListSplitter;
 import com.github.weisj.jsvg.util.ParserBase;
 
 public final class ParserUtil {
@@ -102,6 +103,7 @@ public final class ParserUtil {
         List<String> list = new ArrayList<>();
         int max = value.length();
         boolean splitOnWhitespace = splitter.splitOnWhitespace();
+        boolean trimTokens = splitOnWhitespace && splitter instanceof NumberListSplitter;
         int start = 0;
         int i = 0;
         boolean inWhiteSpace = false;
@@ -110,7 +112,9 @@ public final class ParserUtil {
             char c = value.charAt(i);
             if (Character.isWhitespace(c)) {
                 if (!inWhiteSpace && splitOnWhitespace && i - start > 0) {
-                    list.add(value.substring(start, i));
+                    String token = value.substring(start, i);
+                    if (trimTokens) token = token.trim();
+                    list.add(token);
                     start = i + 1;
                     lastSplitWasWhiteSpace = true;
                 }
@@ -120,14 +124,22 @@ public final class ParserUtil {
             inWhiteSpace = false;
             ListSplitter.SplitResult result = splitter.testChar(c, i - start);
             if (result.shouldSplit()) {
-                if (!(lastSplitWasWhiteSpace && i == start)) list.add(value.substring(start, i));
+                if (!(lastSplitWasWhiteSpace && i == start)) {
+                    String token = value.substring(start, i);
+                    if (trimTokens) token = token.trim();
+                    list.add(token);
+                }
                 start = result.shouldIncludeChar() ? i : i + 1;
                 lastSplitWasWhiteSpace = false;
                 continue;
             }
             lastSplitWasWhiteSpace = false;
         }
-        if (i - start > 0) list.add(value.substring(start, i));
+        if (i - start > 0) {
+            String token = value.substring(start, i);
+            if (trimTokens) token = token.trim();
+            list.add(token);
+        }
         return list.toArray(new String[0]);
     }
 }

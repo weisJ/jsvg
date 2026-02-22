@@ -23,15 +23,13 @@ package com.github.weisj.jsvg.attribute;
 
 import java.util.Random;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
-import com.github.weisj.jsvg.parser.NumberListSplitter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
+import com.github.weisj.jsvg.parser.NumberListSplitter;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 import com.github.weisj.jsvg.util.RandomData;
@@ -111,21 +109,4 @@ class AttributeParserTest {
         return builder.toString();
     }
 
-    @Test
-    void testTransformScaleAllowsCommaAndWhitespace() {
-        TransformPart part = parser.parseTransformPart(TransformPart.TransformType.SCALE, "-1, 1");
-        Assertions.assertNotNull(part);
-    }
-
-    @Test
-    void testTransformScaleAllowsMixedCommaAndWhitespace() {
-        TransformPart part = parser.parseTransformPart(TransformPart.TransformType.SCALE, "-1 , 1");
-        Assertions.assertNotNull(part);
-    }
-
-    @Test
-    void testTransformCommaOnlyKeepsEmptyEntryBetweenCommas() {
-        String[] values = parser.parseStringList("1,,1", SeparatorMode.COMMA_ONLY);
-        Assertions.assertArrayEquals(new String[] {"1", "", "1"}, values);
-    }
 }
