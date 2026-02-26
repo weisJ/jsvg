@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,47 +21,19 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.TextContent;
 
-public class TextContentImpl implements TextContent {
-    private final @NotNull ParsedElement parent;
-    private final @NotNull List<@NotNull List<Segment>> contentLists = new ArrayList<>();
+public final class StringSegment implements TextContent.Segment {
+    private final @NotNull String text;
 
-    public TextContentImpl(@NotNull ParsedElement parent) {
-        this.parent = parent;
-        for (int i = 0; i <= parent.children().size(); i++) {
-            // One before each child and one after the last child.
-            contentLists.add(new ArrayList<>());
-        }
-    }
-
-    private void ensureSize() {
-        while (contentLists.size() < parent.children().size() + 1) {
-            contentLists.add(new ArrayList<>());
-        }
-    }
-
-    public @NotNull List<@NotNull List<Segment>> contentLists() {
-        return contentLists;
-    }
-
-    public @NotNull List<Segment> currentContentList() {
-        ensureSize();
-        return contentLists.get(contentLists.size() - 1);
-    }
-
-    public void addContentList() {
-        contentLists.add(new ArrayList<>());
+    public StringSegment(@NotNull String text) {
+        this.text = text;
     }
 
     @Override
-    public @NotNull List<@NotNull Segment> contentAfterChildIndex(int childIndex) {
-        ensureSize();
-        return contentLists.get(childIndex + 1);
+    public @NotNull String text() {
+        return text;
     }
 }

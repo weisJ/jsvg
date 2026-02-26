@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.DomElement;
+import com.github.weisj.jsvg.parser.TextContent;
 
 public final class ParsedElement implements DomElement {
 
@@ -166,23 +167,25 @@ public final class ParsedElement implements DomElement {
             int contentListsSize = textContent == null ? 0 : textContent.contentLists().size();
             for (int i = 0; i < children.size(); i++) {
                 if (i < contentListsSize) {
+                    assert textContent != null;
                     addContentList(textContent.contentLists().get(i));
                 }
                 ParsedElement child = children.get(i);
                 ((Container<?>) node).addChild(child.id, child.node);
             }
             for (int i = children.size(); i < contentListsSize; i++) {
+                assert textContent != null;
                 addContentList(textContent.contentLists().get(i));
             }
         } else if (textContent != null) {
-            for (List<String> contentList : textContent.contentLists()) {
+            for (List<TextContent.Segment> contentList : textContent.contentLists()) {
                 addContentList(contentList);
             }
         }
     }
 
-    private void addContentList(@NotNull List<@NotNull String> contentList) {
-        for (String text : contentList) {
+    private void addContentList(@NotNull List<TextContent.@NotNull Segment> contentList) {
+        for (TextContent.Segment text : contentList) {
             node.addContent(text);
         }
     }

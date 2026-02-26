@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -134,7 +134,8 @@ public final class SVGDocumentBuilder {
 
     private void flushText(@NotNull ParsedElement element, boolean segmentBreak) {
         if (element.characterDataParser != null && element.characterDataParser.canFlush(segmentBreak)) {
-            element.textContent().currentContentList().add(element.characterDataParser.flush(segmentBreak));
+            element.textContent().currentContentList()
+                    .add(new StringSegment(element.characterDataParser.flush(segmentBreak)));
         }
     }
 

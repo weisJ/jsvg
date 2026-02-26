@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -60,18 +60,4 @@ public interface DomElement {
 
     @Nullable
     DomElement parent();
-
-    @ApiStatus.Experimental
-    interface TextContent {
-        /**
-         * Returns the list of text fragments after the child element at the given index.
-         * Returns the content before the first child if index is -1.
-         *
-         * @param childIndex the index of the child element
-         * @return the list of text fragments
-         */
-        @ApiStatus.Experimental
-        @NotNull
-        List<@NotNull String> contentAfterChildIndex(int childIndex);
-    }
 }

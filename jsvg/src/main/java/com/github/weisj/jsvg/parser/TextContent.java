@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,25 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes;
+package com.github.weisj.jsvg.parser;
 
+import java.util.List;
+
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.parser.TextContent;
-import com.github.weisj.jsvg.parser.impl.AttributeNode;
+@ApiStatus.Experimental
+public interface TextContent {
+    interface Segment {
+        @NotNull
+        String text();
 
-public interface SVGNode {
-
-    @NotNull
-    String tagName();
-
-    @Nullable
-    String id();
-
-    void build(@NotNull AttributeNode attributeNode);
-
-    default void addContent(@NotNull TextContent.Segment content) {
-
+        default boolean isConstant() {
+            return true;
+        }
     }
+
+    /**
+     * Returns the list of text fragments after the child element at the given index.
+     * Returns the content before the first child if index is -1.
+     *
+     * @param childIndex the index of the child element
+     * @return the list of text fragments
+     */
+    @ApiStatus.Experimental
+    @NotNull
+    List<@NotNull Segment> contentAfterChildIndex(int childIndex);
 }

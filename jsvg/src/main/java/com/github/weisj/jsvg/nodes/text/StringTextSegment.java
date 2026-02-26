@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,14 +25,18 @@ import java.text.BreakIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.parser.TextContent;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
 
 final class StringTextSegment implements TextSegment {
-    private final List<String> codepoints;
+    private final Supplier<List<String>> codepoints;
     private final TextContainer parent;
     private final int index;
 
@@ -41,25 +45,54 @@ final class StringTextSegment implements TextSegment {
     @Nullable
     RenderContext currentRenderContext = null;
 
-    public StringTextSegment(@NotNull TextContainer parent, int index, @NotNull String codepoints) {
+    public StringTextSegment(@NotNull TextContainer parent, int index, @NotNull TextContent.Segment content) {
         this.parent = parent;
         this.index = index;
 
-        BreakIterator it = BreakIterator.getCharacterInstance();
-        it.setText(new StringCharacterIterator(codepoints));
-        int start = it.first();
-        List<String> characters = new ArrayList<>();
-        for (int end = it.next(); end != BreakIterator.DONE; start = end, end = it.next()) {
-            characters.add(codepoints.substring(start, end));
+        if (content.isConstant()) {
+            codepoints = new ConstantSupplier<>(segmentCodepoints(content.text()));
+        } else {
+            codepoints = new CachedCodepoints(content);
         }
-        this.codepoints = characters;
     }
 
     public @NotNull List<@NotNull String> codepoints() {
-        return codepoints;
+        return codepoints.get();
     }
 
     public boolean isLastSegmentInParent() {
         return index == parent.children().size() - 1;
+    }
+
+    private static @NotNull List<@NotNull String> segmentCodepoints(String text) {
+        BreakIterator it = BreakIterator.getCharacterInstance();
+        it.setText(new StringCharacterIterator(text));
+        int start = it.first();
+        List<String> characters = new ArrayList<>();
+        for (int end = it.next(); end != BreakIterator.DONE; start = end, end = it.next()) {
+            characters.add(text.substring(start, end));
+        }
+        return characters;
+    }
+
+    private static class CachedCodepoints implements Supplier<List<String>> {
+        private final @Nullable TextContent.Segment segment;
+        private @NotNull List<@NotNull String> codepoints;
+        private @Nullable String lastText;
+
+        private CachedCodepoints(@NotNull TextContent.Segment segment) {
+            this.segment = segment;
+        }
+
+        @Override
+        public List<String> get() {
+            String text = segment.text();
+            if (Objects.equals(text, lastText)) {
+                return codepoints;
+            }
+            lastText = text;
+            codepoints = segmentCodepoints(text);
+            return codepoints;
+        }
     }
 }

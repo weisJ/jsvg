@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,6 +48,7 @@ import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.HasVectorEffects;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.impl.HasContextImpl;
+import com.github.weisj.jsvg.parser.TextContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
@@ -110,8 +111,8 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
     }
 
     @Override
-    public final void addContent(@NotNull String content) {
-        if (content.isEmpty()) return;
+    public final void addContent(@NotNull TextContent.Segment content) {
+        if (content.isConstant() && content.text().isEmpty()) return;
         segments.add(new StringTextSegment(this, segments.size(), content));
     }
 
