@@ -36,4 +36,9 @@ public final class StringSegment implements TextContent.Segment {
     public @NotNull String text() {
         return text;
     }
+
+    @Override
+    public boolean isConstant() {
+        return true;
+    }
 }

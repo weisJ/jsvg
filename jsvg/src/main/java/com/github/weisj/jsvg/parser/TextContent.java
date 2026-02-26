@@ -32,9 +32,7 @@ public interface TextContent {
         @NotNull
         String text();
 
-        default boolean isConstant() {
-            return true;
-        }
+        boolean isConstant();
     }
 
     /**
