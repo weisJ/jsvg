@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -114,9 +114,6 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         ViewBox outerViewBox = computeOuterViewBox(context, useSiteSize);
         ViewBox innerViewBox = view;
 
-        // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
-        if (overflow.establishesClip()) output.applyClip(outerViewBox);
-
         // innerViewBox == null should behave as if it were (0,0,width,height).
         // If no viewBox is specified we can avoid the computation of the transform.
         AffineTransform viewTransform = innerViewBox != null
@@ -129,6 +126,22 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
         RenderContext innerContext = createInnerContext(context, innerViewBox);
         MeasureContext innerMeasure = innerContext.measureContext();
+        Point2D anchorPos = anchorLocation(innerMeasure);
+
+        // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
+        if (overflow.establishesClip()) {
+            ViewBox clipViewBox = new ViewBox(outerViewBox);
+            if (anchorPos != null) {
+                Point2D clipAnchor = anchorPos;
+                if (viewTransform != null) {
+                    clipAnchor = new Point2D.Double();
+                    viewTransform.transform(anchorPos, clipAnchor);
+                }
+                clipViewBox.x += (float) clipAnchor.getX();
+                clipViewBox.y += (float) clipAnchor.getY();
+            }
+            output.applyClip(clipViewBox);
+        }
 
         innerContext.translate(output, outerViewBox.location());
         if (viewTransform != null) {
@@ -136,7 +149,6 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
             innerContext.transform(output, viewTransform);
         }
 
-        Point2D anchorPos = anchorLocation(innerMeasure);
         if (anchorPos != null) {
             innerContext.translate(output, anchorPos);
         }

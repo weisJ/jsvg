@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2022 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,5 +33,10 @@ class MarkerTest {
     void markerRefTest() {
         assertEquals(SUCCESS, compareImages("marker/marker3.svg"));
         assertEquals(SUCCESS, compareImages("marker/marker3_flattened.svg"));
+    }
+
+    @Test
+    void testMarkerReferencePointWithViewportTransform() {
+        assertEquals(SUCCESS, compareImages("marker/marker_bug157.svg"));
     }
 }
