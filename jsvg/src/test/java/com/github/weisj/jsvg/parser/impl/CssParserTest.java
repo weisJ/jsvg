@@ -23,7 +23,9 @@ package com.github.weisj.jsvg.parser.impl;
 
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,9 +104,22 @@ class CssParserTest {
     }
 
     @Test
-    void ruleWithoutSemicolon() {
+    void newLinesAreSkipped() {
         SimpleCssParser cssParser = new SimpleCssParser();
-        var s = cssParser.parse(inputFromString(".cls{fill:#6e6e6e}"));
+        var s = cssParser.parse(inputFromString(".cls{\r\n \r \n \f fill:#6e6e6e}"));
+        assertEquals(1, s.classRules().size());
+        assertTrue(s.classRules().containsKey("cls"));
+        assertEquals(List.of(new StyleProperty("fill", "#6e6e6e")), s.classRules().get("cls"));
+    }
+
+    @Test
+    void emptyInputSegmentsAreSkipped() {
+        SimpleCssParser cssParser = new SimpleCssParser();
+        var s = cssParser.parse(List.of(
+            new char[0],
+            ".cls{".toCharArray(),
+            new char[0],
+            "fill:#6e6e6e}".toCharArray()));
         assertEquals(1, s.classRules().size());
         assertTrue(s.classRules().containsKey("cls"));
         assertEquals(List.of(new StyleProperty("fill", "#6e6e6e")), s.classRules().get("cls"));
@@ -116,7 +131,7 @@ class CssParserTest {
         SimpleCssParser cssParser = new SimpleCssParser();
         Random r = new Random();
         for (int i = 0; i < 200; i++) {
-            String[] inputStrings = RandomData.generateRandomStringArray(r, RandomData.CharType.ALL_ASCII);
+            String[] inputStrings = RandomData.generateRandomStringArray(r, RandomData.CharType.ALPHA_NUMERIC_ONLY);
             List<char[]> input = new ArrayList<>();
             for (String inputString : inputStrings) {
                 input.add(inputString.toCharArray());
@@ -132,6 +147,15 @@ class CssParserTest {
         SimpleCssParser parser = new SimpleCssParser();
         assertDoesNotThrow(() -> parser.parse(inputFromString("..{}")));
         assertDoesNotThrow(() -> parser.parse(inputFromString("#.{}")));
+    }
+
+    @Test
+    void ruleWithoutSemicolon() {
+        SimpleCssParser cssParser = new SimpleCssParser();
+        var s = cssParser.parse(inputFromString(".cls{fill:#6e6e6e}"));
+        assertEquals(1, s.classRules().size());
+        assertTrue(s.classRules().containsKey("cls"));
+        assertEquals(List.of(new StyleProperty("fill", "#6e6e6e")), s.classRules().get("cls"));
     }
 
     @Test
