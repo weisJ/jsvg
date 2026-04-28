@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,176 +33,272 @@ import com.github.weisj.jsvg.logging.Logger.Level;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleProperty;
+import com.github.weisj.jsvg.parser.css.impl.phase1.Lexer;
+import com.github.weisj.jsvg.parser.css.impl.phase1.Token;
+import com.github.weisj.jsvg.parser.css.impl.phase1.TokenType;
 
 public final class SimpleCssParser implements CssParser {
 
     private static final Logger LOGGER = LogFactory.createLogger(SimpleCssParser.class);
 
-    public enum Mode {
-        STYLE_SHEET,
-        SINGLE_RULE
-    }
-
     @Override
     public @NotNull SimpleStyleSheet parse(@NotNull List<char[]> input) {
-        return new Parser(input, Mode.STYLE_SHEET).parse();
+        return new Parser(input).parseStyleSheet();
     }
 
     public @NotNull List<@NotNull StyleProperty> parseRules(@NotNull List<char[]> input) {
-        return new Parser(input, Mode.SINGLE_RULE).parseRules();
+        return new Parser(input).parseDeclarationList();
+    }
+
+    private enum SelectorKind {
+        TAG,
+        ID,
+        CLASS
+    }
+
+    private static final class Selector {
+        final @NotNull SelectorKind kind;
+        final @NotNull String name;
+
+        Selector(@NotNull SelectorKind kind, @NotNull String name) {
+            this.kind = kind;
+            this.name = name;
+        }
     }
 
     private static final class Parser {
 
         private final @NotNull Lexer lexer;
         private final @NotNull SimpleStyleSheet sheet = new SimpleStyleSheet();
-        private final TokenType ruleListEndType;
-        private @NotNull Token current = new Token(TokenType.START);
+        private @NotNull Token current;
 
-
-        private Parser(@NotNull List<char[]> input, Mode mode) {
-            this.ruleListEndType = mode == Mode.SINGLE_RULE
-                    ? TokenType.EOF
-                    : TokenType.CURLY_CLOSE;
-            this.lexer = new Lexer(input, mode);
+        Parser(@NotNull List<char[]> input) {
+            this.lexer = new Lexer(input);
+            this.current = lexer.nextToken();
         }
 
         private void next() {
-            Token next;
-            do {
-                next = lexer.nextToken();
-            } while (next.type() == TokenType.COMMENT);
-            current = next;
+            current = lexer.nextToken();
         }
 
-        private void expected(@NotNull String type) {
-            LOGGER.log(Level.WARNING, () -> MessageFormat.format("Expected ''{0}'' but got ''{1}''", type, current));
-        }
-
-        private void consumeOrSkipAllowedToken(TokenType type, TokenType allowedTokeToSkip) {
-            if (current.type() != type) {
-                if (current.type() != allowedTokeToSkip) {
-                    expected(type.toString());
-                    throw new ParserException();
-                }
-                return;
-            }
-            next();
-        }
-
-        private void consume(TokenType type) {
-            consumeOrSkipAllowedToken(type, null);
-        }
-
-        private @NotNull String consumeValue(TokenType type) {
-            if (current.type() != type) {
-                expected(type.toString());
-                throw new ParserException();
-            }
-            if (current.data() == null) {
-                throw new ParserException();
-            }
-            String value = Objects.requireNonNull(current.data());
-            next();
-            return value;
-        }
-
-        private @NotNull List<Token> readIdentifierList() {
-            List<Token> list = new ArrayList<>();
-
-            while (current.type() != TokenType.CURLY_OPEN && current.type() != TokenType.EOF) {
-                TokenType type = current.type();
-                if (type != TokenType.IDENTIFIER
-                        && type != TokenType.ID_NAME
-                        && type != TokenType.CLASS_NAME) {
-                    expected("identifier");
-                    throw new ParserException();
-                }
-                list.add(current);
+        private void skipWhitespace() {
+            while (current.type() == TokenType.WHITESPACE)
                 next();
-
-                if (current.type() == TokenType.COMMA) {
-                    next();
-                } else {
-                    break;
-                }
-            }
-            return list;
         }
 
-        private @NotNull List<StyleProperty> readProperties() {
-            List<StyleProperty> list = new ArrayList<>();
-
-            while (current.type() != TokenType.CURLY_CLOSE && current.type() != TokenType.EOF) {
-                String name = consumeValue(TokenType.IDENTIFIER);
-                consume(TokenType.COLON);
-                String value = consumeValue(TokenType.RAW_DATA);
-                consumeOrSkipAllowedToken(TokenType.SEMICOLON, ruleListEndType);
-                list.add(new StyleProperty(name, value.trim()));
-            }
-
-            return list;
-        }
-
-        private void skipToNextDefinition() {
-            while (current.type() != TokenType.CURLY_CLOSE && current.type() != TokenType.EOF) {
-                try {
-                    next();
-                } catch (ParserException ignored) {
-                    // Errors are to be expected at this point, as we are handling an invalid definition.
-                }
-            }
-            if (current.type() != TokenType.EOF) {
-                current = new Token(TokenType.START);
-            }
+        private void expected(@NotNull String what) {
+            LOGGER.log(Level.WARNING, () -> MessageFormat.format("Expected ''{0}'' but got ''{1}''", what, current));
         }
 
         @NotNull
-        List<@NotNull StyleProperty> parseRules() {
-            try {
-                if (current.type() == TokenType.START) {
+        SimpleStyleSheet parseStyleSheet() {
+            while (current.type() != TokenType.EOF) {
+                if (current.type() == TokenType.WHITESPACE) {
                     next();
+                    continue;
                 }
-                return readProperties();
+                try {
+                    List<Selector> selectors = readSelectorList();
+                    consume(TokenType.LEFT_BRACE);
+                    List<StyleProperty> properties = readDeclarations();
+                    consume(TokenType.RIGHT_BRACE);
+                    for (Selector s : selectors) {
+                        switch (s.kind) {
+                            case TAG:
+                                sheet.addTagNameRules(s.name, properties);
+                                break;
+                            case ID:
+                                sheet.addIdRules(s.name, properties);
+                                break;
+                            case CLASS:
+                                sheet.addClassRules(s.name, properties);
+                                break;
+                        }
+                    }
+                } catch (ParserException e) {
+                    skipToRuleEnd();
+                }
+            }
+            return sheet;
+        }
+
+        @NotNull
+        List<@NotNull StyleProperty> parseDeclarationList() {
+            try {
+                return readDeclarations();
             } catch (ParserException e) {
                 return Collections.emptyList();
             }
         }
 
-        @NotNull
-        SimpleStyleSheet parse() {
-            do {
-                try {
-                    if (current.type() == TokenType.START) {
-                        next();
-                    }
-
-                    List<Token> identifierList = readIdentifierList();
-
-                    consume(TokenType.CURLY_OPEN);
-                    List<StyleProperty> properties = readProperties();
-                    consume(TokenType.CURLY_CLOSE);
-
-                    for (Token token : identifierList) {
-                        switch (token.type()) {
-                            case CLASS_NAME:
-                                sheet.addClassRules(Objects.requireNonNull(token.data()), properties);
-                                break;
-                            case ID_NAME:
-                                sheet.addIdRules(Objects.requireNonNull(token.data()), properties);
-                                break;
-                            case IDENTIFIER:
-                                sheet.addTagNameRules(Objects.requireNonNull(token.data()), properties);
-                                break;
-                            default:
-                                throw new IllegalStateException("Toke = " + token);
-                        }
-                    }
-                } catch (ParserException e) {
-                    skipToNextDefinition();
+        private @NotNull List<Selector> readSelectorList() {
+            List<Selector> list = new ArrayList<>();
+            while (true) {
+                skipWhitespace();
+                if (current.type() == TokenType.LEFT_BRACE || current.type() == TokenType.EOF) break;
+                list.add(readSelector());
+                skipWhitespace();
+                if (current.type() == TokenType.COMMA) {
+                    next();
+                    continue;
                 }
-            } while (current.type() != TokenType.EOF);
-            return sheet;
+                break;
+            }
+            return list;
+        }
+
+        private @NotNull Selector readSelector() {
+            Token tok = current;
+            switch (tok.type()) {
+                case IDENT:
+                    next();
+                    return new Selector(SelectorKind.TAG, ((Token.Ident) tok).name());
+                case HASH: {
+                    Token.Hash hash = (Token.Hash) tok;
+                    if (hash.hashType() != Token.HashType.ID) break;
+                    next();
+                    return new Selector(SelectorKind.ID, hash.name());
+                }
+                case DELIM:
+                    if (((Token.Delim) tok).value() != '.') break;
+                    next();
+                    if (current.type() != TokenType.IDENT) {
+                        expected("identifier after '.'");
+                        throw new ParserException();
+                    }
+                    String name = ((Token.Ident) current).name();
+                    next();
+                    return new Selector(SelectorKind.CLASS, name);
+                default:
+                    break;
+            }
+            expected("selector");
+            throw new ParserException();
+        }
+
+        private @NotNull List<StyleProperty> readDeclarations() {
+            List<StyleProperty> list = new ArrayList<>();
+            while (true) {
+                skipWhitespace();
+                TokenType t = current.type();
+                if (t == TokenType.RIGHT_BRACE || t == TokenType.EOF) break;
+                if (t == TokenType.SEMICOLON) {
+                    next();
+                    continue;
+                }
+                if (t != TokenType.IDENT) {
+                    expected("identifier");
+                    throw new ParserException();
+                }
+                String name = ((Token.Ident) current).name();
+                next();
+                skipWhitespace();
+                if (current.type() != TokenType.COLON) {
+                    expected("':'");
+                    throw new ParserException();
+                }
+                next();
+                String value = readDeclarationValue();
+                list.add(new StyleProperty(name, value));
+                if (current.type() == TokenType.SEMICOLON) next();
+            }
+            return list;
+        }
+
+        private @NotNull String readDeclarationValue() {
+            skipWhitespace();
+            StringBuilder sb = new StringBuilder();
+            while (true) {
+                TokenType t = current.type();
+                if (t == TokenType.SEMICOLON || t == TokenType.RIGHT_BRACE || t == TokenType.EOF) break;
+                sb.append(stringify(current));
+                next();
+            }
+            int end = sb.length();
+            while (end > 0 && Character.isWhitespace(sb.charAt(end - 1)))
+                end--;
+            return sb.substring(0, end);
+        }
+
+        private void consume(@NotNull TokenType type) {
+            if (current.type() != type) {
+                expected(type.toString());
+                throw new ParserException();
+            }
+            next();
+        }
+
+        private void skipToRuleEnd() {
+            while (current.type() != TokenType.RIGHT_BRACE && current.type() != TokenType.EOF) {
+                next();
+            }
+            if (current.type() == TokenType.RIGHT_BRACE) next();
+        }
+
+        private static @NotNull String formatNumber(double v) {
+            if (v == Math.floor(v) && !Double.isInfinite(v)
+                    && v >= Long.MIN_VALUE && v <= Long.MAX_VALUE) {
+                return Long.toString((long) v);
+            }
+            return Double.toString(v);
+        }
+
+        private static @NotNull String stringify(@NotNull Token t) {
+            switch (t.type()) {
+                case IDENT:
+                    return ((Token.Ident) t).name();
+                case FUNCTION:
+                    return ((Token.Function) t).name() + "(";
+                case AT_KEYWORD:
+                    return "@" + ((Token.AtKeyword) t).name();
+                case HASH:
+                    return "#" + ((Token.Hash) t).name();
+                case STRING:
+                    return "\"" + ((Token.Str) t).value() + "\"";
+                case BAD_STRING:
+                    return "";
+                case URL:
+                    return "url(" + ((Token.Url) t).value() + ")";
+                case BAD_URL:
+                    return "url()";
+                case DELIM:
+                    return new String(Character.toChars(((Token.Delim) t).value()));
+                case NUMBER:
+                    return formatNumber(((Token.Number) t).value());
+                case PERCENTAGE:
+                    return formatNumber(((Token.Percentage) t).value()) + "%";
+                case DIMENSION: {
+                    Token.Dimension d = (Token.Dimension) t;
+                    return formatNumber(d.value()) + d.unit();
+                }
+                case WHITESPACE:
+                    return " ";
+                case CDO:
+                    return "<!--";
+                case CDC:
+                    return "-->";
+                case COLON:
+                    return ":";
+                case SEMICOLON:
+                    return ";";
+                case COMMA:
+                    return ",";
+                case LEFT_BRACKET:
+                    return "[";
+                case RIGHT_BRACKET:
+                    return "]";
+                case LEFT_PAREN:
+                    return "(";
+                case RIGHT_PAREN:
+                    return ")";
+                case LEFT_BRACE:
+                    return "{";
+                case RIGHT_BRACE:
+                    return "}";
+                case EOF:
+                default:
+                    return "";
+            }
         }
     }
 }
