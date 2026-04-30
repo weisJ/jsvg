@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -113,6 +113,28 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> polyline() {
         return checkDirectory("shapes/polyline");
+    }
+
+    @TestFactory
+    Collection<DynamicTest> mask() {
+        return checkDirectory("masking/mask", Set.of(
+                "maskUnits=userSpaceOnUse-with-rect.svg",
+                "maskUnits=userSpaceOnUse-without-rect.svg",
+                "recursive-on-child.svg", // UB
+                "mask-on-child.svg",
+                "recursive.svg",
+                "mask-type=invalid.svg",
+                "with-opacity-1.svg",
+                "color-interpolation=linearRGB.svg",
+                "with-opacity-3.svg",
+                "half-width-region-with-rotation.svg",
+                "on-a-horizontal-line.svg",
+                "simple-case.svg",
+                "mask-on-self-with-mixed-mask-type.svg",
+                "recursive-on-self.svg",
+                "transform-has-no-effect.svg",
+                "mask-type=luminance.svg",
+                "self-recursive.svg"));
     }
 
     @TestFactory
