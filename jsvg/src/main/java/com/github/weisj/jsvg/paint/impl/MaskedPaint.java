@@ -33,6 +33,7 @@ import java.awt.image.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.MaskType;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
@@ -42,13 +43,15 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
     private final @NotNull Raster maskRaster;
     private final @NotNull Point maskOffset;
     private final @Nullable CachedSurfaceSupplier.ResourceCleaner cleaner;
+    private final @NotNull MaskType maskType;
 
     public MaskedPaint(@NotNull Paint paint, @NotNull Raster maskRaster, @NotNull Point2D maskOffset,
-            @Nullable CachedSurfaceSupplier.ResourceCleaner cleaner) {
+            @Nullable CachedSurfaceSupplier.ResourceCleaner cleaner, @NotNull MaskType maskType) {
         this.paint = paint;
         this.maskRaster = maskRaster;
         this.maskOffset = new Point((int) Math.floor(maskOffset.getX()), (int) Math.floor(maskOffset.getY()));
         this.cleaner = cleaner;
+        this.maskType = maskType;
     }
 
     @Override
@@ -71,7 +74,7 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
     public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds,
             AffineTransform xform, RenderingHints hints) {
         PaintContext parentContext = paint.createContext(null, deviceBounds, userBounds, xform, hints);
-        return new MaskPaintContext(parentContext, maskRaster, maskOffset);
+        return new MaskPaintContext(parentContext, maskRaster, maskOffset, maskType);
     }
 
     @Override
@@ -86,9 +89,10 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
         private final @NotNull ColorModel parentColorModel;
         private final @NotNull Raster maskRaster;
         private final @NotNull Point offset;
+        private final int maskBand;
 
         MaskPaintContext(@NotNull PaintContext parentContext, @NotNull Raster maskRaster,
-                @NotNull Point offset) {
+                @NotNull Point offset, @NotNull MaskType maskType) {
             this.parentContext = parentContext;
             parentColorModel = parentContext.getColorModel();
             this.maskRaster = maskRaster;
@@ -100,6 +104,7 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
                         .getColorSpace(), true, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
             }
             numColorComponents = colorModel.getNumColorComponents();
+            this.maskBand = (maskType == MaskType.Alpha) ? maskRaster.getNumBands() - 1 : 0;
         }
 
         @Override
@@ -155,7 +160,7 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
 
                     int luminance;
                     if ((rx >= softMaskMinX) && (rx < softMaskMaxX) && (ry >= softMaskMinY) && (ry < softMaskMaxY)) {
-                        luminance = maskRaster.getSample(rx, ry, 0);
+                        luminance = maskRaster.getSample(rx, ry, maskBand);
                     } else {
                         luminance = 0;
                     }

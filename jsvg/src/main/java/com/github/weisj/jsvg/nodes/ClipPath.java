@@ -26,6 +26,7 @@ import java.awt.geom.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.MaskType;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
@@ -126,7 +127,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
 
         Point2D offset = GeometryUtil.getLocation(blitImage.imageBoundsInDeviceSpace());
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
-                surfaceSupplier.resourceCleaner(output, useCache));
+                surfaceSupplier.resourceCleaner(output, useCache), MaskType.Luminance);
     }
 
     public void applyClip(@NotNull Output output, @NotNull RenderContext context,
