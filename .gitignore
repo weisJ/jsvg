@@ -42,6 +42,7 @@ target/
 /.gradle/
 /build/
 /buildSrc/.gradle/
+/buildSrc/.kotlin/
 /*/build/
 
 # Python
