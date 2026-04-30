@@ -373,7 +373,7 @@ public final class SVGViewer {
                         Output output = Output.createForGraphics(renderGraphics);
                         FloatSize floatSize = intrinsicSize
                                 ? document.sizeForViewBox(viewBox)
-                                : new FloatSize(getWidth(), getWidth());
+                                : new FloatSize(getWidth(), getHeight());
                         ViewBox vb = new ViewBox(
                                 viewBox.width / 2 - floatSize.width / 2,
                                 viewBox.height / 2 - floatSize.height / 2,
