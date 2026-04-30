@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -94,7 +94,7 @@ public final class MaskedPaint implements Paint, GraphicsUtil.WrappingPaint, Gra
         MaskPaintContext(@NotNull PaintContext parentContext, @NotNull Raster maskRaster,
                 @NotNull Point offset, @NotNull MaskType maskType) {
             this.parentContext = parentContext;
-            parentColorModel = parentContext.getColorModel();
+            this.parentColorModel = parentContext.getColorModel();
             this.maskRaster = maskRaster;
             this.offset = offset;
             if (parentContext.getColorModel().hasAlpha()) {
