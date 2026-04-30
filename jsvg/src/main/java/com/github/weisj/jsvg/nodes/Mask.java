@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.MaskType;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -63,7 +64,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
     private static final boolean DEBUG = false;
     public static final String TAG = "mask";
 
-    private final CachedSurfaceSupplier surfaceSupplier =
+    private CachedSurfaceSupplier surfaceSupplier =
             new CachedSurfaceSupplier(ImageUtil::createLuminosityBuffer);
     private Length x;
     private Length y;
@@ -72,6 +73,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
 
     private UnitType maskContentUnits;
     private UnitType maskUnits;
+    private MaskType maskType;
 
     @Override
     public @NotNull String tagName() {
@@ -83,6 +85,10 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         super.build(attributeNode);
         maskContentUnits = attributeNode.getEnum("maskContentUnits", UnitType.UserSpaceOnUse);
         maskUnits = attributeNode.getEnum("maskUnits", UnitType.ObjectBoundingBox);
+        maskType = attributeNode.getEnum("mask-type", MaskType.Luminance);
+        surfaceSupplier = new CachedSurfaceSupplier(maskType == MaskType.Luminance
+                ? ImageUtil::createLuminosityBuffer
+                : ImageUtil::createCompatibleTransparentImage);
 
         x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(-10))
                 .coercePercentageToCorrectUnit(maskUnits, PercentageDimension.WIDTH);
@@ -107,7 +113,14 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
 
         if (blitImage == null) return PaintParser.DEFAULT_COLOR;
 
-        blitImage.clearBackground(Color.BLACK);
+        if (maskType == MaskType.Luminance) {
+            blitImage.clearBackground(Color.BLACK);
+        } else {
+            Graphics2D g = blitImage.image().createGraphics();
+            g.setComposite(AlphaComposite.Clear);
+            g.fillRect(0, 0, blitImage.image().getWidth(), blitImage.image().getHeight());
+            g.dispose();
+        }
         blitImage.renderNode(output, this, this);
 
         if (DEBUG) {
@@ -116,7 +129,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
 
         Point2D offset = GeometryUtil.getLocation(blitImage.imageBoundsInDeviceSpace());
         return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
-                surfaceSupplier.resourceCleaner(output, useCache));
+                surfaceSupplier.resourceCleaner(output, useCache), maskType);
     }
 
     @Override
