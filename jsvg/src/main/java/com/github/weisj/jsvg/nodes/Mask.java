@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,7 +48,6 @@ import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
-import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.Container)
 @PermittedContent(
@@ -64,8 +63,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
     private static final boolean DEBUG = false;
     public static final String TAG = "mask";
 
-    private CachedSurfaceSupplier surfaceSupplier =
-            new CachedSurfaceSupplier(ImageUtil::createLuminosityBuffer);
+    private CachedSurfaceSupplier surfaceSupplier;
     private Length x;
     private Length y;
     private Length width;
@@ -86,9 +84,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         maskContentUnits = attributeNode.getEnum("maskContentUnits", UnitType.UserSpaceOnUse);
         maskUnits = attributeNode.getEnum("maskUnits", UnitType.ObjectBoundingBox);
         maskType = attributeNode.getEnum("mask-type", MaskType.Luminance);
-        surfaceSupplier = new CachedSurfaceSupplier(maskType == MaskType.Luminance
-                ? ImageUtil::createLuminosityBuffer
-                : ImageUtil::createCompatibleTransparentImage);
+        surfaceSupplier = new CachedSurfaceSupplier(maskType.bufferSurface());
 
         x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(-10))
                 .coercePercentageToCorrectUnit(maskUnits, PercentageDimension.WIDTH);
