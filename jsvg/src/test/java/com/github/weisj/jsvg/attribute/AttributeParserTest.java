@@ -22,12 +22,14 @@
 package com.github.weisj.jsvg.attribute;
 
 import java.util.Random;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
+import com.github.weisj.jsvg.parser.NumberListSplitter;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 import com.github.weisj.jsvg.util.RandomData;
@@ -51,6 +53,20 @@ class AttributeParserTest {
         testStringList(true);
     }
 
+    @Test
+    void testNumberSplitter() {
+        BiConsumer<String, String[]> test = (str, expected) -> {
+            String[] result = parser.parseStringList(str, NumberListSplitter.INSTANCE);
+            Assertions.assertArrayEquals(expected, result, "input: " + str);
+        };
+        test.accept("1,1", new String[] {"1", "1"});
+        test.accept("1 1", new String[] {"1", "1"});
+        test.accept("1-1", new String[] {"1", "-1"});
+        test.accept("1, 1", new String[] {"1", "1"});
+        test.accept("1,  1", new String[] {"1", "1"});
+        test.accept("1 , 1", new String[] {"1", "1"});
+        test.accept("1, ,1", new String[] {"1", "", "1"});
+    }
     @Test
     void testFloatList() {
         Random r = new Random();
