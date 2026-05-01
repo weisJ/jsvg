@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,7 +34,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.time.Duration;
 import com.github.weisj.jsvg.animation.value.*;
-import com.github.weisj.jsvg.attributes.*;
+import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.attributes.value.*;
@@ -69,9 +70,12 @@ public final class AttributeNode {
         PAINT_SERVER
     }
 
-    private static final Length TopOrLeft = new Length(Unit.PERCENTAGE, 0f);
-    private static final Length Center = new Length(Unit.PERCENTAGE, 50f);
-    private static final Length BottomOrRight = new Length(Unit.PERCENTAGE, 100f);
+    private static final Length Top = new Length(Unit.PERCENTAGE_HEIGHT, 0f);
+    private static final Length CenterHeight = new Length(Unit.PERCENTAGE_HEIGHT, 50f);
+    private static final Length Bottom = new Length(Unit.PERCENTAGE_HEIGHT, 100f);
+    private static final Length Left = new Length(Unit.PERCENTAGE_WIDTH, 0f);
+    private static final Length CenterWidth = new Length(Unit.PERCENTAGE_WIDTH, 50f);
+    private static final Length Right = new Length(Unit.PERCENTAGE_WIDTH, 100f);
     private static final Length FALLBACK_LENGTH = new Length(Unit.RAW, 0f);
     private static final Percentage FALLBACK_PERCENTAGE = new Percentage(1f);
     private static final MeasureContext DUMMY_MEASURE_CONTEXT =
@@ -315,26 +319,44 @@ public final class AttributeNode {
         return loadHelper().attributeParser().parseLength(getValue(key), FALLBACK_LENGTH, dimension);
     }
 
-    public @NotNull Length getHorizontalReferenceLength(@NotNull String key) {
-        return parseReferenceLength(key, "left", "right", PercentageDimension.WIDTH);
+    public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key) {
+        return getHorizontalReferenceLength(getValue(key));
     }
 
-    public @NotNull Length getVerticalReferenceLength(@NotNull String key) {
-        return parseReferenceLength(key, "top", "bottom", PercentageDimension.HEIGHT);
+    public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key) {
+        return getVerticalReferenceLength(getValue(key));
     }
 
-    private @NotNull Length parseReferenceLength(@NotNull String key, @NotNull String topLeft,
-            @NotNull String bottomRight, @NotNull PercentageDimension dimension) {
-        String value = getValue(key);
-        if (topLeft.equals(value)) {
-            return TopOrLeft;
+    public @NotNull Length getHorizontalReferenceLength(@Nullable String value) {
+        if ("left".equals(value)) {
+            return Left;
         } else if ("center".equals(value)) {
-            return Center;
-        } else if (bottomRight.equals(value)) {
-            return BottomOrRight;
+            return CenterWidth;
+        } else if ("right".equals(value)) {
+            return Right;
         } else {
-            return loadHelper().attributeParser().parseLength(value, Length.ZERO, dimension);
+            return loadHelper().attributeParser().parseLength(value, Length.ZERO, PercentageDimension.WIDTH);
         }
+    }
+
+    public @NotNull Length getVerticalReferenceLength(@Nullable String value) {
+        if ("top".equals(value)) {
+            return Top;
+        } else if ("center".equals(value)) {
+            return CenterHeight;
+        } else if ("bottom".equals(value)) {
+            return Bottom;
+        } else {
+            return loadHelper().attributeParser().parseLength(value, Length.ZERO, PercentageDimension.HEIGHT);
+        }
+    }
+
+    public boolean isHorizontalKeyword(@NotNull String value) {
+        return "left".equals(value) || "right".equals(value);
+    }
+
+    public boolean isVerticalKeyword(@NotNull String value) {
+        return "top".equals(value) || "bottom".equals(value);
     }
 
     @Contract("_,!null -> !null")

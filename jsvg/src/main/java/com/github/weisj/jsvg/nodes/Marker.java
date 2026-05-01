@@ -105,8 +105,8 @@ public final class Marker extends BaseInnerViewContainer {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        refX = attributeNode.getHorizontalReferenceLength("refX");
-        refY = attributeNode.getVerticalReferenceLength("refY");
+        refX = attributeNode.getHorizontalReferenceLengthFromKey("refX");
+        refY = attributeNode.getVerticalReferenceLengthFromKey("refY");
 
         orientation = MarkerOrientation.parse(attributeNode.getValue("orient"), attributeNode.parser());
 

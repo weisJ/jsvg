@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,7 +29,6 @@ import com.github.weisj.jsvg.attributes.Coordinate;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.transform.TransformBox;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
-import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.ClipPath;
@@ -60,18 +59,53 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
     }
 
     public static @NotNull HasGeometryContext parse(@NotNull AttributeNode attributeNode) {
-        String[] transformOrigin = attributeNode.getStringList("transform-origin");
-        String originX = transformOrigin.length > 0 ? transformOrigin[0] : null;
-        String originY = transformOrigin.length > 1 ? transformOrigin[1] : null;
         return new HasGeometryContextImpl(
                 attributeNode.parseTransform("transform", Inherited.NO, Animatable.YES),
-                new Coordinate<>(
-                        attributeNode.parser().parseLength(originX, Length.ZERO, PercentageDimension.WIDTH),
-                        attributeNode.parser().parseLength(originY, Length.ZERO, PercentageDimension.HEIGHT)),
+                parseTransformOrigin(attributeNode, attributeNode.getStringList("transform-origin")),
                 attributeNode.getEnum("transform-box", TransformBox.ViewBox),
                 attributeNode.getClipPath(),
                 attributeNode.getMask(),
                 attributeNode.getFilter());
+    }
+
+    private static @NotNull Coordinate<LengthValue> parseTransformOrigin(@NotNull AttributeNode attributeNode,
+            @NotNull String @NotNull [] parts) {
+        // SVG default for elements without an associated CSS layout box is "0 0"
+        if (parts.length == 0) {
+            return new Coordinate<>(Length.ZERO, Length.ZERO);
+        }
+
+        String originX;
+        String originY;
+
+        if (parts.length == 1) {
+            String val = parts[0];
+            if (attributeNode.isVerticalKeyword(val)) {
+                // e.g. "top" => x defaults to center, y = top
+                originX = "center";
+                originY = val;
+            } else {
+                // e.g. "left", "50%", "10px" => x = val, y defaults to center
+                originX = val;
+                originY = "center";
+            }
+        } else {
+            // 2+ values: keywords can appear in any order
+            String first = parts[0];
+            String second = parts[1];
+            // If the first is a vertical keyword or the second is a horizontal keyword, swap them
+            if (attributeNode.isVerticalKeyword(first) || attributeNode.isHorizontalKeyword(second)) {
+                originX = second;
+                originY = first;
+            } else {
+                originX = first;
+                originY = second;
+            }
+        }
+
+        return new Coordinate<>(
+                attributeNode.getHorizontalReferenceLength(originX),
+                attributeNode.getVerticalReferenceLength(originY));
     }
 
     @Override
