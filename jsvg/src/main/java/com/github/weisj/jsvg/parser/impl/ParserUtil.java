@@ -122,7 +122,8 @@ public final class ParserUtil {
             inWhiteSpace = false;
             ListSplitter.SplitResult result = splitter.testChar(c, i - start);
             if (result.shouldSplit()) {
-                if (!(lastSplitWasWhiteSpace && i == start)) {
+                boolean tokenAlreadyEmittedByWhitespace = lastSplitWasWhiteSpace && i == start;
+                if (!tokenAlreadyEmittedByWhitespace) {
                     list.add(value.substring(start, i));
                 }
                 start = result.shouldIncludeChar() ? i : i + 1;

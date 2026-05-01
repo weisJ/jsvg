@@ -67,6 +67,7 @@ class AttributeParserTest {
         test.accept("1 , 1", new String[] {"1", "1"});
         test.accept("1, ,1", new String[] {"1", "", "1"});
     }
+
     @Test
     void testFloatList() {
         Random r = new Random();
