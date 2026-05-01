@@ -151,22 +151,23 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
         prepareSegmentForRendering(cursor, context, textOutput);
 
         double offset = textAnchorOffset(
-                RenderContextAccessor.instance().fontRenderContext(context).textAnchor(), cursor);
+                RenderContextAccessor.instance().fontRenderContext(context).textAnchor(),
+                cursor.completeGlyphRunMetrics);
         context.translate(output, -offset, 0);
 
         renderSegmentWithoutLayout(cursor, context, output);
         textOutput.endText();
     }
 
-    private double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull GlyphCursor glyphCursor) {
+    protected double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull AbstractGlyphRun.Metrics metrics) {
         switch (textAnchor) {
             default:
             case Start:
                 return 0;
             case Middle:
-                return glyphCursor.completeGlyphRunMetrics.layoutBounds.getWidth() / 2f;
+                return metrics.layoutBounds.getWidth() / 2f;
             case End:
-                return glyphCursor.completeGlyphRunMetrics.layoutBounds.getWidth();
+                return metrics.layoutBounds.getWidth();
         }
     }
 

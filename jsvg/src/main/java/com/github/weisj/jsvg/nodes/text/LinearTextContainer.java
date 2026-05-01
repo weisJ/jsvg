@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,8 +29,10 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 
 abstract class LinearTextContainer extends TextContainer {
@@ -55,8 +57,13 @@ abstract class LinearTextContainer extends TextContainer {
     @Override
     protected @NotNull Shape glyphShape(@NotNull RenderContext context) {
         MutableGlyphRun glyphRun = new MutableGlyphRun();
-        appendTextShape(createCursor(), glyphRun, context);
-        return glyphRun.shape();
+        GlyphCursor cursor = createCursor();
+        appendTextShape(cursor, glyphRun, context);
+        // TODO: Properly implement this for TextPath
+        double offset = textAnchorOffset(
+                RenderContextAccessor.instance().fontRenderContext(context).textAnchor(), glyphRun.metrics());
+        if (GeometryUtil.approximatelyEqual(offset, 0)) return glyphRun.shape();
+        return glyphRun.shape().createTransformedShape(AffineTransform.getTranslateInstance(-offset, 0));
     }
 
     @Override
