@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 500 300" width="500" height="300"
+     font-family="sans-serif" font-size="16">
+
+  <defs>
+    <!-- Straight horizontal path for easy verification -->
+    <path id="hPath" d="M 50,80 H 450" fill="none"/>
+    <!-- Arc path for visual demonstration -->
+    <path id="arcPath" d="M 100,250 A 150,150 0 0 1 400,250" fill="none"/>
+  </defs>
+
+  <!-- Show the paths -->
+  <use xlink:href="#hPath" stroke="lightblue" stroke-width="1"/>
+  <use xlink:href="#arcPath" stroke="lightblue" stroke-width="1"/>
+
+  <!-- Anchor point markers at startOffset positions -->
+  <circle cx="250" cy="80" r="3" fill="red"/>
+  <circle cx="250" cy="80" r="3" fill="red"/>
+
+  <!-- text-anchor="start" (default) - text starts at 50% of path -->
+  <text fill="black">
+    <textPath xlink:href="#hPath" startOffset="50%" text-anchor="start">start</textPath>
+  </text>
+
+  <!-- text-anchor="middle" - text centered at 50% of path (translated down for visibility) -->
+  <g transform="translate(0,30)">
+    <use xlink:href="#hPath" stroke="lightblue" stroke-width="1"/>
+    <circle cx="250" cy="80" r="3" fill="red"/>
+    <text fill="black">
+      <textPath xlink:href="#hPath" startOffset="50%" text-anchor="middle">middle</textPath>
+    </text>
+  </g>
+
+  <!-- text-anchor="end" - text ends at 50% of path (translated down for visibility) -->
+  <g transform="translate(0,60)">
+    <use xlink:href="#hPath" stroke="lightblue" stroke-width="1"/>
+    <circle cx="250" cy="80" r="3" fill="red"/>
+    <text fill="black">
+      <textPath xlink:href="#hPath" startOffset="50%" text-anchor="end">end</textPath>
+    </text>
+  </g>
+
+  <!-- Arc text with text-anchor="middle" at 50% -->
+  <text fill="darkblue">
+    <textPath xlink:href="#arcPath" startOffset="50%" text-anchor="middle">Centered Arc Text</textPath>
+  </text>
+
+</svg>

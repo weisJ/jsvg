@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.text.GlyphRenderMethod;
 import com.github.weisj.jsvg.attributes.text.Side;
 import com.github.weisj.jsvg.attributes.text.Spacing;
+import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -53,6 +54,7 @@ import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.PathUtil;
 
@@ -129,16 +131,52 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
     @Override
     protected @NotNull Shape glyphShape(@NotNull RenderContext context) {
         MutableGlyphRun glyphRun = new MutableGlyphRun();
-        appendTextShape(createCursor(context), glyphRun, context);
+        appendTextShape(createCursorWithAnchorAdjustment(context), glyphRun, context);
         return glyphRun.shape();
     }
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderSegment(createCursor(context), context, output);
+        renderSegment(createCursorWithAnchorAdjustment(context), context, output);
         if (DEBUG) {
             output.debugPaint(g -> paintDebugPath(context, g));
         }
+    }
+
+    @Override
+    protected double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull AbstractGlyphRun.Metrics metrics) {
+        // For text on a path, text-anchor is handled by adjusting the startOffset before layout,
+        // so we don't apply an additional linear x-axis translation here.
+        return 0;
+    }
+
+    private @NotNull PathGlyphCursor createCursorWithAnchorAdjustment(@NotNull RenderContext context) {
+        return new PathGlyphCursor(
+                createPathIterator(context),
+                computeAnchorAdjustedStartOffset(context));
+    }
+
+    private float computeAnchorAdjustedStartOffset(@NotNull RenderContext context) {
+        float offset = computeStartOffset(context);
+        TextAnchor textAnchor = RenderContextAccessor.instance().fontRenderContext(context).textAnchor();
+        if (textAnchor == TextAnchor.Start) return offset;
+        float totalTextLength = computeTotalTextLength(context);
+        switch (textAnchor) {
+            case Middle:
+                return offset - totalTextLength / 2f;
+            case End:
+                return offset - totalTextLength;
+            default:
+                return offset;
+        }
+    }
+
+    private float computeTotalTextLength(@NotNull RenderContext context) {
+        if (hasFixedLength()) {
+            return textLength.resolve(context.measureContext());
+        }
+        TextMetrics metrics = computeTextMetrics(context, TextSegment.RenderableSegment.UseTextLengthForCalculation.NO);
+        return (float) metrics.totalAdjustableLength();
     }
 
     private float computeStartOffset(@NotNull RenderContext context) {
@@ -151,12 +189,6 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
             return (float) (offset * pathShape.pathLength(context));
         }
         return offset;
-    }
-
-    private @NotNull PathGlyphCursor createCursor(@NotNull RenderContext context) {
-        return new PathGlyphCursor(
-                createPathIterator(context),
-                computeStartOffset(context));
     }
 
     private void paintDebugPath(@NotNull RenderContext context, @NotNull Graphics2D g) {
@@ -223,7 +255,7 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
     protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
         return new PathGlyphCursor(current,
                 createPathIterator(context),
-                computeStartOffset(context));
+                computeAnchorAdjustedStartOffset(context));
     }
 
     @Override

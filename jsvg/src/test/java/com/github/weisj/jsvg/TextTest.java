@@ -99,6 +99,11 @@ class TextTest {
     }
 
     @Test
+    void textAnchorOnPathTest() {
+        assertDoesNotThrow(() -> renderJsvg("text/textAnchorOnPath.svg"));
+    }
+
+    @Test
     void letterSpacingTest() {
         assertEquals(SUCCESS, compareImages("text/letterSpacing.svg"));
     }
