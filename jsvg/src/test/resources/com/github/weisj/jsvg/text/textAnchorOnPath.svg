@@ -14,8 +14,7 @@
   <use xlink:href="#hPath" stroke="lightblue" stroke-width="1"/>
   <use xlink:href="#arcPath" stroke="lightblue" stroke-width="1"/>
 
-  <!-- Anchor point markers at startOffset positions -->
-  <circle cx="250" cy="80" r="3" fill="red"/>
+  <!-- Anchor point marker at startOffset=50% on horizontal path -->
   <circle cx="250" cy="80" r="3" fill="red"/>
 
   <!-- text-anchor="start" (default) - text starts at 50% of path -->

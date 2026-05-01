@@ -161,13 +161,11 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
         TextAnchor textAnchor = RenderContextAccessor.instance().fontRenderContext(context).textAnchor();
         if (textAnchor == TextAnchor.Start) return offset;
         float totalTextLength = computeTotalTextLength(context);
-        switch (textAnchor) {
-            case Middle:
-                return offset - totalTextLength / 2f;
-            case End:
-                return offset - totalTextLength;
-            default:
-                return offset;
+        if (textAnchor == TextAnchor.Middle) {
+            return offset - totalTextLength / 2f;
+        } else {
+            // TextAnchor.End
+            return offset - totalTextLength;
         }
     }
 
