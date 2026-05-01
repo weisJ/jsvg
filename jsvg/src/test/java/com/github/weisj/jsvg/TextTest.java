@@ -196,4 +196,9 @@ class TextTest {
             Assertions.fail(e);
         }
     }
+
+    @Test
+    void testTransformOrigin() {
+        assertEquals(SUCCESS, compareImages("text/bug150.svg"));
+    }
 }
