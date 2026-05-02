@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -120,7 +120,7 @@ public final class ParserUtil {
                 continue;
             }
             inWhiteSpace = false;
-            ListSplitter.SplitResult result = splitter.testChar(c, i - start);
+            ListSplitter.SplitResult result = splitter.testChar(c, i - start, value, i);
             if (result.shouldSplit()) {
                 boolean tokenAlreadyEmittedByWhitespace = lastSplitWasWhiteSpace && i == start;
                 if (!tokenAlreadyEmittedByWhitespace) {

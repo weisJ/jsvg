@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -20,6 +20,8 @@
  *
  */
 package com.github.weisj.jsvg.parser.impl;
+
+import org.jetbrains.annotations.NotNull;
 
 public enum SeparatorMode implements ListSplitter {
     COMMA_ONLY(',', false),
@@ -41,7 +43,7 @@ public enum SeparatorMode implements ListSplitter {
     }
 
     @Override
-    public SplitResult testChar(char c, int subwordIndex) {
+    public SplitResult testChar(char c, int subwordIndex, @NotNull String s, int stringIndex) {
         return (separator != 0 && c == separator) ? SplitResult.YES : SplitResult.NO;
     }
 }
