@@ -1,6 +1,7 @@
 <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
-    <text x="200" y="80" font-size="25" text-anchor="middle" style="transform-box: fill-box; transform-origin: center; transform: scale(1, -1);">
-        MIRROR ME
-    </text>
-    <text x="200" y="80" font-size="25" text-anchor="middle" >_____________</text>
+	<text x="200" y="80" font-size="25" text-anchor="middle"
+		style="transform-box: fill-box; transform-origin: center; transform: scale(1, -1);">
+		MIRROR ME
+	</text>
+	<text x="200" y="80" font-size="25" text-anchor="middle">_____________</text>
 </svg>

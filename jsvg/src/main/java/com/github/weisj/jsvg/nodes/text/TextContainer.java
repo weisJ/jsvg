@@ -123,6 +123,10 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
 
     abstract @NotNull Shape glyphShape(@NotNull RenderContext context);
 
+    protected final TextAnchor textAnchor(@NotNull RenderContext context) {
+        return RenderContextAccessor.instance().fontRenderContext(context).textAnchor();
+    }
+
     @Override
     public final @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {
         Shape shape = glyphShape(context);
@@ -148,26 +152,26 @@ abstract class TextContainer extends BaseContainerNode<TextSegment>
             @NotNull Output output) {
         TextOutput textOutput = output.textOutput();
         textOutput.beginText();
-        prepareSegmentForRendering(cursor, context, textOutput);
-
-        double offset = textAnchorOffset(
-                RenderContextAccessor.instance().fontRenderContext(context).textAnchor(),
-                cursor.completeGlyphRunMetrics);
-        context.translate(output, -offset, 0);
-
+        prepareRendering(cursor, context, output, textOutput);
         renderSegmentWithoutLayout(cursor, context, output);
         textOutput.endText();
     }
 
+    protected void prepareRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
+            @NotNull Output output, @NotNull TextOutput textOutput) {
+        prepareSegmentForRendering(cursor, context, textOutput);
+    }
+
     protected double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull AbstractGlyphRun.Metrics metrics) {
         switch (textAnchor) {
-            default:
             case Start:
                 return 0;
             case Middle:
                 return metrics.layoutBounds.getWidth() / 2f;
             case End:
                 return metrics.layoutBounds.getWidth();
+            default:
+                throw new IllegalStateException("Unexpected value: " + textAnchor);
         }
     }
 

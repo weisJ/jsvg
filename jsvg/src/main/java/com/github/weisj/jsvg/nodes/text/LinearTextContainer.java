@@ -32,8 +32,8 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.TextOutput;
 
 abstract class LinearTextContainer extends TextContainer {
     protected Length[] x;
@@ -59,9 +59,7 @@ abstract class LinearTextContainer extends TextContainer {
         MutableGlyphRun glyphRun = new MutableGlyphRun();
         GlyphCursor cursor = createCursor();
         appendTextShape(cursor, glyphRun, context);
-        // TODO: Properly implement this for TextPath
-        double offset = textAnchorOffset(
-                RenderContextAccessor.instance().fontRenderContext(context).textAnchor(), glyphRun.metrics());
+        double offset = textAnchorOffset(textAnchor(context), glyphRun.metrics());
         if (GeometryUtil.approximatelyEqual(offset, 0)) return glyphRun.shape();
         return glyphRun.shape().createTransformedShape(AffineTransform.getTranslateInstance(-offset, 0));
     }
@@ -69,6 +67,16 @@ abstract class LinearTextContainer extends TextContainer {
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
         renderSegment(createCursor(), context, output);
+    }
+
+    @Override
+    protected void prepareRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
+            @NotNull Output output, @NotNull TextOutput textOutput) {
+        prepareSegmentForRendering(cursor, context, textOutput);
+        // Optimization for linear text, so we don't have to compute the text metrics beforehand.
+        // For text on a path this is achieved by djusting the cursor position before layout happens.
+        double offset = textAnchorOffset(textAnchor(context), cursor.completeGlyphRunMetrics);
+        context.translate(output, -offset, 0);
     }
 
     @NotNull

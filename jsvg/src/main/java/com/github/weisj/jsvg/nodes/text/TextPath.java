@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.text.GlyphRenderMethod;
 import com.github.weisj.jsvg.attributes.text.Side;
 import com.github.weisj.jsvg.attributes.text.Spacing;
+import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -129,16 +130,48 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
     @Override
     protected @NotNull Shape glyphShape(@NotNull RenderContext context) {
         MutableGlyphRun glyphRun = new MutableGlyphRun();
-        appendTextShape(createCursor(context), glyphRun, context);
+        appendTextShape(createCursorWithAnchorAdjustment(context), glyphRun, context);
         return glyphRun.shape();
     }
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderSegment(createCursor(context), context, output);
+        renderSegment(createCursorWithAnchorAdjustment(context), context, output);
         if (DEBUG) {
             output.debugPaint(g -> paintDebugPath(context, g));
         }
+    }
+
+    @Override
+    protected double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull AbstractGlyphRun.Metrics metrics) {
+        // For text on a path, text-anchor is handled by adjusting the startOffset before layout,
+        // so we don't apply an additional linear x-axis translation here.
+        return 0;
+    }
+
+    private @NotNull PathGlyphCursor createCursorWithAnchorAdjustment(@NotNull RenderContext context) {
+        return new PathGlyphCursor(
+                createPathIterator(context),
+                computeAnchorAdjustedStartOffset(context));
+    }
+
+    private float computeAnchorAdjustedStartOffset(@NotNull RenderContext context) {
+        float offset = computeStartOffset(context);
+        TextAnchor textAnchor = textAnchor(context);
+        switch (textAnchor) {
+            case Start:
+                return offset;
+            case Middle:
+                return offset - computeTotalTextLength(context) / 2f;
+            case End:
+                return offset - computeTotalTextLength(context);
+            default:
+                throw new IllegalStateException("Unexpected value: " + textAnchor);
+        }
+    }
+
+    private float computeTotalTextLength(@NotNull RenderContext context) {
+        return (float) computeTextMetrics(context, UseTextLengthForCalculation.YES).totalAdjustableLength();
     }
 
     private float computeStartOffset(@NotNull RenderContext context) {
@@ -151,12 +184,6 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
             return (float) (offset * pathShape.pathLength(context));
         }
         return offset;
-    }
-
-    private @NotNull PathGlyphCursor createCursor(@NotNull RenderContext context) {
-        return new PathGlyphCursor(
-                createPathIterator(context),
-                computeStartOffset(context));
     }
 
     private void paintDebugPath(@NotNull RenderContext context, @NotNull Graphics2D g) {
@@ -223,7 +250,7 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
     protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
         return new PathGlyphCursor(current,
                 createPathIterator(context),
-                computeStartOffset(context));
+                computeAnchorAdjustedStartOffset(context));
     }
 
     @Override
