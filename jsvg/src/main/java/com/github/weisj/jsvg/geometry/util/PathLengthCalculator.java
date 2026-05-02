@@ -58,7 +58,7 @@ public final class PathLengthCalculator {
                 y = coords[5];
                 break;
             case PathIterator.SEG_CLOSE:
-                segmentLength = lineLength(x, y, coords[0], coords[1]);
+                segmentLength = lineLength(x, y, xStart, yStart);
                 x = xStart;
                 y = yStart;
                 break;
@@ -102,7 +102,7 @@ public final class PathLengthCalculator {
         if (ax1 != 0 || ay1 != 0) {
             double c = 4f * dot2D(ax1, ay1, ax1, ay1);
             double b = 8f * dot2D(ax0, ay0, ax1, ay1);
-            double a = 8f * dot2D(ax0, ay0, ax0, ay0);
+            double a = 4f * dot2D(ax0, ay0, ax0, ay0);
             double q = 4f * a * c - b * b;
             double twoCpB = 2.0 * c + b;
             double sumCBA = c + b + a;
