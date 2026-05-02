@@ -102,8 +102,11 @@ public final class GeometryUtil {
     }
 
     public static double pathLength(@NotNull Shape shape) {
+        return pathLength(shape.getPathIterator(null));
+    }
+
+    private static double pathLength(@NotNull PathIterator pathIterator) {
         PathLengthCalculator pathLengthCalculator = new PathLengthCalculator();
-        PathIterator pathIterator = shape.getPathIterator(null);
         double length = 0;
         double[] args = new double[6];
         while (!pathIterator.isDone()) {
