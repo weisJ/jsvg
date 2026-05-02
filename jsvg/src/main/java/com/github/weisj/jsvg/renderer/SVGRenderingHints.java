@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class SVGRenderingHints {
@@ -67,28 +66,4 @@ public final class SVGRenderingHints {
         OFF
     }
 
-    static void setupSVGRenderingHints(@NotNull Graphics2D g) {
-        Object aaHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-        if (aaHint != RenderingHints.VALUE_ANTIALIAS_DEFAULT) {
-            setSVGRenderingHint(g,
-                    SVGRenderingHints.KEY_IMAGE_ANTIALIASING,
-                    aaHint == RenderingHints.VALUE_ANTIALIAS_ON
-                            ? SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON
-                            : SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_OFF);
-        } else {
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        }
-        if (g.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL) == RenderingHints.VALUE_STROKE_DEFAULT) {
-            g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-        }
-        setSVGRenderingHint(g,
-                SVGRenderingHints.KEY_MASK_CLIP_RENDERING,
-                SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_DEFAULT);
-    }
-
-    private static void setSVGRenderingHint(@NotNull Graphics2D g, @NotNull RenderingHints.Key key, @NotNull Object o) {
-        if (g.getRenderingHint(key) == null) {
-            g.setRenderingHint(key, o);
-        }
-    }
 }

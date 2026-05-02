@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2026 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,13 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.output.impl;
+package com.github.weisj.jsvg.ui.jfx.renderer;
 
+import javafx.scene.Node;
+
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
+import com.github.weisj.jsvg.view.ViewBox;
 
-public interface CurrentColorProvider {
-    @Nullable
-    SVGPaint currentColor();
+public interface FXSVGRenderer {
+
+    @NotNull
+    FXSVGCanvas.RenderBackend getBackend();
+
+    void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
+            @Nullable AnimationState animationState);
+
+    void dispose();
+
+    @NotNull
+    Node getFXNode();
+
 }
