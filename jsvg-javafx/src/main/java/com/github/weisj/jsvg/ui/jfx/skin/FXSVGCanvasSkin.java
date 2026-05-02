@@ -22,6 +22,8 @@
 package com.github.weisj.jsvg.ui.jfx.skin;
 
 import javafx.animation.*;
+import javafx.beans.property.LongProperty;
+import javafx.geometry.Bounds;
 import javafx.scene.control.SkinBase;
 import javafx.scene.layout.StackPane;
 
@@ -38,15 +40,17 @@ import com.github.weisj.jsvg.view.ViewBox;
  */
 public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
 
-    private final FXSVGCanvas svgCanvas;
-    private final StackPane innerPane;
+    private final @NotNull FXSVGCanvas svgCanvas;
+    private final @NotNull StackPane innerPane;
 
-    private final AnimationTimer timer;
-    private FXSVGRenderer activeRenderer;
+    private final @NotNull AnimationTimer timer;
+    private final @NotNull LongProperty elapsedAnimationTime;
+    private @Nullable FXSVGRenderer activeRenderer;
     private boolean dirty = true;
 
-    public FXSVGCanvasSkin(FXSVGCanvas svgCanvas) {
+    public FXSVGCanvasSkin(@NotNull FXSVGCanvas svgCanvas, @NotNull LongProperty elapsedAnimationTime) {
         super(svgCanvas);
+        this.elapsedAnimationTime = elapsedAnimationTime;
         this.consumeMouseEvents(false);
         this.svgCanvas = svgCanvas;
 
@@ -56,10 +60,8 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
 
         registerChangeListener(svgCanvas.documentProperty(), o -> markDirty());
         registerChangeListener(svgCanvas.renderBackendProperty(), o -> markDirty());
-        registerChangeListener(svgCanvas.useSVGViewBoxProperty(), o -> markDirty());
         registerChangeListener(svgCanvas.viewBoxProperty(), o -> markDirty());
-        registerChangeListener(svgCanvas.animationProperty(), o -> markDirty());
-        registerChangeListener(svgCanvas.elapsedAnimationTimeProperty(), o -> markDirty());
+        registerChangeListener(elapsedAnimationTime, o -> markDirty());
 
         timer = new AnimationTimer() {
             @Override
@@ -84,10 +86,8 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
 
         SVGDocument svgDocument = svgCanvas.getDocument();
         FXSVGCanvas.RenderBackend backend = svgCanvas.getRenderBackend();
-        ViewBox viewBox = activeViewBox();
-        AnimationState state = new AnimationState(0, svgCanvas.getElapsedAnimationTime());
 
-        if (activeRenderer != null && activeRenderer.getBackend() != backend) {
+        if (activeRenderer != null && activeRenderer.backend() != backend) {
             innerPane.getChildren().remove(activeRenderer.getFXNode());
             activeRenderer.dispose();
             activeRenderer = null;
@@ -99,6 +99,9 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         }
 
         if (svgDocument != null) {
+            ViewBox viewBox = activeViewBox();
+            AnimationState state = new AnimationState(0, elapsedAnimationTime.get());
+
             activeRenderer.render(svgDocument, viewBox, state);
             activeRenderer.getFXNode().setVisible(true);
         } else {
@@ -106,11 +109,10 @@ public class FXSVGCanvasSkin extends SkinBase<FXSVGCanvas> {
         }
     }
 
-    private @Nullable ViewBox activeViewBox() {
+    private @NotNull ViewBox activeViewBox() {
         if (svgCanvas.getViewBox() != null) return svgCanvas.getViewBox();
-        if (!svgCanvas.isUsingSVGViewBox()) return null;
-        SVGDocument document = svgCanvas.getDocument();
-        return document == null ? null : document.viewBox();
+        Bounds bounds = svgCanvas.getBoundsInLocal();
+        return new ViewBox(0, 0, (float) bounds.getWidth(), (float) bounds.getHeight());
     }
 
     @Override

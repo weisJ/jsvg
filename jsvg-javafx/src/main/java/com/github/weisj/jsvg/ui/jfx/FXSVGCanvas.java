@@ -44,7 +44,7 @@ import com.github.weisj.jsvg.view.ViewBox;
 /**
  * A JavaFX node for displaying a {@link SVGDocument}}
  */
-public class FXSVGCanvas extends Control {
+public final class FXSVGCanvas extends Control {
 
     public enum RenderBackend {
         /**
@@ -63,11 +63,11 @@ public class FXSVGCanvas extends Control {
     private static final RenderBackend DEFAULT_RENDER_BACKEND = RenderBackend.JavaFX;
     private static final ViewBox DEFAULT_VIEW_BOX = null;
     private static final AnimationPeriod DEFAULT_ANIMATION = new AnimationPeriod(0, 0, false);
-    private static final boolean DEFAULT_USE_SVG_VIEW_BOX = true;
     private static final boolean DEFAULT_ANIMATED = true;
     private static final boolean DEFAULT_SHOW_TRANSPARENT_PATTERN = false;
 
     private final Timeline timeline = new Timeline();
+    private final LongProperty elapsedAnimationTime = new SimpleLongProperty();
 
     public FXSVGCanvas() {
         getStyleClass().add(STYLE_CLASS);
@@ -76,7 +76,6 @@ public class FXSVGCanvas extends Control {
         InvalidationListener animationModificationListener = observable -> setupAnimation();
         animated.addListener(animationModificationListener);
         document.addListener(animationModificationListener);
-        animation.addListener(animationModificationListener);
 
         showTransparentPatternProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue) getStyleClass().remove(STYLE_CLASS_TRANSPARENT_PATTERN);
@@ -89,13 +88,9 @@ public class FXSVGCanvas extends Control {
         if (!isAnimated()) {
             return DEFAULT_ANIMATION;
         }
-        Animation userAnimation = getAnimation();
-        if (userAnimation != null) {
-            return userAnimation;
-        }
-        SVGDocument document = getDocument();
-        if (document != null) {
-            return document.animation();
+        SVGDocument currentDocument = getDocument();
+        if (currentDocument != null) {
+            return currentDocument.animation();
         }
         return DEFAULT_ANIMATION;
     }
@@ -181,28 +176,6 @@ public class FXSVGCanvas extends Control {
 
     ////////////////////////////////////////////////
 
-    private final BooleanProperty useSVGViewBox = new SimpleBooleanProperty(DEFAULT_USE_SVG_VIEW_BOX);
-
-    /**
-     * Returns whether the canvas uses the SVG document's own viewBox for rendering.
-     * When {@code true} (the default), the canvas sizes itself to the SVG document's declared viewBox,
-     * which ensures correct rendering of masks and transforms. Set to {@code false} to use the SVG's
-     * natural pixel size instead.
-     */
-    public boolean isUsingSVGViewBox() {
-        return useSVGViewBox.get();
-    }
-
-    public BooleanProperty useSVGViewBoxProperty() {
-        return useSVGViewBox;
-    }
-
-    public void setUseSVGViewBox(boolean useSVGViewBox) {
-        this.useSVGViewBox.set(useSVGViewBox);
-    }
-
-    ////////////////////////////////////////////////
-
     private final ObjectProperty<@Nullable ViewBox> viewBox = new SimpleObjectProperty<>(DEFAULT_VIEW_BOX);
 
     public @Nullable ViewBox getViewBox() {
@@ -235,34 +208,6 @@ public class FXSVGCanvas extends Control {
 
     ////////////////////////////////////////////////
 
-    private final LongProperty elapsedAnimationTime = new SimpleLongProperty();
-
-    public long getElapsedAnimationTime() {
-        return elapsedAnimationTime.get();
-    }
-
-    public @NotNull ReadOnlyLongProperty elapsedAnimationTimeProperty() {
-        return elapsedAnimationTime;
-    }
-
-    ////////////////////////////////////////////////
-
-    private final ObjectProperty<@Nullable Animation> animation = new SimpleObjectProperty<>();
-
-    public @Nullable Animation getAnimation() {
-        return animation.get();
-    }
-
-    public @NotNull ObjectProperty<@Nullable Animation> animationProperty() {
-        return animation;
-    }
-
-    public void setAnimation(@Nullable Animation animation) {
-        this.animation.set(animation);
-    }
-
-    ////////////////////////////////////////////////
-
     private final BooleanProperty showTransparentPattern = new SimpleBooleanProperty(DEFAULT_SHOW_TRANSPARENT_PATTERN);
 
     public boolean getShowTransparentPattern() {
@@ -286,6 +231,6 @@ public class FXSVGCanvas extends Control {
 
     @Override
     protected Skin<?> createDefaultSkin() {
-        return new FXSVGCanvasSkin(this);
+        return new FXSVGCanvasSkin(this, elapsedAnimationTime);
     }
 }

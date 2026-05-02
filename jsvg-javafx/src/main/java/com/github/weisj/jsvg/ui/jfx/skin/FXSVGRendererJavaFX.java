@@ -39,23 +39,24 @@ import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
 final class FXSVGRendererJavaFX implements FXSVGRenderer {
-    private final Canvas canvas;
-    private final GraphicsContext graphics;
+    private final @NotNull Canvas canvas;
+    private final @NotNull GraphicsContext graphics;
 
     public FXSVGRendererJavaFX() {
-        canvas = new Canvas();
-        graphics = canvas.getGraphicsContext2D();
+        this.canvas = new Canvas();
+        this.graphics = canvas.getGraphicsContext2D();
+        canvas.setStyle("-fx-border-color: orange; -fx-border-width: 1;");
     }
 
     @Override
-    public FXSVGCanvas.@NotNull RenderBackend getBackend() {
+    public FXSVGCanvas.@NotNull RenderBackend backend() {
         return FXSVGCanvas.RenderBackend.JavaFX;
     }
 
     @Override
-    public void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
+    public void render(@NotNull SVGDocument svgDocument, @NotNull ViewBox viewBox,
             @Nullable AnimationState animationState) {
-        FloatSize renderSize = viewBox != null ? viewBox.size() : svgDocument.size();
+        FloatSize renderSize = viewBox.size();
         double width = renderSize.getWidth();
         double height = renderSize.getHeight();
 

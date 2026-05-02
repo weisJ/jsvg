@@ -34,9 +34,9 @@ import com.github.weisj.jsvg.view.ViewBox;
 interface FXSVGRenderer {
 
     @NotNull
-    FXSVGCanvas.RenderBackend getBackend();
+    FXSVGCanvas.RenderBackend backend();
 
-    void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
+    void render(@NotNull SVGDocument svgDocument, @NotNull ViewBox viewBox,
             @Nullable AnimationState animationState);
 
     void dispose();

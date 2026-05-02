@@ -73,16 +73,18 @@ final class FXSVGRendererAWT implements FXSVGRenderer {
     }
 
     @Override
-    public FXSVGCanvas.@NotNull RenderBackend getBackend() {
+    public FXSVGCanvas.@NotNull RenderBackend backend() {
         return FXSVGCanvas.RenderBackend.AWT;
     }
 
     @Override
-    public void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
+    public void render(@NotNull SVGDocument svgDocument, @NotNull ViewBox viewBox,
             @Nullable AnimationState animationState) {
-        FloatSize renderSize = viewBox != null ? viewBox.size() : svgDocument.size();
+        FloatSize renderSize = viewBox.size();
         int width = (int) renderSize.width;
         int height = (int) renderSize.height;
+
+        if (width <= 0 || height <= 0) return;
 
         if (currentRTWidth != width || currentRTHeight != height) {
             disposeRenderTargets();
