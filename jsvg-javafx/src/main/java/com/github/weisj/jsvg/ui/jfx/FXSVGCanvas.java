@@ -183,6 +183,12 @@ public class FXSVGCanvas extends Control {
 
     private final BooleanProperty useSVGViewBox = new SimpleBooleanProperty(DEFAULT_USE_SVG_VIEW_BOX);
 
+    /**
+     * Returns whether the canvas uses the SVG document's own viewBox for rendering.
+     * When {@code true} (the default), the canvas sizes itself to the SVG document's declared viewBox,
+     * which ensures correct rendering of masks and transforms. Set to {@code false} to use the SVG's
+     * natural pixel size instead.
+     */
     public boolean isUsingSVGViewBox() {
         return useSVGViewBox.get();
     }
