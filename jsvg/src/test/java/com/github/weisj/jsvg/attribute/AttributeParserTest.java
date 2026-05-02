@@ -66,6 +66,42 @@ class AttributeParserTest {
         test.accept("1,  1", new String[] {"1", "1"});
         test.accept("1 , 1", new String[] {"1", "1"});
         test.accept("1, ,1", new String[] {"1", "", "1"});
+
+        // Negative numbers
+        test.accept("-1-1", new String[] {"-1", "-1"});
+        test.accept("-1 -1", new String[] {"-1", "-1"});
+        test.accept("-1,-1", new String[] {"-1", "-1"});
+
+        // Positive sign
+        test.accept("1+1", new String[] {"1", "+1"});
+        test.accept("+1+1", new String[] {"+1", "+1"});
+        test.accept("+1-1", new String[] {"+1", "-1"});
+
+        // Decimals
+        test.accept("1.5 2.5", new String[] {"1.5", "2.5"});
+        test.accept("1.5,2.5", new String[] {"1.5", "2.5"});
+        test.accept("1.5-2.5", new String[] {"1.5", "-2.5"});
+        test.accept("1.5+2.5", new String[] {"1.5", "+2.5"});
+
+        // Scientific notation – sign after 'e'/'E' must NOT split the token
+        test.accept("1e10 2e-3", new String[] {"1e10", "2e-3"});
+        test.accept("1e+10 2e-3", new String[] {"1e+10", "2e-3"});
+
+        // Leading sign only at position 0 should not split
+        test.accept("+1 -2", new String[] {"+1", "-2"});
+
+        // Multiple whitespace / mixed separators
+        test.accept("1  2  3", new String[] {"1", "2", "3"});
+        test.accept("1 , 2 , 3", new String[] {"1", "2", "3"});
+        test.accept("10-20-30", new String[] {"10", "-20", "-30"});
+
+        // Empty / blank input
+        test.accept("", new String[] {});
+        test.accept("   ", new String[] {});
+
+        // Single value
+        test.accept("42", new String[] {"42"});
+        test.accept("-42", new String[] {"-42"});
     }
 
     @Test

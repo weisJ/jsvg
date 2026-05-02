@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,12 +21,14 @@
  */
 package com.github.weisj.jsvg.parser;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.github.weisj.jsvg.parser.impl.ListSplitter;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
-public class NumberListSplitter implements ListSplitter {
+public final class NumberListSplitter implements ListSplitter {
 
-    public final static NumberListSplitter INSTANCE = new NumberListSplitter();
+    public static final NumberListSplitter INSTANCE = new NumberListSplitter();
 
     @Override
     public boolean splitOnWhitespace() {
@@ -34,10 +36,15 @@ public class NumberListSplitter implements ListSplitter {
     }
 
     @Override
-    public SplitResult testChar(char c, int subwordIndex) {
-        SplitResult result = SeparatorMode.COMMA_AND_WHITESPACE.testChar(c, subwordIndex);
+    public SplitResult testChar(char c, int subwordIndex, @NotNull String s, int stringIndex) {
+        SplitResult result = SeparatorMode.COMMA_AND_WHITESPACE.testChar(c, subwordIndex, s, stringIndex);
         if (result.shouldSplit()) return result;
-        if ((subwordIndex > 0 && "+-".indexOf(c) != -1)) return SplitResult.YES_INCLUDING_CHAR;
+        if (subwordIndex > 0) {
+            int signIndex = "+-".indexOf(c);
+            if (signIndex != -1 && stringIndex > 0 && s.charAt(stringIndex - 1) != 'e') {
+                return SplitResult.YES_INCLUDING_CHAR;
+            }
+        }
         return SplitResult.NO;
     }
 }

@@ -120,7 +120,7 @@ public final class ParserUtil {
                 continue;
             }
             inWhiteSpace = false;
-            ListSplitter.SplitResult result = splitter.testChar(c, i - start);
+            ListSplitter.SplitResult result = splitter.testChar(c, i - start, value, i);
             if (result.shouldSplit()) {
                 boolean tokenAlreadyEmittedByWhitespace = lastSplitWasWhiteSpace && i == start;
                 if (!tokenAlreadyEmittedByWhitespace) {
