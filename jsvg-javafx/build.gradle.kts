@@ -19,6 +19,7 @@ dependencies {
     compileOnly(libs.osgiAnnotations)
 
     testImplementation(projects.jsvg)
+    testImplementation(testFixtures(projects.jsvg))
     testImplementation(testLibs.junit.api)
     testImplementation(testLibs.imageCompare)
     testImplementation(gradleApi())

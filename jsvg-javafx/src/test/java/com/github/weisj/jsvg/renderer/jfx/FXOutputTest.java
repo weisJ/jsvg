@@ -24,9 +24,7 @@ package com.github.weisj.jsvg.renderer.jfx;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -42,10 +40,7 @@ import javafx.scene.paint.Color;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 
-import com.github.romankh3.image.comparison.ImageComparison;
-import com.github.romankh3.image.comparison.ImageComparisonUtil;
-import com.github.romankh3.image.comparison.model.ImageComparisonResult;
-import com.github.romankh3.image.comparison.model.ImageComparisonState;
+import com.github.weisj.jsvg.ReferenceTest;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
@@ -73,18 +68,25 @@ class FXOutputTest {
                 .map(File::new)
                 .map(file -> {
                     String testName = "test-jfx_" + file.getName().replace(".svg", "");
-                    return DynamicTest.dynamicTest(testName, () -> {
-                        Assumptions.assumeTrue(!isExceptionTest(file.getName()),
-                                "Skipping exception test: " + file.getAbsolutePath());
-                        compareSVGOutput(file);
-                    });
+                    if (isInvalidSVGFile(file.getName())) {
+                        return DynamicTest.dynamicTest(testName, () -> {
+                            SVGLoader loader = new SVGLoader();
+                            LoaderContext loaderContext = LoaderContext.builder()
+                                    .externalResourcePolicy(ResourcePolicy.ALLOW_ALL)
+                                    .build();
+                            SVGDocument svgDocument = loader.load(file.toURI().toURL(), loaderContext);
+                            Assertions.assertNull(svgDocument,
+                                    "Expected SVG loading to fail for: " + file.getName());
+                        });
+                    }
+                    return DynamicTest.dynamicTest(testName, () -> compareSVGOutput(file));
                 })
                 .collect(Collectors.toList());
     }
 
-    // Lazily filter out tests that are expected to fail. TODO refactor testing to allow testing JFX
-    // with the same unit tests as AWT implementation
-    private boolean isExceptionTest(String testName) {
+    // SVG files that are expected to fail loading due to invalid structure (e.g., use cycles or
+    // excessive nesting). These are tested explicitly to verify they produce no valid document.
+    private boolean isInvalidSVGFile(String testName) {
         return "manyImplicitPathsThroughUse.svg".equals(testName)
                 || "useCycle.svg".equals(testName)
                 || "useCycleSelfReference.svg".equals(testName)
@@ -105,40 +107,9 @@ class FXOutputTest {
         BufferedImage expected = renderJSVG(svgDocument);
         BufferedImage actual = renderJavaFX(svgDocument);
 
-        // TODO Move ReferenceTest to a testFixtures package and use that instead
-        ImageComparison comp = new ImageComparison(expected, actual);
-        comp.setAllowingPercentOfDifferentPixels(DEFAULT_TOLERANCE);
-        comp.setPixelToleranceLevel(DEFAULT_PIXEL_TOLERANCE);
-        ImageComparisonResult comparison = comp.compareImages();
-        ImageComparisonState state = comparison.getImageComparisonState();
-
-        if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= DEFAULT_TOLERANCE) {
-            return;
-        }
-
-        String baseName = file.getAbsolutePath().replaceAll("[- /]", "_");
-        File diffFile = new File(baseName + "_jfx_diff.png");
-        File expectedFile = new File(baseName + "_jfx_expected.png");
-        File actualFile = new File(baseName + "_jfx_actual.png");
-
-        try {
-            Files.deleteIfExists(diffFile.toPath());
-            Files.deleteIfExists(expectedFile.toPath());
-            Files.deleteIfExists(actualFile.toPath());
-        } catch (IOException ignore) {
-        }
-
-        if (state != ImageComparisonState.MATCH) {
-            System.err.println("Image comparison failed");
-            System.err.println("Expected: " + comparison.getExpected());
-            System.err.println("Actual: " + comparison.getActual());
-            System.err.println("Diff: " + comparison.getResult());
-
-            ImageComparisonUtil.saveImage(diffFile, comparison.getResult());
-            ImageComparisonUtil.saveImage(expectedFile, comparison.getExpected());
-            ImageComparisonUtil.saveImage(actualFile, comparison.getActual());
-        }
-        Assumptions.assumeTrue(state == ImageComparisonState.MATCH,
+        ReferenceTest.ReferenceTestResult result = ReferenceTest.compareImageRasterization(
+                expected, actual, file.getAbsolutePath() + "_jfx", DEFAULT_TOLERANCE, DEFAULT_PIXEL_TOLERANCE);
+        Assumptions.assumeTrue(result.equals(ReferenceTest.ReferenceTestResult.SUCCESS),
                 "JFX/AWT Render Comparison Failed: " + file.getAbsolutePath());
     }
 

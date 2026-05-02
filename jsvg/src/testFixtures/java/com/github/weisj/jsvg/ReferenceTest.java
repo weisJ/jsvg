@@ -25,7 +25,6 @@ import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
 import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
 import static com.github.weisj.jsvg.ReferenceTest.RenderType.*;
 import static com.github.weisj.jsvg.ReferenceTest.RenderType.Batik;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -56,7 +55,6 @@ import org.apache.batik.util.SVGConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.ImageComparisonUtil;
@@ -253,22 +251,6 @@ public final class ReferenceTest {
             String bName = actual.source.name();
             return aName.equals(bName) ? aName : aName + " vs " + bName;
         }
-    }
-
-    @Test
-    void testIcons() {
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/desktop.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/drive.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/folder.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/general.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/homeFolder.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/image.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/missingImage.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/newFolder.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/pendingImage.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/text.svg"));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/unknown.svg", 0.4));
-        assertEquals(ReferenceTestResult.SUCCESS, compareImages("icons/upFolder.svg"));
     }
 
     public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName) {
