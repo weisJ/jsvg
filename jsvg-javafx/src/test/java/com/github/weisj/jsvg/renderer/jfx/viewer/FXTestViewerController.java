@@ -28,9 +28,10 @@ import java.util.List;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.util.Callback;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
@@ -52,9 +53,16 @@ public class FXTestViewerController {
     public FXSVGCanvas svgCanvasAWT;
     public CheckBox checkBoxShowTransparentPattern;
 
+    public Button buttonPlayPause;
+
     public void initialize() {
         String svgDirectoryPrefix = FXTestSVGFiles.getTestSVGDirectory().toPath().toString();
-        List<String> testSVGFiles = FXTestSVGFiles.findTestSVGFiles();
+        List<String> testSVGFiles = FXTestSVGFiles.findTestSVGFiles()
+                .stream()
+                .sorted((a, b) -> compareAsPaths(
+                        relativePath(a, svgDirectoryPrefix),
+                        relativePath(b, svgDirectoryPrefix)))
+                .toList();
         comboBoxSVGDocument.getItems().addAll(testSVGFiles);
         if (!testSVGFiles.isEmpty()) {
             comboBoxSVGDocument.setValue(testSVGFiles.getFirst());
@@ -102,6 +110,61 @@ public class FXTestViewerController {
                     .build();
             return loader.load(url, loaderContext);
         }, comboBoxSVGDocument.valueProperty()));
+
+        currentSVG.addListener((obs, oldDoc, newDoc) -> updateTimelineForDocument(newDoc));
+        updateTimelineForDocument(currentSVG.get());
+
+        svgCanvasJFX.animatedProperty().addListener((obs, o, n) -> updatePlayPauseButton());
+    }
+
+    private void updateTimelineForDocument(SVGDocument doc) {
+        if (doc == null) {
+            buttonPlayPause.setDisable(true);
+        } else {
+            com.github.weisj.jsvg.renderer.animation.Animation animation = doc.animation();
+            buttonPlayPause.setDisable(animation.duration() <= 0);
+        }
+        updatePlayPauseButton();
+    }
+
+    private void updatePlayPauseButton() {
+        boolean playing = svgCanvasJFX.isAnimationPlaying();
+        buttonPlayPause.setText(playing ? "Pause" : "Play");
+        buttonPlayPause.setDisable(currentSVG.get() == null
+                || currentSVG.get().animation().duration() <= 0);
+    }
+
+    private static @NotNull String relativePath(@NotNull String absolutePath, @NotNull String prefix) {
+        if (absolutePath.startsWith(prefix)) {
+            return absolutePath.substring(prefix.length()).replace(File.separatorChar, '/').replaceAll("^/+", "");
+        }
+        return absolutePath;
+    }
+
+    /** Directories (paths with '/') sort before root-level files, both groups alphabetically. */
+    private static int compareAsPaths(@NotNull String a, @NotNull String b) {
+        boolean aHasDir = a.contains("/");
+        boolean bHasDir = b.contains("/");
+        if (aHasDir && !bHasDir) return -1;
+        if (!aHasDir && bHasDir) return 1;
+        return a.compareTo(b);
+    }
+
+    public void togglePlayPause() {
+        if (svgCanvasJFX.isAnimationPlaying()) {
+            svgCanvasJFX.pauseAnimation();
+            svgCanvasAWT.pauseAnimation();
+        } else {
+            svgCanvasJFX.playAnimation();
+            svgCanvasAWT.playAnimation();
+        }
+        updatePlayPauseButton();
+    }
+
+    public void restartAnimation() {
+        svgCanvasJFX.restartAnimation();
+        svgCanvasAWT.restartAnimation();
+        updatePlayPauseButton();
     }
 
     public void refreshCanvas() {
@@ -116,7 +179,7 @@ public class FXTestViewerController {
         }
     }
 
-    public void nextSVG(ActionEvent actionEvent) {
+    public void nextSVG() {
         int index = comboBoxSVGDocument.getSelectionModel().getSelectedIndex();
         if (index < comboBoxSVGDocument.getItems().size() - 1) {
             comboBoxSVGDocument.getSelectionModel().select(index + 1);

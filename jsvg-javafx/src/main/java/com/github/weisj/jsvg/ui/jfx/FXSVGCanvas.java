@@ -141,6 +141,10 @@ public final class FXSVGCanvas extends Control {
         timeline.stop();
     }
 
+    public boolean isAnimationPlaying() {
+        return timeline.getStatus() == javafx.animation.Animation.Status.RUNNING;
+    }
+
     ////////////////////////////////////////////////
 
     private final ObjectProperty<@NotNull RenderBackend> renderBackend =
