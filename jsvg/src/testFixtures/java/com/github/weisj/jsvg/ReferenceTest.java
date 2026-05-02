@@ -195,8 +195,8 @@ public final class ReferenceTest {
         }
 
         public static @NotNull Expected expected(@NotNull ImageSource source, @NotNull RenderType renderType,
-                @Nullable Consumer<Graphics2D> graphicsMutato) {
-            return new Expected(source, renderType, graphicsMutato);
+                @Nullable Consumer<Graphics2D> graphicsMutator) {
+            return new Expected(source, renderType, graphicsMutator);
         }
 
         public static @NotNull Actual actual(@NotNull ImageSource source, @NotNull RenderType renderType) {
