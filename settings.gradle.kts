@@ -19,6 +19,7 @@ pluginManagement {
         idv("org.sonarqube")
         idv("biz.aQute.bnd.builder", "biz.aQute.bnd.lib")
         idv("com.gradleup.nmcp")
+        idv("org.openjfx.javafxplugin")
     }
 }
 
@@ -73,7 +74,12 @@ dependencyResolutionManagement {
                 idv("dsl", "com.github.weisj:swing-extensions-dsl")
             }
             idv("svgSalamander", "com.formdev:svgSalamander")
-            idv("batik", "org.apache.xmlgraphics:batik-all")
+            bundle("batik") {
+                idv("batikSwing", "org.apache.xmlgraphics:batik-swing")
+                idv("batikAnim", "org.apache.xmlgraphics:batik-anim")
+                idv("batikTranscoder", "org.apache.xmlgraphics:batik-transcoder")
+                idv("batikUtil", "org.apache.xmlgraphics:batik-util")
+            }
             idv("imageCompare", "com.github.weisj:image-comparison")
             idv("sizeof", "org.ehcache:sizeof")
         }
@@ -94,6 +100,7 @@ dependencyResolutionManagement {
 
 include(
     "jsvg",
+    "jsvg-javafx",
     "annotations",
     "annotations-processor",
     "jsvg-systemlogger",

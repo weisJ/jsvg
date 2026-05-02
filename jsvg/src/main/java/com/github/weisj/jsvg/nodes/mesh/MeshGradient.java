@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -97,7 +97,7 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
             @Nullable Rectangle2D bounds) {
         Output.SafeState safeState = output.safeState();
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setClip(shape);
+        output.applyClip(shape);
         output.translate(b.getX(), b.getY());
         renderMesh(context.measureContext(), output);
         safeState.restore();
@@ -108,7 +108,7 @@ public final class MeshGradient extends ContainerNode implements SVGPaint {
             @Nullable Rectangle2D bounds) {
         Output.SafeState safeState = output.safeState();
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setClip(output.stroke().createStrokedShape(shape));
+        output.applyClip(output.stroke().createStrokedShape(shape));
         output.translate(b.getX(), b.getY());
         renderMesh(context.measureContext(), output);
         safeState.restore();

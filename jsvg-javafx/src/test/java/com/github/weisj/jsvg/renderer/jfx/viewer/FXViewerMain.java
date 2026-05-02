@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2026 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,13 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.renderer.output.impl;
+package com.github.weisj.jsvg.renderer.jfx.viewer;
 
-import org.jetbrains.annotations.Nullable;
+import javafx.application.Application;
 
-import com.github.weisj.jsvg.paint.SVGPaint;
+public class FXViewerMain {
 
-public interface CurrentColorProvider {
-    @Nullable
-    SVGPaint currentColor();
+    public static void main(String[] args) {
+        Application.launch(FXTestViewerApplication.class, args);
+    }
 }
