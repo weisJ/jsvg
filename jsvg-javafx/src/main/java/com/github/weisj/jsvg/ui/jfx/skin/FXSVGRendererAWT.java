@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.ui.jfx.renderer;
+package com.github.weisj.jsvg.ui.jfx.skin;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -40,7 +40,7 @@ import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
-public final class FXSVGRendererAWT implements FXSVGRenderer {
+final class FXSVGRendererAWT implements FXSVGRenderer {
 
     private ImageView fxImageView;
 
@@ -80,9 +80,9 @@ public final class FXSVGRendererAWT implements FXSVGRenderer {
     @Override
     public void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
             @Nullable AnimationState animationState) {
-        FloatSize size = svgDocument.size();
-        int width = (int) size.width;
-        int height = (int) size.height;
+        FloatSize renderSize = viewBox != null ? viewBox.size() : svgDocument.size();
+        int width = (int) renderSize.width;
+        int height = (int) renderSize.height;
 
         if (currentRTWidth != width || currentRTHeight != height) {
             disposeRenderTargets();

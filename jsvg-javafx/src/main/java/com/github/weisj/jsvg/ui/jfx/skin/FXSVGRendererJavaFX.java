@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.ui.jfx.renderer;
+package com.github.weisj.jsvg.ui.jfx.skin;
 
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -38,7 +38,7 @@ import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
-public final class FXSVGRendererJavaFX implements FXSVGRenderer {
+final class FXSVGRendererJavaFX implements FXSVGRenderer {
     private final Canvas canvas;
     private final GraphicsContext graphics;
 
@@ -55,13 +55,13 @@ public final class FXSVGRendererJavaFX implements FXSVGRenderer {
     @Override
     public void render(@NotNull SVGDocument svgDocument, @Nullable ViewBox viewBox,
             @Nullable AnimationState animationState) {
-        FloatSize svgSize = svgDocument.size();
-        double width = svgSize.getWidth();
-        double height = svgSize.getHeight();
+        FloatSize renderSize = viewBox != null ? viewBox.size() : svgDocument.size();
+        double width = renderSize.getWidth();
+        double height = renderSize.getHeight();
 
         if (canvas.getWidth() != width || canvas.getHeight() != height) {
-            canvas.setWidth(svgSize.getWidth());
-            canvas.setHeight(svgSize.getHeight());
+            canvas.setWidth(width);
+            canvas.setHeight(height);
         }
 
         graphics.save();
