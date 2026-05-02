@@ -51,12 +51,15 @@ tasks {
         }
     }
 
+    val svgRresourcePath = File(project.rootDir, "jsvg/src/test/resources").absolutePath
+
     withType<JavaExec> {
-        environment("JAVAFX_TEST_SVG_PATH" to File(project.rootDir, "jsvg/src/test/resources").absolutePath)
+        environment("JAVAFX_TEST_SVG_PATH" to svgRresourcePath)
     }
 
     test {
         dependsOn(jar)
+        environment("JAVAFX_TEST_SVG_PATH" to svgRresourcePath)
         doFirst {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
