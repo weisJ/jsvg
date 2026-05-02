@@ -63,7 +63,7 @@ public class FXSVGCanvas extends Control {
     private static final RenderBackend DEFAULT_RENDER_BACKEND = RenderBackend.JavaFX;
     private static final ViewBox DEFAULT_VIEW_BOX = null;
     private static final AnimationPeriod DEFAULT_ANIMATION = new AnimationPeriod(0, 0, false);
-    private static final boolean DEFAULT_USE_SVG_VIEW_BOX = false;
+    private static final boolean DEFAULT_USE_SVG_VIEW_BOX = true;
     private static final boolean DEFAULT_ANIMATED = true;
     private static final boolean DEFAULT_SHOW_TRANSPARENT_PATTERN = false;
 
@@ -104,6 +104,10 @@ public class FXSVGCanvas extends Control {
         Animation animation = currentAnimation();
 
         timeline.getKeyFrames().clear();
+        if (animation.duration() <= 0) {
+            timeline.stop();
+            return;
+        }
         timeline.getKeyFrames()
                 .add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(elapsedAnimationTime, 0)));
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.endTime()),

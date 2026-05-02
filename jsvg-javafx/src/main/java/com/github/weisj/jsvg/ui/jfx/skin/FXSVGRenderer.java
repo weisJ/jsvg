@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.ui.jfx.renderer;
+package com.github.weisj.jsvg.ui.jfx.skin;
 
 import javafx.scene.Node;
 
@@ -31,7 +31,7 @@ import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 import com.github.weisj.jsvg.view.ViewBox;
 
-public interface FXSVGRenderer {
+interface FXSVGRenderer {
 
     @NotNull
     FXSVGCanvas.RenderBackend getBackend();
