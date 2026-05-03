@@ -62,16 +62,16 @@ public final class SVGDocument {
 
     private SVGDocument(@NotNull SVG root) {
         this.root = root;
-        this.size = sizeForViewBox(null);
+        this.size = sizeForViewport(null);
     }
 
     public @NotNull FloatSize size() {
         return size;
     }
 
-    public @NotNull FloatSize sizeForViewBox(@Nullable ViewBox viewBox) {
+    public @NotNull FloatSize sizeForViewport(@Nullable ViewBox viewport) {
         float em = SVGFont.defaultFontSize();
-        return root.sizeForTopLevel(viewBox, em, SVGFont.exFromEm(em));
+        return root.sizeForTopLevel(viewport, em, SVGFont.exFromEm(em));
     }
 
     public @NotNull ViewBox viewBox() {
@@ -119,20 +119,20 @@ public final class SVGDocument {
     }
 
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
-            @Nullable ViewBox bounds) {
-        renderWithPlatform(platformSupport, output, bounds, null);
+            @Nullable ViewBox viewportBounds) {
+        renderWithPlatform(platformSupport, output, viewportBounds, null);
     }
 
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
-            @Nullable ViewBox bounds, @Nullable AnimationState animationState) {
-        RenderContext context = prepareRenderContext(platformSupport, output, bounds, animationState);
+            @Nullable ViewBox viewportBounds, @Nullable AnimationState animationState) {
+        RenderContext context = prepareRenderContext(platformSupport, output, viewportBounds, animationState);
 
         ViewBox rootVieBox = new ViewBox(root.size(context));
 
-        if (bounds == null) bounds = rootVieBox;
+        if (viewportBounds == null) viewportBounds = rootVieBox;
 
         if (DEBUG) {
-            final ViewBox finalBounds = bounds;
+            final ViewBox finalBounds = viewportBounds;
             output.debugPaint(g -> {
                 g.setColor(Color.RED);
                 g.draw(finalBounds);
@@ -140,13 +140,13 @@ public final class SVGDocument {
         }
 
         AffineTransform rootTransform = PreserveAspectRatio.forDisplay()
-                .computeViewportTransform(bounds.size(), rootVieBox);
+                .computeViewportTransform(viewportBounds.size(), rootVieBox);
 
         RenderContext innerContext = NodeRenderer.setupInnerViewRenderContext(rootVieBox, context, true);
 
-        output.applyClip(bounds);
+        output.applyClip(viewportBounds);
 
-        innerContext.translate(output, bounds.location());
+        innerContext.translate(output, viewportBounds.location());
         innerContext.transform(output, rootTransform);
 
         // Needed for vector-effects to work properly.
@@ -159,13 +159,13 @@ public final class SVGDocument {
     private @NotNull RenderContext prepareRenderContext(
             @NotNull PlatformSupport platformSupport,
             @NotNull Output output,
-            @Nullable ViewBox bounds,
+            @Nullable ViewBox viewportBounds,
             @Nullable AnimationState animationState) {
         float defaultEm = computePlatformFontSize(platformSupport, output);
         float defaultEx = SVGFont.exFromEm(defaultEm);
         AnimationState animState = animationState != null ? animationState : AnimationState.NO_ANIMATION;
-        MeasureContext initialMeasure = bounds != null
-                ? MeasureContext.createInitial(bounds.size(), defaultEm, defaultEx, animState)
+        MeasureContext initialMeasure = viewportBounds != null
+                ? MeasureContext.createInitial(viewportBounds.size(), defaultEm, defaultEx, animState)
                 : MeasureContext.createInitial(root.sizeForTopLevel(null, defaultEm, defaultEx),
                         defaultEm, defaultEx, animState);
         SVGPaint currentColor = null;

@@ -354,28 +354,28 @@ public final class SVGViewer {
             System.out.println("======");
             switch (mode) {
                 case JSVG:
-                    ViewBox viewBox = new ViewBox(0, 0, getWidth(), getHeight());
+                    ViewBox viewport = new ViewBox(0, 0, getWidth(), getHeight());
                     Graphics2D renderGraphics = (Graphics2D) g.create();
                     BufferedImage img = null;
                     if (this.lowResolution) {
-                        viewBox = new ViewBox(document.size());
-                        img = new BufferedImage((int) viewBox.width, (int) viewBox.height, BufferedImage.TYPE_INT_ARGB);
+                        viewport = new ViewBox(document.size());
+                        img = new BufferedImage((int) viewport.width, (int) viewport.height, BufferedImage.TYPE_INT_ARGB);
                         Graphics2D imgGraphics = img.createGraphics();
                         imgGraphics.setRenderingHints(renderGraphics.getRenderingHints());
                         renderGraphics = imgGraphics;
                     }
                     if (paintShape) {
-                        Shape shape = document.computeShape(viewBox);
+                        Shape shape = document.computeShape(viewport);
                         renderGraphics.setColor(Color.MAGENTA);
                         renderGraphics.fill(shape);
                     } else {
                         Output output = Output.createForGraphics(renderGraphics);
                         FloatSize floatSize = intrinsicSize
-                                ? document.sizeForViewBox(viewBox)
+                                ? document.sizeForViewport(viewport)
                                 : new FloatSize(getWidth(), getHeight());
                         ViewBox vb = new ViewBox(
-                                viewBox.width / 2 - floatSize.width / 2,
-                                viewBox.height / 2 - floatSize.height / 2,
+                                viewport.width / 2 - floatSize.width / 2,
+                                viewport.height / 2 - floatSize.height / 2,
                                 floatSize.width,
                                 floatSize.height);
                         document.renderWithPlatform(
