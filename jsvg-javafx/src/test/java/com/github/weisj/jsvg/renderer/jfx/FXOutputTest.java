@@ -45,7 +45,7 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
-import com.github.weisj.jsvg.renderer.FXTestSVGFiles;
+import com.github.weisj.jsvg.renderer.SVGTestFiles;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
 import com.github.weisj.jsvg.renderer.output.Output;
@@ -60,9 +60,9 @@ class FXOutputTest {
     Collection<DynamicNode> generateSVGTests() {
         Assumptions.assumeTrue(FXHeadlessApplication.checkJavaFXThread(), "Failed to initialize JavaFX");
 
-        List<String> testFiles = FXTestSVGFiles.findTestSVGFiles();
+        List<String> testFiles = SVGTestFiles.findTestSVGFiles();
         Assumptions.assumeTrue(!testFiles.isEmpty(),
-                "No SVG Test Files Found in: " + FXTestSVGFiles.getTestSVGDirectory().getAbsolutePath());
+                "No SVG Test Files Found in: " + SVGTestFiles.getTestSVGDirectory().getAbsolutePath());
 
         return testFiles.stream()
                 .map(File::new)
