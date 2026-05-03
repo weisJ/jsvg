@@ -107,10 +107,10 @@ class FXOutputTest {
         BufferedImage expected = renderJSVG(svgDocument);
         BufferedImage actual = renderJavaFX(svgDocument);
 
+        String testName = file.getName().replace(".svg", "") + "_jfx";
         ReferenceTest.ReferenceTestResult result = ReferenceTest.compareImageRasterization(
-                expected, actual, file.getAbsolutePath() + "_jfx", DEFAULT_TOLERANCE, DEFAULT_PIXEL_TOLERANCE);
-        Assumptions.assumeTrue(result.equals(ReferenceTest.ReferenceTestResult.SUCCESS),
-                "JFX/AWT Render Comparison Failed: " + file.getAbsolutePath());
+                expected, actual, testName, DEFAULT_TOLERANCE, DEFAULT_PIXEL_TOLERANCE);
+        Assertions.assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, result, result::toString);
     }
 
     private BufferedImage renderJSVG(@NotNull SVGDocument svgDocument) {
