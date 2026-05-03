@@ -25,6 +25,24 @@ Partial animations exists and will be extended in future versions.
 This library aims to be as lightweight as possible. Generally JSVG uses ~50% less memory than svgSalamander and
 ~98% less than Batik.
 
+## Table of contents
+
+- [How to use](#how-to-use)
+  - [Loading](#loading)
+  - [Rendering](#rendering)
+    - [Rendering Quality](#rendering-quality)
+  - [Animations](#animations)
+  - [Additional modules](#additional-modules)
+    - [JavaFX renderer *(experimental)*](#javafx-renderer-experimental)
+    - [Logging](#logging)
+- [Supported features](#supported-features)
+- [Usage examples](#usage-examples)
+  - [Basic (Swing)](#basic-swing)
+  - [JavaFX](#javafx)
+  - [DOM manipulation](#dom-manipulation)
+  - [Animations (Swing)](#animations-swing)
+  - [Using a custom XML parser](#using-a-custom-xml-parser)
+
 ## Projects using JSVG
 * The [Jetbrains IDEA IDE](https://github.com/JetBrains/intellij-community) suite ([YouTrack Ticket](https://youtrack.jetbrains.com/issue/IJPL-81/Switch-to-JSVG-for-SVG-icon-rendering?reloaded=true)).
 * [Apache NetBeans](https://netbeans.apache.org/front/main/index.html) ([PR #7941](https://github.com/apache/netbeans/pull/7941))
@@ -114,7 +132,7 @@ class MyComponent extends JComponent {
 }
 ````
 
-For more in-depth examples see [Usage](#usage) examples below.
+For more in-depth examples see [Usage examples](#usage-examples) below.
 
 #### Rendering Quality
 
@@ -154,7 +172,7 @@ Supported custom rendering hints are:
 | `KEY_MASK_CLIP_RENDERING`   | `VALUE_MASK_CLIP_RENDERING_FAST`<br>`VALUE_MASK_CLIP_RENDERING_ACCURACY`<br>`VALUE_MASK_CLIP_RENDERING_DEFAULT` | `VALUE_MASK_CLIP_RENDERING_DEFAULT = VALUE_MASK_CLIP_RENDERING_FAST` | Changes how masks and clip paths are rendered. Accurate rendering enforces the sub-image to which the mask/clip is applied to be rendered on its own isolated offscreen image |
 | `KEY_CACHE_OFFSCREEN_IMAGE` | `VALUE_USE_CACHE`<br>`VALUE_NO_CACHE`                                                                           | `VALUE_USE_CACHE`                                                    | Whether to cache offscreen images. This can be useful for performance reasons, but can also lead to increased memory usage.                                                   |
 
-All are exposed through the `SVGRenderingHints`class.
+All are exposed through the `SVGRenderingHints` class.
 
 ### Animations
 
@@ -165,7 +183,60 @@ Please beware that the API for animations is subject to change.
 
 Animations can be controlled on a per frame basis by supplying an `AnimationState` to `SVGDocument#renderWithPlatform`.
 In particular this means that animations need to be driven by the user code.
-See below for examples on how to do this.
+See the [Animations (Swing)](#animations-swing) and [JavaFX](#javafx) usage examples below for details.
+
+### Additional modules
+
+#### JavaFX renderer *(experimental)*
+
+> **⚠️ Note:** The JavaFX renderer is experimental and its API is subject to change in future releases.
+
+JSVG provides an optional JavaFX rendering module that allows SVG documents to be displayed inside a JavaFX
+application. It requires JavaFX 17 or later.
+
+````kotlin
+dependencies {
+    implementation("com.github.weisj:jsvg:2.0.1")
+    implementation("com.github.weisj:jsvg-javafx:2.0.1")
+}
+````
+
+See the [JavaFX usage example](#javafx) for a full code sample.
+
+#### Logging
+
+By default JSVG uses `java.util.logging` (JUL) for internal diagnostics.
+Two optional adapter modules are provided so you can route JSVG log output through your own logging framework
+without any additional configuration code — simply add the desired module to the classpath/module-path and the
+adapter is picked up automatically via `ServiceLoader`.
+
+##### SLF4J adapter
+
+Routes JSVG log output through any [SLF4J](https://www.slf4j.org/) 2.x compatible backend (Logback, Log4j 2, etc.):
+
+````kotlin
+dependencies {
+    implementation("com.github.weisj:jsvg:2.0.1")
+    implementation("com.github.weisj:jsvg-slf4j:2.0.1")
+    // also add your preferred SLF4J backend, e.g.:
+    runtimeOnly("ch.qos.logback:logback-classic:1.5.6")
+}
+````
+
+##### `System.Logger` adapter
+
+Routes JSVG log output through the Java 9+ `System.Logger` API, which in turn delegates to whatever logging
+backend has been installed for the JVM (JUL, Log4j 2, etc.):
+
+````kotlin
+dependencies {
+    implementation("com.github.weisj:jsvg:2.0.1")
+    implementation("com.github.weisj:jsvg-systemlogger:2.0.1")
+}
+````
+
+Both adapters provide OSGi metadata and register themselves as `LogManager` service providers.
+Only one adapter should be present on the classpath at a time.
 
 
 ## Supported features
@@ -304,20 +375,20 @@ For supported elements most of the attributes which apply to them are implemente
 
 ## Usage examples
 
-### Basic
-To render an SVG to a swing component you can start from the following example:
+### Basic (Swing)
+
+To render an SVG to a Swing component you can start from the following example:
 
 ````java
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-
-import com.github.weisj.jsvg.*;
-import com.github.weisj.jsvg.attributes.*;
-import com.github.weisj.jsvg.parser.*;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
+
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.view.ViewBox;
+import org.jetbrains.annotations.NotNull;
 
 public class RenderExample {
 
@@ -331,7 +402,7 @@ public class RenderExample {
             JFrame frame = new JFrame();
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.setPreferredSize(new Dimension(400, 400));
-            frame.setContentPane(new SVGPanel(Objects.requireNonNull(document)));
+            frame.setContentPane(new SVGPanel(document));
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
@@ -339,7 +410,7 @@ public class RenderExample {
     }
 
     static class SVGPanel extends JPanel {
-        private @NotNull final SVGDocument document;
+        private final @NotNull SVGDocument document;
 
         SVGPanel(@NotNull SVGDocument document) {
             this.document = document;
@@ -354,14 +425,87 @@ public class RenderExample {
             ((Graphics2D) g).setRenderingHint(
                 RenderingHints.KEY_STROKE_CONTROL,
                 RenderingHints.VALUE_STROKE_PURE);
-
             document.render(this, (Graphics2D) g, new ViewBox(0, 0, getWidth(), getHeight()));
         }
     }
 }
 ````
 
+### JavaFX
+
+> **⚠️ Note:** The JavaFX renderer is experimental and its API is subject to change in future releases.
+>
+> Required dependency: `com.github.weisj:jsvg-javafx:2.0.1` (JavaFX 17 or later).
+> See [JavaFX renderer](#javafx-renderer-experimental) for the full dependency declaration.
+
+The main entry point is `FXSVGCanvas`, a standard JavaFX `Control` that can be placed anywhere in a scene graph:
+
+````java
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
+public class FXRenderExample extends Application {
+
+    @Override
+    public void start(Stage stage) {
+        SVGLoader loader = new SVGLoader();
+        SVGDocument document = loader.load(getClass().getResource("path/to/image.svg"));
+
+        FXSVGCanvas canvas = new FXSVGCanvas();
+
+        // Choose the rendering backend:
+        //   RenderBackend.JavaFX  - renders directly to a GraphicsContext (faster, hardware accelerated,
+        //                           but some advanced features such as filters and masks may not render correctly)
+        //   RenderBackend.AWT     - renders via the JSVG AWT pipeline (slower, but more accurate)
+        canvas.setRenderBackend(FXSVGCanvas.RenderBackend.JavaFX);
+        canvas.setDocument(document);
+
+        stage.setScene(new Scene(new StackPane(canvas), 400, 300));
+        stage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+````
+
+`FXSVGCanvas` exposes JavaFX properties so it integrates naturally with bindings:
+
+````java
+// Bind the document property to an external observable
+canvas.documentProperty().bind(currentDocumentProperty);
+
+// Show or hide the transparency checker-board pattern behind the SVG
+canvas.setShowTransparentPattern(true);
+
+// Restrict the rendered area to a sub-region of the SVG viewport
+canvas.setViewBox(new ViewBox(0, 0, 200, 200));
+````
+
+Animations are driven automatically when `animated` is `true` (the default).
+You can also control playback manually:
+
+````java
+canvas.pauseAnimation();
+canvas.playAnimation();
+canvas.restartAnimation();
+
+// Disable automatic animation entirely
+canvas.setAnimated(false);
+````
+
+For a more complete working example see
+[`FXTestViewerApplication`](jsvg-javafx/src/test/java/com/github/weisj/jsvg/renderer/jfx/viewer/FXTestViewerApplication.java)
+in the test sources.
+
 ### DOM manipulation
+
 You can even change the color of svg elements by using a suitable `DomProcessor` together with a custom implementation
 of `SVGPaint`. Lets take the following SVG as an example:
 
@@ -373,7 +517,7 @@ of `SVGPaint`. Lets take the following SVG as an example:
 ````
 
 We want to change the color if the first rectangle at runtime. We start by loading the SVG using a custom `ParserProvider`
-which returns a `DomProcessor`for the pre-processing step. The `DomProcessor` will allow us to change attributes
+which returns a `DomProcessor` for the pre-processing step. The `DomProcessor` will allow us to change attributes
 of the SVG elements before they are fully parsed.
 
 ````java
@@ -405,23 +549,22 @@ class CustomColorsProcessor implements DomProcessor {
     }
 
     private void processImpl(@NotNull DomElement element) {
-        // Obtain the id of the element
-        // Note: There that Element also has a node() method to obtain the SVGNode. However during the pre-processing
+        // Obtain the id of the element.
+        // Note: Element also has a node() method to obtain the SVGNode. However during the pre-processing
         // phase the SVGNode is not yet fully parsed and doesn't contain any non-defaulted information.
         String nodeId = element.id();
 
-        // Check if this element is one of the elements we want to change the color of
         if (customColors.containsKey(nodeId)) {
             DynamicAWTSvgPaint dynamicColor = customColors.get(nodeId);
 
-            // This assumed that the fill attribute is a color and not a gradient or pattern.
+            // This assumes the fill attribute is a plain color, not a gradient or pattern.
             Color color = element.document().loaderContext().paintParser()
                 .parseColor(element.attribute("fill", "black"));
             if (color == null) color = Color.BLACK;
 
             dynamicColor.setColor(color);
 
-            // This can be anything as long as it's unique
+            // The id must be unique.
             String uniqueIdForDynamicColor = UUID.randomUUID().toString();
 
             // Register the dynamic color as a custom element
@@ -429,9 +572,6 @@ class CustomColorsProcessor implements DomProcessor {
 
             // Refer to the custom element as the fill attribute
             element.setAttribute("fill", uniqueIdForDynamicColor);
-
-            // Note: This class can easily be adapted to also support changing the stroke color.
-            // With a bit more work it could also support changing the color of gradients and patterns.
         }
     }
 }
@@ -480,13 +620,20 @@ content.add(panel, BorderLayout.CENTER);
 content.add(button, BorderLayout.SOUTH);
 frame.setContentPane(content);
 ````
-### Animations
+
+### Animations (Swing)
 
 JSVG provides a helper class `AnimationPlayer` for implementing animations in Swing components.
-The following example demonstrates how to use the `AnimationPlayer` to animate an SVG element:
+The following example demonstrates how to use the `AnimationPlayer` to animate an SVG document:
 
 ````java
 import javax.swing.*;
+import java.awt.*;
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.ui.AnimationPlayer;
+import com.github.weisj.jsvg.view.ViewBox;
+import org.jetbrains.annotations.NotNull;
 
 public class AnimationPanel extends JComponent {
     private final @NotNull SVGDocument document;
@@ -495,18 +642,19 @@ public class AnimationPanel extends JComponent {
     public AnimationPanel(@NotNull SVGDocument document) {
         this.document = document;
         this.player = new AnimationPlayer(e -> repaint());
+        player.setAnimation(document.animation());
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Setup rendering hints (see above)
-        // ...
+        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         document.renderWithPlatform(
             new AwtComponentPlatformSupport(this),
             Output.createForGraphics((Graphics2D) g),
             new ViewBox(0, 0, getWidth(), getHeight()),
-            animationPlayer.animationState());
+            player.animationState());
     }
 
     public void startAnimation() {
@@ -518,6 +666,7 @@ public class AnimationPanel extends JComponent {
     }
 }
 ````
+
 ### Using a custom XML parser
 
 If you need more control over how the XML source is parsed you can e.g. use a custom `XMLInputFactory`.
@@ -532,23 +681,21 @@ public class CustomXMLInput implements XMLInput {
         this.inputStream = inputStream;
     }
 
-
     @Override
     public @NotNull XMLEventReader createReader() throws XMLStreamException {
         return factory.createXMLEventReader(inputStream);
     }
 }
 
-XMLInpitFactory factory = XMLInputFactory.newFactory();
+XMLInputFactory factory = XMLInputFactory.newFactory();
 // Set up the factory to your liking
 URL inputUrl = ...;
 SVGLoader loader = new SVGLoader();
-try (InputStream inputStream = inputUrl.openStream()){
+try (InputStream inputStream = inputUrl.openStream()) {
     SVGDocument document = loader.load(
-            new CustomXMLInput(factory,inputStream),
+            new CustomXMLInput(factory, inputStream),
             inputUrl,
             LoaderContext.createDefault()
     );
 }
-
 ````
