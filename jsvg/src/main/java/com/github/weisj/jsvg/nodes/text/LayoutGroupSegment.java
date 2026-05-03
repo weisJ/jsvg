@@ -124,7 +124,7 @@ class LayoutGroupSegment<E, T extends TextContainer<E> & CursorContext> implemen
             @NotNull BiConsumer<TextSegment.RenderableSegment, RenderContext> onRenderableSegment) {
         for (TextSegment segment : segments) {
             RenderContext currentContext = context;
-            if (segment instanceof TextSpan) {
+            if (segment instanceof TextContainer) {
                 currentContext = NodeRenderer.setupRenderContext(segment, context);
             }
             if (segment instanceof StringTextSegment) {

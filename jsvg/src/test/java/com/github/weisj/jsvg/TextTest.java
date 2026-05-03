@@ -101,6 +101,7 @@ class TextTest {
     @Test
     void textAnchorOnPathTest() {
         assertEquals(SUCCESS, compareImages("text/textAnchorOnPath.svg"));
+        assertEquals(SUCCESS, compareImages("text/textAnchorPath2.svg"));
     }
 
     @Test

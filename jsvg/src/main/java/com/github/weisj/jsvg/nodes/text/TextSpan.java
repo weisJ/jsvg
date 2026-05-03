@@ -36,10 +36,10 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.TextContent;
-import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
+import com.github.weisj.jsvg.util.AttributeUtil;
 
 @ElementCategories({Category.TextContent, Category.TextContentChild})
 @PermittedContent(
@@ -50,17 +50,11 @@ import com.github.weisj.jsvg.renderer.output.TextOutput;
 public final class TextSpan extends LinearTextContainer<TextSegment> implements TextSegment.RenderableSegment {
     public static final String TAG = "tspan";
 
-    private LinearTextLayoutGroup layoutGroup;
+    private final @NotNull LinearTextLayoutGroup layoutGroup = new LinearTextLayoutGroup(this, children);
 
     @Override
     public @NotNull String tagName() {
         return TAG;
-    }
-
-    @Override
-    public void build(@NotNull AttributeNode attributeNode) {
-        super.build(attributeNode);
-        layoutGroup = new LinearTextLayoutGroup(this, children);
     }
 
     @Override
@@ -71,7 +65,8 @@ public final class TextSpan extends LinearTextContainer<TextSegment> implements 
     @Override
     public void addContent(@NotNull TextContent.Segment content) {
         if (content.isConstant() && content.text().isEmpty()) return;
-        children.add(new StringTextSegment(this, children.size(), content));
+        if (children.isEmpty() && content.isConstant() && AttributeUtil.isBlank(content.text())) return;
+        children.add(new StringTextSegment(this, layoutGroup, children.size(), content));
     }
 
     @Override

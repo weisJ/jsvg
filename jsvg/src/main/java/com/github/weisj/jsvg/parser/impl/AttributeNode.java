@@ -59,6 +59,7 @@ import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.util.AttributeUtil;
 import com.github.weisj.jsvg.view.ViewBox;
 
 public final class AttributeNode {
@@ -113,7 +114,7 @@ public final class AttributeNode {
 
         // First process the inline styles. They have the highest priority.
         String styleStr = attributes.get("style");
-        if (styleStr != null && !isBlank(styleStr)) {
+        if (styleStr != null && !AttributeUtil.isBlank(styleStr)) {
             CssParser cssParser = element.document().loaderContext().cssParser();
             if (cssParser instanceof SimpleCssParser) {
                 ((SimpleCssParser) cssParser).parseRules(Collections.singletonList(styleStr.toCharArray()))
@@ -146,10 +147,6 @@ public final class AttributeNode {
             });
         }
         attributes.putAll(styleSheetAttributes);
-    }
-
-    private static boolean isBlank(@NotNull String s) {
-        return s.trim().isEmpty();
     }
 
     public @NotNull ParsedDocument document() {

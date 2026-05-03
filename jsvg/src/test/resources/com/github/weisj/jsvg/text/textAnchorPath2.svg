@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 150">
+	<style>svg { font-family: sans-serif; font-weight: bold }</style>
+	<defs>
+		<path id="text-path" d="M 15,15 c 40,0 20,20 70,20" fill="none"
+			stroke="blue" stroke-width="0.25" />
+	</defs>
+	<use xlink:href="#text-path" />
+	<text font-size="7" fill="green" text-anchor="middle">
+		<textPath xlink:href="#text-path" startOffset="37.32">Foo Bar Baz</textPath>
+	</text>
+	<g transform="translate(0, 50)">
+		<use xlink:href="#text-path" />
+		<text font-size="7" fill="green" text-anchor="start">
+			<textPath xlink:href="#text-path" startOffset="22.625%">Foo Bar Baz</textPath>
+		</text>
+	</g>
+	<g transform="translate(0, 100)">
+		<use xlink:href="#text-path" />
+		<text font-size="7" fill="green" text-anchor="end">
+			<textPath xlink:href="#text-path" startOffset="100%">Foo Bar Baz</textPath>
+		</text>
+	</g>
+</svg>

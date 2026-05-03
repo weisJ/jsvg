@@ -40,7 +40,9 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.TextContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.util.AttributeUtil;
 
 @ElementCategories({Category.Graphic, Category.TextContent})
 @PermittedContent(
@@ -93,8 +95,11 @@ public final class Text extends LinearTextContainer<TextLayoutGroup> implements 
     @Override
     public void addContent(@NotNull TextContent.Segment content) {
         if (content.isConstant() && content.text().isEmpty()) return;
-        lastLinearLayoutGroup().segments().add(
-                new StringTextSegment(this, lastLinearLayoutGroup().segments().size(), content));
+        if (children.isEmpty() && content.isConstant() && AttributeUtil.isBlank(content.text())) return;
+
+        LinearTextLayoutGroup linearTextLayoutGroup = lastLinearLayoutGroup();
+        linearTextLayoutGroup.segments().add(
+                new StringTextSegment(this, linearTextLayoutGroup, linearTextLayoutGroup.segments().size(), content));
     }
 
     private @NotNull LinearTextLayoutGroup lastLinearLayoutGroup() {
@@ -110,7 +115,11 @@ public final class Text extends LinearTextContainer<TextLayoutGroup> implements 
     public void render(@NotNull RenderContext context, @NotNull Output output) {
         Point2D start = null;
         for (TextLayoutGroup layoutGroup : children()) {
-            start = layoutGroup.renderText(start, context, output);
+            RenderContext currentContext = context;
+            if (layoutGroup instanceof TextContainer) {
+                currentContext = NodeRenderer.setupRenderContext(layoutGroup, context);
+            }
+            start = layoutGroup.renderText(start, currentContext, output);
         }
     }
 

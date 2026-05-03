@@ -122,19 +122,52 @@ public final class PathLengthCalculator {
 
 
     /*
-     * Takes the start-, first and second control- and end-point coordinates.
+     * Arc-length calculation for a cubic Bézier curve using 12-point Gauss-Legendre quadrature.
      *
-     * We approximate the cubic Bézier curve with a quadratic one going through an adjusted midpoint.
-     * Then use the integral calculation above. If this approximation bring any problems we will have to
-     * use more precise (but expensive) calculation.
+     * P'(t) = 3[(B-A)(1-t)² + 2(C-B)(1-t)t + (D-C)t²]
+     *
+     * Nodes and weights taken from standard Gauss-Legendre tables (interval [-1,1], mapped to [0,1]).
      *
      * Note: Exact calculation as for the quadratic case isn't possible due to the integral not being
      * solvable with elementary functions.
      */
     private double cubicParametricLength(double ax, double ay, double bx, double by, double cx, double cy,
             double dx, double dy) {
-        double qx = (3f * cx - dx + 3f * bx - ax) / 4f;
-        double qy = (3f * cy - dy + 3f * by - ay) / 4f;
-        return quadraticParametricLength(ax, ay, qx, qy, dx, dy);
+        // 12-point Gauss-Legendre nodes on [-1,1]
+        final double[] nodes = {
+                -0.9815606342467192, -0.9041172563704749, -0.7699026741943047,
+                -0.5873179542866175, -0.3678314989981802, -0.1252334085114689,
+                0.1252334085114689, 0.3678314989981802, 0.5873179542866175,
+                0.7699026741943047, 0.9041172563704749, 0.9815606342467192
+        };
+        // Corresponding weights
+        final double[] weights = {
+                0.0471753363865118, 0.1069393259953184, 0.1600783285433462,
+                0.2031674267230659, 0.2334925365383548, 0.2491470458134028,
+                0.2491470458134028, 0.2334925365383548, 0.2031674267230659,
+                0.1600783285433462, 0.1069393259953184, 0.0471753363865118
+        };
+
+        // Derivative coefficients: P'(t) = 3[A1*(1-t)^2 + 2*A2*(1-t)*t + A3*t^2]
+        // where A1 = B-A, A2 = C-B, A3 = D-C
+        double a1x = bx - ax;
+        double a1y = by - ay;
+        double a2x = cx - bx;
+        double a2y = cy - by;
+        double a3x = dx - cx;
+        double a3y = dy - cy;
+
+        double sum = 0;
+        for (int i = 0; i < nodes.length; i++) {
+            // Map node from [-1,1] to [0,1]: t = (node + 1) / 2
+            double t = (nodes[i] + 1.0) * 0.5;
+            double mt = 1.0 - t;
+            // Derivative / 3
+            double dtx = a1x * mt * mt + 2.0 * a2x * mt * t + a3x * t * t;
+            double dty = a1y * mt * mt + 2.0 * a2y * mt * t + a3y * t * t;
+            sum += weights[i] * Math.sqrt(dtx * dtx + dty * dty);
+        }
+        // Factor of 3 from derivative, factor of 0.5 from interval mapping [-1,1] -> [0,1]
+        return 3.0 * 0.5 * sum;
     }
 }

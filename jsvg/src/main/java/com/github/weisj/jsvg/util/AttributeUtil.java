@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -37,6 +37,13 @@ import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 public final class AttributeUtil {
     private AttributeUtil() {}
+
+    public static boolean isBlank(@NotNull String s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isWhitespace(s.charAt(i))) return false;
+        }
+        return true;
+    }
 
     @SafeVarargs
     public static <T> @NotNull T @Nullable [] toNonnullArray(@Nullable T... values) {

@@ -60,6 +60,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
+import com.github.weisj.jsvg.util.AttributeUtil;
 import com.github.weisj.jsvg.util.PathUtil;
 
 @ElementCategories({Category.Graphic, Category.TextContent, Category.TextContentChild})
@@ -128,7 +129,8 @@ public final class TextPath extends TextContainer<TextSegment>
     @Override
     public void addContent(@NotNull TextContent.Segment content) {
         if (content.isConstant() && content.text().isEmpty()) return;
-        children.add(new StringTextSegment(this, children.size(), content));
+        if (children.isEmpty() && content.isConstant() && AttributeUtil.isBlank(content.text())) return;
+        children.add(new StringTextSegment(this, this, children.size(), content));
     }
 
     @Override

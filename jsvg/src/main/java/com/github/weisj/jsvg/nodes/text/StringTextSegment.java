@@ -37,7 +37,8 @@ import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
 
 final class StringTextSegment implements TextSegment {
     private final Supplier<List<String>> codepoints;
-    private final TextContainer<?> parent;
+    private final @NotNull TextContainer<?> parent;
+    private final @NotNull TextLayoutGroup layoutGroup;
     private final int index;
 
     @Nullable
@@ -45,8 +46,11 @@ final class StringTextSegment implements TextSegment {
     @Nullable
     RenderContext currentRenderContext = null;
 
-    public StringTextSegment(@NotNull TextContainer<?> parent, int index, @NotNull TextContent.Segment content) {
+    public StringTextSegment(@NotNull TextContainer<?> parent,
+            @NotNull TextLayoutGroup layoutGroup, int index, @NotNull TextContent.Segment content) {
+        if (layoutGroup == null) throw new NullPointerException();
         this.parent = parent;
+        this.layoutGroup = layoutGroup;
         this.index = index;
 
         if (content.isConstant()) {
@@ -66,7 +70,7 @@ final class StringTextSegment implements TextSegment {
     }
 
     public boolean isLastSegmentInParent() {
-        return index == parent.children().size() - 1;
+        return index == layoutGroup.segments().size() - 1;
     }
 
     private static @NotNull List<@NotNull String> segmentCodepoints(String text) {

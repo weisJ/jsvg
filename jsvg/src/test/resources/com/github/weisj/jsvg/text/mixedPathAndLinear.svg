@@ -1,0 +1,26 @@
+<svg width="600" height="300" viewBox="0 0 500 300"
+	xmlns="http://www.w3.org/2000/svg">
+
+	<!-- Define a curved path -->
+	<defs>
+		<path id="curve" d="M 50 200 Q 250 50 450 200" />
+	</defs>
+
+	<!-- Straight text with multiple tspans -->
+	<text x="250" y="60" text-anchor="middle" font-size="20">
+		BEFORE
+		<tspan fill="black">This is</tspan>
+		<tspan fill="red" font-weight="bold">multiple</tspan>
+		<tspan fill="blue" font-style="italic">tspans</tspan>
+		BETWEEN
+		<textPath href="#curve" startOffset="50%">
+			<tspan fill="green">Text along a curve </tspan>
+			<tspan fill="purple" font-weight="bold">with tspans</tspan>
+		</textPath>
+		AFTER
+	</text>
+
+	<!-- Optional: show the path -->
+	<use href="#curve" fill="none" stroke="red" />
+
+</svg>
