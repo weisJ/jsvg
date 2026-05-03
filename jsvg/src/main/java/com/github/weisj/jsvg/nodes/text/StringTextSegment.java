@@ -37,7 +37,7 @@ import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
 
 final class StringTextSegment implements TextSegment {
     private final Supplier<List<String>> codepoints;
-    private final TextContainer parent;
+    private final TextContainer<?> parent;
     private final int index;
 
     @Nullable
@@ -45,7 +45,7 @@ final class StringTextSegment implements TextSegment {
     @Nullable
     RenderContext currentRenderContext = null;
 
-    public StringTextSegment(@NotNull TextContainer parent, int index, @NotNull TextContent.Segment content) {
+    public StringTextSegment(@NotNull TextContainer<?> parent, int index, @NotNull TextContent.Segment content) {
         this.parent = parent;
         this.index = index;
 
@@ -54,6 +54,11 @@ final class StringTextSegment implements TextSegment {
         } else {
             codepoints = new CachedCodepoints(content);
         }
+    }
+
+    @Override
+    public boolean isSegmentVisible(@NotNull RenderContext currentContext) {
+        return parent.isVisible(currentContext);
     }
 
     public @NotNull List<@NotNull String> codepoints() {
@@ -76,8 +81,8 @@ final class StringTextSegment implements TextSegment {
     }
 
     private static class CachedCodepoints implements Supplier<List<String>> {
-        private final @Nullable TextContent.Segment segment;
-        private @NotNull List<@NotNull String> codepoints;
+        private final @NotNull TextContent.Segment segment;
+        private List<@NotNull String> codepoints;
         private @Nullable String lastText;
 
         private CachedCodepoints(@NotNull TextContent.Segment segment) {

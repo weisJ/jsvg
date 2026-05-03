@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,37 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.prototype;
+package com.github.weisj.jsvg.nodes.text;
+
+import java.awt.*;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.Output;
 
-public interface Renderable {
+interface TextLayoutGroup {
 
-    /**
-     * Indicated whether the element can only be rendered through means of instantiation e.g. being referenced in
-     * a use tag. Instantiation doesn't create a new element it only controls, when an element can be rendered.
-     *
-     * @return true if only rendered is instantiated.
-     */
-    default boolean requiresInstantiation() {
-        return false;
-    }
+    @NotNull
+    List<? extends @NotNull TextSegment> segments();
 
-    boolean isVisible(@NotNull RenderContext context);
+    void renderText(@NotNull RenderContext context, @NotNull Output output);
 
-    void render(@NotNull RenderContext context, @NotNull Output output);
+    @NotNull
+    Shape glyphShape(@NotNull RenderContext context);
 
-    default boolean parseIsVisible(@NotNull AttributeNode node) {
-        return parseVisibility(node);
-    }
-
-    static boolean parseVisibility(@NotNull AttributeNode node) {
-        return !"none".equals(node.getValue("display"))
-                && !"hidden".equals(node.getValue("visibility"))
-                && !"collapse".equals(node.getValue("visibility"));
-    }
+    @Nullable
+    Length fixedLength();
 }

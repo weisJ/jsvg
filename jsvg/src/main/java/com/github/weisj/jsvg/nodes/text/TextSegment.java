@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,18 +29,15 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
 
 interface TextSegment {
-    default boolean isValid(@NotNull RenderContext currentContext) {
-        return true;
-    }
+    boolean isSegmentVisible(@NotNull RenderContext currentContext);
 
     interface RenderableSegment extends TextSegment {
+
         void prepareSegmentForRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
                 @NotNull TextOutput textOutput);
 
         void renderSegmentWithoutLayout(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
                 @NotNull Output output);
-
-        boolean hasFixedLength();
 
         enum UseTextLengthForCalculation {
             YES,

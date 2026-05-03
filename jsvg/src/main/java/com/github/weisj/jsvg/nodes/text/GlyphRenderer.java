@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -95,6 +95,7 @@ final class GlyphRenderer {
     static @NotNull GlyphRun layoutGlyphRun(@NotNull StringTextSegment segment, @NotNull GlyphCursor cursor,
             @NotNull SVGFont font, @NotNull RenderContext context,
             @NotNull TextOutput textOutput) {
+        boolean segmentVisible = segment.isSegmentVisible(context);
         MeasureContext measure = context.measureContext();
         FontRenderContext fontRenderContext = RenderContextAccessor.instance().fontRenderContext(context);
         float letterSpacing = fontRenderContext.letterSpacing().resolve(measure);
@@ -125,7 +126,7 @@ final class GlyphRenderer {
             boolean skipSpacing = lastCodepoint && shouldSkipLastSpacing;
             if (!skipSpacing) cursor.advanceSpacing(letterSpacing);
 
-            if (!cursor.shouldRenderCurrentGlyph()) continue;
+            if (!segmentVisible || !cursor.shouldRenderCurrentGlyph()) continue;
 
             // If null no more characters should be processed.
             if (glyphTransform == null) break;

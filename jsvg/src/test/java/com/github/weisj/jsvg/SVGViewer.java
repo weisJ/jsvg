@@ -359,7 +359,8 @@ public final class SVGViewer {
                     BufferedImage img = null;
                     if (this.lowResolution) {
                         viewport = new ViewBox(document.size());
-                        img = new BufferedImage((int) viewport.width, (int) viewport.height, BufferedImage.TYPE_INT_ARGB);
+                        img = new BufferedImage((int) viewport.width, (int) viewport.height,
+                                BufferedImage.TYPE_INT_ARGB);
                         Graphics2D imgGraphics = img.createGraphics();
                         imgGraphics.setRenderingHints(renderGraphics.getRenderingHints());
                         renderGraphics = imgGraphics;

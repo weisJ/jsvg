@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -47,7 +47,8 @@ final class CharacterDataParser {
     private State state = State.SEGMENT_START;
     private StringBuilder buffer = new StringBuilder();
     // True if any content (including whitespace-only) has been appended since the last flush.
-    // This lets us emit a space segment for inter-element whitespace like <tspan>a</tspan> <tspan>b</tspan>.
+    // This lets us emit a space segment for inter-element whitespace like <tspan>a</tspan>
+    // <tspan>b</tspan>.
     private boolean hadAnyContent = false;
 
     private char[] data;

@@ -22,20 +22,16 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.output.Output;
-import com.github.weisj.jsvg.renderer.output.TextOutput;
 
-abstract class LinearTextContainer extends TextContainer {
+abstract class LinearTextContainer<T> extends TextContainer<T> {
     protected Length[] x;
     protected Length[] y;
     protected Length[] dx;
@@ -51,37 +47,6 @@ abstract class LinearTextContainer extends TextContainer {
         dx = attributeNode.getLengthList("dx", PercentageDimension.WIDTH);
         dy = attributeNode.getLengthList("dy", PercentageDimension.HEIGHT);
         rotate = attributeNode.getFloatList("rotate");
-    }
-
-
-    @Override
-    protected @NotNull Shape glyphShape(@NotNull RenderContext context) {
-        MutableGlyphRun glyphRun = new MutableGlyphRun();
-        GlyphCursor cursor = createCursor();
-        appendTextShape(cursor, glyphRun, context);
-        double offset = textAnchorOffset(textAnchor(context), glyphRun.metrics());
-        if (GeometryUtil.approximatelyEqual(offset, 0)) return glyphRun.shape();
-        return glyphRun.shape().createTransformedShape(AffineTransform.getTranslateInstance(-offset, 0));
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderSegment(createCursor(), context, output);
-    }
-
-    @Override
-    protected void prepareRendering(@NotNull GlyphCursor cursor, @NotNull RenderContext context,
-            @NotNull Output output, @NotNull TextOutput textOutput) {
-        prepareSegmentForRendering(cursor, context, textOutput);
-        // Optimization for linear text, so we don't have to compute the text metrics beforehand.
-        // For text on a path this is achieved by djusting the cursor position before layout happens.
-        double offset = textAnchorOffset(textAnchor(context), cursor.completeGlyphRunMetrics);
-        context.translate(output, -offset, 0);
-    }
-
-    @NotNull
-    protected GlyphCursor createCursor() {
-        return new GlyphCursor(0, 0, new AffineTransform());
     }
 
     @Override

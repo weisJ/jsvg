@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes.text;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +39,7 @@ import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.util.ReversePathIterator;
 import com.github.weisj.jsvg.nodes.Anchor;
+import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.ShapeNode;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
@@ -49,12 +51,15 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.NotImplemented;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.nodes.text.TextSegment.RenderableSegment.UseTextLengthForCalculation;
+import com.github.weisj.jsvg.parser.TextContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.TextOutput;
 import com.github.weisj.jsvg.util.PathUtil;
 
 @ElementCategories({Category.Graphic, Category.TextContent, Category.TextContentChild})
@@ -63,9 +68,12 @@ import com.github.weisj.jsvg.util.PathUtil;
     anyOf = {Anchor.class, TextSpan.class, Animate.class, AnimateTransform.class, Set.class, /* <altGlyph>, <tref> */},
     charData = true
 )
-public final class TextPath extends TextContainer implements HasGeometryContext.ByDelegate {
+public final class TextPath extends TextContainer<TextSegment>
+        implements HasGeometryContext.ByDelegate, TextLayoutGroup {
     public static final String TAG = "textpath";
     private static final boolean DEBUG = false;
+
+    private final LayoutGroupSegment asSegment = new LayoutGroupSegment(this, this);
 
     private HasGeometryContext geometryContext;
     private SVGShape pathShape;
@@ -113,40 +121,60 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
     }
 
     @Override
+    protected void doAdd(@NotNull SVGNode node) {
+        children.add((TextSegment) node);
+    }
+
+    @Override
+    public void addContent(@NotNull TextContent.Segment content) {
+        if (content.isConstant() && content.text().isEmpty()) return;
+        children.add(new StringTextSegment(this, children.size(), content));
+    }
+
+    @Override
+    protected boolean acceptChild(@Nullable String id, @NotNull SVGNode node) {
+        return node instanceof TextSegment;
+    }
+
+    @Override
     public @NotNull HasGeometryContext geometryContextDelegate() {
         return geometryContext;
     }
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return isValid(context) && super.isVisible(context);
+        return pathShape != null && super.isVisible(context);
     }
 
     @Override
-    public boolean isValid(@NotNull RenderContext currentContext) {
-        return pathShape != null;
+    public @NotNull List<? extends @NotNull TextSegment> segments() {
+        return children();
     }
 
     @Override
-    protected @NotNull Shape glyphShape(@NotNull RenderContext context) {
-        MutableGlyphRun glyphRun = new MutableGlyphRun();
-        appendTextShape(createCursorWithAnchorAdjustment(context), glyphRun, context);
-        return glyphRun.shape();
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderSegment(createCursorWithAnchorAdjustment(context), context, output);
+    public void renderText(@NotNull RenderContext context, @NotNull Output output) {
+        GlyphCursor cursor = createCursorWithAnchorAdjustment(context);
+        TextOutput textOutput = output.textOutput();
+        textOutput.beginText();
+        asSegment.prepareSegmentForRendering(cursor, context, textOutput);
+        asSegment.renderSegmentWithoutLayout(cursor, context, output);
+        textOutput.endText();
         if (DEBUG) {
             output.debugPaint(g -> paintDebugPath(context, g));
         }
     }
 
     @Override
-    protected double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull AbstractGlyphRun.Metrics metrics) {
-        // For text on a path, text-anchor is handled by adjusting the startOffset before layout,
-        // so we don't apply an additional linear x-axis translation here.
-        return 0;
+    public @NotNull Shape glyphShape(@NotNull RenderContext context) {
+        MutableGlyphRun glyphRun = new MutableGlyphRun();
+        asSegment.appendTextShape(createCursorWithAnchorAdjustment(context), glyphRun, context);
+        return glyphRun.shape();
+    }
+
+    @Override
+    public @Nullable Length fixedLength() {
+        if (textLength.isSpecified()) return textLength;
+        return null;
     }
 
     private @NotNull PathGlyphCursor createCursorWithAnchorAdjustment(@NotNull RenderContext context) {
@@ -171,7 +199,7 @@ public final class TextPath extends TextContainer implements HasGeometryContext.
     }
 
     private float computeTotalTextLength(@NotNull RenderContext context) {
-        return (float) computeTextMetrics(context, UseTextLengthForCalculation.YES).totalAdjustableLength();
+        return (float) asSegment.computeTextMetrics(context, UseTextLengthForCalculation.YES).totalAdjustableLength();
     }
 
     private float computeStartOffset(@NotNull RenderContext context) {
