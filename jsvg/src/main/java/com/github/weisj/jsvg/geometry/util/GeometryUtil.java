@@ -244,6 +244,36 @@ public final class GeometryUtil {
         return transform.get(context.measureContext());
     }
 
+    public static @NotNull Point2D lastPointOnPath(@NotNull PathIterator pathIterator) {
+        Point2D lastPoint = new Point2D.Double();
+        Point2D lastMoveToPoint = new Point2D.Double();
+        double[] args = new double[6];
+        while (!pathIterator.isDone()) {
+            switch (pathIterator.currentSegment(args)) {
+                case PathIterator.SEG_MOVETO:
+                    lastPoint.setLocation(args[0], args[1]);
+                    lastMoveToPoint.setLocation(args[0], args[1]);
+                    break;
+                case PathIterator.SEG_LINETO:
+                    lastPoint.setLocation(args[0], args[1]);
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    lastPoint.setLocation(args[2], args[3]);
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    lastPoint.setLocation(args[4], args[5]);
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    lastPoint.setLocation(lastMoveToPoint.getX(), lastMoveToPoint.getY());
+                    break;
+                default:
+                    break;
+            }
+            pathIterator.next();
+        }
+        return lastPoint;
+    }
+
     public enum Space {
         USER,
         ROOT,

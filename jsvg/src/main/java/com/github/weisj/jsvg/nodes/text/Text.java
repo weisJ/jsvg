@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -107,17 +108,25 @@ public final class Text extends LinearTextContainer<TextLayoutGroup> implements 
 
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
+        Point2D start = null;
         for (TextLayoutGroup layoutGroup : children()) {
-            layoutGroup.renderText(context, output);
+            start = layoutGroup.renderText(start, context, output);
         }
     }
 
     @Override
     protected @NotNull Shape glyphShape(@NotNull RenderContext context) {
         Path2D shape = new Path2D.Float();
+        Point2D start = null;
         for (TextLayoutGroup layoutGroup : children()) {
-            shape.append(layoutGroup.glyphShape(context), false);
+            start = layoutGroup.appendGlyphShape(start, context, shape);
         }
         return shape;
+    }
+
+    @Override
+    public @NotNull GlyphCursor createLocalCursor(boolean isInitial, @NotNull GlyphCursor current) {
+        if (!isInitial) return current;
+        return super.createLocalCursor(isInitial, current);
     }
 }

@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
+import java.awt.geom.Path2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -105,7 +106,9 @@ public final class TextSpan extends LinearTextContainer<TextSegment> implements 
     @Override
     @NotNull
     Shape glyphShape(@NotNull RenderContext context) {
-        return layoutGroup.glyphShape(context);
+        Path2D shape = new Path2D.Float();
+        layoutGroup.appendGlyphShape(null, context, shape);
+        return shape;
     }
 
     @Override

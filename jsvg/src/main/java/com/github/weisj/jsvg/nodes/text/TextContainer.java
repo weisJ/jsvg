@@ -117,12 +117,6 @@ abstract class TextContainer<T> extends BaseContainerNode<T>
         }
     }
 
-    protected abstract GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current);
-
-    // Update necessary information from the local cursor to the parent cursor e.g. the current x/y
-    // position.
-    protected abstract void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
-
     @Override
     public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
         // TODO: Bounding-box is specified by the character box.

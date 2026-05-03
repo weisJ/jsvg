@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -54,6 +54,12 @@ final class PathGlyphCursor extends GlyphCursor {
         this.segmentIterator = new SegmentIteratorWithLookBehind(pathIterator, 0);
         setupInitialData();
         advance(startOffset);
+    }
+
+    // Note: Only use when cursor is not used anymore.
+    @NotNull
+    PathIterator pathIterator() {
+        return segmentIterator.pathIterator();
     }
 
     private void setupInitialData() {

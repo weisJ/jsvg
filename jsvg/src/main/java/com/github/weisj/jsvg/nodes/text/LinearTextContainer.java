@@ -21,17 +21,14 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.*;
-
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
-import com.github.weisj.jsvg.renderer.RenderContext;
 
-abstract class LinearTextContainer<T> extends TextContainer<T> {
+abstract class LinearTextContainer<T> extends TextContainer<T> implements CursorContext {
     protected Length[] x;
     protected Length[] y;
     protected Length[] dx;
@@ -50,7 +47,7 @@ abstract class LinearTextContainer<T> extends TextContainer<T> {
     }
 
     @Override
-    protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
+    public @NotNull GlyphCursor createLocalCursor(boolean isInitial, @NotNull GlyphCursor current) {
         GlyphCursor local = current.derive();
         if (x.length != 0) {
             local.xLocations = x;
@@ -76,7 +73,7 @@ abstract class LinearTextContainer<T> extends TextContainer<T> {
     }
 
     @Override
-    protected void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
+    public void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
         current.updateFrom(local);
         if (x.length == 0) current.xOff = local.xOff;
         if (y.length == 0) current.yOff = local.yOff;

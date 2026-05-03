@@ -22,8 +22,7 @@
 package com.github.weisj.jsvg.nodes.text;
 
 import java.awt.*;
-import java.awt.geom.Line2D;
-import java.awt.geom.PathIterator;
+import java.awt.geom.*;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +36,7 @@ import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.geometry.util.ReversePathIterator;
 import com.github.weisj.jsvg.nodes.Anchor;
 import com.github.weisj.jsvg.nodes.SVGNode;
@@ -69,11 +69,11 @@ import com.github.weisj.jsvg.util.PathUtil;
     charData = true
 )
 public final class TextPath extends TextContainer<TextSegment>
-        implements HasGeometryContext.ByDelegate, TextLayoutGroup {
+        implements HasGeometryContext.ByDelegate, TextLayoutGroup, CursorContext {
     public static final String TAG = "textpath";
     private static final boolean DEBUG = false;
 
-    private final LayoutGroupSegment asSegment = new LayoutGroupSegment(this, this);
+    private final LayoutGroupSegment<TextSegment, TextPath> asSegment = new LayoutGroupSegment<>(this, this);
 
     private HasGeometryContext geometryContext;
     private SVGShape pathShape;
@@ -147,13 +147,14 @@ public final class TextPath extends TextContainer<TextSegment>
     }
 
     @Override
-    public @NotNull List<? extends @NotNull TextSegment> segments() {
+    public @NotNull List<? extends TextSegment> segments() {
         return children();
     }
 
     @Override
-    public void renderText(@NotNull RenderContext context, @NotNull Output output) {
-        GlyphCursor cursor = createCursorWithAnchorAdjustment(context);
+    public @NotNull Point2D renderText(@Nullable Point2D start, @NotNull RenderContext context,
+            @NotNull Output output) {
+        PathGlyphCursor cursor = createCursorWithAnchorAdjustment(context);
         TextOutput textOutput = output.textOutput();
         textOutput.beginText();
         asSegment.prepareSegmentForRendering(cursor, context, textOutput);
@@ -162,12 +163,25 @@ public final class TextPath extends TextContainer<TextSegment>
         if (DEBUG) {
             output.debugPaint(g -> paintDebugPath(context, g));
         }
+        return GeometryUtil.lastPointOnPath(cursor.pathIterator());
+    }
+
+    public @NotNull Point2D appendGlyphShape(@Nullable Point2D start, @NotNull RenderContext context,
+            @NotNull Path2D shape) {
+        PathGlyphCursor cursor = createCursorWithAnchorAdjustment(context);
+        shape.append(glyphShape(cursor, context), false);
+        return GeometryUtil.lastPointOnPath(cursor.pathIterator());
     }
 
     @Override
-    public @NotNull Shape glyphShape(@NotNull RenderContext context) {
+    @NotNull
+    Shape glyphShape(@NotNull RenderContext context) {
+        return glyphShape(createCursorWithAnchorAdjustment(context), context);
+    }
+
+    private @NotNull Shape glyphShape(PathGlyphCursor cursor, @NotNull RenderContext context) {
         MutableGlyphRun glyphRun = new MutableGlyphRun();
-        asSegment.appendTextShape(createCursorWithAnchorAdjustment(context), glyphRun, context);
+        asSegment.appendTextShape(cursor, glyphRun, context);
         return glyphRun.shape();
     }
 
@@ -275,14 +289,12 @@ public final class TextPath extends TextContainer<TextSegment>
     }
 
     @Override
-    protected GlyphCursor createLocalCursor(@NotNull RenderContext context, @NotNull GlyphCursor current) {
-        return new PathGlyphCursor(current,
-                createPathIterator(context),
-                computeAnchorAdjustedStartOffset(context));
+    public @NotNull GlyphCursor createLocalCursor(boolean isInitial, @NotNull GlyphCursor current) {
+        return current;
     }
 
     @Override
-    protected void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
+    public void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local) {
         current.updateFrom(local);
     }
 }

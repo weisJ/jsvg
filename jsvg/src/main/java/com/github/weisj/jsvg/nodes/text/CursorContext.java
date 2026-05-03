@@ -21,28 +21,13 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
-import java.util.List;
-
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.output.Output;
-
-interface TextLayoutGroup {
-
+public interface CursorContext {
     @NotNull
-    List<? extends TextSegment> segments();
+    GlyphCursor createLocalCursor(boolean isInitial, @NotNull GlyphCursor current);
 
-    @NotNull
-    Point2D renderText(@Nullable Point2D start, @NotNull RenderContext context, @NotNull Output output);
-
-    @NotNull
-    Point2D appendGlyphShape(@Nullable Point2D start, @NotNull RenderContext context, @NotNull Path2D shape);
-
-    @Nullable
-    Length fixedLength();
+    // Update necessary information from the local cursor to the parent cursor e.g. the current x/y
+    // position.
+    void cleanUpLocalCursor(@NotNull GlyphCursor current, @NotNull GlyphCursor local);
 }

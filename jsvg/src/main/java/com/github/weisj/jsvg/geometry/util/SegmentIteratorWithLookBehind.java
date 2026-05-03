@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -58,6 +58,13 @@ public final class SegmentIteratorWithLookBehind {
         if (Length.isUnspecified(currentSegment.xStart) || Length.isUnspecified(currentSegment.yStart)) {
             throw new IllegalStateException("Path iterator did not establish starting position");
         }
+    }
+
+    /*
+     * Do not modify while the iterator is still used.
+     */
+    public @NotNull PathIterator pathIterator() {
+        return pathIterator;
     }
 
     public void setMaxLookBehindLength(float maxLookBehindLength) {

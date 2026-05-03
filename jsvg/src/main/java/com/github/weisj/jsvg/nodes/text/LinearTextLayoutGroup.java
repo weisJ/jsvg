@@ -21,8 +21,9 @@
  */
 package com.github.weisj.jsvg.nodes.text;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,25 +38,30 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
 
 final class LinearTextLayoutGroup implements TextLayoutGroup {
-    private final TextContainer<?> parent;
+    private final LinearTextContainer<?> parent;
     private final @NotNull List<@NotNull TextSegment> segments;
-    private final LayoutGroupSegment asSegment;
+    private final TextSegment.RenderableSegment asSegment;
 
-    LinearTextLayoutGroup(@NotNull TextContainer<?> parent) {
+    LinearTextLayoutGroup(@NotNull LinearTextContainer<?> parent) {
         this(parent, new ArrayList<>());
     }
 
-    LinearTextLayoutGroup(@NotNull TextContainer<?> parent, @NotNull List<@NotNull TextSegment> segments) {
+    LinearTextLayoutGroup(@NotNull LinearTextContainer<?> parent, @NotNull List<@NotNull TextSegment> segments) {
         this.parent = parent;
         this.segments = segments;
-        this.asSegment = new LayoutGroupSegment(parent, this);
+        this.asSegment = createSegment(parent, this);
+    }
+
+    private static <E> TextSegment.RenderableSegment createSegment(
+            @NotNull LinearTextContainer<E> parent, @NotNull TextLayoutGroup group) {
+        return new LayoutGroupSegment<>(parent, group);
     }
 
     public @NotNull TextSegment.RenderableSegment asSegment() {
         return asSegment;
     }
 
-    public @NotNull List<@NotNull TextSegment> segments() {
+    public @NotNull List<TextSegment> segments() {
         return segments;
     }
 
@@ -65,32 +71,48 @@ final class LinearTextLayoutGroup implements TextLayoutGroup {
         return null;
     }
 
-    private @NotNull GlyphCursor createCursor() {
-        return new GlyphCursor(0, 0, new AffineTransform());
+    private @NotNull GlyphCursor createCursor(@Nullable Point2D start) {
+        GlyphCursor cursor = parent.createLocalCursor(start == null, new GlyphCursor(0, 0, new AffineTransform()));
+        if (start != null) {
+            cursor.x = (float) start.getX();
+            cursor.y = (float) start.getY();
+        }
+        return cursor;
     }
 
     @Override
-    public void renderText(@NotNull RenderContext context, @NotNull Output output) {
-        GlyphCursor cursor = createCursor();
+    public @NotNull Point2D renderText(@Nullable Point2D start, @NotNull RenderContext context,
+            @NotNull Output output) {
+        GlyphCursor cursor = createCursor(start);
         TextOutput textOutput = output.textOutput();
         textOutput.beginText();
         asSegment().prepareSegmentForRendering(cursor, context, textOutput);
 
-        double offset = textAnchorOffset(parent.textAnchor(context), cursor.completeGlyphRunMetrics);
+        // Disable text anchor if there is an intermediate <textPath>
+        double offset = start == null
+                ? textAnchorOffset(parent.textAnchor(context), cursor.completeGlyphRunMetrics)
+                : 0;
         context.translate(output, -offset, 0);
         asSegment().renderSegmentWithoutLayout(cursor, context, output);
         context.translate(output, offset, 0);
 
         textOutput.endText();
+        return cursor.currentLocation(context.measureContext());
     }
 
-    @Override
-    public @NotNull Shape glyphShape(@NotNull RenderContext context) {
+    public @NotNull Point2D appendGlyphShape(@Nullable Point2D start, @NotNull RenderContext context,
+            @NotNull Path2D shape) {
         MutableGlyphRun glyphRun = new MutableGlyphRun();
-        asSegment().appendTextShape(createCursor(), glyphRun, context);
+        GlyphCursor cursor = createCursor(start);
+        asSegment().appendTextShape(cursor, glyphRun, context);
         double offset = textAnchorOffset(parent.textAnchor(context), glyphRun.metrics());
-        if (GeometryUtil.approximatelyEqual(offset, 0)) return glyphRun.shape();
-        return glyphRun.shape().createTransformedShape(AffineTransform.getTranslateInstance(-offset, 0));
+        if (GeometryUtil.approximatelyEqual(offset, 0)) {
+            shape.append(glyphRun.shape(), false);
+        } else {
+            shape.append(glyphRun.shape().createTransformedShape(AffineTransform.getTranslateInstance(-offset, 0)),
+                    false);
+        }
+        return cursor.currentLocation(context.measureContext());
     }
 
     private double textAnchorOffset(@NotNull TextAnchor textAnchor, @NotNull AbstractGlyphRun.Metrics metrics) {

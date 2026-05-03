@@ -35,11 +35,11 @@ import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
 
-class LayoutGroupSegment implements TextSegment.RenderableSegment {
-    private final @NotNull TextContainer<?> parent;
+class LayoutGroupSegment<E, T extends TextContainer<E> & CursorContext> implements TextSegment.RenderableSegment {
+    private final @NotNull T parent;
     private final @NotNull TextLayoutGroup group;
 
-    LayoutGroupSegment(@NotNull TextContainer<?> parent, @NotNull TextLayoutGroup group) {
+    LayoutGroupSegment(@NotNull T parent, @NotNull TextLayoutGroup group) {
         this.parent = parent;
         this.group = group;
     }
@@ -54,7 +54,7 @@ class LayoutGroupSegment implements TextSegment.RenderableSegment {
             @NotNull TextOutput textOutput) {
         SVGFont font = RenderContextAccessor.instance().font(context);
 
-        GlyphCursor localCursor = parent.createLocalCursor(context, cursor);
+        GlyphCursor localCursor = parent.createLocalCursor(false, cursor);
         localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
 
         forEachSegment(
@@ -105,7 +105,7 @@ class LayoutGroupSegment implements TextSegment.RenderableSegment {
             @NotNull RenderContext context) {
         SVGFont font = RenderContextAccessor.instance().font(context);
 
-        GlyphCursor localCursor = parent.createLocalCursor(context, cursor);
+        GlyphCursor localCursor = parent.createLocalCursor(false, cursor);
         localCursor.setAdvancement(localGlyphAdvancement(context, cursor));
 
         forEachSegment(
