@@ -46,6 +46,9 @@ final class CharacterDataParser {
 
     private State state = State.SEGMENT_START;
     private StringBuilder buffer = new StringBuilder();
+    // True if any content (including whitespace-only) has been appended since the last flush.
+    // This lets us emit a space segment for inter-element whitespace like <tspan>a</tspan> <tspan>b</tspan>.
+    private boolean hadAnyContent = false;
 
     private char[] data;
     private int begin;
@@ -53,6 +56,7 @@ final class CharacterDataParser {
 
     public void append(char[] ch, int offset, int length) {
         if (length == 0) return;
+        hadAnyContent = true;
         LOGGER.log(Level.DEBUG,
                 () -> String.format("Append: [%s]", new String(ch, offset, length).replace("\n", "\\n")));
         data = ch;
@@ -121,11 +125,12 @@ final class CharacterDataParser {
     }
 
     public boolean canFlush(boolean dueToSegmentBreak) {
-        if (state == State.SEGMENT_START) return false;
+        if (state == State.SEGMENT_START && !hadAnyContent) return false;
         return dueToSegmentBreak || buffer.length() > 0;
     }
 
     public @NotNull String flush(boolean dueToSegmentBreak) {
+        hadAnyContent = false;
         if (dueToSegmentBreak && state != State.CHARACTER) {
             // We ended on a non-character and hence have to insert a whitespace
             buffer.append(' ');
