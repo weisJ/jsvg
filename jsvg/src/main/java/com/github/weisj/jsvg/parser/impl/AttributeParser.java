@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -247,35 +245,93 @@ public final class AttributeParser {
         return null;
     }
 
-    private static final Pattern TRANSFORM_PATTERN = Pattern.compile("\\w+\\([^)]*\\)");
+    private static void warnIllegalTransform(@NotNull String value, @NotNull String input) {
+        LOGGER.log(Level.WARNING,
+                () -> String.format("Illegal transform definition '%s' encountered error while parsing '%s'",
+                        value, input));
+    }
+
+    private static final class RawTransformFunction {
+        final int endIndex;
+        final @NotNull String name;
+        final @NotNull String args;
+
+        RawTransformFunction(int endIndex, @NotNull String name, @NotNull String args) {
+            this.endIndex = endIndex;
+            this.name = name;
+            this.args = args;
+        }
+    }
+
+    /**
+     * Parses the next transform function starting at {@code start} in {@code value}, skipping
+     * leading whitespace/commas.
+     *
+     * @return a {@link RawTransformFunction} whose {@code endIndex} points to the character
+     *         after the closing {@code ')'}, or {@code null} if parsing fails.
+     */
+    private static @Nullable AttributeParser.RawTransformFunction parseNextTransformFunction(@NotNull String value,
+            int start) {
+        int i = start;
+        int len = value.length();
+        // Skip whitespace and commas
+        while (i < len && (Character.isWhitespace(value.charAt(i)) || value.charAt(i) == ',')) {
+            i++;
+        }
+        if (i >= len) return null;
+        // Read function name
+        int nameStart = i;
+        while (i < len && (Character.isLetterOrDigit(value.charAt(i))
+                || value.charAt(i) == '-' || value.charAt(i) == '_')) {
+            i++;
+        }
+        if (i >= len || value.charAt(i) != '(') return null;
+        String name = value.substring(nameStart, i);
+        i++; // skip '('
+        int argStart = i;
+        while (i < len && value.charAt(i) != ')')
+            i++;
+        if (i >= len) return null;
+        String args = value.substring(argStart, i);
+        i++; // skip ')'
+        return new RawTransformFunction(i, name, args);
+    }
 
     public @Nullable List<@NotNull TransformPart> parseTransform(@Nullable String value) {
         if (value == null) return null;
         if ("none".equals(value)) return null;
-        final Matcher transformMatcher = TRANSFORM_PATTERN.matcher(value);
         List<TransformPart> parts = new ArrayList<>();
-        while (transformMatcher.find()) {
-            String group = transformMatcher.group();
-            TransformPart part = parseSingleTransformPart(group);
+        int i = 0;
+        while (i < value.length()) {
+            // Skip remaining whitespace/commas (handles end-of-string)
+            int skipped = i;
+            while (skipped < value.length()
+                    && (Character.isWhitespace(value.charAt(skipped)) || value.charAt(skipped) == ','))
+                skipped++;
+            if (skipped >= value.length()) break;
+
+            RawTransformFunction parsed = parseNextTransformFunction(value, i);
+            if (parsed == null) {
+                warnIllegalTransform(value, value.substring(i));
+                return null;
+            }
+            TransformPart part = parseSingleTransformPart(parsed);
             if (part == null) {
-                LOGGER.log(Level.WARNING,
-                        () -> String.format("Illegal transform definition '%s' encountered error while parsing '%s'",
-                                value, group));
+                warnIllegalTransform(value, parsed.args);
                 return null;
             }
             parts.add(part);
+            i = parsed.endIndex;
         }
         return parts;
     }
 
-    private @Nullable TransformPart parseSingleTransformPart(@NotNull String value) {
-        int first = value.indexOf('(');
-        int last = value.lastIndexOf(')');
-        String command = value.substring(0, value.indexOf('(')).toLowerCase(Locale.ENGLISH);
+    private @Nullable TransformPart parseSingleTransformPart(@NotNull RawTransformFunction transformFunction) {
+        String command = transformFunction.name.toLowerCase(Locale.ENGLISH);
         TransformPart.TransformType type = parseEnum(command, TransformPart.TransformType.class);
         if (type == null) return null;
 
-        return parseTransformPart(type, value.substring(first + 1, last));
+        return parseTransformPart(type, transformFunction.args);
     }
 
     public @Nullable TransformPart parseTransformPart(TransformPart.TransformType type, @NotNull String value) {
