@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -144,7 +144,7 @@ class BlitImageTest {
         renderThroughBlitImage(actualOutput, context, shapeBounds, objectBounds, contentUnits,
                 (o, ctx) -> renderShape.accept(o));
 
-        assertEquals(SUCCESS, ReferenceTest.compareImageRasterization(reference.image(), actual.image(),
+        assertEquals(SUCCESS, ImageComparison.compareImageRasterization(reference.image(), actual.image(),
                 "BlitImage", 0f, 0f));
     }
 

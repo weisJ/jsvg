@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.ReferenceTest;
+import com.github.weisj.jsvg.ImageComparison;
 import com.github.weisj.jsvg.parser.LoaderContext;
 
 class UseValidationTest {
@@ -43,7 +43,7 @@ class UseValidationTest {
     private final StaxSVGLoader loader = new StaxSVGLoader();
 
     private void tryLoad(@NotNull String path) throws IOException, XMLStreamException {
-        URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path));
+        URL url = Objects.requireNonNull(ImageComparison.class.getResource(path));
         try (InputStream stream = url.openStream()) {
             loader.load(loader.createXMLInput(stream), url.toURI(), LoaderContext.createDefault());
         } catch (URISyntaxException e) {

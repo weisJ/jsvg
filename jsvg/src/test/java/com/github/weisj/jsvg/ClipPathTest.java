@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,11 +21,11 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
-import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
-import static com.github.weisj.jsvg.ReferenceTest.RenderType;
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.RenderType;
+import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static com.github.weisj.jsvg.renderer.SVGRenderingHints.KEY_MASK_CLIP_RENDERING;
 import static com.github.weisj.jsvg.renderer.SVGRenderingHints.VALUE_MASK_CLIP_RENDERING_ACCURACY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,8 +34,8 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.ReferenceTest.CompareInfo;
-import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 
 class ClipPathTest {
@@ -49,19 +49,19 @@ class ClipPathTest {
 
     @Test
     void testClipPathUnitsSoftClip() {
-        ReferenceTest.softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
+        ImageComparison.softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
         assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits.svg", 0.75));
         assertEquals(SUCCESS, compareImages("clipPath/clipPathUnits2.svg", 0.75));
         assertEquals(SUCCESS, compareImages("clipPath/clipPathTransform.svg", 0.75));
-        ReferenceTest.softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
+        ImageComparison.softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
     }
 
     @Test
     void filterAndClipPath() {
-        ReferenceTest.softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
+        ImageComparison.softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
         assertEquals(SUCCESS, compareImages("clipPath/filterAndClipPath.svg"));
         assertEquals(SUCCESS, compareImages("clipPath/filterAndClipPath2.svg", 0.1));
-        ReferenceTest.softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
+        ImageComparison.softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
     }
 
     @Test

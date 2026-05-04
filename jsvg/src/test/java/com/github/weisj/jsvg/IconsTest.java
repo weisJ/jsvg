@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -30,17 +30,17 @@ class IconsTest {
 
     @Test
     void testIcons() {
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/desktop.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/drive.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/folder.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/general.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/homeFolder.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/image.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/missingImage.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/newFolder.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/pendingImage.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/text.svg"));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/unknown.svg", 0.4));
-        assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, compareImages("icons/upFolder.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/desktop.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/drive.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/folder.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/general.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/homeFolder.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/image.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/missingImage.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/newFolder.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/pendingImage.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/text.svg"));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/unknown.svg", 0.4));
+        assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, compareImages("icons/upFolder.svg"));
     }
 }

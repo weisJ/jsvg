@@ -21,10 +21,10 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
-import static com.github.weisj.jsvg.ReferenceTest.ImageSource.*;
-import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
+import static com.github.weisj.jsvg.ImageComparison.ImageSource.*;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -41,7 +41,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.function.Executable;
 
-import com.github.weisj.jsvg.ReferenceTest.RenderType;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
 
 class ReSvgTestSuite {
 
@@ -182,7 +182,7 @@ class ReSvgTestSuite {
         @Override
         public void execute() throws Throwable {
             var pngRef = testFile.resolveSibling(testFile.getFileName().toString().replace(".svg", ".png"));
-            var result = ReferenceTest.compareImages(new ReferenceTest.CompareInfo(
+            var result = ImageComparison.compareImages(new ImageComparison.CompareInfo(
                     expected(new UrlImageSource(pngRef.toUri().toURL()),
                             RenderType.DiskImage),
                     actual(new UrlImageSource(testFile.toUri().toURL()),

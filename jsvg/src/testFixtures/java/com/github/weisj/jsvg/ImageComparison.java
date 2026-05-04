@@ -21,10 +21,10 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
-import static com.github.weisj.jsvg.ReferenceTest.RenderType.*;
-import static com.github.weisj.jsvg.ReferenceTest.RenderType.Batik;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
+import static com.github.weisj.jsvg.ImageComparison.RenderType.*;
+import static com.github.weisj.jsvg.ImageComparison.RenderType.Batik;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -56,12 +56,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
-import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.ImageComparisonUtil;
 import com.github.romankh3.image.comparison.model.ImageComparisonResult;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import com.github.romankh3.image.comparison.model.Rectangle;
-import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
@@ -72,7 +71,7 @@ import com.github.weisj.jsvg.view.ViewBox;
 import com.google.errorprone.annotations.CheckReturnValue;
 
 @CheckReturnValue
-public final class ReferenceTest {
+public final class ImageComparison {
 
     private static final double DEFAULT_TOLERANCE = 0.3;
     private static final double DEFAULT_PIXEL_TOLERANCE = 0.1;
@@ -130,7 +129,7 @@ public final class ReferenceTest {
 
             @Override
             public @Nullable URL url() {
-                return ReferenceTest.class.getResource(path);
+                return ImageComparison.class.getResource(path);
             }
 
             @Override
@@ -253,15 +252,16 @@ public final class ReferenceTest {
         }
     }
 
-    public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName) {
+    public static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull String fileName) {
         return compareImages(fileName, DEFAULT_TOLERANCE);
     }
 
-    public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance) {
+    public static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull String fileName,
+            double tolerance) {
         return compareImages(fileName, tolerance, DEFAULT_PIXEL_TOLERANCE);
     }
 
-    public static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance,
+    public static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull String fileName, double tolerance,
             double pixelTolerance) {
         return compareImages(new CompareInfo(
                 expected(new PathImageSource(fileName), Batik),
@@ -269,11 +269,12 @@ public final class ReferenceTest {
                 tolerance, pixelTolerance));
     }
 
-    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent) {
+    static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull String name,
+            @NotNull String svgContent) {
         return compareImages(name, svgContent, DEFAULT_TOLERANCE);
     }
 
-    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull CompareInfo compareInfo) {
+    static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull CompareInfo compareInfo) {
         try {
             BufferedImage expected = compareInfo.expected.render(null);
             BufferedImage actual = compareInfo.actual.render(expected);
@@ -285,7 +286,7 @@ public final class ReferenceTest {
         }
     }
 
-    static @NotNull ReferenceTest.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent,
+    static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull String name, @NotNull String svgContent,
             double tolerance) {
         return compareImages(new CompareInfo(
                 expected(new ImageSource.MemoryImageSource(name, svgContent), Batik),
@@ -293,10 +294,11 @@ public final class ReferenceTest {
                 tolerance, DEFAULT_PIXEL_TOLERANCE));
     }
 
-    public static @NotNull ReferenceTest.ReferenceTestResult compareImageRasterization(
+    public static @NotNull ImageComparison.ReferenceTestResult compareImageRasterization(
             @NotNull BufferedImage expected, @NotNull BufferedImage actual,
             @NotNull String name, double tolerance, double pixelTolerance) {
-        ImageComparison comp = new ImageComparison(expected, actual);
+        com.github.romankh3.image.comparison.ImageComparison comp =
+                new com.github.romankh3.image.comparison.ImageComparison(expected, actual);
         comp.setAllowingPercentOfDifferentPixels(tolerance);
         comp.setPixelToleranceLevel(pixelTolerance);
         ImageComparisonResult comparison = comp.compareImages();
@@ -454,9 +456,9 @@ public final class ReferenceTest {
     }
 
     public static final class ReferenceTestResult {
-        public static final @NotNull ReferenceTest.ReferenceTestResult SUCCESS =
+        public static final @NotNull ImageComparison.ReferenceTestResult SUCCESS =
                 new ReferenceTestResult(ImageComparisonState.MATCH, () -> "SUCCESS");
-        public static final @NotNull ReferenceTest.ReferenceTestResult FAILURE =
+        public static final @NotNull ImageComparison.ReferenceTestResult FAILURE =
                 new ReferenceTestResult(ImageComparisonState.MATCH, () -> "FAILURE");
 
         private final @NotNull ImageComparisonState comparisonState;

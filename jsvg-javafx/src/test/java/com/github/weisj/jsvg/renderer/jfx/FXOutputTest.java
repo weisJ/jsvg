@@ -42,7 +42,7 @@ import javafx.scene.paint.Color;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 
-import com.github.weisj.jsvg.ReferenceTest;
+import com.github.weisj.jsvg.ImageComparison;
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
@@ -151,9 +151,9 @@ class FXOutputTest {
         BufferedImage actual = renderJavaFX(svgDocument);
 
         String testName = file.getName().replace(".svg", "") + "_jfx";
-        ReferenceTest.ReferenceTestResult result = ReferenceTest.compareImageRasterization(
+        ImageComparison.ReferenceTestResult result = ImageComparison.compareImageRasterization(
                 expected, actual, testName, DEFAULT_TOLERANCE, DEFAULT_PIXEL_TOLERANCE);
-        Assertions.assertEquals(ReferenceTest.ReferenceTestResult.SUCCESS, result, result::toString);
+        Assertions.assertEquals(ImageComparison.ReferenceTestResult.SUCCESS, result, result::toString);
     }
 
     private BufferedImage renderJSVG(@NotNull SVGDocument svgDocument) {

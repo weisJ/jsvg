@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,16 +21,16 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.*;
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
-import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ImageComparison.*;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
 class PatternTest {
 
@@ -38,7 +38,7 @@ class PatternTest {
     void patternRefTest() {
         assertEquals(SUCCESS, compareImages("pattern/patternUnits.svg"));
         // Batik renders this incorrectly.
-        assertEquals(SUCCESS, compareImages(new ReferenceTest.CompareInfo(
+        assertEquals(SUCCESS, compareImages(new ImageComparison.CompareInfo(
                 expected(new PathImageSource("pattern/patternContentUnits_ref.svg"), RenderType.JSVG),
                 actual(new PathImageSource("pattern/patternContentUnits.svg"), RenderType.JSVG))));
     }

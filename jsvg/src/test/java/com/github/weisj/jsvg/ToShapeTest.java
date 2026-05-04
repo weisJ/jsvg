@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
@@ -177,20 +177,20 @@ class ToShapeTest {
         return img;
     }
 
-    private static ReferenceTest.ReferenceTestResult compareShape(@NotNull String path) {
+    private static ImageComparison.ReferenceTestResult compareShape(@NotNull String path) {
         return compareShape(path, 0.5f);
     }
 
-    private static ReferenceTest.ReferenceTestResult compareShape(@NotNull String path, float tolerance) {
+    private static ImageComparison.ReferenceTestResult compareShape(@NotNull String path, float tolerance) {
         try {
-            URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path), path);
+            URL url = Objects.requireNonNull(ImageComparison.class.getResource(path), path);
             SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
             BufferedImage expected = renderReference(document);
             BufferedImage actual = renderShape(document);
-            return ReferenceTest.compareImageRasterization(expected, actual, path, tolerance, 0);
+            return ImageComparison.compareImageRasterization(expected, actual, path, tolerance, 0);
         } catch (Exception e) {
             Assertions.fail(e);
-            return ReferenceTest.ReferenceTestResult.FAILURE;
+            return ImageComparison.ReferenceTestResult.FAILURE;
         }
     }
 

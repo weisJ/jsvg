@@ -21,11 +21,11 @@
  */
 package com.github.weisj.jsvg;
 
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.actual;
-import static com.github.weisj.jsvg.ReferenceTest.ImageInfo.expected;
-import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
-import static com.github.weisj.jsvg.ReferenceTest.renderJsvg;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.compareImages;
+import static com.github.weisj.jsvg.ImageComparison.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,9 +39,9 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.github.weisj.jsvg.ReferenceTest.CompareInfo;
-import com.github.weisj.jsvg.ReferenceTest.ImageSource.PathImageSource;
-import com.github.weisj.jsvg.ReferenceTest.RenderType;
+import com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.nodes.text.GlyphRunTextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
@@ -127,7 +127,7 @@ class TextTest {
     void testExtractingText() {
         try {
             String path = "text/extractText.svg";
-            URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path), path);
+            URL url = Objects.requireNonNull(ImageComparison.class.getResource(path), path);
             SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
 
             StringBuilder textBuilder = new StringBuilder();
@@ -170,7 +170,7 @@ class TextTest {
     void testExtractingGlyphRunsText() {
         try {
             String path = "text/extractText2.svg";
-            URL url = Objects.requireNonNull(ReferenceTest.class.getResource(path), path);
+            URL url = Objects.requireNonNull(ImageComparison.class.getResource(path), path);
             SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
 
             List<String> runs = new ArrayList<>();

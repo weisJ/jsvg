@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,8 +21,8 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import static com.github.weisj.jsvg.ReferenceTest.ReferenceTestResult.SUCCESS;
-import static com.github.weisj.jsvg.ReferenceTest.compareImages;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
