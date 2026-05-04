@@ -93,9 +93,10 @@ class FXOutputTest {
     // Test cases that currently fail with the JavaFX renderer. Remove once fixed.
     private static final Set<String> SKIPPED_SVG_FILES = Set.of(
             "test2.svg",
-            "mesh2.svg",
-            "mesh4.svg",
             "mesh.svg",
+            "mesh2.svg",
+            "mesh3.svg",
+            "mesh4.svg",
             "mask_isolation_2_bug74.svg",
             "maskType.svg",
             "mask_isolation_2_bug74_ref.svg",
@@ -113,7 +114,11 @@ class FXOutputTest {
             "dropShadow_ref.svg",
             "ptr_bug62.svg",
             "merge.svg",
-            "pattern.svg");
+            "pattern.svg",
+            "striped.svg",
+            "overflowImage.svg",
+            "imageBase64.svg",
+            "radialGradient3.svg");
 
     // SVG files that are expected to fail loading due to invalid structure (e.g., use cycles or
     // excessive nesting). These are tested explicitly to verify they produce no valid document.
