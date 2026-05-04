@@ -115,7 +115,7 @@ class FXOutputTest {
             "ptr_bug62.svg",
             "merge.svg",
             "pattern.svg",
-            "striped.svg",
+            "stripes.svg",
             "overflowImage.svg",
             "imageBase64.svg",
             "radialGradient3.svg");
