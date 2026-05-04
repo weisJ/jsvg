@@ -484,7 +484,7 @@ canvas.documentProperty().bind(currentDocumentProperty);
 // Show or hide the transparency checker-board pattern behind the SVG
 canvas.setShowTransparentPattern(true);
 
-// Restrict the rendered area to a sub-region of the SVG viewport
+// Places the svg viewport inside this region within the SVG canvas.
 canvas.setViewBox(new ViewBox(0, 0, 200, 200));
 ````
 
