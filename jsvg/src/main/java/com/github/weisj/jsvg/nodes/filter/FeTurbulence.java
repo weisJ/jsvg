@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -128,8 +128,8 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
                 final int w = dest.getWidth();
                 final int h = dest.getHeight();
 
-                final double scaleX = tileBounds.getWidth() / (double) w;
-                final double scaleY = tileBounds.getHeight() / (double) h;
+                final double scaleX = tileBounds.getWidth() / w;
+                final double scaleY = tileBounds.getHeight() / h;
 
                 final double startX = tileBounds.getX();
                 final double startY = tileBounds.getY();
@@ -140,15 +140,15 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
                 final int dstAdjust = ImageUtil.getINT_RGBA_DataAdjust(dest);
                 int dp = ImageUtil.getINT_RGBA_DataOffset(dest);
 
-                double point_1 = startY;
+                double point1 = startY;
                 for (int i = 0; i < h; i++) {
-                    double point_0 = startX;
+                    double point0 = startX;
                     for (int end = dp + w; dp < end; dp++) {
-                        perlinTurbulence.turbulence(channels, point_0, point_1, fractalNoise, null, null);
+                        perlinTurbulence.turbulence(channels, point0, point1, fractalNoise, null, null);
                         destPixels[dp] = cm.getRGB(channelsToRGB(channels));
-                        point_0 += scaleX;
+                        point0 += scaleX;
                     }
-                    point_1 += scaleY;
+                    point1 += scaleY;
                     dp += dstAdjust;
                 }
             }

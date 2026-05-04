@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -385,11 +385,11 @@ public final class BlendModeComposite extends AbstractBlendComposite {
         int srcM = 255 - dstA;
         int dstM = 255 - srcA;
         float[] srcHSL = new float[3];
-        ColorUtil.RGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
+        ColorUtil.convertRGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
         float[] dstHSL = new float[3];
-        ColorUtil.RGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
+        ColorUtil.convertRGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
 
-        ColorUtil.HSLtoRGB(srcHSL[0], dstHSL[1], dstHSL[2], result);
+        ColorUtil.convertHSLtoRGB(srcHSL[0], dstHSL[1], dstHSL[2], result);
 
         result[0] = div255(srcM * src[0] + dstM * dst[0] + div255(srcA * dstA) * result[0]);
         result[1] = div255(srcM * src[1] + dstM * dst[1] + div255(srcA * dstA) * result[1]);
@@ -407,11 +407,11 @@ public final class BlendModeComposite extends AbstractBlendComposite {
         int srcM = 255 - dstA;
         int dstM = 255 - srcA;
         float[] srcHSL = new float[3];
-        ColorUtil.RGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
+        ColorUtil.convertRGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
         float[] dstHSL = new float[3];
-        ColorUtil.RGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
+        ColorUtil.convertRGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
 
-        ColorUtil.HSLtoRGB(dstHSL[0], srcHSL[1], dstHSL[2], result);
+        ColorUtil.convertHSLtoRGB(dstHSL[0], srcHSL[1], dstHSL[2], result);
 
         result[0] = div255(srcM * src[0] + dstM * dst[0] + div255(srcA * dstA) * result[0]);
         result[1] = div255(srcM * src[1] + dstM * dst[1] + div255(srcA * dstA) * result[1]);
@@ -429,11 +429,11 @@ public final class BlendModeComposite extends AbstractBlendComposite {
         int srcM = 255 - dstA;
         int dstM = 255 - srcA;
         float[] srcHSL = new float[3];
-        ColorUtil.RGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
+        ColorUtil.convertRGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
         float[] dstHSL = new float[3];
-        ColorUtil.RGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
+        ColorUtil.convertRGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
 
-        ColorUtil.HSLtoRGB(srcHSL[0], srcHSL[1], dstHSL[2], result);
+        ColorUtil.convertHSLtoRGB(srcHSL[0], srcHSL[1], dstHSL[2], result);
 
         result[0] = div255(srcM * src[0] + dstM * dst[0] + div255(srcA * dstA) * result[0]);
         result[1] = div255(srcM * src[1] + dstM * dst[1] + div255(srcA * dstA) * result[1]);
@@ -451,11 +451,11 @@ public final class BlendModeComposite extends AbstractBlendComposite {
         int srcM = 255 - dstA;
         int dstM = 255 - srcA;
         float[] srcHSL = new float[3];
-        ColorUtil.RGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
+        ColorUtil.convertRGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
         float[] dstHSL = new float[3];
-        ColorUtil.RGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
+        ColorUtil.convertRGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
 
-        ColorUtil.HSLtoRGB(dstHSL[0], dstHSL[1], srcHSL[2], result);
+        ColorUtil.convertHSLtoRGB(dstHSL[0], dstHSL[1], srcHSL[2], result);
 
         result[0] = div255(srcM * src[0] + dstM * dst[0] + div255(srcA * dstA) * result[0]);
         result[1] = div255(srcM * src[1] + dstM * dst[1] + div255(srcA * dstA) * result[1]);

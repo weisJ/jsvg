@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.ui.jfx;
 
+import static javafx.animation.Animation.INDEFINITE;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -107,7 +109,7 @@ public final class FXSVGCanvas extends Control {
                 .add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(elapsedAnimationTime, 0)));
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.endTime()),
                 new KeyValue(elapsedAnimationTime, animation.endTime())));
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.setCycleCount(INDEFINITE);
         timeline.playFromStart();
     }
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -128,17 +128,33 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(f), filterContext);
     }
 
-    private static abstract class AffineRGBImageFilter extends ColorSpaceAwareRGBImageFilter {
+    private abstract static class AffineRGBImageFilter extends ColorSpaceAwareRGBImageFilter {
 
         abstract boolean isLinear();
     }
 
     private static final class MatrixRGBFilter extends AffineRGBImageFilter {
 
-        private final double r1, r2, r3, r4, r5;
-        private final double g1, g2, g3, g4, g5;
-        private final double b1, b2, b3, b4, b5;
-        private final double a1, a2, a3, a4, a5;
+        private final double r1;
+        private final double r2;
+        private final double r3;
+        private final double r4;
+        private final double r5;
+        private final double g1;
+        private final double g2;
+        private final double g3;
+        private final double g4;
+        private final double g5;
+        private final double b1;
+        private final double b2;
+        private final double b3;
+        private final double b4;
+        private final double b5;
+        private final double a1;
+        private final double a2;
+        private final double a3;
+        private final double a4;
+        private final double a5;
 
         private MatrixRGBFilter(double[] values) {
             r1 = values[0];
@@ -190,9 +206,15 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     }
 
     private static final class NoAlphaMatrixRGBFilter extends AffineRGBImageFilter {
-        private final double r1, r2, r3;
-        private final double g1, g2, g3;
-        private final double b1, b2, b3;
+        private final double r1;
+        private final double r2;
+        private final double r3;
+        private final double g1;
+        private final double g2;
+        private final double g3;
+        private final double b1;
+        private final double b2;
+        private final double b3;
 
         private NoAlphaMatrixRGBFilter(
                 double r1, double r2, double r3,

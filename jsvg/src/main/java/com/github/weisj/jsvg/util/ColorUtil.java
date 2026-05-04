@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -53,7 +53,7 @@ public final class ColorUtil {
         return String.format("Color[%d,%d,%d,%d]", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
     }
 
-    public static void RGBPretoHSL(int r, int g, int b, int a, float @NotNull [] hsl) {
+    public static void convertRGBPretoHSL(int r, int g, int b, int a, float @NotNull [] hsl) {
         if (r < 0)
             r = 0;
         else if (r > 255) r = 255;
@@ -128,7 +128,7 @@ public final class ColorUtil {
         hsl[2] = l;
     }
 
-    public static void HSLtoRGB(float h, float s, float l, int @NotNull [] rgb) {
+    public static void convertHSLtoRGB(float h, float s, float l, int @NotNull [] rgb) {
         if (h < 0)
             h = 0.0f;
         else if (h > 1.0f) h = 1.0f;

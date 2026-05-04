@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -174,13 +174,15 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
             final int dstAdjust = ImageUtil.getINT_RGBA_DataAdjust(raster);
             int dp = ImageUtil.getINT_RGBA_DataOffset(raster);
 
-            double point_0, point_1 = startY;
-            int x, y = 0;
+            double point0;
+            double point1 = startY;
+            int x;
+            int y = 0;
             for (int i = 0; i < h; i++) {
                 x = 0;
-                point_0 = startX;
+                point0 = startX;
                 for (int end = dp + w; dp < end; dp++) {
-                    int displacementRGB = displacementChannel.pixelAt(point_0, point_1);
+                    int displacementRGB = displacementChannel.pixelAt(point0, point1);
                     double xDisplacement = xChannelSelector.value(displacementRGB) / 255.0 - 0.5f;
                     double yDisplacement = yChannelSelector.value(displacementRGB) / 255.0 - 0.5f;
                     int xDest = (int) (x + displacementScaleX * xDisplacement / scaleX);
@@ -190,10 +192,10 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
                     } else {
                         destPixels[dp] = 0;
                     }
-                    point_0 += scaleX;
+                    point0 += scaleX;
                     x++;
                 }
-                point_1 += scaleY;
+                point1 += scaleY;
                 dp += dstAdjust;
                 y++;
             }

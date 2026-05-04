@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -55,7 +55,7 @@ import org.junit.jupiter.api.Test;
 class DataUriTest {
 
     @Test
-    public void testSimple() throws DataUri.MalformedDataUriException {
+    void testSimple() throws DataUri.MalformedDataUriException {
         final String test = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
         DataUri duri = DataUri.parse(test, UTF_8);
 
@@ -72,48 +72,48 @@ class DataUriTest {
 
 
     @Test
-    public void testSimpleConstructor() {
-        final String EXPECTED_MIME = "text/plain";
-        final Charset EXPECTED_CHARSET = Charset.forName("ISO-8859-15");
-        final byte[] EXPECTED_DATA = new byte[] {1, 2, 3};
+    void testSimpleConstructor() {
+        final String expectedMime = "text/plain";
+        final Charset expectedCharset = Charset.forName("ISO-8859-15");
+        final byte[] expectedData = new byte[] {1, 2, 3};
 
-        DataUri duri = new DataUri(EXPECTED_MIME, EXPECTED_CHARSET, EXPECTED_DATA);
+        DataUri duri = new DataUri(expectedMime, expectedCharset, expectedData);
 
-        assertEquals(EXPECTED_MIME, duri.mime());
-        assertEquals(EXPECTED_CHARSET, duri.charset());
+        assertEquals(expectedMime, duri.mime());
+        assertEquals(expectedCharset, duri.charset());
         assertNull(duri.filename());
         assertNull(duri.contentDisposition());
-        assertArrayEquals(EXPECTED_DATA, duri.data());
+        assertArrayEquals(expectedData, duri.data());
     }
 
 
 
     @Test
-    public void testExtendedConstructor() {
-        final String EXPECTED_MIME = "text/plain";
-        final Charset EXPECTED_CHARSET = Charset.forName("ISO-8859-15");
-        final String EXPECTED_FILENAME = "test.txt";
-        final String EXPECTED_CONTENT_DISPOSITION = "inline";
-        final byte[] EXPECTED_DATA = new byte[] {1, 2, 3};
+    void testExtendedConstructor() {
+        final String expectedMime = "text/plain";
+        final Charset expectedCharset = Charset.forName("ISO-8859-15");
+        final String expectedFilename = "test.txt";
+        final String expectedContentDisposition = "inline";
+        final byte[] expectedData = new byte[] {1, 2, 3};
 
         DataUri duri = new DataUri(
-                EXPECTED_MIME,
-                EXPECTED_CHARSET,
-                EXPECTED_FILENAME,
-                EXPECTED_CONTENT_DISPOSITION,
-                EXPECTED_DATA);
+                expectedMime,
+                expectedCharset,
+                expectedFilename,
+                expectedContentDisposition,
+                expectedData);
 
-        assertEquals(EXPECTED_MIME, duri.mime());
-        assertEquals(EXPECTED_CHARSET, duri.charset());
-        assertEquals(EXPECTED_FILENAME, duri.filename());
-        assertEquals(EXPECTED_CONTENT_DISPOSITION, duri.contentDisposition());
-        assertArrayEquals(EXPECTED_DATA, duri.data());
+        assertEquals(expectedMime, duri.mime());
+        assertEquals(expectedCharset, duri.charset());
+        assertEquals(expectedFilename, duri.filename());
+        assertEquals(expectedContentDisposition, duri.contentDisposition());
+        assertArrayEquals(expectedData, duri.data());
     }
 
 
 
     @Test
-    public void testStartWithDataSchema() {
+    void testStartWithDataSchema() {
         assertThrows(DataUri.MalformedDataUriException.class, () -> DataUri.parse(
                 "dato:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==", UTF_8));
     }
@@ -121,7 +121,7 @@ class DataUriTest {
 
 
     @Test
-    public void testCaseInsensitivedataSchema() throws DataUri.MalformedDataUriException {
+    void testCaseInsensitivedataSchema() throws DataUri.MalformedDataUriException {
         final String test = "DaTa:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
         DataUri duri = DataUri.parse(test, UTF_8);
 
@@ -138,7 +138,7 @@ class DataUriTest {
 
 
     @Test
-    public void testEquals() throws DataUri.MalformedDataUriException {
+    void testEquals() throws DataUri.MalformedDataUriException {
         final String test = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
         DataUri duri = DataUri.parse(test, UTF_8);
 
@@ -158,7 +158,7 @@ class DataUriTest {
 
 
     @Test
-    public void testHashcode() throws DataUri.MalformedDataUriException {
+    void testHashcode() throws DataUri.MalformedDataUriException {
         final String test = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
         DataUri duri = DataUri.parse(test, UTF_8);
 
@@ -178,7 +178,7 @@ class DataUriTest {
 
 
     @Test
-    public void testMustContainComma() {
+    void testMustContainComma() {
         assertThrows(DataUri.MalformedDataUriException.class, () -> DataUri.parse(
                 "DaTa:image/gif;base64;R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==", UTF_8));
     }
@@ -186,7 +186,7 @@ class DataUriTest {
 
 
     @Test
-    public void testOptions() throws DataUri.MalformedDataUriException {
+    void testOptions() throws DataUri.MalformedDataUriException {
         final String test =
                 "data:image/gif;charset=utf-8;filename=test.txt;content-disposition=inline;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
         DataUri duri = DataUri.parse(test, UTF_8);
@@ -202,7 +202,7 @@ class DataUriTest {
 
 
     @Test
-    public void testToString() throws DataUri.MalformedDataUriException {
+    void testToString() throws DataUri.MalformedDataUriException {
         final String[] testStrings = {
                 "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==",
                 "data:image/gif;charset=UTF-8;content-disposition=inline;filename=test.txt;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==",
@@ -219,7 +219,7 @@ class DataUriTest {
     }
 
     @Test
-    public void testPlusCharacter() throws DataUri.MalformedDataUriException {
+    void testPlusCharacter() throws DataUri.MalformedDataUriException {
         // spaces shouldn't turn into pluses (see https://github.com/ooxi/jdatauri/issues/10)
         DataUri duri = DataUri.parse("data:text/plain;charset=utf-8,Hello%2C%20how%20do%20you%20do%3F", UTF_8);
         assertEquals(UTF_8, duri.charset());
