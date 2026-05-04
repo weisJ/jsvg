@@ -189,6 +189,11 @@ class FilterTest {
     }
 
     @Test
+    void testConvolveMatrix() {
+        assertDoesNotThrow(() -> renderJsvg("filter/convolveMatrix.svg"));
+    }
+
+    @Test
     void testEmptyGroup() {
         assertEquals(SUCCESS, compareImages("filter/emptyGroupNoTransform.svg"));
         assertEquals(SUCCESS, compareImages("filter/emptyGroupTransform.svg"));

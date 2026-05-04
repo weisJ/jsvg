@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <defs>
+    <filter id="sharpen" x="0%" y="0%" width="100%" height="100%">
+      <feConvolveMatrix order="3" kernelMatrix="0 -1 0 -1 5 -1 0 -1 0" preserveAlpha="true"/>
+    </filter>
+    <filter id="blur-convolve" x="0%" y="0%" width="100%" height="100%">
+      <feConvolveMatrix order="3" kernelMatrix="1 1 1 1 1 1 1 1 1" divisor="9"/>
+    </filter>
+    <filter id="emboss" x="0%" y="0%" width="100%" height="100%">
+      <feConvolveMatrix order="3" kernelMatrix="-2 -1 0 -1 1 1 0 1 2" bias="0.5"/>
+    </filter>
+  </defs>
+  <!-- Sharpen filter -->
+  <rect x="10" y="10" width="50" height="50" fill="blue" filter="url(#sharpen)"/>
+  <!-- Blur (via convolution) filter -->
+  <rect x="80" y="10" width="50" height="50" fill="red" filter="url(#blur-convolve)"/>
+  <!-- Emboss filter -->
+  <rect x="10" y="80" width="50" height="50" fill="green" filter="url(#emboss)"/>
+  <!-- No filter (reference) -->
+  <rect x="80" y="80" width="50" height="50" fill="orange"/>
+</svg>
