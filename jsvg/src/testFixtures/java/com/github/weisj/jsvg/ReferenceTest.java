@@ -76,7 +76,7 @@ public final class ReferenceTest {
 
     private static final double DEFAULT_TOLERANCE = 0.3;
     private static final double DEFAULT_PIXEL_TOLERANCE = 0.1;
-    public static Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
+    public static final Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
 
     public sealed interface RenderType {
         BatikType Batik = new BatikType();
