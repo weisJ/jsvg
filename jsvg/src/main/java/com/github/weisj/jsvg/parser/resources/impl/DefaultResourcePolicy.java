@@ -62,7 +62,7 @@ public class DefaultResourcePolicy implements ResourcePolicy {
 
     private static @NotNull String cleanup(@NotNull String path) {
         if (path.startsWith("data")) {
-            return path.replaceAll(" ", "");
+            return path.replace(" ", "");
         }
         return path;
     }
