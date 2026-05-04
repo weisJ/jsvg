@@ -37,7 +37,7 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
-import com.github.weisj.jsvg.renderer.FXTestSVGFiles;
+import com.github.weisj.jsvg.renderer.SVGTestFiles;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
 
 
@@ -56,8 +56,8 @@ public class FXTestViewerController {
     public Button buttonPlayPause;
 
     public void initialize() {
-        String svgDirectoryPrefix = FXTestSVGFiles.getTestSVGDirectory().toPath().toString();
-        List<String> testSVGFiles = FXTestSVGFiles.findTestSVGFiles()
+        String svgDirectoryPrefix = SVGTestFiles.getTestSVGDirectory().toPath().toString();
+        List<String> testSVGFiles = SVGTestFiles.findTestSVGFiles()
                 .stream()
                 .sorted((a, b) -> compareAsPaths(
                         relativePath(a, svgDirectoryPrefix),

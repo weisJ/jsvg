@@ -1,6 +1,9 @@
 # Local test files
 jsvg/src/test/resources/**/tmp.svg
 
+# Linting
+.sonarlint
+
 # SVN
 .svn
 repo/

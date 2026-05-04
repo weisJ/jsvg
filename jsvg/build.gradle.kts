@@ -2,6 +2,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
     `java-library`
+    `java-test-fixtures`
     jacoco
     id("biz.aQute.bnd.builder")
 }
@@ -15,11 +16,16 @@ dependencies {
 
     annotationProcessor(projects.annotationsProcessor)
 
+    testFixturesCompileOnly(libs.nullabilityAnnotations)
+    testFixturesCompileOnly(toolLibs.errorprone.annotations)
+    testFixturesImplementation(testLibs.junit.api)
+    testFixturesImplementation(testLibs.bundles.batik)
+    testFixturesImplementation(testLibs.imageCompare)
+
     testImplementation(testLibs.darklaf.core)
     testImplementation(testLibs.junit.api)
-    testImplementation(testLibs.svgSalamander)
     testImplementation(testLibs.bundles.batik)
-    testImplementation(testLibs.imageCompare)
+    testImplementation(testLibs.svgSalamander)
     testImplementation(testLibs.sizeof)
     testImplementation(gradleApi())
 
@@ -31,6 +37,10 @@ dependencies {
 tasks {
 
     compileTestJava {
+        options.release.set(21)
+    }
+
+    compileTestFixturesJava {
         options.release.set(21)
     }
 

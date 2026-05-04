@@ -28,10 +28,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
-/**
- * TODO Refactor test suite into testFixtures to allow different implementations to use the files more easily
- */
-public class FXTestSVGFiles {
+public class SVGTestFiles {
 
     private static final String TEST_PATH = System.getenv("JAVAFX_TEST_SVG_PATH");
     private static final String PACKAGE_NAME = "com/github/weisj/jsvg";
