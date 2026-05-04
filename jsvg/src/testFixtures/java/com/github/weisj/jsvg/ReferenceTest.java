@@ -76,7 +76,7 @@ public final class ReferenceTest {
 
     private static final double DEFAULT_TOLERANCE = 0.3;
     private static final double DEFAULT_PIXEL_TOLERANCE = 0.1;
-    public static final Object SOFT_CLIPPING_VALUE = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
+    public static Object softClippingValue = SVGRenderingHints.VALUE_SOFT_CLIPPING_OFF;
 
     public sealed interface RenderType {
         BatikType Batik = new BatikType();
@@ -378,7 +378,7 @@ public final class ReferenceTest {
                 RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE,
                 RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON,
                 RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY,
-                SVGRenderingHints.KEY_SOFT_CLIPPING, SOFT_CLIPPING_VALUE));
+                SVGRenderingHints.KEY_SOFT_CLIPPING, softClippingValue));
     }
 
     private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
