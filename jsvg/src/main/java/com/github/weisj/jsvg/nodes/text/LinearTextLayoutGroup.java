@@ -61,6 +61,7 @@ final class LinearTextLayoutGroup implements TextLayoutGroup {
         return asSegment;
     }
 
+    @Override
     public @NotNull List<TextSegment> segments() {
         return segments;
     }
@@ -100,6 +101,7 @@ final class LinearTextLayoutGroup implements TextLayoutGroup {
         return cursor.currentLocation(context.measureContext());
     }
 
+    @Override
     public @NotNull Point2D appendGlyphShape(@Nullable Point2D start, @NotNull RenderContext context,
             @NotNull Path2D shape) {
         MutableGlyphRun glyphRun = new MutableGlyphRun();

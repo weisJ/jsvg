@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -61,17 +61,24 @@ public final class Duration implements Comparable<Duration> {
     }
 
     public @NotNull Duration plus(@NotNull Duration duration) {
-        if (duration == INDEFINITE || this == INDEFINITE) return INDEFINITE;
+        if (duration.isIndefinite() || this.isIndefinite()) return INDEFINITE;
         return new Duration(milliseconds + duration.milliseconds);
     }
 
     public @NotNull Duration minus(@NotNull Duration duration) {
-        if (duration == INDEFINITE || this == INDEFINITE) return INDEFINITE;
+        if (duration.isIndefinite() || this.isIndefinite()) return INDEFINITE;
         return new Duration(milliseconds - duration.milliseconds);
     }
 
     @Override
     public int compareTo(@NotNull Duration o) {
         return Long.compare(milliseconds, o.milliseconds);
+    }
+
+    @Override
+    public String toString() {
+        return "Duration{" +
+                "milliseconds=" + milliseconds +
+                '}';
     }
 }

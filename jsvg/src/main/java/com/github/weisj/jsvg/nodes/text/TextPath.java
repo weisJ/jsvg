@@ -168,6 +168,7 @@ public final class TextPath extends TextContainer<TextSegment>
         return GeometryUtil.lastPointOnPath(cursor.pathIterator());
     }
 
+    @Override
     public @NotNull Point2D appendGlyphShape(@Nullable Point2D start, @NotNull RenderContext context,
             @NotNull Path2D shape) {
         PathGlyphCursor cursor = createCursorWithAnchorAdjustment(context);

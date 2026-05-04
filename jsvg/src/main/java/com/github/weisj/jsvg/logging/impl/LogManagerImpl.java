@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -35,6 +35,7 @@ import com.github.weisj.jsvg.logging.Logger;
 import aQute.bnd.annotation.spi.ServiceConsumer;
 
 @ServiceConsumer(value = LogManager.class)
+@SuppressWarnings("SameNameButDifferent")
 public final class LogManagerImpl {
     private static final @NotNull LogManager logManager;
 

@@ -62,16 +62,19 @@ public final class RenderContext {
 
     static {
         RenderContextAccessor.setInstance(new RenderContextAccessor.Accessor() {
+            @Override
             public @NotNull RenderContext createInitial(@Nullable SVGPaint currentColor,
                     @NotNull PlatformSupport awtSupport,
                     @NotNull MeasureContext measureContext) {
                 return RenderContext.createInitial(currentColor, awtSupport, measureContext);
             }
 
+            @Override
             public @NotNull RenderContext deriveForSurface(@NotNull RenderContext context) {
                 return context.deriveForSurface();
             }
 
+            @Override
             public @NotNull RenderContext deriveForChildGraphics(@NotNull RenderContext context) {
                 return context.deriveForChildGraphics();
             }
