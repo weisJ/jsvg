@@ -47,6 +47,7 @@ public final class AttributeUtil {
 
     @SafeVarargs
     public static <T> @NotNull T @Nullable [] toNonnullArray(@Nullable T... values) {
+        if (values == null) return null;
         for (T value : values) {
             if (value == null) return null;
         }
