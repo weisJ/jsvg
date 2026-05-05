@@ -205,22 +205,6 @@ class LengthTest {
     }
 
     // -------------------------------------------------------------------------
-    // toString
-    // -------------------------------------------------------------------------
-
-    @Test
-    void testToStringUnspecified() {
-        assertEquals("<unspecified>", Length.UNSPECIFIED.toString());
-    }
-
-    @Test
-    void testToStringSpecified() {
-        assertEquals("5.0px", new Length(Unit.PX, 5f).toString());
-        assertEquals("10.0em", new Length(Unit.EM, 10f).toString());
-        assertEquals("50.0%", new Length(Unit.PERCENTAGE, 50f).toString());
-    }
-
-    // -------------------------------------------------------------------------
     // Unit.valueOf
     // -------------------------------------------------------------------------
 

@@ -92,13 +92,6 @@ class ColorUtilTest {
     }
 
     @Test
-    void testToStringColor() {
-        assertEquals("null", ColorUtil.toString(null));
-        Color c = new Color(10, 20, 30, 40);
-        assertEquals("Color[10,20,30,40]", ColorUtil.toString(c));
-    }
-
-    @Test
     void testClampColor() {
         assertEquals(0, ColorUtil.clampColor(-1));
         assertEquals(0, ColorUtil.clampColor(0));

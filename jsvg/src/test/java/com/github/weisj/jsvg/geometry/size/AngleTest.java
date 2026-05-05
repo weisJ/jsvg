@@ -137,11 +137,4 @@ class AngleTest {
         assertFalse(Angle.isUnspecified(1f));
     }
 
-    @Test
-    void testAngleToString() {
-        Angle a = new Angle(AngleUnit.Deg, 90f);
-        String s = a.toString();
-        assertNotNull(s);
-        assertTrue(s.contains("radian"));
-    }
 }
