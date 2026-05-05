@@ -1,0 +1,20 @@
+<svg width="300" height="200" viewBox="0 0 300 200"
+	xmlns="http://www.w3.org/2000/svg">
+
+	<!-- opacity on individual elements -->
+	<rect x="10"  y="10" width="80" height="80" fill="red"  opacity="1.0" />
+	<rect x="110" y="10" width="80" height="80" fill="red"  opacity="0.5" />
+	<rect x="210" y="10" width="80" height="80" fill="red"  opacity="0.0" />
+
+	<!-- opacity on a group (non-overlapping children so there is no
+	     compositor ambiguity between renderers) -->
+	<g opacity="0.5">
+		<rect x="10"  y="110" width="60" height="70" fill="blue"  />
+		<rect x="80"  y="110" width="60" height="70" fill="green" />
+	</g>
+
+	<!-- fill-opacity and stroke-opacity -->
+	<circle cx="245" cy="150" r="40"
+		fill="purple" fill-opacity="0.5"
+		stroke="orange" stroke-width="6" stroke-opacity="0.7" />
+</svg>

@@ -1,0 +1,17 @@
+<svg width="300" height="160" viewBox="0 0 300 160"
+	xmlns="http://www.w3.org/2000/svg">
+
+	<!-- visible (default) -->
+	<rect x="10"  y="10" width="60" height="60" fill="green" visibility="visible" />
+
+	<!-- visibility:hidden — element is not painted, but still takes up space -->
+	<rect x="90"  y="10" width="60" height="60" fill="red"   visibility="hidden" />
+
+	<!-- display:none — element is entirely removed from rendering and layout -->
+	<rect x="170" y="10" width="60" height="60" fill="blue"  display="none" />
+
+	<!-- visibility:hidden on a group hides all children -->
+	<g visibility="hidden">
+		<rect x="10" y="90" width="60" height="60" fill="orange" />
+	</g>
+</svg>
