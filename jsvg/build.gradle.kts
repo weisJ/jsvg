@@ -34,6 +34,12 @@ dependencies {
     testCompileOnly(libs.nullabilityAnnotations)
     testCompileOnly(toolLibs.errorprone.annotations)
 }
+
+components.named<AdhocComponentWithVariants>("java") {
+    withVariantsFromConfiguration(configurations["testFixturesApiElements"]) { skip() }
+    withVariantsFromConfiguration(configurations["testFixturesRuntimeElements"]) { skip() }
+}
+
 tasks {
 
     compileTestJava {
