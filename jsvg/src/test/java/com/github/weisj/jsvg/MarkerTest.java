@@ -21,11 +21,16 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.RenderType;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
 class MarkerTest {
 
@@ -33,6 +38,24 @@ class MarkerTest {
     void markerRefTest() {
         assertEquals(SUCCESS, compareImages("marker/marker3.svg"));
         assertEquals(SUCCESS, compareImages("marker/marker3_flattened.svg"));
+    }
+
+    @Test
+    void testMarkerOrientAutoStartReverse() {
+        // auto-start-reverse is an SVG 2 feature not supported by Batik;
+        // compare against a flattened reference where the reversal is expressed
+        // by mirroring the marker shape.
+        assertEquals(SUCCESS, compareImages(new ImageComparison.CompareInfo(
+                expected(new PathImageSource("marker/marker1_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("marker/marker1.svg"), RenderType.JSVG))));
+    }
+
+    @Test
+    void testMarkerContextStroke() {
+        // Batik does not support context-stroke; compare against a flattened reference
+        assertEquals(SUCCESS, compareImages(new ImageComparison.CompareInfo(
+                expected(new PathImageSource("marker/marker2_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("marker/marker2.svg"), RenderType.JSVG))));
     }
 
     @Test

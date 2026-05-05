@@ -33,4 +33,9 @@ class FillTest {
     void testFillAttributeOnSVGRoot() {
         assertEquals(SUCCESS, compareImages("fillOnSVG.svg"));
     }
+
+    @Test
+    void testFillRule() {
+        assertEquals(SUCCESS, compareImages("fillRule.svg"));
+    }
 }

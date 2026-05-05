@@ -45,6 +45,12 @@ class GradientTest {
     }
 
     @Test
+    void radialGradientFocusRadius() {
+        // fr (focal radius) is an SVG 2 attribute not supported by Batik
+        assertDoesNotThrow(() -> renderJsvg("gradient/radialGradientFocusRadius.svg"));
+    }
+
+    @Test
     void radialGradientOutOfMemory() {
         assertDoesNotThrow(() -> renderJsvg("gradient/bad_gradient_stop_issue_51.svg"));
     }
