@@ -1,0 +1,29 @@
+<svg width="240" height="260" viewBox="0 0 240 260"
+	xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<!-- pad (default): stops extend to edges -->
+		<linearGradient id="gradPad" x1="0.25" x2="0.75" y1="0" y2="0"
+			spreadMethod="pad">
+			<stop offset="0%"   stop-color="red"  />
+			<stop offset="100%" stop-color="blue" />
+		</linearGradient>
+
+		<!-- reflect: gradient is mirrored at each edge -->
+		<linearGradient id="gradReflect" x1="0.25" x2="0.75" y1="0" y2="0"
+			spreadMethod="reflect">
+			<stop offset="0%"   stop-color="red"  />
+			<stop offset="100%" stop-color="blue" />
+		</linearGradient>
+
+		<!-- repeat: gradient repeats from the beginning at each edge -->
+		<linearGradient id="gradRepeat" x1="0.25" x2="0.75" y1="0" y2="0"
+			spreadMethod="repeat">
+			<stop offset="0%"   stop-color="red"  />
+			<stop offset="100%" stop-color="blue" />
+		</linearGradient>
+	</defs>
+
+	<rect x="10" y="10"  width="220" height="70" fill="url(#gradPad)"     />
+	<rect x="10" y="95"  width="220" height="70" fill="url(#gradReflect)" />
+	<rect x="10" y="180" width="220" height="70" fill="url(#gradRepeat)"  />
+</svg>

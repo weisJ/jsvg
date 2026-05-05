@@ -38,6 +38,16 @@ class GradientTest {
     }
 
     @Test
+    void linearGradientSpreadMethodRefTest() {
+        assertEquals(SUCCESS, compareImages("gradient/spreadMethod.svg"));
+    }
+
+    @Test
+    void gradientUserSpaceRefTest() {
+        assertEquals(SUCCESS, compareImages("gradient/gradientUserSpace.svg"));
+    }
+
+    @Test
     void radialGradientRefTest() {
         assertEquals(SUCCESS, compareImages("gradient/radialGradient.svg"));
         assertEquals(SUCCESS, compareImages("gradient/radialGradient2.svg"));
