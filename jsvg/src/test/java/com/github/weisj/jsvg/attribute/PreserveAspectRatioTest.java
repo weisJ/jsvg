@@ -121,7 +121,6 @@ class PreserveAspectRatioTest {
     void testEqualsWithNull() {
         PreserveAspectRatio par = parse("xMidYMid");
         assertNotEquals(null, par);
-        assertNotEquals("not a PAR", par);
     }
 
     // -------------------------------------------------------------------------

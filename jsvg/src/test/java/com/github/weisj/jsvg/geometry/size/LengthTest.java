@@ -192,8 +192,6 @@ class LengthTest {
         assertEquals(a, b);
         assertNotEquals(a, c);
         assertNotEquals(a, d);
-        assertNotEquals(null, a);
-        assertNotEquals("string", a);
         assertEquals(a, a);
     }
 

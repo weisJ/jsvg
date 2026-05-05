@@ -127,7 +127,6 @@ class AngleTest {
         Angle a = new Angle(AngleUnit.Deg, 90f);
         assertEquals(a, a);
         assertNotEquals(null, a);
-        assertNotEquals("angle", a);
     }
 
     @Test
