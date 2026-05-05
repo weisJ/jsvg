@@ -44,9 +44,10 @@ println("  Gradle: " + gradle.gradleVersion)
 
 sonarqube {
     properties {
-        properties["sonar.coverage.jacoco.xmlReportPaths"] = subprojects.joinToString(",") {
-            "${it.projectDir}/build/reports/jacoco/test/jacocoTestReport.xml"
-        }
+        properties["sonar.coverage.jacoco.xmlReportPaths"] =
+            subprojects.joinToString(",") {
+                "${it.projectDir}/build/reports/jacoco/test/jacocoTestReport.xml"
+            }
         properties["sonar.issue.ignore.multicriteria"] = "e1,e2,e3,e4,e5"
 
         // java:S115: Disable checking of constants names: We follow the nomenclature of the standard which
