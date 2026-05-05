@@ -48,7 +48,6 @@ final class StringTextSegment implements TextSegment {
 
     public StringTextSegment(@NotNull TextContainer<?> parent,
             @NotNull TextLayoutGroup layoutGroup, int index, @NotNull TextContent.Segment content) {
-        if (layoutGroup == null) throw new NullPointerException();
         this.parent = parent;
         this.layoutGroup = layoutGroup;
         this.index = index;
