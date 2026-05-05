@@ -6,7 +6,6 @@ import com.github.vlsi.gradle.properties.dsl.stringProperty
 import com.github.vlsi.gradle.publishing.dsl.simplifyXml
 import com.github.vlsi.gradle.publishing.dsl.versionFromResolution
 import net.ltgt.gradle.errorprone.errorprone
-import nmcp.NmcpExtension
 import org.gradle.kotlin.dsl.provideDelegate
 import java.time.Duration
 
@@ -16,7 +15,7 @@ plugins {
     id("com.diffplug.spotless")
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.gradle-extensions")
-    id("com.gradleup.nmcp") apply false
+    id("com.gradleup.nmcp.aggregation")
     id("net.ltgt.errorprone") apply false
 }
 
@@ -68,6 +67,31 @@ sonarqube {
         // java:S6548: Singleton detection. We use singletons in some cases.
         properties["sonar.issue.ignore.multicriteria.e5.ruleKey"] = "java:S6548"
         properties["sonar.issue.ignore.multicriteria.e5.resourceKey"] = "**/*.java"
+    }
+}
+
+val useInMemoryKey by props(default = false)
+val centralPortalPublishingType by props(default = "USER_MANAGED")
+val centralPortalPublishingTimeout by props(default = 1)
+
+nmcpAggregation {
+    centralPortal {
+        username.set(
+            project.stringProperty("centralPortalUsername")
+                ?: providers.environmentVariable("CENTRAL_PORTAL_USERNAME").orNull,
+        )
+        password.set(
+            project.stringProperty("centralPortalPassword")
+                ?: providers.environmentVariable("CENTRAL_PORTAL_PASSWORD").orNull,
+        )
+        publishingType = centralPortalPublishingType
+        validationTimeout = Duration.ofMinutes(centralPortalPublishingTimeout.toLong())
+    }
+}
+
+dependencies {
+    allprojects {
+        nmcpAggregation(project(path))
     }
 }
 
@@ -188,53 +212,6 @@ allprojects {
             }
         }
 
-        apply(plugin = "maven-publish")
-        apply(plugin = "com.gradleup.nmcp")
-        apply(plugin = "signing")
-
-        val useInMemoryKey by props(default = false)
-        val centralPortalPublishingType by props(default = "USER_MANAGED")
-        val centralPortalPublishingTimeout by props(default = 1)
-
-        configure<NmcpExtension> {
-            centralPortal {
-                username.set(
-                    project.stringProperty("centralPortalUsername")
-                        ?: providers.environmentVariable("CENTRAL_PORTAL_USERNAME").orNull,
-                )
-                password.set(
-                    project.stringProperty("centralPortalPassword")
-                        ?: providers.environmentVariable("CENTRAL_PORTAL_PASSWORD").orNull,
-                )
-                publishingType = centralPortalPublishingType
-                verificationTimeout = Duration.ofMinutes(centralPortalPublishingTimeout.toLong())
-            }
-        }
-
-        if (!isRelease) {
-            configure<PublishingExtension> {
-                repositories {
-                    maven {
-                        name = "centralSnapshots"
-                        url = uri("https://central.sonatype.com/repository/maven-snapshots")
-                        credentials(PasswordCredentials::class)
-                    }
-                }
-            }
-        } else {
-            configure<SigningExtension> {
-                sign(extensions.getByType<PublishingExtension>().publications)
-                if (!useInMemoryKey) {
-                    useGpgCmd()
-                } else {
-                    useInMemoryPgpKeys(
-                        project.stringProperty("signing.inMemoryKey")?.replace("#", "\n"),
-                        project.stringProperty("signing.password"),
-                    )
-                }
-            }
-        }
-
         if (enableErrorProne) {
             apply(plugin = "net.ltgt.errorprone")
             dependencies {
@@ -323,58 +300,88 @@ allprojects {
             }
         }
 
-        configure<PublishingExtension> {
-            if (project.path in listOf(":", ":annotations", ":annotations-processor")) {
-                return@configure
+        apply(plugin = "maven-publish")
+        apply(plugin = "com.gradleup.nmcp")
+        apply(plugin = "signing")
+
+        if (project.path !in listOf(":", ":annotations", ":annotations-processor")) {
+            if (!isRelease) {
+                configure<PublishingExtension> {
+                    repositories {
+                        maven {
+                            name = "centralSnapshots"
+                            url = uri("https://central.sonatype.com/repository/maven-snapshots")
+                            credentials(PasswordCredentials::class)
+                        }
+                    }
+                }
+            } else {
+                configure<SigningExtension> {
+                    sign(extensions.getByType<PublishingExtension>().publications)
+                    if (!useInMemoryKey) {
+                        useGpgCmd()
+                    } else {
+                        useInMemoryPgpKeys(
+                            project.stringProperty("signing.inMemoryKey")?.replace("#", "\n"),
+                            project.stringProperty("signing.password"),
+                        )
+                    }
+                }
             }
 
-            publications {
-                create<MavenPublication>(project.name) {
-                    artifactId = "${project.name}$snapshotIdentifier"
-                    version = buildVersion
-                    description = project.description
-                    from(project.components["java"])
+            configure<PublishingExtension> {
+                if (project.path in listOf(":", ":annotations", ":annotations-processor")) {
+                    return@configure
                 }
-                withType<MavenPublication> {
-                    // Use the resolved versions in pom.xml
-                    // Gradle might have different resolution rules, so we set the versions
-                    // that were used in Gradle build/test.
-                    versionFromResolution()
-                    pom {
-                        simplifyXml()
 
-                        description.set(
-                            project.description
-                                ?: "A lightweight Java2D SVG renderer",
-                        )
-                        name.set(
-                            (project.findProperty("artifact.name") as? String)
-                                ?: project.name.replaceFirstChar { it.uppercase() }.replace("-", " "),
-                        )
-                        url.set("https://github.com/weisJ/jsvg")
-                        organization {
-                            name.set("com.github.weisj")
-                            url.set("https://github.com/weisj")
-                        }
-                        issueManagement {
-                            system.set("GitHub")
-                            url.set("https://github.com/weisJ/jsvg/issues")
-                        }
-                        licenses {
-                            license {
-                                name.set("MIT")
-                                url.set("https://github.com/weisj/jsvg/blob/master/LICENSE")
-                                distribution.set("repo")
-                            }
-                        }
-                        scm {
+                publications {
+                    create<MavenPublication>(project.name) {
+                        artifactId = "${project.name}$snapshotIdentifier"
+                        version = buildVersion
+                        description = project.description
+                        from(project.components["java"])
+                    }
+                    withType<MavenPublication> {
+                        // Use the resolved versions in pom.xml
+                        // Gradle might have different resolution rules, so we set the versions
+                        // that were used in Gradle build/test.
+                        versionFromResolution()
+                        pom {
+                            simplifyXml()
+
+                            description.set(
+                                project.description
+                                    ?: "A lightweight Java2D SVG renderer",
+                            )
+                            name.set(
+                                (project.findProperty("artifact.name") as? String)
+                                    ?: project.name.replaceFirstChar { it.uppercase() }.replace("-", " "),
+                            )
                             url.set("https://github.com/weisJ/jsvg")
-                            connection.set("scm:git:git://github.com/weisJ/jsvg.git")
-                            developerConnection.set("scm:git:ssh://git@github.com:weisj/jsvg.git")
-                        }
-                        developers {
-                            developer {
-                                name.set("Jannis Weis")
+                            organization {
+                                name.set("com.github.weisj")
+                                url.set("https://github.com/weisj")
+                            }
+                            issueManagement {
+                                system.set("GitHub")
+                                url.set("https://github.com/weisJ/jsvg/issues")
+                            }
+                            licenses {
+                                license {
+                                    name.set("MIT")
+                                    url.set("https://github.com/weisj/jsvg/blob/master/LICENSE")
+                                    distribution.set("repo")
+                                }
+                            }
+                            scm {
+                                url.set("https://github.com/weisJ/jsvg")
+                                connection.set("scm:git:git://github.com/weisJ/jsvg.git")
+                                developerConnection.set("scm:git:ssh://git@github.com:weisj/jsvg.git")
+                            }
+                            developers {
+                                developer {
+                                    name.set("Jannis Weis")
+                                }
                             }
                         }
                     }
