@@ -1,0 +1,25 @@
+<svg width="200" height="140" viewBox="0 0 200 140"
+	xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<!-- solidColor with full opacity -->
+		<solidcolor id="solidBlue" solid-color="steelblue" solid-opacity="1" />
+
+		<!-- solidColor with partial opacity -->
+		<solidcolor id="solidRed" solid-color="crimson" solid-opacity="0.5" />
+	</defs>
+
+	<!-- fill with an opaque solidColor -->
+	<rect x="10" y="10" width="80" height="60" fill="url(#solidBlue)" />
+
+	<!-- stroke with an opaque solidColor -->
+	<rect x="110" y="10" width="80" height="60" fill="none"
+		stroke="url(#solidBlue)" stroke-width="8" />
+
+	<!-- fill with a semi-transparent solidColor -->
+	<rect x="10" y="80" width="80" height="50" fill="url(#solidRed)" />
+
+	<!-- inherit solidColor via fill on a group -->
+	<g fill="url(#solidBlue)">
+		<circle cx="150" cy="105" r="25" />
+	</g>
+</svg>

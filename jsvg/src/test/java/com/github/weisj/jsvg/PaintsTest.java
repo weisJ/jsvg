@@ -21,7 +21,10 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.RenderType;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static com.github.weisj.jsvg.ImageComparison.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,6 +34,7 @@ import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 
 class PaintsTest {
@@ -38,6 +42,15 @@ class PaintsTest {
     @Test
     void testCurrentColor() {
         assertEquals(SUCCESS, compareImages("paint/currentColor.svg"));
+    }
+
+    @Test
+    void testSolidColor() {
+        // <solidcolor> is an SVG Tiny 1.2 element not supported by Batik;
+        // compare against a flattened reference using plain fill/stroke attributes.
+        assertEquals(SUCCESS, compareImages(new ImageComparison.CompareInfo(
+                expected(new PathImageSource("paint/solidColor_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("paint/solidColor.svg"), RenderType.JSVG))));
     }
 
     @Test

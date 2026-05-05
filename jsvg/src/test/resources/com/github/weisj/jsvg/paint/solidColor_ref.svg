@@ -1,0 +1,20 @@
+<svg width="200" height="140" viewBox="0 0 200 140"
+	xmlns="http://www.w3.org/2000/svg">
+	<!-- Flattened version of solidColor.svg: solidColor paints replaced with
+	     their equivalent plain fill/stroke values. -->
+
+	<!-- fill with an opaque solidColor (steelblue, opacity 1) -->
+	<rect x="10" y="10" width="80" height="60" fill="steelblue" />
+
+	<!-- stroke with an opaque solidColor -->
+	<rect x="110" y="10" width="80" height="60" fill="none"
+		stroke="steelblue" stroke-width="8" />
+
+	<!-- fill with a semi-transparent solidColor (crimson, opacity 0.5) -->
+	<rect x="10" y="80" width="80" height="50" fill="crimson" fill-opacity="0.5" />
+
+	<!-- inherit solidColor via fill on a group -->
+	<g fill="steelblue">
+		<circle cx="150" cy="105" r="25" />
+	</g>
+</svg>
