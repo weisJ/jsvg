@@ -45,4 +45,6 @@ public interface TextContent {
     @ApiStatus.Experimental
     @NotNull
     List<@NotNull Segment> contentAfterChildIndex(int childIndex);
+
+    void setText(@NotNull String text);
 }
