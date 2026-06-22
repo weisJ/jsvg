@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +43,7 @@ import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.FontRenderContext;
 import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
@@ -99,21 +101,31 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
 
     @Override
     public @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {
+        if (!(referencedNode instanceof HasShape)) return AWTSVGShape.EMPTY_SHAPE;
         // Todo: Inner views need to handle this differently
-        return referencedNode instanceof HasShape
-                ? ((HasShape) referencedNode).elementShape(
-                        NodeRenderer.createChildContext((Renderable) referencedNode, context, this),
-                        box)
-                : AWTSVGShape.EMPTY_SHAPE;
+        return ((HasShape) referencedNode).elementShape(
+                NodeRenderer.createChildContext((Renderable) referencedNode, context, this),
+                box);
     }
 
     @Override
     public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
+        if (!(referencedNode instanceof HasShape)) return AWTSVGShape.EMPTY_SHAPE;
         // Todo: Inner views need to handle this differently
-        return referencedNode instanceof HasShape
-                ? ((HasShape) referencedNode).elementBounds(
-                        NodeRenderer.createChildContext((Renderable) referencedNode, context, this), box)
-                : AWTSVGShape.EMPTY_SHAPE;
+        return ((HasShape) referencedNode).elementBounds(
+                NodeRenderer.createChildContext((Renderable) referencedNode, context, this), box);
+    }
+
+    @Override
+    public @NotNull AffineTransform effectiveTransform(@NotNull RenderContext context, @NotNull ElementBounds bounds) {
+        MeasureContext measureContext = context.measureContext();
+        AffineTransform transform =
+                AffineTransform.getTranslateInstance(x.resolve(measureContext), y.resolve(measureContext));
+        AffineTransform effectiveTransform = super.effectiveTransform(context, bounds);
+        if (effectiveTransform != null) {
+            transform.concatenate(effectiveTransform);
+        }
+        return transform;
     }
 
     @Override
@@ -140,7 +152,6 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     public void render(@NotNull RenderContext context, @NotNull Output output) {
         if (referencedNode == null) return;
         MeasureContext measureContext = context.measureContext();
-        context.translate(output, x.resolve(measureContext), y.resolve(measureContext));
 
         // Todo: Vector Effects
 

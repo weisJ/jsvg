@@ -31,6 +31,11 @@ class UseTest {
 
     @Test
     void referenceTest() {
-        assertEquals(SUCCESS, compareImages("use.svg"));
+        assertEquals(SUCCESS, compareImages("use/use.svg"));
+    }
+
+    @Test
+    void clipPathUse() {
+        assertEquals(SUCCESS, compareImages("use/use_with_clippath_bug166.svg"));
     }
 }
