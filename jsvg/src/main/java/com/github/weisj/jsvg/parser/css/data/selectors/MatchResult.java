@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,36 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl.phase1;
+package com.github.weisj.jsvg.parser.css.data.selectors;
 
-/**
- * Token types from CSS Syntax Module Level 3, §4.2.
- * <p>See <a href="https://www.w3.org/TR/css-syntax-3/#tokenization">https://www.w3.org/TR/css-syntax-3/#tokenization</a>.
- */
-public enum TokenType {
-    IDENT,
-    FUNCTION,
-    AT_KEYWORD,
-    HASH,
-    STRING,
-    BAD_STRING,
-    URL,
-    BAD_URL,
-    DELIM,
-    NUMBER,
-    PERCENTAGE,
-    DIMENSION,
-    WHITESPACE,
-    CDO,
-    CDC,
-    COLON,
-    SEMICOLON,
-    COMMA,
-    LEFT_BRACKET,
-    RIGHT_BRACKET,
-    LEFT_PAREN,
-    RIGHT_PAREN,
-    LEFT_BRACE,
-    RIGHT_BRACE,
-    EOF
+public final class MatchResult {
+    public final boolean matches;
+    public final boolean selectorsUseElementPositionInDom;
+
+    public MatchResult(boolean matches, boolean selectorsUseElementPositionInDom) {
+        this.matches = matches;
+        this.selectorsUseElementPositionInDom = selectorsUseElementPositionInDom;
+    }
 }

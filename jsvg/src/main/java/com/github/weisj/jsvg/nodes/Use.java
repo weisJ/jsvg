@@ -35,7 +35,10 @@ import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
-import com.github.weisj.jsvg.nodes.prototype.*;
+import com.github.weisj.jsvg.nodes.prototype.HasContext;
+import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.nodes.prototype.Instantiator;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -74,6 +77,10 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
 
     public @Nullable SVGNode referencedNode() {
         return referencedNode;
+    }
+
+    public void setReferencedNode(@NotNull SVGNode referencedNode) {
+        this.referencedNode = referencedNode;
     }
 
     @Override

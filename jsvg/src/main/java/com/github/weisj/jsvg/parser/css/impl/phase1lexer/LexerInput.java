@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,7 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl;
+package com.github.weisj.jsvg.parser.css.impl.phase1lexer;
 
-public final class ParserException extends RuntimeException {
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+
+public interface LexerInput {
+    @NotNull
+    List<char[]> segments();
 }

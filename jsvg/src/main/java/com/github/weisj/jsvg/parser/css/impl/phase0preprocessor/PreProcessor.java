@@ -19,11 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl.phase0;
+package com.github.weisj.jsvg.parser.css.impl.phase0preprocessor;
 
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+
+import com.github.weisj.jsvg.parser.css.impl.phase1lexer.LexerInput;
 
 /**
  * <a href="https://www.w3.org/TR/css-syntax-3/#input-preprocessing">CSS Syntax Module Level 3 §3.3 input preprocessing</a>.
@@ -49,8 +51,8 @@ public final class PreProcessor {
     private int listIndex = 0;
     private int characterIndex = 0;
 
-    public PreProcessor(@NotNull List<char[]> input) {
-        this.input = input;
+    public PreProcessor(@NotNull LexerInput input) {
+        this.input = input.segments();
     }
 
     /** Returns the next preprocessed code point, or {@link #EOF} if the input is exhausted. */
@@ -59,19 +61,18 @@ public final class PreProcessor {
         if (listIndex >= input.size()) return EOF;
 
         char ch = input.get(listIndex)[characterIndex];
-        ++characterIndex; // advances to next character
+        ++characterIndex;
 
         switch (ch) {
             case '\r':
-                if (peekChar() == '\n') ++characterIndex; // consumes both characters
-                // \r\n becomes \n
+                if (peekChar() == '\n') ++characterIndex; // \r\n -> \n
                 return '\n';
             case '\f':
                 return '\n';
             case '\0':
                 return REPLACEMENT_CHARACTER;
             default:
-                // two-character Unicode code points are returned as a single int
+                // combine a surrogate pair into one code point; unpaired surrogates are invalid
                 if (Character.isHighSurrogate(ch)) {
                     char nextChar = peekChar();
                     if (nextChar != (char) EOF && Character.isLowSurrogate(nextChar)) {
@@ -101,7 +102,7 @@ public final class PreProcessor {
 
     private void skipEmptySegments() {
         while (listIndex < input.size()
-            && characterIndex >= input.get(listIndex).length) {
+                && characterIndex >= input.get(listIndex).length) {
             listIndex++;
             characterIndex = 0;
         }

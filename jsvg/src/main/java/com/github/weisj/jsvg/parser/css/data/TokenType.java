@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,17 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css;
+package com.github.weisj.jsvg.parser.css.data;
 
-import org.jetbrains.annotations.NotNull;
-
-import com.github.weisj.jsvg.parser.DomElement;
-
-public interface StyleSheet {
-
-    interface RuleConsumer {
-        void applyRule(@NotNull StyleProperty property);
-    }
-
-    void forEachMatchingRule(@NotNull DomElement element, @NotNull RuleConsumer ruleConsumer);
+/**
+ * Token types from CSS Syntax Module Level 3, §4.2.
+ * <p>See <a href="https://www.w3.org/TR/css-syntax-3/#tokenization">https://www.w3.org/TR/css-syntax-3/#tokenization</a>.
+ */
+public enum TokenType {
+    IDENT,
+    FUNCTION,
+    AT_KEYWORD,
+    HASH,
+    STRING,
+    BAD_STRING,
+    URL,
+    BAD_URL,
+    DELIM,
+    NUMBER,
+    PERCENTAGE,
+    DIMENSION,
+    WHITESPACE,
+    CDO,
+    CDC,
+    COLON,
+    SEMICOLON,
+    COMMA,
+    LEFT_BRACKET,
+    RIGHT_BRACKET,
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    LEFT_BRACE,
+    RIGHT_BRACE,
+    EOF
 }

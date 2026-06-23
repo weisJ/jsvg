@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.attribute;
 import java.awt.Font;
 import java.awt.image.ImageObserver;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -36,6 +37,8 @@ import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
 import com.github.weisj.jsvg.parser.impl.ParserTestUtil;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
@@ -90,6 +93,75 @@ class FontTest {
 
         Assertions.assertEquals("nosuchfamily", queriedFontFamily); // CSS-canonicalized
         Assertions.assertEquals(12f, font.size());
+    }
+
+    @Test
+    void checkFontShorthandExpansion() {
+        //@formatter:off
+
+        // font-size font-family
+        assertFontShorthand("1.2em \"Fira Sans\", sans-serif",
+            mapOf(
+                "font-style", "normal",
+                "font-variant", "normal",
+                "font-weight", "normal",
+                "font-stretch", "normal",
+                "font-size", "1.2em",
+                "line-height", "normal",
+                "font-family", "\"Fira Sans\", sans-serif"));
+
+        // font-size/line-height font-family
+        assertFontShorthand("1.2em/2 \"Fira Sans\", sans-serif",
+            mapOf(
+                "font-style", "normal",
+                "font-variant", "normal",
+                "font-weight", "normal",
+                "font-stretch", "normal",
+                "font-size", "1.2em",
+                "line-height", "2",
+                "font-family", "\"Fira Sans\", sans-serif"));
+
+        // font-style font-weight font-size font-family
+        assertFontShorthand("italic bold 1.2em \"Fira Sans\", sans-serif",
+            mapOf(
+                "font-style", "italic",
+                "font-variant", "normal",
+                "font-weight", "bold",
+                "font-stretch", "normal",
+                "font-size", "1.2em",
+                "line-height", "normal",
+                "font-family", "\"Fira Sans\", sans-serif"));
+
+        // font-stretch font-variant font-size font-family
+        assertFontShorthand("ultra-condensed small-caps 1.2em \"Fira Sans\", sans-serif",
+            mapOf(
+                "font-style", "normal",
+                "font-variant", "small-caps",
+                "font-weight", "normal",
+                "font-stretch", "ultra-condensed",
+                "font-size", "1.2em",
+                "line-height", "normal",
+                "font-family", "\"Fira Sans\", sans-serif"));
+
+        // system font
+        assertFontShorthand("caption", mapOf("font", "caption"));
+
+        //@formatter:on
+    }
+
+    private static void assertFontShorthand(@NotNull String input,
+            @NotNull Map<String, List<ComponentValue>> expected) {
+        List<ComponentValue> parsedInput = new FullCssParser().parseCssAttribute(input);
+        Assertions.assertEquals(expected, FontParser.expandFontShorthand(parsedInput));
+    }
+
+    private static @NotNull Map<String, List<ComponentValue>> mapOf(@NotNull String... keysAndValues) {
+        FullCssParser parser = new FullCssParser();
+        Map<String, List<ComponentValue>> map = new HashMap<>();
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            map.put(keysAndValues[i], parser.parseCssAttribute(keysAndValues[i + 1]));
+        }
+        return map;
     }
 
     private @NotNull PlatformSupport getSupport() {

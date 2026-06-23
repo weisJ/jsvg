@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -20,8 +20,6 @@
  *
  */
 package com.github.weisj.jsvg.nodes.filter;
-
-import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -52,41 +50,40 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
         super.build(attributeNode);
 
         AttributeNode child = attributeNode.copy();
-        Map<String, String> attributes = child.attributes();
 
         String resultKey = "result";
 
         FilterChannelKey inputId = attributeNode.getFilterChannelKey("in", outerLastResult);
-        String resultId = attributes.get(resultKey);
+        String resultId = child.getValue(resultKey);
         if (resultId == null) {
             resultId = "dropshadow-" + attributeNode.hashCode();
         }
-        attributes.put(resultKey, resultId);
+        child.setValue(resultKey, resultId);
 
         FeGaussianBlur blur = new FeGaussianBlur();
         blur.build(child);
         blur.setOnlyAlpha(true);
 
-        attributes.put("in", resultId);
+        child.setValue("in", resultId);
 
         String offsetResultId = resultId + "-offset-" + resultId.hashCode();
-        attributes.put(resultKey, offsetResultId);
+        child.setValue(resultKey, offsetResultId);
         FeOffset offset = new FeOffset();
         offset.build(child);
 
-        attributes.put(resultKey, resultId);
+        child.setValue(resultKey, resultId);
         FeFlood flood = new FeFlood();
         flood.build(child);
 
-        attributes.put("in2", offsetResultId);
-        attributes.put("operator", "in");
+        child.setValue("in2", offsetResultId);
+        child.setValue("operator", "in");
         FeComposite composite = new FeComposite();
         composite.build(child);
 
         FeMergeNode node1 = new FeMergeNode();
         node1.build(child);
 
-        attributes.put("in", inputId.key().toString());
+        child.setValue("in", inputId.key().toString());
         FeMergeNode node2 = new FeMergeNode();
         node2.build(child);
 

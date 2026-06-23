@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,7 +25,28 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
+import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
+import com.github.weisj.jsvg.renderer.CssHints;
+
 public interface CssParser {
+    /**
+     * Parse a stylesheet, evaluating {@code @media} at-rules against the given hints.
+     * CSS shorthand attributes like font are replaced with multiple declarations.
+     */
     @NotNull
-    StyleSheet parse(@NotNull List<char[]> input);
+    StyleRuleList parseStyleSheet(@NotNull List<char[]> input, @NotNull CssHints hints);
+
+    /**
+     * Parse an SVG style attribute. Shorthands like {@code font} are expanded into their longhands.
+     */
+    @NotNull
+    List<@NotNull NormalizedProperty> parseStyleAttribute(@NotNull String input, @NotNull CssHints hints);
+
+    @NotNull
+    List<@NotNull ComponentValue> parseCssAttribute(@NotNull String input);
+
+    @NotNull
+    List<@NotNull List<@NotNull ComponentValue>> parseCommaSeparatedCssAttribute(@NotNull String input);
 }
