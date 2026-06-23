@@ -31,23 +31,24 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.TextContent;
 import com.github.weisj.jsvg.parser.css.CssParser;
-import com.github.weisj.jsvg.parser.css.StyleSheet;
+import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
+import com.github.weisj.jsvg.renderer.CssHints;
 
 @ElementCategories({/* None */})
 @PermittedContent(any = true, charData = true)
 public final class Style extends MetaSVGNode {
     public static final String TAG = "style";
 
-    private StyleSheet styleSheet;
+    private StyleRuleList styleSheet;
 
     private final List<char @NotNull []> data = new ArrayList<>();
 
-    public void parseStyleSheet(@NotNull CssParser cssParser) {
-        styleSheet = cssParser.parse(data);
+    public void parseStyleSheet(@NotNull CssParser cssParser, @NotNull CssHints cssHints) {
+        styleSheet = cssParser.parseStyleSheet(data, cssHints);
         data.clear();
     }
 
-    public @NotNull StyleSheet styleSheet() {
+    public @NotNull StyleRuleList styleSheet() {
         return Objects.requireNonNull(styleSheet);
     }
 

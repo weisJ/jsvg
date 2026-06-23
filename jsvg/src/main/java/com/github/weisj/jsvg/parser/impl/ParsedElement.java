@@ -21,7 +21,10 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,10 +49,13 @@ public final class ParsedElement implements DomElement {
     private final @Nullable String id;
     private final @NotNull ParsedDocument document;
     private final @Nullable ParsedElement parent;
+    private final int oneBasedIndexInParent;
+    private final int oneBasedIndexAmongSiblingsWithSameTagName;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
+    private final @NotNull Map<String, Integer> childCountsByTagName = new HashMap<>();
     private final @NotNull List<@NotNull ParsedElement> indirectChildren = new ArrayList<>();
     private final @NotNull Map<String, @NotNull List<@NotNull ParsedElement>> animationElements = new HashMap<>();
     private TextContentImpl textContent = null;
@@ -58,11 +64,17 @@ public final class ParsedElement implements DomElement {
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
     private int outgoingPaths = -1;
 
-    ParsedElement(@Nullable String id, @NotNull ParsedDocument document,
-            @Nullable ParsedElement parent, @NotNull AttributeNode element,
+    ParsedElement(@Nullable String id,
+            @NotNull ParsedDocument document,
+            @Nullable ParsedElement parent,
+            int oneBasedIndexInParent,
+            int oneBasedIndexAmongSiblingsWithSameTagName,
+            @NotNull AttributeNode element,
             @NotNull SVGNode node) {
         this.document = document;
         this.parent = parent;
+        this.oneBasedIndexInParent = oneBasedIndexInParent;
+        this.oneBasedIndexAmongSiblingsWithSameTagName = oneBasedIndexAmongSiblingsWithSameTagName;
         this.attributeNode = element;
         this.node = node;
         this.id = id;
@@ -112,7 +124,7 @@ public final class ParsedElement implements DomElement {
         if (value == null) {
             attributeNode.attributes().remove(name);
         } else {
-            attributeNode.attributes().put(name, value);
+            attributeNode.attributes().put(name, new AttributeValue.PlainString(value));
         }
     }
 
@@ -133,6 +145,37 @@ public final class ParsedElement implements DomElement {
         return parent;
     }
 
+    public int oneBasedIndexInParent() {
+        return oneBasedIndexInParent;
+    }
+
+    public int oneBasedIndexAmongSiblingsWithSameTagName() {
+        return oneBasedIndexAmongSiblingsWithSameTagName;
+    }
+
+    /** Number of element children with the given tag name. */
+    public int childCountWithTagName(@NotNull String tagName) {
+        return childCountsByTagName.getOrDefault(tagName, 0);
+    }
+
+    /** Whether this element contains any non-whitespace text (for the {@code :empty} pseudo-class). */
+    public boolean hasNonWhitespaceText() {
+        return textContent != null && textContent.hasNonWhitespaceText();
+    }
+
+    /** Preceding element sibling, or null if first child */
+    public @Nullable ParsedElement previousSibling() {
+        ParsedElement parent = parent();
+        if (parent == null) {
+            return null;
+        }
+        int previousZeroBasedIndex = oneBasedIndexInParent() - 2;
+        if (previousZeroBasedIndex < 0) {
+            return null;
+        }
+        return parent.children().get(previousZeroBasedIndex);
+    }
+
     public @NotNull SVGNode node() {
         return node;
     }
@@ -150,11 +193,51 @@ public final class ParsedElement implements DomElement {
         return attributeNode;
     }
 
+    /**
+     * Deep-copies this element as the shadow tree of a {@code <use>}. The copied root is detached (no parent,
+     * treated as an only child) so position-dependent selectors re-match against the shadow tree; the copy is
+     * unbuilt, so the caller must invoke build().
+     * <p>
+     * Limitation: {@code url(#id)} references inside the clone resolve to the original, not the clone.
+     */
+    @NotNull
+    ParsedElement copyAsUseInstance(@NotNull NodeSupplier nodeSupplier) {
+        return deepCopy(nodeSupplier, null, 1, 1);
+    }
+
+    private @NotNull ParsedElement deepCopy(@NotNull NodeSupplier nodeSupplier, @Nullable ParsedElement newParent,
+            int indexInParent, int indexAmongSiblingsWithSameTagName) {
+        SVGNode freshNode = nodeSupplier.create(tagName());
+        if (freshNode == null) {
+            throw new IllegalStateException("Cannot copy element <" + tagName() + ">");
+        }
+        // Fresh AttributeNode with an empty resolved-attribute map so build() re-runs the cascade.
+        AttributeNode freshAttributes = attributeNode.copyForReparse();
+
+        ParsedElement copy = new ParsedElement(id, document, newParent, indexInParent,
+                indexAmongSiblingsWithSameTagName, freshAttributes, freshNode);
+        freshAttributes.setElement(copy);
+
+        // Text content is parsed during SAX parsing and never regenerated at build time, so carry it over.
+        if (textContent != null) {
+            copy.textContent = textContent.copyFor(copy);
+        }
+
+        // The subtree structure is identical to the original, so descendants keep their own indices;
+        // only the root (above) is detached.
+        for (ParsedElement child : children) {
+            copy.addChild(child.deepCopy(nodeSupplier, copy,
+                    child.oneBasedIndexInParent, child.oneBasedIndexAmongSiblingsWithSameTagName));
+        }
+        return copy;
+    }
+
     void addChild(@NotNull ParsedElement parsedElement) {
         if (Category.hasCategory(parsedElement.node, Category.Animation)) {
             String attributeName = BaseAnimationNode.attributeName(parsedElement.attributeNode());
             animationElements.computeIfAbsent(attributeName, k -> new ArrayList<>()).add(parsedElement);
         }
+        childCountsByTagName.merge(parsedElement.tagName(), 1, Integer::sum);
         children.add(parsedElement);
     }
 
@@ -215,9 +298,19 @@ public final class ParsedElement implements DomElement {
             child.build(depth + 1);
         }
 
+        // Children are built depth-first above, so each child's flag already covers its own subtree.
+        updateSelectorsUseElementPositionInDomWithChildrenValues();
+
         document().setCurrentNestingDepth(depth);
         node.build(attributeNode);
         buildStatus = BuildStatus.FINISHED;
+    }
+
+    private void updateSelectorsUseElementPositionInDomWithChildrenValues() {
+        for (ParsedElement child : children) {
+            attributeNode.orSelectorsUseElementPositionInDom(
+                    child.attributeNode.selectorsUseElementPositionInDom());
+        }
     }
 
     /*

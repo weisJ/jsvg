@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,6 +28,7 @@ import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.impl.*;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
+import com.github.weisj.jsvg.renderer.CssHints;
 
 /**
  * The context providing all necessary components for loading an SVG document.
@@ -54,6 +55,9 @@ public interface LoaderContext {
 
     @NotNull
     DocumentLimits documentLimits();
+
+    @NotNull
+    CssHints cssHints();
 
     static @NotNull Builder builder() {
         return MutableLoaderContext.createDefault();
@@ -86,6 +90,8 @@ public interface LoaderContext {
         @NotNull
         Builder documentLimits(@NotNull DocumentLimits documentLimits);
 
+        @NotNull
+        Builder cssHints(@NotNull CssHints cssHints);
 
         @NotNull
         LoaderContext build();

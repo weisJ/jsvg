@@ -22,26 +22,58 @@
 package com.github.weisj.jsvg.parser.impl;
 
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.nodes.*;
+import com.github.weisj.jsvg.nodes.SVG;
+import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.Style;
+import com.github.weisj.jsvg.nodes.Use;
 import com.github.weisj.jsvg.nodes.container.CommonRenderableContainerNode;
 import com.github.weisj.jsvg.parser.DomProcessor;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.css.CssParser;
-import com.github.weisj.jsvg.parser.css.StyleSheet;
+import com.github.weisj.jsvg.parser.css.impl.phase4matcher.StyleSheets;
+import com.github.weisj.jsvg.renderer.CssHints;
 
 public final class SVGDocumentBuilder {
     private final @NotNull ParsedDocument parsedDocument;
-    private final @NotNull List<@NotNull Use> useElements = new ArrayList<>();
+    /** All the <use> nodes */
+    private final @NotNull List<@NotNull ParsedElement> useElements = new ArrayList<>();
+    /** Map from (element ids in the href attributes of <use> elements) to (the corresponding target element). */
+    private final @NotNull Map<@NotNull String, @NotNull ParsedElement> useTargets = new HashMap<>();
+    /**
+     * Map from (element ids in the href attributes of <use> elements) to (a copy of the corresponding target node).
+     * Each target element (distinct by id) is copied at most once and reused across all <use> elements.
+     * The target element is only copied if its AttributeNode.selectorsUseElementPositionInDom is true.
+     */
+    private final @NotNull Map<@NotNull String, @NotNull SVGNode> copiedUseTargets = new HashMap<>();
     private final @NotNull List<@NotNull ParsedElement> styleElements = new ArrayList<>();
-    private final @NotNull List<@NotNull StyleSheet> styleSheets = new ArrayList<>();
-    private final @NotNull Deque<@NotNull ParsedElement> currentNodeStack = new ArrayDeque<>();
+    private final @NotNull StyleSheets styleSheets = new StyleSheets();
+
+    private final static class ParsedElementAnnotated {
+        public final @NotNull ParsedElement element;
+        /**
+         * Number of children of this element, grouped by their tag name. Used to compute
+         * {@link ParsedElement#oneBasedIndexAmongSiblingsWithSameTagName()}.
+         */
+        public final @NotNull Map<String, Integer> nChildrenByTagName = new HashMap<>();
+
+        public ParsedElementAnnotated(@NotNull ParsedElement element) {
+            this.element = element;
+        }
+    }
+
+    private final @NotNull Deque<@NotNull ParsedElementAnnotated> currentNodeStack = new ArrayDeque<>();
 
     private final @NotNull LoaderContext loaderContext;
     private final @NotNull NodeSupplier nodeSupplier;
@@ -74,19 +106,25 @@ public final class SVGDocumentBuilder {
         if (rootNode == null) throw new IllegalStateException("Document is empty");
     }
 
-    public boolean startElement(@NotNull String tagName, @NotNull Map<String, String> attributes) {
-        ParsedElement parentElement = !currentNodeStack.isEmpty()
+    public boolean startElement(@NotNull String tagName, @NotNull Map<@NotNull String, @NotNull String> attributes) {
+        ParsedElementAnnotated parentElementAnnotated = !currentNodeStack.isEmpty()
                 ? currentNodeStack.peek()
                 : null;
+        ParsedElement parentElement = parentElementAnnotated != null ? parentElementAnnotated.element : null;
 
         if (parentElement != null) flushText(parentElement, true);
 
         @Nullable SVGNode newNode = nodeSupplier.create(tagName);
         if (newNode == null) return false;
 
+        // SVG attributes are initially stored as plain strings; afterwards, some are converted to Parsed
         AttributeNode attributeNode = new AttributeNode(tagName, attributes, styleSheets);
         String id = attributes.get("id");
-        ParsedElement parsedElement = new ParsedElement(id, parsedDocument, parentElement, attributeNode, newNode);
+        int oneBasedIndexInParent = parentElement == null ? 1 : parentElement.children().size() + 1;
+        int oneBasedIndexAmongSiblingsWithSameTagName = parentElementAnnotated == null ? 1
+                : parentElementAnnotated.nChildrenByTagName.getOrDefault(tagName, 0) + 1;
+        ParsedElement parsedElement = new ParsedElement(id, parsedDocument, parentElement, oneBasedIndexInParent,
+                oneBasedIndexAmongSiblingsWithSameTagName, attributeNode, newNode);
         attributeNode.setElement(parsedElement);
 
         if (id != null && !parsedDocument.hasElementWithId(id)) {
@@ -103,10 +141,10 @@ public final class SVGDocumentBuilder {
         }
 
         if (parsedElement.node() instanceof Use) {
-            useElements.add((Use) parsedElement.node());
+            useElements.add(parsedElement);
         }
 
-        currentNodeStack.push(parsedElement);
+        currentNodeStack.push(new ParsedElementAnnotated(parsedElement));
         return true;
     }
 
@@ -114,7 +152,7 @@ public final class SVGDocumentBuilder {
         if (currentNodeStack.isEmpty()) {
             throw new IllegalStateException("Adding text content without a current node");
         }
-        ParsedElement currentElement = currentNodeStack.peek();
+        ParsedElement currentElement = currentNodeStack.peek().element;
         if (currentElement.characterDataParser == null) return;
         currentElement.characterDataParser.append(characterData, startOffset, endOffset);
     }
@@ -123,7 +161,7 @@ public final class SVGDocumentBuilder {
         if (currentNodeStack.isEmpty()) {
             throw new IllegalStateException("No current node to end");
         }
-        ParsedElement currentElement = currentNodeStack.pop();
+        ParsedElement currentElement = currentNodeStack.pop().element;
         String currentNodeTagName = currentElement.attributeNode().tagName();
         if (!currentNodeTagName.equals(tagName)) {
             throw new IllegalStateException(
@@ -134,8 +172,8 @@ public final class SVGDocumentBuilder {
 
     private void flushText(@NotNull ParsedElement element, boolean segmentBreak) {
         if (element.characterDataParser != null && element.characterDataParser.canFlush(segmentBreak)) {
-            element.textContent().currentContentList()
-                    .add(new StringSegment(element.characterDataParser.flush(segmentBreak)));
+            element.textContent()
+                    .addSegmentToCurrentContentList(new StringSegment(element.characterDataParser.flush(segmentBreak)));
         }
     }
 
@@ -149,21 +187,56 @@ public final class SVGDocumentBuilder {
     public @NotNull SVGDocument build() {
         preProcess();
         processStyleSheets();
+        processUseElements();
         rootNode.build(0);
         validatePathCount();
         validateUseElementsDepth();
+        copyUseElementTargets();
         return DocumentConstructorAccessor.constructor().create((SVG) rootNode.node());
     }
 
     private void processStyleSheets() {
         if (styleElements.isEmpty()) return;
         CssParser cssParser = loaderContext.cssParser();
+        CssHints cssHints = loaderContext.cssHints();
         for (ParsedElement styleElement : styleElements) {
             styleElement.build(0);
             Style styleNode = (Style) styleElement.node();
-            styleNode.parseStyleSheet(cssParser);
+            styleNode.parseStyleSheet(cssParser, cssHints);
             styleSheets.add(styleNode.styleSheet());
         }
+    }
+
+    private void processUseElements() {
+        // sets this.useTargets
+        for (ParsedElement parsedElement : useElements) {
+            parsedElement.build(0); // sets Use.referencedNode()
+            Use useElement = (Use) parsedElement.node();
+            SVGNode referencedNode = useElement.referencedNode();
+            if (referencedNode != null) { // id is non-null because the referencedNode was referenced by id
+                @NotNull String useTargetId = referencedNode.id();
+                ParsedElement targetElement = parsedDocument.getElementById(ParsedElement.class, useTargetId);
+                // Skip targets in external documents: they cascade against their own document's stylesheets,
+                // so the host-DOM re-match the copy performs doesn't apply. Identity (not id) detects locality,
+                // since ids may collide across documents.
+                if (targetElement != null && targetElement.node() == referencedNode) {
+                    // one copy is enough for all <use> instances that target the same element
+                    useTargets.put(useTargetId, targetElement);
+                }
+            }
+        }
+
+        // sets this.copiedUseTargets
+        for (ParsedElement useTarget : useTargets.values()) {
+            if (useTarget.attributeNode().selectorsUseElementPositionInDom()
+                    && !copiedUseTargets.containsKey(useTarget.id())) {
+                // one copy is enough for all <use> instances that target the same element
+                ParsedElement copy = useTarget.copyAsUseInstance(nodeSupplier);
+                copy.build(0);
+                copiedUseTargets.put(useTarget.id(), copy.node());
+            }
+        }
+
     }
 
     private void validatePathCount() {
@@ -181,13 +254,26 @@ public final class SVGDocumentBuilder {
         if (useElements.isEmpty()) return;
         Map<SVGNode, Integer> checkedNodes = new HashMap<>();
         int useNestingLimit = parsedDocument.loaderContext().documentLimits().maxUseNestingDepth();
-        for (Use useElement : useElements) {
+        for (ParsedElement parsedElement : useElements) {
+            Use useElement = (Use) parsedElement.node();
             int depth = nestingDepthOf(useElement, checkedNodes);
             if (depth > useNestingLimit) {
                 throw new IllegalStateException(String.format(
                         "Maximum nesting depth for <use> exceeded %d > %d starting from node with id '%s'%n",
                         depth, useNestingLimit, useElement.id())
                         + "Note: You can configure this using LoaderContext#documentLimits()");
+            }
+        }
+    }
+
+    private void copyUseElementTargets() {
+        for (ParsedElement useElement : useElements) {
+            Use useNode = (Use) useElement.node();
+            if (useNode.referencedNode() != null) {
+                SVGNode targetCopy = copiedUseTargets.get(useNode.referencedNode().id());
+                if (targetCopy != null) {
+                    useNode.setReferencedNode(targetCopy);
+                }
             }
         }
     }

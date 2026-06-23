@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,20 +25,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
-import com.github.weisj.jsvg.parser.*;
+import com.github.weisj.jsvg.parser.DocumentLimits;
+import com.github.weisj.jsvg.parser.DomProcessor;
+import com.github.weisj.jsvg.parser.ElementLoader;
+import com.github.weisj.jsvg.parser.LoaderContext;
+import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.css.CssParser;
-import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
+import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.parser.resources.impl.DefaultResourcePolicy;
 import com.github.weisj.jsvg.parser.resources.impl.SynchronousResourceLoader;
-
+import com.github.weisj.jsvg.renderer.CssHints;
 
 public final class MutableLoaderContext implements LoaderContext, LoaderContext.Builder {
     private static final ResourceLoader DEFAULT_RESOURCE_LOADER = new SynchronousResourceLoader();
     private static final ElementLoader DEFAULT_ELEMENT_LOADER =
             new DefaultElementLoader(DefaultElementLoader.AllowExternalResources.DENY);
-    private static final CssParser DEFAULT_CSS_PARSER = new SimpleCssParser();
+    private static final CssParser DEFAULT_CSS_PARSER = new FullCssParser();
     private static final PaintParser DEFAULT_PAINT_PARSER = new DefaultPaintParser();
     private @Nullable DomProcessor preProcessor = null;
     private @NotNull CssParser cssParser = DEFAULT_CSS_PARSER;
@@ -47,6 +51,7 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     private @NotNull ElementLoader elementLoader = DEFAULT_ELEMENT_LOADER;
     private @NotNull ResourcePolicy resourcePolicy = ResourcePolicy.DENY_EXTERNAL;
     private @NotNull DocumentLimits documentLimits = DocumentLimits.DEFAULT;
+    private @NotNull CssHints cssHints = CssHints.DEFAULT;
 
     public static @NotNull MutableLoaderContext createDefault() {
         return new MutableLoaderContext();
@@ -88,6 +93,11 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     }
 
     @Override
+    public @NotNull CssHints cssHints() {
+        return cssHints;
+    }
+
+    @Override
     public @NotNull Builder preProcessor(@Nullable DomProcessor preProcessor) {
         this.preProcessor = preProcessor;
         return this;
@@ -126,6 +136,12 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     @Override
     public @NotNull Builder documentLimits(@NotNull DocumentLimits documentLimits) {
         this.documentLimits = documentLimits;
+        return this;
+    }
+
+    @Override
+    public @NotNull Builder cssHints(@NotNull CssHints cssHints) {
+        this.cssHints = cssHints;
         return this;
     }
 

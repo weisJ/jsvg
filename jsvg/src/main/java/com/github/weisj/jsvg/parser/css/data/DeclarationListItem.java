@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,7 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl;
+package com.github.weisj.jsvg.parser.css.data;
 
-public final class ParserException extends RuntimeException {
+import com.google.errorprone.annotations.Immutable;
+
+/**
+ * Marker for an entry in a §5.4.5 list-of-declarations of
+ * <a href="https://www.w3.org/TR/css-syntax-3/#parsing">CSS Syntax Module Level 3</a>: either a
+ * {@link Declaration} or a {@link Rule.AtRule}.
+ */
+@Immutable
+public interface DeclarationListItem {
 }

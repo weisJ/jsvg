@@ -19,21 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl.phase1;
+package com.github.weisj.jsvg.parser.css.data;
+
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.google.errorprone.annotations.Immutable;
 
 /**
- * A CSS Syntax Module Level 3 token (§4.2). Each token kind is a distinct nested type carrying
- * only the fields the spec assigns to it. Stateless kinds (punctuation, whitespace, EOF, CDO/CDC,
- * bad-*) are pre-allocated singletons in {@link Simple}; parametric kinds are immutable
- * inner classes.
+ * A CSS Syntax Module Level 3 token (§4.2). Each kind is a distinct nested type with only the fields the
+ * spec assigns it; stateless kinds are singletons in {@link Static}, parametric kinds are immutable classes.
+ * A token is a {@link ComponentValue}: per §5.2 every token except the bracket-opening and function tokens
+ * is a preserved token; those are instead folded into a {@link ComponentValue.SimpleBlock} /
+ * {@link ComponentValue.FunctionBlock} by the parser.
  */
-public interface Token {
+@Immutable
+public interface Token extends ComponentValue {
 
-    @NotNull TokenType type();
+    @NotNull
+    TokenType type();
+
+    String serialize();
 
     /** Type flag of a {@code <hash-token>} per §4.2. */
     enum HashType {
@@ -48,32 +55,39 @@ public interface Token {
     }
 
     /** Stateless token kinds — one singleton per kind. */
-    enum Simple implements Token {
-        EOF(TokenType.EOF),
-        WHITESPACE(TokenType.WHITESPACE),
-        COLON(TokenType.COLON),
-        SEMICOLON(TokenType.SEMICOLON),
-        COMMA(TokenType.COMMA),
-        LEFT_BRACKET(TokenType.LEFT_BRACKET),
-        RIGHT_BRACKET(TokenType.RIGHT_BRACKET),
-        LEFT_PAREN(TokenType.LEFT_PAREN),
-        RIGHT_PAREN(TokenType.RIGHT_PAREN),
-        LEFT_BRACE(TokenType.LEFT_BRACE),
-        RIGHT_BRACE(TokenType.RIGHT_BRACE),
-        CDO(TokenType.CDO),
-        CDC(TokenType.CDC),
-        BAD_STRING(TokenType.BAD_STRING),
-        BAD_URL(TokenType.BAD_URL);
+    enum Static implements Token {
+        EOF(TokenType.EOF, ""),
+        WHITESPACE(TokenType.WHITESPACE, " "),
+        COLON(TokenType.COLON, ":"),
+        SEMICOLON(TokenType.SEMICOLON, ";"),
+        COMMA(TokenType.COMMA, ","),
+        LEFT_BRACKET(TokenType.LEFT_BRACKET, "["),
+        RIGHT_BRACKET(TokenType.RIGHT_BRACKET, "]"),
+        LEFT_PAREN(TokenType.LEFT_PAREN, "("),
+        RIGHT_PAREN(TokenType.RIGHT_PAREN, ")"),
+        LEFT_BRACE(TokenType.LEFT_BRACE, "{"),
+        RIGHT_BRACE(TokenType.RIGHT_BRACE, "}"),
+        CDO(TokenType.CDO, "<!--"),
+        CDC(TokenType.CDC, "-->"),
+        BAD_STRING(TokenType.BAD_STRING, ""),
+        BAD_URL(TokenType.BAD_URL, "");
 
         private final @NotNull TokenType type;
+        private final @NotNull String serialized;
 
-        Simple(@NotNull TokenType type) {
+        Static(@NotNull TokenType type, @NotNull String serialized) {
             this.type = type;
+            this.serialized = serialized;
         }
 
         @Override
         public @NotNull TokenType type() {
             return type;
+        }
+
+        @Override
+        public String serialize() {
+            return serialized;
         }
     }
 
@@ -93,6 +107,23 @@ public interface Token {
         @Override
         public @NotNull TokenType type() {
             return TokenType.IDENT;
+        }
+
+        @Override
+        public String serialize() {
+            return name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Ident)) return false;
+            return name.equals(((Ident) o).name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
         }
 
         @Override
@@ -120,6 +151,23 @@ public interface Token {
         }
 
         @Override
+        public String serialize() {
+            return name + "(";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Function)) return false;
+            return name.equals(((Function) o).name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
+        }
+
+        @Override
         public String toString() {
             return "Function{name='" + name + "'}";
         }
@@ -141,6 +189,23 @@ public interface Token {
         @Override
         public @NotNull TokenType type() {
             return TokenType.AT_KEYWORD;
+        }
+
+        @Override
+        public String serialize() {
+            return "@" + name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof AtKeyword)) return false;
+            return name.equals(((AtKeyword) o).name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
         }
 
         @Override
@@ -174,12 +239,29 @@ public interface Token {
         }
 
         @Override
+        public String serialize() {
+            return "#" + name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Hash)) return false;
+            return name.equals(((Hash) o).name) && hashType == ((Hash) o).hashType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, hashType);
+        }
+
+        @Override
         public String toString() {
             return "Hash{name='" + name + "', hashType=" + hashType + "}";
         }
     }
 
-    /** {@code <string-token>}. Named {@code Str} to avoid shadowing {@link java.lang.String}. */
+    /** {@code <string-token>}. */
     @Immutable
     final class Str implements Token {
         private final @NotNull String value;
@@ -195,6 +277,23 @@ public interface Token {
         @Override
         public @NotNull TokenType type() {
             return TokenType.STRING;
+        }
+
+        @Override
+        public String serialize() {
+            return "'" + value + "'";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Str)) return false;
+            return value.equals(((Str) o).value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
         }
 
         @Override
@@ -222,6 +321,23 @@ public interface Token {
         }
 
         @Override
+        public String serialize() {
+            return "url(" + value + ")";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Url)) return false;
+            return value.equals(((Url) o).value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
+
+        @Override
         public String toString() {
             return "Url{value='" + value + "'}";
         }
@@ -243,6 +359,23 @@ public interface Token {
         @Override
         public @NotNull TokenType type() {
             return TokenType.DELIM;
+        }
+
+        @Override
+        public String serialize() {
+            return new String(Character.toChars(value));
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Delim)) return false;
+            return value == ((Delim) o).value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
         }
 
         @Override
@@ -276,6 +409,24 @@ public interface Token {
         }
 
         @Override
+        public String serialize() {
+            return Double.toString(value);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Number)) return false;
+            return value == ((Number) o).value
+                    && numericType == ((Number) o).numericType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value, numericType);
+        }
+
+        @Override
         public String toString() {
             return "Number{value=" + value + ", numericType=" + numericType + "}";
         }
@@ -297,6 +448,23 @@ public interface Token {
         @Override
         public @NotNull TokenType type() {
             return TokenType.PERCENTAGE;
+        }
+
+        @Override
+        public String serialize() {
+            return value + "%";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Percentage)) return false;
+            return value == ((Percentage) o).value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
         }
 
         @Override
@@ -333,6 +501,25 @@ public interface Token {
         @Override
         public @NotNull TokenType type() {
             return TokenType.DIMENSION;
+        }
+
+        @Override
+        public String serialize() {
+            return value + unit;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Dimension)) return false;
+            return value == ((Dimension) o).value
+                    && numericType == ((Dimension) o).numericType
+                    && unit.equals(((Dimension) o).unit);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value, numericType, unit);
         }
 
         @Override

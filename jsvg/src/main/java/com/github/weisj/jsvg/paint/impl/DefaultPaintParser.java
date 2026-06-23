@@ -22,8 +22,10 @@
 package com.github.weisj.jsvg.paint.impl;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -34,6 +36,9 @@ import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.data.TokenType;
 import com.github.weisj.jsvg.parser.impl.ParserUtil;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
@@ -47,40 +52,7 @@ public final class DefaultPaintParser implements PaintParser {
         if (value.isEmpty()) return null;
         try {
             if (value.charAt(0) == '#') {
-                int rgba = 0xff000000;
-                switch (value.length()) {
-                    case 4:
-                        // Short rgb
-                        rgba = parseHex(new char[] {
-                                value.charAt(1), value.charAt(1),
-                                value.charAt(2), value.charAt(2),
-                                value.charAt(3), value.charAt(3),
-                                'F', 'F'});
-                        break;
-                    case 5:
-                        // Short rgba
-                        rgba = parseHex(new char[] {
-                                value.charAt(1), value.charAt(1),
-                                value.charAt(2), value.charAt(2),
-                                value.charAt(3), value.charAt(3),
-                                value.charAt(4), value.charAt(4)});
-                        break;
-                    case 7:
-                        // Long rgb
-                        rgba = parseHex(new char[] {
-                                value.charAt(1), value.charAt(2),
-                                value.charAt(3), value.charAt(4),
-                                value.charAt(5), value.charAt(6),
-                                'F', 'F'});
-                        break;
-                    case 9:
-                        // Long rgba
-                        rgba = parseHex(value.substring(1).toCharArray());
-                        break;
-                    default:
-                        break;
-                }
-                return new Color(rgba, true);
+                return parseHexColor(value.substring(1));
             } else if (value.length() > 3 && value.substring(0, 3).equalsIgnoreCase("rgb")) {
                 boolean isRgba = value.length() > 4 && (value.charAt(3) == 'a' || value.charAt(3) == 'A');
                 int startIndex = isRgba ? 5 : 4;
@@ -104,13 +76,123 @@ public final class DefaultPaintParser implements PaintParser {
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
         String lower = value.toLowerCase(Locale.ENGLISH);
+        SVGPaint keyword = paintKeyword(lower);
+        if (keyword != null) return keyword;
+        Color color = parseColor(lower);
+        if (color == null) return null;
+        return new AwtSVGPaint(color);
+    }
+
+    @Override
+    public @Nullable Color parseColor(@NotNull List<@NotNull ComponentValue> tokens) {
+        ComponentValue token = singleToken(tokens);
+        try {
+            if (token instanceof Token.Hash) {
+                return parseHexColor(((Token.Hash) token).name());
+            }
+            if (token instanceof Token.Ident) {
+                return ColorLookup.colorMap().get(((Token.Ident) token).name().toLowerCase(Locale.ENGLISH));
+            }
+            if (token instanceof ComponentValue.FunctionBlock) {
+                return parseColorFunction((ComponentValue.FunctionBlock) token);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Logger.Level.INFO, e.getMessage(), e);
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
+        ComponentValue token = singleToken(tokens);
+        if (token instanceof Token.Ident) {
+            SVGPaint keyword = paintKeyword(((Token.Ident) token).name().toLowerCase(Locale.ENGLISH));
+            if (keyword != null) return keyword;
+        }
+        Color color = parseColor(tokens);
+        if (color == null) return null;
+        return new AwtSVGPaint(color);
+    }
+
+    private static @Nullable SVGPaint paintKeyword(@NotNull String lower) {
         if ("none".equals(lower) || "transparent".equals(lower)) return PredefinedPaints.NONE;
         if ("currentcolor".equals(lower)) return PredefinedPaints.CURRENT_COLOR;
         if ("context-fill".equals(lower)) return PredefinedPaints.CONTEXT_FILL;
         if ("context-stroke".equals(lower)) return PredefinedPaints.CONTEXT_STROKE;
-        Color color = parseColor(lower);
-        if (color == null) return null;
-        return new AwtSVGPaint(color);
+        return null;
+    }
+
+    /** {@code #rgb}, {@code #rgba}, {@code #rrggbb} or {@code #rrggbbaa} digits without the leading {@code #}. */
+    private @NotNull Color parseHexColor(@NotNull String hex) {
+        int rgba = 0xff000000;
+        switch (hex.length()) {
+            case 3:
+                rgba = parseHex(new char[] {
+                        hex.charAt(0), hex.charAt(0), hex.charAt(1), hex.charAt(1),
+                        hex.charAt(2), hex.charAt(2), 'F', 'F'});
+                break;
+            case 4:
+                rgba = parseHex(new char[] {
+                        hex.charAt(0), hex.charAt(0), hex.charAt(1), hex.charAt(1),
+                        hex.charAt(2), hex.charAt(2), hex.charAt(3), hex.charAt(3)});
+                break;
+            case 6:
+                rgba = parseHex(new char[] {
+                        hex.charAt(0), hex.charAt(1), hex.charAt(2), hex.charAt(3),
+                        hex.charAt(4), hex.charAt(5), 'F', 'F'});
+                break;
+            case 8:
+                rgba = parseHex(hex.toCharArray());
+                break;
+            default:
+                break;
+        }
+        return new Color(rgba, true);
+    }
+
+    private @Nullable Color parseColorFunction(@NotNull ComponentValue.FunctionBlock function) {
+        String name = function.name().toLowerCase(Locale.ENGLISH);
+        if (!"rgb".equals(name) && !"rgba".equals(name)) return null;
+        List<ComponentValue> components = new ArrayList<>();
+        for (ComponentValue value : function.value()) {
+            if (value instanceof Token) {
+                TokenType type = ((Token) value).type();
+                if (type == TokenType.WHITESPACE || type == TokenType.COMMA) continue;
+            }
+            components.add(value);
+        }
+        if (components.size() < 3) return null;
+        int alpha = components.size() >= 4 ? colorComponent(components.get(3), true) : 255;
+        return new Color(
+                colorComponent(components.get(0), false),
+                colorComponent(components.get(1), false),
+                colorComponent(components.get(2), false),
+                alpha);
+    }
+
+    private int colorComponent(@NotNull ComponentValue token, boolean alpha) {
+        if (token instanceof Token.Percentage) {
+            return clampComponent(((Token.Percentage) token).value() / 100.0 * 255.0);
+        }
+        if (token instanceof Token.Number) {
+            double value = ((Token.Number) token).value();
+            return clampComponent(alpha ? value * 255.0 : value);
+        }
+        return 0;
+    }
+
+    private static int clampComponent(double value) {
+        return Math.min(255, Math.max(0, (int) value));
+    }
+
+    private static @Nullable ComponentValue singleToken(@NotNull List<@NotNull ComponentValue> tokens) {
+        ComponentValue found = null;
+        for (ComponentValue token : tokens) {
+            if (token instanceof Token && ((Token) token).type() == TokenType.WHITESPACE) continue;
+            if (found != null) return null;
+            found = token;
+        }
+        return found;
     }
 
     private int parseColorComponent(String value, boolean percentage) {

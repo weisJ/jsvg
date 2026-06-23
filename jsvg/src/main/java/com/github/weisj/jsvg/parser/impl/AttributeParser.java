@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -49,6 +49,9 @@ import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.NumberListSplitter;
 import com.github.weisj.jsvg.parser.PaintParser;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.data.TokenType;
 
 
 public final class AttributeParser {
@@ -418,6 +421,278 @@ public final class AttributeParser {
                 lengths = null;
         }
         return lengths;
+    }
+
+    // Token-native parsing (CSS Syntax §5): consume already-lexed component values directly instead of
+    // serializing and re-scanning. A single value-bearing token carries its number/unit/keyword;
+    // irregular or multi-token inputs fall back to the string parsers above.
+
+    @Contract("_,!null,_ -> !null")
+    public @Nullable Length parseLength(@NotNull List<@NotNull ComponentValue> tokens, @Nullable Length fallback,
+            @NotNull PercentageDimension dimension) {
+        Length length = lengthFromToken(singleToken(tokens), dimension);
+        return length != null ? length : fallback;
+    }
+
+    /** {@code <number>}/{@code <length>}/{@code <percentage>} from one token, or {@code null} if it is neither. */
+    private @Nullable Length lengthFromToken(@Nullable ComponentValue token, @NotNull PercentageDimension dimension) {
+        if (token instanceof Token.Number) {
+            return Unit.RAW.valueOf((float) ((Token.Number) token).value());
+        }
+        if (token instanceof Token.Dimension) {
+            Token.Dimension dimensionToken = (Token.Dimension) token;
+            Unit unit = unitForSuffix(dimensionToken.unit());
+            return unit == null ? null : unit.valueOf((float) dimensionToken.value());
+        }
+        if (token instanceof Token.Percentage) {
+            Unit unit = percentageUnit(dimension);
+            return unit == null ? null : unit.valueOf((float) ((Token.Percentage) token).value());
+        }
+        return null;
+    }
+
+    public float parseFloat(@NotNull List<@NotNull ComponentValue> tokens, float fallback) {
+        ComponentValue token = singleToken(tokens);
+        if (token instanceof Token.Number) return (float) ((Token.Number) token).value();
+        return fallback;
+    }
+
+    public int parseInt(@NotNull List<@NotNull ComponentValue> tokens, int fallback) {
+        ComponentValue token = singleToken(tokens);
+        if (token instanceof Token.Number) return (int) ((Token.Number) token).value();
+        return fallback;
+    }
+
+    @Contract("_,!null,_ -> !null")
+    public @NotNull Length @Nullable [] parseLengthList(@NotNull List<@NotNull ComponentValue> tokens,
+            @NotNull Length @Nullable [] fallback, @NotNull PercentageDimension dimension) {
+        ComponentValue single = singleToken(tokens);
+        if (single instanceof Token.Ident && ((Token.Ident) single).name().equalsIgnoreCase("none")) {
+            return new Length[0];
+        }
+        List<Length> result = new ArrayList<>();
+        for (ComponentValue token : tokens) {
+            if (isSeparator(token)) continue;
+            Length length = lengthFromToken(token, dimension);
+            if (length == null) return fallback;
+            result.add(length);
+        }
+        return result.toArray(new Length[0]);
+    }
+
+    public float @NotNull [] parseFloatList(@NotNull List<@NotNull ComponentValue> tokens) {
+        List<Float> values = new ArrayList<>();
+        for (ComponentValue token : tokens) {
+            if (isSeparator(token)) continue;
+            values.add(token instanceof Token.Number ? (float) ((Token.Number) token).value() : 0f);
+        }
+        float[] result = new float[values.size()];
+        for (int i = 0; i < result.length; i++)
+            result[i] = values.get(i);
+        return result;
+    }
+
+    public double @NotNull [] parseDoubleList(@NotNull List<@NotNull ComponentValue> tokens) {
+        List<Double> values = new ArrayList<>();
+        for (ComponentValue token : tokens) {
+            if (isSeparator(token)) continue;
+            if (token instanceof Token.Number)
+                values.add(((Token.Number) token).value());
+            else if (token instanceof Token.Dimension) values.add(((Token.Dimension) token).value());
+        }
+        double[] result = new double[values.size()];
+        for (int i = 0; i < result.length; i++)
+            result[i] = values.get(i);
+        return result;
+    }
+
+    public @NotNull String @NotNull [] parseStringList(@NotNull List<@NotNull ComponentValue> tokens,
+            @NotNull SeparatorMode separatorMode) {
+        boolean splitWhitespace = separatorMode.splitOnWhitespace();
+        boolean commaSplits = separatorMode.testChar(',', 0, ",", 0).shouldSplit();
+        boolean semicolonSplits = separatorMode.testChar(';', 0, ";", 0).shouldSplit();
+        List<String> items = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean started = false;
+        for (ComponentValue token : tokens) {
+            TokenType type = token instanceof Token ? ((Token) token).type() : null;
+            if (type == TokenType.WHITESPACE) {
+                if (splitWhitespace) {
+                    if (started) items.add(current.toString().trim());
+                    current.setLength(0);
+                    started = false;
+                } else if (started) {
+                    current.append(' ');
+                }
+                continue;
+            }
+            if ((type == TokenType.COMMA && commaSplits) || (type == TokenType.SEMICOLON && semicolonSplits)) {
+                items.add(current.toString().trim());
+                current.setLength(0);
+                started = false;
+                continue;
+            }
+            current.append(token.serialize());
+            started = true;
+        }
+        if (started) items.add(current.toString().trim());
+        return items.toArray(new String[0]);
+    }
+
+    public @Nullable List<@NotNull TransformPart> parseTransform(@NotNull List<@NotNull ComponentValue> tokens) {
+        ComponentValue single = singleToken(tokens);
+        if (single instanceof Token.Ident && ((Token.Ident) single).name().equalsIgnoreCase("none")) return null;
+        List<TransformPart> parts = new ArrayList<>();
+        for (ComponentValue token : tokens) {
+            if (token instanceof Token && ((Token) token).type() == TokenType.WHITESPACE) continue;
+            if (!(token instanceof ComponentValue.FunctionBlock)) return null;
+            ComponentValue.FunctionBlock function = (ComponentValue.FunctionBlock) token;
+            TransformPart.TransformType type =
+                    parseEnum(function.name().toLowerCase(Locale.ENGLISH), TransformPart.TransformType.class);
+            if (type == null) return null;
+            List<ComponentValue> args = new ArrayList<>();
+            for (ComponentValue arg : function.value()) {
+                if (!isSeparator(arg)) args.add(arg);
+            }
+            Length[] lengths = parseTransformLengths(type, args);
+            if (lengths == null) return null;
+            parts.add(new TransformPart(type, lengths));
+        }
+        return parts.isEmpty() ? null : parts;
+    }
+
+    private Length @Nullable [] parseTransformLengths(TransformPart.@NotNull TransformType type,
+            @NotNull List<@NotNull ComponentValue> args) {
+        switch (type) {
+            case MATRIX:
+                if (args.size() == 4) {
+                    return toNonnullArray(number(args, 0), number(args, 1), number(args, 2), number(args, 3),
+                            Length.ZERO, Length.ZERO);
+                } else if (args.size() == 6) {
+                    return toNonnullArray(number(args, 0), number(args, 1), number(args, 2),
+                            number(args, 3), number(args, 4), number(args, 5));
+                }
+                return null;
+            case TRANSLATE:
+                if (args.size() == 1) {
+                    return toNonnullArray(length(args, 0, PercentageDimension.WIDTH), Length.ZERO);
+                }
+                return toNonnullArray(length(args, 0, PercentageDimension.WIDTH),
+                        length(args, 1, PercentageDimension.HEIGHT));
+            case TRANSLATE_X:
+                return toNonnullArray(length(args, 0, PercentageDimension.WIDTH));
+            case TRANSLATE_Y:
+                return toNonnullArray(length(args, 0, PercentageDimension.HEIGHT));
+            case ROTATE:
+                if (args.size() > 2) {
+                    return toNonnullArray(number(args, 0), length(args, 1, PercentageDimension.WIDTH),
+                            length(args, 2, PercentageDimension.HEIGHT));
+                }
+                return toNonnullArray(number(args, 0));
+            case SCALE:
+            case SKEW:
+                if (args.size() == 1) return toNonnullArray(number(args, 0));
+                return toNonnullArray(number(args, 0), number(args, 1));
+            case SCALE_X:
+            case SCALE_Y:
+            case SKEW_X:
+            case SKEW_Y:
+                return toNonnullArray(length(args, 0, PercentageDimension.NONE));
+            default:
+                return null;
+        }
+    }
+
+    private @Nullable Length number(@NotNull List<@NotNull ComponentValue> args, int index) {
+        if (index >= args.size()) return null;
+        ComponentValue token = args.get(index);
+        return token instanceof Token.Number ? Unit.RAW.valueOf((float) ((Token.Number) token).value()) : null;
+    }
+
+    private @Nullable Length length(@NotNull List<@NotNull ComponentValue> args, int index,
+            @NotNull PercentageDimension dimension) {
+        return index < args.size() ? lengthFromToken(args.get(index), dimension) : null;
+    }
+
+    private static boolean isSeparator(@NotNull ComponentValue token) {
+        if (!(token instanceof Token)) return false;
+        TokenType type = ((Token) token).type();
+        return type == TokenType.WHITESPACE || type == TokenType.COMMA;
+    }
+
+    @Contract("_,!null -> !null")
+    public @Nullable Percentage parsePercentage(@NotNull List<@NotNull ComponentValue> tokens,
+            @Nullable Percentage fallback) {
+        return parsePercentage(tokens, fallback, 0, 1);
+    }
+
+    @Contract("_,!null,_,_ -> !null")
+    public @Nullable Percentage parsePercentage(@NotNull List<@NotNull ComponentValue> tokens,
+            @Nullable Percentage fallback, float min, float max) {
+        ComponentValue token = singleToken(tokens);
+        if (token instanceof Token.Percentage) {
+            return new Percentage(clamp(min, max, (float) ((Token.Percentage) token).value() / 100f));
+        }
+        if (token instanceof Token.Number) {
+            return new Percentage(clamp(min, max, (float) ((Token.Number) token).value()));
+        }
+        return fallback;
+    }
+
+    public <E extends Enum<E>> @NotNull E parseEnum(@NotNull List<@NotNull ComponentValue> tokens,
+            @NotNull E fallback) {
+        E e = parseEnum(tokens, fallback.getDeclaringClass());
+        return e == null ? fallback : e;
+    }
+
+    public <E extends Enum<E>> @Nullable E parseEnum(@NotNull List<@NotNull ComponentValue> tokens,
+            @NotNull Class<E> enumType) {
+        ComponentValue token = singleToken(tokens);
+        if (token instanceof Token.Ident) return parseEnum(((Token.Ident) token).name(), enumType);
+        return null;
+    }
+
+    public @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
+        return paintParser.parsePaint(tokens);
+    }
+
+    /** The sole non-whitespace token, or {@code null} if there are zero or several. */
+    private static @Nullable ComponentValue singleToken(@NotNull List<@NotNull ComponentValue> tokens) {
+        ComponentValue found = null;
+        for (ComponentValue token : tokens) {
+            if (token instanceof Token && ((Token) token).type() == TokenType.WHITESPACE) continue;
+            if (found != null) return null;
+            found = token;
+        }
+        return found;
+    }
+
+    private static @Nullable Unit unitForSuffix(@NotNull String suffix) {
+        String lower = suffix.toLowerCase(Locale.ENGLISH);
+        for (Unit unit : Unit.values()) {
+            if (unit != Unit.RAW && !unit.isPercentage() && unit.suffix().equals(lower)) return unit;
+        }
+        return null;
+    }
+
+    private static @Nullable Unit percentageUnit(@NotNull PercentageDimension dimension) {
+        switch (dimension) {
+            case WIDTH:
+                return Unit.PERCENTAGE_WIDTH;
+            case HEIGHT:
+                return Unit.PERCENTAGE_HEIGHT;
+            case LENGTH:
+                return Unit.PERCENTAGE_LENGTH;
+            case CUSTOM:
+                return Unit.PERCENTAGE;
+            case NONE:
+            default:
+                return null;
+        }
+    }
+
+    private static float clamp(float min, float max, float value) {
+        return Math.max(min, Math.min(max, value));
     }
 
     public @NotNull PaintParser paintParser() {

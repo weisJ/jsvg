@@ -31,6 +31,7 @@ import com.github.weisj.jsvg.parser.TextContent;
 public class TextContentImpl implements TextContent {
     private final @NotNull ParsedElement parent;
     private final @NotNull List<@NotNull List<Segment>> contentLists = new ArrayList<>();
+    private boolean hasNonWhitespaceText = false;
 
     public TextContentImpl(@NotNull ParsedElement parent) {
         this.parent = parent;
@@ -38,6 +39,19 @@ public class TextContentImpl implements TextContent {
             // One before each child and one after the last child.
             contentLists.add(new ArrayList<>());
         }
+    }
+
+    /** Appends a segment to the current content list, tracking whether any non-whitespace text exists. */
+    public void addSegmentToCurrentContentList(@NotNull Segment segment) {
+        currentContentList().add(segment);
+        if (!hasNonWhitespaceText && !segment.text().trim().isEmpty()) {
+            hasNonWhitespaceText = true;
+        }
+    }
+
+    /** Whether any non-whitespace text has been added (for the {@code :empty} pseudo-class). */
+    public boolean hasNonWhitespaceText() {
+        return hasNonWhitespaceText;
     }
 
     private void ensureSize() {
@@ -48,6 +62,19 @@ public class TextContentImpl implements TextContent {
 
     public @NotNull List<@NotNull List<Segment>> contentLists() {
         return contentLists;
+    }
+
+    /** Copies this text content onto a new owner element (for {@code <use>} shadow-tree cloning). */
+    @NotNull
+    TextContentImpl copyFor(@NotNull ParsedElement newParent) {
+        TextContentImpl copy = new TextContentImpl(newParent);
+        copy.contentLists.clear();
+        for (List<Segment> contentList : contentLists) {
+            // Segments are immutable, so a shallow copy of each list is sufficient.
+            copy.contentLists.add(new ArrayList<>(contentList));
+        }
+        copy.hasNonWhitespaceText = hasNonWhitespaceText;
+        return copy;
     }
 
     public @NotNull List<Segment> currentContentList() {

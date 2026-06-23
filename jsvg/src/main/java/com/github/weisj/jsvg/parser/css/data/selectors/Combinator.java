@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,7 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl;
+package com.github.weisj.jsvg.parser.css.data.selectors;
 
-public final class ParserException extends RuntimeException {
+/**
+ * Combinator following <a href="https://www.w3.org/TR/selectors-4/#combinators">Selectors Level 4</a>:
+ * the relationship between two adjacent compound selectors in a complex selector.
+ * <p>
+ * Four combinators are modeled — descendant, child, and the two sibling combinators. The column
+ * combinator ({@code ||}) also defined by Selectors Level 4 is not modeled here.
+ */
+public enum Combinator {
+    /** Whitespace: matches any descendant. */
+    DESCENDANT,
+    /** {@code >}: matches a direct child. */
+    CHILD,
+    /** {@code +}: matches the immediately following sibling. */
+    NEXT_SIBLING,
+    /** {@code ~}: matches any subsequent sibling. */
+    SUBSEQUENT_SIBLING
 }

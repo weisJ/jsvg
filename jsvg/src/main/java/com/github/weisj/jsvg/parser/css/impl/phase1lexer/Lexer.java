@@ -19,19 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css.impl.phase1;
+package com.github.weisj.jsvg.parser.css.impl.phase1lexer;
 
-import java.util.List;
 import java.util.function.IntPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.data.TokenType;
 import com.github.weisj.jsvg.parser.css.impl.ParserException;
-import com.github.weisj.jsvg.parser.css.impl.phase0.PreProcessor;
+import com.github.weisj.jsvg.parser.css.impl.phase0preprocessor.PreProcessor;
 
 /**
+ * Stream of characters -> Stream of {@link Token}
+ * <p>
  * CSS tokenizer following <a href="https://www.w3.org/TR/css-syntax-3/#tokenization">CSS Syntax Module Level 3, §4.3</a>.
  * <p>
  * Input preprocessing (§3.3) is delegated to {@link PreProcessor}, which streams the raw segments
@@ -46,7 +49,7 @@ public final class Lexer {
 
     private final @NotNull Lookahead look;
 
-    public Lexer(@NotNull List<char[]> input) {
+    public Lexer(@NotNull LexerInput input) {
         this.look = new Lookahead(new PreProcessor(input), LOOKAHEAD);
     }
 
@@ -54,12 +57,12 @@ public final class Lexer {
     public @NotNull Token nextToken() {
         consumeComments();
 
-        if (look.isEof()) return Token.Simple.EOF;
+        if (look.isEof()) return Token.Static.EOF;
         int c = look.peek(0);
 
         if (isWhitespace(c)) {
             look.consumeWhile(Lexer::isWhitespace);
-            return Token.Simple.WHITESPACE;
+            return Token.Static.WHITESPACE;
         }
 
         switch (c) {
@@ -70,17 +73,17 @@ public final class Lexer {
                 return consumeHashOrDelim();
             case '(':
                 look.advance();
-                return Token.Simple.LEFT_PAREN;
+                return Token.Static.LEFT_PAREN;
             case ')':
                 look.advance();
-                return Token.Simple.RIGHT_PAREN;
+                return Token.Static.RIGHT_PAREN;
             case '+':
                 if (wouldStartNumber(c, look.peek(1), look.peek(2))) return consumeNumericToken();
                 look.advance();
                 return new Token.Delim('+');
             case ',':
                 look.advance();
-                return Token.Simple.COMMA;
+                return Token.Static.COMMA;
             case '-':
                 return consumeHyphenStart();
             case '.':
@@ -89,17 +92,17 @@ public final class Lexer {
                 return new Token.Delim('.');
             case ':':
                 look.advance();
-                return Token.Simple.COLON;
+                return Token.Static.COLON;
             case ';':
                 look.advance();
-                return Token.Simple.SEMICOLON;
+                return Token.Static.SEMICOLON;
             case '<':
                 if (look.peek(1) == '!' && look.peek(2) == '-' && look.peek(3) == '-') {
                     look.advance();
                     look.advance();
                     look.advance();
                     look.advance();
-                    return Token.Simple.CDO;
+                    return Token.Static.CDO;
                 }
                 look.advance();
                 return new Token.Delim('<');
@@ -112,20 +115,20 @@ public final class Lexer {
                 return new Token.Delim('@');
             case '[':
                 look.advance();
-                return Token.Simple.LEFT_BRACKET;
+                return Token.Static.LEFT_BRACKET;
             case '\\':
                 if (isValidEscapeStart(c, look.peek(1))) return consumeIdentLikeToken();
                 look.advance();
                 return new Token.Delim('\\');
             case ']':
                 look.advance();
-                return Token.Simple.RIGHT_BRACKET;
+                return Token.Static.RIGHT_BRACKET;
             case '{':
                 look.advance();
-                return Token.Simple.LEFT_BRACE;
+                return Token.Static.LEFT_BRACE;
             case '}':
                 look.advance();
-                return Token.Simple.RIGHT_BRACE;
+                return Token.Static.RIGHT_BRACE;
             default:
                 if (isDigit(c)) return consumeNumericToken();
                 if (isIdentStart(c)) return consumeIdentLikeToken();
@@ -168,9 +171,7 @@ public final class Lexer {
     private @NotNull Token consumeIdentLikeToken() {
         String name = consumeIdentSequence();
         if (equalsIgnoreCaseAscii(name, "url") && look.peek(0) == '(') {
-            // skip over '('
-            look.advance();
-            // while the next two input code points are whitespace, consume the next input code point
+            look.advance(); // skip over '('
             while (look.peek(0) == ' ' && look.peek(1) == ' ') {
                 look.advance();
             }
@@ -178,7 +179,7 @@ public final class Lexer {
             int first = look.peek(0);
             int second = look.peek(1);
             if (first == '"' || first == '\''
-                || (first == ' ' && (second == '"' || second == '\''))) {
+                    || (first == ' ' && (second == '"' || second == '\''))) {
                 return new Token.Function(name);
             }
             return consumeUrlToken();
@@ -201,7 +202,7 @@ public final class Lexer {
                 look.advance();
                 return new Token.Str(sb.toString());
             }
-            if (c == '\n') return Token.Simple.BAD_STRING;
+            if (c == '\n') return Token.Static.BAD_STRING;
             if (c == '\\') {
                 if (look.isEofAt(1)) {
                     look.advance();
@@ -240,11 +241,11 @@ public final class Lexer {
                     return new Token.Url(sb.toString());
                 }
                 consumeBadUrlRemnants();
-                return Token.Simple.BAD_URL;
+                return Token.Static.BAD_URL;
             }
             if (c == '"' || c == '\'' || c == '(' || isNonPrintable(c)) {
                 consumeBadUrlRemnants();
-                return Token.Simple.BAD_URL;
+                return Token.Static.BAD_URL;
             }
             if (c == '\\') {
                 if (isValidEscapeStart(c, look.peek(1))) {
@@ -253,7 +254,7 @@ public final class Lexer {
                     continue;
                 }
                 consumeBadUrlRemnants();
-                return Token.Simple.BAD_URL;
+                return Token.Static.BAD_URL;
             }
             sb.appendCodePoint(c);
             look.advance();
@@ -319,8 +320,7 @@ public final class Lexer {
             if (isIdentCodePoint(c)) {
                 sb.appendCodePoint(c);
                 look.advance();
-            }
-            else if (isValidEscapeStart(c, look.peek(1))) {
+            } else if (isValidEscapeStart(c, look.peek(1))) {
                 look.advance();
                 sb.append(consumeEscapedCodePoint());
             } else {
@@ -410,7 +410,7 @@ public final class Lexer {
             look.advance();
             look.advance();
             look.advance();
-            return Token.Simple.CDC;
+            return Token.Static.CDC;
         }
         if (wouldStartIdentSequence('-', c1, c2)) return consumeIdentLikeToken();
         look.advance();
@@ -424,12 +424,11 @@ public final class Lexer {
         boolean isHash = isIdentCodePoint(c1) || isValidEscapeStart(c1, c2);
         if (isHash) {
             Token.HashType hashType = wouldStartIdentSequence(c1, c2, c3)
-                ? Token.HashType.ID
-                : Token.HashType.UNRESTRICTED;
+                    ? Token.HashType.ID
+                    : Token.HashType.UNRESTRICTED;
             look.advance();
             return new Token.Hash(consumeIdentSequence(), hashType);
-        }
-        else {
+        } else {
             look.advance();
             return new Token.Delim('#');
         }
@@ -495,12 +494,13 @@ public final class Lexer {
 
         int s = sign.equals("-") ? -1 : 1; // sign of the number
         long i = integer.isEmpty() ? 0 : Long.parseUnsignedLong(integer); // integer part
-        long f = fraction.isEmpty() ? 0 : Long.parseUnsignedLong(fraction.replaceFirst("^0+", "")); // fractional part as integer
+        long f = fraction.isEmpty() ? 0 : Long.parseUnsignedLong(fraction.replaceFirst("^0+", "")); // fractional part
+                                                                                                    // as integer
         int d = fraction.length(); // number of fractional digits
         int t = exponentSign.equals("-") ? -1 : 1; // exponent sign
         long e = exponent.isEmpty() ? 0 : Long.parseUnsignedLong(exponent); // exponent
 
-        return s * (i + f / Math.pow(10, -d)) * Math.pow(10, t * e);
+        return s * (i + f * Math.pow(10, -d)) * Math.pow(10, t * e);
     }
 
     private static boolean equalsIgnoreCaseAscii(@NotNull String a, @NotNull String b) {
@@ -515,7 +515,8 @@ public final class Lexer {
         return true;
     }
 
-    private static final Pattern NUMBER_PATTERN = Pattern.compile("^(?<s>[-+]?)(?<i>[0-9]*+)\\.?(?<f>[0-9]*+)(?:[eE](?<t>[-+]?)(?<e>[0-9]*+))?$");
+    private static final Pattern NUMBER_PATTERN =
+            Pattern.compile("^(?<s>[-+]?)(?<i>[0-9]*+)\\.?(?<f>[0-9]*+)(?:[eE](?<t>[-+]?)(?<e>[0-9]*+))?$");
 
     /**
      * Sliding window of code points over a {@link PreProcessor}. Owns the circular-buffer
@@ -532,7 +533,7 @@ public final class Lexer {
         private int head;
         private int count;
 
-        Lookahead(@NotNull PreProcessor input, int capacity) {
+        Lookahead(@NotNull final PreProcessor input, final int capacity) {
             this.input = input;
             this.capacity = capacity;
             this.buffer = new int[capacity];

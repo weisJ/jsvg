@@ -32,14 +32,23 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import com.github.weisj.jsvg.parser.css.StyleProperty;
-import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
-import com.github.weisj.jsvg.parser.css.impl.SimpleStyleSheet;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
+import com.github.weisj.jsvg.parser.css.data.StyleRule;
+import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
+import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.data.TokenType;
+import com.github.weisj.jsvg.parser.css.data.selectors.ComplexSelector;
+import com.github.weisj.jsvg.parser.css.data.selectors.CompoundSelector;
+import com.github.weisj.jsvg.parser.css.data.selectors.SimpleSelector;
+import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
+import com.github.weisj.jsvg.renderer.CssHints;
 import com.github.weisj.jsvg.util.RandomData;
 
 class CssParserTest {
@@ -50,13 +59,11 @@ class CssParserTest {
 
     @Test
     void invalidCssProducesNoRules() {
-        SimpleCssParser cssParser = new SimpleCssParser();
+        FullCssParser cssParser = new FullCssParser();
 
         Consumer<String> assertNoRulesProduced = css -> {
-            SimpleStyleSheet sheet = cssParser.parse(inputFromString(css));
-            assertEquals(0, sheet.classRules().size());
-            assertEquals(0, sheet.idRules().size());
-            assertEquals(0, sheet.tagNameRules().size());
+            StyleRuleList sheet = cssParser.parseStyleSheet(inputFromString(css), CssHints.DEFAULT);
+            assertEquals(sheet.rules(), List.of());
         };
 
         assertNoRulesProduced.accept(".a .b {}");
@@ -68,11 +75,20 @@ class CssParserTest {
         assertNoRulesProduced.accept(".a { .b }");
         assertNoRulesProduced.accept(".a { .b : a; }");
 
-        var s = cssParser.parse(inputFromString("#rule { c : d; }"));
-        assertTrue(s.idRules().containsKey("rule"));
-        assertEquals(List.of(new StyleProperty("c", "d")), s.idRules().get("rule"));
+        var s = cssParser.parseStyleSheet(inputFromString("#rule { c : d; }"), CssHints.DEFAULT);
+        var expected = new StyleRuleList(
+                List.of(new StyleRule(
+                        new ComplexSelector(
+                                List.of(new CompoundSelector(
+                                        List.of(new SimpleSelector.Id("rule")))),
+                                List.of()),
+                        List.of(new NormalizedProperty(
+                                "c",
+                                List.of(new Token.Ident("d")),
+                                false)))));
+        assertEquals(expected, s);
 
-        var sheet = cssParser.parse(inputFromString("""
+        var sheet = cssParser.parseStyleSheet(inputFromString("""
                 .a .b {}
                 #rule1 {
                     fill: orange;
@@ -87,48 +103,67 @@ class CssParserTest {
                 #rule3 {
                     fill: orange;
                 }
-                """));
-        assertEquals(0, sheet.classRules().size());
-        assertEquals(0, sheet.tagNameRules().size());
-        assertEquals(3, sheet.idRules().size());
+                """), CssHints.DEFAULT);
 
-        assertTrue(sheet.idRules().containsKey("rule1"), () -> sheet.idRules().toString());
-        assertTrue(sheet.idRules().containsKey("rule2"), () -> sheet.idRules().toString());
-        assertTrue(sheet.idRules().containsKey("rule3"), () -> sheet.idRules().toString());
-
-        var p = List.of(new StyleProperty("fill", "orange"));
-
-        assertEquals(p, sheet.idRules().get("rule1"));
-        assertEquals(p, sheet.idRules().get("rule2"));
-        assertEquals(p, sheet.idRules().get("rule3"));
+        Function<String, StyleRule> styleRule = (String name) -> new StyleRule(
+                new ComplexSelector(
+                        List.of(new CompoundSelector(
+                                List.of(new SimpleSelector.Id(name)))),
+                        List.of()),
+                List.of(new NormalizedProperty(
+                        "fill",
+                        List.of(new Token.Ident("orange")),
+                        false)));
+        assertEquals(new StyleRuleList(List.of(
+                styleRule.apply("rule1"),
+                styleRule.apply("rule2"),
+                styleRule.apply("rule3"))), sheet);
     }
 
     @Test
     void newLinesAreSkipped() {
-        SimpleCssParser cssParser = new SimpleCssParser();
-        var s = cssParser.parse(inputFromString(".cls{\r\n \r \n \f fill:#6e6e6e}"));
-        assertEquals(1, s.classRules().size());
-        assertTrue(s.classRules().containsKey("cls"));
-        assertEquals(List.of(new StyleProperty("fill", "#6e6e6e")), s.classRules().get("cls"));
+        FullCssParser cssParser = new FullCssParser();
+        var s = cssParser.parseStyleSheet(inputFromString(".cls{\r\n \r \n \f fill:#6e6e6e}"), CssHints.DEFAULT);
+
+        var expected = new StyleRuleList(
+                List.of(new StyleRule(
+                        new ComplexSelector(
+                                List.of(new CompoundSelector(
+                                        List.of(new SimpleSelector.Class("cls")))),
+                                List.of()),
+                        List.of(new NormalizedProperty(
+                                "fill",
+                                List.of(new Token.Hash("6e6e6e", Token.HashType.UNRESTRICTED)),
+                                false)))));
+        assertEquals(expected, s);
     }
 
     @Test
     void emptyInputSegmentsAreSkipped() {
-        SimpleCssParser cssParser = new SimpleCssParser();
-        var s = cssParser.parse(List.of(
-            new char[0],
-            ".cls{".toCharArray(),
-            new char[0],
-            "fill:#6e6e6e}".toCharArray()));
-        assertEquals(1, s.classRules().size());
-        assertTrue(s.classRules().containsKey("cls"));
-        assertEquals(List.of(new StyleProperty("fill", "#6e6e6e")), s.classRules().get("cls"));
+        FullCssParser cssParser = new FullCssParser();
+        var s = cssParser.parseStyleSheet(List.of(
+                new char[0],
+                ".cls{".toCharArray(),
+                new char[0],
+                "fill:#6e6e6e}".toCharArray()), CssHints.DEFAULT);
+
+        var expected = new StyleRuleList(
+                List.of(new StyleRule(
+                        new ComplexSelector(
+                                List.of(new CompoundSelector(
+                                        List.of(new SimpleSelector.Class("cls")))),
+                                List.of()),
+                        List.of(new NormalizedProperty(
+                                "fill",
+                                List.of(new Token.Hash("6e6e6e", Token.HashType.UNRESTRICTED)),
+                                false)))));
+        assertEquals(expected, s);
     }
 
     @Test
     @Timeout(value = 10)
     void randomInput() {
-        SimpleCssParser cssParser = new SimpleCssParser();
+        FullCssParser cssParser = new FullCssParser();
         Random r = new Random();
         for (int i = 0; i < 200; i++) {
             String[] inputStrings = RandomData.generateRandomStringArray(r, RandomData.CharType.ALPHA_NUMERIC_ONLY);
@@ -136,26 +171,49 @@ class CssParserTest {
             for (String inputString : inputStrings) {
                 input.add(inputString.toCharArray());
             }
+            String singleString = String.join("", inputStrings);
+
             assertDoesNotThrow(() -> {
-                cssParser.parse(input);
-            }, () -> Arrays.toString(inputStrings));
+                cssParser.parseStyleSheet(input, CssHints.DEFAULT);
+            }, Arrays.toString(inputStrings));
+
+            assertDoesNotThrow(() -> {
+                cssParser.parseStyleAttribute(singleString, CssHints.DEFAULT);
+            }, singleString);
+
+            assertDoesNotThrow(() -> {
+                cssParser.parseCssAttribute(singleString);
+            }, singleString);
+
+            assertDoesNotThrow(() -> {
+                cssParser.parseCommaSeparatedCssAttribute(singleString);
+            }, singleString);
         }
     }
 
     @Test
     void invalidIdentifiers() {
-        SimpleCssParser parser = new SimpleCssParser();
-        assertDoesNotThrow(() -> parser.parse(inputFromString("..{}")));
-        assertDoesNotThrow(() -> parser.parse(inputFromString("#.{}")));
+        FullCssParser parser = new FullCssParser();
+        assertDoesNotThrow(() -> parser.parseStyleSheet(inputFromString("..{}"), CssHints.DEFAULT));
+        assertDoesNotThrow(() -> parser.parseStyleSheet(inputFromString("#.{}"), CssHints.DEFAULT));
     }
 
     @Test
     void ruleWithoutSemicolon() {
-        SimpleCssParser cssParser = new SimpleCssParser();
-        var s = cssParser.parse(inputFromString(".cls{fill:#6e6e6e}"));
-        assertEquals(1, s.classRules().size());
-        assertTrue(s.classRules().containsKey("cls"));
-        assertEquals(List.of(new StyleProperty("fill", "#6e6e6e")), s.classRules().get("cls"));
+        FullCssParser cssParser = new FullCssParser();
+        var s = cssParser.parseStyleSheet(inputFromString(".cls{fill:#6e6e6e}"), CssHints.DEFAULT);
+
+        var expected = new StyleRuleList(
+                List.of(new StyleRule(
+                        new ComplexSelector(
+                                List.of(new CompoundSelector(
+                                        List.of(new SimpleSelector.Class("cls")))),
+                                List.of()),
+                        List.of(new NormalizedProperty(
+                                "fill",
+                                List.of(new Token.Hash("6e6e6e", Token.HashType.UNRESTRICTED)),
+                                false)))));
+        assertEquals(expected, s);
     }
 
     @Test
@@ -176,5 +234,52 @@ class CssParserTest {
     @Test
     void selectorTypes() {
         assertEquals(SUCCESS, compareImages("css/selectorTypes.svg"));
+    }
+
+    // §4.3.14: value = s·(i + f·10^-d)·10^(t·e). A sign slip on the fractional term turned
+    // 0.7 into 70, so em-sized text rendered far off-screen and appeared missing.
+    @Test
+    void fractionalNumbersParseCorrectly() {
+        FullCssParser parser = new FullCssParser();
+
+        assertEquals(0.7, dimensionValue(parser, "0.7em"), 1e-9);
+        assertEquals(0.8, dimensionValue(parser, "0.8em"), 1e-9);
+        assertEquals(1.5, dimensionValue(parser, "1.5em"), 1e-9);
+        assertEquals(2.0, dimensionValue(parser, "2em"), 1e-9);
+        assertEquals(10.25, dimensionValue(parser, "10.25px"), 1e-9);
+        assertEquals(-0.25, dimensionValue(parser, "-0.25px"), 1e-9);
+
+        // Scientific notation.
+        assertEquals(0.015, dimensionValue(parser, "1.5e-2px"), 1e-9);
+        assertEquals(150.0, dimensionValue(parser, "1.5e2px"), 1e-9);
+
+        // Plain numbers and percentages share the same code path.
+        assertEquals(0.5, numberValue(parser, "0.5"), 1e-9);
+        assertEquals(12.5, percentageValue(parser, "12.5%"), 1e-9);
+    }
+
+    private static double dimensionValue(@NotNull FullCssParser parser, @NotNull String value) {
+        ComponentValue token = firstToken(parser, value);
+        assertTrue(token instanceof Token.Dimension, value);
+        return ((Token.Dimension) token).value();
+    }
+
+    private static double numberValue(@NotNull FullCssParser parser, @NotNull String value) {
+        ComponentValue token = firstToken(parser, value);
+        assertTrue(token instanceof Token.Number, value);
+        return ((Token.Number) token).value();
+    }
+
+    private static double percentageValue(@NotNull FullCssParser parser, @NotNull String value) {
+        ComponentValue token = firstToken(parser, value);
+        assertTrue(token instanceof Token.Percentage, value);
+        return ((Token.Percentage) token).value();
+    }
+
+    private static @NotNull ComponentValue firstToken(@NotNull FullCssParser parser, @NotNull String value) {
+        for (ComponentValue token : parser.parseCssAttribute(value)) {
+            if (!(token instanceof Token) || ((Token) token).type() != TokenType.WHITESPACE) return token;
+        }
+        throw new AssertionError("No token produced for: " + value);
     }
 }
