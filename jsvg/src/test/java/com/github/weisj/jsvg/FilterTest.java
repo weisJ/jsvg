@@ -119,6 +119,11 @@ class FilterTest {
     }
 
     @Test
+    void testDiffuseLighting() {
+        assertEquals(SUCCESS, compareImages("filter/diffuseLighting.svg", 0.2, 0.15));
+    }
+
+    @Test
     void testComposite() {
         // TODO: BackgroundImage not supported
         assertDoesNotThrow(() -> renderJsvg("filter/composite.svg"));
