@@ -76,9 +76,8 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        LayoutBounds layoutBounds = new LayoutBounds(
-                filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this),
-                new FloatInsets());
+        float grow = Math.abs(scale) / 2f;
+        LayoutBounds layoutBounds = impl().layoutInput(filterLayoutContext).grow(grow, grow, filterLayoutContext);
         impl().saveLayoutResult(layoutBounds, filterLayoutContext);
     }
 
