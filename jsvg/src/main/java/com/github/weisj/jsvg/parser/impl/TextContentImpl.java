@@ -68,6 +68,6 @@ public class TextContentImpl implements TextContent {
     @Override
     public void setText(@NotNull String text) {
         currentContentList().clear();
-	currentContentList().add(new StringSegment(text));
+        currentContentList().add(new StringSegment(text));
     }
 }
