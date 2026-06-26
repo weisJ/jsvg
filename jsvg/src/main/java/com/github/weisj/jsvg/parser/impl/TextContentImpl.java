@@ -24,6 +24,8 @@ package com.github.weisj.jsvg.parser.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.text.Segment;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.parser.TextContent;
@@ -67,7 +69,7 @@ public class TextContentImpl implements TextContent {
 
     @Override
     public void setText(@NotNull String text) {
-        currentContentList().clear();
+        contentLists.forEach(List::clear);
         currentContentList().add(new StringSegment(text));
     }
 }
