@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 260 140"
+     width="260"
+     height="140">
+  <defs>
+    <filter id="paper">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.04"
+        result="noise"
+        numOctaves="5"/>
+
+      <feDiffuseLighting in="noise" surfaceScale="2" result="texture">
+        <feDistantLight azimuth="45" elevation="75"/>
+      </feDiffuseLighting>
+
+      <feComposite
+        in="SourceGraphic"
+        in2="texture"
+        operator="arithmetic"
+        k1="1"
+        k2="0"
+        k3="0"
+        k4="0"/>
+    </filter>
+  </defs>
+
+  <rect x="10" y="10" width="110" height="110"
+        fill="rgb(200,230,150)"
+        stroke="#444444"
+        filter="url(#paper)"/>
+
+  <rect x="140" y="10" width="110" height="110"
+        fill="rgb(200,230,150)"
+        stroke="#444444"/>
+</svg>
