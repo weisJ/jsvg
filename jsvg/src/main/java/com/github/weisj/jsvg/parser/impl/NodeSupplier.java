@@ -143,7 +143,7 @@ public final class NodeSupplier {
 
     private void populateDummyNodeConstructors() {
         constructorMap.put("feConvolveMatrix", () -> new DummyFilterPrimitive("feConvolveMatrix"));
-        constructorMap.put("feDiffuseLightning", () -> new DummyFilterPrimitive("feDiffuseLightning"));
+        constructorMap.put("feDiffuseLighting", () -> new DummyFilterPrimitive("feDiffuseLighting"));
         constructorMap.put("feImage", () -> new DummyFilterPrimitive("feImage"));
         constructorMap.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
         constructorMap.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));
