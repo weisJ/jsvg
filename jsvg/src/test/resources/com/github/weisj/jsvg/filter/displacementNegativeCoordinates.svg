@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 180" width="260" height="180">
+  <defs>
+    <filter id="stream">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.05"
+        numOctaves="3"
+        result="noise"/>
+      <feDisplacementMap
+        in2="noise"
+        in="SourceGraphic"
+        scale="10"
+        xChannelSelector="R"
+        yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="260" height="180" fill="white"/>
+  <g fill="none" stroke="blue" stroke-width="18" stroke-linecap="round" stroke-opacity="0.6"
+      stroke-linejoin="round">
+    <g transform="translate(20,150)" filter="url(#stream)">
+      <polyline
+        points="
+          20, 20
+          60, 0
+          60, -40
+          100, -60
+          100, -100
+          140, -120
+          180, -100
+          220, -120
+        "/>
+    </g>
+  </g>
+</svg>

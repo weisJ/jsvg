@@ -57,10 +57,10 @@ public final class CompositeModeComposite {
                 return new LighterComposite();
             case Arithmetic:
                 return new ArithmeticComposite(
-                        attributeNode.getInt("k1", 0),
-                        attributeNode.getInt("k2", 0),
-                        attributeNode.getInt("k3", 0),
-                        attributeNode.getInt("k4", 0));
+                        attributeNode.getFloat("k1", 0),
+                        attributeNode.getFloat("k2", 0),
+                        attributeNode.getFloat("k3", 0),
+                        attributeNode.getFloat("k4", 0));
             default:
                 throw new IllegalStateException();
         }
@@ -69,12 +69,12 @@ public final class CompositeModeComposite {
     private static final class ArithmeticComposite extends AbstractBlendComposite
             implements AbstractBlendComposite.Blender {
 
-        private final int k1;
-        private final int k2;
-        private final int k3;
-        private final int k4;
+        private final float k1;
+        private final float k2;
+        private final float k3;
+        private final float k4;
 
-        private ArithmeticComposite(int k1, int k2, int k3, int k4) {
+        private ArithmeticComposite(float k1, float k2, float k3, float k4) {
             this.k1 = k1;
             this.k2 = k2;
             this.k3 = k3;
@@ -88,10 +88,16 @@ public final class CompositeModeComposite {
 
         @Override
         public void blend(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
-            result[0] = Math.max(0, Math.min(255, k1 * src[0] * dst[0] + k2 * src[0] + k3 * dst[0] + k4));
-            result[1] = Math.max(0, Math.min(255, k1 * src[1] * dst[1] + k2 * src[1] + k3 * dst[1] + k4));
-            result[2] = Math.max(0, Math.min(255, k1 * src[2] * dst[2] + k2 * src[2] + k3 * dst[2] + k4));
-            result[3] = Math.max(0, Math.min(255, k1 * src[3] * dst[3] + k2 * src[3] + k3 * dst[3] + k4));
+            result[0] = arithmetic(src[0], dst[0]);
+            result[1] = arithmetic(src[1], dst[1]);
+            result[2] = arithmetic(src[2], dst[2]);
+            result[3] = arithmetic(src[3], dst[3]);
+        }
+
+        private int arithmetic(int src, int dst) {
+            double s = src / 255.0;
+            double d = dst / 255.0;
+            return Math.max(0, Math.min(255, (int) Math.round(255 * (k1 * s * d + k2 * s + k3 * d + k4))));
         }
     }
 

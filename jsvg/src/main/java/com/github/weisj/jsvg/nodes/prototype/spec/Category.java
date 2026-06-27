@@ -34,6 +34,7 @@ public enum Category {
     // in a static context.
     Descriptive(false),
     FilterPrimitive,
+    LightSource,
     TransferFunctionElement,
     Gradient,
     Graphic,

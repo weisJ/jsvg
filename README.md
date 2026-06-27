@@ -321,7 +321,7 @@ For supported elements most of the attributes which apply to them are implemente
 | feConvolveMatrix    | :x:                     |
 | feDiffuseLighting   | :white_check_mark:      |
 | feDisplacementMap   | :white_check_mark:      |
-| feDistantLight      | :x:                     |
+| feDistantLight      | :white_check_mark:      |
 | feDropShadow        | :white_check_mark:      |
 | feFlood             | :white_check_mark:      |
 | feFuncA             | :white_check_mark:      |
@@ -334,9 +334,9 @@ For supported elements most of the attributes which apply to them are implemente
 | feMergeNode         | :white_check_mark:      |
 | feMorphology        | :x:                     |
 | feOffset            | :white_check_mark:      |
-| fePointLight        | :x:                     |
+| fePointLight        | :white_check_mark:      |
 | feSpecularLighting  | :x:                     |
-| feSpotLight         | :x:                     |
+| feSpotLight         | :white_check_mark:      |
 | feTile              | :x:                     |
 | feTurbulence        | :white_check_mark:      |
 | filter              | :ballot_box_with_check: |

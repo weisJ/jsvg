@@ -76,9 +76,10 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        LayoutBounds layoutBounds = new LayoutBounds(
-                filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this),
-                new FloatInsets());
+        // The displacement formula maps channel values from [0, 1] to [-0.5, 0.5],
+        // so the maximum lookup offset is half of the configured scale in either direction.
+        float grow = Math.abs(scale) / 2f;
+        LayoutBounds layoutBounds = impl().layoutInput(filterLayoutContext).grow(grow, grow, filterLayoutContext);
         impl().saveLayoutResult(layoutBounds, filterLayoutContext);
     }
 
