@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70">
+<svg xmlns="http://www.w3.org/2000/svg" width="1286" height="500" viewBox="0 0 180 70">
     <defs>
         <filter id="distant" x="0" y="0" width="1" height="1">
             <feDiffuseLighting in="SourceGraphic" lighting-color="#ffcc66" surfaceScale="6" diffuseConstant="1.1">

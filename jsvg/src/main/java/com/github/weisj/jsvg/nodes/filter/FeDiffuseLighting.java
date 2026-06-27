@@ -26,6 +26,8 @@ import java.awt.color.ColorSpace;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
+import java.util.Collections;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,10 +35,12 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
-import com.github.weisj.jsvg.nodes.container.ContainerNode;
+import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -47,17 +51,19 @@ import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
-    anyOf = {FeDistantLight.class, FePointLight.class, FeSpotLight.class, Animate.class, Set.class}
+    categories = {Category.LightSource},
+    anyOf = {Animate.class, Set.class}
 )
-public final class FeDiffuseLighting extends ContainerNode implements FilterPrimitive {
+public final class FeDiffuseLighting extends AbstractFilterPrimitive implements Container<LightSource> {
     public static final String TAG = "fediffuselighting";
 
-    private FilterPrimitiveBase filterPrimitiveBase;
+    private static final Logger LOGGER = LogFactory.createLogger(FeDiffuseLighting.class);
 
     private float surfaceScale;
     private float diffuseConstant;
     private Color lightingColor;
     private double @Nullable [] kernelUnitLength;
+    private @Nullable LightSource lightSource;
 
     @Override
     public @NotNull String tagName() {
@@ -68,7 +74,6 @@ public final class FeDiffuseLighting extends ContainerNode implements FilterPrim
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
 
-        filterPrimitiveBase = new FilterPrimitiveBase(attributeNode);
         surfaceScale = attributeNode.getFloat("surfaceScale", 1);
         diffuseConstant = attributeNode.getNonNegativeFloat("diffuseConstant", 1);
         lightingColor = attributeNode.getColor("lighting-color", Color.WHITE);
@@ -83,33 +88,22 @@ public final class FeDiffuseLighting extends ContainerNode implements FilterPrim
         }
     }
 
-    private @NotNull FilterPrimitiveBase impl() {
-        return filterPrimitiveBase;
+    @Override
+    public void addChild(@Nullable String id, @NotNull SVGNode node) {
+        if (node instanceof LightSource) {
+            if (lightSource != null) {
+                LOGGER.log(Logger.Level.WARNING,
+                        "Element <fediffuselighting> should only have one light source. Using the first one.");
+            } else {
+                lightSource = (LightSource) node;
+            }
+        }
     }
 
     @Override
-    public @NotNull com.github.weisj.jsvg.geometry.size.Length x() {
-        return impl().x;
-    }
-
-    @Override
-    public @NotNull com.github.weisj.jsvg.geometry.size.Length y() {
-        return impl().y;
-    }
-
-    @Override
-    public @NotNull com.github.weisj.jsvg.geometry.size.Length width() {
-        return impl().width;
-    }
-
-    @Override
-    public @NotNull com.github.weisj.jsvg.geometry.size.Length height() {
-        return impl().height;
-    }
-
-    @Override
-    protected boolean acceptChild(@Nullable String id, @NotNull SVGNode node) {
-        return node instanceof LightSource && super.acceptChild(id, node);
+    public @NotNull List<? extends @NotNull LightSource> children() {
+        if (lightSource == null) return Collections.emptyList();
+        return Collections.singletonList(lightSource);
     }
 
     @Override
@@ -122,7 +116,6 @@ public final class FeDiffuseLighting extends ContainerNode implements FilterPrim
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        LightSource lightSource = lightSource();
         if (lightSource == null) {
             Filter.FilterInfo info = filterContext.info();
             BufferedImage img = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
@@ -133,18 +126,6 @@ public final class FeDiffuseLighting extends ContainerNode implements FilterPrim
         ImageFilter lightingFilter = new BufferedImageFilter(
                 new DiffuseLightingOp(lightSource, filterContext.info().tile(), colorInterpolation(filterContext)));
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(lightingFilter), filterContext);
-    }
-
-    private @Nullable LightSource lightSource() {
-        for (SVGNode node : children()) {
-            if (node instanceof LightSource) return (LightSource) node;
-        }
-        return null;
-    }
-
-    @Override
-    public ColorInterpolation colorInterpolation(@NotNull FilterContext filterContext) {
-        return impl().colorInterpolation(filterContext);
     }
 
     private final class DiffuseLightingOp implements BufferedImageOp {

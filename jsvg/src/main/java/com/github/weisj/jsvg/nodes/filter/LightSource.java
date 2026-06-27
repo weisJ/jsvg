@@ -23,9 +23,7 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.SVGNode;
-
-interface LightSource extends SVGNode {
+interface LightSource {
 
     @NotNull
     Light lightAt(double x, double y, double z);

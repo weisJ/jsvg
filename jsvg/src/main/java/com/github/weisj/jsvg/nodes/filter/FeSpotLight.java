@@ -29,7 +29,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
-@ElementCategories(Category.None)
+@ElementCategories(Category.LightSource)
 @PermittedContent
 public final class FeSpotLight extends FePointLight {
     public static final String TAG = "fespotlight";
