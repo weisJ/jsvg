@@ -1,26 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1286" height="500" viewBox="0 0 180 70">
-    <defs>
-        <filter id="distant" x="0" y="0" width="1" height="1">
-            <feDiffuseLighting in="SourceGraphic" lighting-color="#ffcc66" surfaceScale="6" diffuseConstant="1.1">
-                <feDistantLight azimuth="45" elevation="35"/>
-            </feDiffuseLighting>
-            <feComposite in2="SourceGraphic" operator="in"/>
-        </filter>
-        <filter id="point" x="0" y="0" width="1" height="1">
-            <feDiffuseLighting in="SourceGraphic" lighting-color="#99ddff" surfaceScale="4" diffuseConstant="1.2">
-                <fePointLight x="86" y="15" z="36"/>
-            </feDiffuseLighting>
-            <feComposite in2="SourceGraphic" operator="in"/>
-        </filter>
-        <filter id="spot" x="0" y="0" width="1" height="1">
-            <feDiffuseLighting in="SourceGraphic" lighting-color="#d8ff9a" surfaceScale="5" diffuseConstant="1.3">
-                <feSpotLight x="142" y="-12" z="42" pointsAtX="144" pointsAtY="36" pointsAtZ="0"
-                    specularExponent="3" limitingConeAngle="30"/>
-            </feDiffuseLighting>
-            <feComposite in2="SourceGraphic" operator="in"/>
-        </filter>
-    </defs>
-    <rect x="12" y="14" width="42" height="42" rx="10" fill="black" filter="url(#distant)"/>
-    <circle cx="90" cy="35" r="22" fill="black" filter="url(#point)"/>
-    <path d="M126 56 L146 12 L168 56 Z" fill="black" filter="url(#spot)"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1286" height="500"
+	viewBox="0 0 180 70">
+	<defs>
+		<filter id="distant" x="0" y="0" width="1" height="1">
+			<feDiffuseLighting in="SourceGraphic"
+				lighting-color="#ffcc66" surfaceScale="6" diffuseConstant="1.1">
+				<feDistantLight azimuth="45" elevation="35" />
+			</feDiffuseLighting>
+			<feComposite in2="SourceGraphic" operator="in" />
+		</filter>
+		<filter id="point" x="0" y="0" width="1" height="1">
+			<feDiffuseLighting in="SourceGraphic"
+				lighting-color="#99ddff" surfaceScale="4" diffuseConstant="1.2">
+				<fePointLight x="86" y="15" z="36" />
+			</feDiffuseLighting>
+			<feComposite in2="SourceGraphic" operator="in" />
+		</filter>
+		<filter id="spot" x="0" y="0" width="1" height="1">
+			<feDiffuseLighting in="SourceGraphic"
+				lighting-color="#d8ff9a" surfaceScale="5" diffuseConstant="1.3">
+				<feSpotLight x="142" y="-12" z="42" pointsAtX="144"
+					pointsAtY="36" pointsAtZ="0" specularExponent="3"
+					limitingConeAngle="30" />
+			</feDiffuseLighting>
+			<feComposite in2="SourceGraphic" operator="in" />
+		</filter>
+	</defs>
+	<rect x="12" y="14" width="42" height="42" rx="10" fill="black"
+		filter="url(#distant)" />
+	<circle cx="90" cy="35" r="22" fill="black" filter="url(#point)" />
+	<path d="M126 56 L146 12 L168 56 Z" fill="black"
+		filter="url(#spot)" />
 </svg>
