@@ -101,7 +101,7 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
         }
 
         ImageFilter displacementFilter = new BufferedImageFilter(
-                new DisplacementOp(displacementInput.pixels(context), filterContext.info().tile(),
+                new DisplacementOp(displacementInput.pixels(context), filterContext.info().imageBounds(),
                         displacementScaleX, displacementScaleY));
         impl().saveResult(input.applyFilter(displacementFilter), filterContext);
     }
