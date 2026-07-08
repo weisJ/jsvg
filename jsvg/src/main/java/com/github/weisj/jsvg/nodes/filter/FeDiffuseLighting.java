@@ -124,7 +124,8 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
         }
 
         ImageFilter lightingFilter = new BufferedImageFilter(
-                new DiffuseLightingOp(lightSource, filterContext.info().tile(), colorInterpolation(filterContext)));
+                new DiffuseLightingOp(lightSource, filterContext.info().imageBounds(),
+                        colorInterpolation(filterContext)));
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(lightingFilter), filterContext);
     }
 

@@ -108,6 +108,8 @@ class FXOutputTest {
             "topRight.svg",
             "unknown.svg",
             "dropShadow.svg",
+            "diffuseLighting.svg",
+            "diffuseLighting_issue167.svg",
             "composite.svg",
             "turbulence1.svg",
             "turbulence2.svg",
