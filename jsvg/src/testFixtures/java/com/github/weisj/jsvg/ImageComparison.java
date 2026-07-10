@@ -301,11 +301,6 @@ public final class ImageComparison {
                 new com.github.romankh3.image.comparison.ImageComparison(expected, actual);
         comp.setAllowingPercentOfDifferentPixels(tolerance);
         comp.setPixelToleranceLevel(pixelTolerance);
-        ImageComparisonResult comparison = comp.compareImages();
-        ImageComparisonState state = comparison.getImageComparisonState();
-        if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
-            return ReferenceTestResult.SUCCESS;
-        }
 
         String baseName = name.replaceAll("[- /]", "_");
         File diffFile = new File(baseName + "_diff.png");
@@ -319,6 +314,11 @@ public final class ImageComparison {
         } catch (IOException ignore) {
         }
 
+        ImageComparisonResult comparison = comp.compareImages();
+        ImageComparisonState state = comparison.getImageComparisonState();
+        if (state == ImageComparisonState.MISMATCH && comparison.getDifferencePercent() <= tolerance) {
+            return ReferenceTestResult.SUCCESS;
+        }
 
         return new ReferenceTestResult(state, () -> {
             StringBuilder sb = new StringBuilder();
