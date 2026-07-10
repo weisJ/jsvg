@@ -130,9 +130,9 @@ public final class SVGDocument {
 
         RenderContext context = prepareRenderContext(platformSupport, output, viewportBounds, animationState);
 
-        // Needed for vector-effects to work properly.
+        // Needed for the non-scaling-stroke vector-effect to work properly.
         RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
-        accessor.setRootTransform(context, output.transform());
+        accessor.setHostTransform(context, output.transform());
 
         ViewBox fallbackViewbox = new ViewBox(root.size(context));
         if (viewportBounds == null) viewportBounds = fallbackViewbox;
@@ -148,6 +148,9 @@ public final class SVGDocument {
         ViewBox rootViewBox = root.viewBox(context);
         RenderContext viewContext = root.createInnerContextForViewBox(
                 viewportBounds.size(), rootViewBox, context, output);
+
+        // Needed for other vector-effects to work properly.
+        accessor.setTransforms(viewContext, output.transform());
 
         ViewBox clipViewbox = rootViewBox != null ? rootViewBox : fallbackViewbox;
         output.applyClip(clipViewbox);

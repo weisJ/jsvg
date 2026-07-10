@@ -72,5 +72,9 @@ class VectorEffectsTest {
         assertEquals(SUCCESS, compareImages(new CompareInfo(
                 expected(new PathImageSource("vectorEffect/nonScalingStroke_bug139_ref.svg"), RenderType.JSVG, hints),
                 actual(new PathImageSource("vectorEffect/nonScalingStroke_bug139.svg"), RenderType.JSVG, hints))));
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("vectorEffect/nonScalingStroke_bug139_ref.svg"), RenderType.JSVG, hints),
+                actual(new PathImageSource("vectorEffect/nonScalingStroke_bug139_with_filter.svg"), RenderType.JSVG,
+                        hints))));
     }
 }

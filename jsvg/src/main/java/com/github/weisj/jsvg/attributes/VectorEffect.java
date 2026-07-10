@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -100,9 +100,12 @@ public enum VectorEffect implements HasMatchName {
             @NotNull Stroke stroke, @NotNull Shape shape) {
         // For the stroke not to be scaled we have to pre-multiply the shape by the transform and then paint
         // in the non-transformed coordinate system.
-        Shape strokedShape = ShapeUtil.transformShape(shape, context.userSpaceTransform());
+        AffineTransform shapeTransform = output.transform();
+        shapeTransform.concatenate(GeometryUtil.createInverse(context.hostTransform()));
+
+        Shape strokedShape = ShapeUtil.transformShape(shape, shapeTransform);
         strokedShape = stroke.createStrokedShape(strokedShape);
-        return ShapeUtil.transformShape(strokedShape, GeometryUtil.createInverse(context.userSpaceTransform()));
+        return ShapeUtil.transformShape(strokedShape, GeometryUtil.createInverse(shapeTransform));
     }
 
     private static void updateTransformForFlags(int flags, @NotNull AffineTransform transform, double x0, double y0) {

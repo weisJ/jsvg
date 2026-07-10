@@ -103,6 +103,10 @@ public final class BlittableImage {
                 boundsInDeviceSpace.getWidth(),
                 boundsInDeviceSpace.getHeight());
 
+        AffineTransform hostTransform = new AffineTransform();
+        hostTransform.translate(-boundsInDeviceSpace.getX(), -boundsInDeviceSpace.getY());
+        hostTransform.concatenate(context.hostTransform());
+
         AffineTransform rootTransform = new AffineTransform();
         rootTransform.translate(-boundsInDeviceSpace.getX(), -boundsInDeviceSpace.getY());
         rootTransform.concatenate(context.rootTransform());
@@ -116,7 +120,7 @@ public final class BlittableImage {
 
         // Note: This should actually be the render context from the declaration site of the mask/clipPath
         // etc.
-        RenderContextAccessor.instance().setRootTransform(imageContext, rootTransform, userSpaceTransform);
+        RenderContextAccessor.instance().setTransforms(imageContext, hostTransform, rootTransform, userSpaceTransform);
 
         return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedBoundsInUserSpace);
     }

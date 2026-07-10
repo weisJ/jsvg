@@ -58,6 +58,7 @@ public final class RenderContext {
     private final @Nullable ContextElementAttributes contextElementAttributes;
 
     private final @NotNull AffineTransform rootTransform;
+    private final @NotNull AffineTransform hostTransform;
     private final @NotNull AffineTransform userSpaceTransform;
 
     static {
@@ -102,6 +103,7 @@ public final class RenderContext {
                     return new RenderContext(
                             context.platformSupport(),
                             new AffineTransform(),
+                            context.hostTransform,
                             new AffineTransform(),
                             PaintContext.createDefault(PredefinedPaints.DEFAULT_PAINT),
                             newMeasure,
@@ -143,14 +145,20 @@ public final class RenderContext {
             }
 
             @Override
-            public void setRootTransform(@NotNull RenderContext context, @NotNull AffineTransform rootTransform) {
+            public void setTransforms(@NotNull RenderContext context, @NotNull AffineTransform rootTransform) {
                 context.setRootTransform(rootTransform);
             }
 
             @Override
-            public void setRootTransform(@NotNull RenderContext context, @NotNull AffineTransform rootTransform,
+            public void setTransforms(@NotNull RenderContext context, @NotNull AffineTransform hostTransform,
+                    @NotNull AffineTransform rootTransform,
                     @NotNull AffineTransform userSpaceTransform) {
                 context.setRootTransform(rootTransform, userSpaceTransform);
+            }
+
+            @Override
+            public void setHostTransform(@NotNull RenderContext context, @NotNull AffineTransform hostTransform) {
+                context.setHostTransform(hostTransform);
             }
         });
     }
@@ -163,6 +171,7 @@ public final class RenderContext {
         return new RenderContext(awtSupport,
                 new AffineTransform(),
                 new AffineTransform(),
+                new AffineTransform(),
                 PaintContext.createDefault(color),
                 measureContext,
                 FontRenderContext.createDefault(),
@@ -172,6 +181,7 @@ public final class RenderContext {
 
     private RenderContext(@NotNull PlatformSupport platformSupport,
             @NotNull AffineTransform rootTransform,
+            @NotNull AffineTransform hostTransform,
             @NotNull AffineTransform userSpaceTransform,
             @NotNull com.github.weisj.jsvg.renderer.impl.context.PaintContext paintContext,
             @NotNull MeasureContext measureContext,
@@ -180,6 +190,7 @@ public final class RenderContext {
             @Nullable ContextElementAttributes contextElementAttributes) {
         this.platformSupport = platformSupport;
         this.rootTransform = rootTransform;
+        this.hostTransform = hostTransform;
         this.userSpaceTransform = userSpaceTransform;
         this.paintContext = paintContext;
         this.measureContext = measureContext;
@@ -233,7 +244,8 @@ public final class RenderContext {
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
         AffineTransform newRootTransform = rootTransform != null ? rootTransform : this.rootTransform;
 
-        return new RenderContext(platformSupport, newRootTransform, new AffineTransform(userSpaceTransform),
+        return new RenderContext(platformSupport, newRootTransform, hostTransform,
+                new AffineTransform(userSpaceTransform),
                 newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newContextAttributes);
     }
 
@@ -262,6 +274,10 @@ public final class RenderContext {
 
     public @NotNull AffineTransform rootTransform() {
         return rootTransform;
+    }
+
+    public @NotNull AffineTransform hostTransform() {
+        return hostTransform;
     }
 
     public @NotNull AffineTransform userSpaceTransform() {
@@ -367,6 +383,10 @@ public final class RenderContext {
         this.userSpaceTransform.setTransform(userSpaceTransform);
     }
 
+    private void setHostTransform(@NotNull AffineTransform hostTransform) {
+        this.hostTransform.setTransform(hostTransform);
+    }
+
     @Override
     public String toString() {
         return "RenderContext{" +
@@ -377,6 +397,7 @@ public final class RenderContext {
                 ", fontSpec=" + fontSpec +
                 ", contextElementAttributes=" + contextElementAttributes +
                 ", rootTransform=" + rootTransform +
+                ", hostTransform=" + hostTransform +
                 ", userSpaceTransform=" + userSpaceTransform +
                 '}';
     }

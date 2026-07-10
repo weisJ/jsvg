@@ -82,10 +82,13 @@ public final class RenderContextAccessor {
         @Nullable
         SVGPaint currentColor(@NotNull RenderContext context);
 
-        void setRootTransform(@NotNull RenderContext context, @NotNull AffineTransform rootTransform);
+        void setTransforms(@NotNull RenderContext context, @NotNull AffineTransform rootTransform);
 
-        void setRootTransform(@NotNull RenderContext context, @NotNull AffineTransform rootTransform,
+        void setTransforms(@NotNull RenderContext context, @NotNull AffineTransform hostTransform,
+                @NotNull AffineTransform rootTransform,
                 @NotNull AffineTransform userSpaceTransform);
+
+        void setHostTransform(@NotNull RenderContext context, @NotNull AffineTransform hostTransform);
     }
 
     private static Accessor instance;

@@ -129,7 +129,7 @@ class BlitImageTest {
         ImageSurface actual = new ImageSurface(size, size, scale, scale);
         Output actualOutput = actual.output();
 
-        RenderContextAccessor.instance().setRootTransform(context, actualOutput.transform());
+        RenderContextAccessor.instance().setTransforms(context, actualOutput.transform());
         context.transform(actualOutput, transform);
         actualOutput.debugPaint(g -> {
             g.setColor(Color.GREEN);
