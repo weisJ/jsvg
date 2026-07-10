@@ -36,6 +36,8 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.attributes.text.AlignmentBaseline;
+import com.github.weisj.jsvg.attributes.text.DominantBaseline;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ShapeRenderer;
@@ -168,7 +170,38 @@ final class GlyphRenderer {
     }
 
     private static float computeBaselineOffset(@NotNull SVGFont font, @NotNull FontRenderContext fontRenderContext) {
-        switch (fontRenderContext.dominantBaseline()) {
+        AlignmentBaseline alignmentBaseline = fontRenderContext.alignmentBaseline();
+        switch (alignmentBaseline) {
+            default:
+            case Auto:
+            case Baseline:
+                return computeDominantBaselineOffset(font, fontRenderContext.dominantBaseline());
+            case Alphabetic:
+                return font.romanBaseline();
+            case Hanging:
+                return font.hangingBaseline();
+            case Central:
+            case Center:
+                return font.centerBaseline();
+            case Middle:
+                return font.middleBaseline();
+            case Mathematical:
+                return font.mathematicalBaseline();
+            case Ideographic:
+            case AfterEdge:
+            case TextAfterEdge:
+            case Bottom:
+                return font.textUnderBaseline();
+            case BeforeEdge:
+            case TextBeforeEdge:
+            case Top:
+                return font.textOverBaseline();
+        }
+    }
+
+    private static float computeDominantBaselineOffset(@NotNull SVGFont font,
+            @NotNull DominantBaseline dominantBaseline) {
+        switch (dominantBaseline) {
             default:
             case Auto:
                 // TODO: If text is in vertical mode this should be 'central'

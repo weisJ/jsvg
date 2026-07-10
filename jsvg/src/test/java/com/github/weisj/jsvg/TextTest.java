@@ -94,6 +94,15 @@ class TextTest {
     }
 
     @Test
+    void alignmentBaselineTest() {
+        assertDoesNotThrow(() -> renderJsvg("text/alignmentBaseline.svg"));
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("text/alignmentBaseline_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("text/alignmentBaseline.svg"), RenderType.JSVG),
+                0, 0)));
+    }
+
+    @Test
     void textAnchorTest() {
         assertEquals(SUCCESS, compareImages("text/textAnchor.svg", 0.4));
     }
