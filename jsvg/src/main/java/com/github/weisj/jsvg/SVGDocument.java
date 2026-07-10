@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 
@@ -124,7 +123,16 @@ public final class SVGDocument {
 
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
             @Nullable ViewBox viewportBounds, @Nullable AnimationState animationState) {
+
+        if (viewportBounds != null) {
+            output.translate(viewportBounds.x, viewportBounds.y);
+        }
+
         RenderContext context = prepareRenderContext(platformSupport, output, viewportBounds, animationState);
+
+        // Needed for vector-effects to work properly.
+        RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
+        accessor.setRootTransform(context, output.transform());
 
         ViewBox fallbackViewbox = new ViewBox(root.size(context));
         if (viewportBounds == null) viewportBounds = fallbackViewbox;
@@ -137,24 +145,9 @@ public final class SVGDocument {
             });
         }
 
-        AffineTransform rootTransform = output.transform();
-        // Set transform to identity. After createInnerContextForViewBox the transform of the output will be
-        // the pure user space transform.
-        output.setTransform(AffineTransform.getTranslateInstance(0, 0));
-
         ViewBox rootViewBox = root.viewBox(context);
         RenderContext viewContext = root.createInnerContextForViewBox(
                 viewportBounds.size(), rootViewBox, context, output);
-
-        AffineTransform userSpaceTransform = output.transform();
-
-        // Restore the original transform. The user space transform will be applied on top of this.
-        output.setTransform(rootTransform);
-        output.applyTransform(userSpaceTransform);
-
-        // Needed for vector-effects to work properly.
-        RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
-        accessor.setRootTransform(viewContext, rootTransform, userSpaceTransform);
 
         ViewBox clipViewbox = rootViewBox != null ? rootViewBox : fallbackViewbox;
         output.applyClip(clipViewbox);
