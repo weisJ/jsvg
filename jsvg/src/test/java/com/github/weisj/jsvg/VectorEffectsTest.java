@@ -40,21 +40,28 @@ import com.github.weisj.jsvg.ImageComparison.RenderType;
 
 class VectorEffectsTest {
 
+    private static void testVectorEffect(String name) {
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/ve-" + name + ".svg"));
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("vectorEffect/ref-ve-" + name + ".svg"), RenderType.JSVG),
+                actual(new PathImageSource("vectorEffect/ve-" + name + ".svg"), RenderType.JSVG))));
+    }
+
     @Test
     void simpleEffects() {
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/before.svg"));
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/none.svg"));
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingSize.svg"));
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonRotation.svg"));
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/fixedPosition.svg"));
+        assertDoesNotThrow(() -> renderJsvg("vectorEffect/ve-initial.svg"));
+        testVectorEffect("none");
+        testVectorEffect("nonScalingSize");
+        testVectorEffect("nonRotation");
+        testVectorEffect("fixedPosition");
     }
 
     @Test
     void combinedEffects() {
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingSizeNonRotation.svg"));
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingSizeFixedPosition.svg"));
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonRotationFixedPosition.svg"));
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingSizeNonRotationFixedPosition.svg"));
+        testVectorEffect("nonScalingSize-nonRotation");
+        testVectorEffect("nonScalingSize-fixedPosition");
+        testVectorEffect("nonRotation-fixedPosition");
+        testVectorEffect("nonScalingSize-nonRotation-fixedPosition");
     }
 
     @Test
