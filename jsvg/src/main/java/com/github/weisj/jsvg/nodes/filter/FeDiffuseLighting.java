@@ -231,8 +231,8 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
         }
 
         private double alphaAt(@NotNull BufferedImage src, double x, double y) {
-            double clampedX = Math.max(0, Math.min(src.getWidth() - 1, x));
-            double clampedY = Math.max(0, Math.min(src.getHeight() - 1, y));
+            double clampedX = Math.max(0, Math.min(src.getWidth() - 1.0, x));
+            double clampedY = Math.max(0, Math.min(src.getHeight() - 1.0, y));
             int x0 = (int) Math.floor(clampedX);
             int y0 = (int) Math.floor(clampedY);
             int x1 = Math.min(src.getWidth() - 1, x0 + 1);
