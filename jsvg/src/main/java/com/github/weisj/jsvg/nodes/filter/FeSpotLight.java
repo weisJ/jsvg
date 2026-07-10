@@ -24,13 +24,17 @@ package com.github.weisj.jsvg.nodes.filter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.nodes.animation.Animate;
+import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 @ElementCategories(Category.LightSource)
-@PermittedContent
+@PermittedContent(
+    anyOf = {Animate.class, Set.class}
+)
 public final class FeSpotLight extends FePointLight {
     public static final String TAG = "fespotlight";
 
