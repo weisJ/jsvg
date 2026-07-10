@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -114,7 +114,9 @@ public final class NodeSupplier {
         constructorMap.put(FeBlend.TAG, () -> new FeBlend());
         constructorMap.put(FeColorMatrix.TAG, () -> new FeColorMatrix());
         constructorMap.put(FeComposite.TAG, () -> new FeComposite());
+        constructorMap.put(FeDiffuseLighting.TAG, () -> new FeDiffuseLighting());
         constructorMap.put(FeDisplacementMap.TAG, () -> new FeDisplacementMap());
+        constructorMap.put(FeDistantLight.TAG, () -> new FeDistantLight());
         constructorMap.put(FeDropShadow.TAG, () -> new FeDropShadow());
         constructorMap.put(FeFlood.TAG, () -> new FeFlood());
         constructorMap.put(FeGaussianBlur.TAG, () -> new FeGaussianBlur());
@@ -122,6 +124,8 @@ public final class NodeSupplier {
         constructorMap.put(FeMergeNode.TAG, () -> new FeMergeNode());
         constructorMap.put(FeTurbulence.TAG, () -> new FeTurbulence());
         constructorMap.put(FeOffset.TAG, () -> new FeOffset());
+        constructorMap.put(FePointLight.TAG, () -> new FePointLight());
+        constructorMap.put(FeSpotLight.TAG, () -> new FeSpotLight());
         constructorMap.put(FeComponentTransfer.TAG, () -> new FeComponentTransfer());
         constructorMap.put(TransferFunctionElement.FeFuncB.TAG, () -> new TransferFunctionElement.FeFuncB());
         constructorMap.put(TransferFunctionElement.FeFuncG.TAG, () -> new TransferFunctionElement.FeFuncG());
@@ -143,7 +147,6 @@ public final class NodeSupplier {
 
     private void populateDummyNodeConstructors() {
         constructorMap.put("feConvolveMatrix", () -> new DummyFilterPrimitive("feConvolveMatrix"));
-        constructorMap.put("feDiffuseLighting", () -> new DummyFilterPrimitive("feDiffuseLighting"));
         constructorMap.put("feImage", () -> new DummyFilterPrimitive("feImage"));
         constructorMap.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
         constructorMap.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));

@@ -116,6 +116,13 @@ class FilterTest {
     @Test
     void testDisplacementMap() {
         assertEquals(SUCCESS, compareImages("filter/displacement.svg"));
+        assertEquals(SUCCESS, compareImages("filter/displacementNegativeCoordinates.svg", 0.4));
+    }
+
+    @Test
+    void testDiffuseLighting() {
+        assertEquals(SUCCESS, compareImages("filter/diffuseLighting.svg", 0.2, 0.15));
+        assertEquals(SUCCESS, compareImages("filter/diffuseLighting_issue167.svg", 0.2, 0.15));
     }
 
     @Test

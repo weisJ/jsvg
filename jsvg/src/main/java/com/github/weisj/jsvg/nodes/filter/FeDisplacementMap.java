@@ -34,7 +34,6 @@ import com.github.weisj.jsvg.attributes.filter.ColorChannel;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -76,9 +75,10 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        LayoutBounds layoutBounds = new LayoutBounds(
-                filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this),
-                new FloatInsets());
+        // The displacement formula maps channel values from [0, 1] to [-0.5, 0.5],
+        // so the maximum lookup offset is half of the configured scale in either direction.
+        float grow = Math.abs(scale) / 2f;
+        LayoutBounds layoutBounds = impl().layoutInput(filterLayoutContext).grow(grow, grow, filterLayoutContext);
         impl().saveLayoutResult(layoutBounds, filterLayoutContext);
     }
 
@@ -100,7 +100,7 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
         }
 
         ImageFilter displacementFilter = new BufferedImageFilter(
-                new DisplacementOp(displacementInput.pixels(context), filterContext.info().tile(),
+                new DisplacementOp(displacementInput.pixels(context), filterContext.info().imageBounds(),
                         displacementScaleX, displacementScaleY));
         impl().saveResult(input.applyFilter(displacementFilter), filterContext);
     }
