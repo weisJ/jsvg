@@ -1,0 +1,42 @@
+<svg width="520" height="430" viewBox="0 0 520 430"
+    xmlns="http://www.w3.org/2000/svg">
+    <rect width="520" height="430" fill="white" />
+    <g transform="translate(0 10)">
+        <path
+            d="M70,20 L70,400
+               M30,20 L500,20
+               M30,80 L500,80
+               M30,140 L500,140
+               M30,200 L500,200
+               M30,260 L500,260
+               M30,320 L500,320
+               M30,380 L500,380"
+            stroke="grey" />
+
+        <g font-weight="bold" font-size="30px" font-family="sans-serif">
+            <text alignment-baseline="baseline" x="80" y="20">Baseline</text>
+            <text alignment-baseline="middle" x="80" y="80">Middle</text>
+            <text alignment-baseline="mathematical" x="80" y="140">Mathematical</text>
+            <text alignment-baseline="hanging" x="80" y="200">Hanging</text>
+            <text alignment-baseline="text-before-edge" x="80" y="260">Text before edge</text>
+            <text alignment-baseline="text-after-edge" x="80" y="320">Text after edge</text>
+            <text alignment-baseline="central" x="80" y="380">Central</text>
+
+            <text x="10" y="20">Ax</text>
+            <text x="10" y="80">Ax</text>
+            <text x="10" y="140">Ax</text>
+            <text x="10" y="200">Ax</text>
+            <text x="10" y="260">Ax</text>
+            <text x="10" y="320">Ax</text>
+            <text x="10" y="380">Ax</text>
+        </g>
+
+        <circle cx="70" cy="20" r="3" fill="red" />
+        <circle cx="70" cy="80" r="3" fill="red" />
+        <circle cx="70" cy="140" r="3" fill="red" />
+        <circle cx="70" cy="200" r="3" fill="red" />
+        <circle cx="70" cy="260" r="3" fill="red" />
+        <circle cx="70" cy="320" r="3" fill="red" />
+        <circle cx="70" cy="380" r="3" fill="red" />
+    </g>
+</svg>

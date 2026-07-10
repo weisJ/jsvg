@@ -26,6 +26,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.text.AlignmentBaseline;
 import com.github.weisj.jsvg.attributes.text.DominantBaseline;
 import com.github.weisj.jsvg.attributes.text.TextAnchor;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
@@ -39,12 +40,14 @@ public final class FontRenderContext {
     // Unlike 0 it allows us to use spacing different from 0 if needed.
     private final @Nullable Length letterSpacing;
     private final @Nullable DominantBaseline dominantBaseline;
+    private final @NotNull AlignmentBaseline alignmentBaseline;
     private final @Nullable TextAnchor textAnchor;
 
     public FontRenderContext(@Nullable Length letterSpacing, @Nullable DominantBaseline dominantBaseline,
-            @Nullable TextAnchor textAnchor) {
+            @NotNull AlignmentBaseline alignmentBaseline, @Nullable TextAnchor textAnchor) {
         this.letterSpacing = letterSpacing;
         this.dominantBaseline = dominantBaseline;
+        this.alignmentBaseline = alignmentBaseline;
         this.textAnchor = textAnchor;
     }
 
@@ -60,6 +63,10 @@ public final class FontRenderContext {
         return dominantBaseline != null ? dominantBaseline : DominantBaseline.Auto;
     }
 
+    public @NotNull AlignmentBaseline alignmentBaseline() {
+        return alignmentBaseline;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -67,16 +74,17 @@ public final class FontRenderContext {
         FontRenderContext that = (FontRenderContext) o;
         return Objects.equals(letterSpacing, that.letterSpacing)
                 && dominantBaseline == that.dominantBaseline
+                && alignmentBaseline == that.alignmentBaseline
                 && textAnchor == that.textAnchor;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(letterSpacing, dominantBaseline, textAnchor);
+        return Objects.hash(letterSpacing, dominantBaseline, alignmentBaseline, textAnchor);
     }
 
     public static @NotNull FontRenderContext createDefault() {
-        return new FontRenderContext(null, null, null);
+        return new FontRenderContext(null, null, AlignmentBaseline.Auto, null);
     }
 
     public static @NotNull FontRenderContext parse(@NotNull AttributeNode attributeNode) {
@@ -89,6 +97,7 @@ public final class FontRenderContext {
         return new FontRenderContext(
                 attributeNode.getLength("letter-spacing", PercentageDimension.NONE),
                 dominantBaseline,
+                attributeNode.getEnum("alignment-baseline", AlignmentBaseline.Auto),
                 attributeNode.getEnumNullable("text-anchor", TextAnchor.class));
     }
 
@@ -97,6 +106,7 @@ public final class FontRenderContext {
         return new FontRenderContext(
                 frc.letterSpacing != null ? frc.letterSpacing : letterSpacing,
                 frc.dominantBaseline != null ? frc.dominantBaseline : dominantBaseline,
+                frc.alignmentBaseline,
                 frc.textAnchor != null ? frc.textAnchor : textAnchor);
     }
 
@@ -105,6 +115,7 @@ public final class FontRenderContext {
         return "FontRenderContext{" +
                 "letterSpacing=" + letterSpacing +
                 ", dominantBaseline=" + dominantBaseline +
+                ", alignmentBaseline=" + alignmentBaseline +
                 ", textAnchor=" + textAnchor +
                 '}';
     }
