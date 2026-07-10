@@ -1,6 +1,7 @@
 # Local test files
 jsvg/src/test/resources/**/tmp.svg
 .env
+.ai
 
 # Linting
 .sonarlint
