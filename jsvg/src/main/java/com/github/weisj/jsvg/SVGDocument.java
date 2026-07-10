@@ -31,7 +31,6 @@ import javax.swing.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.paint.SVGPaint;
@@ -127,9 +126,8 @@ public final class SVGDocument {
             @Nullable ViewBox viewportBounds, @Nullable AnimationState animationState) {
         RenderContext context = prepareRenderContext(platformSupport, output, viewportBounds, animationState);
 
-        ViewBox rootVieBox = new ViewBox(root.size(context));
-
-        if (viewportBounds == null) viewportBounds = rootVieBox;
+        ViewBox fallbackViewbox = new ViewBox(root.size(context));
+        if (viewportBounds == null) viewportBounds = fallbackViewbox;
 
         if (DEBUG) {
             final ViewBox finalBounds = viewportBounds;
@@ -139,21 +137,29 @@ public final class SVGDocument {
             });
         }
 
-        AffineTransform rootTransform = PreserveAspectRatio.forDisplay()
-                .computeViewportTransform(viewportBounds.size(), rootVieBox);
+        AffineTransform rootTransform = output.transform();
+        // Set transform to identity. After createInnerContextForViewBox the transform of the output will be
+        // the pure user space transform.
+        output.setTransform(AffineTransform.getTranslateInstance(0, 0));
 
-        RenderContext innerContext = NodeRenderer.setupInnerViewRenderContext(rootVieBox, context, true);
+        ViewBox rootViewBox = root.viewBox(context);
+        RenderContext viewContext = root.createInnerContextForViewBox(
+                viewportBounds.size(), rootViewBox, context, output);
 
-        output.applyClip(viewportBounds);
+        AffineTransform userSpaceTransform = output.transform();
 
-        innerContext.translate(output, viewportBounds.location());
-        innerContext.transform(output, rootTransform);
+        // Restore the original transform. The user space transform will be applied on top of this.
+        output.setTransform(rootTransform);
+        output.applyTransform(userSpaceTransform);
 
         // Needed for vector-effects to work properly.
         RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
-        accessor.setRootTransform(innerContext, output.transform());
+        accessor.setRootTransform(viewContext, rootTransform, userSpaceTransform);
 
-        NodeRenderer.renderRootSVG(root, context, output);
+        ViewBox clipViewbox = rootViewBox != null ? rootViewBox : fallbackViewbox;
+        output.applyClip(clipViewbox);
+
+        NodeRenderer.renderRootSVG(root, viewContext, output);
     }
 
     private @NotNull RenderContext prepareRenderContext(

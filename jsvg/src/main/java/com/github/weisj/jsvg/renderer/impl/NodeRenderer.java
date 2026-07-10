@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,9 +48,7 @@ public final class NodeRenderer {
     private NodeRenderer() {}
 
     public static void renderRootSVG(@NotNull SVG svgRoot, @NotNull RenderContext context, @NotNull Output output) {
-        RenderContext viewContext = svgRoot.createInnerContextForViewBox(
-                svgRoot.size(context), svgRoot.viewBox(context), context, output);
-        try (Info info = createRenderInfo(svgRoot, viewContext, output, null)) {
+        try (Info info = createRenderInfo(svgRoot, context, output, null)) {
             if (info != null) ((SVG) info.renderable()).renderWithEstablishedViewBox(info.context(), info.output());
         }
     }
