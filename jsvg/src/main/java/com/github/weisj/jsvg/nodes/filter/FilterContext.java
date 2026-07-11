@@ -28,11 +28,14 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 
 public final class FilterContext {
 
     private final @NotNull ChannelStorage<Channel> resultChannels = new ChannelStorage<>();
+    private final @NotNull FilterLayoutContext layoutContext;
     private final Filter.FilterInfo info;
     private final @NotNull UnitType primitiveUnits;
     private final @Nullable ColorInterpolation colorInterpolation;
@@ -44,6 +47,11 @@ public final class FilterContext {
         this.primitiveUnits = primitiveUnits;
         this.colorInterpolation = colorInterpolation;
         this.renderingHints = renderingHints;
+        this.layoutContext = new FilterLayoutContext(primitiveUnits, info.elementBounds(), info.imageBounds());
+        layoutContext.resultChannels().addResult(DefaultFilterChannel.LastResult, info.lastResultLayoutBounds());
+        LayoutBounds sourceDependentLayoutBounds = info.sourceDependentLayoutBounds();
+        layoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceDependentLayoutBounds);
+        layoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentLayoutBounds);
     }
 
     public @NotNull Filter.FilterInfo info() {
@@ -60,6 +68,10 @@ public final class FilterContext {
 
     public @NotNull ChannelStorage<Channel> resultChannels() {
         return resultChannels;
+    }
+
+    public @NotNull FilterLayoutContext layoutContext() {
+        return layoutContext;
     }
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {

@@ -162,7 +162,8 @@ public final class Filter extends ContainerNode {
                 .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
-        return new FilterBounds(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds);
+        return new FilterBounds(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds, elementLayoutBounds,
+                sourceDependentBounds);
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -179,8 +180,14 @@ public final class Filter extends ContainerNode {
                 () -> new SourceAlphaChannel(sourceChannel.alphaChannel().producer()));
 
         for (SVGNode child : children()) {
+            FilterPrimitive filterPrimitive = (FilterPrimitive) child;
             try {
-                FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+                filterPrimitive.layoutFilter(context, filterContext.layoutContext());
+            } catch (IllegalFilterStateException ignored) {
+                // Just carry on applying filters
+            }
+
+            try {
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
@@ -202,12 +209,17 @@ public final class Filter extends ContainerNode {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
+        private final @NotNull LayoutBounds lastResultLayoutBounds;
+        private final @NotNull LayoutBounds sourceDependentLayoutBounds;
 
         private FilterBounds(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
-                @NotNull Rectangle2D effectiveFilterArea) {
+                @NotNull Rectangle2D effectiveFilterArea, @NotNull LayoutBounds lastResultLayoutBounds,
+                @NotNull LayoutBounds sourceDependentLayoutBounds) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
+            this.lastResultLayoutBounds = lastResultLayoutBounds;
+            this.sourceDependentLayoutBounds = sourceDependentLayoutBounds;
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -220,6 +232,14 @@ public final class Filter extends ContainerNode {
 
         public @NotNull Rectangle2D effectiveFilterArea() {
             return effectiveFilterArea;
+        }
+
+        @NotNull LayoutBounds lastResultLayoutBounds() {
+            return lastResultLayoutBounds;
+        }
+
+        @NotNull LayoutBounds sourceDependentLayoutBounds() {
+            return sourceDependentLayoutBounds;
         }
     }
 
@@ -251,6 +271,14 @@ public final class Filter extends ContainerNode {
 
         public @NotNull Rectangle2D elementBounds() {
             return filterBounds.elementBounds();
+        }
+
+        @NotNull LayoutBounds lastResultLayoutBounds() {
+            return filterBounds.lastResultLayoutBounds();
+        }
+
+        @NotNull LayoutBounds sourceDependentLayoutBounds() {
+            return filterBounds.sourceDependentLayoutBounds();
         }
 
         public @NotNull Output output() {

@@ -27,6 +27,8 @@ import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.awt.image.BufferedImage;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
@@ -92,6 +94,18 @@ class FilterTest {
         assertEquals(SUCCESS, compareImages("filter/turbulence1.svg"));
         assertEquals(SUCCESS, compareImages("filter/turbulence2.svg"));
         assertEquals(SUCCESS, compareImages("filter/turbulence3.svg"));
+    }
+
+    @Test
+    void testTile() {
+        BufferedImage image = renderJsvg("filter/tile.svg");
+        for (int y : new int[] {1, 7, 13, 19}) {
+            for (int x : new int[] {1, 5, 10, 15, 19}) {
+                int expected = image.getRGB(x, y);
+                assertEquals(expected, image.getRGB(x + 20, y));
+                assertEquals(expected, image.getRGB(x, y + 20));
+            }
+        }
     }
 
     @Test
