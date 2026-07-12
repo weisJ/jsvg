@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -34,6 +35,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -57,9 +59,9 @@ public final class FeTile extends AbstractFilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        BufferedImage input = impl().inputChannel(filterContext).toBufferedImageNonAliased(context);
+        Image input = impl().inputChannel(filterContext).toImage(context);
         Filter.FilterInfo info = filterContext.info();
-        BufferedImage output = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage output = ImageUtil.createCompatibleTransparentImage(info.imageWidth, info.imageHeight);
 
         Rectangle2D tileRegion = impl().layoutInput(filterContext.layoutContext())
                 .resolve(LayoutBounds.ComputeFlags.INITIAL)
@@ -72,35 +74,39 @@ public final class FeTile extends AbstractFilterPrimitive {
         Rectangle2D primitiveRegion =
                 filterContext.layoutContext().filterPrimitiveRegion(context.measureContext(), this);
         Rectangle2D imageBounds = info.imageBounds();
-        double scaleX = imageBounds.getWidth() / output.getWidth();
-        double scaleY = imageBounds.getHeight() / output.getHeight();
+        Rectangle tileArea = userToPixelRect(tileRegion, imageBounds, info.imageWidth, info.imageHeight);
+        Rectangle primitiveArea = userToPixelRect(primitiveRegion, imageBounds, info.imageWidth, info.imageHeight);
+        if (tileArea.isEmpty() || primitiveArea.isEmpty()) {
+            impl().saveResult(new ImageProducerChannel(output.getSource()), filterContext);
+            return;
+        }
 
-        for (int y = 0; y < output.getHeight(); y++) {
-            double userY = imageBounds.getY() + y * scaleY;
-            if (userY < primitiveRegion.getY() || userY >= primitiveRegion.getMaxY()) continue;
-            double tiledY = tileRegion.getY() + positiveModulo(userY - tileRegion.getY(), tileRegion.getHeight());
-            int sourceY = userToPixel(tiledY, imageBounds.getY(), scaleY, input.getHeight());
-
-            for (int x = 0; x < output.getWidth(); x++) {
-                double userX = imageBounds.getX() + x * scaleX;
-                if (userX < primitiveRegion.getX() || userX >= primitiveRegion.getMaxX()) continue;
-                double tiledX = tileRegion.getX()
-                        + positiveModulo(userX - tileRegion.getX(), tileRegion.getWidth());
-                int sourceX = userToPixel(tiledX, imageBounds.getX(), scaleX, input.getWidth());
-                output.setRGB(x, y, input.getRGB(sourceX, sourceY));
+        Graphics2D graphics = output.createGraphics();
+        if (filterContext.renderingHints() != null) graphics.setRenderingHints(filterContext.renderingHints());
+        graphics.clip(primitiveArea);
+        int startX = tileArea.x + Math.floorDiv(primitiveArea.x - tileArea.x, tileArea.width) * tileArea.width;
+        int startY = tileArea.y + Math.floorDiv(primitiveArea.y - tileArea.y, tileArea.height) * tileArea.height;
+        for (int y = startY; y < primitiveArea.y + primitiveArea.height; y += tileArea.height) {
+            for (int x = startX; x < primitiveArea.x + primitiveArea.width; x += tileArea.width) {
+                graphics.drawImage(input,
+                        x, y, x + tileArea.width, y + tileArea.height,
+                        tileArea.x, tileArea.y, tileArea.x + tileArea.width, tileArea.y + tileArea.height,
+                        context.platformSupport().imageObserver());
             }
         }
+        graphics.dispose();
 
         impl().saveResult(new ImageProducerChannel(output.getSource()), filterContext);
     }
 
-    private static double positiveModulo(double value, double mod) {
-        double result = value % mod;
-        return result < 0 ? result + mod : result;
-    }
-
-    private static int userToPixel(double value, double origin, double scale, int size) {
-        int pixel = (int) ((value - origin) / scale);
-        return Math.min(Math.max(pixel, 0), size - 1);
+    private static @NotNull Rectangle userToPixelRect(@NotNull Rectangle2D userRect, @NotNull Rectangle2D imageBounds,
+            int imageWidth, int imageHeight) {
+        double scaleX = imageWidth / imageBounds.getWidth();
+        double scaleY = imageHeight / imageBounds.getHeight();
+        int x = (int) Math.floor((userRect.getX() - imageBounds.getX()) * scaleX);
+        int y = (int) Math.floor((userRect.getY() - imageBounds.getY()) * scaleY);
+        int maxX = (int) Math.ceil((userRect.getMaxX() - imageBounds.getX()) * scaleX);
+        int maxY = (int) Math.ceil((userRect.getMaxY() - imageBounds.getY()) * scaleY);
+        return new Rectangle(x, y, maxX - x, maxY - y);
     }
 }
