@@ -23,6 +23,9 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
@@ -144,9 +147,11 @@ public final class Filter extends ContainerNode {
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceDependentBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentBounds);
 
+        Map<FilterPrimitive, ChannelProvider<LayoutBounds>> layoutChannels = new IdentityHashMap<>();
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+                layoutChannels.put(filterPrimitive, filterLayoutContext.resultChannels().snapshot());
                 filterPrimitive.layoutFilter(context, filterLayoutContext);
             } catch (IllegalFilterStateException ignored) {
                 // Just carry on doing layout
@@ -163,7 +168,7 @@ public final class Filter extends ContainerNode {
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
         return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds,
-                filterLayoutContext.resultChannels());
+                layoutChannels);
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -182,6 +187,7 @@ public final class Filter extends ContainerNode {
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+                filterContext.setLayoutChannels(filterInfo.layoutChannels(filterPrimitive));
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
@@ -203,14 +209,15 @@ public final class Filter extends ContainerNode {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
-        private final @NotNull ChannelProvider<LayoutBounds> layoutChannels;
+        private final @NotNull Map<FilterPrimitive, ChannelProvider<LayoutBounds>> layoutChannels;
 
         private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
-                @NotNull Rectangle2D effectiveFilterArea, @NotNull ChannelProvider<LayoutBounds> layoutChannels) {
+                @NotNull Rectangle2D effectiveFilterArea,
+                @NotNull Map<FilterPrimitive, ChannelProvider<LayoutBounds>> layoutChannels) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
-            this.layoutChannels = layoutChannels;
+            this.layoutChannels = Collections.unmodifiableMap(layoutChannels);
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -225,8 +232,10 @@ public final class Filter extends ContainerNode {
             return effectiveFilterArea;
         }
 
-        @NotNull ChannelProvider<LayoutBounds> layoutChannels() {
-            return layoutChannels;
+        @NotNull ChannelProvider<LayoutBounds> layoutChannels(@NotNull FilterPrimitive filterPrimitive) {
+            ChannelProvider<LayoutBounds> channels = layoutChannels.get(filterPrimitive);
+            if (channels == null) throw new IllegalFilterStateException("Layout channels not found.");
+            return channels;
         }
     }
 
@@ -260,8 +269,8 @@ public final class Filter extends ContainerNode {
             return filterLayout.elementBounds();
         }
 
-        @NotNull ChannelProvider<LayoutBounds> layoutChannels() {
-            return filterLayout.layoutChannels();
+        @NotNull ChannelProvider<LayoutBounds> layoutChannels(@NotNull FilterPrimitive filterPrimitive) {
+            return filterLayout.layoutChannels(filterPrimitive);
         }
 
         public @NotNull Output output() {

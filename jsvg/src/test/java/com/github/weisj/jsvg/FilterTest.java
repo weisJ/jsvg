@@ -109,6 +109,19 @@ class FilterTest {
     }
 
     @Test
+    void testChainedTileUsesPrimitiveRegion() {
+        BufferedImage image = renderJsvg("filter/tileChained.svg");
+        assertEquals(0xFFFFFF00, image.getRGB(25, 25));
+        assertEquals(0xFF0000FF, image.getRGB(75, 25));
+        assertEquals(0xFFFFFF00, image.getRGB(125, 25));
+        assertEquals(0xFF0000FF, image.getRGB(175, 25));
+        assertEquals(0xFF008000, image.getRGB(25, 75));
+        assertEquals(0xFFFF0000, image.getRGB(75, 75));
+        assertEquals(0xFF008000, image.getRGB(125, 75));
+        assertEquals(0xFFFF0000, image.getRGB(175, 75));
+    }
+
+    @Test
     void testFlood() {
         // TODO: Filter region not applied correctly.
         assertDoesNotThrow(() -> renderJsvg("filter/flood.svg"));

@@ -42,6 +42,15 @@ public final class ChannelStorage<T> implements ChannelProvider<T> {
         storage.put(key.key(), new LazySupplier<>(value));
     }
 
+    public @NotNull ChannelProvider<T> snapshot() {
+        Map<@NotNull Object, @NotNull Supplier<T>> snapshot = new HashMap<>(storage);
+        return key -> {
+            Supplier<T> provider = snapshot.get(key.key());
+            if (provider == null) throw new IllegalFilterStateException("Channel " + key + " not found.");
+            return provider.get();
+        };
+    }
+
     @Override
     public @NotNull T get(@NotNull FilterChannelKey key) {
         Supplier<T> provider = storage.get(key.key());
