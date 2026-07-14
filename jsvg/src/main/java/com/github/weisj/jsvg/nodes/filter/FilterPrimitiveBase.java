@@ -72,6 +72,10 @@ public final class FilterPrimitiveBase {
         return channels.get(inputChannel);
     }
 
+    public @NotNull LayoutBounds layoutInput(@NotNull FilterLayoutContext context) {
+        return layoutInput(context.resultChannels());
+    }
+
     public void noop(@NotNull FilterContext context) {
         saveResult(inputChannel(context), context);
     }
