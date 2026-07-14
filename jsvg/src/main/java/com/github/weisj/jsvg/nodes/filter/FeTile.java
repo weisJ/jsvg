@@ -63,7 +63,7 @@ public final class FeTile extends AbstractFilterPrimitive {
         Filter.FilterInfo info = filterContext.info();
         BufferedImage output = ImageUtil.createCompatibleTransparentImage(info.imageWidth, info.imageHeight);
 
-        Rectangle2D tileRegion = impl().layoutInput(filterContext.layoutContext())
+        Rectangle2D tileRegion = impl().layoutInput(filterContext.layoutChannels())
                 .resolve(LayoutBounds.ComputeFlags.INITIAL)
                 .bounds();
         if (tileRegion.isEmpty()) {
@@ -71,8 +71,8 @@ public final class FeTile extends AbstractFilterPrimitive {
             return;
         }
 
-        Rectangle2D primitiveRegion =
-                filterContext.layoutContext().filterPrimitiveRegion(context.measureContext(), this);
+        Rectangle2D primitiveRegion = filterContext.primitiveUnits()
+                .computeViewBounds(context.measureContext(), info.elementBounds(), x(), y(), width(), height());
         Rectangle2D imageBounds = info.imageBounds();
         Rectangle tileArea = userToPixelRect(tileRegion, imageBounds, info.imageWidth, info.imageHeight);
         Rectangle primitiveArea = userToPixelRect(primitiveRegion, imageBounds, info.imageWidth, info.imageHeight);

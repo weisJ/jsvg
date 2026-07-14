@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,31 +21,11 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
-import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
-import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
-public final class ChannelStorage<T> implements ChannelProvider<T> {
-    private final @NotNull Map<@NotNull Object, @NotNull Supplier<T>> storage = new HashMap<>();
+public interface ChannelProvider<T> {
 
-    public void addResult(@NotNull FilterChannelKey key, @NotNull T value) {
-        storage.put(key.key(), new ConstantSupplier<>(value));
-    }
-
-    public void addResult(@NotNull FilterChannelKey key, @NotNull Supplier<T> value) {
-        storage.put(key.key(), new LazySupplier<>(value));
-    }
-
-    @Override
-    public @NotNull T get(@NotNull FilterChannelKey key) {
-        Supplier<T> provider = storage.get(key.key());
-        if (provider == null) throw new IllegalFilterStateException("Channel " + key + " not found.");
-        return provider.get();
-    }
+    @NotNull T get(@NotNull FilterChannelKey key);
 }

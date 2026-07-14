@@ -68,8 +68,8 @@ public final class FilterPrimitiveBase {
         return channel(inputChannel, context);
     }
 
-    public @NotNull LayoutBounds layoutInput(@NotNull FilterLayoutContext context) {
-        return context.resultChannels().get(inputChannel);
+    public @NotNull LayoutBounds layoutInput(@NotNull ChannelProvider<LayoutBounds> channels) {
+        return channels.get(inputChannel);
     }
 
     public void noop(@NotNull FilterContext context) {

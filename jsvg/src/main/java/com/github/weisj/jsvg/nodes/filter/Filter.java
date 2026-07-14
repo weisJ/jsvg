@@ -117,7 +117,7 @@ public final class Filter extends ContainerNode {
                 .coercePercentageToCorrectUnit(filterUnits, PercentageDimension.HEIGHT);
     }
 
-    public @Nullable FilterBounds createFilterBounds(@Nullable Output output, @NotNull RenderContext context,
+    public @Nullable FilterLayout createFilterLayout(@Nullable Output output, @NotNull RenderContext context,
             @NotNull ElementBounds elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds.boundingBox(), x, y, width, height);
@@ -162,7 +162,8 @@ public final class Filter extends ContainerNode {
                 .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
-        return new FilterBounds(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds, filterLayoutContext);
+        return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds,
+                filterLayoutContext.resultChannels());
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -198,18 +199,18 @@ public final class Filter extends ContainerNode {
         return node instanceof FilterPrimitive && super.acceptChild(id, node);
     }
 
-    public static final class FilterBounds {
+    public static final class FilterLayout {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
-        private final @NotNull FilterLayoutContext filterLayoutContext;
+        private final @NotNull ChannelProvider<LayoutBounds> layoutChannels;
 
-        private FilterBounds(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
-                @NotNull Rectangle2D effectiveFilterArea, @NotNull FilterLayoutContext filterLayoutContext) {
+        private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
+                @NotNull Rectangle2D effectiveFilterArea, @NotNull ChannelProvider<LayoutBounds> layoutChannels) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
-            this.filterLayoutContext = filterLayoutContext;
+            this.layoutChannels = layoutChannels;
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -224,8 +225,8 @@ public final class Filter extends ContainerNode {
             return effectiveFilterArea;
         }
 
-        @NotNull FilterLayoutContext filterLayoutContext() {
-            return filterLayoutContext;
+        @NotNull ChannelProvider<LayoutBounds> layoutChannels() {
+            return layoutChannels;
         }
     }
 
@@ -233,17 +234,17 @@ public final class Filter extends ContainerNode {
         public final int imageWidth;
         public final int imageHeight;
 
-        private final @NotNull FilterBounds filterBounds;
+        private final @NotNull FilterLayout filterLayout;
         private final @NotNull BlittableImage blittableImage;
         private final @NotNull Output imageOutput;
 
         public FilterInfo(@NotNull BlittableImage blittableImage, @NotNull Output imageOutput,
-                @NotNull FilterBounds filterBounds) {
+                @NotNull FilterLayout filterLayout) {
             BufferedImage image = blittableImage.image();
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();
             this.blittableImage = blittableImage;
-            this.filterBounds = filterBounds;
+            this.filterLayout = filterLayout;
             this.imageOutput = imageOutput;
         }
 
@@ -252,15 +253,15 @@ public final class Filter extends ContainerNode {
         }
 
         public @NotNull Rectangle2D filterRegion() {
-            return filterBounds.filterRegion();
+            return filterLayout.filterRegion();
         }
 
         public @NotNull Rectangle2D elementBounds() {
-            return filterBounds.elementBounds();
+            return filterLayout.elementBounds();
         }
 
-        @NotNull FilterLayoutContext filterLayoutContext() {
-            return filterBounds.filterLayoutContext();
+        @NotNull ChannelProvider<LayoutBounds> layoutChannels() {
+            return filterLayout.layoutChannels();
         }
 
         public @NotNull Output output() {

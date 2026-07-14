@@ -107,9 +107,9 @@ public class ElementBounds {
             @NotNull Rectangle2D elementBounds) {
         Filter filter = node.filter();
         if (filter == null) return elementBounds;
-        Filter.FilterBounds filterBounds = filter.createFilterBounds(null, context, this);
-        if (filterBounds == null) return elementBounds;
-        return elementBounds.createUnion(filterBounds.effectiveFilterArea());
+        Filter.FilterLayout filterLayout = filter.createFilterLayout(null, context, this);
+        if (filterLayout == null) return elementBounds;
+        return elementBounds.createUnion(filterLayout.effectiveFilterArea());
     }
 
 }
