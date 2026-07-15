@@ -29,10 +29,13 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 
 public final class FilterContext {
 
     private final @NotNull ChannelStorage<Channel> resultChannels = new ChannelStorage<>();
+    private LayoutBounds.Data inputLayout;
+    private LayoutBounds.Data outputLayout;
     private final Filter.FilterInfo info;
     private final @NotNull UnitType primitiveUnits;
     private final @Nullable ColorInterpolation colorInterpolation;
@@ -60,6 +63,21 @@ public final class FilterContext {
 
     public @NotNull ChannelStorage<Channel> resultChannels() {
         return resultChannels;
+    }
+
+    public @NotNull LayoutBounds.Data inputLayout() {
+        if (inputLayout == null) throw new IllegalFilterStateException("Input layout not set.");
+        return inputLayout;
+    }
+
+    public @NotNull LayoutBounds.Data outputLayout() {
+        if (outputLayout == null) throw new IllegalFilterStateException("Output layout not set.");
+        return outputLayout;
+    }
+
+    void setPrimitiveLayout(@NotNull LayoutBounds.Data inputLayout, @NotNull LayoutBounds.Data outputLayout) {
+        this.inputLayout = inputLayout;
+        this.outputLayout = outputLayout;
     }
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {

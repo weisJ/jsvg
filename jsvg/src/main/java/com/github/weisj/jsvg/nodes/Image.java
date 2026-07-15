@@ -21,7 +21,9 @@
  */
 package com.github.weisj.jsvg.nodes;
 
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
@@ -36,6 +38,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.Logger.Level;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
+import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -55,7 +58,7 @@ import com.github.weisj.jsvg.view.ViewBox;
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive}
 )
-public final class Image extends RenderableSVGNode {
+public final class Image extends RenderableSVGNode implements HasShape {
     private static final Logger LOGGER = LogFactory.createLogger(Image.class);
 
     public static final String TAG = "image";
@@ -141,5 +144,25 @@ public final class Image extends RenderableSVGNode {
                 new ViewBox(resourceWidth, resourceHeight));
 
         resource.render(output, context, imgTransform);
+    }
+
+    @Override
+    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
+        return imageBounds(context);
+    }
+
+    @Override
+    public @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {
+        return imageBounds(context);
+    }
+
+    private @NotNull Rectangle2D imageBounds(@NotNull RenderContext context) {
+        MeasureContext measure = context.measureContext();
+        RenderableResource resource = fetchImage(context);
+        if (resource == null) resource = new MissingImageResource();
+        FloatSize intrinsicSize = resource.intrinsicSize(context);
+        float viewWidth = width.orElseIfUnspecified(intrinsicSize.width).resolve(measure);
+        float viewHeight = height.orElseIfUnspecified(intrinsicSize.height).resolve(measure);
+        return new Rectangle2D.Float(x.resolve(measure), y.resolve(measure), viewWidth, viewHeight);
     }
 }

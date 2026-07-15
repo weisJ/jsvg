@@ -124,8 +124,33 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
     }
 
     @Override
+    public boolean xSpecified() {
+        return filterPrimitiveBase.xSpecified();
+    }
+
+    @Override
+    public boolean ySpecified() {
+        return filterPrimitiveBase.ySpecified();
+    }
+
+    @Override
+    public boolean widthSpecified() {
+        return filterPrimitiveBase.widthSpecified();
+    }
+
+    @Override
+    public boolean heightSpecified() {
+        return filterPrimitiveBase.heightSpecified();
+    }
+
+    @Override
     public ColorInterpolation colorInterpolation(@NotNull FilterContext filterContext) {
         return filterPrimitiveBase.colorInterpolation(filterContext);
+    }
+
+    @Override
+    public @NotNull LayoutBounds inputLayout(@NotNull FilterLayoutContext filterLayoutContext) {
+        return filterPrimitiveBase.layoutInput(filterLayoutContext);
     }
 
     @Override

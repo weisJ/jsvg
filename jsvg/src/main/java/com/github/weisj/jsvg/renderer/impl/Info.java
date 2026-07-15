@@ -82,7 +82,7 @@ class Info implements AutoCloseable {
 
             Rectangle2D clipBounds = null;
             Rectangle2D bounds = null;
-            Filter.FilterBounds filterBounds = null;
+            Filter.FilterLayout filterLayout = null;
             Filter.FilterInfo filterInfo = null;
 
             Filter filter = effects.filter;
@@ -90,10 +90,10 @@ class Info implements AutoCloseable {
             ClipPath clipPath = effects.clipPath;
 
             if (filter != null) {
-                filterBounds = filter.createFilterBounds(output, context, elementBounds);
-                if (filterBounds != null) {
-                    bounds = filterBounds.filterRegion();
-                    clipBounds = filterBounds.effectiveFilterArea();
+                filterLayout = filter.createFilterLayout(output, context, elementBounds);
+                if (filterLayout != null) {
+                    bounds = filterLayout.filterRegion();
+                    clipBounds = filterLayout.effectiveFilterArea();
                 }
             }
             if (mask != null || clipPath != null) {
@@ -115,8 +115,8 @@ class Info implements AutoCloseable {
             g.setRenderingHints(output.renderingHints());
             Output imageOutput = new Graphics2DOutput(g);
 
-            if (filter != null && filterBounds != null) {
-                filterInfo = new Filter.FilterInfo(blitImage, imageOutput, filterBounds);
+            if (filter != null && filterLayout != null) {
+                filterInfo = new Filter.FilterInfo(blitImage, imageOutput, filterLayout);
             }
 
             return new InfoWithIsolation(

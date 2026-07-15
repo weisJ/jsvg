@@ -25,6 +25,7 @@ package com.github.weisj.jsvg.nodes.filter;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
@@ -42,11 +43,22 @@ public interface FilterPrimitive {
     @NotNull
     Length height();
 
+    boolean xSpecified();
+
+    boolean ySpecified();
+
+    boolean widthSpecified();
+
+    boolean heightSpecified();
+
     default boolean isValid() {
         return true;
     }
 
     void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext);
+
+    @NotNull
+    LayoutBounds inputLayout(@NotNull FilterLayoutContext filterLayoutContext);
 
     void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext);
 

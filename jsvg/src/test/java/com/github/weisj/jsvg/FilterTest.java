@@ -27,6 +27,8 @@ import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.awt.image.BufferedImage;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
@@ -92,6 +94,38 @@ class FilterTest {
         assertEquals(SUCCESS, compareImages("filter/turbulence1.svg"));
         assertEquals(SUCCESS, compareImages("filter/turbulence2.svg"));
         assertEquals(SUCCESS, compareImages("filter/turbulence3.svg"));
+    }
+
+    @Test
+    void testTile() {
+        BufferedImage image = renderJsvg("filter/tile.svg");
+        for (int y : new int[] {1, 7, 13, 19}) {
+            for (int x : new int[] {1, 5, 10, 15, 19}) {
+                int expected = image.getRGB(x, y);
+                assertEquals(expected, image.getRGB(x + 20, y));
+                assertEquals(expected, image.getRGB(x, y + 20));
+            }
+        }
+    }
+
+    @Test
+    void testChainedTileUsesPrimitiveRegion() {
+        BufferedImage image = renderJsvg("filter/tileChained.svg");
+        assertEquals(0xFFFFFF00, image.getRGB(25, 25));
+        assertEquals(0xFF0000FF, image.getRGB(75, 25));
+        assertEquals(0xFFFFFF00, image.getRGB(125, 25));
+        assertEquals(0xFF0000FF, image.getRGB(175, 25));
+        assertEquals(0xFF008000, image.getRGB(25, 75));
+        assertEquals(0xFFFF0000, image.getRGB(75, 75));
+        assertEquals(0xFF008000, image.getRGB(125, 75));
+        assertEquals(0xFFFF0000, image.getRGB(175, 75));
+    }
+
+    @Test
+    void testTileUsesImageBounds() {
+        BufferedImage image = renderJsvg("filter/tileImageBounds.svg");
+        assertEquals(0, image.getRGB(0, 0) >>> 24);
+        assertNotEquals(0, image.getRGB(10, 10) >>> 24);
     }
 
     @Test

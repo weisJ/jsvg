@@ -23,6 +23,9 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
@@ -117,7 +120,7 @@ public final class Filter extends ContainerNode {
                 .coercePercentageToCorrectUnit(filterUnits, PercentageDimension.HEIGHT);
     }
 
-    public @Nullable FilterBounds createFilterBounds(@Nullable Output output, @NotNull RenderContext context,
+    public @Nullable FilterLayout createFilterLayout(@Nullable Output output, @NotNull RenderContext context,
             @NotNull ElementBounds elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds.boundingBox(), x, y, width, height);
@@ -126,7 +129,8 @@ public final class Filter extends ContainerNode {
                 : NO_CLIP_BOUNDS.getBounds2D();
 
         FilterLayoutContext filterLayoutContext =
-                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds);
+                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds,
+                        filterRegion);
 
         Rectangle2D clippedElementBounds = elementBounds.geometryBox().createIntersection(graphicsClipBounds);
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
@@ -144,10 +148,17 @@ public final class Filter extends ContainerNode {
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceDependentBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentBounds);
 
+        Map<FilterPrimitive, LayoutBounds.Data> inputLayouts = new IdentityHashMap<>();
+        Map<FilterPrimitive, LayoutBounds.Data> outputLayouts = new IdentityHashMap<>();
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+                inputLayouts.put(filterPrimitive,
+                        filterPrimitive.inputLayout(filterLayoutContext).resolve(LayoutBounds.ComputeFlags.INITIAL));
                 filterPrimitive.layoutFilter(context, filterLayoutContext);
+                outputLayouts.put(filterPrimitive, filterLayoutContext.resultChannels()
+                        .get(DefaultFilterChannel.LastResult)
+                        .resolve(LayoutBounds.ComputeFlags.INITIAL));
             } catch (IllegalFilterStateException ignored) {
                 // Just carry on doing layout
             }
@@ -162,7 +173,8 @@ public final class Filter extends ContainerNode {
                 .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
-        return new FilterBounds(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds);
+        return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds,
+                inputLayouts, outputLayouts);
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -181,6 +193,8 @@ public final class Filter extends ContainerNode {
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
+                filterContext.setPrimitiveLayout(filterInfo.inputLayout(filterPrimitive),
+                        filterInfo.outputLayout(filterPrimitive));
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
@@ -198,16 +212,22 @@ public final class Filter extends ContainerNode {
         return node instanceof FilterPrimitive && super.acceptChild(id, node);
     }
 
-    public static final class FilterBounds {
+    public static final class FilterLayout {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
+        private final @NotNull Map<FilterPrimitive, LayoutBounds.Data> inputLayouts;
+        private final @NotNull Map<FilterPrimitive, LayoutBounds.Data> outputLayouts;
 
-        private FilterBounds(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
-                @NotNull Rectangle2D effectiveFilterArea) {
+        private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
+                @NotNull Rectangle2D effectiveFilterArea,
+                @NotNull Map<FilterPrimitive, LayoutBounds.Data> inputLayouts,
+                @NotNull Map<FilterPrimitive, LayoutBounds.Data> outputLayouts) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
+            this.inputLayouts = Collections.unmodifiableMap(inputLayouts);
+            this.outputLayouts = Collections.unmodifiableMap(outputLayouts);
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -221,23 +241,35 @@ public final class Filter extends ContainerNode {
         public @NotNull Rectangle2D effectiveFilterArea() {
             return effectiveFilterArea;
         }
+
+        @NotNull LayoutBounds.Data inputLayout(@NotNull FilterPrimitive filterPrimitive) {
+            LayoutBounds.Data inputLayout = inputLayouts.get(filterPrimitive);
+            if (inputLayout == null) throw new IllegalFilterStateException("Input layout not found.");
+            return inputLayout;
+        }
+
+        @NotNull LayoutBounds.Data outputLayout(@NotNull FilterPrimitive filterPrimitive) {
+            LayoutBounds.Data outputLayout = outputLayouts.get(filterPrimitive);
+            if (outputLayout == null) throw new IllegalFilterStateException("Output layout not found.");
+            return outputLayout;
+        }
     }
 
     public static final class FilterInfo {
         public final int imageWidth;
         public final int imageHeight;
 
-        private final @NotNull FilterBounds filterBounds;
+        private final @NotNull FilterLayout filterLayout;
         private final @NotNull BlittableImage blittableImage;
         private final @NotNull Output imageOutput;
 
         public FilterInfo(@NotNull BlittableImage blittableImage, @NotNull Output imageOutput,
-                @NotNull FilterBounds filterBounds) {
+                @NotNull FilterLayout filterLayout) {
             BufferedImage image = blittableImage.image();
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();
             this.blittableImage = blittableImage;
-            this.filterBounds = filterBounds;
+            this.filterLayout = filterLayout;
             this.imageOutput = imageOutput;
         }
 
@@ -246,11 +278,19 @@ public final class Filter extends ContainerNode {
         }
 
         public @NotNull Rectangle2D filterRegion() {
-            return filterBounds.filterRegion();
+            return filterLayout.filterRegion();
         }
 
         public @NotNull Rectangle2D elementBounds() {
-            return filterBounds.elementBounds();
+            return filterLayout.elementBounds();
+        }
+
+        @NotNull LayoutBounds.Data inputLayout(@NotNull FilterPrimitive filterPrimitive) {
+            return filterLayout.inputLayout(filterPrimitive);
+        }
+
+        @NotNull LayoutBounds.Data outputLayout(@NotNull FilterPrimitive filterPrimitive) {
+            return filterLayout.outputLayout(filterPrimitive);
         }
 
         public @NotNull Output output() {

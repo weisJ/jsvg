@@ -122,6 +122,7 @@ public final class NodeSupplier {
         constructorMap.put(FeGaussianBlur.TAG, () -> new FeGaussianBlur());
         constructorMap.put(FeMerge.TAG, () -> new FeMerge());
         constructorMap.put(FeMergeNode.TAG, () -> new FeMergeNode());
+        constructorMap.put(FeTile.TAG, () -> new FeTile());
         constructorMap.put(FeTurbulence.TAG, () -> new FeTurbulence());
         constructorMap.put(FeOffset.TAG, () -> new FeOffset());
         constructorMap.put(FePointLight.TAG, () -> new FePointLight());
@@ -150,7 +151,6 @@ public final class NodeSupplier {
         constructorMap.put("feImage", () -> new DummyFilterPrimitive("feImage"));
         constructorMap.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
         constructorMap.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));
-        constructorMap.put("feTile", () -> new DummyFilterPrimitive("feTile"));
     }
 
 }

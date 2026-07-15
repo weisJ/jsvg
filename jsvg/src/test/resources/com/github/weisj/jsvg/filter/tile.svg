@@ -1,0 +1,14 @@
+<svg width="120" height="80" viewBox="0 0 120 80"
+    xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="tile" x="0" y="0" width="120" height="80"
+            filterUnits="userSpaceOnUse">
+            <feTurbulence x="0" y="0" width="20" height="20"
+                type="fractalNoise" baseFrequency="0.08" numOctaves="1"
+                seed="4" result="noise" />
+            <feTile in="noise" x="0" y="0" width="120" height="80" />
+        </filter>
+    </defs>
+
+    <rect x="0" y="0" width="120" height="80" filter="url(#tile)" />
+</svg>
