@@ -116,18 +116,7 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        if (inputChannels.length == 0) {
-            filterPrimitiveBase.saveLayoutResult(
-                    filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic),
-                    filterLayoutContext);
-            return;
-        }
-        LayoutBounds result = filterLayoutContext.resultChannels().get(inputChannels[0]);
-        for (int i = 1; i < inputChannels.length; i++) {
-            LayoutBounds channelBounds = filterLayoutContext.resultChannels().get(inputChannels[i]);
-            result = result.union(channelBounds);
-        }
-        filterPrimitiveBase.saveLayoutResult(result, filterLayoutContext);
+        filterPrimitiveBase.saveLayoutResult(inputLayout(filterLayoutContext), filterLayoutContext);
     }
 
     @Override

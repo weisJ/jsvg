@@ -149,12 +149,16 @@ public final class Filter extends ContainerNode {
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentBounds);
 
         Map<FilterPrimitive, LayoutBounds.Data> inputLayouts = new IdentityHashMap<>();
+        Map<FilterPrimitive, LayoutBounds.Data> outputLayouts = new IdentityHashMap<>();
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
                 inputLayouts.put(filterPrimitive,
                         filterPrimitive.inputLayout(filterLayoutContext).resolve(LayoutBounds.ComputeFlags.INITIAL));
                 filterPrimitive.layoutFilter(context, filterLayoutContext);
+                outputLayouts.put(filterPrimitive, filterLayoutContext.resultChannels()
+                        .get(DefaultFilterChannel.LastResult)
+                        .resolve(LayoutBounds.ComputeFlags.INITIAL));
             } catch (IllegalFilterStateException ignored) {
                 // Just carry on doing layout
             }
@@ -170,7 +174,7 @@ public final class Filter extends ContainerNode {
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
         return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds,
-                inputLayouts);
+                inputLayouts, outputLayouts);
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -189,7 +193,8 @@ public final class Filter extends ContainerNode {
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-                filterContext.setInputLayout(filterInfo.inputLayout(filterPrimitive));
+                filterContext.setPrimitiveLayout(filterInfo.inputLayout(filterPrimitive),
+                        filterInfo.outputLayout(filterPrimitive));
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
@@ -212,14 +217,17 @@ public final class Filter extends ContainerNode {
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
         private final @NotNull Map<FilterPrimitive, LayoutBounds.Data> inputLayouts;
+        private final @NotNull Map<FilterPrimitive, LayoutBounds.Data> outputLayouts;
 
         private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
                 @NotNull Rectangle2D effectiveFilterArea,
-                @NotNull Map<FilterPrimitive, LayoutBounds.Data> inputLayouts) {
+                @NotNull Map<FilterPrimitive, LayoutBounds.Data> inputLayouts,
+                @NotNull Map<FilterPrimitive, LayoutBounds.Data> outputLayouts) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
             this.inputLayouts = Collections.unmodifiableMap(inputLayouts);
+            this.outputLayouts = Collections.unmodifiableMap(outputLayouts);
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -238,6 +246,12 @@ public final class Filter extends ContainerNode {
             LayoutBounds.Data inputLayout = inputLayouts.get(filterPrimitive);
             if (inputLayout == null) throw new IllegalFilterStateException("Input layout not found.");
             return inputLayout;
+        }
+
+        @NotNull LayoutBounds.Data outputLayout(@NotNull FilterPrimitive filterPrimitive) {
+            LayoutBounds.Data outputLayout = outputLayouts.get(filterPrimitive);
+            if (outputLayout == null) throw new IllegalFilterStateException("Output layout not found.");
+            return outputLayout;
         }
     }
 
@@ -273,6 +287,10 @@ public final class Filter extends ContainerNode {
 
         @NotNull LayoutBounds.Data inputLayout(@NotNull FilterPrimitive filterPrimitive) {
             return filterLayout.inputLayout(filterPrimitive);
+        }
+
+        @NotNull LayoutBounds.Data outputLayout(@NotNull FilterPrimitive filterPrimitive) {
+            return filterLayout.outputLayout(filterPrimitive);
         }
 
         public @NotNull Output output() {

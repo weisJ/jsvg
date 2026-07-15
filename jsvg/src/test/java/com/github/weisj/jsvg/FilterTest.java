@@ -122,6 +122,13 @@ class FilterTest {
     }
 
     @Test
+    void testTileUsesImageBounds() {
+        BufferedImage image = renderJsvg("filter/tileImageBounds.svg");
+        assertEquals(0, image.getRGB(0, 0) >>> 24);
+        assertNotEquals(0, image.getRGB(10, 10) >>> 24);
+    }
+
+    @Test
     void testFlood() {
         // TODO: Filter region not applied correctly.
         assertDoesNotThrow(() -> renderJsvg("filter/flood.svg"));

@@ -35,6 +35,7 @@ public final class FilterContext {
 
     private final @NotNull ChannelStorage<Channel> resultChannels = new ChannelStorage<>();
     private LayoutBounds.Data inputLayout;
+    private LayoutBounds.Data outputLayout;
     private final Filter.FilterInfo info;
     private final @NotNull UnitType primitiveUnits;
     private final @Nullable ColorInterpolation colorInterpolation;
@@ -69,8 +70,14 @@ public final class FilterContext {
         return inputLayout;
     }
 
-    void setInputLayout(@NotNull LayoutBounds.Data inputLayout) {
+    public @NotNull LayoutBounds.Data outputLayout() {
+        if (outputLayout == null) throw new IllegalFilterStateException("Output layout not set.");
+        return outputLayout;
+    }
+
+    void setPrimitiveLayout(@NotNull LayoutBounds.Data inputLayout, @NotNull LayoutBounds.Data outputLayout) {
         this.inputLayout = inputLayout;
+        this.outputLayout = outputLayout;
     }
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {
