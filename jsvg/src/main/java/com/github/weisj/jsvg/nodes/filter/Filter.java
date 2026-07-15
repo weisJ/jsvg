@@ -129,7 +129,8 @@ public final class Filter extends ContainerNode {
                 : NO_CLIP_BOUNDS.getBounds2D();
 
         FilterLayoutContext filterLayoutContext =
-                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds);
+                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds,
+                        filterRegion);
 
         Rectangle2D clippedElementBounds = elementBounds.geometryBox().createIntersection(graphicsClipBounds);
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
@@ -147,11 +148,12 @@ public final class Filter extends ContainerNode {
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceDependentBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentBounds);
 
-        Map<FilterPrimitive, ChannelProvider<LayoutBounds>> layoutChannels = new IdentityHashMap<>();
+        Map<FilterPrimitive, LayoutBounds.Data> inputLayouts = new IdentityHashMap<>();
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-                layoutChannels.put(filterPrimitive, filterLayoutContext.resultChannels().snapshot());
+                inputLayouts.put(filterPrimitive,
+                        filterPrimitive.inputLayout(filterLayoutContext).resolve(LayoutBounds.ComputeFlags.INITIAL));
                 filterPrimitive.layoutFilter(context, filterLayoutContext);
             } catch (IllegalFilterStateException ignored) {
                 // Just carry on doing layout
@@ -168,7 +170,7 @@ public final class Filter extends ContainerNode {
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
         return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds,
-                layoutChannels);
+                inputLayouts);
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -187,7 +189,7 @@ public final class Filter extends ContainerNode {
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-                filterContext.setLayoutChannels(filterInfo.layoutChannels(filterPrimitive));
+                filterContext.setInputLayout(filterInfo.inputLayout(filterPrimitive));
                 filterPrimitive.applyFilter(context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
@@ -209,15 +211,15 @@ public final class Filter extends ContainerNode {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
-        private final @NotNull Map<FilterPrimitive, ChannelProvider<LayoutBounds>> layoutChannels;
+        private final @NotNull Map<FilterPrimitive, LayoutBounds.Data> inputLayouts;
 
         private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
                 @NotNull Rectangle2D effectiveFilterArea,
-                @NotNull Map<FilterPrimitive, ChannelProvider<LayoutBounds>> layoutChannels) {
+                @NotNull Map<FilterPrimitive, LayoutBounds.Data> inputLayouts) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
-            this.layoutChannels = Collections.unmodifiableMap(layoutChannels);
+            this.inputLayouts = Collections.unmodifiableMap(inputLayouts);
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -232,10 +234,10 @@ public final class Filter extends ContainerNode {
             return effectiveFilterArea;
         }
 
-        @NotNull ChannelProvider<LayoutBounds> layoutChannels(@NotNull FilterPrimitive filterPrimitive) {
-            ChannelProvider<LayoutBounds> channels = layoutChannels.get(filterPrimitive);
-            if (channels == null) throw new IllegalFilterStateException("Layout channels not found.");
-            return channels;
+        @NotNull LayoutBounds.Data inputLayout(@NotNull FilterPrimitive filterPrimitive) {
+            LayoutBounds.Data inputLayout = inputLayouts.get(filterPrimitive);
+            if (inputLayout == null) throw new IllegalFilterStateException("Input layout not found.");
+            return inputLayout;
         }
     }
 
@@ -269,8 +271,8 @@ public final class Filter extends ContainerNode {
             return filterLayout.elementBounds();
         }
 
-        @NotNull ChannelProvider<LayoutBounds> layoutChannels(@NotNull FilterPrimitive filterPrimitive) {
-            return filterLayout.layoutChannels(filterPrimitive);
+        @NotNull LayoutBounds.Data inputLayout(@NotNull FilterPrimitive filterPrimitive) {
+            return filterLayout.inputLayout(filterPrimitive);
         }
 
         public @NotNull Output output() {

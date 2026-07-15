@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 public final class FilterContext {
 
     private final @NotNull ChannelStorage<Channel> resultChannels = new ChannelStorage<>();
-    private ChannelProvider<LayoutBounds> layoutChannels;
+    private LayoutBounds.Data inputLayout;
     private final Filter.FilterInfo info;
     private final @NotNull UnitType primitiveUnits;
     private final @Nullable ColorInterpolation colorInterpolation;
@@ -64,13 +64,13 @@ public final class FilterContext {
         return resultChannels;
     }
 
-    public @NotNull ChannelProvider<LayoutBounds> layoutChannels() {
-        if (layoutChannels == null) throw new IllegalFilterStateException("Layout channels not set.");
-        return layoutChannels;
+    public @NotNull LayoutBounds.Data inputLayout() {
+        if (inputLayout == null) throw new IllegalFilterStateException("Input layout not set.");
+        return inputLayout;
     }
 
-    void setLayoutChannels(@NotNull ChannelProvider<LayoutBounds> layoutChannels) {
-        this.layoutChannels = layoutChannels;
+    void setInputLayout(@NotNull LayoutBounds.Data inputLayout) {
+        this.inputLayout = inputLayout;
     }
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {

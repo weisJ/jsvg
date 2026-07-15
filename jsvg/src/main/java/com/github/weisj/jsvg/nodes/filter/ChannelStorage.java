@@ -31,7 +31,7 @@ import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
 import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
-public final class ChannelStorage<T> implements ChannelProvider<T> {
+public final class ChannelStorage<T> {
     private final @NotNull Map<@NotNull Object, @NotNull Supplier<T>> storage = new HashMap<>();
 
     public void addResult(@NotNull FilterChannelKey key, @NotNull T value) {
@@ -42,16 +42,6 @@ public final class ChannelStorage<T> implements ChannelProvider<T> {
         storage.put(key.key(), new LazySupplier<>(value));
     }
 
-    public @NotNull ChannelProvider<T> snapshot() {
-        Map<@NotNull Object, @NotNull Supplier<T>> snapshot = new HashMap<>(storage);
-        return key -> {
-            Supplier<T> provider = snapshot.get(key.key());
-            if (provider == null) throw new IllegalFilterStateException("Channel " + key + " not found.");
-            return provider.get();
-        };
-    }
-
-    @Override
     public @NotNull T get(@NotNull FilterChannelKey key) {
         Supplier<T> provider = storage.get(key.key());
         if (provider == null) throw new IllegalFilterStateException("Channel " + key + " not found.");
