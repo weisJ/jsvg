@@ -26,7 +26,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -89,11 +88,6 @@ public class NullOutput implements Output, Output.SafeState {
     @Override
     public void setClip(@Nullable Shape shape) {
         /* do nothing */
-    }
-
-    @Override
-    public Optional<Float> contextFontSize() {
-        return Optional.empty();
     }
 
     @Override

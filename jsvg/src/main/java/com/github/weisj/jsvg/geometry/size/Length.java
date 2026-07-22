@@ -87,6 +87,8 @@ public final class Length implements LengthValue {
                 return context.em() * value;
             case REM:
                 return context.rem() * value;
+            case UA_EM:
+                return context.defaultEm() * value;
             case CH:
             case EX:
                 return context.ex() * value;

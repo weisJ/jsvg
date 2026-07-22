@@ -21,11 +21,14 @@
  */
 package com.github.weisj.jsvg;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,14 +37,14 @@ import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.impl.DocumentConstructorAccessor;
-import com.github.weisj.jsvg.renderer.*;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.animation.Animation;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
-import com.github.weisj.jsvg.renderer.impl.*;
+import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.CurrentColorProvider;
@@ -105,10 +108,6 @@ public final class SVGDocument {
         renderWithPlatform(platformSupport, graphics2D, bounds);
     }
 
-    private float computePlatformFontSize(@NotNull PlatformSupport platformSupport, @NotNull Output output) {
-        return output.contextFontSize().orElseGet(platformSupport::fontSize);
-    }
-
     public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Graphics2D graphics2D,
             @Nullable ViewBox bounds) {
         Output output = Output.createForGraphics(graphics2D);
@@ -163,7 +162,7 @@ public final class SVGDocument {
             @NotNull Output output,
             @Nullable ViewBox viewportBounds,
             @Nullable AnimationState animationState) {
-        float defaultEm = computePlatformFontSize(platformSupport, output);
+        float defaultEm = platformSupport.fontSize();
         float defaultEx = SVGFont.exFromEm(defaultEm);
         AnimationState animState = animationState != null ? animationState : AnimationState.NO_ANIMATION;
         MeasureContext initialMeasure = viewportBounds != null

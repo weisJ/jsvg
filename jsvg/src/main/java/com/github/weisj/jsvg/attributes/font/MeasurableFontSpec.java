@@ -43,7 +43,8 @@ public final class MeasurableFontSpec extends FontSpec {
         this.currentSize = currentSize;
     }
 
-    public static @NotNull MeasurableFontSpec createDefault() {
+    /** Root of the font-size cascade; {@code defaultEm} is the user-agent default font size. */
+    public static @NotNull MeasurableFontSpec createDefault(float defaultEm) {
         return new MeasurableFontSpec(
                 // Ensure there is always a valid family available.
                 new String[] {SVGFont.defaultFontFamily()},
@@ -51,7 +52,7 @@ public final class MeasurableFontSpec extends FontSpec {
                 null,
                 FontStretch.Normal.percentage(),
                 PredefinedFontWeight.NORMAL_WEIGHT,
-                Unit.RAW.valueOf(SVGFont.defaultFontSize()));
+                Unit.RAW.valueOf(defaultEm));
     }
 
     public @NotNull String[] families() {

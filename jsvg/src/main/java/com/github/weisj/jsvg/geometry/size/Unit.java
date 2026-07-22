@@ -38,6 +38,8 @@ public enum Unit implements SuffixUnit<Unit, Length> {
     IN,
     EM,
     REM,
+    // User-agent default font size; internal, never parsed from a suffix. Basis for absolute font-size keywords.
+    UA_EM,
     EX,
     CH,
     PT,

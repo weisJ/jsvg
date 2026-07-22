@@ -108,7 +108,8 @@ public final class RenderContext {
                             PaintContext.createDefault(PredefinedPaints.DEFAULT_PAINT),
                             newMeasure,
                             FontRenderContext.createDefault(),
-                            MeasurableFontSpec.createDefault(),
+                            // font-size inherits even here; anchor the reset cascade to the UA default.
+                            MeasurableFontSpec.createDefault(newMeasure.defaultEm()),
                             context.contextElementAttributes());
                 }
             }
@@ -175,7 +176,8 @@ public final class RenderContext {
                 PaintContext.createDefault(color),
                 measureContext,
                 FontRenderContext.createDefault(),
-                MeasurableFontSpec.createDefault(),
+                // Seed the cascade root with the UA default font size (from PlatformSupport).
+                MeasurableFontSpec.createDefault(measureContext.defaultEm()),
                 null);
     }
 

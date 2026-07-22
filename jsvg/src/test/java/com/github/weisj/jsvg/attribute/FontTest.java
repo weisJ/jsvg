@@ -191,7 +191,7 @@ class FontTest {
         for (AttributeEntry attribute : attributes) {
             attrs.put(attribute.key, attribute.value);
         }
-        return MeasurableFontSpec.createDefault().derive(FontParser.parseFontSpec(
+        return MeasurableFontSpec.createDefault(SVGFont.defaultFontSize()).derive(FontParser.parseFontSpec(
                 ParserTestUtil.createDummyAttributeNode(attrs)));
     }
 

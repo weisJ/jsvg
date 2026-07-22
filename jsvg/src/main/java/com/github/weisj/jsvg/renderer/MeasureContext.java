@@ -39,28 +39,33 @@ public final class MeasureContext {
     private final float em;
     private final float rem;
     private final float ex;
+    // User-agent default font size; stays fixed across derivation (basis for absolute font-size keywords).
+    private final float defaultEm;
     private final @NotNull AnimationState animationState;
 
-    public MeasureContext(float vw, float vh, float em, float ex, float rem, @NotNull AnimationState animationState) {
+    public MeasureContext(float vw, float vh, float em, float ex, float rem, float defaultEm,
+            @NotNull AnimationState animationState) {
         this.vw = vw;
         this.vh = vh;
         this.em = em;
         this.rem = rem;
         this.ex = ex;
+        this.defaultEm = defaultEm;
         this.animationState = animationState;
     }
 
     public static @NotNull MeasureContext createInitial(@NotNull FloatSize viewBoxSize, float em, float ex,
             @NotNull AnimationState animationState) {
-        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, em, animationState);
+        // At the root the current font size is the user-agent default.
+        return new MeasureContext(viewBoxSize.width, viewBoxSize.height, em, ex, em, em, animationState);
     }
 
     public @NotNull MeasureContext deriveRoot(float rem) {
-        return new MeasureContext(vw, vh, em, ex, rem, animationState);
+        return new MeasureContext(vw, vh, em, ex, rem, defaultEm, animationState);
     }
 
     public @NotNull MeasureContext derive(float viewWidth, float viewHeight) {
-        return new MeasureContext(viewWidth, viewHeight, em, ex, rem, animationState);
+        return new MeasureContext(viewWidth, viewHeight, em, ex, rem, defaultEm, animationState);
     }
 
     public @NotNull MeasureContext derive(@Nullable ViewBox viewBox, float em, float ex) {
@@ -74,7 +79,7 @@ public final class MeasureContext {
         }
         float effectiveEm = Length.isUnspecified(em) ? this.em : em;
         float effectiveEx = Length.isUnspecified(ex) ? this.ex : ex;
-        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, rem, animationState);
+        return new MeasureContext(newVw, newVh, effectiveEm, effectiveEx, rem, defaultEm, animationState);
     }
 
     public float viewWidth() {
@@ -97,6 +102,10 @@ public final class MeasureContext {
         return rem;
     }
 
+    public float defaultEm() {
+        return defaultEm;
+    }
+
     public float ex() {
         return ex;
     }
@@ -113,6 +122,7 @@ public final class MeasureContext {
                 ", em=" + em +
                 ", rem=" + rem +
                 ", ex=" + ex +
+                ", defaultEm=" + defaultEm +
                 ", animationState=" + animationState +
                 '}';
     }
@@ -127,12 +137,13 @@ public final class MeasureContext {
                 && Float.compare(that.em, em) == 0
                 && Float.compare(that.rem, rem) == 0
                 && Float.compare(that.ex, ex) == 0
+                && Float.compare(that.defaultEm, defaultEm) == 0
                 && animationState.equals(that.animationState);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vw, vh, em, ex, rem, animationState);
+        return Objects.hash(vw, vh, em, ex, rem, defaultEm, animationState);
     }
 
 }
