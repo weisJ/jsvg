@@ -26,7 +26,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -85,8 +84,6 @@ public interface Output {
      */
     @Deprecated
     default void setClip(@Nullable Shape shape) {}
-
-    Optional<Float> contextFontSize();
 
     @NotNull
     Output createChild();

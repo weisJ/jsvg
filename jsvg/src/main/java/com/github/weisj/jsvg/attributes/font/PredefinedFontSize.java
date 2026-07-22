@@ -62,6 +62,7 @@ public enum PredefinedFontSize implements HasMatchName, FontSize {
     public @NotNull Length size(@NotNull Length parentSize) {
         if (this == Number) throw new UnsupportedOperationException("Number font-size needs to parsed explicitly");
         if (this == smaller || this == larger) return parentSize.multiply(scalingFactor);
-        return Unit.RAW.valueOf(SVGFont.defaultFontSize() * scalingFactor);
+        // Absolute-size keywords are relative to the user-agent default font size, not the parent.
+        return Unit.UA_EM.valueOf(scalingFactor);
     }
 }

@@ -104,7 +104,7 @@ public final class AttributeNode {
     private static final Length Right = new Length(Unit.PERCENTAGE_WIDTH, 100f);
     private static final Length FALLBACK_LENGTH = new Length(Unit.RAW, 0f);
     private static final MeasureContext DUMMY_MEASURE_CONTEXT =
-            new MeasureContext(0, 0, 0, 0, 0, new AnimationState(0, 0));
+            new MeasureContext(0, 0, 0, 0, 0, 0, new AnimationState(0, 0));
 
     /**
      * Presentation attributes that are also CSS properties (SVG 2 §6.1): when declared on an element their value is

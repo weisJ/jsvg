@@ -27,7 +27,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -138,11 +137,6 @@ public class ShapeOutput implements Output {
         currentClip = shape != null
                 ? ShapeUtil.transformShape(shape, currentTransform)
                 : null;
-    }
-
-    @Override
-    public Optional<Float> contextFontSize() {
-        return Optional.empty();
     }
 
     @Override
