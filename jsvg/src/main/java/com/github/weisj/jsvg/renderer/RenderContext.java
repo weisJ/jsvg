@@ -235,7 +235,9 @@ public final class RenderContext {
         ContextElementAttributes newContextAttributes = contextElementAttributes;
         if (contextAttributes != null) newContextAttributes = contextAttributes;
 
-        float em = newFontSpec.emSize(measureContext);
+        // A font-size resolves against the parent em, which here is the current context's em. derive then
+        // records that em as the child's parentEm so later lookups (e.g. font()) resolve consistently.
+        float em = newFontSpec.emSize(measureContext, measureContext.em());
         float ex = SVGFont.exFromEm(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -129,14 +129,32 @@ public final class Length implements LengthValue {
      * @return the resolved size.
      */
     public float resolveFontSize(@NotNull MeasureContext context) {
+        return resolveFontSize(context, context.parentEm());
+    }
+
+    /**
+     * Resolves a font size against an explicit parent font size. Used while establishing a child context,
+     * where the parent em is the current context's em rather than {@link MeasureContext#parentEm()}.
+     * @param context the measuring context.
+     * @param parentEm the parent element's font size; relative units resolve against it.
+     * @return the resolved size.
+     */
+    public float resolveFontSize(@NotNull MeasureContext context, float parentEm) {
         float raw = raw();
+        // A font-size is relative to the parent element's font size (CSS Fonts, font-size).
         switch (unit) {
             case PERCENTAGE_LENGTH:
             case PERCENTAGE_WIDTH:
             case PERCENTAGE_HEIGHT:
                 throw new IllegalStateException("Can't resolve font size with geometric percentage unit");
             case PERCENTAGE:
-                return (raw / 100f) * context.em();
+                return (raw / 100f) * parentEm;
+            case EM:
+                return parentEm * raw;
+            case EX:
+            case CH:
+                // ex defaults to half the em value.
+                return (parentEm / 2f) * raw;
             default:
                 return resolveNonPercentage(context, unit, raw);
         }

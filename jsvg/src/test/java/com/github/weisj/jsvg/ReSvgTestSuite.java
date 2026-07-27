@@ -234,6 +234,11 @@ class ReSvgTestSuite {
     }
 
     @TestFactory
+    Collection<DynamicTest> fontSize() {
+        return checkDirectory("text/font-size");
+    }
+
+    @TestFactory
     Collection<DynamicTest> defs() {
         return checkDirectory("structure/defs", Set.of(
                 // Gradient color ramp differs from the reference. Needs investigation
