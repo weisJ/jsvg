@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -42,7 +42,8 @@ public abstract class BaseAnimationNode extends AbstractSVGNode {
     BaseAnimationNode() {}
 
     public static @Nullable String attributeName(@NotNull AttributeNode attributeNode) {
-        return attributeNode.getValue("attributeName");
+        // Read while parsing (ParsedElement#addChild), before the cascade has resolved any value.
+        return attributeNode.declaredAttributes().get("attributeName");
     }
 
     @SuppressWarnings("ReferenceEquality")

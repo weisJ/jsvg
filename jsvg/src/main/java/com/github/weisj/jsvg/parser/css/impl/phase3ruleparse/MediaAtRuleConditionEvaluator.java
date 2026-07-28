@@ -89,12 +89,9 @@ public final class MediaAtRuleConditionEvaluator {
     private final @NotNull CssHints hints;
     private final @NotNull ComponentValueGrammarParser parser;
 
-    /**
-     * @param cv with whitespaces already stripped
-     */
     private MediaAtRuleConditionEvaluator(@NotNull List<@NotNull ComponentValue> cv, @NotNull CssHints hints) {
         this.hints = hints;
-        this.parser = new ComponentValueGrammarParser(cv);
+        this.parser = new ComponentValueGrammarParser(cv, true);
     }
 
     /** @return {@code true} if the prelude matches; {@code false} if it does not or any query is malformed. */

@@ -387,15 +387,15 @@ public interface Token extends ComponentValue {
     /** {@code <number-token>} per §4.2: numeric value plus type flag. */
     @Immutable
     final class Number implements Token {
-        private final double value;
+        private final float value;
         private final @NotNull NumericType numericType;
 
-        public Number(double value, @NotNull NumericType numericType) {
+        public Number(float value, @NotNull NumericType numericType) {
             this.value = value;
             this.numericType = numericType;
         }
 
-        public double value() {
+        public float value() {
             return value;
         }
 
@@ -410,7 +410,11 @@ public interface Token extends ComponentValue {
 
         @Override
         public String serialize() {
-            return Double.toString(value);
+            if (numericType == NumericType.NUMBER) {
+                return Float.toString(value);
+            } else {
+                return Integer.toString((int) value);
+            }
         }
 
         @Override
@@ -435,13 +439,13 @@ public interface Token extends ComponentValue {
     /** {@code <percentage-token>} per §4.2: numeric value only (no type flag). */
     @Immutable
     final class Percentage implements Token {
-        private final double value;
+        private final float value;
 
-        public Percentage(double value) {
+        public Percentage(float value) {
             this.value = value;
         }
 
-        public double value() {
+        public float value() {
             return value;
         }
 
@@ -476,17 +480,17 @@ public interface Token extends ComponentValue {
     /** {@code <dimension-token>} per §4.2: numeric value, type flag, and unit ident. */
     @Immutable
     final class Dimension implements Token {
-        private final double value;
+        private final float value;
         private final @NotNull NumericType numericType;
         private final @NotNull String unit;
 
-        public Dimension(double value, @NotNull NumericType numericType, @NotNull String unit) {
+        public Dimension(float value, @NotNull NumericType numericType, @NotNull String unit) {
             this.value = value;
             this.numericType = numericType;
             this.unit = unit;
         }
 
-        public double value() {
+        public float value() {
             return value;
         }
 
@@ -494,6 +498,7 @@ public interface Token extends ComponentValue {
             return numericType;
         }
 
+        /** Non-empty string */
         public @NotNull String unit() {
             return unit;
         }
@@ -505,7 +510,11 @@ public interface Token extends ComponentValue {
 
         @Override
         public String serialize() {
-            return value + unit;
+            if (numericType == NumericType.NUMBER) {
+                return value + unit;
+            } else {
+                return ((int) value) + unit;
+            }
         }
 
         @Override

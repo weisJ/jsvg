@@ -96,9 +96,8 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED);
         height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED);
 
-        String href = attributeNode.getValue("href");
-        if (href == null) href = attributeNode.getValue("xlink:href");
-        referencedNode = attributeNode.getElementByHref(SVGNode.class, href, ElementRelation.PAINTED_CHILD);
+        referencedNode = attributeNode.getElementByHref(
+                SVGNode.class, attributeNode.getHref(), ElementRelation.PAINTED_CHILD);
 
         paintContext = PaintContext.parse(attributeNode);
         fontRenderContext = FontRenderContext.parse(attributeNode);

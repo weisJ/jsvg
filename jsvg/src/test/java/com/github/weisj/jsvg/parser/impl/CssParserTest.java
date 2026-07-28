@@ -43,7 +43,6 @@ import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
 import com.github.weisj.jsvg.parser.css.data.StyleRule;
 import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
 import com.github.weisj.jsvg.parser.css.data.Token;
-import com.github.weisj.jsvg.parser.css.data.TokenType;
 import com.github.weisj.jsvg.parser.css.data.selectors.ComplexSelector;
 import com.github.weisj.jsvg.parser.css.data.selectors.CompoundSelector;
 import com.github.weisj.jsvg.parser.css.data.selectors.SimpleSelector;
@@ -242,20 +241,21 @@ class CssParserTest {
     void fractionalNumbersParseCorrectly() {
         FullCssParser parser = new FullCssParser();
 
-        assertEquals(0.7, dimensionValue(parser, "0.7em"), 1e-9);
-        assertEquals(0.8, dimensionValue(parser, "0.8em"), 1e-9);
-        assertEquals(1.5, dimensionValue(parser, "1.5em"), 1e-9);
-        assertEquals(2.0, dimensionValue(parser, "2em"), 1e-9);
-        assertEquals(10.25, dimensionValue(parser, "10.25px"), 1e-9);
-        assertEquals(-0.25, dimensionValue(parser, "-0.25px"), 1e-9);
+        // Tolerance is float-precision: token values are narrowed to float in the lexer.
+        assertEquals(0.7, dimensionValue(parser, "0.7em"), 1e-6);
+        assertEquals(0.8, dimensionValue(parser, "0.8em"), 1e-6);
+        assertEquals(1.5, dimensionValue(parser, "1.5em"), 1e-6);
+        assertEquals(2.0, dimensionValue(parser, "2em"), 1e-6);
+        assertEquals(10.25, dimensionValue(parser, "10.25px"), 1e-6);
+        assertEquals(-0.25, dimensionValue(parser, "-0.25px"), 1e-6);
 
         // Scientific notation.
-        assertEquals(0.015, dimensionValue(parser, "1.5e-2px"), 1e-9);
-        assertEquals(150.0, dimensionValue(parser, "1.5e2px"), 1e-9);
+        assertEquals(0.015, dimensionValue(parser, "1.5e-2px"), 1e-6);
+        assertEquals(150.0, dimensionValue(parser, "1.5e2px"), 1e-6);
 
         // Plain numbers and percentages share the same code path.
-        assertEquals(0.5, numberValue(parser, "0.5"), 1e-9);
-        assertEquals(12.5, percentageValue(parser, "12.5%"), 1e-9);
+        assertEquals(0.5, numberValue(parser, "0.5"), 1e-6);
+        assertEquals(12.5, percentageValue(parser, "12.5%"), 1e-6);
     }
 
     private static double dimensionValue(@NotNull FullCssParser parser, @NotNull String value) {
@@ -278,7 +278,7 @@ class CssParserTest {
 
     private static @NotNull ComponentValue firstToken(@NotNull FullCssParser parser, @NotNull String value) {
         for (ComponentValue token : parser.parseCssAttribute(value)) {
-            if (!(token instanceof Token) || ((Token) token).type() != TokenType.WHITESPACE) return token;
+            if (token != Token.Static.WHITESPACE) return token;
         }
         throw new AssertionError("No token produced for: " + value);
     }

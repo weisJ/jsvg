@@ -226,4 +226,10 @@ public interface ComponentValue {
     default boolean isEq() {
         return this instanceof Token.Delim && ((Token.Delim) this).value() == "=".codePointAt(0);
     }
+
+    default boolean isANumberInRange(int min, int max) {
+        return this instanceof Token.Number
+                && ((Token.Number) this).value() >= min
+                && ((Token.Number) this).value() <= max;
+    }
 }

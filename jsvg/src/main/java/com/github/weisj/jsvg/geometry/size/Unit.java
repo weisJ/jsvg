@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,9 +21,12 @@
  */
 package com.github.weisj.jsvg.geometry.size;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.SuffixUnit;
 
@@ -89,5 +92,19 @@ public enum Unit implements SuffixUnit<Unit, Length> {
             default:
                 return false;
         }
+    }
+
+    private static final Map<String, Unit> suffixToNonPercentageUnit = new HashMap<>();
+
+    static {
+        for (Unit unit : values()) {
+            if (!unit.isPercentage() && unit != RAW) {
+                suffixToNonPercentageUnit.put(unit.suffix, unit);
+            }
+        }
+    }
+
+    public static @Nullable Unit fromNonPercentageSuffix(@NotNull String suffix) {
+        return suffixToNonPercentageUnit.get(suffix);
     }
 }

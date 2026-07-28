@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,10 +21,24 @@
  */
 package com.github.weisj.jsvg.attributes.value;
 
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.geometry.size.Unit;
+
 public enum PercentageDimension {
-    WIDTH,
-    HEIGHT,
-    LENGTH,
-    CUSTOM,
-    NONE
+    WIDTH(Unit.PERCENTAGE_WIDTH),
+    HEIGHT(Unit.PERCENTAGE_HEIGHT),
+    LENGTH(Unit.PERCENTAGE_LENGTH),
+    CUSTOM(Unit.PERCENTAGE),
+    NONE(null);
+
+    private final @Nullable Unit unit;
+
+    PercentageDimension(@Nullable Unit unit) {
+        this.unit = unit;
+    }
+
+    public @Nullable Unit unit() {
+        return unit;
+    }
 }

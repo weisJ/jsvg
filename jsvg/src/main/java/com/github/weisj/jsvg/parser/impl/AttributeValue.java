@@ -29,21 +29,40 @@ import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 
 public interface AttributeValue {
 
-    /** For values of SVG-only attributes that don't need a full parser */
-    class PlainString implements AttributeValue {
-        public final @NotNull String value;
+    /** For values of SVG-only attributes that don't need a CSS parser */
+    final class PlainString implements AttributeValue {
+        private final @NotNull String value;
 
         public PlainString(@NotNull String value) {
             this.value = value;
         }
+
+        public @NotNull String string() {
+            return value;
+        }
     }
 
     /** For values of CSS attributes */
-    class Parsed implements AttributeValue {
-        public final @NotNull List<@NotNull ComponentValue> tokens;
+    final class Parsed implements AttributeValue {
+        private final @NotNull List<@NotNull ComponentValue> tokens;
 
         public Parsed(@NotNull List<@NotNull ComponentValue> tokens) {
             this.tokens = tokens;
+        }
+
+        public @NotNull List<@NotNull ComponentValue> tokens() {
+            return tokens;
+        }
+
+        /** Serializes a component-value list back to CSS text (§5.2).
+         * Expensive operation; only use it as a fallback.
+         * Prefer to use {@link #tokens()} directly. */
+        public @NotNull String reserialize() {
+            StringBuilder sb = new StringBuilder();
+            for (ComponentValue token : tokens) {
+                sb.append(token.serialize());
+            }
+            return sb.toString().trim();
         }
     }
 }

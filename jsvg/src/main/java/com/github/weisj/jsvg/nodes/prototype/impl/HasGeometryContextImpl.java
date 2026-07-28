@@ -21,6 +21,9 @@
  */
 package com.github.weisj.jsvg.nodes.prototype.impl;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,9 +38,14 @@ import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasGeometryContext;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.Token;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 public final class HasGeometryContextImpl implements HasGeometryContext {
+
+    private static final List<ComponentValue> CENTER = Collections.singletonList(new Token.Ident("center"));
 
     private final @Nullable TransformValue transform;
     private final @NotNull Coordinate<LengthValue> transformOrigin;
@@ -61,40 +69,41 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
     public static @NotNull HasGeometryContext parse(@NotNull AttributeNode attributeNode) {
         return new HasGeometryContextImpl(
                 attributeNode.parseTransform("transform", Inherited.NO, Animatable.YES),
-                parseTransformOrigin(attributeNode, attributeNode.getStringList("transform-origin")),
+                parseTransformOrigin(attributeNode),
                 attributeNode.getEnum("transform-box", TransformBox.ViewBox),
                 attributeNode.getClipPath(),
                 attributeNode.getMask(),
                 attributeNode.getFilter());
     }
 
-    private static @NotNull Coordinate<LengthValue> parseTransformOrigin(@NotNull AttributeNode attributeNode,
-            @NotNull String @NotNull [] parts) {
-        // SVG default for elements without an associated CSS layout box is "0 0"
-        if (parts.length == 0) {
-            return new Coordinate<>(Length.ZERO, Length.ZERO);
-        }
+    private static @NotNull Coordinate<LengthValue> parseTransformOrigin(@NotNull AttributeNode node) {
+        List<List<ComponentValue>> tokenParts =
+                node.getSplitTokenList("transform-origin", SeparatorMode.WHITESPACE_ONLY);
+        // absent or empty: default "0 0"
+        if (tokenParts == null || tokenParts.isEmpty()) return new Coordinate<>(Length.ZERO, Length.ZERO);
+        return resolveOrigin(node, tokenParts);
+    }
 
-        String originX;
-        String originY;
-
-        if (parts.length == 1) {
-            String val = parts[0];
-            if (attributeNode.isVerticalKeyword(val)) {
-                // e.g. "top" => x defaults to center, y = top
-                originX = "center";
-                originY = val;
+    /** Assigns transform-origin parts to x/y per CSS Transforms 1 §3. */
+    private static @NotNull Coordinate<LengthValue> resolveOrigin(@NotNull AttributeNode node,
+            @NotNull List<@NotNull List<@NotNull ComponentValue>> parts) {
+        List<ComponentValue> originX;
+        List<ComponentValue> originY;
+        if (parts.size() == 1) {
+            List<ComponentValue> value = parts.get(0);
+            // lone vertical keyword → y; else → x
+            if (node.isVerticalKeyword(value)) {
+                originX = CENTER;
+                originY = value;
             } else {
-                // e.g. "left", "50%", "10px" => x = val, y defaults to center
-                originX = val;
-                originY = "center";
+                originX = value;
+                originY = CENTER;
             }
         } else {
-            // 2+ values: keywords can appear in any order
-            String first = parts[0];
-            String second = parts[1];
-            // If the first is a vertical keyword or the second is a horizontal keyword, swap them
-            if (attributeNode.isVerticalKeyword(first) || attributeNode.isHorizontalKeyword(second)) {
+            // keywords may appear in either order
+            List<ComponentValue> first = parts.get(0);
+            List<ComponentValue> second = parts.get(1);
+            if (node.isVerticalKeyword(first) || node.isHorizontalKeyword(second)) {
                 originX = second;
                 originY = first;
             } else {
@@ -102,10 +111,7 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
                 originY = second;
             }
         }
-
-        return new Coordinate<>(
-                attributeNode.getHorizontalReferenceLength(originX),
-                attributeNode.getVerticalReferenceLength(originY));
+        return new Coordinate<>(node.getHorizontalReferenceLength(originX), node.getVerticalReferenceLength(originY));
     }
 
     @Override

@@ -178,8 +178,7 @@ public final class Lexer {
 
             int first = look.peek(0);
             int second = look.peek(1);
-            if (first == '"' || first == '\''
-                    || (first == ' ' && (second == '"' || second == '\''))) {
+            if (first == '"' || first == '\'' || (first == ' ' && (second == '"' || second == '\''))) {
                 return new Token.Function(name);
             }
             return consumeUrlToken();
@@ -376,10 +375,10 @@ public final class Lexer {
     }
 
     private static final class NumberValue {
-        final double value;
+        final float value;
         final @NotNull Token.NumericType numericType;
 
-        NumberValue(double value, @NotNull Token.NumericType numericType) {
+        NumberValue(float value, @NotNull Token.NumericType numericType) {
             this.value = value;
             this.numericType = numericType;
         }
@@ -479,10 +478,10 @@ public final class Lexer {
     }
 
     /**
-     * §4.3.13 Converts a string to a double.
-     * Assumes that the string is a valid CSS number.
+     * §4.3.13 Converts a string to a number. Computed in double, then narrowed to the float used
+     * throughout the geometry layer. Assumes that the string is a valid CSS number.
      */
-    private static double convertStringToNumber(String str) {
+    private static float convertStringToNumber(String str) {
         Matcher matcher = NUMBER_PATTERN.matcher(str);
         if (!matcher.matches())
             throw new ParserException();
@@ -494,13 +493,13 @@ public final class Lexer {
 
         int s = sign.equals("-") ? -1 : 1; // sign of the number
         long i = integer.isEmpty() ? 0 : Long.parseUnsignedLong(integer); // integer part
-        long f = fraction.isEmpty() ? 0 : Long.parseUnsignedLong(fraction.replaceFirst("^0+", "")); // fractional part
-                                                                                                    // as integer
+        // fractional part as integer
+        long f = fraction.isEmpty() ? 0 : Long.parseUnsignedLong(fraction.replaceFirst("^0+", ""));
         int d = fraction.length(); // number of fractional digits
         int t = exponentSign.equals("-") ? -1 : 1; // exponent sign
         long e = exponent.isEmpty() ? 0 : Long.parseUnsignedLong(exponent); // exponent
 
-        return s * (i + f * Math.pow(10, -d)) * Math.pow(10, t * e);
+        return (float) (s * (i + f * Math.pow(10, -d)) * Math.pow(10, t * e));
     }
 
     private static boolean equalsIgnoreCaseAscii(@NotNull String a, @NotNull String b) {

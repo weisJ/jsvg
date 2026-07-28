@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.data.Token;
-import com.github.weisj.jsvg.parser.css.data.TokenType;
 import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
 import com.github.weisj.jsvg.parser.css.impl.phase1lexer.Lexer;
 import com.github.weisj.jsvg.parser.css.impl.phase1lexer.LexerInput;
@@ -118,11 +117,11 @@ interface ComponentValueCursor {
             Token t = nextToken();
             switch (t.type()) {
                 case LEFT_BRACE:
-                    return new ComponentValue.SimpleBlock.Brace(consumeBlockBody(TokenType.RIGHT_BRACE, "{}"));
+                    return new ComponentValue.SimpleBlock.Brace(consumeBlockBody(Token.Static.RIGHT_BRACE, "{}"));
                 case LEFT_BRACKET:
-                    return new ComponentValue.SimpleBlock.Bracket(consumeBlockBody(TokenType.RIGHT_BRACKET, "[]"));
+                    return new ComponentValue.SimpleBlock.Bracket(consumeBlockBody(Token.Static.RIGHT_BRACKET, "[]"));
                 case LEFT_PAREN:
-                    return new ComponentValue.SimpleBlock.Paren(consumeBlockBody(TokenType.RIGHT_PAREN, "()"));
+                    return new ComponentValue.SimpleBlock.Paren(consumeBlockBody(Token.Static.RIGHT_PAREN, "()"));
                 case FUNCTION:
                     return consumeFunction(((Token.Function) t).name());
                 default:
@@ -135,14 +134,14 @@ interface ComponentValueCursor {
          * collects component values until {@code endType} (the matching closer) or EOF.
          */
         private @NotNull List<@NotNull ComponentValue> consumeBlockBody(
-                @NotNull TokenType endType, @NotNull String label) {
+                @NotNull Token endToken, @NotNull String label) {
             List<ComponentValue> values = new ArrayList<>();
             while (true) {
                 Token t = nextToken();
-                if (t.type() == endType) {
+                if (t == endToken) {
                     return values;
                 }
-                if (t.type() == TokenType.EOF) {
+                if (t == Token.Static.EOF) {
                     FullCssParser.logParseEvent("unexpected EOF inside " + label + "-block");
                     return values;
                 }
@@ -156,10 +155,10 @@ interface ComponentValueCursor {
             List<ComponentValue> values = new ArrayList<>();
             while (true) {
                 Token t = nextToken();
-                if (t.type() == TokenType.RIGHT_PAREN) {
+                if (t == Token.Static.RIGHT_PAREN) {
                     return new ComponentValue.FunctionBlock(name, values);
                 }
-                if (t.type() == TokenType.EOF) {
+                if (t == Token.Static.EOF) {
                     FullCssParser.logParseEvent("unexpected EOF inside " + name + "()");
                     return new ComponentValue.FunctionBlock(name, values);
                 }

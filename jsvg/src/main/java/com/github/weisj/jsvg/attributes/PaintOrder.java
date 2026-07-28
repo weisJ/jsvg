@@ -22,10 +22,12 @@
 package com.github.weisj.jsvg.attributes;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
@@ -54,19 +56,21 @@ public final class PaintOrder {
     public static @Nullable PaintOrder parse(@NotNull AttributeNode attributeNode) {
         @NotNull AttributeParser parser = attributeNode.parser();
 
-        String[] rawPhases = attributeNode.getStringList("paint-order", SeparatorMode.COMMA_AND_WHITESPACE);
-        if (rawPhases.length == 0) return null;
-        if (rawPhases.length == 1) {
-            if ("inherit".equals(rawPhases[0])) return null;
-            if ("none".equals(rawPhases[0]) || "normal".equals(rawPhases[0])) return NORMAL;
+        List<List<ComponentValue>> rawPhases =
+                attributeNode.getSplitTokenList("paint-order", SeparatorMode.COMMA_AND_WHITESPACE);
+        if (rawPhases == null || rawPhases.isEmpty()) return null;
+        if (rawPhases.size() == 1) {
+            ComponentValue only = AttributeParser.singleToken(rawPhases.get(0));
+            if (only != null && only.isOneOfKeywords("inherit")) return null;
+            if (only != null && only.isOneOfKeywords("none", "normal")) return NORMAL;
         }
 
         Phase[] phases = new Phase[3];
-        int length = Math.min(phases.length, rawPhases.length);
+        int length = Math.min(phases.length, rawPhases.size());
         int phasesIndex = 0;
         int rawPhasesIndex = 0;
         while (phasesIndex < length && rawPhasesIndex < length) {
-            Phase phase = parser.parseEnum(rawPhases[rawPhasesIndex], Phase.class);
+            Phase phase = parser.parseEnum(rawPhases.get(rawPhasesIndex), Phase.class);
             if (phase != null && !AttributeUtil.arrayContains(phases, phase)) {
                 phases[phasesIndex] = phase;
                 phasesIndex++;
