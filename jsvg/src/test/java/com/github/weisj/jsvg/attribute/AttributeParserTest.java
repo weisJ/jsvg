@@ -104,24 +104,6 @@ class AttributeParserTest {
         test.accept("-42", new String[] {"-42"});
     }
 
-    @Test
-    void testFloatList() {
-        Random r = new Random();
-        for (int i = 0; i < 20; i++) {
-            float[] arr = RandomData.generateRandomFloatArray(r);
-            float[] parsed = parser.parseFloatList(appendToList(box(arr), r, false));
-            Assertions.assertArrayEquals(arr, parsed);
-        }
-    }
-
-    private Float[] box(float[] arr) {
-        Float[] boxed = new Float[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            boxed[i] = arr[i];
-        }
-        return boxed;
-    }
-
     private void testStringList(boolean requireComma) {
         Random r = new Random();
         for (int i = 0; i < 20; i++) {

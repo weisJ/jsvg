@@ -48,8 +48,7 @@ public interface Renderable {
     }
 
     static boolean parseVisibility(@NotNull AttributeNode node) {
-        return !node.valueIsIdent("display", "none")
-                && !node.valueIsIdent("visibility", "hidden")
-                && !node.valueIsIdent("visibility", "collapse");
+        return !node.valueIsOneOfKeywords("display", "none")
+                && !node.valueIsOneOfKeywords("visibility", "hidden", "collapse");
     }
 }

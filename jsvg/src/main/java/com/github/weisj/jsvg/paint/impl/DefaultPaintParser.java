@@ -38,7 +38,7 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.data.Token;
-import com.github.weisj.jsvg.parser.css.data.TokenType;
+import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.ParserUtil;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
@@ -85,7 +85,7 @@ public final class DefaultPaintParser implements PaintParser {
 
     @Override
     public @Nullable Color parseColor(@NotNull List<@NotNull ComponentValue> tokens) {
-        ComponentValue token = singleToken(tokens);
+        ComponentValue token = AttributeParser.singleToken(tokens);
         try {
             if (token instanceof Token.Hash) {
                 return parseHexColor(((Token.Hash) token).name());
@@ -104,7 +104,7 @@ public final class DefaultPaintParser implements PaintParser {
 
     @Override
     public @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
-        ComponentValue token = singleToken(tokens);
+        ComponentValue token = AttributeParser.singleToken(tokens);
         if (token instanceof Token.Ident) {
             SVGPaint keyword = paintKeyword(((Token.Ident) token).name().toLowerCase(Locale.ENGLISH));
             if (keyword != null) return keyword;
@@ -155,10 +155,7 @@ public final class DefaultPaintParser implements PaintParser {
         if (!"rgb".equals(name) && !"rgba".equals(name)) return null;
         List<ComponentValue> components = new ArrayList<>();
         for (ComponentValue value : function.value()) {
-            if (value instanceof Token) {
-                TokenType type = ((Token) value).type();
-                if (type == TokenType.WHITESPACE || type == TokenType.COMMA) continue;
-            }
+            if (value == Token.Static.WHITESPACE || value == Token.Static.COMMA) continue;
             components.add(value);
         }
         if (components.size() < 3) return null;
@@ -183,16 +180,6 @@ public final class DefaultPaintParser implements PaintParser {
 
     private static int clampComponent(double value) {
         return Math.min(255, Math.max(0, (int) value));
-    }
-
-    private static @Nullable ComponentValue singleToken(@NotNull List<@NotNull ComponentValue> tokens) {
-        ComponentValue found = null;
-        for (ComponentValue token : tokens) {
-            if (token instanceof Token && ((Token) token).type() == TokenType.WHITESPACE) continue;
-            if (found != null) return null;
-            found = token;
-        }
-        return found;
     }
 
     private int parseColorComponent(String value, boolean percentage) {

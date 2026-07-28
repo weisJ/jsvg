@@ -58,32 +58,32 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
         if (resultId == null) {
             resultId = "dropshadow-" + attributeNode.hashCode();
         }
-        child.setValue(resultKey, resultId);
+        child.setResolvedNonCssValue(resultKey, resultId);
 
         FeGaussianBlur blur = new FeGaussianBlur();
         blur.build(child);
         blur.setOnlyAlpha(true);
 
-        child.setValue("in", resultId);
+        child.setResolvedNonCssValue("in", resultId);
 
         String offsetResultId = resultId + "-offset-" + resultId.hashCode();
-        child.setValue(resultKey, offsetResultId);
+        child.setResolvedNonCssValue(resultKey, offsetResultId);
         FeOffset offset = new FeOffset();
         offset.build(child);
 
-        child.setValue(resultKey, resultId);
+        child.setResolvedNonCssValue(resultKey, resultId);
         FeFlood flood = new FeFlood();
         flood.build(child);
 
-        child.setValue("in2", offsetResultId);
-        child.setValue("operator", "in");
+        child.setResolvedNonCssValue("in2", offsetResultId);
+        child.setResolvedNonCssValue("operator", "in");
         FeComposite composite = new FeComposite();
         composite.build(child);
 
         FeMergeNode node1 = new FeMergeNode();
         node1.build(child);
 
-        child.setValue("in", inputId.key().toString());
+        child.setResolvedNonCssValue("in", inputId.key().toString());
         FeMergeNode node2 = new FeMergeNode();
         node2.build(child);
 

@@ -21,22 +21,39 @@
  */
 package com.github.weisj.jsvg.parser.css.impl.phase3ruleparse;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.data.Token;
-import com.github.weisj.jsvg.parser.css.data.TokenType;
 
 public class ComponentValueGrammarParser {
-    private int idx = 0;
     private final @NotNull List<@NotNull ComponentValue> tokens;
+    private final boolean skipWhitespace;
+    private int idx;
+    // Caches the result of peekNext() for usage in advance(), to avoid skipping over whitespace twice.
+    // Set to -1 to indicate that peekNext() has not been called yet in this position.
+    private int cachedNextIdx = -1;
 
-    public ComponentValueGrammarParser(@NotNull List<@NotNull ComponentValue> tokens) {
+    /** @param skipWhitespace hides whitespace from the grammar; it stays in {@link #remainingTokens()}. */
+    public ComponentValueGrammarParser(@NotNull List<@NotNull ComponentValue> tokens, boolean skipWhitespace) {
         this.tokens = tokens;
+        this.skipWhitespace = skipWhitespace;
+        this.idx = firstValidIndexFrom(0);
+    }
+
+    /** Returns the first index of a non-whitespace token if skipWhitespace is true, otherwise returns the given index. */
+    private int firstValidIndexFrom(int from) {
+        int i = from;
+        if (skipWhitespace) {
+            while (i < tokens.size() && tokens.get(i) == Token.Static.WHITESPACE) {
+                i++;
+            }
+        }
+        return i;
     }
 
     @NotNull
@@ -46,11 +63,15 @@ public class ComponentValueGrammarParser {
 
     @Nullable
     public ComponentValue peekNext() {
-        return idx + 1 < tokens.size() ? tokens.get(idx + 1) : null;
+        if (cachedNextIdx == -1) { // if peekNext() was not already called in this position
+            cachedNextIdx = firstValidIndexFrom(idx + 1);
+        }
+        return cachedNextIdx < tokens.size() ? tokens.get(cachedNextIdx) : null;
     }
 
     public void advance() {
-        idx++;
+        idx = firstValidIndexFrom(idx + 1);
+        cachedNextIdx = -1; // indicates that peekNext() has not been called yet in the new position
     }
 
     public boolean isEof() {
@@ -58,24 +79,11 @@ public class ComponentValueGrammarParser {
     }
 
     public boolean isCurrentOneOfKeywords(@NotNull String... keywords) {
-        if (isEof()) {
-            return false;
-        }
+        if (isEof()) return false;
         return current().isOneOfKeywords(keywords);
     }
 
-    public boolean isNextOfType(@NotNull TokenType type) {
-        ComponentValue next = peekNext();
-        return next instanceof Token && ((Token) next).type() == type;
-    }
-
-    public boolean isNextANumberInRange(int min, int max) {
-        ComponentValue next = peekNext();
-        return next instanceof Token.Number
-                && ((Token.Number) next).value() >= min
-                && ((Token.Number) next).value() <= max;
-    }
-
+    /** Includes whitespaces, even if skipWhitespace is set */
     @NotNull
     public List<@NotNull ComponentValue> remainingTokens() {
         return tokens.subList(idx, tokens.size());
@@ -83,12 +91,8 @@ public class ComponentValueGrammarParser {
 
     public static @NotNull List<@NotNull ComponentValue> stripWhitespace(
             @NotNull List<@NotNull ComponentValue> in) {
-        List<ComponentValue> out = new ArrayList<>(in.size());
-        for (ComponentValue v : in) {
-            if (!(v instanceof Token && ((Token) v).type() == TokenType.WHITESPACE)) {
-                out.add(v);
-            }
-        }
-        return out;
+        return in.stream()
+                .filter(v -> v != Token.Static.WHITESPACE)
+                .collect(Collectors.toList());
     }
 }

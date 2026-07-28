@@ -116,15 +116,17 @@ public final class ParsedElement implements DomElement {
 
     @Override
     public @Nullable String attribute(@NotNull String name) {
-        return attributeNode.getValue(name);
+        return attributeNode.declaredAttributes().get(name);
     }
 
     @Override
     public void setAttribute(@NotNull String name, @Nullable String value) {
+        // Write the raw declared attribute; prepareForNodeBuilding tokenizes, expands and cascades it (like
+        // parsed input).
         if (value == null) {
-            attributeNode.attributes().remove(name);
+            attributeNode.declaredAttributes().remove(name);
         } else {
-            attributeNode.attributes().put(name, new AttributeValue.PlainString(value));
+            attributeNode.declaredAttributes().put(name, value);
         }
     }
 

@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Unit;
-import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.util.ParserBase;
 
 public final class ParserUtil {
@@ -39,15 +38,6 @@ public final class ParserUtil {
     private ParserUtil() {}
 
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
-
-    /** Serializes a component-value list back to CSS text (§5.2), for parsers that only accept strings. */
-    public static @NotNull String serialize(@NotNull List<@NotNull ComponentValue> tokens) {
-        StringBuilder sb = new StringBuilder();
-        for (ComponentValue token : tokens) {
-            sb.append(token.serialize());
-        }
-        return sb.toString().trim();
-    }
 
     public static @NotNull String removeWhiteSpace(@NotNull String value) {
         return WHITESPACE_PATTERN.matcher(value).replaceAll("");

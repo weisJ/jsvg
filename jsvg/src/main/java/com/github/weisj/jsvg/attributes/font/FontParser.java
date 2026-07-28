@@ -33,11 +33,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.data.Token;
-import com.github.weisj.jsvg.parser.css.data.TokenType;
 import com.github.weisj.jsvg.parser.css.impl.phase3ruleparse.ComponentValueGrammarParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
@@ -47,8 +47,7 @@ public final class FontParser {
 
     // Todo: font-variant
     public static @NotNull AttributeFontSpec parseFontSpec(@NotNull AttributeNode node) {
-        String[] fontFamilies = node.getStringList("font-family", SeparatorMode.COMMA_ONLY);
-        canonicalizeFontFamily(fontFamilies);
+        String[] fontFamilies = parseFontFamily(node);
 
         // Todo: https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#fallback_weights
         @Nullable FontWeight weight = parseWeight(node);
@@ -69,7 +68,7 @@ public final class FontParser {
      */
     public static @NotNull Map<String, List<ComponentValue>> expandFontShorthand(
             @NotNull List<@NotNull ComponentValue> shorthandValue) {
-        ComponentValueGrammarParser parser = new ComponentValueGrammarParser(shorthandValue);
+        ComponentValueGrammarParser parser = new ComponentValueGrammarParser(shorthandValue, true);
 
         // Handle system font keywords
         if (shorthandValue.size() == 1 && parser.isCurrentOneOfKeywords(
@@ -90,8 +89,8 @@ public final class FontParser {
         while (!parser.isEof()) {
             // font-style: normal | italic | left | right| oblique [<angle>]?
             if (fontStyle == null && parser.isCurrentOneOfKeywords("normal", "italic", "left", "right", "oblique")) {
-                if (parser.isCurrentOneOfKeywords("oblique")
-                        && parser.isNextOfType(TokenType.DIMENSION)) {
+                if (parser.isCurrentOneOfKeywords("oblique") && isAngleDimension(parser.peekNext())) {
+                    // a non-angle dimension is the font-size
                     fontStyle = Arrays.asList(parser.current(), parser.peekNext());
                     parser.advance();
                 } else {
@@ -110,7 +109,7 @@ public final class FontParser {
 
             // font-weight: normal | bold | bolder | lighter | 1-1000
             if (fontWeight == null && (parser.isCurrentOneOfKeywords("bold", "bolder", "lighter")
-                    || parser.isNextANumberInRange(1, 1000))) {
+                    || parser.current().isANumberInRange(1, 1000))) {
                 fontWeight = Collections.singletonList(parser.current());
                 parser.advance();
                 continue;
@@ -160,7 +159,7 @@ public final class FontParser {
         @NotNull List<ComponentValue> fontFamily = parser.remainingTokens();
 
         Map<String, List<ComponentValue>> result = new HashMap<>();
-        List<ComponentValue> normal = Collections.singletonList(new Token.Str("normal"));
+        List<ComponentValue> normal = Collections.singletonList(new Token.Ident("normal"));
         result.put("font-style", fontStyle != null ? fontStyle : normal);
         result.put("font-variant", fontVariant != null ? fontVariant : normal);
         result.put("font-weight", fontWeight != null ? fontWeight : normal);
@@ -169,6 +168,45 @@ public final class FontParser {
         result.put("line-height", lineHeight != null ? lineHeight : normal);
         result.put("font-family", fontFamily);
         return result;
+    }
+
+    /** A {@code <dimension>} with an angle unit. */
+    private static boolean isAngleDimension(@Nullable ComponentValue value) {
+        if (!(value instanceof Token.Dimension)) return false;
+        String unit = ((Token.Dimension) value).unit().toLowerCase(Locale.ENGLISH);
+        for (AngleUnit angleUnit : AngleUnit.units()) {
+            if (angleUnit != AngleUnit.Raw && angleUnit.suffix().equals(unit)) return true;
+        }
+        return false;
+    }
+
+    public static @NotNull String @NotNull [] parseFontFamily(@NotNull AttributeNode node) {
+        List<List<ComponentValue>> groups = node.getSplitTokenList("font-family", SeparatorMode.COMMA_ONLY);
+        if (groups == null) return new String[0];
+        String[] families = familyNames(groups);
+        canonicalizeFontFamily(families);
+        return families;
+    }
+
+    private static @NotNull String @NotNull [] familyNames(
+            @NotNull List<@NotNull List<@NotNull ComponentValue>> groups) {
+        String[] families = new String[groups.size()];
+        for (int i = 0; i < families.length; i++) {
+            families[i] = familyName(groups.get(i));
+        }
+        return families;
+    }
+
+    /** {@code <family-name> = <string> | <custom-ident>+}; idents joined by spaces. */
+    private static @NotNull String familyName(@NotNull List<@NotNull ComponentValue> group) {
+        StringBuilder name = new StringBuilder();
+        for (ComponentValue token : group) {
+            if (token instanceof Token.Str) return ((Token.Str) token).value();
+            if (!(token instanceof Token.Ident)) continue;
+            if (name.length() > 0) name.append(' ');
+            name.append(((Token.Ident) token).name());
+        }
+        return name.toString();
     }
 
     private static @NotNull String stripQuotes(@NotNull String str, char quoteChar) {
@@ -242,15 +280,18 @@ public final class FontParser {
     }
 
     static @Nullable FontStyle parseFontStyle(@NotNull AttributeNode node) {
-        String[] parts = node.getStringList("font-style", SeparatorMode.WHITESPACE_ONLY);
-        if (parts.length == 0) return null;
-        String kind = parts[0];
-        if ("normal".equalsIgnoreCase(kind)) return FontStyle.normal();
-        if ("italic".equalsIgnoreCase(kind)) return FontStyle.italic();
-        if ("oblique".equalsIgnoreCase(kind)) {
-            return parts.length >= 2
-                    ? new FontStyle.Oblique(node.parser().parseAngle(parts[1], FontStyle.Oblique.DEFAULT_ANGLE))
-                    : FontStyle.oblique();
+        List<ComponentValue> tokens = node.getTokens("font-style");
+        if (tokens == null) return null;
+        ComponentValueGrammarParser parser = new ComponentValueGrammarParser(tokens, true);
+        if (parser.isEof()) return null;
+        if (parser.isCurrentOneOfKeywords("normal")) return FontStyle.normal();
+        if (parser.isCurrentOneOfKeywords("italic")) return FontStyle.italic();
+        if (parser.isCurrentOneOfKeywords("oblique")) {
+            parser.advance();
+            return parser.isEof()
+                    ? FontStyle.oblique()
+                    : new FontStyle.Oblique(
+                            node.parser().parseAngle(parser.remainingTokens(), FontStyle.Oblique.DEFAULT_ANGLE));
         }
         return null;
     }
