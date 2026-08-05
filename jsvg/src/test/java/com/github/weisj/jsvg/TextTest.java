@@ -53,8 +53,9 @@ class TextTest {
 
     @Test
     void textRefTest() {
-        assertEquals(SUCCESS, compareImages("text/text1.svg"));
-        assertEquals(SUCCESS, compareImages("text/text2.svg"));
+        // Batik doesn't apply kerning; the tolerance covers the resulting shift (measured 0.45% and 1.22%).
+        assertEquals(SUCCESS, compareImages("text/text1.svg", 0.7));
+        assertEquals(SUCCESS, compareImages("text/text2.svg", 1.8));
         assertEquals(SUCCESS, compareImages("text/text5.svg"));
         // Batik doesn't correctly implement rotation.
         assertDoesNotThrow(() -> renderJsvg("text/text3.svg"));

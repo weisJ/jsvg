@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,6 +26,9 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphMetrics;
 import java.awt.font.GlyphVector;
 import java.awt.font.LineMetrics;
+import java.awt.font.TextAttribute;
+import java.text.Bidi;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +43,8 @@ public final class AWTSVGFont implements SVGFont {
     private final @NotNull Font font;
     private final FontRenderContext frc = new FontRenderContext(null, true, true);
     private final HashMap<String, Glyph> glyphCache;
+    private final HashMap<String, Float> kerningCache = new HashMap<>();
+    private @Nullable Font kerningFont;
 
     private @Nullable LineMetrics lineMetrics;
     private float[] baselineOffsets;
@@ -62,6 +67,36 @@ public final class AWTSVGFont implements SVGFont {
         glyph = createGlyph(codepoint.toCharArray());
         glyphCache.put(codepoint, glyph);
         return glyph;
+    }
+
+    @Override
+    public float kerningAdjustment(@NotNull String leftCodepoint, @NotNull String rightCodepoint) {
+        String pair = leftCodepoint + '\0' + rightCodepoint;
+        Float cached = kerningCache.get(pair);
+        if (cached != null) return cached;
+        float kerning = computeKerningAdjustment(leftCodepoint, rightCodepoint);
+        kerningCache.put(pair, kerning);
+        return kerning;
+    }
+
+    private float computeKerningAdjustment(@NotNull String leftCodepoint, @NotNull String rightCodepoint) {
+        Glyph leftGlyph = codepointGlyph(leftCodepoint);
+        Glyph rightGlyph = codepointGlyph(rightCodepoint);
+        if (leftGlyph instanceof EmojiGlyph || rightGlyph instanceof EmojiGlyph) return 0;
+
+        char[] pair = (leftCodepoint + rightCodepoint).toCharArray();
+        if (Bidi.requiresBidi(pair, 0, pair.length)) return 0;
+
+        if (kerningFont == null) {
+            kerningFont = font.deriveFont(
+                    Collections.singletonMap(TextAttribute.KERNING, TextAttribute.KERNING_ON));
+        }
+        GlyphVector glyphVector = kerningFont.layoutGlyphVector(frc, pair, 0, pair.length,
+                Font.LAYOUT_LEFT_TO_RIGHT);
+        // Contextual shaping changed the glyphs; the advance difference is not a kern.
+        if (glyphVector.getNumGlyphs() != 2) return 0;
+        float kernedAdvance = (float) glyphVector.getGlyphPosition(2).getX();
+        return kernedAdvance - leftGlyph.advance() - rightGlyph.advance();
     }
 
     @Override

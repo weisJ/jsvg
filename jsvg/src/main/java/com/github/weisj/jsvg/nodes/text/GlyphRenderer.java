@@ -112,6 +112,7 @@ final class GlyphRenderer {
         textOutput.glyphRunBreak();
 
         List<String> codepoints = segment.codepoints();
+        String previousCodepoint = null;
         for (int i = 0, count = codepoints.size(); i < count; i++) {
             String codepoint = codepoints.get(i);
 
@@ -122,6 +123,12 @@ final class GlyphRenderer {
             if (i > 0 && !cursor.isCurrentGlyphAutoLayout()) {
                 textOutput.glyphRunBreak();
             }
+
+            // Explicitly positioned glyphs reset kerning.
+            if (previousCodepoint != null && cursor.isCurrentGlyphAutoLayout()) {
+                cursor.applyKerning(font.kerningAdjustment(previousCodepoint, codepoint));
+            }
+            previousCodepoint = codepoint;
 
             AffineTransform glyphTransform = cursor.advance(measure, glyph);
 

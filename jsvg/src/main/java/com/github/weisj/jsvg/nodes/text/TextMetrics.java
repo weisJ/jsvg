@@ -107,8 +107,13 @@ public final class TextMetrics {
         metrics.letterSpacingLength += whiteSpaceCount * letterSpacing;
         metrics.controllableLetterSpacingCount += whiteSpaceCount;
 
+        String previousCodepoint = null;
         for (String codepoint : segment.codepoints()) {
             metrics.glyphLength += font.codepointGlyph(codepoint).advance();
+            if (previousCodepoint != null) {
+                metrics.glyphLength += font.kerningAdjustment(previousCodepoint, codepoint);
+            }
+            previousCodepoint = codepoint;
         }
     }
 
