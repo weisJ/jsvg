@@ -237,7 +237,9 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> fontSize() {
-        return checkDirectory("text/font-size");
+        return checkDirectory("text/font-size", Set.of(
+                "negative-size.svg" // UB
+        ));
     }
 
     @TestFactory
