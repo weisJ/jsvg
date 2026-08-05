@@ -124,6 +124,12 @@ class ReSvgTestSuite {
 
     private record BundledFontSupport(@NotNull Map<String, Font> fonts) implements PlatformSupport {
         @Override
+        public float fontSize() {
+            // The reference images are rendered with resvg, whose default font size is 12.
+            return 12;
+        }
+
+        @Override
         public @Nullable ImageObserver imageObserver() {
             return null;
         }
