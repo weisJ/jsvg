@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,6 +48,13 @@ public interface SVGFont {
 
     @NotNull
     Glyph codepointGlyph(@NotNull String codepoint);
+
+    /**
+     * Horizontal kerning adjustment between two adjacent codepoints, usually {@code <= 0}.
+     */
+    default float kerningAdjustment(@NotNull String leftCodepoint, @NotNull String rightCodepoint) {
+        return 0;
+    }
 
     @NotNull
     String family();

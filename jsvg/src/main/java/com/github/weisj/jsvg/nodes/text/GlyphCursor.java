@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -137,6 +137,10 @@ class GlyphCursor {
 
     void advanceSpacing(float letterSpacing) {
         x += advancement.spacingAdvancement(letterSpacing);
+    }
+
+    void applyKerning(float kerning) {
+        x += advancement.kerningAdvancement(kerning);
     }
 
     private boolean currentGlyphHasXOverride() {

@@ -216,8 +216,6 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> fillOpacity() {
         return checkDirectory("painting/fill-opacity", Set.of(
-                // We don't do proper kerning
-                "on-text.svg",
                 // Needs investigation
                 "with-linearGradient.svg",
                 "with-opacity.svg"));
@@ -226,8 +224,6 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> strokeOpacity() {
         return checkDirectory("painting/stroke-opacity", Set.of(
-                // We don't do proper kerning
-                "on-text.svg",
                 // Needs investigation
                 "with-linearGradient.svg",
                 "with-opacity.svg"));

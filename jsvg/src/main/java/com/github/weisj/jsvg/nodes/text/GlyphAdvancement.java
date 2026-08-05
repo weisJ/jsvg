@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2023 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -84,6 +84,11 @@ final class GlyphAdvancement {
 
     float spacingAdvancement(float letterSpacing) {
         return letterSpacing * spacingAdjustment + absoluteSpacingAdjustment;
+    }
+
+    // Kerning is part of the glyph geometry and scales with it.
+    float kerningAdvancement(float kerning) {
+        return kerning * glyphAdjustment;
     }
 
     float glyphAdvancement(@NotNull Glyph glyph) {
