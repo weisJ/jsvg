@@ -36,8 +36,9 @@ public enum PredefinedFontSize implements HasMatchName, FontSize {
     xLarge("x-large", 3f / 2f),
     xxLarge("xx-large", 2f),
     xxxLarge("xxx-large", 3f),
-    larger(1.3f),
-    smaller(0.7f),
+    // CSS Fonts § font-size steps larger/smaller by ~1.2 (see resvg text/font-size/mixed-values.svg).
+    larger(1.2f),
+    smaller(1 / 1.2f),
     Number(0);
 
     private final @NotNull String matchName;
