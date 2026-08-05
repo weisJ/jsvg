@@ -92,6 +92,13 @@ public final class MeasurableFontSpec extends FontSpec {
         return emSize;
     }
 
+    /** Replaces the size with its computed value; children inherit it (CSS Fonts, font-size). */
+    public @NotNull MeasurableFontSpec withComputedSize(float size) {
+        Length computedSize = Unit.RAW.valueOf(size);
+        if (computedSize.equals(currentSize)) return this;
+        return new MeasurableFontSpec(families, style, sizeAdjust, stretch, currentWeight, computedSize);
+    }
+
     public @NotNull MeasurableFontSpec withFontSize(@Nullable FontSize size, @Nullable Length sizeAdjust) {
         if (size == null && sizeAdjust == null) return this;
         return new MeasurableFontSpec(families, style, sizeAdjust != null ? sizeAdjust : this.sizeAdjust, stretch,

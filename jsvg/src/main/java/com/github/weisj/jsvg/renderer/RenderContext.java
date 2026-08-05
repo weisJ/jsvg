@@ -239,6 +239,8 @@ public final class RenderContext {
         // records that em as the child's parentEm so later lookups (e.g. font()) resolve consistently.
         float em = newFontSpec.emSize(measureContext, measureContext.em());
         float ex = SVGFont.exFromEm(em);
+        // Bake the computed size so descendants don't re-resolve a relative value against their own em.
+        newFontSpec = newFontSpec.withComputedSize(em);
         MeasureContext newMeasureContext = measureContext.derive(viewBox, em, ex);
 
         if (establishRootMeasure == EstablishRootMeasure.YES) {
