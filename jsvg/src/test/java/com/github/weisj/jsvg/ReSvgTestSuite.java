@@ -233,6 +233,39 @@ class ReSvgTestSuite {
                 "with-opacity.svg"));
     }
 
+    @TestFactory
+    Collection<DynamicTest> defs() {
+        return checkDirectory("structure/defs", Set.of(
+                // Gradient color ramp differs from the reference. Needs investigation
+                "multiple-defs.svg",
+                "nested-defs.svg",
+                "out-of-order.svg",
+                "simple-case.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> style() {
+        return checkDirectory("structure/style", Set.of(
+                // @import of external stylesheets is not supported
+                "external-CSS.svg",
+                // We follow SVG 2, where geometry properties can be set via CSS
+                "non-presentational-attribute.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> styleAttribute() {
+        return checkDirectory("structure/style-attribute", Set.of(
+                // We follow SVG 2, where geometry properties can be set via CSS
+                "non-presentational-attribute.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> use() {
+        return checkDirectory("structure/use", Set.of(
+                // References into external documents are not supported
+                "xlink-to-an-external-file.svg"));
+    }
+
     private record ReSVGRefTest(@NotNull Path testFile) implements Executable {
 
         @Override
