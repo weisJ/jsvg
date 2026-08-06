@@ -68,7 +68,9 @@ public final class NodeRenderer {
             @NotNull RenderContext context, @NotNull Output output,
             @Nullable Instantiator instantiator) {
         try (Info info = createRenderInfo(node, context, output, instantiator)) {
-            if (info != null) node.renderWithSize(size, node.viewBox(info.context()), info.context(), info.output());
+            // Only a declared viewBox may introduce a scaling transform. Synthesizing one from the
+            // element's own size would wrongly scale content when the use-site size differs.
+            if (info != null) node.renderWithSize(size, node.declaredViewBox(), info.context(), info.output());
         }
     }
 
