@@ -202,7 +202,7 @@ public final class SVGDocumentBuilder {
         for (ParsedElement styleElement : styleElements) {
             styleElement.build(0);
             Style styleNode = (Style) styleElement.node();
-            styleNode.parseStyleSheet(cssParser, cssHints);
+            styleNode.parseStyleSheet(styleElement.attributeNode(), cssParser, cssHints);
             styleSheets.add(styleNode.styleSheet());
         }
     }
