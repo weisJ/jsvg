@@ -746,6 +746,7 @@ public final class AttributeNode {
                 .stream()
                 .filter(n -> type.isInstance(n.node()))
                 .map(n -> type.cast(n.nodeEnsuringBuildStatus(document().currentNestingDepth())))
+                .filter(n -> n != null)
                 .collect(Collectors.toList());
         for (T animateNode : animateNodes) {
             document().registerAnimatedElement(animateNode);

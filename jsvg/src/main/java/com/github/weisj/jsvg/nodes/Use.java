@@ -79,7 +79,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         return referencedNode;
     }
 
-    public void setReferencedNode(@NotNull SVGNode referencedNode) {
+    public void setReferencedNode(@Nullable SVGNode referencedNode) {
         this.referencedNode = referencedNode;
     }
 
