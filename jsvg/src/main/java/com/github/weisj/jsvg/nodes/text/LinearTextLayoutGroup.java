@@ -93,6 +93,7 @@ final class LinearTextLayoutGroup implements TextLayoutGroup {
         double offset = start == null
                 ? textAnchorOffset(parent.textAnchor(context), cursor.completeGlyphRunMetrics)
                 : 0;
+        textOutput.textAnchorOffset(offset);
         context.translate(output, -offset, 0);
         asSegment().renderSegmentWithoutLayout(cursor, context, output);
         context.translate(output, offset, 0);
