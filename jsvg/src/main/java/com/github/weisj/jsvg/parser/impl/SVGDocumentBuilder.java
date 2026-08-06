@@ -115,7 +115,8 @@ public final class SVGDocumentBuilder {
         if (parentElement != null) flushText(parentElement, true);
 
         @Nullable SVGNode newNode = nodeSupplier.create(tagName);
-        if (newNode == null) return false;
+        // Unknown elements aren't rendered, but their children must stay referencable (e.g. by <use>).
+        if (newNode == null) newNode = new UnknownElementNode(tagName);
 
         // SVG attributes are initially stored as plain strings; afterwards, some are converted to Parsed
         AttributeNode attributeNode = new AttributeNode(tagName, attributes, styleSheets);

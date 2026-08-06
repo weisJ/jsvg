@@ -221,7 +221,7 @@ public final class ParsedElement implements DomElement {
             int indexInParent, int indexAmongSiblingsWithSameTagName) {
         SVGNode freshNode = nodeSupplier.create(tagName());
         if (freshNode == null) {
-            throw new IllegalStateException("Cannot copy element <" + tagName() + ">");
+            freshNode = new UnknownElementNode(tagName());
         }
         // Fresh AttributeNode with an empty resolved-attribute map so build() re-runs the cascade.
         AttributeNode freshAttributes = attributeNode.copyForReparse();
