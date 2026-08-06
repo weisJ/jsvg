@@ -29,7 +29,11 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.logging.Logger;
+import com.github.weisj.jsvg.logging.Logger.Level;
+import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.nodes.SVGNode;
+import com.github.weisj.jsvg.nodes.Use;
 import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
@@ -39,6 +43,7 @@ import com.github.weisj.jsvg.parser.DomElement;
 import com.github.weisj.jsvg.parser.TextContent;
 
 public final class ParsedElement implements DomElement {
+    private static final Logger LOGGER = LogFactory.createLogger(ParsedElement.class);
 
     private enum BuildStatus {
         NOT_BUILT,
@@ -62,6 +67,7 @@ public final class ParsedElement implements DomElement {
 
     final CharacterDataParser characterDataParser;
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
+    private boolean partOfCycle = false;
     private int outgoingPaths = -1;
 
     ParsedElement(@Nullable String id,
@@ -182,10 +188,14 @@ public final class ParsedElement implements DomElement {
         return node;
     }
 
-    public @NotNull SVGNode nodeEnsuringBuildStatus(int depth) {
+    /** Returns null if resolving the node would close a reference cycle. */
+    public @Nullable SVGNode nodeEnsuringBuildStatus(int depth) {
         if (buildStatus == BuildStatus.IN_PROGRESS) {
+            // Referencing an element currently being built closes a cycle; treat as unresolvable.
             cyclicDependencyDetected();
-        } else if (buildStatus == BuildStatus.NOT_BUILT) {
+            return null;
+        }
+        if (buildStatus == BuildStatus.NOT_BUILT) {
             build(depth);
         }
         return node;
@@ -278,6 +288,9 @@ public final class ParsedElement implements DomElement {
     void build(int depth) {
         if (buildStatus == BuildStatus.FINISHED) return;
         if (buildStatus == BuildStatus.IN_PROGRESS) {
+            // A containment cycle: this element is building further up the stack and its reference
+            // (transitively) led back here. Its in-flight reference gets severed below.
+            partOfCycle = true;
             cyclicDependencyDetected();
             return;
         }
@@ -305,6 +318,10 @@ public final class ParsedElement implements DomElement {
 
         document().setCurrentNestingDepth(depth);
         node.build(attributeNode);
+        if (partOfCycle && node instanceof Use) {
+            // The reference resolved during node.build closes a cycle; sever it (SVG 1.1 § 5.6).
+            ((Use) node).setReferencedNode(null);
+        }
         buildStatus = BuildStatus.FINISHED;
     }
 
@@ -342,6 +359,6 @@ public final class ParsedElement implements DomElement {
     }
 
     private void cyclicDependencyDetected() {
-        throw new IllegalStateException("Cyclic dependency involving node '" + id + "' detected.");
+        LOGGER.log(Level.WARNING, () -> "Cyclic dependency involving node '" + id + "' detected.");
     }
 }

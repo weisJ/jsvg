@@ -52,9 +52,10 @@ class UseValidationTest {
     }
 
     @Test
-    void detectReferenceCycle() {
-        assertThrows(IllegalStateException.class, () -> tryLoad("parser/useCycle.svg"));
-        assertThrows(IllegalStateException.class, () -> tryLoad("parser/useCycleSelfReference.svg"));
+    void toleratesReferenceCycle() {
+        // Cyclic references are severed and render nothing instead of failing the document.
+        Assertions.assertDoesNotThrow(() -> tryLoad("parser/useCycle.svg"));
+        Assertions.assertDoesNotThrow(() -> tryLoad("parser/useCycleSelfReference.svg"));
     }
 
     @Test
