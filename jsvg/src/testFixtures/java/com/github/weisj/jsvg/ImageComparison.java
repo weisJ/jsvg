@@ -280,7 +280,7 @@ public final class ImageComparison {
         return compareImages(name, svgContent, DEFAULT_TOLERANCE);
     }
 
-    static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull CompareInfo compareInfo) {
+    public static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull CompareInfo compareInfo) {
         try {
             BufferedImage expected = compareInfo.expected.render(null);
             BufferedImage actual = compareInfo.actual.render(expected);

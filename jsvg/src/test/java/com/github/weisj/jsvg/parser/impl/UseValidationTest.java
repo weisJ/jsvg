@@ -21,6 +21,11 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
+import static com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -36,6 +41,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.ImageComparison;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.parser.LoaderContext;
 
 class UseValidationTest {
@@ -54,8 +61,14 @@ class UseValidationTest {
     @Test
     void toleratesReferenceCycle() {
         // Cyclic references are severed and render nothing instead of failing the document.
-        Assertions.assertDoesNotThrow(() -> tryLoad("parser/useCycle.svg"));
-        Assertions.assertDoesNotThrow(() -> tryLoad("parser/useCycleSelfReference.svg"));
+        assertRendersNothing("parser/useCycle.svg");
+        assertRendersNothing("parser/useCycleSelfReference.svg");
+    }
+
+    private static void assertRendersNothing(@NotNull String path) {
+        Assertions.assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("parser/useCycle_empty.svg"), RenderType.JSVG),
+                actual(new PathImageSource(path), RenderType.JSVG))));
     }
 
     @Test
