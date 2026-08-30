@@ -260,7 +260,7 @@ public interface SimpleSelector {
 
         @Override
         public @NotNull MatchResult matches(@NotNull ParsedElement targetElement) {
-            boolean caseSensitive = this.caseSensitive != null ? this.caseSensitive
+            boolean caseSensitiveWithDefault = this.caseSensitive != null ? this.caseSensitive
                     : StyleRuleMatcher.ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES.contains(name);
 
             String attributeValue = targetElement.attributeNode().declaredAttributes().get(name);
@@ -274,32 +274,35 @@ public interface SimpleSelector {
             switch (operator) { // since operator is non-null, value is also non-null
                 case EQUALS: { // [name=value]
                     return new MatchResult(
-                            caseSensitive ? attributeValue.equals(value) : attributeValue.equalsIgnoreCase(value),
+                            caseSensitiveWithDefault ? attributeValue.equals(value)
+                                    : attributeValue.equalsIgnoreCase(value),
                             false);
                 }
                 case INCLUDES: { // [name~=value]
                     return new MatchResult(Arrays.stream(attributeValue.split("\\s+"))
-                            .anyMatch(word -> caseSensitive ? word.equals(value) : word.equalsIgnoreCase(value)),
+                            .anyMatch(word -> caseSensitiveWithDefault ? word.equals(value)
+                                    : word.equalsIgnoreCase(value)),
                             false);
                 }
                 case DASH_MATCH: { // [name|=value]
-                    return new MatchResult(caseSensitive
+                    return new MatchResult(caseSensitiveWithDefault
                             ? attributeValue.equals(value) || attributeValue.startsWith(value + "-")
                             : attributeValue.equalsIgnoreCase(value)
                                     || startsWithIgnoreCase(attributeValue, value + "-"),
                             false);
                 }
                 case PREFIX: { // [name^=value]
-                    return new MatchResult(caseSensitive ? attributeValue.startsWith(value)
+                    return new MatchResult(caseSensitiveWithDefault ? attributeValue.startsWith(value)
                             : startsWithIgnoreCase(attributeValue, value), false);
                 }
                 case SUFFIX: { // [name$=value]
                     return new MatchResult(
-                            caseSensitive ? attributeValue.endsWith(value) : endsWithIgnoreCase(attributeValue, value),
+                            caseSensitiveWithDefault ? attributeValue.endsWith(value)
+                                    : endsWithIgnoreCase(attributeValue, value),
                             false);
                 }
                 case SUBSTRING: { // [name*=value]
-                    return new MatchResult(caseSensitive
+                    return new MatchResult(caseSensitiveWithDefault
                             ? attributeValue.contains(value)
                             : attributeValue.toLowerCase(Locale.ENGLISH).contains(value.toLowerCase(Locale.ENGLISH)),
                             false);
