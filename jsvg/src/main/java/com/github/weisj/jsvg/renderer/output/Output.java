@@ -26,6 +26,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -84,6 +85,15 @@ public interface Output {
      */
     @Deprecated
     default void setClip(@Nullable Shape shape) {}
+
+    /**
+     * @deprecated No longer consulted; the default font size is taken from
+     *             {@link com.github.weisj.jsvg.renderer.PlatformSupport#fontSize()}.
+     */
+    @Deprecated
+    default Optional<Float> contextFontSize() {
+        return Optional.empty();
+    }
 
     @NotNull
     Output createChild();
