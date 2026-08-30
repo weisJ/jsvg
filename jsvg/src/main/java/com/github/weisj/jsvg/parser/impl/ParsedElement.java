@@ -173,7 +173,6 @@ public final class ParsedElement implements DomElement {
 
     /** Preceding element sibling, or null if first child */
     public @Nullable ParsedElement previousSibling() {
-        ParsedElement parent = parent();
         if (parent == null) {
             return null;
         }
