@@ -49,7 +49,7 @@ public final class TextMetrics {
     }
 
     static @NotNull TextMetrics computeTextMetrics(@NotNull TextLayoutGroup layoutGroup,
-            @NotNull RenderContext context, @NotNull UseTextLengthForCalculation flag) {
+            @NotNull RenderContext context, @NotNull UseTextLengthForCalculation flag, boolean applyKerning) {
         if (flag == UseTextLengthForCalculation.YES) {
             Length fixedLength = layoutGroup.fixedLength();
             if (fixedLength != null) {
@@ -72,9 +72,10 @@ public final class TextMetrics {
             }
             if (segment instanceof StringTextSegment) {
                 StringTextSegment stringTextSegment = (StringTextSegment) segment;
-                accumulateSegmentMetrics(layoutGroup, metrics, stringTextSegment, font, letterSpacing, index);
+                accumulateSegmentMetrics(layoutGroup, metrics, stringTextSegment, font, letterSpacing, applyKerning,
+                        index);
             } else if (segment instanceof RenderableSegment) {
-                accumulateRenderableSegmentMetrics((RenderableSegment) segment, metrics, currentContext);
+                accumulateRenderableSegmentMetrics((RenderableSegment) segment, metrics, currentContext, applyKerning);
             } else {
                 throw new IllegalStateException("Unexpected segment " + segment);
             }
@@ -85,8 +86,9 @@ public final class TextMetrics {
     }
 
     private static void accumulateRenderableSegmentMetrics(@NotNull RenderableSegment segment,
-            @NotNull IntermediateTextMetrics metrics, @NotNull RenderContext currentContext) {
-        TextMetrics textMetrics = segment.computeTextMetrics(currentContext, UseTextLengthForCalculation.YES);
+            @NotNull IntermediateTextMetrics metrics, @NotNull RenderContext currentContext, boolean applyKerning) {
+        TextMetrics textMetrics =
+                segment.computeTextMetrics(currentContext, UseTextLengthForCalculation.YES, applyKerning);
         metrics.letterSpacingLength += textMetrics.letterSpacingLength();
         metrics.glyphLength += textMetrics.glyphLength();
         metrics.glyphCount += textMetrics.glyphCount();
@@ -97,7 +99,7 @@ public final class TextMetrics {
     private static void accumulateSegmentMetrics(@NotNull TextLayoutGroup layoutGroup,
             @NotNull IntermediateTextMetrics metrics,
             @NotNull StringTextSegment segment,
-            @NotNull SVGFont font, float letterSpacing, int index) {
+            @NotNull SVGFont font, float letterSpacing, boolean applyKerning, int index) {
         int glyphCount = segment.codepoints().size();
 
         boolean lastSegment = index == layoutGroup.segments().size() - 1;
@@ -110,7 +112,7 @@ public final class TextMetrics {
         String previousCodepoint = null;
         for (String codepoint : segment.codepoints()) {
             metrics.glyphLength += font.codepointGlyph(codepoint).advance();
-            if (previousCodepoint != null) {
+            if (applyKerning && previousCodepoint != null) {
                 metrics.glyphLength += font.kerningAdjustment(previousCodepoint, codepoint);
             }
             previousCodepoint = codepoint;

@@ -125,7 +125,7 @@ final class GlyphRenderer {
             }
 
             // Explicitly positioned glyphs reset kerning.
-            if (previousCodepoint != null && cursor.isCurrentGlyphAutoLayout()) {
+            if (cursor.kerningEnabled && previousCodepoint != null && cursor.isCurrentGlyphAutoLayout()) {
                 cursor.applyKerning(font.kerningAdjustment(previousCodepoint, codepoint));
             }
             previousCodepoint = codepoint;

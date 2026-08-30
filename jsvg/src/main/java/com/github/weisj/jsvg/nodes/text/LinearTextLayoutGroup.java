@@ -85,6 +85,7 @@ final class LinearTextLayoutGroup implements TextLayoutGroup {
     public @NotNull Point2D renderText(@Nullable Point2D start, @NotNull RenderContext context,
             @NotNull Output output) {
         GlyphCursor cursor = createCursor(start);
+        cursor.kerningEnabled = output.isTextKerningEnabled();
         TextOutput textOutput = output.textOutput();
         textOutput.beginText();
         asSegment().prepareSegmentForRendering(cursor, context, textOutput);

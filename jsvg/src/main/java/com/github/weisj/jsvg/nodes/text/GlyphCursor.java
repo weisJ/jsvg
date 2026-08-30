@@ -34,6 +34,7 @@ class GlyphCursor {
 
     public final @NotNull AbstractGlyphRun.Metrics completeGlyphRunMetrics;
     protected @NotNull GlyphAdvancement advancement = GlyphAdvancement.defaultAdvancement();
+    protected boolean kerningEnabled = true;
 
     protected float x;
     protected float y;
@@ -71,6 +72,7 @@ class GlyphCursor {
     GlyphCursor(@NotNull GlyphCursor c) {
         this(c.x, c.y, c.transform, c.completeGlyphRunMetrics);
         this.advancement = c.advancement;
+        this.kerningEnabled = c.kerningEnabled;
         this.glyphOffset = 0;
         this.xLocations = c.xLocations;
         this.xOff = c.xOff;

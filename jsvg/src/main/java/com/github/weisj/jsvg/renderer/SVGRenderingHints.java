@@ -32,6 +32,7 @@ public final class SVGRenderingHints {
     private static final int P_KEY_SOFT_CLIPPING = 2;
     private static final int P_KEY_CACHE_OFFSCREEN_IMAGE = 3;
     private static final int P_KEY_MASK_CLIP_RENDERING = 4;
+    private static final int P_KEY_TEXT_KERNING = 5;
 
     public static final RenderingHints.Key KEY_IMAGE_ANTIALIASING = new Key(P_KEY_IMAGE_ANTIALIASING);
     public static final Object VALUE_IMAGE_ANTIALIASING_ON = Value.ON;
@@ -49,6 +50,11 @@ public final class SVGRenderingHints {
     public static final RenderingHints.Key KEY_CACHE_OFFSCREEN_IMAGE = new Key(P_KEY_CACHE_OFFSCREEN_IMAGE);
     public static final Object VALUE_USE_CACHE = Value.ON;
     public static final Object VALUE_NO_CACHE = Value.OFF;
+
+    // Default font kerning
+    public static final RenderingHints.Key KEY_TEXT_KERNING = new Key(P_KEY_TEXT_KERNING);
+    public static final Object VALUE_TEXT_KERNING_ON = Value.ON;
+    public static final Object VALUE_TEXT_KERNING_OFF = Value.OFF;
 
     private static final class Key extends RenderingHints.Key {
         private Key(int privateKey) {
