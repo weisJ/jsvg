@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.css.data;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,9 +40,10 @@ public final class Declaration implements DeclarationListItem {
     private final @NotNull List<@NotNull ComponentValue> value;
     private final boolean important;
 
+    /** Takes ownership of {@code value}. */
     public Declaration(@NotNull String name, @NotNull List<@NotNull ComponentValue> value, boolean important) {
         this.name = name;
-        this.value = Collections.unmodifiableList(new ArrayList<>(value));
+        this.value = value;
         this.important = important;
     }
 

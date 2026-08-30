@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.css.data;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,19 +37,20 @@ public final class StyleRule {
 
     private final @NotNull ComplexSelector selector;
     // NormalizedProperty carries a mutable sourceOrder set once at registration.
-    private final @NotNull List<@NotNull NormalizedProperty> declarations;
+    private final @NotNull List<? extends @NotNull NormalizedProperty> declarations;
 
+    /** Takes ownership of {@code declarations}. */
     public StyleRule(@NotNull ComplexSelector selector,
-            @NotNull List<@NotNull NormalizedProperty> declarations) {
+            @NotNull List<? extends @NotNull NormalizedProperty> declarations) {
         this.selector = selector;
-        this.declarations = Collections.unmodifiableList(new ArrayList<>(declarations));
+        this.declarations = declarations;
     }
 
     public @NotNull ComplexSelector selector() {
         return selector;
     }
 
-    public @NotNull List<@NotNull NormalizedProperty> declarations() {
+    public @NotNull List<? extends @NotNull NormalizedProperty> declarations() {
         return declarations;
     }
 

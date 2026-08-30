@@ -641,7 +641,7 @@ public final class AttributeParser {
     }
 
     /** The sole non-whitespace token, or {@code null} if there are zero or several. */
-    public static @Nullable ComponentValue singleToken(@NotNull List<@NotNull ComponentValue> tokens) {
+    public static @Nullable ComponentValue singleToken(@NotNull List<? extends @NotNull ComponentValue> tokens) {
         ComponentValue found = null;
         for (ComponentValue token : tokens) {
             if (token == Token.Static.WHITESPACE) continue;
@@ -651,7 +651,7 @@ public final class AttributeParser {
         return found;
     }
 
-    public static @Nullable String identOf(@NotNull List<@NotNull ComponentValue> tokens) {
+    public static @Nullable String identOf(@NotNull List<? extends @NotNull ComponentValue> tokens) {
         ComponentValue token = singleToken(tokens);
         return token instanceof Token.Ident ? ((Token.Ident) token).name() : null;
     }

@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.css.data;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,13 +35,14 @@ import com.github.weisj.jsvg.parser.css.impl.phase3ruleparse.CssNormalizer;
  */
 public final class StyleRuleList {
 
-    private final @NotNull List<@NotNull StyleRule> rules;
+    private final @NotNull List<? extends @NotNull StyleRule> rules;
 
-    public StyleRuleList(@NotNull List<@NotNull StyleRule> rules) {
-        this.rules = Collections.unmodifiableList(new ArrayList<>(rules));
+    /** Takes ownership of {@code rules}. */
+    public StyleRuleList(@NotNull List<? extends @NotNull StyleRule> rules) {
+        this.rules = rules;
     }
 
-    public @NotNull List<@NotNull StyleRule> rules() {
+    public @NotNull List<? extends @NotNull StyleRule> rules() {
         return rules;
     }
 

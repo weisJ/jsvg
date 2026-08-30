@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.parser.css.impl.phase2basicparse;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -145,11 +144,11 @@ public final class BasicParser {
         while (true) {
             ComponentValue cv = parser.componentValueCursor.next();
             if (isEof(cv)) {
-                result.add(Collections.unmodifiableList(current));
+                result.add(current);
                 return result;
             }
             if (isPreservedTokenOf(cv, TokenType.COMMA)) {
-                result.add(Collections.unmodifiableList(current));
+                result.add(current);
                 current = new ArrayList<>();
                 continue;
             }

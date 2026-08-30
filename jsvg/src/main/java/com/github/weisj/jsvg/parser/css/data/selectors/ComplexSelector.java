@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.css.data.selectors;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,12 +38,13 @@ import com.google.errorprone.annotations.Immutable;
 @Immutable
 public final class ComplexSelector {
 
-    private final @NotNull List<@NotNull CompoundSelector> sequences;
-    private final @NotNull List<@NotNull Combinator> combinators;
+    private final @NotNull List<? extends @NotNull CompoundSelector> sequences;
+    private final @NotNull List<? extends @NotNull Combinator> combinators;
     private final @NotNull Specificity specificity;
 
-    public ComplexSelector(@NotNull List<@NotNull CompoundSelector> sequences,
-            @NotNull List<@NotNull Combinator> combinators) {
+    /** Takes ownership of {@code sequences} and {@code combinators}. */
+    public ComplexSelector(@NotNull List<? extends @NotNull CompoundSelector> sequences,
+            @NotNull List<? extends @NotNull Combinator> combinators) {
         if (sequences.isEmpty()) {
             throw new IllegalArgumentException("complex selector must contain at least one compound selector");
         }
@@ -54,16 +53,16 @@ public final class ComplexSelector {
                     "combinators.size() must equal sequences.size() - 1 (got "
                             + combinators.size() + " and " + sequences.size() + ")");
         }
-        this.sequences = Collections.unmodifiableList(new ArrayList<>(sequences));
-        this.combinators = Collections.unmodifiableList(new ArrayList<>(combinators));
+        this.sequences = sequences;
+        this.combinators = combinators;
         this.specificity = computeSpecificity();
     }
 
-    public @NotNull List<@NotNull CompoundSelector> sequences() {
+    public @NotNull List<? extends @NotNull CompoundSelector> sequences() {
         return sequences;
     }
 
-    public @NotNull List<@NotNull Combinator> combinators() {
+    public @NotNull List<? extends @NotNull Combinator> combinators() {
         return combinators;
     }
 

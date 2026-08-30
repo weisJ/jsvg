@@ -78,7 +78,7 @@ public class StyleRuleMatcher {
 
     /** Buckets the rule by the most selective simple selector of its rightmost compound selector. */
     public void add(@NotNull StyleRule rule) {
-        List<SimpleSelector> lastCompoundSelector = rule.selector().rightmostSequence().simpleSelectors();
+        List<? extends SimpleSelector> lastCompoundSelector = rule.selector().rightmostSequence().simpleSelectors();
         // lastCompoundSelector list is non-empty, so it always has a maximum
         SimpleSelector mostSelective = lastCompoundSelector.stream().max(MOST_SELECTIVE_SELECTOR_COMPARATOR).get();
         getOrCreateBucket(mostSelective).add(rule);

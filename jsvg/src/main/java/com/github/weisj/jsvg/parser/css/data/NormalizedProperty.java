@@ -40,6 +40,7 @@ public final class NormalizedProperty {
     private final boolean important;
     private int sourceOrder;
 
+    /** Takes ownership of {@code value}. */
     public NormalizedProperty(@NotNull String name, @NotNull List<@NotNull ComponentValue> value, boolean important) {
         this.name = name;
         this.value = value;

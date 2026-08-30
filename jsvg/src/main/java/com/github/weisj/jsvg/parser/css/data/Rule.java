@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.css.data;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,17 +42,18 @@ public interface Rule {
     /** A qualified rule (§5.4.2): {@code <prelude> { <block> }}. In SVG, this is a style rule. */
     @Immutable
     final class QualifiedRule implements Rule {
-        private final @NotNull List<@NotNull ComponentValue> prelude;
+        private final @NotNull List<? extends @NotNull ComponentValue> prelude;
         private final @NotNull ComponentValue.SimpleBlock.Brace block;
 
-        public QualifiedRule(@NotNull List<@NotNull ComponentValue> prelude,
+        /** Takes ownership of {@code prelude}. */
+        public QualifiedRule(@NotNull List<? extends @NotNull ComponentValue> prelude,
                 @NotNull ComponentValue.SimpleBlock.Brace block) {
-            this.prelude = Collections.unmodifiableList(new ArrayList<>(prelude));
+            this.prelude = prelude;
             this.block = block;
         }
 
         /** Component values between the start of the rule and the {@code {} block. The selector list, unparsed. */
-        public @NotNull List<@NotNull ComponentValue> prelude() {
+        public @NotNull List<? extends @NotNull ComponentValue> prelude() {
             return prelude;
         }
 
@@ -86,14 +85,15 @@ public interface Rule {
     @Immutable
     final class AtRule implements Rule, DeclarationListItem {
         private final @NotNull String name;
-        private final @NotNull List<@NotNull ComponentValue> prelude;
+        private final @NotNull List<? extends @NotNull ComponentValue> prelude;
         private final @Nullable ComponentValue.SimpleBlock.Brace block;
 
+        /** Takes ownership of {@code prelude}. */
         public AtRule(@NotNull String name,
-                @NotNull List<@NotNull ComponentValue> prelude,
+                @NotNull List<? extends @NotNull ComponentValue> prelude,
                 @Nullable ComponentValue.SimpleBlock.Brace block) {
             this.name = name;
-            this.prelude = Collections.unmodifiableList(new ArrayList<>(prelude));
+            this.prelude = prelude;
             this.block = block;
         }
 
@@ -103,7 +103,7 @@ public interface Rule {
         }
 
         /** Component values between the at-keyword and the block (or terminating {@code ;}). */
-        public @NotNull List<@NotNull ComponentValue> prelude() {
+        public @NotNull List<? extends @NotNull ComponentValue> prelude() {
             return prelude;
         }
 

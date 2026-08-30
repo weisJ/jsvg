@@ -98,7 +98,7 @@ public final class CssNormalizer {
             return Stream.empty();
         }
 
-        Stream<ComplexSelector> supportedSelectors = selectors.selectors().stream()
+        Stream<? extends ComplexSelector> supportedSelectors = selectors.selectors().stream()
                 .filter(CssNormalizer::isSupported);
 
         return supportedSelectors.map(complexSelector -> new StyleRule(complexSelector, supportedDeclarations));
@@ -123,7 +123,7 @@ public final class CssNormalizer {
             return Stream.empty();
         }
         // recurse into @media block contents
-        List<ComponentValue> blockContents = atRule.block().value();
+        List<? extends ComponentValue> blockContents = atRule.block().value();
         List<Rule> parsedRules = BasicParser.parseListOfRules(BasicParserInput.fromComponentValues(blockContents));
         return normalizeStyleSheet(parsedRules.stream(), hints, false);
     }
@@ -168,7 +168,7 @@ public final class CssNormalizer {
     }
 
     /** Short, single-line description of a component-value list, for log messages. */
-    private static @NotNull String summarize(@NotNull List<@NotNull ComponentValue> values) {
+    private static @NotNull String summarize(@NotNull List<? extends @NotNull ComponentValue> values) {
         StringBuilder sb = new StringBuilder();
         for (ComponentValue cv : values) {
             sb.append(cv);

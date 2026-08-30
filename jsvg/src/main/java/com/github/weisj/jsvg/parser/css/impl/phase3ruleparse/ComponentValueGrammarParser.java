@@ -90,7 +90,7 @@ public class ComponentValueGrammarParser {
     }
 
     public static @NotNull List<@NotNull ComponentValue> stripWhitespace(
-            @NotNull List<@NotNull ComponentValue> in) {
+            @NotNull List<? extends @NotNull ComponentValue> in) {
         return in.stream()
                 .filter(v -> v != Token.Static.WHITESPACE)
                 .collect(Collectors.toList());
