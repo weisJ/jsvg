@@ -60,7 +60,7 @@ public final class SVGDocumentBuilder {
     private final @NotNull List<@NotNull ParsedElement> styleElements = new ArrayList<>();
     private final @NotNull StyleSheets styleSheets = new StyleSheets();
 
-    private final static class ParsedElementAnnotated {
+    private static final class ParsedElementAnnotated {
         public final @NotNull ParsedElement element;
         /**
          * Number of children of this element, grouped by their tag name. Used to compute

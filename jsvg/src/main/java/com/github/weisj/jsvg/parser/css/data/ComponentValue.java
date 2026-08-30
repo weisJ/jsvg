@@ -65,7 +65,7 @@ public interface ComponentValue {
 
         /** A {@code {...}} curly-brace simple block. Delimits qualified-rule and at-rule bodies. */
         @Immutable
-        public final static class Brace extends SimpleBlock {
+        public static final class Brace extends SimpleBlock {
             public Brace(@NotNull List<? extends @NotNull ComponentValue> value) {
                 super(value);
             }
@@ -95,7 +95,7 @@ public interface ComponentValue {
 
         /** A {@code [...]} square-bracket simple block. */
         @Immutable
-        public final static class Bracket extends SimpleBlock {
+        public static final class Bracket extends SimpleBlock {
             public Bracket(@NotNull List<? extends @NotNull ComponentValue> value) {
                 super(value);
             }
@@ -125,7 +125,7 @@ public interface ComponentValue {
 
         /** A {@code (...)} round-bracket simple block. */
         @Immutable
-        public final static class Paren extends SimpleBlock {
+        public static final class Paren extends SimpleBlock {
             public Paren(@NotNull List<? extends @NotNull ComponentValue> value) {
                 super(value);
             }
