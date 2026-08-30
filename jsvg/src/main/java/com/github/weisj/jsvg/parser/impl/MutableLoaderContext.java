@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +52,7 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     private @NotNull ElementLoader elementLoader = DEFAULT_ELEMENT_LOADER;
     private @NotNull ResourcePolicy resourcePolicy = ResourcePolicy.DENY_EXTERNAL;
     private @NotNull DocumentLimits documentLimits = DocumentLimits.DEFAULT;
-    private @NotNull CssHints cssHints = CssHints.DEFAULT;
+    private @ApiStatus.Experimental @NotNull CssHints cssHints = CssHints.DEFAULT;
 
     public static @NotNull MutableLoaderContext createDefault() {
         return new MutableLoaderContext();
@@ -92,6 +93,7 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
         return documentLimits;
     }
 
+    @ApiStatus.Experimental
     @Override
     public @NotNull CssHints cssHints() {
         return cssHints;
@@ -139,6 +141,7 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
         return this;
     }
 
+    @ApiStatus.Experimental
     @Override
     public @NotNull Builder cssHints(@NotNull CssHints cssHints) {
         this.cssHints = cssHints;
