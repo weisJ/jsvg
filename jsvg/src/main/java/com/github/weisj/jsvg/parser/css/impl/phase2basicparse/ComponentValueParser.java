@@ -170,7 +170,7 @@ interface ComponentValueCursor {
 
     /** Stream of {@link ComponentValue} -> Stream of {@link ComponentValue} */
     final class PassThroughParser implements ComponentValueCursor {
-        private final @NotNull List<@NotNull ComponentValue> values;
+        private final @NotNull List<? extends @NotNull ComponentValue> values;
         private int index = -1;
 
         public PassThroughParser(@NotNull BasicParserInput.ComponentValuesInput input) {

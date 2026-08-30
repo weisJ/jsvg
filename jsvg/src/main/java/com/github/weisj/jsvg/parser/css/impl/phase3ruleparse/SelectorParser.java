@@ -46,10 +46,10 @@ import com.github.weisj.jsvg.parser.css.data.selectors.SimpleSelector;
  */
 public final class SelectorParser {
 
-    private final @NotNull List<@NotNull ComponentValue> input;
+    private final @NotNull List<? extends @NotNull ComponentValue> input;
     private int pos;
 
-    public SelectorParser(@NotNull final List<@NotNull ComponentValue> input) {
+    public SelectorParser(@NotNull final List<? extends @NotNull ComponentValue> input) {
         this.input = input;
     }
 
@@ -178,7 +178,7 @@ public final class SelectorParser {
 
     /** Attribute selector: parses the contents of a {@code [...]} {@link ComponentValue.SimpleBlock.Bracket}. */
     private static @Nullable SimpleSelector.Attribute parseAttributeSelector(
-            @NotNull List<@NotNull ComponentValue> contents) {
+            @NotNull List<? extends @NotNull ComponentValue> contents) {
         int p = 0;
         p = skipWs(contents, p);
         if (p >= contents.size() || !isPreservedTokenOf(contents.get(p), TokenType.IDENT)) return null;
@@ -342,7 +342,7 @@ public final class SelectorParser {
     }
 
     /** Parses the {@code <an+b>} microsyntax (css-syntax-3 §"The An+B microsyntax"). Returns {@code {a, b}} or null. */
-    private static int @Nullable [] parseAnB(@NotNull List<@NotNull ComponentValue> values) {
+    private static int @Nullable [] parseAnB(@NotNull List<? extends @NotNull ComponentValue> values) {
         int p = skipWs(values, 0);
         if (p >= values.size()) return null;
         ComponentValue first = values.get(p);
@@ -425,7 +425,7 @@ public final class SelectorParser {
     }
 
     // optional trailing b; returns 0 if absent, null if malformed
-    private static @Nullable Integer trailingB(@NotNull List<@NotNull ComponentValue> values, int p) {
+    private static @Nullable Integer trailingB(@NotNull List<? extends @NotNull ComponentValue> values, int p) {
         int q = skipWs(values, p);
         if (q >= values.size()) return 0;
         ComponentValue t = values.get(q);
@@ -453,7 +453,7 @@ public final class SelectorParser {
         return Integer.parseInt(s.substring(start));
     }
 
-    private static boolean atEnd(@NotNull List<@NotNull ComponentValue> values, int p) {
+    private static boolean atEnd(@NotNull List<? extends @NotNull ComponentValue> values, int p) {
         return skipWs(values, p) >= values.size();
     }
 
@@ -467,7 +467,7 @@ public final class SelectorParser {
         }
     }
 
-    private static int skipWs(@NotNull List<@NotNull ComponentValue> list, int p) {
+    private static int skipWs(@NotNull List<? extends @NotNull ComponentValue> list, int p) {
         while (p < list.size() && isPreservedTokenOf(list.get(p), TokenType.WHITESPACE))
             p++;
         return p;

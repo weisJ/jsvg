@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.css.data.selectors;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,16 +38,17 @@ import com.google.errorprone.annotations.Immutable;
 @Immutable
 public final class SelectorList {
 
-    private final @NotNull List<@NotNull ComplexSelector> selectors;
+    private final @NotNull List<? extends @NotNull ComplexSelector> selectors;
 
-    public SelectorList(@NotNull List<@NotNull ComplexSelector> selectors) {
+    /** Takes ownership of {@code selectors}. */
+    public SelectorList(@NotNull List<? extends @NotNull ComplexSelector> selectors) {
         if (selectors.isEmpty()) {
             throw new IllegalArgumentException("selector list must contain at least one selector");
         }
-        this.selectors = Collections.unmodifiableList(new ArrayList<>(selectors));
+        this.selectors = selectors;
     }
 
-    public @NotNull List<@NotNull ComplexSelector> selectors() {
+    public @NotNull List<? extends @NotNull ComplexSelector> selectors() {
         return selectors;
     }
 

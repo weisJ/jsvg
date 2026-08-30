@@ -95,7 +95,7 @@ public final class MediaAtRuleConditionEvaluator {
     }
 
     /** @return {@code true} if the prelude matches; {@code false} if it does not or any query is malformed. */
-    public static boolean matches(@NotNull List<@NotNull ComponentValue> prelude, @NotNull CssHints hints) {
+    public static boolean matches(@NotNull List<? extends @NotNull ComponentValue> prelude, @NotNull CssHints hints) {
         List<List<ComponentValue>> queries = BasicParser.parseCommaSeparatedListOfComponentValues(
                 BasicParserInput.fromComponentValues(ComponentValueGrammarParser.stripWhitespace(prelude)));
         if (queries.isEmpty()) {

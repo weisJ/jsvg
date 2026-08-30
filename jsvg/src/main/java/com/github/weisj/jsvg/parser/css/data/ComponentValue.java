@@ -21,9 +21,7 @@
  */
 package com.github.weisj.jsvg.parser.css.data;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -53,21 +51,22 @@ public interface ComponentValue {
     @Immutable
     abstract class SimpleBlock implements ComponentValue {
 
-        protected final @NotNull List<@NotNull ComponentValue> value;
+        protected final @NotNull List<? extends @NotNull ComponentValue> value;
 
-        protected SimpleBlock(@NotNull List<@NotNull ComponentValue> value) {
-            this.value = Collections.unmodifiableList(new ArrayList<>(value));
+        /** Takes ownership of {@code value}. */
+        protected SimpleBlock(@NotNull List<? extends @NotNull ComponentValue> value) {
+            this.value = value;
         }
 
         /** Component values inside the block, in source order. */
-        public final @NotNull List<@NotNull ComponentValue> value() {
+        public final @NotNull List<? extends @NotNull ComponentValue> value() {
             return value;
         }
 
         /** A {@code {...}} curly-brace simple block. Delimits qualified-rule and at-rule bodies. */
         @Immutable
         public final static class Brace extends SimpleBlock {
-            public Brace(@NotNull List<@NotNull ComponentValue> value) {
+            public Brace(@NotNull List<? extends @NotNull ComponentValue> value) {
                 super(value);
             }
 
@@ -97,7 +96,7 @@ public interface ComponentValue {
         /** A {@code [...]} square-bracket simple block. */
         @Immutable
         public final static class Bracket extends SimpleBlock {
-            public Bracket(@NotNull List<@NotNull ComponentValue> value) {
+            public Bracket(@NotNull List<? extends @NotNull ComponentValue> value) {
                 super(value);
             }
 
@@ -127,7 +126,7 @@ public interface ComponentValue {
         /** A {@code (...)} round-bracket simple block. */
         @Immutable
         public final static class Paren extends SimpleBlock {
-            public Paren(@NotNull List<@NotNull ComponentValue> value) {
+            public Paren(@NotNull List<? extends @NotNull ComponentValue> value) {
                 super(value);
             }
 
@@ -160,18 +159,19 @@ public interface ComponentValue {
     @Immutable
     final class FunctionBlock implements ComponentValue {
         private final @NotNull String name;
-        private final @NotNull List<@NotNull ComponentValue> value;
+        private final @NotNull List<? extends @NotNull ComponentValue> value;
 
-        public FunctionBlock(@NotNull String name, @NotNull List<@NotNull ComponentValue> value) {
+        /** Takes ownership of {@code value}. */
+        public FunctionBlock(@NotNull String name, @NotNull List<? extends @NotNull ComponentValue> value) {
             this.name = name;
-            this.value = Collections.unmodifiableList(new ArrayList<>(value));
+            this.value = value;
         }
 
         public @NotNull String name() {
             return name;
         }
 
-        public @NotNull List<@NotNull ComponentValue> value() {
+        public @NotNull List<? extends @NotNull ComponentValue> value() {
             return value;
         }
 

@@ -38,7 +38,7 @@ public interface BasicParserInput {
         return new StringInput(input);
     }
 
-    static BasicParserInput fromComponentValues(@NotNull List<@NotNull ComponentValue> input) {
+    static BasicParserInput fromComponentValues(@NotNull List<? extends @NotNull ComponentValue> input) {
         return new ComponentValuesInput(input);
     }
 
@@ -67,9 +67,9 @@ public interface BasicParserInput {
         }
     }
     class ComponentValuesInput implements BasicParserInput {
-        public final @NotNull List<@NotNull ComponentValue> values;
+        public final @NotNull List<? extends @NotNull ComponentValue> values;
 
-        private ComponentValuesInput(@NotNull List<@NotNull ComponentValue> values) {
+        private ComponentValuesInput(@NotNull List<? extends @NotNull ComponentValue> values) {
             this.values = values;
         }
     }

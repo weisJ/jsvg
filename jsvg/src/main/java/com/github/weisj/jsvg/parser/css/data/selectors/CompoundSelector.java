@@ -21,8 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.css.data.selectors;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,16 +36,17 @@ import com.google.errorprone.annotations.Immutable;
 @Immutable
 public final class CompoundSelector {
 
-    private final @NotNull List<@NotNull SimpleSelector> simpleSelectors;
+    private final @NotNull List<? extends @NotNull SimpleSelector> simpleSelectors;
 
-    public CompoundSelector(@NotNull List<@NotNull SimpleSelector> simpleSelectors) {
+    /** Takes ownership of {@code simpleSelectors}. */
+    public CompoundSelector(@NotNull List<? extends @NotNull SimpleSelector> simpleSelectors) {
         if (simpleSelectors.isEmpty()) {
             throw new IllegalArgumentException("compound selector must contain at least one simple selector");
         }
-        this.simpleSelectors = Collections.unmodifiableList(new ArrayList<>(simpleSelectors));
+        this.simpleSelectors = simpleSelectors;
     }
 
-    public @NotNull List<@NotNull SimpleSelector> simpleSelectors() {
+    public @NotNull List<? extends @NotNull SimpleSelector> simpleSelectors() {
         return simpleSelectors;
     }
 
