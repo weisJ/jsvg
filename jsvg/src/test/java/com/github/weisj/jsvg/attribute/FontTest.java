@@ -72,7 +72,8 @@ class FontTest {
     void checkFontParsing() {
         String fontName = FontResolver.supportedFonts().getFirst();
         MeasurableFontSpec fontSpec = createFontSpec(
-                entry("font-family", fontName),
+                // Quoted: system names like macOS ".AppleSystemUIFont" aren't valid <custom-ident>s.
+                entry("font-family", '"' + fontName + '"'),
                 entry("font-size", "3em"));
         SVGFont font = FontResolver.resolveWithoutCache(fontSpec, MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
         Assertions.assertEquals(fontName, font.family());
