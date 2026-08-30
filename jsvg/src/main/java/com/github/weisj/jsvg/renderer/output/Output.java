@@ -135,6 +135,10 @@ public interface Output {
         return renderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING) == SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
     }
 
+    default boolean isTextKerningEnabled() {
+        return renderingHint(SVGRenderingHints.KEY_TEXT_KERNING) != SVGRenderingHints.VALUE_TEXT_KERNING_OFF;
+    }
+
     default boolean hasMaskedPaint() {
         return false;
     }

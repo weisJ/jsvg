@@ -46,6 +46,7 @@ import com.github.weisj.jsvg.nodes.text.GlyphRunTextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
 import com.github.weisj.jsvg.renderer.output.impl.NullOutput;
 
@@ -53,15 +54,23 @@ class TextTest {
 
     @Test
     void textRefTest() {
-        // Batik doesn't apply kerning; the tolerance covers the resulting shift (measured 0.45% and 1.22%).
-        assertEquals(SUCCESS, compareImages("text/text1.svg", 0.7));
-        assertEquals(SUCCESS, compareImages("text/text2.svg", 1.8));
+        // Batik doesn't apply kerning; disable it to keep the comparison font independent.
+        assertEquals(SUCCESS, compareImages(withoutKerning("text/text1.svg")));
+        assertEquals(SUCCESS, compareImages(withoutKerning("text/text2.svg")));
         assertEquals(SUCCESS, compareImages("text/text5.svg"));
         // Batik doesn't correctly implement rotation.
         assertDoesNotThrow(() -> renderJsvg("text/text3.svg"));
         // textPath has to be checked manually.
         assertDoesNotThrow(() -> renderJsvg("text/text4.svg"));
         assertDoesNotThrow(() -> renderJsvg("text/text6.svg"));
+    }
+
+    private static @NotNull CompareInfo withoutKerning(@NotNull String path) {
+        return new CompareInfo(
+                expected(new PathImageSource(path), RenderType.Batik),
+                actual(new PathImageSource(path), RenderType.JSVG,
+                        g -> g.setRenderingHint(SVGRenderingHints.KEY_TEXT_KERNING,
+                                SVGRenderingHints.VALUE_TEXT_KERNING_OFF)));
     }
 
     @Test

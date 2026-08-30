@@ -88,8 +88,8 @@ public final class TextSpan extends LinearTextContainer<TextSegment> implements 
 
     @Override
     public @NotNull TextMetrics computeTextMetrics(@NotNull RenderContext context,
-            @NotNull UseTextLengthForCalculation flag) {
-        return layoutGroup.asSegment().computeTextMetrics(context, flag);
+            @NotNull UseTextLengthForCalculation flag, boolean applyKerning) {
+        return layoutGroup.asSegment().computeTextMetrics(context, flag, applyKerning);
     }
 
     @Override
