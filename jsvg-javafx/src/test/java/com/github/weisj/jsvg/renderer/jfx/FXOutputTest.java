@@ -129,8 +129,6 @@ class FXOutputTest {
     // excessive nesting). These are tested explicitly to verify they produce no valid document.
     private static final Set<String> INVALID_SVG_FILES = Set.of(
             "manyImplicitPathsThroughUse.svg",
-            "useCycle.svg",
-            "useCycleSelfReference.svg",
             "useNesting.svg");
 
     private boolean isSkippedSVGFile(String testName) {
