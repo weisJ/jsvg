@@ -21,17 +21,20 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
+import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.ParsedElement;
 
 public final class FilterPrimitiveBase {
 
@@ -45,10 +48,20 @@ public final class FilterPrimitiveBase {
     private final ColorInterpolation colorInterpolation;
 
     public FilterPrimitiveBase(@NotNull AttributeNode attributeNode) {
-        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(0));
-        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(0));
-        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(100));
-        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(100));
+        // The parent filter's attributes are prepared before its children, but its node is built after
+        // them.
+        ParsedElement parent = attributeNode.element().parent();
+        UnitType primitiveUnits = parent != null
+                ? parent.attributeNode().getEnum("primitiveUnits", UnitType.UserSpaceOnUse)
+                : UnitType.UserSpaceOnUse;
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Length.UNSPECIFIED)
+                .coercePercentageToCorrectUnit(primitiveUnits, PercentageDimension.WIDTH);
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Length.UNSPECIFIED)
+                .coercePercentageToCorrectUnit(primitiveUnits, PercentageDimension.HEIGHT);
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED)
+                .coercePercentageToCorrectUnit(primitiveUnits, PercentageDimension.WIDTH);
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED)
+                .coercePercentageToCorrectUnit(primitiveUnits, PercentageDimension.HEIGHT);
 
         inputChannel = attributeNode.getFilterChannelKey("in", DefaultFilterChannel.LastResult);
         resultChannel = attributeNode.getFilterChannelKey("result", DefaultFilterChannel.LastResult);
@@ -77,8 +90,29 @@ public final class FilterPrimitiveBase {
     }
 
     public void saveLayoutResult(@NotNull LayoutBounds outputBounds, @NotNull FilterLayoutContext filterLayoutContext) {
-        filterLayoutContext.saveResult(this, outputBounds);
-        saveResultImpl(outputBounds, filterLayoutContext.resultChannels());
+        saveLayoutResult(outputBounds, outputBounds.region(), filterLayoutContext);
+    }
+
+    public void saveLayoutResult(@NotNull FilterLayoutContext filterLayoutContext) {
+        // The default regions is the filters region.
+        saveLayoutResult(filterLayoutContext.filterRegion(), filterLayoutContext);
+    }
+
+    public void saveLayoutResult(@NotNull Rectangle2D defaultRegion, @NotNull FilterLayoutContext filterLayoutContext) {
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(this, defaultRegion);
+        saveLayoutResultImpl(new LayoutBounds(region, new FloatInsets(), region), filterLayoutContext);
+    }
+
+    public void saveLayoutResult(@NotNull LayoutBounds outputBounds, @NotNull Rectangle2D defaultRegion,
+            @NotNull FilterLayoutContext filterLayoutContext) {
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(this, defaultRegion);
+        LayoutBounds result = outputBounds.withRegion(region);
+        saveLayoutResultImpl(result, filterLayoutContext);
+    }
+
+    private void saveLayoutResultImpl(@NotNull LayoutBounds bounds, @NotNull FilterLayoutContext context) {
+        context.saveResult(this, bounds);
+        saveResultImpl(bounds, context.resultChannels());
     }
 
     public void saveResult(@NotNull Channel output, @NotNull FilterContext filterContext) {

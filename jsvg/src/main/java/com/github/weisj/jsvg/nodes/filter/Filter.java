@@ -126,15 +126,17 @@ public final class Filter extends ContainerNode {
                 : NO_CLIP_BOUNDS.getBounds2D();
 
         FilterLayoutContext filterLayoutContext =
-                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds);
+                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds,
+                        filterRegion, context.measureContext());
 
         Rectangle2D clippedElementBounds = elementBounds.geometryBox().createIntersection(graphicsClipBounds);
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
 
         if (effectiveFilterRegion.isEmpty()) return null;
 
-        LayoutBounds elementLayoutBounds = new LayoutBounds(effectiveFilterRegion, new FloatInsets());
-        LayoutBounds clippedElementLayoutBounds = new LayoutBounds(clippedElementBounds, new FloatInsets());
+        LayoutBounds elementLayoutBounds = new LayoutBounds(effectiveFilterRegion, new FloatInsets(), filterRegion);
+        LayoutBounds clippedElementLayoutBounds =
+                new LayoutBounds(clippedElementBounds, new FloatInsets(), clippedElementBounds);
         LayoutBounds sourceDependentBounds = elementLayoutBounds.transform(
                 (data, flags) -> flags.operatesOnWholeFilterRegion
                         ? data
@@ -226,7 +228,12 @@ public final class Filter extends ContainerNode {
 
         @NotNull
         LayoutBounds.Data layout(@NotNull FilterPrimitiveBase primitive) {
-            return layouts.get(primitive);
+            return layouts.data(primitive);
+        }
+
+        @NotNull
+        Rectangle2D primitiveRegion(@NotNull FilterPrimitiveBase primitive) {
+            return layouts.region(primitive);
         }
     }
 
@@ -263,6 +270,11 @@ public final class Filter extends ContainerNode {
         @NotNull
         LayoutBounds.Data layout(@NotNull FilterPrimitiveBase primitive) {
             return filterLayout.layout(primitive);
+        }
+
+        @NotNull
+        Rectangle2D primitiveRegion(@NotNull FilterPrimitiveBase primitive) {
+            return filterLayout.primitiveRegion(primitive);
         }
 
         @NotNull

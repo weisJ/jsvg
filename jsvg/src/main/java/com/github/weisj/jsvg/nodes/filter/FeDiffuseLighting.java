@@ -34,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.nodes.SVGNode;
@@ -108,10 +107,8 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        LayoutBounds layoutBounds = new LayoutBounds(
-                filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this),
-                new FloatInsets());
-        impl().saveLayoutResult(layoutBounds, filterLayoutContext);
+        LayoutBounds input = impl().layoutInput(filterLayoutContext);
+        impl().saveLayoutResult(input.region(), filterLayoutContext);
     }
 
     @Override

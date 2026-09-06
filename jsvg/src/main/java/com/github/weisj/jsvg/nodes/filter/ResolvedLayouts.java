@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
@@ -40,12 +41,21 @@ final class ResolvedLayouts {
     }
 
     @NotNull
-    LayoutBounds.Data get(@NotNull FilterPrimitiveBase primitive) {
+    LayoutBounds.Data data(@NotNull FilterPrimitiveBase primitive) {
+        return layoutBounds(primitive).resolve(LayoutBounds.ComputeFlags.INITIAL);
+    }
+
+    @NotNull
+    Rectangle2D region(@NotNull FilterPrimitiveBase primitive) {
+        return layoutBounds(primitive).region();
+    }
+
+    private @NotNull LayoutBounds layoutBounds(@NotNull FilterPrimitiveBase primitive) {
         LayoutBounds layout = layouts.get(primitive);
         if (layout == null) {
             throw new IllegalFilterStateException("Primitive layout not found.");
         }
-        return layout.resolve(LayoutBounds.ComputeFlags.INITIAL);
+        return layout;
     }
 
     @NotNull
