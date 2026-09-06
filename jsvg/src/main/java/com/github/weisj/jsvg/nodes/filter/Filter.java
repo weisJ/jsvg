@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -153,16 +153,15 @@ public final class Filter extends ContainerNode {
             }
         }
 
-        LayoutBounds.Data clipHeuristic = filterLayoutContext.resultChannels()
-                .get(DefaultFilterChannel.LastResult)
-                .resolve(LayoutBounds.ComputeFlags.INITIAL);
+        ResolvedLayouts layouts = filterLayoutContext.resolvedLayouts();
+        LayoutBounds.Data clipHeuristic = layouts.lastResult();
 
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
         Rectangle2D clipHeuristicBounds = clipHeuristic.bounds()
                 .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
-        return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds);
+        return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds, layouts);
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -202,12 +201,15 @@ public final class Filter extends ContainerNode {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
+        private final @NotNull ResolvedLayouts layouts;
 
         private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
-                @NotNull Rectangle2D effectiveFilterArea) {
+                @NotNull Rectangle2D effectiveFilterArea,
+                @NotNull ResolvedLayouts layouts) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
+            this.layouts = layouts;
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -220,6 +222,11 @@ public final class Filter extends ContainerNode {
 
         public @NotNull Rectangle2D effectiveFilterArea() {
             return effectiveFilterArea;
+        }
+
+        @NotNull
+        LayoutBounds.Data layout(@NotNull FilterPrimitiveBase primitive) {
+            return layouts.get(primitive);
         }
     }
 
@@ -251,6 +258,16 @@ public final class Filter extends ContainerNode {
 
         public @NotNull Rectangle2D elementBounds() {
             return filterLayout.elementBounds();
+        }
+
+        @NotNull
+        LayoutBounds.Data layout(@NotNull FilterPrimitiveBase primitive) {
+            return filterLayout.layout(primitive);
+        }
+
+        @NotNull
+        LayoutBounds.Data sourceLayout() {
+            return filterLayout.layouts.source();
         }
 
         public @NotNull Output output() {
