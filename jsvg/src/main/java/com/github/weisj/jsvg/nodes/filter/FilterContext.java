@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,6 +66,10 @@ public final class FilterContext {
 
     public @NotNull LayoutBounds.Data layout(@NotNull FilterPrimitiveBase primitive) {
         return info.layout(primitive);
+    }
+
+    public @NotNull Rectangle2D region(@NotNull FilterPrimitiveBase primitive) {
+        return info.primitiveRegion(primitive);
     }
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {

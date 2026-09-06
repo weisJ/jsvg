@@ -94,31 +94,44 @@ public final class LayoutBounds {
         }
     }
 
+    private final @NotNull Rectangle2D region;
     private final @NotNull Function<ComputeFlags, @NotNull Data> computer;
     private final @NotNull ComputeFlags additionalFlags;
     private final @Nullable Data @NotNull [] cache = new Data[ComputeFlags.CACHE_SIZE];
 
-    public LayoutBounds(@NotNull Rectangle2D bounds, @NotNull FloatInsets clipBoundsEscapeInsets) {
+    public LayoutBounds(@NotNull Rectangle2D bounds, @NotNull FloatInsets clipBoundsEscapeInsets,
+            @NotNull Rectangle2D region) {
         Data data = new Data(bounds, clipBoundsEscapeInsets);
-        computer = flags -> data;
-        additionalFlags = ComputeFlags.INITIAL;
+        this.region = region;
+        this.computer = flags -> data;
+        this.additionalFlags = ComputeFlags.INITIAL;
     }
 
-    private LayoutBounds(@NotNull Function<ComputeFlags, @NotNull Data> computer,
+    private LayoutBounds(@NotNull Rectangle2D region, @NotNull Function<ComputeFlags, @NotNull Data> computer,
             @NotNull ComputeFlags flags) {
+        this.region = region;
         this.computer = computer;
         this.additionalFlags = flags;
     }
 
+    public @NotNull Rectangle2D region() {
+        return region;
+    }
+
+    public @NotNull LayoutBounds withRegion(@NotNull Rectangle2D region) {
+        if (this.region.equals(region)) return this;
+        return new LayoutBounds(region, this::resolve, additionalFlags);
+    }
+
     public @NotNull LayoutBounds transform(
             @NotNull BiFunction<@NotNull Data, ComputeFlags, @NotNull Data> newTransformer) {
-        return new LayoutBounds(flags -> newTransformer.apply(resolve(flags), flags), additionalFlags);
+        return new LayoutBounds(region, flags -> newTransformer.apply(resolve(flags), flags), additionalFlags);
     }
 
     public @NotNull LayoutBounds withFlags(@NotNull ComputeFlags flags) {
         ComputeFlags combined = additionalFlags.or(flags);
         if (combined.equals(additionalFlags)) return this;
-        return new LayoutBounds(this::resolve, combined);
+        return new LayoutBounds(region, this::resolve, combined);
     }
 
     public @NotNull Data resolve(@NotNull ComputeFlags flags) {
@@ -140,12 +153,20 @@ public final class LayoutBounds {
     }
 
     public @NotNull LayoutBounds union(@NotNull LayoutBounds other) {
-        return transform((data, flags) -> {
+        Rectangle2D unionRegion = unionRegion(other);
+        return new LayoutBounds(unionRegion, flags -> {
+            Data data = resolve(flags);
             Data otherData = other.resolve(flags);
             return new Data(
                     data.bounds.createUnion(otherData.bounds),
                     GeometryUtil.max(data.clipBoundsEscapeInsets, otherData.clipBoundsEscapeInsets));
-        });
+        }, additionalFlags);
+    }
+
+    public @NotNull Rectangle2D unionRegion(@NotNull LayoutBounds other) {
+        if (region.isEmpty()) return other.region;
+        if (other.region.isEmpty() || region.equals(other.region)) return region;
+        return region.createUnion(other.region);
     }
 
     public @NotNull LayoutBounds grow(float horizontal, float vertical, @NotNull FilterLayoutContext context) {
@@ -178,7 +199,8 @@ public final class LayoutBounds {
     @Override
     public String toString() {
         return "LayoutBounds{" +
-                "resolved=" + isResolved() +
+                "region=" + GeometryUtil.compactRepresentation(region) +
+                ", resolved=" + isResolved() +
                 '}';
     }
 }
