@@ -254,6 +254,99 @@ class ConstantColorChannelTest {
                 }));
     }
 
+    @Test
+    void emptyMergeAvoidsRasterizingItsSource() {
+        java.lang.management.ThreadMXBean platformBean = ManagementFactory.getThreadMXBean();
+        assumeTrue(platformBean instanceof ThreadMXBean);
+        ThreadMXBean allocations = (ThreadMXBean) platformBean;
+        assumeTrue(allocations.isThreadAllocatedMemorySupported());
+        allocations.setThreadAllocatedMemoryEnabled(true);
+        assumeTrue(allocations.getTotalThreadAllocatedBytes() >= 0);
+
+        int size = 1024;
+        String source = element("rect").attributes(Map.of("width", size, "height", size))
+                .attributes("fill='red' filter='url(#f)'").build();
+        SVGDocument document = load(filterDocument(size, size, element("feMerge").build(), source, "", ""));
+        for (int i = 0; i < 4; i++) {
+            render(document, size);
+        }
+        long before = allocations.getTotalThreadAllocatedBytes();
+        BufferedImage image = render(document, size);
+        long bytes = allocations.getTotalThreadAllocatedBytes() - before;
+        // Allow the output, a spare raster and fixed overhead, but reject source and result rasters.
+        long budget = 2L * size * size * Integer.BYTES + 2_000_000;
+        assertTrue(bytes <= budget,
+                () -> "Empty merge allocated " + bytes + " bytes (budget " + budget + ")");
+        assertPixelsEqual(render(load(wrapTag(size, size, "")), size), image);
+    }
+
+    @Test
+    void clippingTransparentColorStillPreservesHiddenRgbOnlyInsideItsRegion() {
+        String seed = constant(0x00336699).attributes("x='20' y='30' width='40' height='20'").build();
+        String restoreAlpha = element("feComponentTransfer").attributes("x='0' y='0' width='100' height='100'")
+                .children(element("feFuncA").attributes("type='linear' slope='0' intercept='1'")).build();
+        String artwork = rectangle(0, 0, SIZE, SIZE, 0xff000000) + rectangle(20, 30, 40, 20, 0xff336699);
+        assertRenderedEquals(wrapTag(SIZE, SIZE, artwork),
+                document(seed + restoreAlpha, NON_UNIFORM_SOURCE, "sRGB"));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> transparentBlackMergeChainsAvoidIntermediateImageAllocations() {
+        return Stream.of(element("feMerge"), constant(0))
+                .map(seed -> DynamicTest.dynamicTest(seed.build(), () -> {
+                    java.lang.management.ThreadMXBean platformBean = ManagementFactory.getThreadMXBean();
+                    assumeTrue(platformBean instanceof ThreadMXBean);
+                    ThreadMXBean allocations = (ThreadMXBean) platformBean;
+                    assumeTrue(allocations.isThreadAllocatedMemorySupported());
+                    allocations.setThreadAllocatedMemoryEnabled(true);
+                    assumeTrue(allocations.getTotalThreadAllocatedBytes() >= 0);
+
+                    int size = 512;
+                    String region = "x='20' y='30' width='40' height='20'";
+                    String merge = element("feMerge").children(
+                            element("feMergeNode").attributes("in='empty'"), element("feMergeNode")).build();
+                    String restoreAlpha = element("feComponentTransfer")
+                            .attributes(Map.of("x", 0, "y", 0, "width", size, "height", size)).children(
+                                    element("feFuncA").attributes("type='linear' slope='0' intercept='1'"))
+                            .build();
+                    String primitives = seed.attributes(region, "result='empty'").build()
+                            + merge.repeat(32) + restoreAlpha;
+                    SVGDocument document = load(filterDocument(size, size, primitives, NON_UNIFORM_SOURCE, "",
+                            "color-interpolation-filters='sRGB'"));
+                    for (int i = 0; i < 4; i++) {
+                        render(document, size, RenderingHints.VALUE_ANTIALIAS_OFF);
+                    }
+                    long before = allocations.getTotalThreadAllocatedBytes();
+                    BufferedImage image = render(document, size, RenderingHints.VALUE_ANTIALIAS_OFF);
+                    long bytes = allocations.getTotalThreadAllocatedBytes() - before;
+                    // Allow eight full rasters and fixed overhead, but reject a raster for each merge.
+                    long budget = 8L * size * size * Integer.BYTES + 2_000_000;
+                    assertTrue(bytes <= budget,
+                            () -> "Transparent merge chain allocated " + bytes + " bytes (budget " + budget + ")");
+                    BufferedImage reference = render(load(wrapTag(size, size,
+                            rectangle(0, 0, size, size, 0xff000000))), size, RenderingHints.VALUE_ANTIALIAS_OFF);
+                    assertPixelsEqual(reference, image);
+                }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> mergingTransparentColorsRetainsRasterCompositingBehavior() {
+        return Stream.of(false, true).map(reverse -> DynamicTest.dynamicTest("reverse=" + reverse, () -> {
+            String seed = constant(0x00336699).attributes("result='colored'").build()
+                    + constant(0).attributes("result='black'").build();
+            String merge = element("feMerge").children(
+                    element("feMergeNode").attributes(Map.of("in", reverse ? "black" : "colored")),
+                    element("feMergeNode").attributes(Map.of("in", reverse ? "colored" : "black"))).build();
+            String restoreAlpha = element("feComponentTransfer").children(
+                    element("feFuncA").attributes("type='linear' slope='0' intercept='1'")).build();
+            // The first input's hidden RGB survives the AWT destination copy; a later transparent
+            // input does not paint its RGB into that destination. Keep both orders on the raster path.
+            int color = reverse ? 0xff000000 : 0xff336699;
+            assertRenderedEquals(wrapTag(SIZE, SIZE, rectangle(0, 0, SIZE, SIZE, color)),
+                    document(seed + merge + restoreAlpha, NON_UNIFORM_SOURCE, "sRGB"));
+        }));
+    }
+
     private static String document(String primitives, String source, String space) {
         return filterDocument(SIZE, SIZE, primitives, source, "", "color-interpolation-filters='" + space + "'");
     }

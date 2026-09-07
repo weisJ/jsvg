@@ -71,11 +71,6 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     }
 
     @Override
-    public boolean isValid() {
-        return inputChannels.length > 0;
-    }
-
-    @Override
     public @NotNull Length x() {
         return filterPrimitiveBase.x;
     }
@@ -115,14 +110,15 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (inputChannels.length == 0) {
-            filterPrimitiveBase.saveResult(
-                    filterPrimitiveBase.channel(DefaultFilterChannel.SourceGraphic, filterContext),
-                    filterContext);
+            Rectangle2D region = filterContext.layout(filterPrimitiveBase).region();
+            Channel result = new ConstantColorChannel((int) region.getWidth(), (int) region.getHeight(), 0);
+            filterPrimitiveBase.saveResult(result, filterContext);
             return;
         }
+
         Channel in = filterPrimitiveBase.channel(inputChannels[0], filterContext);
         Channel result = in;
-        if (inputChannels.length > 1) {
+        if (inputChannels.length > 1 && !hasOnlyTransparentBlackInputs(filterContext)) {
             BufferedImage dst = in.toBufferedImageNonAliased(context);
             Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
             for (int i = 1; i < inputChannels.length; i++) {
@@ -130,9 +126,20 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
                 imgGraphics.drawImage(context.platformSupport().createImage(channel.producer()),
                         null, context.platformSupport().imageObserver());
             }
+            imgGraphics.dispose();
             result = new ImageProducerChannel(dst.getSource());
         }
         filterPrimitiveBase.saveResult(result, filterContext);
+    }
+
+    private boolean hasOnlyTransparentBlackInputs(@NotNull FilterContext context) {
+        for (FilterChannelKey key : inputChannels) {
+            Channel channel = filterPrimitiveBase.channel(key, context);
+            if (!(channel instanceof ConstantColorChannel) || ((ConstantColorChannel) channel).color() != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
