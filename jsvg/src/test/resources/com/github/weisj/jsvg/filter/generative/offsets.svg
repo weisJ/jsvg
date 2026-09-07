@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220" viewBox="0 0 440 220">
+    <!-- offsetNegativeMatrix -->
+    <g transform="translate(0 0)">
+        <defs>
+            <filter id="f0" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
+                <feFlood x="10" y="10" width="10" height="10" result="seed" />
+                <feColorMatrix values="0 0 0 0 1
+                    0 0 0 0 0
+                    0 0 0 0 0
+                    0 0 0 0 1" x="50" y="50" width="20" height="20" />
+                <feOffset width="20" y="50" x="45" dx="-5" height="20" />
+            </filter>
+        </defs>
+        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f0)" />
+    </g>
+    <!-- offsetNegativeTransfer -->
+    <g transform="translate(110 0)">
+        <defs>
+            <filter id="f1" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
+                <feFlood x="10" y="10" width="10" height="10" result="seed" />
+                <feComponentTransfer x="50" y="50" width="20" height="20">
+                    <feFuncA type="linear" slope="0" intercept="1" />
+                </feComponentTransfer>
+                <feOffset width="20" y="50" x="45" dx="-5" height="20" />
+            </filter>
+        </defs>
+        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f1)" />
+    </g>
+    <!-- offsetNegativeComposite -->
+    <g transform="translate(220 0)">
+        <defs>
+            <filter id="f2" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
+                <feFlood x="10" y="10" width="10" height="10" result="seed" />
+                <feComposite in2="seed" operator="arithmetic" k4="1" x="50" y="50" width="20" height="20" />
+                <feOffset width="20" y="50" x="45" dx="-5" height="20" />
+            </filter>
+        </defs>
+        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f2)" />
+    </g>
+    <!-- offsetNegativeLighting -->
+    <g transform="translate(330 0)">
+        <defs>
+            <filter id="f3" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
+                <feFlood x="10" y="10" width="10" height="10" result="seed" />
+                <feDiffuseLighting x="50" y="50" width="20" height="20">
+                    <feDistantLight elevation="90" />
+                </feDiffuseLighting>
+                <feOffset width="20" y="50" x="45" dx="-5" height="20" />
+            </filter>
+        </defs>
+        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f3)" />
+    </g>
+    <!-- offsetPositiveMatrix -->
+    <g transform="translate(0 110)">
+        <defs>
+            <filter id="f4" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
+                <feFlood x="10" y="10" width="10" height="10" result="seed" />
+                <feColorMatrix values="0 0 0 0 1
+                    0 0 0 0 0
+                    0 0 0 0 0
+                    0 0 0 0 1" x="50" y="50" width="20" height="20" />
+                <feOffset width="20" y="50" x="55" dx="5" height="20" />
+            </filter>
+        </defs>
+        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f4)" />
+    </g>
+    <!-- offsetPositiveTransfer -->
+    <g transform="translate(110 110)">
+        <defs>
+            <filter id="f5" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
+                <feFlood x="10" y="10" width="10" height="10" result="seed" />
+                <feComponentTransfer x="50" y="50" width="20" height="20">
+                    <feFuncA type="linear" slope="0" intercept="1" />
+                </feComponentTransfer>
+                <feOffset width="20" y="50" x="55" dx="5" height="20" />
+            </filter>
+        </defs>
+        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f5)" />
+    </g>
+    <!-- offsetPositiveComposite -->
+    <g transform="translate(220 110)">
+        <defs>
+            <filter id="f6" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
+                <feFlood x="10" y="10" width="10" height="10" result="seed" />
+                <feComposite in2="seed" operator="arithmetic" k4="1" x="50" y="50" width="20" height="20" />
+                <feOffset width="20" y="50" x="55" dx="5" height="20" />
+            </filter>
+        </defs>
+        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f6)" />
+    </g>
+    <!-- offsetPositiveLighting -->
+    <g transform="translate(330 110)">
+        <defs>
+            <filter id="f7" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
+                <feFlood x="10" y="10" width="10" height="10" result="seed" />
+                <feDiffuseLighting x="50" y="50" width="20" height="20">
+                    <feDistantLight elevation="90" />
+                </feDiffuseLighting>
+                <feOffset width="20" y="50" x="55" dx="5" height="20" />
+            </filter>
+        </defs>
+        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f7)" />
+    </g>
+</svg>

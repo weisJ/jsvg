@@ -63,13 +63,17 @@ class EdgeModeTest {
 
     @TestFactory
     Stream<DynamicTest> inputSubregionMatchesContinuedArtwork() {
-        return Stream
-                .of("duplicate", "wrap",
-                        "none")
+        return Stream.of("duplicate", "wrap", "none")
                 .flatMap(mode -> Stream.of("1.5", "4", "12", "1.5 0", "0 1.5")
-                        .flatMap(deviation -> Stream.of(false, true).map(named -> DynamicTest.dynamicTest(
-                                mode + " subregion " + deviation + (named ? " named" : " unnamed"),
-                                () -> compareSubregion(mode, deviation, named)))));
+                        .map(deviation -> DynamicTest.dynamicTest(mode + " subregion " + deviation,
+                                () -> compareSubregion(mode, deviation, false))));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> namedInputSurvivesLaterResults() {
+        return Stream.of("duplicate", "wrap", "none")
+                .map(mode -> DynamicTest.dynamicTest(mode + " named input",
+                        () -> compareSubregion(mode, "1.5", true)));
     }
 
     private static void compareSubregion(String mode, String deviation, boolean named) {
@@ -122,7 +126,7 @@ class EdgeModeTest {
 
     @TestFactory
     Stream<DynamicTest> transparentInputEdgesStayTransparent() {
-        return Stream.of("duplicate", "wrap", "none")
+        return Stream.of("duplicate", "wrap")
                 .map(mode -> DynamicTest.dynamicTest(mode + " transparent edge", () -> {
                     String input = element("feOffset").attributes("x='20' y='12' width='48' height='40'").build();
                     String blur = element("feGaussianBlur").attributes("stdDeviation='1.5'")

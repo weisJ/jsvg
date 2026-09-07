@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="440" viewBox="0 0 440 440">
+    <!-- flood -->
+    <g transform="translate(0 0)">
+        <defs>
+            <filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feFlood />
+            </filter>
+            <clipPath id="clip0">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip0)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f0)" />
+        </g>
+    </g>
+    <!-- offset -->
+    <g transform="translate(110 0)">
+        <defs>
+            <filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feOffset />
+            </filter>
+            <clipPath id="clip1">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip1)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f1)" />
+        </g>
+    </g>
+    <!-- identityBlur -->
+    <g transform="translate(220 0)">
+        <defs>
+            <filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feGaussianBlur stdDeviation="0" />
+            </filter>
+            <clipPath id="clip2">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip2)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f2)" />
+        </g>
+    </g>
+    <!-- blur -->
+    <g transform="translate(330 0)">
+        <defs>
+            <filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feGaussianBlur stdDeviation="2" />
+            </filter>
+            <clipPath id="clip3">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip3)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f3)" />
+        </g>
+    </g>
+    <!-- identityMatrix -->
+    <g transform="translate(0 110)">
+        <defs>
+            <filter id="f4" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feColorMatrix />
+            </filter>
+            <clipPath id="clip4">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip4)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f4)" />
+        </g>
+    </g>
+    <!-- saturate -->
+    <g transform="translate(110 110)">
+        <defs>
+            <filter id="f5" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feColorMatrix type="saturate" values="0" />
+            </filter>
+            <clipPath id="clip5">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip5)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f5)" />
+        </g>
+    </g>
+    <!-- identityTransfer -->
+    <g transform="translate(220 110)">
+        <defs>
+            <filter id="f6" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feComponentTransfer />
+            </filter>
+            <clipPath id="clip6">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip6)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f6)" />
+        </g>
+    </g>
+    <!-- alphaTransfer -->
+    <g transform="translate(330 110)">
+        <defs>
+            <filter id="f7" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.5" />
+                </feComponentTransfer>
+            </filter>
+            <clipPath id="clip7">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip7)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f7)" />
+        </g>
+    </g>
+    <!-- composite -->
+    <g transform="translate(0 220)">
+        <defs>
+            <filter id="f8" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feComposite in2="SourceAlpha" />
+            </filter>
+            <clipPath id="clip8">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip8)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f8)" />
+        </g>
+    </g>
+    <!-- blend -->
+    <g transform="translate(110 220)">
+        <defs>
+            <filter id="f9" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feBlend in2="SourceAlpha" />
+            </filter>
+            <clipPath id="clip9">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip9)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f9)" />
+        </g>
+    </g>
+    <!-- merge -->
+    <g transform="translate(220 220)">
+        <defs>
+            <filter id="f10" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feMerge>
+                    <feMergeNode in="SourceGraphic" />
+                </feMerge>
+            </filter>
+            <clipPath id="clip10">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip10)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f10)" />
+        </g>
+    </g>
+    <!-- identityDisplacement -->
+    <g transform="translate(330 220)">
+        <defs>
+            <filter id="f11" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feDisplacementMap in2="SourceAlpha" scale="0" />
+            </filter>
+            <clipPath id="clip11">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip11)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f11)" />
+        </g>
+    </g>
+    <!-- displacement -->
+    <g transform="translate(0 330)">
+        <rect x="20" y="20" width="20" height="20" fill="red" />
+    </g>
+    <!-- lighting -->
+    <g transform="translate(110 330)">
+        <defs>
+            <filter id="f13" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feDiffuseLighting>
+                    <feDistantLight elevation="90" />
+                </feDiffuseLighting>
+            </filter>
+            <clipPath id="clip13">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip13)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f13)" />
+        </g>
+    </g>
+    <!-- turbulence -->
+    <g transform="translate(220 330)">
+        <defs>
+            <filter id="f14" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feTurbulence type="fractalNoise" baseFrequency="0.05" />
+            </filter>
+            <clipPath id="clip14">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip14)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f14)" />
+        </g>
+    </g>
+    <!-- dropShadow -->
+    <g transform="translate(330 330)">
+        <defs>
+            <filter id="f15" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                <feDropShadow stdDeviation="0" dx="0" dy="0" />
+            </filter>
+            <clipPath id="clip15">
+                <rect x="20" y="20" width="20" height="20" />
+            </clipPath>
+        </defs>
+        <g clip-path="url(#clip15)">
+            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f15)" />
+        </g>
+    </g>
+</svg>
