@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
 public final class ChannelStorage<T> {
     private final @NotNull Map<@NotNull Object, @NotNull Supplier<T>> storage = new HashMap<>();
+    private final @NotNull Map<@NotNull Object, @NotNull FilterChannelKey> aliases = new HashMap<>();
 
     public void addResult(@NotNull FilterChannelKey key, @NotNull T value) {
         storage.put(key.key(), new ConstantSupplier<>(value));
@@ -42,8 +43,17 @@ public final class ChannelStorage<T> {
         storage.put(key.key(), new LazySupplier<>(value));
     }
 
+    public void addAlias(@NotNull FilterChannelKey alias, @NotNull FilterChannelKey key) {
+        // Capture the output, so reassigning a name or LastResult cannot redirect existing aliases.
+        aliases.put(alias.key(), resolveKey(key));
+    }
+
+    public @NotNull FilterChannelKey resolveKey(@NotNull FilterChannelKey key) {
+        return aliases.getOrDefault(key.key(), key);
+    }
+
     public @NotNull T get(@NotNull FilterChannelKey key) {
-        Supplier<T> provider = storage.get(key.key());
+        Supplier<T> provider = storage.get(resolveKey(key).key());
         if (provider == null) throw new IllegalFilterStateException("Channel " + key + " not found.");
         return provider.get();
     }

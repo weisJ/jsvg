@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -56,7 +55,6 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
 
         String resultKey = "result";
 
-        FilterChannelKey inputId = attributeNode.getFilterChannelKey("in", outerLastResult);
         String resultId = attributes.get(resultKey);
         if (resultId == null) {
             resultId = "dropshadow-" + attributeNode.hashCode();
@@ -86,7 +84,7 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
         FeMergeNode node1 = new FeMergeNode();
         node1.build(child);
 
-        attributes.put("in", inputId.key().toString());
+        attributes.put("in", outerLastResult.key().toString());
         FeMergeNode node2 = new FeMergeNode();
         node2.build(child);
 

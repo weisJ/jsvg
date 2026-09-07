@@ -22,13 +22,10 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.geom.Rectangle2D;
-import java.util.IdentityHashMap;
-import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
-import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.renderer.MeasureContext;
@@ -41,7 +38,6 @@ public final class FilterLayoutContext {
     private final @NotNull Rectangle2D clipBounds;
     private final @NotNull Rectangle2D filterRegion;
     private final @NotNull MeasureContext measureContext;
-    private final Map<FilterPrimitiveBase, LayoutBounds> layouts = new IdentityHashMap<>();
 
     public FilterLayoutContext(@NotNull UnitType primitiveUnits, @NotNull Rectangle2D elementBounds,
             @NotNull Rectangle2D clipBounds, @NotNull Rectangle2D filterRegion,
@@ -89,17 +85,6 @@ public final class FilterLayoutContext {
         // computeViewBounds created this rectangle, so it can be clipped in place.
         Rectangle2D.intersect(region, filterRegion, region);
         return region;
-    }
-
-    void saveResult(@NotNull FilterPrimitiveBase primitive, @NotNull LayoutBounds bounds) {
-        layouts.put(primitive, bounds);
-    }
-
-    @NotNull
-    ResolvedLayouts resolvedLayouts() {
-        return new ResolvedLayouts(layouts,
-                resultChannels.get(DefaultFilterChannel.LastResult),
-                resultChannels.get(DefaultFilterChannel.SourceGraphic));
     }
 
     public @NotNull ChannelStorage<LayoutBounds> resultChannels() {

@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 
 public final class FilterContext {
 
@@ -65,6 +66,11 @@ public final class FilterContext {
 
     public @NotNull Rectangle2D primitiveRegion(@NotNull FilterPrimitiveBase primitive) {
         return info.layout(primitive).region();
+    }
+
+    public @NotNull LayoutBounds layout(@NotNull FilterChannelKey key) {
+        // Rendering's aliases identify the input at this pass, even after the layout pass has finished.
+        return info.layout(resultChannels.resolveKey(key));
     }
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {
