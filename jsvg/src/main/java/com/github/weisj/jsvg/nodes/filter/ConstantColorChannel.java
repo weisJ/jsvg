@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.FilteredImageSource;
@@ -36,10 +37,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.ImageUtil;
 
-/**
- * A uniform, non-premultiplied ARGB image. Primitive subregions are applied by {@link Channel#clip},
- * so a partially clipped result is no longer a constant-color channel.
- */
 public final class ConstantColorChannel implements Channel, PixelProvider {
     private final int width;
     private final int height;
@@ -63,6 +60,13 @@ public final class ConstantColorChannel implements Channel, PixelProvider {
     public @NotNull ConstantColorChannel withColor(int color) {
         if (this.color == color) return this;
         return new ConstantColorChannel(width, height, color);
+    }
+
+    @Override
+    public @NotNull Channel clip(@NotNull Rectangle2D region, @NotNull FilterContext context) {
+        // Transparent black remains identical both inside and outside every primitive subregion.
+        if (color == 0) return this;
+        return Channel.super.clip(region, context);
     }
 
     @Override
