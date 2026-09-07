@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,9 +21,9 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -96,7 +96,10 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         double[] sigma = computeAbsoluteStdDeviation(null);
         int hExtend = kernelDiameterForStandardDeviation(sigma[0]);
         int vExtend = kernelDiameterForStandardDeviation(sigma[1]);
-        impl().saveLayoutResult(input.grow(hExtend, vExtend, filterLayoutContext), filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        LayoutBounds bounds =
+                input.grow(hExtend, vExtend, filterLayoutContext).withRegion(region);
+        impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
     @Override

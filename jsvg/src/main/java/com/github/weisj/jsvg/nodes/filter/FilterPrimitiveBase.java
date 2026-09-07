@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +30,6 @@ import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
-import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.ParsedElement;
@@ -89,34 +87,13 @@ public final class FilterPrimitiveBase {
         saveResult(inputChannel(context), context);
     }
 
-    public void saveLayoutResult(@NotNull LayoutBounds outputBounds, @NotNull FilterLayoutContext filterLayoutContext) {
-        saveLayoutResult(outputBounds, outputBounds.region(), filterLayoutContext);
-    }
-
-    public void saveLayoutResult(@NotNull FilterLayoutContext filterLayoutContext) {
-        // The default regions is the filters region.
-        saveLayoutResult(filterLayoutContext.filterRegion(), filterLayoutContext);
-    }
-
-    public void saveLayoutResult(@NotNull Rectangle2D defaultRegion, @NotNull FilterLayoutContext filterLayoutContext) {
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(this, defaultRegion);
-        saveLayoutResultImpl(new LayoutBounds(region, new FloatInsets(), region), filterLayoutContext);
-    }
-
-    public void saveLayoutResult(@NotNull LayoutBounds outputBounds, @NotNull Rectangle2D defaultRegion,
-            @NotNull FilterLayoutContext filterLayoutContext) {
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(this, defaultRegion);
-        LayoutBounds result = outputBounds.withRegion(region);
-        saveLayoutResultImpl(result, filterLayoutContext);
-    }
-
-    private void saveLayoutResultImpl(@NotNull LayoutBounds bounds, @NotNull FilterLayoutContext context) {
+    public void saveLayoutResult(@NotNull LayoutBounds bounds, @NotNull FilterLayoutContext context) {
         context.saveResult(this, bounds);
         saveResultImpl(bounds, context.resultChannels());
     }
 
     public void saveResult(@NotNull Channel output, @NotNull FilterContext filterContext) {
-        saveResultImpl(output.clip(filterContext.region(this), filterContext), filterContext.resultChannels());
+        saveResultImpl(output.clip(filterContext.primitiveRegion(this), filterContext), filterContext.resultChannels());
     }
 
     private <T> void saveResultImpl(@NotNull T value, @NotNull ChannelStorage<T> storage) {

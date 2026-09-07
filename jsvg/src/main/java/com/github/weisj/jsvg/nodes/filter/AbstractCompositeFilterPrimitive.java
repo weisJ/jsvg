@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -60,7 +61,10 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds in = impl().layoutInput(filterLayoutContext);
         LayoutBounds in2 = filterLayoutContext.resultChannels().get(inputChannel2);
-        impl().saveLayoutResult(in.union(in2), filterLayoutContext);
+        LayoutBounds bounds = in.union(in2);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), bounds.region());
+        bounds = bounds.withRegion(region);
+        impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
     @Override

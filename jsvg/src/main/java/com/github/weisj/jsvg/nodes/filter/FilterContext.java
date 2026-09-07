@@ -64,12 +64,8 @@ public final class FilterContext {
         return resultChannels;
     }
 
-    public @NotNull LayoutBounds.Data layout(@NotNull FilterPrimitiveBase primitive) {
-        return info.layout(primitive);
-    }
-
-    public @NotNull Rectangle2D region(@NotNull FilterPrimitiveBase primitive) {
-        return info.primitiveRegion(primitive);
+    public @NotNull Rectangle2D primitiveRegion(@NotNull FilterPrimitiveBase primitive) {
+        return info.layout(primitive).region();
     }
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {

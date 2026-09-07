@@ -22,12 +22,14 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.Inherited;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -68,7 +70,8 @@ public final class FeFlood extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        impl().saveLayoutResult(filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), filterLayoutContext.filterRegion());
+        impl().saveLayoutResult(LayoutBounds.createInitial(region, region), filterLayoutContext);
     }
 
     @Override

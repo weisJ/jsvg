@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.attributes.filter.ColorChannel;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -87,7 +88,9 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
         LayoutBounds displacementInput = filterLayoutContext.resultChannels().get(inputChannel2);
         LayoutBounds layoutBounds = scale == 0 ? input : input.grow(growX, growY, filterLayoutContext);
-        impl().saveLayoutResult(layoutBounds, input.unionRegion(displacementInput), filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(),
+                GeometryUtil.union(input.region(), displacementInput.region()));
+        impl().saveLayoutResult(layoutBounds.withRegion(region), filterLayoutContext);
     }
 
     @Override

@@ -136,14 +136,9 @@ public final class Filter extends ContainerNode {
 
         LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(effectiveFilterRegion, filterRegion);
         LayoutBounds clippedElementLayoutBounds = LayoutBounds.createInitial(clippedElementBounds, filterRegion);
-        LayoutBounds sourceDependentBounds = elementLayoutBounds.transform(
-                (data, flags) -> flags.operatesOnWholeFilterRegion
-                        ? data
-                        : clippedElementLayoutBounds.resolve(flags));
-
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.LastResult, elementLayoutBounds);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceDependentBounds);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, clippedElementLayoutBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, clippedElementLayoutBounds);
 
         for (SVGNode child : children()) {
             try {
@@ -155,7 +150,7 @@ public final class Filter extends ContainerNode {
         }
 
         ResolvedLayouts layouts = filterLayoutContext.resolvedLayouts();
-        LayoutBounds.Data clipHeuristic = layouts.lastResult();
+        LayoutBounds clipHeuristic = layouts.lastResult();
 
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
         Rectangle2D clipHeuristicBounds = clipHeuristic.bounds()
@@ -225,13 +220,8 @@ public final class Filter extends ContainerNode {
         }
 
         @NotNull
-        LayoutBounds.Data layout(@NotNull FilterPrimitiveBase primitive) {
-            return layouts.data(primitive);
-        }
-
-        @NotNull
-        Rectangle2D primitiveRegion(@NotNull FilterPrimitiveBase primitive) {
-            return layouts.region(primitive);
+        LayoutBounds layout(@NotNull FilterPrimitiveBase primitive) {
+            return layouts.get(primitive);
         }
     }
 
@@ -266,18 +256,8 @@ public final class Filter extends ContainerNode {
         }
 
         @NotNull
-        LayoutBounds.Data layout(@NotNull FilterPrimitiveBase primitive) {
+        LayoutBounds layout(@NotNull FilterPrimitiveBase primitive) {
             return filterLayout.layout(primitive);
-        }
-
-        @NotNull
-        Rectangle2D primitiveRegion(@NotNull FilterPrimitiveBase primitive) {
-            return filterLayout.primitiveRegion(primitive);
-        }
-
-        @NotNull
-        LayoutBounds.Data sourceLayout() {
-            return filterLayout.layouts.source();
         }
 
         public @NotNull Output output() {

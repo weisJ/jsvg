@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import static com.github.weisj.jsvg.util.ColorUtil.toRgbRange;
 
+import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -108,12 +109,9 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        // Doesn't change the input bounds regardless whether filter is specified or not.
-        // If the filter is null or linear we can operate only on the visible area of the element.
-        // Otherwise, we need to consider the whole filter region.
-        LayoutBounds bounds = impl()
-                .layoutInput(filterLayoutContext)
-                .withFlags(new LayoutBounds.ComputeFlags(filter != null && !filter.isLinear()));
+        LayoutBounds bounds = impl().layoutInput(filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), bounds.region());
+        bounds = bounds.withRegion(region);
         impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
