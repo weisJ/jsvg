@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
 import com.github.weisj.jsvg.attributes.filter.TransferFunctionType;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -53,6 +54,7 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
     private FilterPrimitiveBase filterPrimitiveBase;
     private ByteLookupTable sRGBlookupTable;
     private ByteLookupTable linearRGBlookupTable;
+    private boolean affectsTransparentBlack;
 
     @Override
     public @NotNull String tagName() {
@@ -100,6 +102,9 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
 
         if (redValid || greenValid || blueValid || alphaValid) {
             sRGBlookupTable = new ByteLookupTable(0, tables);
+            for (byte[] table : tables) {
+                affectsTransparentBlack |= table[0] != 0;
+            }
         }
         children().clear();
     }
@@ -133,7 +138,8 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds bounds = filterPrimitiveBase.layoutInput(filterLayoutContext);
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, bounds.region());
-        bounds = bounds.withRegion(region);
+        bounds = bounds.withRegion(region,
+                affectsTransparentBlack ? CoversWholeRegion.YES : CoversWholeRegion.NO);
         filterPrimitiveBase.saveLayoutResult(bounds, filterLayoutContext);
     }
 
