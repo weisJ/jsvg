@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -94,11 +95,20 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
         double[] sigma = computeAbsoluteStdDeviation(null);
-        int hExtend = kernelDiameterForStandardDeviation(sigma[0]);
-        int vExtend = kernelDiameterForStandardDeviation(sigma[1]);
+        int dX = kernelDiameterForStandardDeviation(sigma[0]);
+        int dY = kernelDiameterForStandardDeviation(sigma[1]);
+        float hExtend = extendForKernelDiameter(sigma[0], dX);
+        float vExtend = extendForKernelDiameter(sigma[1], dY);
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        // Wrapping can repeat content anywhere; duplication only adds content outside the input region.
+        boolean extendsInput = edgeMode == EdgeMode.Wrap
+                || (edgeMode == EdgeMode.Duplicate && !input.region().contains(region));
+        boolean nonZeroKernel = sigma[0] > 0 || sigma[1] > 0;
+        CoversWholeRegion coversWholeRegion = extendsInput && nonZeroKernel && !input.region().isEmpty()
+                ? CoversWholeRegion.YES
+                : CoversWholeRegion.NO;
         LayoutBounds bounds =
-                input.grow(hExtend, vExtend, filterLayoutContext).withRegion(region);
+                input.grow(hExtend, vExtend, filterLayoutContext).withRegion(region, coversWholeRegion);
         impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
@@ -136,7 +146,10 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             yBlurKernel = createConvolveKernel(dY, ySigma, false);
         }
 
-        ImageProducer output = edgeMode.convolve(context, filterContext, input,
+        Rectangle2D inputRegion = filterContext.layout(impl().inputChannelKey()).region();
+        Rectangle sourceBounds =
+                filterContext.info().output().transform().createTransformedShape(inputRegion).getBounds();
+        ImageProducer output = edgeMode.convolve(context, filterContext, input, sourceBounds,
                 new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, dX, dY));
         impl().saveResult(new ImageProducerChannel(output), filterContext);
     }
@@ -188,7 +201,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         return data;
     }
 
-    public static int kernelDiameterForStandardDeviation(double standardDeviation) {
+    private static int kernelDiameterForStandardDeviation(double standardDeviation) {
         if (standardDeviation < BOX_BLUR_APPROXIMATION_THRESHOLD) {
             float areaSum = (float) (0.5 / (standardDeviation * SQRT_2_PI));
             int i = 0;
@@ -202,6 +215,14 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
     }
 
+    private static float extendForKernelDiameter(double standardDeviation, int diameter) {
+        return standardDeviation < BOX_BLUR_APPROXIMATION_THRESHOLD ? diameter / 2.0f : boxRadius(diameter);
+    }
+
+    private static int boxRadius(int diameter) {
+        // Both layout and padding must cover all three box passes.
+        return (diameter & 1) == 0 ? 3 * (diameter / 2) - 1 : 3 * (diameter / 2);
+    }
 
     private static final class MixedQualityConvolveOperation implements EdgeMode.ConvolveOperation {
 
@@ -224,11 +245,6 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             return new Dimension(
                     xKernel != null ? xKernel.getXOrigin() : boxRadius(dX),
                     yKernel != null ? yKernel.getYOrigin() : boxRadius(dY));
-        }
-
-        private static int boxRadius(int diameter) {
-            // The padding must cover all three box passes.
-            return (diameter & 1) == 0 ? 3 * (diameter / 2) - 1 : 3 * (diameter / 2);
         }
 
         @Override

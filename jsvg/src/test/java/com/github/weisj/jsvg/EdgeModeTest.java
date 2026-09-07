@@ -61,6 +61,128 @@ class EdgeModeTest {
         }));
     }
 
+    @TestFactory
+    Stream<DynamicTest> inputSubregionMatchesContinuedArtwork() {
+        return Stream
+                .of("duplicate", "wrap",
+                        "none")
+                .flatMap(mode -> Stream.of("1.5", "4", "12", "1.5 0", "0 1.5")
+                        .flatMap(deviation -> Stream.of(false, true).map(named -> DynamicTest.dynamicTest(
+                                mode + " subregion " + deviation + (named ? " named" : " unnamed"),
+                                () -> compareSubregion(mode, deviation, named)))));
+    }
+
+    private static void compareSubregion(String mode, String deviation, boolean named) {
+        ElementBuilder input = element("feOffset").attributes("x='32' y='24' width='24' height='16'");
+        ElementBuilder blur = element("feGaussianBlur")
+                .attributes("x='0' y='0' width='144' height='80'", "result='tile'")
+                .attributes(Map.of("stdDeviation", deviation, "edgeMode", mode));
+        String interveningResult = "";
+        if (named) {
+            input.attributes("result='tile'");
+            blur.attributes("in='tile'");
+            // The named input must remain accessible after another output replaces LastResult.
+            interveningResult = element("feFlood")
+                    .attributes("x='90' y='10' width='10' height='10' flood-color='red'").build();
+        }
+        // Later passes overwrite both aliases with a different region.
+        String primitives = input.build() + interveningResult + blur.build()
+                + element("feOffset").attributes("result='tile'").build();
+        String artwork = element("g").attributes("filter='url(#f)'").children(tile(32, 24)).build();
+        String svg = filterDocument(144, 80, primitives, artwork, "", "color-interpolation-filters='sRGB'");
+        // Explicitly continue the artwork, so the reference needs only transparent-edge blur.
+        String reference = filterDocument(144, 80,
+                element("feGaussianBlur").attributes(Map.of("stdDeviation", deviation, "edgeMode", "none")).build(),
+                element("g").attributes("filter='url(#f)'").children(continuedTile(mode)).build(),
+                "x='-100' y='-100' width='344' height='280'", "color-interpolation-filters='sRGB'");
+        compareSvg("edge-mode-subregion-" + mode + "-" + deviation + "-" + named, svg, reference);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> chainedPrimitivePreservesOriginalInput() {
+        return Stream.of("duplicate", "wrap").map(mode -> DynamicTest.dynamicTest(mode + " chained input", () -> {
+            String primitives = element("feOffset")
+                    .attributes("x='32' y='24' width='24' height='16' result='tile'").build()
+                    + element("feDropShadow")
+                            .attributes("in='tile' result='tile' dx='0' dy='0' stdDeviation='0' flood-opacity='0'")
+                            .build()
+                    + element("feGaussianBlur")
+                            .attributes("x='0' y='0' width='144' height='80' stdDeviation='1.5'")
+                            .attributes(Map.of("edgeMode", mode)).build();
+            String svg = filterDocument(144, 80, primitives,
+                    element("g").attributes("filter='url(#f)'").children(tile(32, 24)).build(), "",
+                    "color-interpolation-filters='sRGB'");
+            String reference = filterDocument(144, 80,
+                    element("feGaussianBlur").attributes("stdDeviation='1.5' edgeMode='none'").build(),
+                    element("g").attributes("filter='url(#f)'").children(continuedTile(mode)).build(),
+                    "x='-100' y='-100' width='344' height='280'", "color-interpolation-filters='sRGB'");
+            compareSvg("edge-mode-chained-" + mode, svg, reference);
+        }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> transparentInputEdgesStayTransparent() {
+        return Stream.of("duplicate", "wrap", "none")
+                .map(mode -> DynamicTest.dynamicTest(mode + " transparent edge", () -> {
+                    String input = element("feOffset").attributes("x='20' y='12' width='48' height='40'").build();
+                    String blur = element("feGaussianBlur").attributes("stdDeviation='1.5'")
+                            .attributes(Map.of("edgeMode", mode)).build();
+                    String referenceBlur =
+                            element("feGaussianBlur").attributes("stdDeviation='1.5' edgeMode='none'").build();
+                    String artwork =
+                            element("g").attributes("filter='url(#f)' opacity='0.5'").children(tile(32, 24)).build();
+                    compareSvg("edge-mode-transparent-" + mode,
+                            filterDocument(144, 80, input + blur, artwork, "", "color-interpolation-filters='sRGB'"),
+                            filterDocument(144, 80, input + referenceBlur, artwork, "",
+                                    "color-interpolation-filters='sRGB'"));
+                }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> emptyInputHasNoEdgesToRepeat() {
+        return Stream.of("duplicate", "wrap", "none").map(mode -> DynamicTest.dynamicTest(mode + " empty input", () -> {
+            String primitives = element("feFlood").attributes("x='32' y='24' width='0' height='16'").build()
+                    + element("feGaussianBlur").attributes("x='0' y='0' width='144' height='80' stdDeviation='1.5'")
+                            .attributes(Map.of("edgeMode", mode)).build();
+            String svg = filterDocument(144, 80, primitives,
+                    element("g").attributes("filter='url(#f)'").children(tile(32, 24)).build(), "", "");
+            compareSvg("edge-mode-empty-" + mode, svg, wrapTag(144, 80, ""));
+        }));
+    }
+
+    private static void compareSvg(String name, String svg, String reference) {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new ImageSource.MemoryImageSource(name + "-ref", reference), RenderType.JSVG),
+                actual(new ImageSource.MemoryImageSource(name, svg), RenderType.JSVG), 0, 2 / 255.0)));
+    }
+
+    private static String tile(int x, int y) {
+        return element("g").children(
+                rectangle(x, y, 12, 8, 0xffe08040),
+                rectangle(x + 12, y, 12, 8, 0xff40c080),
+                rectangle(x, y + 8, 12, 8, 0xff204060),
+                rectangle(x + 12, y + 8, 12, 8, 0xff8040c0)).build();
+    }
+
+    private static String continuedTile(String mode) {
+        if (mode.equals("none")) return tile(32, 24);
+        ElementBuilder artwork = element("g");
+        if (mode.equals("duplicate")) {
+            artwork.children(
+                    rectangle(-100, -100, 144, 132, 0xffe08040),
+                    rectangle(44, -100, 200, 132, 0xff40c080),
+                    rectangle(-100, 32, 144, 148, 0xff204060),
+                    rectangle(44, 32, 200, 148, 0xff8040c0));
+        } else {
+            for (int y = 24 - 16 * 8; y < 180; y += 16) {
+                for (int x = 32 - 24 * 6; x < 244; x += 24) {
+                    artwork.children(tile(x, y));
+                }
+            }
+        }
+        return artwork.build();
+    }
+
     private static void compare(String mode, String deviation, String artwork, String region) {
         String primitive = element("feGaussianBlur")
                 .attributes(Map.of("stdDeviation", deviation, "edgeMode", mode)).build();

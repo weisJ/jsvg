@@ -36,28 +36,32 @@ public enum EdgeMode {
     Duplicate {
         @Override
         public ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-                @NotNull ImageProducer producer, @NotNull ConvolveOperation convolveOperation) {
-            return convolveDuplicate(context, filterContext, producer, convolveOperation);
+                @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
+                @NotNull ConvolveOperation convolveOperation) {
+            return convolveDuplicate(context, filterContext, producer, sourceBounds, convolveOperation);
         }
     },
     Wrap {
         @Override
         public ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-                @NotNull ImageProducer producer, @NotNull ConvolveOperation convolveOperation) {
-            return convolveWrap(context, filterContext, producer, convolveOperation);
+                @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
+                @NotNull ConvolveOperation convolveOperation) {
+            return convolveWrap(context, filterContext, producer, sourceBounds, convolveOperation);
         }
     },
     None {
         @Override
         public ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-                @NotNull ImageProducer producer, @NotNull ConvolveOperation convolveOperation) {
-            EdgeModeImage image = prepareEdgeModeImage(context, producer, convolveOperation);
+                @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
+                @NotNull ConvolveOperation convolveOperation) {
+            EdgeModeImage image = prepareEdgeModeImage(context, producer, sourceBounds, convolveOperation);
             return applyConvolutions(filterContext.renderingHints(), image, convolveOperation);
         }
     };
 
     public abstract ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-            @NotNull ImageProducer producer, @NotNull ConvolveOperation convolveOperation);
+            @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
+            @NotNull ConvolveOperation convolveOperation);
 
     public interface ConvolveOperation {
 
@@ -74,18 +78,22 @@ public enum EdgeMode {
         private final int yOff;
         private final int width;
         private final int height;
+        private final @NotNull Rectangle sourceBounds;
 
-        private EdgeModeImage(@NotNull BufferedImage img, int xOff, int yOff, int width, int height) {
+        private EdgeModeImage(@NotNull BufferedImage img, int xOff, int yOff, int width, int height,
+                @NotNull Rectangle sourceBounds) {
             this.img = img;
             this.xOff = xOff;
             this.yOff = yOff;
             this.width = width;
             this.height = height;
+            this.sourceBounds = sourceBounds;
         }
     }
 
     private static EdgeModeImage prepareEdgeModeImage(@NotNull RenderContext context,
-            @NotNull ImageProducer producer, @NotNull ConvolveOperation convolveOperation) {
+            @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
+            @NotNull ConvolveOperation convolveOperation) {
         Image img = context.platformSupport().createImage(producer);
         int width = img.getWidth(null);
         int height = img.getHeight(null);
@@ -102,46 +110,44 @@ public enum EdgeMode {
         g.drawImage(img, null, null);
         g.dispose();
 
-        return new EdgeModeImage(bufferedImage, xOff, yOff, width, height);
+        sourceBounds.translate(xOff, yOff);
+        return new EdgeModeImage(bufferedImage, xOff, yOff, width, height, sourceBounds);
     }
 
     private static @NotNull ImageProducer convolveDuplicate(@NotNull RenderContext context,
             @NotNull FilterContext filterContext, @NotNull ImageProducer producer,
-            @NotNull ConvolveOperation convolveOperation) {
-        EdgeModeImage edgeModeImage = prepareEdgeModeImage(context, producer, convolveOperation);
-        int xOff = edgeModeImage.xOff;
-        int yOff = edgeModeImage.yOff;
-        int width = edgeModeImage.width;
-        int height = edgeModeImage.height;
+            @NotNull Rectangle sourceBounds, @NotNull ConvolveOperation convolveOperation) {
+        EdgeModeImage edgeModeImage = prepareEdgeModeImage(context, producer, sourceBounds, convolveOperation);
+        int xOff = edgeModeImage.sourceBounds.x;
+        int yOff = edgeModeImage.sourceBounds.y;
+        int width = edgeModeImage.sourceBounds.width;
+        int height = edgeModeImage.sourceBounds.height;
+        if (width <= 0 || height <= 0) {
+            return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
+        }
 
         Graphics2D g = GraphicsUtil.createGraphics(edgeModeImage.img);
 
-        BufferedImage top = edgeModeImage.img.getSubimage(xOff, yOff, width, 1);
-        BufferedImage left = edgeModeImage.img.getSubimage(xOff, yOff, 1, height);
-        BufferedImage right = edgeModeImage.img.getSubimage(xOff + width - 1, yOff, 1, height);
-        BufferedImage bottom = edgeModeImage.img.getSubimage(xOff, yOff + height - 1, width, 1);
+        BufferedImage img = edgeModeImage.img;
+        // Source coordinates may lie outside the allocated image. drawImage clips those reads,
+        // without treating the allocation boundary as an edge of the input region.
+        g.drawImage(img, xOff, 0, xOff + width, yOff,
+                xOff, yOff, xOff + width, yOff + 1, null);
+        g.drawImage(img, xOff, yOff + height, xOff + width, img.getHeight(),
+                xOff, yOff + height - 1, xOff + width, yOff + height, null);
+        g.drawImage(img, 0, yOff, xOff, yOff + height,
+                xOff, yOff, xOff + 1, yOff + height, null);
+        g.drawImage(img, xOff + width, yOff, img.getWidth(), yOff + height,
+                xOff + width - 1, yOff, xOff + width, yOff + height, null);
 
-        g.drawImage(top, xOff, 0, width, yOff, null);
-        g.drawImage(bottom, xOff, yOff + height, width, yOff, null);
-        g.drawImage(left, 0, yOff, xOff, height, null);
-        g.drawImage(right, xOff + width, yOff, xOff, height, null);
-
-        Color topLeft = new Color(top.getRGB(0, 0), true);
-        Color topRight = new Color(top.getRGB(top.getWidth() - 1, 0), true);
-        Color bottomLeft = new Color(bottom.getRGB(0, 0), true);
-        Color bottomRight = new Color(bottom.getRGB(bottom.getWidth() - 1, 0), true);
-
-        g.setColor(topLeft);
-        g.fillRect(0, 0, xOff, yOff);
-
-        g.setColor(topRight);
-        g.fillRect(xOff + width, 0, xOff, yOff);
-
-        g.setColor(bottomLeft);
-        g.fillRect(0, yOff + height, xOff, yOff);
-
-        g.setColor(bottomRight);
-        g.fillRect(xOff + width, yOff + height, xOff, yOff);
+        g.drawImage(img, 0, 0, xOff, yOff,
+                xOff, yOff, xOff + 1, yOff + 1, null);
+        g.drawImage(img, xOff + width, 0, img.getWidth(), yOff,
+                xOff + width - 1, yOff, xOff + width, yOff + 1, null);
+        g.drawImage(img, 0, yOff + height, xOff, img.getHeight(),
+                xOff, yOff + height - 1, xOff + 1, yOff + height, null);
+        g.drawImage(img, xOff + width, yOff + height, img.getWidth(), img.getHeight(),
+                xOff + width - 1, yOff + height - 1, xOff + width, yOff + height, null);
 
         g.dispose();
 
@@ -149,48 +155,80 @@ public enum EdgeMode {
     }
 
     private static ImageProducer convolveWrap(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-            @NotNull ImageProducer producer, @NotNull ConvolveOperation convolveOperation) {
-        EdgeModeImage edgeModeImage = prepareEdgeModeImage(context, producer, convolveOperation);
-        int xOff = edgeModeImage.xOff;
-        int yOff = edgeModeImage.yOff;
-        int width = edgeModeImage.width;
-        int height = edgeModeImage.height;
+            @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
+            @NotNull ConvolveOperation convolveOperation) {
+        EdgeModeImage edgeModeImage = prepareEdgeModeImage(context, producer, sourceBounds, convolveOperation);
+        int xOff = edgeModeImage.sourceBounds.x;
+        int yOff = edgeModeImage.sourceBounds.y;
+        int width = edgeModeImage.sourceBounds.width;
+        int height = edgeModeImage.sourceBounds.height;
+        int rightPadding = edgeModeImage.img.getWidth() - xOff - width;
+        int bottomPadding = edgeModeImage.img.getHeight() - yOff - height;
+        if (width <= 0 || height <= 0) {
+            return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
+        }
 
         Graphics2D g = GraphicsUtil.createGraphics(edgeModeImage.img);
 
-        if (xOff > width || yOff > height) {
+        if (xOff > width || yOff > height || rightPadding > width || bottomPadding > height) {
             // A border wider than the input needs more than one copy of its opposite edge.
-            BufferedImage tile = edgeModeImage.img.getSubimage(xOff, yOff, width, height);
-            g.setPaint(new TexturePaint(tile, new Rectangle(xOff, yOff, width, height)));
-            g.fillRect(0, 0, edgeModeImage.img.getWidth(), yOff);
-            g.fillRect(0, yOff + height, edgeModeImage.img.getWidth(), yOff);
-            g.fillRect(0, yOff, xOff, height);
-            g.fillRect(xOff + width, yOff, xOff, height);
+            if (xOff >= 0 && yOff >= 0 && rightPadding >= 0 && bottomPadding >= 0) {
+                BufferedImage tile = edgeModeImage.img.getSubimage(xOff, yOff, width, height);
+                g.setPaint(new TexturePaint(tile, edgeModeImage.sourceBounds));
+                g.fillRect(0, 0, edgeModeImage.img.getWidth(), yOff);
+                g.fillRect(0, yOff + height, edgeModeImage.img.getWidth(), bottomPadding);
+                g.fillRect(0, yOff, xOff, height);
+                g.fillRect(xOff + width, yOff, rightPadding, height);
+            } else {
+                // Only part of the tile is allocated. Keep the full region's repetition period,
+                // and let drawImage clip source pixels outside the backing image.
+                for (int y = Math.floorDiv(-yOff, height); y * height < edgeModeImage.img.getHeight() - yOff; y++) {
+                    for (int x = Math.floorDiv(-xOff, width); x * width < edgeModeImage.img.getWidth() - xOff; x++) {
+                        if (x == 0 && y == 0) {
+                            continue;
+                        }
+                        g.drawImage(edgeModeImage.img,
+                                xOff + x * width, yOff + y * height, xOff + (x + 1) * width, yOff + (y + 1) * height,
+                                xOff, yOff, xOff + width, yOff + height, null);
+                    }
+                }
+            }
             g.dispose();
             return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
         }
 
+        BufferedImage img = edgeModeImage.img;
         if (yOff > 0) {
-            BufferedImage top = edgeModeImage.img.getSubimage(xOff, yOff, width, yOff);
-            BufferedImage bottom = edgeModeImage.img.getSubimage(xOff, height, width, yOff);
-            g.drawImage(bottom, xOff, 0, null);
-            g.drawImage(top, xOff, yOff + height, null);
+            g.drawImage(img, xOff, 0, xOff + width, yOff,
+                    xOff, height, xOff + width, yOff + height, null);
+        }
+        if (bottomPadding > 0) {
+            g.drawImage(img, xOff, yOff + height, xOff + width, img.getHeight(),
+                    xOff, yOff, xOff + width, yOff + bottomPadding, null);
         }
         if (xOff > 0) {
-            BufferedImage left = edgeModeImage.img.getSubimage(xOff, yOff, xOff, height);
-            BufferedImage right = edgeModeImage.img.getSubimage(width, yOff, xOff, height);
-            g.drawImage(right, 0, yOff, null);
-            g.drawImage(left, xOff + width, yOff, null);
+            g.drawImage(img, 0, yOff, xOff, yOff + height,
+                    width, yOff, xOff + width, yOff + height, null);
+        }
+        if (rightPadding > 0) {
+            g.drawImage(img, xOff + width, yOff, img.getWidth(), yOff + height,
+                    xOff, yOff, xOff + rightPadding, yOff + height, null);
         }
         if (xOff > 0 && yOff > 0) {
-            BufferedImage topLeft = edgeModeImage.img.getSubimage(xOff, yOff, xOff, yOff);
-            BufferedImage topRight = edgeModeImage.img.getSubimage(width, yOff, xOff, yOff);
-            BufferedImage bottomLeft = edgeModeImage.img.getSubimage(xOff, height, xOff, yOff);
-            BufferedImage bottomRight = edgeModeImage.img.getSubimage(width, height, xOff, yOff);
-            g.drawImage(bottomRight, 0, 0, null);
-            g.drawImage(bottomLeft, xOff + width, 0, null);
-            g.drawImage(topRight, 0, yOff + height, null);
-            g.drawImage(topLeft, xOff + width, yOff + height, null);
+            g.drawImage(img, 0, 0, xOff, yOff,
+                    width, height, xOff + width, yOff + height, null);
+        }
+        if (rightPadding > 0 && yOff > 0) {
+            g.drawImage(img, xOff + width, 0, img.getWidth(), yOff,
+                    xOff, height, xOff + rightPadding, yOff + height, null);
+        }
+        if (xOff > 0 && bottomPadding > 0) {
+            g.drawImage(img, 0, yOff + height, xOff, img.getHeight(),
+                    width, yOff, xOff + width, yOff + bottomPadding, null);
+        }
+        if (rightPadding > 0 && bottomPadding > 0) {
+            g.drawImage(img, xOff + width, yOff + height, img.getWidth(), img.getHeight(),
+                    xOff, yOff, xOff + rightPadding, yOff + bottomPadding, null);
         }
         g.dispose();
 
