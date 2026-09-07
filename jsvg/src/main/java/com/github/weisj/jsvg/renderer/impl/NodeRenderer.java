@@ -111,9 +111,14 @@ public final class NodeRenderer {
             filter = setupFilter((HasFilter) renderable, childOutput);
         }
 
-        Info info = Info.InfoWithIsolation.create(renderable, childContext, childOutput, elementBounds,
-                new IsolationEffects(filter, maskForIsolation, clipPathForIsolation));
-        if (info != null) return info;
+        IsolationEffects isolation = new IsolationEffects(filter, maskForIsolation, clipPathForIsolation);
+        Info info = Info.InfoWithIsolation.create(renderable, childContext, childOutput, elementBounds, isolation);
+        if (info != null) {
+            return info;
+        } else if (isolation.hasEffects()) {
+            childOutput.dispose();
+            return null;
+        }
 
         return new Info(renderable, childContext, childOutput);
     }
