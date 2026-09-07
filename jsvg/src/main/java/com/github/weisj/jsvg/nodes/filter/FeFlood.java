@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,11 +37,8 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.paint.SVGPaint;
-import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -62,8 +58,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        floodColor = attributeNode.getPaint("flood-color", new AwtSVGPaint(Color.BLACK),
-                Inherited.NO, Animatable.YES);
+        floodColor = attributeNode.getColor("flood-color", Color.BLACK, Animatable.YES);
         floodOpacity = attributeNode.getPercentage("flood-opacity", Percentage.ONE,
                 Inherited.NO, Animatable.YES);
     }
@@ -76,19 +71,15 @@ public final class FeFlood extends AbstractFilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        // Todo: We should be able to optimize this heavily by implementing a custom image producer.
-        // and even then filters like feBlend could benefit from knowing that this is a constant color.
         Filter.FilterInfo info = filterContext.info();
-        BufferedImage img = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
         float opacity = floodOpacity.get(context.measureContext());
-        if (opacity != 0) {
-            Graphics2D graphics = GraphicsUtil.createGraphics(img);
-            graphics.setComposite(AlphaComposite.Src.derive(opacity));
-            Rectangle rect = new Rectangle(0, 0, img.getWidth(), img.getHeight());
-            floodColor.fillShape(new Graphics2DOutput(graphics), context, rect, rect);
-            graphics.dispose();
+        Color color = context.resolveColor(floodColor);
+        if (color == null) {
+            throw new IllegalFilterStateException("The resolved flood color is not a solid color");
         }
-        impl().saveResult(new ImageProducerChannel(img.getSource()), filterContext);
+        int argb = opacity == 0 ? 0
+                : (Math.round(color.getAlpha() * opacity) << 24) | (color.getRGB() & 0xffffff);
+        impl().saveResult(new ConstantColorChannel(info.imageWidth, info.imageHeight, argb), filterContext);
     }
 
 }

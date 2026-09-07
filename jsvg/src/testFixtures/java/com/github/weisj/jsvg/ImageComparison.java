@@ -67,6 +67,8 @@ import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.ColorUtil;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
@@ -89,9 +91,18 @@ public final class ImageComparison {
         record BatikType() implements RenderType {
         }
         record JSVGType(@NotNull LoaderContext loaderContext,
-                @NotNull PlatformSupport platformSupport) implements RenderType {
+                @NotNull PlatformSupport platformSupport,
+                @NotNull AnimationState animationState) implements RenderType {
+            JSVGType(@NotNull LoaderContext loaderContext, @NotNull PlatformSupport platformSupport) {
+                this(loaderContext, platformSupport, AnimationState.NO_ANIMATION);
+            }
+
             JSVGType(@NotNull LoaderContext loaderContext) {
                 this(loaderContext, NullPlatformSupport.INSTANCE);
+            }
+
+            JSVGType withAnimationState(@NotNull AnimationState state) {
+                return new JSVGType(loaderContext, platformSupport, state);
             }
         }
 
@@ -224,12 +235,12 @@ public final class ImageComparison {
         BufferedImage render(@Nullable BufferedImage expectedHint) throws IOException {
             return switch (renderType) {
                 case BatikType() -> renderBatik(source.openStream());
-                case JSVGType(LoaderContext loaderContext, PlatformSupport platformSupport) -> {
+                case JSVGType(LoaderContext loaderContext, PlatformSupport platformSupport, AnimationState state) -> {
                     Dimension size = null;
                     if (expectedHint != null) {
                         size = new Dimension(expectedHint.getWidth(), expectedHint.getHeight());
                     }
-                    yield renderJsvg(source, graphicsMutator, loaderContext, platformSupport, size);
+                    yield renderJsvg(source, graphicsMutator, loaderContext, platformSupport, size, state);
                 }
                 case DiskImage() -> {
                     var img = ImageIO.read(source.openStream());
@@ -374,7 +385,8 @@ public final class ImageComparison {
 
     public static @NotNull BufferedImage renderJsvg(@NotNull String path) {
         try {
-            return renderJsvg(new PathImageSource(path), null, JSVG.loaderContext(), JSVG.platformSupport(), null);
+            return renderJsvg(new PathImageSource(path), null, JSVG.loaderContext(), JSVG.platformSupport(), null,
+                    AnimationState.NO_ANIMATION);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -391,7 +403,8 @@ public final class ImageComparison {
 
     private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
             @Nullable Consumer<Graphics2D> graphicsMutator, LoaderContext loaderContext,
-            @NotNull PlatformSupport platformSupport, @Nullable Dimension sizeHint) throws IOException {
+            @NotNull PlatformSupport platformSupport, @Nullable Dimension sizeHint,
+            @NotNull AnimationState animationState) throws IOException {
         SVGDocument document;
 
         URL url = imageSource.url();
@@ -411,7 +424,9 @@ public final class ImageComparison {
         g.setColor(ColorUtil.withAlpha(Color.WHITE, 0));
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         if (graphicsMutator != null) graphicsMutator.accept(g);
-        document.renderWithPlatform(platformSupport, g, new ViewBox(size));
+        Output output = Output.createForGraphics(g);
+        document.renderWithPlatform(platformSupport, output, new ViewBox(size), animationState);
+        output.dispose();
         g.dispose();
         return image;
     }

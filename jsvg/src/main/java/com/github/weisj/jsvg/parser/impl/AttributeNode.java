@@ -72,7 +72,9 @@ import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
@@ -342,6 +344,19 @@ public final class AttributeNode {
         List<ComponentValue> tokens = getTokens(key);
         Color c = tokens != null ? parser().paintParser().parseColor(tokens) : null;
         return c != null ? c : fallback;
+    }
+
+    @Contract("_,!null,_ -> !null")
+    public @Nullable SVGPaint getColor(@NotNull String key, @Nullable Color fallback, @NotNull Animatable animatable) {
+        boolean currentColor = "currentColor".equalsIgnoreCase(getValue(key));
+        Color color = currentColor ? null : getColor(key, fallback);
+        if (animatable == Animatable.YES) {
+            ColorValue initial = color != null ? new RGBColor(color) : RGBColor.INHERITED;
+            AnimatedColor animatedColor = getAnimatedColor(key, initial);
+            if (animatedColor != null) return animatedColor;
+        }
+        if (currentColor) return PredefinedPaints.CURRENT_COLOR;
+        return color != null ? new AwtSVGPaint(color) : null;
     }
 
     public @Nullable SVGPaint getPaint(@NotNull String key, Inherited inherited, Animatable animatable) {
@@ -770,7 +785,7 @@ public final class AttributeNode {
     private static <T, A extends T, N extends BaseAnimationNode> @Nullable A makeAnimated(
             @NotNull List<N> animationNodes,
             @NotNull T initial,
-            @NotNull BiFunction<N, T, A> factory) {
+            @NotNull BiFunction<@NotNull N, @NotNull T, A> factory) {
         if (animationNodes.isEmpty()) return null;
 
         @NotNull T currentInitial = initial;
