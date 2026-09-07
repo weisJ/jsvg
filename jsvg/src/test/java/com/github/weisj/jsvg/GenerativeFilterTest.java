@@ -177,6 +177,28 @@ class GenerativeFilterTest {
         assertAllocationWithin(rendered, 4 * (10 * 10 + 15 * 20));
     }
 
+    @TestFactory
+    Stream<DynamicTest> blurWithinItsInputRegionKeepsTheSmallBackingStore() {
+        return Stream.of("duplicate", "none").map(mode -> DynamicTest.dynamicTest(mode, () -> {
+            Rendered rendered = render(element("feGaussianBlur").attributes("stdDeviation='1.5'")
+                    .attributes(Map.of("edgeMode", mode)).build(), HUGE, SOURCE);
+            // Allow the blur's sampling margin, but reject allocating the whole viewport.
+            assertAllocationWithin(rendered, 4 * 20 * 20);
+        }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> repeatingEdgesDoesNotAllocateTheHugeOutputRegion() {
+        return Stream.of("duplicate", "wrap").map(mode -> DynamicTest.dynamicTest(mode, () -> {
+            Rendered rendered = render(
+                    element("feFlood").attributes(SMALL).build()
+                            + element("feGaussianBlur").attributes(HUGE, "stdDeviation='1.5'")
+                                    .attributes(Map.of("edgeMode", mode)).build(),
+                    HUGE, SOURCE);
+            assertAllocationWithin(rendered, 4 * 100 * 100);
+        }));
+    }
+
     private static void assertAllocationWithin(Rendered rendered, long pixelBudget) {
         assertFalse(rendered.buffers().isEmpty(), "The test must exercise filter image allocation");
         long pixels = rendered.buffers().stream().mapToLong(Long::longValue).sum();
