@@ -80,29 +80,18 @@ public final class Filter extends ContainerNode {
     private UnitType filterPrimitiveUnits;
     private ColorInterpolation colorInterpolation;
 
-    private boolean isValid;
-
     @Override
     public @NotNull String tagName() {
         return TAG;
     }
 
     public boolean hasEffect() {
-        return isValid && !children().isEmpty();
+        return !children().isEmpty();
     }
 
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-
-        isValid = true;
-        for (SVGNode child : children()) {
-            FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-            if (!filterPrimitive.isValid()) {
-                isValid = false;
-                break;
-            }
-        }
 
         filterUnits = attributeNode.getEnum("filterUnits", UnitType.ObjectBoundingBox);
         filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
@@ -144,7 +133,7 @@ public final class Filter extends ContainerNode {
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-                filterPrimitive.layoutFilter(context, filterLayoutContext);
+                layoutPrimitive(filterPrimitive, context, filterLayoutContext);
             } catch (IllegalFilterStateException ignored) {
                 // Just carry on doing layout
             }
@@ -177,7 +166,7 @@ public final class Filter extends ContainerNode {
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-                filterPrimitive.applyFilter(context, filterContext);
+                applyPrimitive(filterPrimitive, context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
                 LOGGER.log(Level.INFO, "Exception during filter", e);
@@ -186,6 +175,18 @@ public final class Filter extends ContainerNode {
 
         Channel result = Objects.requireNonNull(filterContext.getChannel(DefaultFilterChannel.LastResult));
         return result.toBufferedImageNonAliased(context);
+    }
+
+    static void layoutPrimitive(@NotNull FilterPrimitive primitive, @NotNull RenderContext context,
+            @NotNull FilterLayoutContext filterLayoutContext) {
+        if (!primitive.isValid()) return;
+        primitive.layoutFilter(context, filterLayoutContext);
+    }
+
+    static void applyPrimitive(@NotNull FilterPrimitive primitive, @NotNull RenderContext context,
+            @NotNull FilterContext filterContext) {
+        if (!primitive.isValid()) return;
+        primitive.applyFilter(context, filterContext);
     }
 
     @Override

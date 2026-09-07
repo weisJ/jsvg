@@ -41,7 +41,7 @@ abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
         filterLayoutContext.resultChannels().addAlias(outerLastResult, impl().inputChannelKey());
         for (FilterPrimitive primitive : primitives()) {
-            primitive.layoutFilter(context, filterLayoutContext);
+            Filter.layoutPrimitive(primitive, context, filterLayoutContext);
         }
         // The chain implements one primitive, whose default subregion comes from its original input.
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
@@ -53,7 +53,7 @@ abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         filterContext.resultChannels().addAlias(outerLastResult, impl().inputChannelKey());
         for (FilterPrimitive primitive : primitives()) {
-            primitive.applyFilter(context, filterContext);
+            Filter.applyPrimitive(primitive, context, filterContext);
         }
         impl().saveResult(filterContext.getChannel(DefaultFilterChannel.LastResult), filterContext);
     }
