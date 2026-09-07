@@ -29,6 +29,7 @@ import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
 import java.awt.image.MemoryImageSource;
+import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
@@ -62,6 +63,29 @@ public final class ConstantColorChannel implements Channel, PixelProvider {
         return new ConstantColorChannel(width, height, color);
     }
 
+    public @NotNull ConstantColorChannel composite(@NotNull ConstantColorChannel source,
+            @NotNull Composite composite) {
+        if (AlphaComposite.SrcOver.equals(composite)) {
+            if (source.color >>> 24 == 0) return this;
+            if (source.color >>> 24 == 255) return withColor(source.color);
+        }
+        // Use the same color model and compositing rules as the raster path, for a single pixel.
+        ColorModel colorModel = ColorModel.getRGBdefault();
+        WritableRaster src = colorModel.createCompatibleWritableRaster(1, 1);
+        WritableRaster dst = colorModel.createCompatibleWritableRaster(1, 1);
+        src.setDataElements(0, 0, new int[] {source.color});
+        int[] result = {color};
+        dst.setDataElements(0, 0, result);
+        CompositeContext context = composite.createContext(colorModel, colorModel, null);
+        try {
+            context.compose(src, dst, dst);
+            dst.getDataElements(0, 0, result);
+            return withColor(result[0]);
+        } finally {
+            context.dispose();
+        }
+    }
+
     @Override
     public @NotNull Channel clip(@NotNull Rectangle2D region, @NotNull FilterContext context) {
         // Transparent black remains identical both inside and outside every primitive subregion.
@@ -89,12 +113,17 @@ public final class ConstantColorChannel implements Channel, PixelProvider {
     }
 
     @Override
+    public void paint(@NotNull Graphics2D graphics, @NotNull RenderContext context) {
+        graphics.setColor(new Color(color, true));
+        graphics.fillRect(0, 0, width, height);
+    }
+
+    @Override
     public @NotNull BufferedImage toBufferedImageNonAliased(@NotNull RenderContext context) {
         BufferedImage result = ImageUtil.createCompatibleTransparentImage(width, height);
         Graphics2D graphics = result.createGraphics();
         graphics.setComposite(AlphaComposite.Src);
-        graphics.setColor(new Color(color, true));
-        graphics.fillRect(0, 0, width, height);
+        paint(graphics, context);
         graphics.dispose();
         return result;
     }

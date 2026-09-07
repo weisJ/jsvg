@@ -43,6 +43,11 @@ public interface Channel {
         return context.platformSupport().createImage(producer());
     }
 
+    default void paint(@NotNull Graphics2D graphics, @NotNull RenderContext context) {
+        graphics.drawImage(context.platformSupport().createImage(producer()),
+                null, context.platformSupport().imageObserver());
+    }
+
     default @NotNull BufferedImage toBufferedImageNonAliased(@NotNull RenderContext context) {
         return makeNonAliased(toImage(context));
     }
