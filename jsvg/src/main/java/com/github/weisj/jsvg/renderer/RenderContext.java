@@ -324,6 +324,10 @@ public final class RenderContext {
         return PaintResolver.resolvePaint(paintContext.fillPaint, paintContext, contextElementAttributes);
     }
 
+    public @Nullable Color resolveColor(@Nullable SVGPaint paint) {
+        return PaintResolver.resolveColor(paint, paintContext, contextElementAttributes, measureContext);
+    }
+
     public float rawOpacity() {
         return paintContext.opacity.get(measureContext);
     }

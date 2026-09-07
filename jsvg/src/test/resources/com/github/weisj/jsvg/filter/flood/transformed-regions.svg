@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="110">
+    <defs>
+        <filter id="flood" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+            <feFlood x="20.5" y="30.5" width="40" height="20" flood-color="black" flood-opacity="0.5"/>
+        </filter>
+    </defs>
+    <g transform=""><rect width="80" height="80" fill="red" filter="url(#flood)"/></g>
+    <g transform="translate(100 0) translate(4 4) scale(1 2)"><rect width="80" height="80" fill="red" filter="url(#flood)"/></g>
+    <g transform="translate(200 0) matrix(-1 0 0 1 100 0)"><rect width="80" height="80" fill="red" filter="url(#flood)"/></g>
+    <g transform="translate(300 0) rotate(90 50 50)"><rect width="80" height="80" fill="red" filter="url(#flood)"/></g>
+</svg>

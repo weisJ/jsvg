@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="110">
+    <g transform=""><rect x="20.5" y="30.5" width="40" height="20" fill-opacity="0.5"/></g>
+    <g transform="translate(100 0) translate(4 4) scale(1 2)"><rect x="20.5" y="30.5" width="40" height="20" fill-opacity="0.5"/></g>
+    <g transform="translate(200 0) matrix(-1 0 0 1 100 0)"><rect x="20.5" y="30.5" width="40" height="20" fill-opacity="0.5"/></g>
+    <g transform="translate(300 0) rotate(90 50 50)"><rect x="20.5" y="30.5" width="40" height="20" fill-opacity="0.5"/></g>
+</svg>
