@@ -93,14 +93,17 @@ public final class LayoutBounds {
 
     public @NotNull LayoutBounds translate(float dx, float dy, @NotNull FilterLayoutContext context) {
         Rectangle2D clipBounds = context.clipBounds();
-        FloatInsets offsetInsets = new FloatInsets(
+        Rectangle2D newBounds = GeometryUtil.grow(bounds, new FloatInsets(
+                Math.max(-dy, 0),
+                Math.max(-dx, 0),
+                Math.max(dy, 0),
+                Math.max(dx, 0)));
+        // Visible output can require input outside the clip in the opposite direction.
+        FloatInsets ins = GeometryUtil.max(GeometryUtil.overhangInsets(clipBounds, bounds), new FloatInsets(
                 Math.max(dy, 0),
                 Math.max(dx, 0),
                 Math.max(-dy, 0),
-                Math.max(-dx, 0));
-        Rectangle2D newBounds = GeometryUtil.grow(bounds, offsetInsets);
-        // The new layout rect is the union of the original rect and the shifted rect.
-        FloatInsets ins = GeometryUtil.max(GeometryUtil.overhangInsets(clipBounds, bounds), offsetInsets);
+                Math.max(-dx, 0)));
         return new LayoutBounds(newBounds, GeometryUtil.max(clipBoundsEscapeInsets, ins), region);
     }
 

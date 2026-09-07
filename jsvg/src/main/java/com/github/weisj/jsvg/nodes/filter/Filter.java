@@ -134,9 +134,8 @@ public final class Filter extends ContainerNode {
 
         if (effectiveFilterRegion.isEmpty()) return null;
 
-        LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(effectiveFilterRegion, filterRegion);
         LayoutBounds clippedElementLayoutBounds = LayoutBounds.createInitial(clippedElementBounds, filterRegion);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.LastResult, elementLayoutBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.LastResult, clippedElementLayoutBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, clippedElementLayoutBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, clippedElementLayoutBounds);
 
