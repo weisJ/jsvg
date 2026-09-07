@@ -23,8 +23,10 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
@@ -54,7 +56,11 @@ public final class ChannelStorage<T> {
 
     public @NotNull T get(@NotNull FilterChannelKey key) {
         Supplier<T> provider = storage.get(resolveKey(key).key());
-        if (provider == null) throw new IllegalFilterStateException("Channel " + key + " not found.");
+
+        // Fall back to last result if channel is not found.
+        // E.g. this might be the case if the filter primtive is invalid.
+        if (provider == null) provider = storage.get(DefaultFilterChannel.LastResult.key());
+        Objects.requireNonNull(provider, "Channel " + key + " not found.");
         return provider.get();
     }
 }
