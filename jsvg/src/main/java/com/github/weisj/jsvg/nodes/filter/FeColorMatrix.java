@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -111,7 +112,8 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds bounds = impl().layoutInput(filterLayoutContext);
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), bounds.region());
-        bounds = bounds.withRegion(region);
+        bounds = bounds.withRegion(region,
+                filter != null && !filter.isLinear() ? CoversWholeRegion.YES : CoversWholeRegion.NO);
         impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 

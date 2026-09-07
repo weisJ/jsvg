@@ -40,6 +40,10 @@ public final class CompositeModeComposite {
         return composite;
     }
 
+    boolean affectsTransparentBlack() {
+        return composite instanceof ArithmeticComposite && ((ArithmeticComposite) composite).k4 > 0;
+    }
+
     private static @NotNull Composite createComposite(@NotNull AttributeNode attributeNode) {
         CompositeMode compositeMode = attributeNode.getEnum("operator", CompositeMode.Over);
         switch (compositeMode) {
