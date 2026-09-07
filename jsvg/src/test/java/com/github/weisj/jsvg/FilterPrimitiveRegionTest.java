@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.Utils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.*;
@@ -28,6 +29,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
@@ -46,24 +48,24 @@ class FilterPrimitiveRegionTest {
     @TestFactory
     Stream<DynamicTest> clipsPrimitiveBeforeItsResultIsReused() {
         return Stream.of(
-                "<feFlood %s/>",
-                "<feOffset %s/>",
-                "<feGaussianBlur stdDeviation='0' %s/>",
-                "<feGaussianBlur stdDeviation='2' %s/>",
-                "<feColorMatrix %s/>",
-                "<feColorMatrix type='saturate' values='0' %s/>",
-                "<feComponentTransfer %s/>",
-                "<feComponentTransfer %s><feFuncA type='linear' slope='0.5'/></feComponentTransfer>",
-                "<feComposite in2='SourceAlpha' %s/>",
-                "<feBlend in2='SourceAlpha' %s/>",
-                "<feMerge %s><feMergeNode in='SourceGraphic'/></feMerge>",
-                "<feDisplacementMap in2='SourceAlpha' scale='0' %s/>",
-                "<feDisplacementMap in2='SourceAlpha' scale='6' %s/>",
-                "<feDiffuseLighting %s><feDistantLight elevation='90'/></feDiffuseLighting>",
-                "<feTurbulence type='fractalNoise' baseFrequency='0.05' %s/>",
-                "<feDropShadow stdDeviation='0' dx='0' dy='0' %s/>")
-                .map(primitive -> DynamicTest.dynamicTest(primitive, () -> {
-                    BufferedImage image = render(primitive.formatted(REGION) + EXPAND_BUFFER, SOURCE, "");
+                element("feFlood"),
+                element("feOffset"),
+                element("feGaussianBlur").attributes("stdDeviation='0'"),
+                element("feGaussianBlur").attributes("stdDeviation='2'"),
+                element("feColorMatrix"),
+                element("feColorMatrix").attributes("type='saturate' values='0'"),
+                element("feComponentTransfer"),
+                element("feComponentTransfer").children(element("feFuncA").attributes("type='linear' slope='0.5'")),
+                element("feComposite").attributes("in2='SourceAlpha'"),
+                element("feBlend").attributes("in2='SourceAlpha'"),
+                element("feMerge").children(element("feMergeNode").attributes("in='SourceGraphic'")),
+                element("feDisplacementMap").attributes("in2='SourceAlpha' scale='0'"),
+                element("feDisplacementMap").attributes("in2='SourceAlpha' scale='6'"),
+                element("feDiffuseLighting").children(element("feDistantLight").attributes("elevation='90'")),
+                element("feTurbulence").attributes("type='fractalNoise' baseFrequency='0.05'"),
+                element("feDropShadow").attributes("stdDeviation='0' dx='0' dy='0'"))
+                .map(primitive -> DynamicTest.dynamicTest(primitive.build(), () -> {
+                    BufferedImage image = render(primitive.attributes(REGION).build() + EXPAND_BUFFER, SOURCE, "");
                     assertTrue((image.getRGB(30, 30) >>> 24) > 0);
                     for (int y = 0; y < 100; y++) {
                         for (int x = 0; x < 100; x++) {
@@ -95,9 +97,10 @@ class FilterPrimitiveRegionTest {
     @Test
     void repeatedClippingDoesNotApplyAntialiasingTwice() {
         String region = "x='20.5' y='20.5' width='20' height='20' result='clipped'";
-        String flood = "<feFlood flood-opacity='0.5' " + region + "/>";
+        String flood = element("feFlood").attributes("flood-opacity='0.5'", region).build();
         BufferedImage expected = render(flood + EXPAND_BUFFER, SOURCE, "");
-        BufferedImage image = render(flood + "<feOffset " + region + "/>" + EXPAND_BUFFER, SOURCE, "");
+        BufferedImage image =
+                render(flood + element("feOffset").attributes(region).build() + EXPAND_BUFFER, SOURCE, "");
         assertArrayEquals(expected.getRGB(0, 0, 100, 100, null, 0, 100),
                 image.getRGB(0, 0, 100, 100, null, 0, 100));
         assertEquals(128, image.getRGB(30, 30) >>> 24);
@@ -118,8 +121,8 @@ class FilterPrimitiveRegionTest {
                     String matrix = "matrix(" + transform.getScaleX() + "," + transform.getShearY() + ","
                             + transform.getShearX() + "," + transform.getScaleY() + ","
                             + transform.getTranslateX() + "," + transform.getTranslateY() + ")";
-                    BufferedImage image = render("<feFlood " + REGION + "/>" + EXPAND_BUFFER,
-                            "<g transform='" + matrix + "'>" + SOURCE + "</g>", "");
+                    BufferedImage image = render(element("feFlood").attributes(REGION).build() + EXPAND_BUFFER,
+                            element("g").attributes(Map.of("transform", matrix)).children(SOURCE).build(), "");
                     Shape region = transform.createTransformedShape(new Rectangle(20, 20, 20, 20));
                     for (int y = 0; y < 100; y++) {
                         for (int x = 0; x < 100; x++) {
@@ -137,8 +140,9 @@ class FilterPrimitiveRegionTest {
     Stream<DynamicTest> clipsSourceChannelsBeforeSampling() {
         return Stream.of("SourceGraphic", "SourceAlpha")
                 .map(input -> DynamicTest.dynamicTest(input, () -> {
-                    BufferedImage image = render("<feOffset in='" + input + "' dx='15'/>", SOURCE,
-                            "x='20' y='20' width='20' height='20'");
+                    BufferedImage image =
+                            render(element("feOffset").attributes(Map.of("in", input, "dx", 15)).build(), SOURCE,
+                                    "x='20' y='20' width='20' height='20'");
                     assertEquals(0, image.getRGB(25, 30) >>> 24);
                     assertEquals(255, image.getRGB(35, 30) >>> 24);
                 }));
@@ -152,10 +156,7 @@ class FilterPrimitiveRegionTest {
     }
 
     private static BufferedImage render(String primitives, String source, String filterRegion) {
-        String svg = "<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'>"
-                + "<defs><filter id='f' filterUnits='userSpaceOnUse' "
-                + (filterRegion.isEmpty() ? "x='0' y='0' width='100' height='100'" : filterRegion)
-                + ">" + primitives + "</filter></defs>" + source + "</svg>";
+        String svg = filterDocument(100, 100, primitives, source, filterRegion, "");
         SVGDocument document = new SVGLoader().load(
                 new ByteArrayInputStream(svg.getBytes(StandardCharsets.UTF_8)), null, LoaderContext.builder().build());
         assertNotNull(document);
