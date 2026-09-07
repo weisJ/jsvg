@@ -39,7 +39,7 @@ abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
-        filterLayoutContext.resultChannels().addResult(outerLastResult, input);
+        filterLayoutContext.resultChannels().addAlias(outerLastResult, impl().inputChannelKey());
         for (FilterPrimitive primitive : primitives()) {
             primitive.layoutFilter(context, filterLayoutContext);
         }
@@ -51,7 +51,7 @@ abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        filterContext.resultChannels().addResult(outerLastResult, impl().inputChannel(filterContext));
+        filterContext.resultChannels().addAlias(outerLastResult, impl().inputChannelKey());
         for (FilterPrimitive primitive : primitives()) {
             primitive.applyFilter(context, filterContext);
         }

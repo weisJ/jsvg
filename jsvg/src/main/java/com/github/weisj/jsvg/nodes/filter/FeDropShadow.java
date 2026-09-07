@@ -23,7 +23,6 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -53,7 +52,6 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
 
         String resultKey = "result";
 
-        FilterChannelKey inputId = attributeNode.getFilterChannelKey("in", outerLastResult);
         String resultId = child.getValue(resultKey);
         if (resultId == null) {
             resultId = "dropshadow-" + attributeNode.hashCode();
@@ -83,7 +81,7 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
         FeMergeNode node1 = new FeMergeNode();
         node1.build(child);
 
-        child.setResolvedNonCssValue("in", inputId.key().toString());
+        child.setResolvedNonCssValue("in", outerLastResult.key().toString());
         FeMergeNode node2 = new FeMergeNode();
         node2.build(child);
 

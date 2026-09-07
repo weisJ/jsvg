@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
@@ -135,9 +136,10 @@ public final class Filter extends ContainerNode {
         if (effectiveFilterRegion.isEmpty()) return null;
 
         LayoutBounds clippedElementLayoutBounds = LayoutBounds.createInitial(clippedElementBounds, filterRegion);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.LastResult, clippedElementLayoutBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, clippedElementLayoutBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, clippedElementLayoutBounds);
+        filterLayoutContext.resultChannels().addAlias(DefaultFilterChannel.LastResult,
+                DefaultFilterChannel.SourceGraphic);
 
         for (SVGNode child : children()) {
             try {
@@ -148,8 +150,8 @@ public final class Filter extends ContainerNode {
             }
         }
 
-        ResolvedLayouts layouts = filterLayoutContext.resolvedLayouts();
-        LayoutBounds clipHeuristic = layouts.lastResult();
+        ChannelStorage<LayoutBounds> layouts = filterLayoutContext.resultChannels();
+        LayoutBounds clipHeuristic = layouts.get(DefaultFilterChannel.LastResult);
 
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
         Rectangle2D clipHeuristicBounds = clipHeuristic.bounds()
@@ -168,7 +170,7 @@ public final class Filter extends ContainerNode {
 
         Channel sourceChannel = new ImageProducerChannel(producer).clip(filterInfo.filterRegion(), filterContext);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
-        filterContext.resultChannels().addResult(DefaultFilterChannel.LastResult, sourceChannel);
+        filterContext.resultChannels().addAlias(DefaultFilterChannel.LastResult, DefaultFilterChannel.SourceGraphic);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha,
                 () -> new SourceAlphaChannel(sourceChannel.alphaChannel().producer()));
 
@@ -195,11 +197,11 @@ public final class Filter extends ContainerNode {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
-        private final @NotNull ResolvedLayouts layouts;
+        private final @NotNull ChannelStorage<LayoutBounds> layouts;
 
         private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
                 @NotNull Rectangle2D effectiveFilterArea,
-                @NotNull ResolvedLayouts layouts) {
+                @NotNull ChannelStorage<LayoutBounds> layouts) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
@@ -219,8 +221,8 @@ public final class Filter extends ContainerNode {
         }
 
         @NotNull
-        LayoutBounds layout(@NotNull FilterPrimitiveBase primitive) {
-            return layouts.get(primitive);
+        LayoutBounds layout(@NotNull FilterChannelKey key) {
+            return layouts.get(key);
         }
     }
 
@@ -255,8 +257,8 @@ public final class Filter extends ContainerNode {
         }
 
         @NotNull
-        LayoutBounds layout(@NotNull FilterPrimitiveBase primitive) {
-            return filterLayout.layout(primitive);
+        LayoutBounds layout(@NotNull FilterChannelKey key) {
+            return filterLayout.layout(key);
         }
 
         public @NotNull Output output() {

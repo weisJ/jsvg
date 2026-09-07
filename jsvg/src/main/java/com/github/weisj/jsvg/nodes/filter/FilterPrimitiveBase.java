@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.ParsedElement;
 
-public final class FilterPrimitiveBase {
+public final class FilterPrimitiveBase implements FilterChannelKey {
 
     final @NotNull Length x;
     final @NotNull Length y;
@@ -71,6 +71,16 @@ public final class FilterPrimitiveBase {
         return filterContext.colorInterpolation(colorInterpolation);
     }
 
+    @Override
+    public @NotNull Object key() {
+        return this;
+    }
+
+    @NotNull
+    FilterChannelKey inputChannelKey() {
+        return inputChannel;
+    }
+
     public @NotNull Channel channel(@NotNull FilterChannelKey key, @NotNull FilterContext context) {
         return context.getChannel(key);
     }
@@ -88,7 +98,6 @@ public final class FilterPrimitiveBase {
     }
 
     public void saveLayoutResult(@NotNull LayoutBounds bounds, @NotNull FilterLayoutContext context) {
-        context.saveResult(this, bounds);
         saveResultImpl(bounds, context.resultChannels());
     }
 
@@ -97,9 +106,10 @@ public final class FilterPrimitiveBase {
     }
 
     private <T> void saveResultImpl(@NotNull T value, @NotNull ChannelStorage<T> storage) {
-        storage.addResult(resultChannel, value);
+        storage.addResult(this, value);
+        storage.addAlias(DefaultFilterChannel.LastResult, this);
         if (resultChannel != DefaultFilterChannel.LastResult) {
-            storage.addResult(DefaultFilterChannel.LastResult, value);
+            storage.addAlias(resultChannel, this);
         }
     }
 }
