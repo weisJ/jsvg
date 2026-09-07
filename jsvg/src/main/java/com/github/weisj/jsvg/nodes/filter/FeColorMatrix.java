@@ -125,12 +125,27 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
             return;
         }
         f.setConvertToLinear(colorInterpolation(filterContext) == ColorInterpolation.LinearRGB);
-        impl().saveResult(impl().inputChannel(filterContext).applyFilter(f), filterContext);
+        Channel input = impl().inputChannel(filterContext);
+        Channel result;
+        if (f.isConstant()) {
+            Filter.FilterInfo info = filterContext.info();
+            result = new ConstantColorChannel(info.imageWidth, info.imageHeight, f.filterRGB(0, 0, 0));
+        } else if (input instanceof ConstantColorChannel) {
+            ConstantColorChannel constant = (ConstantColorChannel) input;
+            result = constant.withColor(f.filterRGB(0, 0, constant.color()));
+        } else {
+            result = input.applyFilter(f);
+        }
+        impl().saveResult(result, filterContext);
     }
 
     private abstract static class AffineRGBImageFilter extends ColorSpaceAwareRGBImageFilter {
 
         abstract boolean isLinear();
+
+        boolean isConstant() {
+            return false;
+        }
     }
 
     private static final class MatrixRGBFilter extends AffineRGBImageFilter {
@@ -185,6 +200,14 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         @Override
         boolean isLinear() {
             return r5 == 0 && g5 == 0 && b5 == 0 && a5 == 0;
+        }
+
+        @Override
+        boolean isConstant() {
+            return r1 == 0 && r2 == 0 && r3 == 0 && r4 == 0
+                    && g1 == 0 && g2 == 0 && g3 == 0 && g4 == 0
+                    && b1 == 0 && b2 == 0 && b3 == 0 && b4 == 0
+                    && a1 == 0 && a2 == 0 && a3 == 0 && a4 == 0;
         }
 
         @Override
