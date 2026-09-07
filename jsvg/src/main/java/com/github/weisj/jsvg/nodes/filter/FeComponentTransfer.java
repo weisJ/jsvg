@@ -55,6 +55,7 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
     private ByteLookupTable sRGBlookupTable;
     private ByteLookupTable linearRGBlookupTable;
     private boolean affectsTransparentBlack;
+    private boolean constantOutput;
 
     @Override
     public @NotNull String tagName() {
@@ -102,8 +103,12 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
 
         if (redValid || greenValid || blueValid || alphaValid) {
             sRGBlookupTable = new ByteLookupTable(0, tables);
+            constantOutput = true;
             for (byte[] table : tables) {
                 affectsTransparentBlack |= table[0] != 0;
+                for (byte value : table) {
+                    constantOutput &= value == table[0];
+                }
             }
         }
         children().clear();
@@ -171,7 +176,24 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
             filterPrimitiveBase.noop(filterContext);
             return;
         }
-        ImageFilter f = new BufferedImageFilter(new LookupOp(lookup, filterContext.renderingHints()));
-        filterPrimitiveBase.saveResult(filterPrimitiveBase.inputChannel(filterContext).applyFilter(f), filterContext);
+        Channel input = filterPrimitiveBase.inputChannel(filterContext);
+        Channel result;
+        if (constantOutput) {
+            Filter.FilterInfo info = filterContext.info();
+            result = new ConstantColorChannel(info.imageWidth, info.imageHeight, filterColor(lookup, 0));
+        } else if (input instanceof ConstantColorChannel) {
+            ConstantColorChannel constant = (ConstantColorChannel) input;
+            result = constant.withColor(filterColor(lookup, constant.color()));
+        } else {
+            ImageFilter f = new BufferedImageFilter(new LookupOp(lookup, filterContext.renderingHints()));
+            result = input.applyFilter(f);
+        }
+        filterPrimitiveBase.saveResult(result, filterContext);
+    }
+
+    private static int filterColor(@NotNull LookupTable lookup, int argb) {
+        int[] rgba = {(argb >> 16) & 0xff, (argb >> 8) & 0xff, argb & 0xff, argb >>> 24};
+        lookup.lookupPixel(rgba, rgba);
+        return ((rgba[3] & 0xff) << 24) | ((rgba[0] & 0xff) << 16) | ((rgba[1] & 0xff) << 8) | (rgba[2] & 0xff);
     }
 }
