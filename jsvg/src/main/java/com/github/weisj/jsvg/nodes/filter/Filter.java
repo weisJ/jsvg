@@ -134,9 +134,8 @@ public final class Filter extends ContainerNode {
 
         if (effectiveFilterRegion.isEmpty()) return null;
 
-        LayoutBounds elementLayoutBounds = new LayoutBounds(effectiveFilterRegion, new FloatInsets(), filterRegion);
-        LayoutBounds clippedElementLayoutBounds =
-                new LayoutBounds(clippedElementBounds, new FloatInsets(), clippedElementBounds);
+        LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(effectiveFilterRegion, filterRegion);
+        LayoutBounds clippedElementLayoutBounds = LayoutBounds.createInitial(clippedElementBounds, filterRegion);
         LayoutBounds sourceDependentBounds = elementLayoutBounds.transform(
                 (data, flags) -> flags.operatesOnWholeFilterRegion
                         ? data
@@ -173,7 +172,7 @@ public final class Filter extends ContainerNode {
         FilterContext filterContext =
                 new FilterContext(filterInfo, filterPrimitiveUnits, colorInterpolation, output.renderingHints());
 
-        Channel sourceChannel = new ImageProducerChannel(producer);
+        Channel sourceChannel = new ImageProducerChannel(producer).clip(filterInfo.filterRegion(), filterContext);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
         filterContext.resultChannels().addResult(DefaultFilterChannel.LastResult, sourceChannel);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha,
@@ -187,7 +186,6 @@ public final class Filter extends ContainerNode {
                 // Just carry on applying filters
                 LOGGER.log(Level.INFO, "Exception during filter", e);
             }
-            // Todo: Respect filterPrimitiveRegion
         }
 
         Channel result = Objects.requireNonNull(filterContext.getChannel(DefaultFilterChannel.LastResult));

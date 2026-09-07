@@ -99,6 +99,10 @@ public final class LayoutBounds {
     private final @NotNull ComputeFlags additionalFlags;
     private final @Nullable Data @NotNull [] cache = new Data[ComputeFlags.CACHE_SIZE];
 
+    public static @NotNull LayoutBounds createInitial(@NotNull Rectangle2D bounds, @NotNull Rectangle2D region) {
+        return new LayoutBounds(bounds, new FloatInsets(), region);
+    }
+
     public LayoutBounds(@NotNull Rectangle2D bounds, @NotNull FloatInsets clipBoundsEscapeInsets,
             @NotNull Rectangle2D region) {
         Data data = new Data(bounds, clipBoundsEscapeInsets);

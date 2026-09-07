@@ -157,6 +157,21 @@ public final class GeometryUtil {
         return r1;
     }
 
+    public static @NotNull Shape transformBounds(@NotNull AffineTransform transform, @NotNull Rectangle2D rect) {
+        if (rect.isEmpty() || transform.isIdentity()) return rect;
+
+        if (transform.getShearX() == 0 && transform.getShearY() == 0) {
+            double x = transform.getScaleX() * rect.getX() + transform.getTranslateX();
+            double y = transform.getScaleY() * rect.getY() + transform.getTranslateY();
+            double width = transform.getScaleX() * rect.getWidth();
+            double height = transform.getScaleY() * rect.getHeight();
+            return new Rectangle2D.Double(
+                    Math.min(x, x + width), Math.min(y, y + height),
+                    Math.abs(width), Math.abs(height));
+        }
+        return transform.createTransformedShape(rect);
+    }
+
     public static float left(@NotNull Rectangle2D rect) {
         return (float) rect.getX();
     }
