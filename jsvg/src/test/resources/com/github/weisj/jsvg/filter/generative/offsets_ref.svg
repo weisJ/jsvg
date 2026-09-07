@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220" viewBox="0 0 440 220">
+    <!-- offsetNegativeMatrix -->
+    <g transform="translate(0 0)">
+        <rect width="20" fill="#ff0000" y="50" x="45" height="20" />
+    </g>
+    <!-- offsetNegativeTransfer -->
+    <g transform="translate(110 0)">
+        <rect width="20" fill="#000000" y="50" x="45" height="20" />
+    </g>
+    <!-- offsetNegativeComposite -->
+    <g transform="translate(220 0)">
+        <rect width="20" fill="#ffffff" y="50" x="45" height="20" />
+    </g>
+    <!-- offsetNegativeLighting -->
+    <g transform="translate(330 0)">
+        <rect width="20" fill="#ffffff" y="50" x="45" height="20" />
+    </g>
+    <!-- offsetPositiveMatrix -->
+    <g transform="translate(0 110)">
+        <rect width="20" fill="#ff0000" y="50" x="55" height="20" />
+    </g>
+    <!-- offsetPositiveTransfer -->
+    <g transform="translate(110 110)">
+        <rect width="20" fill="#000000" y="50" x="55" height="20" />
+    </g>
+    <!-- offsetPositiveComposite -->
+    <g transform="translate(220 110)">
+        <rect width="20" fill="#ffffff" y="50" x="55" height="20" />
+    </g>
+    <!-- offsetPositiveLighting -->
+    <g transform="translate(330 110)">
+        <rect width="20" fill="#ffffff" y="50" x="55" height="20" />
+    </g>
+</svg>
