@@ -21,6 +21,9 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.*;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
+import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.Utils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -28,6 +31,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -42,6 +46,10 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import com.sun.management.ThreadMXBean;
 
 class ConstantColorChannelTest {
+    private static final int SIZE = 100;
+    private static final String NON_UNIFORM_SOURCE = element("g").attributes("filter='url(#f)'").children(
+            rectangle(10, 10, 25, 25, 0xffff0000), rectangle(55, 60, 30, 20, 0xff0000ff)).build();
+
     private static final String SOURCE = element("rect")
             .attributes("width='100' height='100' fill='red' filter='url(#f)'").build();
 
@@ -130,12 +138,139 @@ class ConstantColorChannelTest {
         assertPixelsEqual(render(load(reference), size), actual);
     }
 
+    private static ElementBuilder matrix(String values) {
+        return element("feColorMatrix").attributes(Map.of("values", values));
+    }
+
+    private static ElementBuilder constantTransfer(String type) {
+        ElementBuilder transfer = element("feComponentTransfer");
+        String[] channels = {"R", "G", "B", "A"};
+        String[] values = {".2", ".4", ".6", "1"};
+        for (int i = 0; i < channels.length; i++) {
+            ElementBuilder function = element("feFunc" + channels[i]).attributes(Map.of("type", type));
+            switch (type) {
+                case "table", "discrete" -> function.attributes(Map.of("tableValues", values[i] + " " + values[i]));
+                case "linear" -> function.attributes("slope='0'").attributes(Map.of("intercept", values[i]));
+                case "gamma" -> function.attributes("amplitude='0'").attributes(Map.of("offset", values[i]));
+                default -> throw new IllegalArgumentException(type);
+            }
+            transfer.children(function);
+        }
+        return transfer;
+    }
+
+    @TestFactory
+    Stream<DynamicTest> inputIndependentOperationsProduceTheirColorThroughoutTheRegion() {
+        return Stream.of("sRGB", "linearRGB").flatMap(space -> Stream.of(
+                constant(0xff336699), constantTransfer("table"), constantTransfer("discrete"),
+                constantTransfer("linear"), constantTransfer("gamma"))
+                .map(primitive -> DynamicTest.dynamicTest(space + " " + primitive.build(), () -> {
+                    String svg = document(primitive.build(), NON_UNIFORM_SOURCE, space);
+                    int color = space.equals("sRGB") ? 0xff336699 : 0xff7caacb;
+                    assertReference(svg, wrapTag(SIZE, SIZE, rectangle(0, 0, SIZE, SIZE, color)), 0);
+                })));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> foldsPointOperationsLikeTheSameOperationsOnUniformArtwork() {
+        return Stream.of("sRGB", "linearRGB").flatMap(space -> Stream.of(
+                matrix(".5 0 0 .1 0 0 .5 0 0 .2 0 0 .5 0 0 0 0 0 .5 0"),
+                element("feColorMatrix").attributes("type='saturate' values='.3'"),
+                element("feColorMatrix").attributes("type='hueRotate' values='45'"),
+                element("feColorMatrix").attributes("type='luminanceToAlpha'"),
+                element("feComponentTransfer").children(
+                        element("feFuncR").attributes("type='table' tableValues='1 .5 0'"),
+                        element("feFuncG").attributes("type='gamma' amplitude='.7' exponent='2' offset='.1'"),
+                        element("feFuncA").attributes("type='linear' slope='.5'")))
+                .map(operation -> DynamicTest.dynamicTest(space + " " + operation.build(), () -> {
+                    // The seed is explicitly sRGB; the operation then chooses its own color space.
+                    String seed = constant(0xff336699).attributes("color-interpolation-filters='sRGB'").build();
+                    String referenceSource = element("rect")
+                            .attributes("width='100' height='100' fill='#336699' filter='url(#f)'").build();
+                    assertReference(document(seed + operation.build(), NON_UNIFORM_SOURCE, space),
+                            document(operation.build(), referenceSource, space), 0);
+                })));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> clippedUniformInputKeepsItsTransparentExterior() {
+        return Stream.of(
+                matrix("0 1 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 -1 1"),
+                element("feComponentTransfer").children(
+                        element("feFuncA").attributes("type='linear' slope='-1' intercept='1'")))
+                .map(operation -> DynamicTest.dynamicTest(operation.build(), () -> {
+                    String region = "x='20' y='30' width='40' height='20'";
+                    String seed = constant(0xff336699).attributes(region).build();
+                    String referenceSource = element("rect").attributes(region,
+                            "fill='#336699' filter='url(#f)'").build();
+                    operation.attributes("x='0' y='0' width='100' height='100'");
+                    assertReference(document(seed + operation.build(), NON_UNIFORM_SOURCE, "sRGB"),
+                            document(operation.build(), referenceSource, "sRGB"), 0);
+                }));
+    }
+
+    @Test
+    void transparentConstantPreservesItsColorForAnAlphaGeneratingOperation() throws IOException {
+        String seed = matrix("0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0").build();
+        String restoreAlpha = element("feComponentTransfer").children(
+                element("feFuncA").attributes("type='linear' slope='0' intercept='1'")).build();
+        assertReference(document(seed + restoreAlpha, NON_UNIFORM_SOURCE, "sRGB"),
+                wrapTag(SIZE, SIZE, rectangle(0, 0, SIZE, SIZE, 0xffff0000)), 0);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> constantChainsAvoidIntermediateImageAllocations() {
+        return Stream.of(constant(0xff336699), constantTransfer("table"))
+                .map(seed -> DynamicTest.dynamicTest(seed.build(), () -> {
+                    java.lang.management.ThreadMXBean platformBean = ManagementFactory.getThreadMXBean();
+                    assumeTrue(platformBean instanceof ThreadMXBean);
+                    ThreadMXBean allocations = (ThreadMXBean) platformBean;
+                    assumeTrue(allocations.isThreadAllocatedMemorySupported());
+                    allocations.setThreadAllocatedMemoryEnabled(true);
+                    assumeTrue(allocations.getTotalThreadAllocatedBytes() >= 0);
+
+                    int size = 512;
+                    String invert = element("feComponentTransfer").children(
+                            element("feFuncR").attributes("type='linear' slope='-1' intercept='1'"),
+                            element("feFuncG").attributes("type='linear' slope='-1' intercept='1'"),
+                            element("feFuncB").attributes("type='linear' slope='-1' intercept='1'")).build();
+                    String swap = matrix("0 0 1 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 1 0").build();
+                    String svg = filterDocument(size, size, seed.build() + (invert + swap).repeat(16),
+                            NON_UNIFORM_SOURCE, "", "color-interpolation-filters='sRGB'");
+                    SVGDocument document = load(svg);
+                    for (int i = 0; i < 4; i++) {
+                        render(document, size, RenderingHints.VALUE_ANTIALIAS_OFF);
+                    }
+                    long before = allocations.getTotalThreadAllocatedBytes();
+                    BufferedImage image = render(document, size, RenderingHints.VALUE_ANTIALIAS_OFF);
+                    long bytes = allocations.getTotalThreadAllocatedBytes() - before;
+                    // Allow eight full rasters and fixed overhead, but reject a raster per point operation.
+                    long budget = 8L * size * size * Integer.BYTES + 2_000_000;
+                    assertTrue(bytes <= budget,
+                            () -> "Constant chain allocated " + bytes + " bytes (budget " + budget + ")");
+                    BufferedImage reference = render(load(wrapTag(size, size,
+                            rectangle(0, 0, size, size, 0xff336699))), size, RenderingHints.VALUE_ANTIALIAS_OFF);
+                    assertEquals(SUCCESS, compareImageRasterization(reference, image, "constant-chain", 0, 0));
+                }));
+    }
+
+    private static String document(String primitives, String source, String space) {
+        return filterDocument(SIZE, SIZE, primitives, source, "", "color-interpolation-filters='" + space + "'");
+    }
+
+    private static void assertReference(String svg, String referenceSvg, double tolerance) throws IOException {
+        BufferedImage image = render(load(svg), SIZE, RenderingHints.VALUE_ANTIALIAS_OFF);
+        BufferedImage reference = expected(new ImageSource.MemoryImageSource("constant-color-reference", referenceSvg),
+                RenderType.JSVG).render(null);
+        assertEquals(SUCCESS, compareImageRasterization(reference, image, "constant-color", 0, tolerance));
+    }
+
     private static ElementBuilder constant(int color) {
         String values = "0 0 0 0 " + ((color >>> 16) & 0xff) / 255.0
                 + " 0 0 0 0 " + ((color >>> 8) & 0xff) / 255.0
                 + " 0 0 0 0 " + (color & 0xff) / 255.0
                 + " 0 0 0 0 " + (color >>> 24) / 255.0;
-        return element("feColorMatrix").attributes(Map.of("values", values));
+        return matrix(values);
     }
 
     private static ElementBuilder coloredRectangle(int color) {
@@ -167,9 +302,13 @@ class ConstantColorChannelTest {
     }
 
     private static BufferedImage render(SVGDocument document, int size) {
+        return render(document, size, RenderingHints.VALUE_ANTIALIAS_ON);
+    }
+
+    private static BufferedImage render(SVGDocument document, int size, Object antialiasing) {
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = image.createGraphics();
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, antialiasing);
         try {
             document.render(null, graphics);
         } finally {
