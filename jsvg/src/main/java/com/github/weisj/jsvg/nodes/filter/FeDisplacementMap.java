@@ -180,6 +180,8 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
 
             Raster sourceRaster = src.getRaster();
             Rectangle sourceRasterBounds = sourceRaster.getBounds();
+            ColorModel sourceColorModel = src.getColorModel();
+            Object sourcePixel = null;
 
             final int[] destPixels = ImageUtil.getINT_RGBA_DataBank(raster);
             final int dstAdjust = ImageUtil.getINT_RGBA_DataAdjust(raster);
@@ -199,7 +201,8 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
                     int xDest = (int) (x + displacementScaleX * xDisplacement / scaleX);
                     int yDest = (int) (y + displacementScaleY * yDisplacement / scaleY);
                     if (sourceRasterBounds.contains(xDest, yDest)) {
-                        destPixels[dp] = src.getRGB(xDest, yDest);
+                        sourcePixel = sourceRaster.getDataElements(xDest, yDest, sourcePixel);
+                        destPixels[dp] = sourceColorModel.getRGB(sourcePixel);
                     } else {
                         destPixels[dp] = 0;
                     }
