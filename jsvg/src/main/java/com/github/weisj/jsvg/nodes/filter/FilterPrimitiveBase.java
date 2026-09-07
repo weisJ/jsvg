@@ -116,7 +116,7 @@ public final class FilterPrimitiveBase {
     }
 
     public void saveResult(@NotNull Channel output, @NotNull FilterContext filterContext) {
-        saveResultImpl(output, filterContext.resultChannels());
+        saveResultImpl(output.clip(filterContext.region(this), filterContext), filterContext.resultChannels());
     }
 
     private <T> void saveResultImpl(@NotNull T value, @NotNull ChannelStorage<T> storage) {
