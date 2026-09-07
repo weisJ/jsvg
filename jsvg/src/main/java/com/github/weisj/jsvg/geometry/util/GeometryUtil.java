@@ -289,6 +289,12 @@ public final class GeometryUtil {
         return lastPoint;
     }
 
+    public static Rectangle2D union(@NotNull Rectangle2D a, @NotNull Rectangle2D b) {
+        if (a.isEmpty()) return b;
+        if (b.isEmpty() || b.equals(a)) return a;
+        return a.createUnion(b);
+    }
+
     public enum Space {
         USER,
         ROOT,

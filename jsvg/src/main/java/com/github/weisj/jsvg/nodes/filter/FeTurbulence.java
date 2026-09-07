@@ -27,6 +27,7 @@ import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.noise.PerlinTurbulence;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -80,7 +81,8 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        impl().saveLayoutResult(filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), filterLayoutContext.filterRegion());
+        impl().saveLayoutResult(LayoutBounds.createInitial(region, region), filterLayoutContext);
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,8 +21,11 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.Rectangle2D;
+
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -49,7 +52,9 @@ public final class DummyFilterPrimitive extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        impl().saveLayoutResult(impl().layoutInput(filterLayoutContext), filterLayoutContext);
+        LayoutBounds input = impl().layoutInput(filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        impl().saveLayoutResult(input.withRegion(region), filterLayoutContext);
     }
 
     @Override

@@ -108,7 +108,8 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
-        impl().saveLayoutResult(input.region(), filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        impl().saveLayoutResult(LayoutBounds.createInitial(region, region), filterLayoutContext);
     }
 
     @Override

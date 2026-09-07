@@ -66,7 +66,7 @@ public final class FilterLayoutContext {
     }
 
     @NotNull
-    Rectangle2D filterPrimitiveRegion(@NotNull FilterPrimitiveBase primitive, @NotNull Rectangle2D defaults) {
+    public Rectangle2D filterPrimitiveRegion(@NotNull FilterPrimitiveBase primitive, @NotNull Rectangle2D defaults) {
         return resolveRegion(measureContext, primitive.x, primitive.y, primitive.width, primitive.height, defaults);
     }
 

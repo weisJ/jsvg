@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -84,7 +84,8 @@ public final class FeOffset extends AbstractFilterPrimitive {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
         Point2D.Double off = offset(null, filterLayoutContext.primitiveUnits(), filterLayoutContext.elementBounds());
         LayoutBounds result = input.translate((float) off.x, (float) off.y, filterLayoutContext);
-        impl().saveLayoutResult(result, filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        impl().saveLayoutResult(result.withRegion(region), filterLayoutContext);
     }
 
     @Override

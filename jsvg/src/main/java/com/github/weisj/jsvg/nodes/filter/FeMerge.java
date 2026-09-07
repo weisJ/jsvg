@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -97,9 +98,9 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         if (inputChannels.length == 0) {
-            filterPrimitiveBase.saveLayoutResult(
-                    filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic),
-                    filterLayoutContext);
+            LayoutBounds input = filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic);
+            Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, input.region());
+            filterPrimitiveBase.saveLayoutResult(input.withRegion(region), filterLayoutContext);
             return;
         }
         LayoutBounds result = filterLayoutContext.resultChannels().get(inputChannels[0]);
@@ -107,7 +108,8 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
             LayoutBounds channelBounds = filterLayoutContext.resultChannels().get(inputChannels[i]);
             result = result.union(channelBounds);
         }
-        filterPrimitiveBase.saveLayoutResult(result, filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, result.region());
+        filterPrimitiveBase.saveLayoutResult(result.withRegion(region), filterLayoutContext);
     }
 
     @Override

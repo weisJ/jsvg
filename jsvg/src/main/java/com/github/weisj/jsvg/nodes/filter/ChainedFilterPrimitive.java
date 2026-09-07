@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.Rectangle2D;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
@@ -42,8 +44,9 @@ abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements
             primitive.layoutFilter(context, filterLayoutContext);
         }
         // The chain implements one primitive, whose default subregion comes from its original input.
-        impl().saveLayoutResult(filterLayoutContext.resultChannels().get(DefaultFilterChannel.LastResult),
-                input.region(), filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        LayoutBounds result = filterLayoutContext.resultChannels().get(DefaultFilterChannel.LastResult);
+        impl().saveLayoutResult(result.withRegion(region), filterLayoutContext);
     }
 
     @Override
