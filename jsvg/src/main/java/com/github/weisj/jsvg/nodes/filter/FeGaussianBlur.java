@@ -133,7 +133,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             xBlurKernel = createConvolveKernel(dX, xSigma, true);
         }
         if (ySigma > 0 && ySigma < BOX_BLUR_APPROXIMATION_THRESHOLD) {
-            yBlurKernel = createConvolveKernel(dX, ySigma, false);
+            yBlurKernel = createConvolveKernel(dY, ySigma, false);
         }
 
         ImageProducer output = edgeMode.convolve(context, filterContext, input,
@@ -220,10 +220,15 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
 
         @Override
-        public @NotNull Dimension maximumKernelSize() {
+        public @NotNull Dimension kernelRadius() {
             return new Dimension(
-                    xKernel != null ? xKernel.getXOrigin() : dX,
-                    yKernel != null ? yKernel.getXOrigin() : dY);
+                    xKernel != null ? xKernel.getXOrigin() : boxRadius(dX),
+                    yKernel != null ? yKernel.getYOrigin() : boxRadius(dY));
+        }
+
+        private static int boxRadius(int diameter) {
+            // The padding must cover all three box passes.
+            return (diameter & 1) == 0 ? 3 * (diameter / 2) - 1 : 3 * (diameter / 2);
         }
 
         @Override
