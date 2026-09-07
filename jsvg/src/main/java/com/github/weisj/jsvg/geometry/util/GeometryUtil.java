@@ -295,6 +295,11 @@ public final class GeometryUtil {
         return a.createUnion(b);
     }
 
+    public static @NotNull Rectangle2D.Double toDoubleRectangle(@NotNull Rectangle2D r) {
+        if (r instanceof Rectangle2D.Double) return (Rectangle2D.Double) r;
+        return new Rectangle2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+    }
+
     public enum Space {
         USER,
         ROOT,

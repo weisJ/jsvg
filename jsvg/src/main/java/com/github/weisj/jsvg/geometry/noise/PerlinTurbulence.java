@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -235,11 +235,11 @@ public final class PerlinTurbulence {
                 // adding it afterward simplifies to subtracting it once.
                 stitchInfo.width *= 2;
                 stitchInfo.wrapX *= 2;
-                stitchInfo.wrapX += (int) PerlinN;
+                stitchInfo.wrapX -= (int) PerlinN;
 
                 stitchInfo.height *= 2;
                 stitchInfo.wrapY *= 2;
-                stitchInfo.wrapY += (int) PerlinN;
+                stitchInfo.wrapY -= (int) PerlinN;
             }
         }
 
