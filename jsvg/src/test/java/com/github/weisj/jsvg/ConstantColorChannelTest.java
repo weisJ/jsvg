@@ -49,7 +49,15 @@ class ConstantColorChannelTest {
                 "mergeTransparentRgb",
                 "transparentMergeChains",
                 "dropShadow",
-                "displacement")
+                "displacement",
+                "blendModesSrgb",
+                "blendModesLinearRgb",
+                "compositeOperatorsSrgb",
+                "compositeOperatorsLinearRgb",
+                "mergeConstantOrder",
+                "mergeMixedInputs",
+                "compositeConstantWithArtwork",
+                "constantCompositeClips")
                 .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
                         expected(new PathImageSource("filter/constantColor/" + name + "_ref.svg"), RenderType.JSVG),
                         actual(new PathImageSource("filter/constantColor/" + name + ".svg"), RenderType.JSVG), 0,

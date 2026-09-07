@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80">
+  <defs>
+    <filter id="multiply" filterUnits="userSpaceOnUse" x="0" y="0" width="120" height="80"
+            color-interpolation-filters="sRGB">
+      <feFlood flood-color="magenta" flood-opacity=".5" result="color"/>
+      <feBlend in="color" in2="SourceGraphic" mode="multiply"/>
+    </filter>
+    <filter id="mask" filterUnits="userSpaceOnUse" x="0" y="0" width="120" height="80"
+            color-interpolation-filters="sRGB">
+      <feFlood flood-color="blue" flood-opacity=".5" result="color"/>
+      <feComposite in="color" in2="SourceGraphic" operator="in"/>
+    </filter>
+  </defs>
+  <!-- Multiply preserves blue and halves green; outside the artwork only magenta remains. -->
+  <g filter="url(#multiply)">
+    <rect x="10" y="10" width="40" height="60" fill="lime"/>
+    <rect x="70" y="10" width="40" height="60" fill="blue"/>
+  </g>
+  <!-- Source-in multiplies the constant color's alpha by the artwork's alpha. -->
+  <g transform="translate(120 0)">
+    <g filter="url(#mask)">
+      <rect x="10" y="10" width="40" height="60" fill="lime"/>
+      <rect x="70" y="10" width="40" height="60" fill="yellow" fill-opacity=".5"/>
+    </g>
+  </g>
+</svg>

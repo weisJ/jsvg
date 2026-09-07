@@ -95,7 +95,8 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
         if (inputChannels.length == 0) {
             LayoutBounds input = filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic);
             Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, input.region());
-            filterPrimitiveBase.saveLayoutResult(input.withRegion(region), filterLayoutContext);
+            filterPrimitiveBase.saveLayoutResult(LayoutBounds.createInitial(new Rectangle2D.Double(), region),
+                    filterLayoutContext);
             return;
         }
         LayoutBounds result = filterLayoutContext.resultChannels().get(inputChannels[0]);
@@ -110,36 +111,35 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (inputChannels.length == 0) {
-            Rectangle2D region = filterContext.layout(filterPrimitiveBase).region();
-            Channel result = new ConstantColorChannel((int) region.getWidth(), (int) region.getHeight(), 0);
+            Filter.FilterInfo info = filterContext.info();
+            Channel result = new ConstantColorChannel(info.imageWidth, info.imageHeight, 0);
             filterPrimitiveBase.saveResult(result, filterContext);
             return;
         }
 
-        Channel in = filterPrimitiveBase.channel(inputChannels[0], filterContext);
-        Channel result = in;
-        if (inputChannels.length > 1 && !hasOnlyTransparentBlackInputs(filterContext)) {
-            BufferedImage dst = in.toBufferedImageNonAliased(context);
+        Channel result = filterPrimitiveBase.channel(inputChannels[0], filterContext);
+        int i = 1;
+        while (result instanceof ConstantColorChannel && i < inputChannels.length) {
+            Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
+            if (!(channel instanceof ConstantColorChannel)) {
+                break;
+            }
+            result = ((ConstantColorChannel) result).composite((ConstantColorChannel) channel, AlphaComposite.SrcOver);
+            i++;
+        }
+
+        if (i < inputChannels.length) {
+            BufferedImage dst = result.toBufferedImageNonAliased(context);
             Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
-            for (int i = 1; i < inputChannels.length; i++) {
+            for (; i < inputChannels.length; i++) {
                 Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
-                imgGraphics.drawImage(context.platformSupport().createImage(channel.producer()),
-                        null, context.platformSupport().imageObserver());
+                channel.paint(imgGraphics, context);
             }
             imgGraphics.dispose();
             result = new ImageProducerChannel(dst.getSource());
         }
-        filterPrimitiveBase.saveResult(result, filterContext);
-    }
 
-    private boolean hasOnlyTransparentBlackInputs(@NotNull FilterContext context) {
-        for (FilterChannelKey key : inputChannels) {
-            Channel channel = filterPrimitiveBase.channel(key, context);
-            if (!(channel instanceof ConstantColorChannel) || ((ConstantColorChannel) channel).color() != 0) {
-                return false;
-            }
-        }
-        return true;
+        filterPrimitiveBase.saveResult(result, filterContext);
     }
 
     @Override

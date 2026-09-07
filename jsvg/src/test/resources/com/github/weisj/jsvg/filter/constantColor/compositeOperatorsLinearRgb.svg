@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="80">
+  <!-- Each swatch compares two translucent inputs. The reference paints the backdrop directly. -->
+  <defs>
+    <filter id="over" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
+      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
+                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
+      <feColorMatrix color-interpolation-filters="sRGB" result="source"
+                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
+      <feComposite in="source" in2="backdrop" operator="over"/>
+    </filter>
+    <filter id="in" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
+      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
+                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
+      <feColorMatrix color-interpolation-filters="sRGB" result="source"
+                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
+      <feComposite in="source" in2="backdrop" operator="in"/>
+    </filter>
+    <filter id="out" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
+      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
+                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
+      <feColorMatrix color-interpolation-filters="sRGB" result="source"
+                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
+      <feComposite in="source" in2="backdrop" operator="out"/>
+    </filter>
+    <filter id="atop" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
+      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
+                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
+      <feColorMatrix color-interpolation-filters="sRGB" result="source"
+                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
+      <feComposite in="source" in2="backdrop" operator="atop"/>
+    </filter>
+    <filter id="xor" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
+      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
+                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
+      <feColorMatrix color-interpolation-filters="sRGB" result="source"
+                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
+      <feComposite in="source" in2="backdrop" operator="xor"/>
+    </filter>
+    <filter id="lighter" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
+      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
+                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
+      <feColorMatrix color-interpolation-filters="sRGB" result="source"
+                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
+      <feComposite in="source" in2="backdrop" operator="lighter"/>
+    </filter>
+    <filter id="arithmetic" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
+      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
+                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
+      <feColorMatrix color-interpolation-filters="sRGB" result="source"
+                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
+      <feComposite in="source" in2="backdrop" operator="arithmetic" k1=".2" k2=".4" k3=".3" k4=".1"/>
+    </filter>
+  </defs>
+  <g fill="red" fill-opacity=".5">
+    <rect x="0" y="0" width="40" height="40" filter="url(#over)"/>
+    <rect x="40" y="0" width="40" height="40" filter="url(#in)"/>
+    <rect x="80" y="0" width="40" height="40" filter="url(#out)"/>
+    <rect x="120" y="0" width="40" height="40" filter="url(#atop)"/>
+    <rect x="0" y="40" width="40" height="40" filter="url(#xor)"/>
+    <rect x="40" y="40" width="40" height="40" filter="url(#lighter)"/>
+    <rect x="80" y="40" width="40" height="40" filter="url(#arithmetic)"/>
+  </g>
+</svg>
