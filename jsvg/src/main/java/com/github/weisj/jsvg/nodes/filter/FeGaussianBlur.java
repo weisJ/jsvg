@@ -107,7 +107,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         float hExtend = extendForKernelDiameter(sigma[0], dX);
         float vExtend = extendForKernelDiameter(sigma[1], dY);
         // Kernel sizes are rounded in device pixels; layout grows in user coordinates.
-        AffineTransform inverse = GeometryUtil.createInverse(transform);
+        AffineTransform inverse = filterLayoutContext.inverseTransform();
         float hUserExtend = (float) (Math.abs(inverse.getScaleX()) * hExtend
                 + Math.abs(inverse.getShearX()) * vExtend);
         float vUserExtend = (float) (Math.abs(inverse.getShearY()) * hExtend
