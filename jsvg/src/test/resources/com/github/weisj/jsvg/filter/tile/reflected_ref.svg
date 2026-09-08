@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="144" height="100">
+  <!-- Repeat the artwork and its transparent margins before applying the group transform. -->
+  <defs>
+    <g id="seed">
+    <rect x="2" y="2" width="8" height="12" fill="#e04020"/>
+    <rect x="12" y="2" width="10" height="12" fill="#2040e0"/>
+    </g>
+  </defs>
+  <g transform="translate(120 0) scale(-1 1)">
+    <use xlink:href="#seed" x="0" y="0"/>
+    <use xlink:href="#seed" x="24" y="0"/>
+    <use xlink:href="#seed" x="48" y="0"/>
+    <use xlink:href="#seed" x="72" y="0"/>
+    <use xlink:href="#seed" x="0" y="16"/>
+    <use xlink:href="#seed" x="24" y="16"/>
+    <use xlink:href="#seed" x="48" y="16"/>
+    <use xlink:href="#seed" x="72" y="16"/>
+    <use xlink:href="#seed" x="0" y="32"/>
+    <use xlink:href="#seed" x="24" y="32"/>
+    <use xlink:href="#seed" x="48" y="32"/>
+    <use xlink:href="#seed" x="72" y="32"/>
+    <use xlink:href="#seed" x="0" y="48"/>
+    <use xlink:href="#seed" x="24" y="48"/>
+    <use xlink:href="#seed" x="48" y="48"/>
+    <use xlink:href="#seed" x="72" y="48"/>
+  </g>
+</svg>
