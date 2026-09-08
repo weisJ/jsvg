@@ -155,7 +155,8 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
         }
         if (linearRGBlookupTable == null) {
             byte[][] tables = sRGBlookupTable.getTable();
-            for (int j = 0; j < tables.length; j++) {
+            // Alpha is coverage and is independent of the RGB interpolation space.
+            for (int j = 0; j < 3; j++) {
                 byte[] table = tables[j];
                 if (table == TransferFunctionElement.IDENTITY_LOOKUP_TABLE) continue;
                 byte[] lRGBtable = new byte[table.length];
