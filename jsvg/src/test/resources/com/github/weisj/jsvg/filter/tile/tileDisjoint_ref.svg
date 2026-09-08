@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20">
+  <!-- Repeat only inside the requested output region. -->
+  <rect x="40" width="10" height="20" fill="red"/>
+  <rect x="50" width="10" height="20" fill="blue"/>
+  <rect x="60" width="10" height="20" fill="red"/>
+  <rect x="70" width="10" height="20" fill="blue"/>
+  <rect x="80" width="10" height="20" fill="red"/>
+  <rect x="90" width="10" height="20" fill="blue"/>
+</svg>

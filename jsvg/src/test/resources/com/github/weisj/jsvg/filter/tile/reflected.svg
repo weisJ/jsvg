@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="144" height="100">
+  <defs>
+    <filter id="tile" filterUnits="userSpaceOnUse" x="0" y="0" width="96" height="64">
+      <feOffset x="24" y="16" width="24" height="16"/>
+      <feTile/>
+    </filter>
+  </defs>
+  <g transform="translate(120 0) scale(-1 1)">
+    <g filter="url(#tile)">
+      <g transform="translate(24 16)">
+    <rect x="2" y="2" width="8" height="12" fill="#e04020"/>
+    <rect x="12" y="2" width="10" height="12" fill="#2040e0"/>
+      </g>
+    </g>
+  </g>
+</svg>
