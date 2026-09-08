@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.filter;
 
 import static com.github.weisj.jsvg.ImageComparison.*;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
@@ -38,32 +38,51 @@ import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
-class TurbulenceTest {
+class FeTileTest {
     @TestFactory
-    Stream<DynamicTest> matchesBatik() {
-        return Stream.of("stitching", "transforms")
+    Stream<DynamicTest> tilesMatchBatik() {
+        return Stream.of("tileChained", "tileFractional", "tileInheritedRegion",
+                "tileMergedInputs", "tileObjectBoundingBox")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
+                        compareImages(new CompareInfo(
+                                expected(new PathImageSource("filter/tile/" + name + ".svg"), RenderType.Batik),
+                                actual(new PathImageSource("filter/tile/" + name + ".svg"), RenderType.JSVG), 0, 0)))));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> tilesMatchReferenceArtwork() {
+        return Stream
+                .of("tile", "tileDisjoint", "tilePartialOverlap", "tileReusedResult", "reflected", "rotated", "sheared",
+                        "empty", "clear", "imageBounds", "partialTile", "subpixel")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
+                        compareImages(new CompareInfo(
+                                expected(new PathImageSource("filter/tile/" + name + "_ref.svg"), RenderType.JSVG),
+                                actual(new PathImageSource("filter/tile/" + name + ".svg"), RenderType.JSVG), 0, 0)))));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> clippedRenderingRetainsTheTileSource() {
+        return Stream.of("remoteRepaint", "offsetRepaint")
                 .map(name -> DynamicTest.dynamicTest(name, () -> {
-                    PathImageSource source = new PathImageSource("filter/turbulence/" + name + ".svg");
+                    Rectangle clip = new Rectangle(70, 70, 10, 10);
                     assertEquals(SUCCESS, compareImages(new CompareInfo(
-                            expected(source, RenderType.Batik), actual(source, RenderType.JSVG), 0, 0)));
+                            expected(new PathImageSource("filter/tile/" + name + "_ref.svg"), RenderType.JSVG,
+                                    graphics -> graphics.setClip(clip)),
+                            actual(new PathImageSource("filter/tile/" + name + ".svg"), RenderType.JSVG,
+                                    graphics -> graphics.setClip(clip)),
+                            0, 0)));
                 }));
     }
 
     @Test
-    void boundingBoxUnitsMatchExplicitCoordinates() {
-        assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new PathImageSource("filter/turbulence/boundingBox_ref.svg"), RenderType.JSVG),
-                actual(new PathImageSource("filter/turbulence/boundingBox.svg"), RenderType.JSVG), 0, 0)));
-    }
-
-    @Test
-    void repaintKeepsTheStitchTile() throws IOException {
-        PathImageSource source = new PathImageSource("filter/turbulence/repaint.svg");
-        Rectangle clip = new Rectangle(60, 20, 30, 40);
+    void clippedRenderingRetainsBlurSamplesOutsideTheTile() throws IOException {
+        Rectangle clip = new Rectangle(70, 70, 10, 10);
+        PathImageSource source = new PathImageSource("filter/tile/blurRepaint.svg");
         BufferedImage full = expected(source, RenderType.JSVG).render(null);
         BufferedImage partial = actual(source, RenderType.JSVG, graphics -> graphics.setClip(clip)).render(null);
         assertEquals(SUCCESS, compareImageRasterization(
                 full.getSubimage(clip.x, clip.y, clip.width, clip.height),
-                partial.getSubimage(clip.x, clip.y, clip.width, clip.height), "turbulence-repaint", 0, 0));
+                partial.getSubimage(clip.x, clip.y, clip.width, clip.height), "tile-blur-repaint", 0, 0));
     }
+
 }

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.filter;
 
 import static com.github.weisj.jsvg.ImageComparison.*;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
@@ -30,24 +30,33 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
-class GenerativeFilterTest {
+class FilterPrimitiveRegionTest {
 
     @TestFactory
     Stream<DynamicTest> referenceImages() {
         return Stream.of(
-                "outsideInput",
-                "emptyInput",
-                "alphaTransfer",
-                "reusedResults",
-                "offsets",
-                "largeGenerativeRegion",
-                "largeRegionSeparateFilters")
-                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
-                        expected(new PathImageSource("filter/generative/" + name + "_ref.svg"), RenderType.JSVG),
-                        actual(new PathImageSource("filter/generative/" + name + ".svg"), RenderType.JSVG), 0, 0)))));
+                "primitiveClipping",
+                "emptyRegions",
+                "sourceRegions",
+                "repeatedFractionalClip")
+                .map(name -> DynamicTest.dynamicTest(name, () -> compareReference(name, 0)));
+    }
+
+    @Test
+    void transformedRegions() {
+        // Complementary clipping and direct shape filling can round coverage one alpha level apart.
+        compareReference("transformedRegions", 1 / 255.0);
+    }
+
+    private static void compareReference(String name, double pixelTolerance) {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("filter/primitiveRegion/" + name + "_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("filter/primitiveRegion/" + name + ".svg"), RenderType.JSVG), 0,
+                pixelTolerance)));
     }
 }

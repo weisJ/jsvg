@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.filter;
 
 import static com.github.weisj.jsvg.ImageComparison.*;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
@@ -34,15 +34,12 @@ import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
-class DropShadowTest {
+class FeOffsetTest {
     @TestFactory
-    Stream<DynamicTest> clipsTheCompletedShadow() {
-        return Stream.of("offset", "blurred", "namedInput")
-                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
-                        compareImages(new CompareInfo(
-                                expected(new PathImageSource("filter/dropShadow/" + name + "_ref.svg"),
-                                        RenderType.JSVG),
-                                actual(new PathImageSource("filter/dropShadow/" + name + ".svg"), RenderType.JSVG),
-                                0, 0)))));
+    Stream<DynamicTest> referenceImages() {
+        return Stream.of("transforms", "followingTransfer")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
+                        expected(new PathImageSource("filter/offset/" + name + "_ref.svg"), RenderType.JSVG),
+                        actual(new PathImageSource("filter/offset/" + name + ".svg"), RenderType.JSVG), 0, 0)))));
     }
 }

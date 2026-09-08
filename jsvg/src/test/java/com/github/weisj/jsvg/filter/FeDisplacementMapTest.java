@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.filter;
 
 import static com.github.weisj.jsvg.ImageComparison.*;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
@@ -27,6 +27,7 @@ import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.awt.Rectangle;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
@@ -34,14 +35,24 @@ import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
-class FilterIsolationTest {
+class FeDisplacementMapTest {
     @TestFactory
     Stream<DynamicTest> referenceImages() {
-        return Stream.of("imageTranslation", "imageScale", "nestedTranslation", "nestedViewBox",
-                "nestedPrimitiveRegion", "nestedObjectBounds", "nestedPercentages",
-                "rootViewBox", "symbolUseSize", "svgUseSize")
-                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
-                        expected(new PathImageSource("filter/isolation/" + name + "_ref.svg"), RenderType.JSVG),
-                        actual(new PathImageSource("filter/isolation/" + name + ".svg"), RenderType.JSVG), 0, 0)))));
+        return Stream.of("vectors", "sourceAlpha", "mapSubregion", "offsetSourceAlpha")
+                .flatMap(name -> (!name.equals("vectors")
+                        ? Stream.of(false, true)
+                        : Stream.of(false))
+                        .map(partial -> DynamicTest.dynamicTest(name + (partial ? " repaint" : ""), () -> {
+                            Rectangle clip = name.equals("offsetSourceAlpha")
+                                    ? new Rectangle(40, 10, 12, 20)
+                                    : new Rectangle(38, 28, 15, 20);
+                            Rectangle repaintClip = partial ? clip : null;
+                            assertEquals(SUCCESS, compareImages(new CompareInfo(
+                                    expected(new PathImageSource("filter/displacementMap/" + name + "_ref.svg"),
+                                            RenderType.JSVG, graphics -> graphics.setClip(repaintClip)),
+                                    actual(new PathImageSource("filter/displacementMap/" + name + ".svg"),
+                                            RenderType.JSVG, graphics -> graphics.setClip(repaintClip)),
+                                    0, 0)));
+                        })));
     }
 }
