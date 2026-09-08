@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+  <defs>
+    <filter id="sample" filterUnits="userSpaceOnUse" x="-1000" y="-1000" width="2000" height="2000"
+            color-interpolation-filters="sRGB">
+      <feOffset dx="-12" dy="0"/>
+      <feOffset dx="-12" dy="0"/>
+      <feOffset dx="-12" dy="0"/>
+    </filter>
+  </defs>
+  <rect x="96" y="60" width="24" height="16" fill="red" filter="url(#sample)"/>
+</svg>

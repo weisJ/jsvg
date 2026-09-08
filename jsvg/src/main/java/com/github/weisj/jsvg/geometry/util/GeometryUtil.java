@@ -188,6 +188,14 @@ public final class GeometryUtil {
         return (float) (rect.getY() + rect.getHeight());
     }
 
+    public static @NotNull FloatInsets sum(@NotNull FloatInsets a, @NotNull FloatInsets b) {
+        return new FloatInsets(
+                a.top() + b.top(),
+                a.left() + b.left(),
+                a.bottom() + b.bottom(),
+                a.right() + b.right());
+    }
+
     public static @NotNull Rectangle2D grow(@NotNull Rectangle2D bounds, FloatInsets grow) {
         return new Rectangle2D.Double(
                 bounds.getX() - grow.left(),

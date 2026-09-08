@@ -119,14 +119,14 @@ public final class Filter extends ContainerNode {
                 new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds,
                         filterRegion, context.measureContext());
 
-        Rectangle2D clippedElementBounds = elementBounds.geometryBox().createIntersection(graphicsClipBounds);
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
 
         if (effectiveFilterRegion.isEmpty()) return null;
 
-        LayoutBounds clippedElementLayoutBounds = LayoutBounds.createInitial(clippedElementBounds, filterRegion);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, clippedElementLayoutBounds);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, clippedElementLayoutBounds);
+        // Sampling primitives may need source pixels outside the repaint clip.
+        LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(elementBounds.geometryBox(), filterRegion);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, elementLayoutBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, elementLayoutBounds);
         filterLayoutContext.resultChannels().addAlias(DefaultFilterChannel.LastResult,
                 DefaultFilterChannel.SourceGraphic);
 
@@ -163,6 +163,7 @@ public final class Filter extends ContainerNode {
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha,
                 () -> new SourceAlphaChannel(sourceChannel.alphaChannel().producer()));
 
+        // TODO: Track if a primitive is actually used and skip applying unused primitives.
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;

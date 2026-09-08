@@ -39,11 +39,14 @@ class FeDisplacementMapTest {
     @TestFactory
     Stream<DynamicTest> referenceImages() {
         return Stream.of("vectors", "sourceAlpha", "mapSubregion", "offsetSourceAlpha")
-                .flatMap(name -> (name.equals("sourceAlpha") || name.equals("mapSubregion")
+                .flatMap(name -> (!name.equals("vectors")
                         ? Stream.of(false, true)
                         : Stream.of(false))
                         .map(partial -> DynamicTest.dynamicTest(name + (partial ? " repaint" : ""), () -> {
-                            Rectangle repaintClip = partial ? new Rectangle(38, 28, 15, 20) : null;
+                            Rectangle clip = name.equals("offsetSourceAlpha")
+                                    ? new Rectangle(40, 10, 12, 20)
+                                    : new Rectangle(38, 28, 15, 20);
+                            Rectangle repaintClip = partial ? clip : null;
                             assertEquals(SUCCESS, compareImages(new CompareInfo(
                                     expected(new PathImageSource("filter/displacementMap/" + name + "_ref.svg"),
                                             RenderType.JSVG, graphics -> graphics.setClip(repaintClip)),

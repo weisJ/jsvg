@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+  <!-- Three offsets bring source artwork from outside the repaint into this rectangle. -->
+  <rect x="60" y="60" width="24" height="16" fill="red"/>
+</svg>
