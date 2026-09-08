@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="112" height="88">
+  <!-- Independently positioned shadow artwork, clipped together with the original only at the end. -->
+  <defs>
+    <filter id="f" filterUnits="userSpaceOnUse" x="0" y="0" width="112" height="88"
+            color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.5" edgeMode="none"/>
+    </filter>
+    <clipPath id="clip"><rect x="40" y="32" width="32" height="24"/></clipPath>
+  </defs>
+  <g clip-path="url(#clip)">
+    <rect x="48" y="36" width="16" height="16" fill="black" filter="url(#f)"/>
+    <rect x="64" y="36" width="16" height="16" fill="#c04020"/>
+  </g>
+</svg>
