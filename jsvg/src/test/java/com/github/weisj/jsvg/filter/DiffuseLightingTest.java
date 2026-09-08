@@ -58,14 +58,40 @@ class DiffuseLightingTest {
     }
 
     @TestFactory
-    Stream<DynamicTest> transformedLightingMatchesReferenceArtwork() {
-        return Stream.of("rotated", "rotatedPoint", "shearedSurface")
-                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
-                        compareImages(new CompareInfo(
-                                expected(new PathImageSource("filter/diffuseLighting/" + name + "_ref.svg"),
-                                        RenderType.JSVG),
-                                actual(new PathImageSource("filter/diffuseLighting/" + name + ".svg"), RenderType.JSVG),
-                                0, 0)))));
+    Stream<DynamicTest> lightingMatchesReferenceArtwork() {
+        return Stream.of("rotated", "rotatedPoint", "shearedSurface", "kernelDefaults", "normals/asymmetric")
+                .map(name -> referenceArtwork(name, null));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> objectBoundingBoxUnitsMatchUserSpaceArtwork() {
+        return Stream.of("squarePoint", "rectanglePoint", "rectangleSurface")
+                .map(name -> referenceArtwork("units/" + name, null));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> clippedObjectBoundingBoxSurfaceMatchesReferenceArtwork() {
+        return Stream.of(new Rectangle(60, 52, 8, 12), new Rectangle(40, 48, 12, 8))
+                .map(clip -> referenceArtwork("units/rectangleSurface", clip));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> sobelNormalsMatchReferenceRenderer() {
+        return Stream.of("interior", "boundary").map(name -> DynamicTest.dynamicTest(name, () -> {
+            // Batik truncates some final color bands where JSVG rounds: allow one 8-bit level.
+            PathImageSource source = new PathImageSource("filter/diffuseLighting/normals/" + name + ".svg");
+            assertEquals(SUCCESS, compareImages(new CompareInfo(
+                    expected(source, RenderType.Batik), actual(source, RenderType.JSVG), 0, 1.0 / 255)));
+        }));
+    }
+
+    private static DynamicTest referenceArtwork(String name, Rectangle clip) {
+        String path = "filter/diffuseLighting/" + name;
+        String description = clip == null ? name : name + " clipped to " + clip;
+        return DynamicTest.dynamicTest(description, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource(path + "_ref.svg"), RenderType.JSVG, graphics -> graphics.setClip(clip)),
+                actual(new PathImageSource(path + ".svg"), RenderType.JSVG, graphics -> graphics.setClip(clip)), 0,
+                0))));
     }
 
     private static void assertRepaintMatchesFullRender(String name, Rectangle clip) throws IOException {

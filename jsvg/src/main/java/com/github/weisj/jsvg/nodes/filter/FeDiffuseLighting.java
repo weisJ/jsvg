@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
-import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -81,9 +80,10 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
         lightingColor = attributeNode.getColor("lighting-color", Color.WHITE);
 
         double[] values = attributeNode.getDoubleList("kernelUnitLength");
-        if (values.length > 0 && values[0] > 0) {
+        if ((values.length == 1 || values.length == 2) && values[0] > 0
+                && (values.length == 1 || values[1] > 0)) {
             double x = values[0];
-            double y = values.length > 1 && values[1] > 0 ? values[1] : x;
+            double y = values.length == 2 ? values[1] : x;
             kernelUnitLength = new double[] {x, y};
         } else {
             kernelUnitLength = null;
@@ -112,7 +112,12 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
-        Point2D.Double step = samplingStep(filterLayoutContext.transform());
+        AffineTransform primitiveToUser =
+                filterLayoutContext.primitiveUnits().viewTransform(filterLayoutContext.elementBounds());
+        AffineTransform primitiveToImage = new AffineTransform(filterLayoutContext.transform());
+        primitiveToImage.concatenate(primitiveToUser);
+        Point2D.Double step = samplingStep(primitiveToImage);
+        primitiveToUser.deltaTransform(step, step);
         // Normals need neighboring height samples beyond the repaint clip.
         LayoutBounds bounds = input.grow((float) step.x, (float) step.y, filterLayoutContext);
         impl().saveLayoutResult(bounds.withRegion(region, CoversWholeRegion.YES), filterLayoutContext);
@@ -120,7 +125,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
 
     private @NotNull Point2D.Double samplingStep(@NotNull AffineTransform transform) {
         if (kernelUnitLength != null) return new Point2D.Double(kernelUnitLength[0], kernelUnitLength[1]);
-        // Sample one image pixel along each transformed user-space axis by default.
+        // Sample one image pixel along each transformed primitive axis by default.
         return new Point2D.Double(
                 1 / GeometryUtil.scaleXOfTransform(transform),
                 1 / GeometryUtil.scaleYOfTransform(transform));
@@ -135,38 +140,43 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             return;
         }
 
+        AffineTransform primitiveToUser =
+                filterContext.primitiveUnits().viewTransform(filterContext.info().elementBounds());
+        AffineTransform primitiveToImage = new AffineTransform(filterContext.info().output().transform());
+        primitiveToImage.concatenate(primitiveToUser);
+        Rectangle2D inputRegion = GeometryUtil.containingBoundsAfterTransform(
+                GeometryUtil.createInverse(primitiveToUser), filterContext.layout(impl().inputChannelKey()).region());
         ImageFilter lightingFilter = new BufferedImageFilter(
-                new DiffuseLightingOp(lightSource, filterContext.info().output().transform(),
-                        colorInterpolation(filterContext)));
+                new DiffuseLightingOp(lightSource, primitiveToImage, inputRegion, colorInterpolation(filterContext)));
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(lightingFilter), filterContext);
     }
 
     private final class DiffuseLightingOp implements BufferedImageOp {
 
         private final @NotNull LightSource lightSource;
-        private final @NotNull AffineTransform imageToUser;
-        private final @NotNull Point2D.Double userStep;
+        private final @NotNull AffineTransform imageToPrimitive;
+        private final @NotNull Point2D.Double primitiveStep;
         private final @NotNull Point2D.Double xSampleStep;
         private final @NotNull Point2D.Double ySampleStep;
+        private final @NotNull Rectangle2D inputRegion;
         private final @Nullable ColorInterpolation colorInterpolation;
 
-        private DiffuseLightingOp(@NotNull LightSource lightSource, @NotNull AffineTransform userToImage,
-                @Nullable ColorInterpolation colorInterpolation) {
+        private DiffuseLightingOp(@NotNull LightSource lightSource, @NotNull AffineTransform primitiveToImage,
+                @NotNull Rectangle2D inputRegion, @Nullable ColorInterpolation colorInterpolation) {
             this.lightSource = lightSource;
-            imageToUser = GeometryUtil.createInverse(userToImage);
-            userStep = samplingStep(userToImage);
-            xSampleStep = new Point2D.Double(userStep.x, 0);
-            ySampleStep = new Point2D.Double(0, userStep.y);
-            userToImage.deltaTransform(xSampleStep, xSampleStep);
-            userToImage.deltaTransform(ySampleStep, ySampleStep);
+            this.inputRegion = inputRegion;
+            imageToPrimitive = GeometryUtil.createInverse(primitiveToImage);
+            primitiveStep = samplingStep(primitiveToImage);
+            xSampleStep = new Point2D.Double(primitiveStep.x, 0);
+            ySampleStep = new Point2D.Double(0, primitiveStep.y);
+            primitiveToImage.deltaTransform(xSampleStep, xSampleStep);
+            primitiveToImage.deltaTransform(ySampleStep, ySampleStep);
             this.colorInterpolation = colorInterpolation;
         }
 
         @Override
         public BufferedImage createCompatibleDestImage(BufferedImage src, ColorModel dstCM) {
-            if (dstCM == null) dstCM = src.getColorModel();
-            return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()),
-                    dstCM.isAlphaPremultiplied(), null);
+            return ImageUtil.createCompatibleDestImage(src, dstCM);
         }
 
         @Override
@@ -186,9 +196,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
 
             BufferedImage result = dest;
             if (result == null) {
-                ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_sRGB);
-                ColorModel cm = new DirectColorModel(cs, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
-                        false, DataBuffer.TYPE_INT);
+                ColorModel cm = ColorModel.getRGBdefault();
                 result = createCompatibleDestImage(src, cm);
             }
 
@@ -203,15 +211,17 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             final int dstAdjust = ImageUtil.getINT_RGBA_DataAdjust(raster);
             int dp = ImageUtil.getINT_RGBA_DataOffset(raster);
 
-            Point2D.Double userPoint = new Point2D.Double();
+            Point2D.Double primitivePoint = new Point2D.Double();
             for (int y = 0; y < h; y++) {
                 for (int x = 0, end = dp + w; dp < end; dp++, x++) {
-                    double z = heightAt(src, x, y);
-                    Normal normal = normalAt(src, x, y);
-                    // Light positions and normals are expressed in user coordinates.
-                    userPoint.setLocation(x + 0.5, y + 0.5);
-                    imageToUser.transform(userPoint, userPoint);
-                    LightSource.Light light = lightSource.lightAt(userPoint.x, userPoint.y, z);
+                    // Z(x,y) = surfaceScale * I(x,y), where I is the input alpha.
+                    double z = surfaceScale * alphaAt(src, x, y);
+                    // Light positions, heights and normals share the primitive coordinate system.
+                    primitivePoint.setLocation(x + 0.5, y + 0.5);
+                    imageToPrimitive.transform(primitivePoint, primitivePoint);
+                    Normal normal = normalAt(src, x, y, primitivePoint);
+                    LightSource.Light light = lightSource.lightAt(primitivePoint.x, primitivePoint.y, z);
+                    // D = kd * (N dot L) * light color; output alpha is always one.
                     double diffuse = diffuseConstant * light.intensity *
                             Math.max(0, normal.x * light.x + normal.y * light.y + normal.z * light.z);
 
@@ -230,10 +240,6 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             return result;
         }
 
-        private double heightAt(@NotNull BufferedImage src, double x, double y) {
-            return surfaceScale * alphaAt(src, x, y) / 255.0;
-        }
-
         private double alphaAt(@NotNull BufferedImage src, double x, double y) {
             double clampedX = Math.max(0, Math.min(src.getWidth() - 1.0, x));
             double clampedY = Math.max(0, Math.min(src.getHeight() - 1.0, y));
@@ -250,20 +256,43 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             double a11 = (src.getRGB(x1, y1) >>> 24) & 0xFF;
             double a0 = a00 + (a10 - a00) * tx;
             double a1 = a01 + (a11 - a01) * tx;
-            return a0 + (a1 - a0) * ty;
+            return (a0 + (a1 - a0) * ty) / 255.0;
         }
 
-        private @NotNull Normal normalAt(@NotNull BufferedImage src, int x, int y) {
-            double dx = (heightAt(src, x + xSampleStep.x, y + xSampleStep.y)
-                    - heightAt(src, x - xSampleStep.x, y - xSampleStep.y)) / (2 * userStep.x);
-            double dy = (heightAt(src, x + ySampleStep.x, y + ySampleStep.y)
-                    - heightAt(src, x - ySampleStep.x, y - ySampleStep.y)) / (2 * userStep.y);
+        private @NotNull Normal normalAt(@NotNull BufferedImage src, int x, int y,
+                @NotNull Point2D.Double primitivePoint) {
+            if (!inputRegion.contains(primitivePoint)) return Normal.FLAT;
 
-            double nx = -dx;
-            double ny = -dy;
-            double nz = 1;
-            double length = Math.sqrt(nx * nx + ny * ny + nz * nz);
-            return new Normal(nx / length, ny / length, nz / length);
+            // Select edges of the input surface, not edges of the clipped backing image.
+            boolean hasLeft = primitivePoint.x - primitiveStep.x >= inputRegion.getMinX();
+            boolean hasRight = primitivePoint.x + primitiveStep.x < inputRegion.getMaxX();
+            boolean hasTop = primitivePoint.y - primitiveStep.y >= inputRegion.getMinY();
+            boolean hasBottom = primitivePoint.y + primitiveStep.y < inputRegion.getMaxY();
+            SobelKernel kernel = SobelKernel.at(hasLeft, hasRight, hasTop, hasBottom);
+
+            double gradientX = 0;
+            double gradientY = 0;
+            for (int row = 0; row < 3; row++) {
+                for (int column = 0; column < 3; column++) {
+                    int index = 3 * row + column;
+                    int kx = kernel.kx[index];
+                    int ky = kernel.ky[index];
+                    if (kx == 0 && ky == 0) continue;
+
+                    // If neither neighbor exists on an axis, the surface is constant along that axis.
+                    int dx = hasLeft || hasRight ? column - 1 : 0;
+                    int dy = hasTop || hasBottom ? row - 1 : 0;
+                    double alpha = alphaAt(src, x + dx * xSampleStep.x + dy * ySampleStep.x,
+                            y + dx * xSampleStep.y + dy * ySampleStep.y);
+                    gradientX += kx * alpha;
+                    gradientY += ky * alpha;
+                }
+            }
+
+            // N = (-surfaceScale * FACTORx * Kx(I), -surfaceScale * FACTORy * Ky(I), 1).
+            double nx = -surfaceScale * kernel.factorX * gradientX / primitiveStep.x;
+            double ny = -surfaceScale * kernel.factorY * gradientY / primitiveStep.y;
+            return Normal.normalized(nx, ny, 1);
         }
 
         @Override
@@ -272,10 +301,138 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
         }
     }
 
+    /**
+     * The specification's Kx, Ky and factors for each position in the input surface.
+     * The factors below omit 1/dx and 1/dy, which normalAt applies in primitive coordinates.
+     *
+     * @see <a href="https://drafts.csswg.org/filter-effects/#feDiffuseLightingElement">Surface normals</a>
+     */
+    private enum SobelKernel {
+        // @formatter:off
+        TOP_LEFT(2.0 / 3, 2.0 / 3,
+            new int[] {
+                 0,  0,  0,
+                 0, -2,  2,
+                 0, -1,  1},
+            new int[] {
+                 0,  0,  0,
+                 0, -2, -1,
+                 0,  2,  1}),
+        TOP(1.0 / 3, 1.0 / 2,
+            new int[] {
+                 0,  0,  0,
+                -2,  0,  2,
+                -1,  0,  1},
+            new int[] {
+                 0,  0,  0,
+                -1, -2, -1,
+                 1,  2,  1}),
+        TOP_RIGHT(2.0 / 3, 2.0 / 3,
+            new int[] {
+                 0,  0,  0,
+                -2,  2,  0,
+                -1,  1,  0},
+            new int[] {
+                 0,  0,  0,
+                -1, -2,  0,
+                 1,  2,  0}),
+        LEFT(1.0 / 2, 1.0 / 3,
+            new int[] {
+                 0, -1,  1,
+                 0, -2,  2,
+                 0, -1,  1},
+            new int[] {
+                 0, -2, -1,
+                 0,  0,  0,
+                 0,  2,  1}),
+        INTERIOR(1.0 / 4, 1.0 / 4,
+            new int[] {
+                -1,  0,  1,
+                -2,  0,  2,
+                -1,  0,  1},
+            new int[] {
+                -1, -2, -1,
+                 0,  0,  0,
+                 1,  2,  1}),
+        RIGHT(1.0 / 2, 1.0 / 3,
+            new int[] {
+                -1,  1,  0,
+                -2,  2,  0,
+                -1,  1,  0},
+            new int[] {
+                -1, -2,  0,
+                 0,  0,  0,
+                 1,  2,  0}),
+        BOTTOM_LEFT(2.0 / 3, 2.0 / 3,
+            new int[] {
+                 0, -1,  1,
+                 0, -2,  2,
+                 0,  0,  0},
+            new int[] {
+                 0, -2, -1,
+                 0,  2,  1,
+                 0,  0,  0}),
+        BOTTOM(1.0 / 3, 1.0 / 2,
+            new int[] {
+                -1,  0,  1,
+                -2,  0,  2,
+                 0,  0,  0},
+            new int[] {
+                -1, -2, -1,
+                 1,  2,  1,
+                 0,  0,  0}),
+        BOTTOM_RIGHT(2.0 / 3, 2.0 / 3,
+            new int[] {
+                -1,  1,  0,
+                -2,  2,  0,
+                 0,  0,  0},
+            new int[] {
+                -1, -2,  0,
+                 1,  2,  0,
+                 0,  0,  0});
+        // @formatter:on
+
+        private final double factorX;
+        private final double factorY;
+        private final int @NotNull [] kx;
+        private final int @NotNull [] ky;
+
+        SobelKernel(double factorX, double factorY, int @NotNull [] kx, int @NotNull [] ky) {
+            this.factorX = factorX;
+            this.factorY = factorY;
+            this.kx = kx;
+            this.ky = ky;
+        }
+
+        private static @NotNull SobelKernel at(boolean hasLeft, boolean hasRight,
+                boolean hasTop, boolean hasBottom) {
+            if (!hasTop && hasBottom) {
+                if (!hasLeft && hasRight) return TOP_LEFT;
+                if (hasLeft && !hasRight) return TOP_RIGHT;
+                return TOP;
+            } else if (hasTop && !hasBottom) {
+                if (!hasLeft && hasRight) return BOTTOM_LEFT;
+                if (hasLeft && !hasRight) return BOTTOM_RIGHT;
+                return BOTTOM;
+            } else {
+                if (!hasLeft && hasRight) return LEFT;
+                if (hasLeft && !hasRight) return RIGHT;
+                return INTERIOR;
+            }
+        }
+    }
+
     private static final class Normal {
+        private static final Normal FLAT = new Normal(0, 0, 1);
+
         final double x;
         final double y;
         final double z;
+
+        private static @NotNull Normal normalized(double x, double y, double z) {
+            double length = Math.sqrt(x * x + y * y + z * z);
+            return new Normal(x / length, y / length, z / length);
+        }
 
         private Normal(double x, double y, double z) {
             this.x = x;
