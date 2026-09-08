@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,6 +25,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 
 import java.awt.*;
+import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
@@ -37,12 +38,24 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
 public final class ImageUtil {
+    public static final @NotNull ColorModel LINEAR_RGB_COLOR_MODEL = new DirectColorModel(
+            ColorSpace.getInstance(ColorSpace.CS_LINEAR_RGB), 32,
+            0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000, false, DataBuffer.TYPE_INT);
 
     private ImageUtil() {}
 
     public enum Premultiplied {
         Yes,
         No
+    }
+
+    public static @NotNull BufferedImage createCompatibleDestImage(@NotNull BufferedImage src,
+            @Nullable ColorModel dstCM) {
+        if (dstCM == null) {
+            dstCM = src.getColorModel();
+        }
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()),
+                dstCM.isAlphaPremultiplied(), null);
     }
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(@NotNull Output output,

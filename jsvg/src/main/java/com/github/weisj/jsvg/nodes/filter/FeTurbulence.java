@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
@@ -149,9 +148,7 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
 
         private @NotNull BufferedImage ensureImageBackingStore() {
             if (bufferedImage == null) {
-                ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_LINEAR_RGB);
-                ColorModel cm = new DirectColorModel(cs, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
-                        false, DataBuffer.TYPE_INT);
+                ColorModel cm = ImageUtil.LINEAR_RGB_COLOR_MODEL;
                 WritableRaster dest = cm.createCompatibleWritableRaster(imageWidth, imageHeight);
                 bufferedImage = new BufferedImage(cm, dest, false, null);
 

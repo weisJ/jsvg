@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
-import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -131,9 +130,7 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
 
         @Override
         public BufferedImage createCompatibleDestImage(BufferedImage src, ColorModel dstCM) {
-            if (dstCM == null) dstCM = src.getColorModel();
-            return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()),
-                    dstCM.isAlphaPremultiplied(), null);
+            return ImageUtil.createCompatibleDestImage(src, dstCM);
         }
 
         @Override
@@ -159,10 +156,7 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
             BufferedImage result = dest;
 
             if (result == null) {
-                ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_sRGB);
-                ColorModel cm = new DirectColorModel(cs, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
-                        false, DataBuffer.TYPE_INT);
-                result = createCompatibleDestImage(src, cm);
+                result = createCompatibleDestImage(src, ColorModel.getRGBdefault());
             }
 
             WritableRaster raster = result.getRaster();
