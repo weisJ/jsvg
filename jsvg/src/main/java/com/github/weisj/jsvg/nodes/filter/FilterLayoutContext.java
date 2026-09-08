@@ -24,7 +24,7 @@ package com.github.weisj.jsvg.nodes.filter;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
-import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
@@ -41,6 +41,7 @@ public final class FilterLayoutContext {
     private final @NotNull Rectangle2D filterRegion;
     private final @NotNull MeasureContext measureContext;
     private final @NotNull AffineTransform transform;
+    private AffineTransform inverseTransform;
 
     public FilterLayoutContext(@NotNull UnitType primitiveUnits, @NotNull Rectangle2D elementBounds,
             @NotNull Rectangle2D clipBounds, @NotNull Rectangle2D filterRegion,
@@ -67,6 +68,11 @@ public final class FilterLayoutContext {
 
     public @NotNull AffineTransform transform() {
         return transform;
+    }
+
+    public @NotNull AffineTransform inverseTransform() {
+        if (inverseTransform == null) inverseTransform = GeometryUtil.createInverse(transform);
+        return inverseTransform;
     }
 
     @NotNull
