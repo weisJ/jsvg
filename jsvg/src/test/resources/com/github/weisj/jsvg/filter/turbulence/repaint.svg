@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+  <defs>
+    <filter id="noise" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+      <feTurbulence type="fractalNoise" seed="2" baseFrequency="0.057" numOctaves="4"
+                    stitchTiles="stitch" x="10" y="10" width="80" height="80"/>
+    </filter>
+  </defs>
+  <g transform="translate(5 7) scale(1.25 .75)">
+    <rect x="5" y="5" width="75" height="75" filter="url(#noise)"/>
+  </g>
+</svg>
