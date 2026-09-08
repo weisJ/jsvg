@@ -63,17 +63,10 @@ public final class ResourceWalker implements AutoCloseable {
     }
 
     private static int compareAsPaths(@NotNull String a, @NotNull String b) {
-        if (a.contains("/")) {
-            if (b.contains("/")) {
-                return a.compareTo(b);
-            } else {
-                return -1;
-            }
-        }
-        if (b.contains("/")) {
-            return 1;
-        }
-        return a.compareTo(b);
+        Path pa = Path.of(a).normalize();
+        Path pb = Path.of(b).normalize();
+
+        return pa.compareTo(pb);
     }
 
     public Stream<String> stream() {
