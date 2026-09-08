@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40">
+	<!-- Alpha transfer is independent of the RGB interpolation space. Left 
+		is raster input, right constant flood. -->
+	<defs>
+		<filter id="raster" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feComponentTransfer>
+				<feFuncA type="linear" slope="0.5" />
+			</feComponentTransfer>
+		</filter>
+		<filter id="constant" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" />
+			<feComponentTransfer>
+				<feFuncA type="linear" slope="0.5" />
+			</feComponentTransfer>
+		</filter>
+	</defs>
+	<rect width="80" height="40" fill="white" />
+	<rect x="8" y="8" width="24" height="24" fill="red"
+		filter="url(#raster)" />
+	<rect x="48" y="8" width="24" height="24" filter="url(#constant)" />
+</svg>

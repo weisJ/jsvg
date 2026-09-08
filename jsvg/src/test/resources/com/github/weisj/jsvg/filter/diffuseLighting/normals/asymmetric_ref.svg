@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6">
+	<!-- Independent reference from the nine Sobel kernels, surfaceScale=2, 
+		dx=dy=1. Input alpha rows: (0, .4, .2), (.8, .2, .6), (.4, 1, .8). Unnormalized 
+		N=(Nx,Ny,1), in row order: (-4/15, -28/15, 1), (-2/15, -4/5, 1), (0, -4/5, 
+		1) (1/5, -14/15, 1), (-1/10, -11/10, 1), (-2/5, -6/5, 1) (-4/5, 0, 1), (-2/5, 
+		-7/5, 1), (0, -8/5, 1) Normalize N, then D=max(0,N dot L). L=(+/-.5,+/-.5,sqrt(.5)). 
+		Convert D to an 8-bit sRGB band; alpha is one. -->
+	<rect x="1" y="1" width="1" height="1" fill="#d4d4d4" />
+	<rect x="2" y="1" width="1" height="1" fill="#e8e8e8" />
+	<rect x="3" y="1" width="1" height="1" fill="#dcdcdc" />
+	<rect x="1" y="2" width="1" height="1" fill="#c6c6c6" />
+	<rect x="2" y="2" width="1" height="1" fill="#e0e0e0" />
+	<rect x="3" y="2" width="1" height="1" fill="#eeeeee" />
+	<rect x="1" y="3" width="1" height="1" fill="#dcdcdc" />
+	<rect x="2" y="3" width="1" height="1" fill="#e8e8e8" />
+	<rect x="3" y="3" width="1" height="1" fill="#cccccc" />
+	<rect x="7" y="1" width="1" height="1" fill="#000000" />
+	<rect x="8" y="1" width="1" height="1" fill="#303030" />
+	<rect x="9" y="1" width="1" height="1" fill="#3d3d3d" />
+	<rect x="7" y="2" width="1" height="1" fill="#3f3f3f" />
+	<rect x="8" y="2" width="1" height="1" fill="#121212" />
+	<rect x="9" y="2" width="1" height="1" fill="#000000" />
+	<rect x="7" y="3" width="1" height="1" fill="#3d3d3d" />
+	<rect x="8" y="3" width="1" height="1" fill="#000000" />
+	<rect x="9" y="3" width="1" height="1" fill="#000000" />
+</svg>

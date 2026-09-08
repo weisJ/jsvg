@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+	<!-- State the same normalized lighting coordinates using an explicit placement 
+		transform. -->
+	<defs>
+		<filter id="f" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="0">
+				<fePointLight x="0.5" y="0.5" z="1" />
+			</feDiffuseLighting>
+		</filter>
+	</defs>
+	<g transform="translate(32 48) scale(64 32)">
+		<g filter="url(#f)">
+			<rect width="1" height="1" />
+		</g>
+	</g>
+</svg>
