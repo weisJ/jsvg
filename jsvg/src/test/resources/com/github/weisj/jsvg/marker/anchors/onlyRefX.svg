@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="140">
+	<!-- Each omitted marker reference component defaults to zero in content 
+		coordinates. -->
+	<defs>
+		<marker id="m" markerUnits="userSpaceOnUse" markerWidth="80"
+			markerHeight="40" viewBox="10 20 40 20" refX="14" orient="0">
+			<rect x="14" y="24" width="16" height="8" fill="red" />
+		</marker>
+	</defs>
+	<path d="M24 16 H30" fill="none" marker-start="url(#m)" />
+</svg>

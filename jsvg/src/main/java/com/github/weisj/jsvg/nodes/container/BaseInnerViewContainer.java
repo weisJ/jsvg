@@ -50,8 +50,19 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
     protected abstract @Nullable Point2D anchorLocation(@NotNull MeasureContext context);
 
-    @Override
-    public abstract @NotNull FloatSize size(@NotNull RenderContext context);
+    /** Reference-point adjustment in the outer viewport's coordinates. */
+    protected @Nullable Point2D anchorLocation(@NotNull MeasureContext context,
+            @Nullable AffineTransform viewTransform) {
+        Point2D anchor = anchorLocation(context);
+        if (anchor != null && viewTransform != null) {
+            // anchorLocation returns the negated content reference point.
+            viewTransform.deltaTransform(anchor, anchor);
+            anchor.setLocation(
+                    anchor.getX() - viewTransform.getTranslateX(),
+                    anchor.getY() - viewTransform.getTranslateY());
+        }
+        return anchor;
+    }
 
     protected abstract @NotNull Overflow defaultOverflow();
 
@@ -115,31 +126,25 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
         RenderContext innerContext = createInnerContext(context, innerViewBox);
         MeasureContext innerMeasure = innerContext.measureContext();
-        Point2D anchorPos = anchorLocation(innerMeasure);
+        Point2D anchorPos = anchorLocation(innerMeasure, viewTransform);
 
         // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
         if (overflow.establishesClip()) {
             ViewBox clipViewBox = new ViewBox(outerViewBox);
             if (anchorPos != null) {
-                Point2D clipAnchor = anchorPos;
-                if (viewTransform != null) {
-                    clipAnchor = new Point2D.Double();
-                    viewTransform.transform(anchorPos, clipAnchor);
-                }
-                clipViewBox.x += (float) clipAnchor.getX();
-                clipViewBox.y += (float) clipAnchor.getY();
+                clipViewBox.x += (float) anchorPos.getX();
+                clipViewBox.y += (float) anchorPos.getY();
             }
             output.applyClip(clipViewBox);
         }
 
         innerContext.translate(output, outerViewBox.location());
+        if (anchorPos != null) {
+            innerContext.translate(output, anchorPos);
+        }
         if (viewTransform != null) {
             // This also applies the translation to the inner viewbox location.
             innerContext.transform(output, viewTransform);
-        }
-
-        if (anchorPos != null) {
-            innerContext.translate(output, anchorPos);
         }
 
         return innerContext;

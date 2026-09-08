@@ -331,15 +331,15 @@ public final class AttributeNode {
         return loadHelper().attributeParser().parseLength(getValue(key), FALLBACK_LENGTH, dimension);
     }
 
-    public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key) {
-        return getHorizontalReferenceLength(getValue(key));
+    public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key, @NotNull Length fallback) {
+        return getHorizontalReferenceLength(getValue(key), fallback);
     }
 
-    public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key) {
-        return getVerticalReferenceLength(getValue(key));
+    public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key, @NotNull Length fallback) {
+        return getVerticalReferenceLength(getValue(key), fallback);
     }
 
-    public @NotNull Length getHorizontalReferenceLength(@Nullable String value) {
+    public @NotNull Length getHorizontalReferenceLength(@Nullable String value, @NotNull Length fallback) {
         if ("left".equals(value)) {
             return Left;
         } else if ("center".equals(value)) {
@@ -347,11 +347,11 @@ public final class AttributeNode {
         } else if ("right".equals(value)) {
             return Right;
         } else {
-            return loadHelper().attributeParser().parseLength(value, Length.ZERO, PercentageDimension.WIDTH);
+            return loadHelper().attributeParser().parseLength(value, fallback, PercentageDimension.WIDTH);
         }
     }
 
-    public @NotNull Length getVerticalReferenceLength(@Nullable String value) {
+    public @NotNull Length getVerticalReferenceLength(@Nullable String value, @NotNull Length fallback) {
         if ("top".equals(value)) {
             return Top;
         } else if ("center".equals(value)) {
@@ -359,7 +359,7 @@ public final class AttributeNode {
         } else if ("bottom".equals(value)) {
             return Bottom;
         } else {
-            return loadHelper().attributeParser().parseLength(value, Length.ZERO, PercentageDimension.HEIGHT);
+            return loadHelper().attributeParser().parseLength(value, fallback, PercentageDimension.HEIGHT);
         }
     }
 
