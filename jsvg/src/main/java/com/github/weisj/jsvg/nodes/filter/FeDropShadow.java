@@ -52,6 +52,11 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
 
         AttributeNode child = attributeNode.copy();
         Map<String, String> attributes = child.attributes();
+        // The outer primitive clips the completed shadow, not its intermediate results.
+        attributes.remove("x");
+        attributes.remove("y");
+        attributes.remove("width");
+        attributes.remove("height");
 
         String resultKey = "result";
 
