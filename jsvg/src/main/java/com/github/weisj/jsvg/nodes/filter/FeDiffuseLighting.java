@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
@@ -35,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.nodes.SVGNode;
@@ -110,7 +112,18 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
-        impl().saveLayoutResult(input.withRegion(region, CoversWholeRegion.YES), filterLayoutContext);
+        Point2D.Double step = samplingStep(filterLayoutContext.transform());
+        // Normals need neighboring height samples beyond the repaint clip.
+        LayoutBounds bounds = input.grow((float) step.x, (float) step.y, filterLayoutContext);
+        impl().saveLayoutResult(bounds.withRegion(region, CoversWholeRegion.YES), filterLayoutContext);
+    }
+
+    private @NotNull Point2D.Double samplingStep(@NotNull AffineTransform transform) {
+        if (kernelUnitLength != null) return new Point2D.Double(kernelUnitLength[0], kernelUnitLength[1]);
+        // Sample one image pixel along each transformed user-space axis by default.
+        return new Point2D.Double(
+                1 / GeometryUtil.scaleXOfTransform(transform),
+                1 / GeometryUtil.scaleYOfTransform(transform));
     }
 
     @Override
@@ -123,7 +136,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
         }
 
         ImageFilter lightingFilter = new BufferedImageFilter(
-                new DiffuseLightingOp(lightSource, filterContext.info().imageBounds(),
+                new DiffuseLightingOp(lightSource, filterContext.info().output().transform(),
                         colorInterpolation(filterContext)));
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(lightingFilter), filterContext);
     }
@@ -131,13 +144,21 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
     private final class DiffuseLightingOp implements BufferedImageOp {
 
         private final @NotNull LightSource lightSource;
-        private final @NotNull Rectangle2D sourceBounds;
+        private final @NotNull AffineTransform imageToUser;
+        private final @NotNull Point2D.Double userStep;
+        private final @NotNull Point2D.Double xSampleStep;
+        private final @NotNull Point2D.Double ySampleStep;
         private final @Nullable ColorInterpolation colorInterpolation;
 
-        private DiffuseLightingOp(@NotNull LightSource lightSource, @NotNull Rectangle2D sourceBounds,
+        private DiffuseLightingOp(@NotNull LightSource lightSource, @NotNull AffineTransform userToImage,
                 @Nullable ColorInterpolation colorInterpolation) {
             this.lightSource = lightSource;
-            this.sourceBounds = sourceBounds;
+            imageToUser = GeometryUtil.createInverse(userToImage);
+            userStep = samplingStep(userToImage);
+            xSampleStep = new Point2D.Double(userStep.x, 0);
+            ySampleStep = new Point2D.Double(0, userStep.y);
+            userToImage.deltaTransform(xSampleStep, xSampleStep);
+            userToImage.deltaTransform(ySampleStep, ySampleStep);
             this.colorInterpolation = colorInterpolation;
         }
 
@@ -174,22 +195,6 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             WritableRaster raster = result.getRaster();
             int w = raster.getWidth();
             int h = raster.getHeight();
-            double scaleX = sourceBounds.getWidth() / w;
-            double scaleY = sourceBounds.getHeight() / h;
-            double startX = sourceBounds.getX();
-            double startY = sourceBounds.getY();
-
-            double pixelStepX = 1;
-            double pixelStepY = 1;
-            double userStepX = scaleX;
-            double userStepY = scaleY;
-            if (kernelUnitLength != null) {
-                pixelStepX = kernelUnitLength[0] / scaleX;
-                pixelStepY = kernelUnitLength[1] / scaleY;
-                userStepX = kernelUnitLength[0];
-                userStepY = kernelUnitLength[1];
-            }
-
             int[] lightColor = {lightingColor.getRed(), lightingColor.getGreen(), lightingColor.getBlue(), 255};
             boolean linearRGB = colorInterpolation != ColorInterpolation.S_RGB;
             if (linearRGB) ColorUtil.sRGBtoLinearRGBinPlace(lightColor);
@@ -198,13 +203,15 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             final int dstAdjust = ImageUtil.getINT_RGBA_DataAdjust(raster);
             int dp = ImageUtil.getINT_RGBA_DataOffset(raster);
 
-            double userY = startY;
+            Point2D.Double userPoint = new Point2D.Double();
             for (int y = 0; y < h; y++) {
-                double userX = startX;
                 for (int x = 0, end = dp + w; dp < end; dp++, x++) {
                     double z = heightAt(src, x, y);
-                    Normal normal = normalAt(src, x, y, pixelStepX, pixelStepY, userStepX, userStepY);
-                    LightSource.Light light = lightSource.lightAt(userX, userY, z);
+                    Normal normal = normalAt(src, x, y);
+                    // Light positions and normals are expressed in user coordinates.
+                    userPoint.setLocation(x + 0.5, y + 0.5);
+                    imageToUser.transform(userPoint, userPoint);
+                    LightSource.Light light = lightSource.lightAt(userPoint.x, userPoint.y, z);
                     double diffuse = diffuseConstant * light.intensity *
                             Math.max(0, normal.x * light.x + normal.y * light.y + normal.z * light.z);
 
@@ -217,9 +224,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
                         b = ColorUtil.linearRGBtoSRGBBand(b);
                     }
                     destPixels[dp] = (0xFF << 24) | (r << 16) | (g << 8) | b;
-                    userX += scaleX;
                 }
-                userY += scaleY;
                 dp += dstAdjust;
             }
             return result;
@@ -248,10 +253,11 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             return a0 + (a1 - a0) * ty;
         }
 
-        private @NotNull Normal normalAt(@NotNull BufferedImage src, int x, int y, double pixelStepX,
-                double pixelStepY, double userStepX, double userStepY) {
-            double dx = (heightAt(src, x + pixelStepX, y) - heightAt(src, x - pixelStepX, y)) / (2 * userStepX);
-            double dy = (heightAt(src, x, y + pixelStepY) - heightAt(src, x, y - pixelStepY)) / (2 * userStepY);
+        private @NotNull Normal normalAt(@NotNull BufferedImage src, int x, int y) {
+            double dx = (heightAt(src, x + xSampleStep.x, y + xSampleStep.y)
+                    - heightAt(src, x - xSampleStep.x, y - xSampleStep.y)) / (2 * userStep.x);
+            double dy = (heightAt(src, x + ySampleStep.x, y + ySampleStep.y)
+                    - heightAt(src, x - ySampleStep.x, y - ySampleStep.y)) / (2 * userStep.y);
 
             double nx = -dx;
             double ny = -dy;
