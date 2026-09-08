@@ -1,22 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220" viewBox="0 0 440 220">
-    <!-- constantMatrixLinearRgb -->
-    <g transform="translate(0 0)">
-        <rect height="100" x="0" y="0" fill="#7caacb" width="100" />
-    </g>
-    <!-- constantTableLinearRgb -->
-    <g transform="translate(110 0)">
-        <rect height="100" x="0" y="0" fill="#7caacb" width="100" />
-    </g>
-    <!-- constantDiscreteLinearRgb -->
-    <g transform="translate(220 0)">
-        <rect height="100" x="0" y="0" fill="#7caacb" width="100" />
-    </g>
-    <!-- constantLinearLinearRgb -->
-    <g transform="translate(330 0)">
-        <rect height="100" x="0" y="0" fill="#7caacb" width="100" />
-    </g>
-    <!-- constantGammaLinearRgb -->
-    <g transform="translate(0 110)">
-        <rect height="100" x="0" y="0" fill="#7caacb" width="100" />
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220"
+	viewBox="0 0 440 220">
+	<!-- constantMatrixLinearRgb -->
+	<g transform="translate(0 0)">
+		<rect height="100" x="0" y="0" fill="#7caacb" width="100" />
+	</g>
+	<!-- constantTableLinearRgb -->
+	<g transform="translate(110 0)">
+		<rect height="100" x="0" y="0" fill="#7caacb" width="100" />
+	</g>
+	<!-- constantDiscreteLinearRgb -->
+	<g transform="translate(220 0)">
+		<rect height="100" x="0" y="0" fill="#7caacb" width="100" />
+	</g>
+	<!-- constantLinearLinearRgb -->
+	<g transform="translate(330 0)">
+		<rect height="100" x="0" y="0" fill="#7caacb" width="100" />
+	</g>
+	<!-- constantGammaLinearRgb -->
+	<g transform="translate(0 110)">
+		<rect height="100" x="0" y="0" fill="#7caacb" width="100" />
+	</g>
 </svg>

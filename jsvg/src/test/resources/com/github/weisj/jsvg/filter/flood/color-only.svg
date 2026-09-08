@@ -1,15 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="160" height="70">
-    <defs>
-        <linearGradient id="gradient">
-            <stop offset="0" stop-color="red"/>
-            <stop offset="1" stop-color="blue"/>
-        </linearGradient>
-        <filter id="default" x="0" y="0" width="1" height="1"><feFlood/></filter>
-        <filter id="paint-server" x="0" y="0" width="1" height="1"><feFlood flood-color="url(#gradient)"/></filter>
-        <filter id="none" x="0" y="0" width="1" height="1"><feFlood flood-color="none"/></filter>
-    </defs>
-    <!-- Paint-server references and none are outside the color grammar and use the black default. -->
-    <rect x="10" y="10" width="30" height="40" fill="red" filter="url(#default)"/>
-    <rect x="60" y="10" width="30" height="40" fill="red" filter="url(#paint-server)"/>
-    <rect x="110" y="10" width="30" height="40" fill="red" filter="url(#none)"/>
+	<defs>
+		<linearGradient id="gradient">
+			<stop offset="0" stop-color="red" />
+			<stop offset="1" stop-color="blue" />
+		</linearGradient>
+		<filter id="default" x="0" y="0" width="1" height="1">
+			<feFlood />
+		</filter>
+		<filter id="paint-server" x="0" y="0" width="1" height="1">
+			<feFlood flood-color="url(#gradient)" />
+		</filter>
+		<filter id="none" x="0" y="0" width="1" height="1">
+			<feFlood flood-color="none" />
+		</filter>
+	</defs>
+	<!-- Paint-server references and none are outside the color grammar and 
+		use the black default. -->
+	<rect x="10" y="10" width="30" height="40" fill="red"
+		filter="url(#default)" />
+	<rect x="60" y="10" width="30" height="40" fill="red"
+		filter="url(#paint-server)" />
+	<rect x="110" y="10" width="30" height="40" fill="red"
+		filter="url(#none)" />
 </svg>

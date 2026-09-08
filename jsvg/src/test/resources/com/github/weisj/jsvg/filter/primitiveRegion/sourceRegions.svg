@@ -1,29 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="330" height="110" viewBox="0 0 330 110">
-    <!-- clippedSourceGraphic -->
-    <g transform="translate(0 0)">
-        <defs>
-            <filter id="f0" filterUnits="userSpaceOnUse" x="20" y="20" width="20" height="20">
-                <feOffset in="SourceGraphic" dx="15" />
-            </filter>
-        </defs>
-        <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f0)" />
-    </g>
-    <!-- clippedSourceAlpha -->
-    <g transform="translate(110 0)">
-        <defs>
-            <filter id="f1" filterUnits="userSpaceOnUse" x="20" y="20" width="20" height="20">
-                <feOffset in="SourceAlpha" dx="15" />
-            </filter>
-        </defs>
-        <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f1)" />
-    </g>
-    <!-- defaultSourceRegion -->
-    <g transform="translate(220 0)">
-        <defs>
-            <filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-                <feOffset in="SourceGraphic" dx="10" />
-            </filter>
-        </defs>
-        <rect x="20" y="20" width="10" height="10" fill="red" filter="url(#f2)" />
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="330" height="110"
+	viewBox="0 0 330 110">
+	<!-- clippedSourceGraphic -->
+	<g transform="translate(0 0)">
+		<defs>
+			<filter id="f0" filterUnits="userSpaceOnUse" x="20" y="20"
+				width="20" height="20">
+				<feOffset in="SourceGraphic" dx="15" />
+			</filter>
+		</defs>
+		<rect x="5" y="5" width="75" height="75" fill="red"
+			filter="url(#f0)" />
+	</g>
+	<!-- clippedSourceAlpha -->
+	<g transform="translate(110 0)">
+		<defs>
+			<filter id="f1" filterUnits="userSpaceOnUse" x="20" y="20"
+				width="20" height="20">
+				<feOffset in="SourceAlpha" dx="15" />
+			</filter>
+		</defs>
+		<rect x="5" y="5" width="75" height="75" fill="red"
+			filter="url(#f1)" />
+	</g>
+	<!-- defaultSourceRegion -->
+	<g transform="translate(220 0)">
+		<defs>
+			<filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0"
+				width="100" height="100">
+				<feOffset in="SourceGraphic" dx="10" />
+			</filter>
+		</defs>
+		<rect x="20" y="20" width="10" height="10" fill="red"
+			filter="url(#f2)" />
+	</g>
 </svg>

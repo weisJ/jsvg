@@ -1,32 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="180" height="60">
-  <defs>
-    <filter id="redThenBlue" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-      <feColorMatrix result="red" values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix result="blue" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 .5"/>
-      <feMerge>
-        <feMergeNode in="red"/>
-        <feMergeNode in="blue"/>
-      </feMerge>
-    </filter>
-    <filter id="blueThenRed" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-      <feColorMatrix result="red" values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix result="blue" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 .5"/>
-      <feMerge>
-        <feMergeNode in="blue"/>
-        <feMergeNode in="red"/>
-      </feMerge>
-    </filter>
-    <filter id="reuseInput" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-      <feColorMatrix result="red" values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix result="blue" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 .5"/>
-      <feMerge>
-        <feMergeNode in="red"/>
-        <feMergeNode in="blue"/>
-      </feMerge>
-      <feOffset in="red"/>
-    </filter>
-  </defs>
-  <rect width="60" height="60" filter="url(#redThenBlue)"/>
-  <rect x="60" width="60" height="60" filter="url(#blueThenRed)"/>
-  <rect x="120" width="60" height="60" filter="url(#reuseInput)"/>
+	<defs>
+		<filter id="redThenBlue" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feColorMatrix result="red"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix result="blue"
+				values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 .5" />
+			<feMerge>
+				<feMergeNode in="red" />
+				<feMergeNode in="blue" />
+			</feMerge>
+		</filter>
+		<filter id="blueThenRed" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feColorMatrix result="red"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix result="blue"
+				values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 .5" />
+			<feMerge>
+				<feMergeNode in="blue" />
+				<feMergeNode in="red" />
+			</feMerge>
+		</filter>
+		<filter id="reuseInput" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feColorMatrix result="red"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix result="blue"
+				values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 .5" />
+			<feMerge>
+				<feMergeNode in="red" />
+				<feMergeNode in="blue" />
+			</feMerge>
+			<feOffset in="red" />
+		</filter>
+	</defs>
+	<rect width="60" height="60" filter="url(#redThenBlue)" />
+	<rect x="60" width="60" height="60" filter="url(#blueThenRed)" />
+	<rect x="120" width="60" height="60" filter="url(#reuseInput)" />
 </svg>

@@ -24,12 +24,12 @@ package com.github.weisj.jsvg.nodes.filter;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
-import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 
 public final class FilterLayoutContext {

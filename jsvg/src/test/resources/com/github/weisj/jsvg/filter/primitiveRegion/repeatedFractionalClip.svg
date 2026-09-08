@@ -1,14 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-    <defs>
-        <filter id="f" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-            <feFlood flood-opacity=".5" x="20.5" y="20.5" width="20" height="20" result="clipped"/>
-            <feOffset x="20.5" y="20.5" width="20" height="20" result="clipped"/>
-            <feFlood flood-opacity="0"/>
-            <feMerge>
-                <feMergeNode in="clipped"/>
-                <feMergeNode/>
-            </feMerge>
-        </filter>
-    </defs>
-    <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f)"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"
+	viewBox="0 0 100 100">
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="100" height="100">
+			<feFlood flood-opacity=".5" x="20.5" y="20.5" width="20"
+				height="20" result="clipped" />
+			<feOffset x="20.5" y="20.5" width="20" height="20"
+				result="clipped" />
+			<feFlood flood-opacity="0" />
+			<feMerge>
+				<feMergeNode in="clipped" />
+				<feMergeNode />
+			</feMerge>
+		</filter>
+	</defs>
+	<rect x="5" y="5" width="75" height="75" fill="red"
+		filter="url(#f)" />
 </svg>

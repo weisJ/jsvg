@@ -1,12 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220" viewBox="0 0 440 220">
-    <!-- emptyFlood -->
-    <g transform="translate(0 0)" />
-    <!-- offscreenFlood -->
-    <g transform="translate(110 0)" />
-    <!-- emptyTurbulence -->
-    <g transform="translate(220 0)" />
-    <!-- emptyMatrix -->
-    <g transform="translate(330 0)" />
-    <!-- negativeMatrix -->
-    <g transform="translate(0 110)" />
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220"
+	viewBox="0 0 440 220">
+	<!-- emptyFlood -->
+	<g transform="translate(0 0)" />
+	<!-- offscreenFlood -->
+	<g transform="translate(110 0)" />
+	<!-- emptyTurbulence -->
+	<g transform="translate(220 0)" />
+	<!-- emptyMatrix -->
+	<g transform="translate(330 0)" />
+	<!-- negativeMatrix -->
+	<g transform="translate(0 110)" />
 </svg>

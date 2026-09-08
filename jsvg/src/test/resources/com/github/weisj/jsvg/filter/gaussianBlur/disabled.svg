@@ -1,44 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="96">
-  <defs>
-    <filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="-1"/>
-    </filter>
-    <filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="-1 4"/>
-    </filter>
-    <filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="4 -1"/>
-    </filter>
-    <filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="0"/>
-    </filter>
-    <filter id="f4" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB">
-      <feGaussianBlur />
-    </filter>
-  </defs>
-  <!-- Deviation: -1; preserve the input. -->
-  <g transform="translate(0 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f0)"/>
-  </g>
-  <!-- Deviation: -1 4; preserve the input. -->
-  <g transform="translate(144 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f1)"/>
-  </g>
-  <!-- Deviation: 4 -1; preserve the input. -->
-  <g transform="translate(288 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f2)"/>
-  </g>
-  <!-- Deviation: 0; preserve the input. -->
-  <g transform="translate(432 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f3)"/>
-  </g>
-  <!-- Deviation: omitted; preserve the input. -->
-  <g transform="translate(576 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f4)"/>
-  </g>
+	<defs>
+		<filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="-1" />
+		</filter>
+		<filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="-1 4" />
+		</filter>
+		<filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="4 -1" />
+		</filter>
+		<filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="0" />
+		</filter>
+		<filter id="f4" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB">
+			<feGaussianBlur />
+		</filter>
+	</defs>
+	<!-- Deviation: -1; preserve the input. -->
+	<g transform="translate(0 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f0)" />
+	</g>
+	<!-- Deviation: -1 4; preserve the input. -->
+	<g transform="translate(144 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f1)" />
+	</g>
+	<!-- Deviation: 4 -1; preserve the input. -->
+	<g transform="translate(288 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f2)" />
+	</g>
+	<!-- Deviation: 0; preserve the input. -->
+	<g transform="translate(432 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f3)" />
+	</g>
+	<!-- Deviation: omitted; preserve the input. -->
+	<g transform="translate(576 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f4)" />
+	</g>
 </svg>

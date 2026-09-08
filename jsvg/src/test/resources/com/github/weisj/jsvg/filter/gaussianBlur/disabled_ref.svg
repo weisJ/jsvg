@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="96">
-  <!-- Deviation: -1; preserve the input. -->
-  <g transform="translate(0 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" />
-  </g>
-  <!-- Deviation: -1 4; preserve the input. -->
-  <g transform="translate(144 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" />
-  </g>
-  <!-- Deviation: 4 -1; preserve the input. -->
-  <g transform="translate(288 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" />
-  </g>
-  <!-- Deviation: 0; preserve the input. -->
-  <g transform="translate(432 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" />
-  </g>
-  <!-- Deviation: omitted; preserve the input. -->
-  <g transform="translate(576 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" />
-  </g>
+	<!-- Deviation: -1; preserve the input. -->
+	<g transform="translate(0 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040" />
+	</g>
+	<!-- Deviation: -1 4; preserve the input. -->
+	<g transform="translate(144 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040" />
+	</g>
+	<!-- Deviation: 4 -1; preserve the input. -->
+	<g transform="translate(288 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040" />
+	</g>
+	<!-- Deviation: 0; preserve the input. -->
+	<g transform="translate(432 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040" />
+	</g>
+	<!-- Deviation: omitted; preserve the input. -->
+	<g transform="translate(576 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040" />
+	</g>
 </svg>

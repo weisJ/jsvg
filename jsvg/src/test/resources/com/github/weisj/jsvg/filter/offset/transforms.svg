@@ -1,74 +1,76 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="480" height="256">
-  <defs>
-    <filter id="positive" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse"
-            x="0" y="0" width="160" height="128">
-      <feOffset dx="12" dy="8"/>
-    </filter>
-    <filter id="negative" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse"
-            x="0" y="0" width="160" height="128">
-      <feOffset dx="-12" dy="-8"/>
-    </filter>
-    <filter id="boxPositive" filterUnits="userSpaceOnUse" primitiveUnits="objectBoundingBox"
-            x="0" y="0" width="160" height="128">
-      <feOffset dx="0.5" dy="0.5"/>
-    </filter>
-    <filter id="boxNegative" filterUnits="userSpaceOnUse" primitiveUnits="objectBoundingBox"
-            x="0" y="0" width="160" height="128">
-      <feOffset dx="-0.5" dy="-0.5"/>
-    </filter>
-  </defs>
-  <!-- Translation. -->
-  <g transform="translate(0 0)">
-    <g transform="translate(7 11)">
-      <g filter="url(#positive)">
-        <rect x="36" y="32" width="12" height="16" fill="#e08040"/>
-        <rect x="48" y="32" width="12" height="16" fill="#204060"/>
-      </g>
-    </g>
-  </g>
-  <!-- Horizontal reflection. -->
-  <g transform="translate(160 0)">
-    <g transform="matrix(-1 0 0 1 128 0)">
-      <g filter="url(#positive)">
-        <rect x="36" y="32" width="12" height="16" fill="#e08040"/>
-        <rect x="48" y="32" width="12" height="16" fill="#204060"/>
-      </g>
-    </g>
-  </g>
-  <!-- Vertical reflection. -->
-  <g transform="translate(320 0)">
-    <g transform="matrix(1 0 0 -1 0 112)">
-      <g filter="url(#negative)">
-        <rect x="36" y="32" width="12" height="16" fill="#e08040"/>
-        <rect x="48" y="32" width="12" height="16" fill="#204060"/>
-      </g>
-    </g>
-  </g>
-  <!-- Quarter turn. -->
-  <g transform="translate(0 128)">
-    <g transform="rotate(90 64 64)">
-      <g filter="url(#negative)">
-        <rect x="36" y="32" width="12" height="16" fill="#e08040"/>
-        <rect x="48" y="32" width="12" height="16" fill="#204060"/>
-      </g>
-    </g>
-  </g>
-  <!-- Shear with bounding-box units. -->
-  <g transform="translate(160 128)">
-    <g transform="matrix(1 .25 .5 1 0 0)">
-      <g filter="url(#boxPositive)">
-        <rect x="36" y="32" width="12" height="16" fill="#e08040"/>
-        <rect x="48" y="32" width="12" height="16" fill="#204060"/>
-      </g>
-    </g>
-  </g>
-  <!-- Nonuniform scale with bounding-box units. -->
-  <g transform="translate(320 128)">
-    <g transform="matrix(1.5 0 0 .75 4 8)">
-      <g filter="url(#boxNegative)">
-        <rect x="36" y="32" width="12" height="16" fill="#e08040"/>
-        <rect x="48" y="32" width="12" height="16" fill="#204060"/>
-      </g>
-    </g>
-  </g>
+	<defs>
+		<filter id="positive" filterUnits="userSpaceOnUse"
+			primitiveUnits="userSpaceOnUse" x="0" y="0" width="160" height="128">
+			<feOffset dx="12" dy="8" />
+		</filter>
+		<filter id="negative" filterUnits="userSpaceOnUse"
+			primitiveUnits="userSpaceOnUse" x="0" y="0" width="160" height="128">
+			<feOffset dx="-12" dy="-8" />
+		</filter>
+		<filter id="boxPositive" filterUnits="userSpaceOnUse"
+			primitiveUnits="objectBoundingBox" x="0" y="0" width="160"
+			height="128">
+			<feOffset dx="0.5" dy="0.5" />
+		</filter>
+		<filter id="boxNegative" filterUnits="userSpaceOnUse"
+			primitiveUnits="objectBoundingBox" x="0" y="0" width="160"
+			height="128">
+			<feOffset dx="-0.5" dy="-0.5" />
+		</filter>
+	</defs>
+	<!-- Translation. -->
+	<g transform="translate(0 0)">
+		<g transform="translate(7 11)">
+			<g filter="url(#positive)">
+				<rect x="36" y="32" width="12" height="16" fill="#e08040" />
+				<rect x="48" y="32" width="12" height="16" fill="#204060" />
+			</g>
+		</g>
+	</g>
+	<!-- Horizontal reflection. -->
+	<g transform="translate(160 0)">
+		<g transform="matrix(-1 0 0 1 128 0)">
+			<g filter="url(#positive)">
+				<rect x="36" y="32" width="12" height="16" fill="#e08040" />
+				<rect x="48" y="32" width="12" height="16" fill="#204060" />
+			</g>
+		</g>
+	</g>
+	<!-- Vertical reflection. -->
+	<g transform="translate(320 0)">
+		<g transform="matrix(1 0 0 -1 0 112)">
+			<g filter="url(#negative)">
+				<rect x="36" y="32" width="12" height="16" fill="#e08040" />
+				<rect x="48" y="32" width="12" height="16" fill="#204060" />
+			</g>
+		</g>
+	</g>
+	<!-- Quarter turn. -->
+	<g transform="translate(0 128)">
+		<g transform="rotate(90 64 64)">
+			<g filter="url(#negative)">
+				<rect x="36" y="32" width="12" height="16" fill="#e08040" />
+				<rect x="48" y="32" width="12" height="16" fill="#204060" />
+			</g>
+		</g>
+	</g>
+	<!-- Shear with bounding-box units. -->
+	<g transform="translate(160 128)">
+		<g transform="matrix(1 .25 .5 1 0 0)">
+			<g filter="url(#boxPositive)">
+				<rect x="36" y="32" width="12" height="16" fill="#e08040" />
+				<rect x="48" y="32" width="12" height="16" fill="#204060" />
+			</g>
+		</g>
+	</g>
+	<!-- Nonuniform scale with bounding-box units. -->
+	<g transform="translate(320 128)">
+		<g transform="matrix(1.5 0 0 .75 4 8)">
+			<g filter="url(#boxNegative)">
+				<rect x="36" y="32" width="12" height="16" fill="#e08040" />
+				<rect x="48" y="32" width="12" height="16" fill="#204060" />
+			</g>
+		</g>
+	</g>
 </svg>

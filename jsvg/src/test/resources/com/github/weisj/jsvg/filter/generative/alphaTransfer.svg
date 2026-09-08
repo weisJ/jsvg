@@ -1,38 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="330" height="110" viewBox="0 0 330 110">
-    <!-- alphaTable -->
-    <g transform="translate(0 0)">
-        <defs>
-            <filter id="f0" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
-                <feFlood x="10" y="10" width="10" height="10" />
-                <feComponentTransfer x="50" y="50" width="20" height="20">
-                    <feFuncA type="table" tableValues="1 1" />
-                </feComponentTransfer>
-            </filter>
-        </defs>
-        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f0)" />
-    </g>
-    <!-- alphaDiscrete -->
-    <g transform="translate(110 0)">
-        <defs>
-            <filter id="f1" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
-                <feFlood x="10" y="10" width="10" height="10" />
-                <feComponentTransfer x="50" y="50" width="20" height="20">
-                    <feFuncA type="discrete" tableValues="1 1" />
-                </feComponentTransfer>
-            </filter>
-        </defs>
-        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f1)" />
-    </g>
-    <!-- alphaGamma -->
-    <g transform="translate(220 0)">
-        <defs>
-            <filter id="f2" filterUnits="userSpaceOnUse" y="0" x="0" height="100" width="100" color-interpolation-filters="sRGB">
-                <feFlood x="10" y="10" width="10" height="10" />
-                <feComponentTransfer x="50" y="50" width="20" height="20">
-                    <feFuncA type="gamma" amplitude="0" offset="1" />
-                </feComponentTransfer>
-            </filter>
-        </defs>
-        <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f2)" />
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="330" height="110"
+	viewBox="0 0 330 110">
+	<!-- alphaTable -->
+	<g transform="translate(0 0)">
+		<defs>
+			<filter id="f0" filterUnits="userSpaceOnUse" y="0" x="0"
+				height="100" width="100" color-interpolation-filters="sRGB">
+				<feFlood x="10" y="10" width="10" height="10" />
+				<feComponentTransfer x="50" y="50" width="20"
+					height="20">
+					<feFuncA type="table" tableValues="1 1" />
+				</feComponentTransfer>
+			</filter>
+		</defs>
+		<rect x="10" y="10" width="10" height="10" fill="red"
+			filter="url(#f0)" />
+	</g>
+	<!-- alphaDiscrete -->
+	<g transform="translate(110 0)">
+		<defs>
+			<filter id="f1" filterUnits="userSpaceOnUse" y="0" x="0"
+				height="100" width="100" color-interpolation-filters="sRGB">
+				<feFlood x="10" y="10" width="10" height="10" />
+				<feComponentTransfer x="50" y="50" width="20"
+					height="20">
+					<feFuncA type="discrete" tableValues="1 1" />
+				</feComponentTransfer>
+			</filter>
+		</defs>
+		<rect x="10" y="10" width="10" height="10" fill="red"
+			filter="url(#f1)" />
+	</g>
+	<!-- alphaGamma -->
+	<g transform="translate(220 0)">
+		<defs>
+			<filter id="f2" filterUnits="userSpaceOnUse" y="0" x="0"
+				height="100" width="100" color-interpolation-filters="sRGB">
+				<feFlood x="10" y="10" width="10" height="10" />
+				<feComponentTransfer x="50" y="50" width="20"
+					height="20">
+					<feFuncA type="gamma" amplitude="0" offset="1" />
+				</feComponentTransfer>
+			</filter>
+		</defs>
+		<rect x="10" y="10" width="10" height="10" fill="red"
+			filter="url(#f2)" />
+	</g>
 </svg>

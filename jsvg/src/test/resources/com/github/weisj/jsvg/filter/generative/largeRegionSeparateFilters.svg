@@ -1,15 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-    <!-- Each filtered source keeps its transparent surroundings through a chain with a huge region. -->
-    <defs>
-        <filter id="f" filterUnits="userSpaceOnUse" x="-1000" y="-1000" width="2000" height="2000"
-                color-interpolation-filters="sRGB">
-            <feComponentTransfer>
-                <feFuncR type="linear" slope="0"/>
-            </feComponentTransfer>
-            <feColorMatrix type="saturate" values="0"/>
-            <feOffset dx="5"/>
-        </filter>
-    </defs>
-    <rect x="10" y="10" width="10" height="10" fill="red" filter="url(#f)"/>
-    <rect x="60" y="60" width="15" height="20" fill="red" filter="url(#f)"/>
+	<!-- Each filtered source keeps its transparent surroundings through a chain 
+		with a huge region. -->
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="-1000" y="-1000"
+			width="2000" height="2000" color-interpolation-filters="sRGB">
+			<feComponentTransfer>
+				<feFuncR type="linear" slope="0" />
+			</feComponentTransfer>
+			<feColorMatrix type="saturate" values="0" />
+			<feOffset dx="5" />
+		</filter>
+	</defs>
+	<rect x="10" y="10" width="10" height="10" fill="red"
+		filter="url(#f)" />
+	<rect x="60" y="60" width="15" height="20" fill="red"
+		filter="url(#f)" />
 </svg>
