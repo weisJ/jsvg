@@ -102,18 +102,21 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     @Override
     public @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {
         if (!(referencedNode instanceof HasShape)) return AWTSVGShape.EMPTY_SHAPE;
-        // Todo: Inner views need to handle this differently
-        return ((HasShape) referencedNode).elementShape(
-                NodeRenderer.createChildContext((Renderable) referencedNode, context, this),
-                box);
+        RenderContext childContext = NodeRenderer.createChildContext((Renderable) referencedNode, context, this);
+        if (referencedNode instanceof CommonInnerViewContainer) {
+            return ((CommonInnerViewContainer) referencedNode).elementShape(childContext, box, useSiteSize(context));
+        }
+        return ((HasShape) referencedNode).elementShape(childContext, box);
     }
 
     @Override
     public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
         if (!(referencedNode instanceof HasShape)) return AWTSVGShape.EMPTY_SHAPE;
-        // Todo: Inner views need to handle this differently
-        return ((HasShape) referencedNode).elementBounds(
-                NodeRenderer.createChildContext((Renderable) referencedNode, context, this), box);
+        RenderContext childContext = NodeRenderer.createChildContext((Renderable) referencedNode, context, this);
+        if (referencedNode instanceof CommonInnerViewContainer) {
+            return ((CommonInnerViewContainer) referencedNode).elementBounds(childContext, box, useSiteSize(context));
+        }
+        return ((HasShape) referencedNode).elementBounds(childContext, box);
     }
 
     @Override
@@ -151,19 +154,19 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
         if (referencedNode == null) return;
-        MeasureContext measureContext = context.measureContext();
-
         // Todo: Vector Effects
 
         if (referencedNode instanceof CommonInnerViewContainer) {
-            FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
-            if (width.isSpecified()) targetViewBox.width = width.resolve(measureContext);
-            if (height.isSpecified()) targetViewBox.height = height.resolve(measureContext);
             CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
-            NodeRenderer.renderWithSize(view, targetViewBox, context, output, this);
+            NodeRenderer.renderWithSize(view, useSiteSize(context), context, output, this);
         } else {
             NodeRenderer.renderNode(referencedNode, context, output, this);
         }
+    }
+
+    private @NotNull FloatSize useSiteSize(@NotNull RenderContext context) {
+        MeasureContext measure = context.measureContext();
+        return new FloatSize(width.resolve(measure), height.resolve(measure));
     }
 
     @Override

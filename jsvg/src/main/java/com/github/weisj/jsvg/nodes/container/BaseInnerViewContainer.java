@@ -89,12 +89,13 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         return true;
     }
 
-    private @NotNull RenderContext createInnerContext(@NotNull RenderContext context,
+    protected final @NotNull RenderContext createInnerContext(@NotNull RenderContext context,
             @NotNull ViewBox viewBox) {
         return NodeRenderer.setupInnerViewRenderContext(viewBox, context, inheritAttributes());
     }
 
-    private @NotNull ViewBox computeOuterViewBox(@NotNull RenderContext context, @NotNull FloatSize useSiteSize) {
+    protected final @NotNull ViewBox computeOuterViewBox(@NotNull RenderContext context,
+            @NotNull FloatSize useSiteSize) {
         MeasureContext measureContext = context.measureContext();
         Point2D outerPos = outerLocation(measureContext);
         ViewBox vb = new ViewBox(outerPos, useSiteSize);
