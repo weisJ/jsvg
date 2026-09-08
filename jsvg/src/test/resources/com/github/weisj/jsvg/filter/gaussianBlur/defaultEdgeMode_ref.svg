@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="144" height="96">
+  <!-- A clipped input must blur into transparent surroundings by default. -->
+  <defs>
+    <filter id="f" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
+            color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="4" edgeMode="none"/>
+    </filter>
+  </defs>
+  <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f)"/>
+</svg>

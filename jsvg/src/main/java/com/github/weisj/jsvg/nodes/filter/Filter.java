@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.Objects;
@@ -115,9 +116,17 @@ public final class Filter extends ContainerNode {
                 ? output.clipBounds()
                 : NO_CLIP_BOUNDS.getBounds2D();
 
+        AffineTransform transform;
+        if (output != null) {
+            transform = output.transform();
+        } else {
+            transform = new AffineTransform(context.rootTransform());
+            transform.concatenate(context.userSpaceTransform());
+        }
+
         FilterLayoutContext filterLayoutContext =
                 new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds,
-                        filterRegion, context.measureContext());
+                        filterRegion, context.measureContext(), transform);
 
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
 

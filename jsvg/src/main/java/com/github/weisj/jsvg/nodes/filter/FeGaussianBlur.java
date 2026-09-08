@@ -30,6 +30,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
@@ -72,7 +73,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         stdDeviation = attributeNode.getFloatList("stdDeviation");
-        edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.Duplicate);
+        edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.None);
     }
 
     @ApiStatus.Internal
@@ -80,25 +81,37 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         this.onlyAlpha = onlyAlpha;
     }
 
-    private double[] computeAbsoluteStdDeviation(@Nullable AffineTransform at) {
+    private double[] computeAbsoluteStdDeviation(@NotNull AffineTransform at, @NotNull UnitType units,
+            @NotNull Rectangle2D elementBounds) {
         if (stdDeviation.length == 0) return new double[] {0, 0};
         double xSigma = stdDeviation[0];
         double ySigma = stdDeviation[Math.min(stdDeviation.length - 1, 1)];
-        if (at != null) {
-            xSigma *= GeometryUtil.scaleXOfTransform(at);
-            ySigma *= GeometryUtil.scaleYOfTransform(at);
+        if (xSigma < 0 || ySigma < 0) return new double[] {0, 0};
+        if (units == UnitType.ObjectBoundingBox) {
+            xSigma *= elementBounds.getWidth();
+            ySigma *= elementBounds.getHeight();
         }
+        xSigma *= GeometryUtil.scaleXOfTransform(at);
+        ySigma *= GeometryUtil.scaleYOfTransform(at);
         return new double[] {xSigma, ySigma};
     }
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
-        double[] sigma = computeAbsoluteStdDeviation(null);
+        AffineTransform transform = filterLayoutContext.transform();
+        double[] sigma = computeAbsoluteStdDeviation(transform,
+                filterLayoutContext.primitiveUnits(), filterLayoutContext.elementBounds());
         int dX = kernelDiameterForStandardDeviation(sigma[0]);
         int dY = kernelDiameterForStandardDeviation(sigma[1]);
         float hExtend = extendForKernelDiameter(sigma[0], dX);
         float vExtend = extendForKernelDiameter(sigma[1], dY);
+        // Kernel sizes are rounded in device pixels; layout grows in user coordinates.
+        AffineTransform inverse = GeometryUtil.createInverse(transform);
+        float hUserExtend = (float) (Math.abs(inverse.getScaleX()) * hExtend
+                + Math.abs(inverse.getShearX()) * vExtend);
+        float vUserExtend = (float) (Math.abs(inverse.getShearY()) * hExtend
+                + Math.abs(inverse.getScaleY()) * vExtend);
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
         // Wrapping can repeat content anywhere; duplication only adds content outside the input region.
         boolean extendsInput = edgeMode == EdgeMode.Wrap
@@ -108,7 +121,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
                 ? CoversWholeRegion.YES
                 : CoversWholeRegion.NO;
         LayoutBounds bounds =
-                input.grow(hExtend, vExtend, filterLayoutContext).withRegion(region, coversWholeRegion);
+                input.grow(hUserExtend, vUserExtend, filterLayoutContext).withRegion(region, coversWholeRegion);
         impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
@@ -119,7 +132,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             return;
         }
 
-        double[] sigma = computeAbsoluteStdDeviation(filterContext.info().output().transform());
+        double[] sigma = computeAbsoluteStdDeviation(filterContext.info().output().transform(),
+                filterContext.primitiveUnits(), filterContext.info().elementBounds());
         double xSigma = sigma[0];
         double ySigma = sigma[1];
 
