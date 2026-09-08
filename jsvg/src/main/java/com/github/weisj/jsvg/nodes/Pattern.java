@@ -180,7 +180,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
             if (patternContentUnits == UnitType.UserSpaceOnUse) {
                 ctx.translate(out, patternBounds.getX(), patternBounds.getY());
             }
-            renderWithSize(new FloatSize(patternBounds), viewBox, ctx, out);
+            RenderContext innerContext = createInnerContextForViewBox(new FloatSize(patternBounds), viewBox, ctx, out);
+            render(innerContext, out);
         });
 
         // Fixme: When patternTransform != null antialiasing is broken

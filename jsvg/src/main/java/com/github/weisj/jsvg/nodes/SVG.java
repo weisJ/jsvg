@@ -71,6 +71,12 @@ public final class SVG extends CommonInnerViewContainer {
         return TAG;
     }
 
+    @Override
+    public boolean establishesViewBox() {
+        // SVGDocument establishes the top-level viewport before entering NodeRenderer.
+        return !isTopLevel;
+    }
+
     public boolean isTopLevel() {
         return isTopLevel;
     }

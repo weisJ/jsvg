@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.nodes.prototype.ViewContainer;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -39,7 +40,7 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
-public abstract class BaseInnerViewContainer extends CommonRenderableContainerNode {
+public abstract class BaseInnerViewContainer extends CommonRenderableContainerNode implements ViewContainer {
 
     protected ViewBox viewBox;
     protected PreserveAspectRatio preserveAspectRatio;
@@ -49,10 +50,12 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
     protected abstract @Nullable Point2D anchorLocation(@NotNull MeasureContext context);
 
+    @Override
     public abstract @NotNull FloatSize size(@NotNull RenderContext context);
 
     protected abstract @NotNull Overflow defaultOverflow();
 
+    @Override
     public @Nullable ViewBox viewBox(@NotNull RenderContext context) {
         return viewBox != null ? viewBox : new ViewBox(size(context));
     }
@@ -69,21 +72,6 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         preserveAspectRatio = PreserveAspectRatio.parse(
                 attributeNode.getValue("preserveAspectRatio"), attributeNode.parser());
         overflow = attributeNode.getEnum("overflow", defaultOverflow());
-    }
-
-    public void renderWithEstablishedViewBox(@NotNull RenderContext context, @NotNull Output output) {
-        super.render(context, output);
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderWithSize(size(context), viewBox(context), context, output);
-    }
-
-    public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
-            @NotNull RenderContext context, @NotNull Output output) {
-        RenderContext innerContext = createInnerContextForViewBox(useSiteSize, view, context, output);
-        renderWithEstablishedViewBox(innerContext, output);
     }
 
     protected boolean inheritAttributes() {
@@ -109,6 +97,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         return vb;
     }
 
+    @Override
     public final @NotNull RenderContext createInnerContextForViewBox(@NotNull FloatSize useSiteSize,
             @Nullable ViewBox view, @NotNull RenderContext context, @NotNull Output output) {
         ViewBox outerViewBox = computeOuterViewBox(context, useSiteSize);

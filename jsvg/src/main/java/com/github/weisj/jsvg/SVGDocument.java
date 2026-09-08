@@ -155,7 +155,7 @@ public final class SVGDocument {
         ViewBox clipViewbox = rootViewBox != null ? rootViewBox : fallbackViewbox;
         output.applyClip(clipViewbox);
 
-        NodeRenderer.renderRootSVG(root, viewContext, output);
+        NodeRenderer.renderNode(root, viewContext, output);
     }
 
     private @NotNull RenderContext prepareRenderContext(
