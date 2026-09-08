@@ -87,7 +87,8 @@ public final class LayoutBounds {
         Rectangle2D clipBounds = context.clipBounds();
         FloatInsets growInsets = new FloatInsets(vertical, horizontal, vertical, horizontal);
         Rectangle2D newBounds = GeometryUtil.grow(bounds, growInsets);
-        FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, newBounds), growInsets);
+        FloatInsets requiredInsets = GeometryUtil.sum(clipBoundsEscapeInsets, growInsets);
+        FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, newBounds), requiredInsets);
         return new LayoutBounds(newBounds, GeometryUtil.max(clipBoundsEscapeInsets, ins), region);
     }
 
@@ -99,11 +100,12 @@ public final class LayoutBounds {
                 Math.max(dy, 0),
                 Math.max(dx, 0)));
         // Visible output can require input outside the clip in the opposite direction.
-        FloatInsets ins = GeometryUtil.max(GeometryUtil.overhangInsets(clipBounds, bounds), new FloatInsets(
+        FloatInsets requiredInsets = GeometryUtil.sum(clipBoundsEscapeInsets, new FloatInsets(
                 Math.max(dy, 0),
                 Math.max(dx, 0),
                 Math.max(-dy, 0),
                 Math.max(-dx, 0)));
+        FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, newBounds), requiredInsets);
         return new LayoutBounds(newBounds, GeometryUtil.max(clipBoundsEscapeInsets, ins), region);
     }
 
