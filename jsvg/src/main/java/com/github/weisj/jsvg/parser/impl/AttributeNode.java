@@ -459,16 +459,16 @@ public final class AttributeNode {
                 text -> parser().parseLength(text, FALLBACK_LENGTH, dimension));
     }
 
-    public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key) {
-        return parseValue(key, Length.ZERO,
-                this::getHorizontalReferenceLength,
-                this::getHorizontalReferenceLength);
+    public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key, @NotNull Length fallback) {
+        return parseValue(key, fallback,
+                tokens -> getHorizontalReferenceLength(tokens, fallback),
+                text -> getHorizontalReferenceLength(text, fallback));
     }
 
-    public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key) {
-        return parseValue(key, Length.ZERO,
-                this::getVerticalReferenceLength,
-                this::getVerticalReferenceLength);
+    public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key, @NotNull Length fallback) {
+        return parseValue(key, fallback,
+                tokens -> getVerticalReferenceLength(tokens, fallback),
+                text -> getVerticalReferenceLength(text, fallback));
     }
 
     private static @Nullable Length horizontalKeyword(@Nullable String value) {
@@ -485,32 +485,34 @@ public final class AttributeNode {
         return null;
     }
 
-    public @NotNull Length getHorizontalReferenceLength(@Nullable String value) {
+    public @NotNull Length getHorizontalReferenceLength(@Nullable String value, @NotNull Length fallback) {
         Length keyword = horizontalKeyword(value);
         return keyword != null
                 ? keyword
-                : parser().parseLength(value, Length.ZERO, PercentageDimension.WIDTH);
+                : parser().parseLength(value, fallback, PercentageDimension.WIDTH);
     }
 
-    public @NotNull Length getVerticalReferenceLength(@Nullable String value) {
+    public @NotNull Length getVerticalReferenceLength(@Nullable String value, @NotNull Length fallback) {
         Length keyword = verticalKeyword(value);
         return keyword != null
                 ? keyword
-                : parser().parseLength(value, Length.ZERO, PercentageDimension.HEIGHT);
+                : parser().parseLength(value, fallback, PercentageDimension.HEIGHT);
     }
 
-    public @NotNull Length getHorizontalReferenceLength(@NotNull List<@NotNull ComponentValue> tokens) {
+    public @NotNull Length getHorizontalReferenceLength(@NotNull List<@NotNull ComponentValue> tokens,
+            @NotNull Length fallback) {
         Length keyword = horizontalKeyword(AttributeParser.identOf(tokens));
         return keyword != null
                 ? keyword
-                : parser().parseLength(tokens, Length.ZERO, PercentageDimension.WIDTH);
+                : parser().parseLength(tokens, fallback, PercentageDimension.WIDTH);
     }
 
-    public @NotNull Length getVerticalReferenceLength(@NotNull List<@NotNull ComponentValue> tokens) {
+    public @NotNull Length getVerticalReferenceLength(@NotNull List<@NotNull ComponentValue> tokens,
+            @NotNull Length fallback) {
         Length keyword = verticalKeyword(AttributeParser.identOf(tokens));
         return keyword != null
                 ? keyword
-                : parser().parseLength(tokens, Length.ZERO, PercentageDimension.HEIGHT);
+                : parser().parseLength(tokens, fallback, PercentageDimension.HEIGHT);
     }
 
     public boolean isHorizontalKeyword(@NotNull List<@NotNull ComponentValue> tokens) {
