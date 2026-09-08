@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="160">
+  <!-- Scaling changes sigma 1.1 into 4.4 device pixels, selecting the three-box kernel.
+       An interior repaint must retain the neighboring samples for all three passes. -->
+  <defs>
+    <filter id="blur" filterUnits="userSpaceOnUse" x="0" y="0" width="64" height="40"
+            color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.1" edgeMode="none"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="48" height="24" fill="red" transform="scale(4)" filter="url(#blur)"/>
+</svg>
