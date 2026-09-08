@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ShapeUtil;
 
 final class ClippedChannel implements Channel {
     private final @NotNull Channel input;
@@ -52,8 +53,9 @@ final class ClippedChannel implements Channel {
 
     @NotNull
     Channel clipTo(@NotNull Shape region) {
-        if (clip.equals(region)) return this;
-        return new ClippedChannel(input, region, bounds.width, bounds.height);
+        if (clip.equals(region) || region.contains(clip.getBounds2D())) return this;
+        Shape intersection = ShapeUtil.intersect(clip, region, true, true);
+        return new ClippedChannel(input, intersection, bounds.width, bounds.height);
     }
 
     @Override
