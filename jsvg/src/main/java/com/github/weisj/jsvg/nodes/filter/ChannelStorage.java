@@ -51,15 +51,17 @@ public final class ChannelStorage<T> {
     }
 
     public @NotNull FilterChannelKey resolveKey(@NotNull FilterChannelKey key) {
-        return aliases.getOrDefault(key.key(), key);
+        FilterChannelKey resolved = aliases.getOrDefault(key.key(), key);
+        if (!storage.containsKey(resolved.key())) {
+            // Pixels and saved layout must fall back to the same preceding output.
+            return aliases.getOrDefault(DefaultFilterChannel.LastResult.key(), resolved);
+        }
+        return resolved;
     }
 
     public @NotNull T get(@NotNull FilterChannelKey key) {
         Supplier<T> provider = storage.get(resolveKey(key).key());
 
-        // Fall back to last result if channel is not found.
-        // E.g. this might be the case if the filter primtive is invalid.
-        if (provider == null) provider = storage.get(DefaultFilterChannel.LastResult.key());
         Objects.requireNonNull(provider, "Channel " + key + " not found.");
         return provider.get();
     }
