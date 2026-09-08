@@ -19,10 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.filter;
 
 import static com.github.weisj.jsvg.ImageComparison.*;
-import static com.github.weisj.jsvg.ImageComparison.ImageInfo.*;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -33,16 +34,14 @@ import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
-class ClipIntersectionTest {
+class FilterIsolationTest {
     @TestFactory
-    Stream<DynamicTest> repeatedClipping() {
-        return Stream.of("widened", "overlap", "disjoint", "reusedInput").flatMap(name -> Stream
-                .of(RenderType.JSVG, RenderType.Batik).map(renderer -> DynamicTest.dynamicTest(name + renderer, () -> {
-                    String p = "filter/clipIntersection/" + name;
-                    assertEquals(SUCCESS,
-                            compareImages(
-                                    new CompareInfo(expected(new PathImageSource(p + "_ref.svg"), RenderType.JSVG),
-                                            actual(new PathImageSource(p + ".svg"), renderer), 0, 0)));
-                })));
+    Stream<DynamicTest> referenceImages() {
+        return Stream.of("imageTranslation", "imageScale", "nestedTranslation", "nestedViewBox",
+                "nestedPrimitiveRegion", "nestedObjectBounds", "nestedPercentages",
+                "rootViewBox", "symbolUseSize", "svgUseSize")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
+                        expected(new PathImageSource("filter/isolation/" + name + "_ref.svg"), RenderType.JSVG),
+                        actual(new PathImageSource("filter/isolation/" + name + ".svg"), RenderType.JSVG), 0, 0)))));
     }
 }
