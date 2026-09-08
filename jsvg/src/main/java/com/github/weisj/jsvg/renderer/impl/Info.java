@@ -72,6 +72,7 @@ class Info implements AutoCloseable {
 
         private final @NotNull BlittableImage blittableImage;
         private final @NotNull Output imageOutput;
+        private final @NotNull Output.SafeState imageOutputState;
         private final @NotNull ElementBounds elementBounds;
         private final @NotNull IsolationEffects isolationEffects;
         private final @Nullable Filter.FilterInfo filterInfo;
@@ -131,6 +132,7 @@ class Info implements AutoCloseable {
             super(renderable, context, output);
             this.blittableImage = blittableImage;
             this.imageOutput = imageOutput;
+            this.imageOutputState = imageOutput.safeState();
             this.elementBounds = elementBounds;
             this.isolationEffects = isolationEffects;
             this.filterInfo = filterInfo;
@@ -148,6 +150,8 @@ class Info implements AutoCloseable {
 
         @Override
         public void close() {
+            // Source rendering may change the output transform, for example when drawing an image.
+            imageOutputState.restore();
             Output previousOutput = this.output;
             BufferedImage result = this.blittableImage.image();
 

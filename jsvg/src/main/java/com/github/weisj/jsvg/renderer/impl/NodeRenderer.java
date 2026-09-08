@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
-import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
@@ -47,30 +46,21 @@ import com.github.weisj.jsvg.view.ViewBox;
 public final class NodeRenderer {
     private NodeRenderer() {}
 
-    public static void renderRootSVG(@NotNull SVG svgRoot, @NotNull RenderContext context, @NotNull Output output) {
-        try (Info info = createRenderInfo(svgRoot, context, output, null)) {
-            if (info != null) ((SVG) info.renderable()).renderWithEstablishedViewBox(info.context(), info.output());
-        }
-    }
-
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output) {
         renderNode(node, context, output, null);
     }
 
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output,
             @Nullable Instantiator instantiator) {
-        try (Info info = createRenderInfo(node, context, output, instantiator)) {
+        try (Info info = createRenderInfo(node, context, output, instantiator, null)) {
             if (info != null) info.renderable().render(info.context(), info.output());
         }
     }
 
-    public static void renderWithSize(@NotNull BaseInnerViewContainer node, @NotNull FloatSize size,
-            @NotNull RenderContext context, @NotNull Output output,
-            @Nullable Instantiator instantiator) {
-        try (Info info = createRenderInfo(node, context, output, instantiator)) {
-            // Only a declared viewBox may introduce a scaling transform. Synthesizing one from the
-            // element's own size would wrongly scale content when the use-site size differs.
-            if (info != null) node.renderWithSize(size, node.declaredViewBox(), info.context(), info.output());
+    public static <T extends SVGNode & ViewContainer> void renderWithSize(@NotNull T node, @NotNull FloatSize size,
+            @NotNull RenderContext context, @NotNull Output output, @Nullable Instantiator instantiator) {
+        try (Info info = createRenderInfo(node, context, output, instantiator, size)) {
+            if (info != null) info.renderable().render(info.context(), info.output());
         }
     }
 
@@ -80,7 +70,7 @@ public final class NodeRenderer {
     }
 
     private static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
-            @NotNull Output output, @Nullable Instantiator instantiator) {
+            @NotNull Output output, @Nullable Instantiator instantiator, @Nullable FloatSize useSiteSize) {
         if (!(node instanceof Renderable)) return null;
 
         Renderable renderable = (Renderable) node;
@@ -93,6 +83,21 @@ public final class NodeRenderer {
         ElementBounds elementBounds = new ElementBounds(node, childContext);
 
         applyTransform(renderable, childOutput, childContext, elementBounds);
+
+        if (node instanceof ViewContainer && ((ViewContainer) node).establishesViewBox()) {
+            ViewContainer view = (ViewContainer) node;
+            // Effects and geometry use the inner coordinate system, just like the container's children.
+            FloatSize viewSize = useSiteSize != null ? useSiteSize : view.size(childContext);
+            // At a use site, only an explicitly declared viewBox may scale the referenced content.
+            // A viewBox synthesized from the referenced element's own size would introduce scaling
+            // when the use-site width or height differs.
+            ViewBox viewBox = useSiteSize != null && view instanceof BaseInnerViewContainer
+                    ? ((BaseInnerViewContainer) view).declaredViewBox()
+                    : view.viewBox(childContext);
+            childContext = view.createInnerContextForViewBox(viewSize, viewBox,
+                    childContext, childOutput);
+            elementBounds = new ElementBounds(node, childContext);
+        }
 
         Mask maskForIsolation = null;
         ClipPath clipPathForIsolation = null;
