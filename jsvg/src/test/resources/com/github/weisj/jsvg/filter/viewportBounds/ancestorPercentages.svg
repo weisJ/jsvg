@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">
+	<defs>
+		<clipPath id="middle" clipPathUnits="objectBoundingBox">
+			<rect x=".25" y=".25" width=".5" height=".5" />
+		</clipPath>
+	</defs>
+	<!-- Inner percentages produce (44,26,40,20) in outer units; retain its 
+		central half. -->
+	<g clip-path="url(#middle)">
+		<svg x="24" y="16" width="80" height="40" viewBox="0 0 40 20">
+			<rect x="25%" y="25%" width="50%" height="50%" fill="red" />
+		</svg>
+	</g>
+</svg>
