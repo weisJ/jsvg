@@ -1,11 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">
-  <!-- The loader supplies the same placeholder; crop it with explicit user coordinates. -->
-  <defs>
-    <clipPath id="crop">
-  <rect x="34" y="22" width="20" height="12" fill="red"/>
-    </clipPath>
-  </defs>
-  <g clip-path="url(#crop)">
-    <image href="red.png" x="24" y="16" width="40" height="24"/>
-  </g>
+	<!-- The loader supplies the same placeholder; crop it with explicit user 
+		coordinates. -->
+	<defs>
+		<clipPath id="crop">
+			<rect x="34" y="22" width="20" height="12" fill="red" />
+		</clipPath>
+	</defs>
+	<g clip-path="url(#crop)">
+		<image href="red.png" x="24" y="16" width="40" height="24" />
+	</g>
 </svg>

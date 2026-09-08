@@ -1,18 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="110" viewBox="0 0 440 110">
-    <!-- emptyInputMatrix -->
-    <g transform="translate(0 0)">
-        <rect width="20" fill="#ff0000" y="50" x="50" height="20" />
-    </g>
-    <!-- emptyInputTransfer -->
-    <g transform="translate(110 0)">
-        <rect width="20" fill="#000000" y="50" x="50" height="20" />
-    </g>
-    <!-- emptyInputComposite -->
-    <g transform="translate(220 0)">
-        <rect width="20" fill="#ffffff" y="50" x="50" height="20" />
-    </g>
-    <!-- emptyInputLighting -->
-    <g transform="translate(330 0)">
-        <rect width="20" fill="#ffffff" y="50" x="50" height="20" />
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="110"
+	viewBox="0 0 440 110">
+	<!-- emptyInputMatrix -->
+	<g transform="translate(0 0)">
+		<rect width="20" fill="#ff0000" y="50" x="50" height="20" />
+	</g>
+	<!-- emptyInputTransfer -->
+	<g transform="translate(110 0)">
+		<rect width="20" fill="#000000" y="50" x="50" height="20" />
+	</g>
+	<!-- emptyInputComposite -->
+	<g transform="translate(220 0)">
+		<rect width="20" fill="#ffffff" y="50" x="50" height="20" />
+	</g>
+	<!-- emptyInputLighting -->
+	<g transform="translate(330 0)">
+		<rect width="20" fill="#ffffff" y="50" x="50" height="20" />
+	</g>
 </svg>

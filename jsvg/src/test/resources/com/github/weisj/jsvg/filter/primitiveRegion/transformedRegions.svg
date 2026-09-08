@@ -1,82 +1,98 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220" viewBox="0 0 440 220">
-    <!-- translated -->
-    <g transform="translate(0 0)">
-        <defs>
-            <filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-                <feFlood x="20" y="20" width="20" height="20" result="clipped" />
-                <feFlood flood-opacity="0" />
-                <feMerge>
-                    <feMergeNode in="clipped" />
-                    <feMergeNode />
-                </feMerge>
-            </filter>
-        </defs>
-        <g transform="translate(10 15)">
-            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f0)" />
-        </g>
-    </g>
-    <!-- reflected -->
-    <g transform="translate(110 0)">
-        <defs>
-            <filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-                <feFlood x="20" y="20" width="20" height="20" result="clipped" />
-                <feFlood flood-opacity="0" />
-                <feMerge>
-                    <feMergeNode in="clipped" />
-                    <feMergeNode />
-                </feMerge>
-            </filter>
-        </defs>
-        <g transform="matrix(-1 0 0 1 70 0)">
-            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f1)" />
-        </g>
-    </g>
-    <!-- rotated -->
-    <g transform="translate(220 0)">
-        <defs>
-            <filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-                <feFlood x="20" y="20" width="20" height="20" result="clipped" />
-                <feFlood flood-opacity="0" />
-                <feMerge>
-                    <feMergeNode in="clipped" />
-                    <feMergeNode />
-                </feMerge>
-            </filter>
-        </defs>
-        <g transform="rotate(25 50 50)">
-            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f2)" />
-        </g>
-    </g>
-    <!-- sheared -->
-    <g transform="translate(330 0)">
-        <defs>
-            <filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-                <feFlood x="20" y="20" width="20" height="20" result="clipped" />
-                <feFlood flood-opacity="0" />
-                <feMerge>
-                    <feMergeNode in="clipped" />
-                    <feMergeNode />
-                </feMerge>
-            </filter>
-        </defs>
-        <g transform="matrix(1 .25 .5 1 0 0)">
-            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f3)" />
-        </g>
-    </g>
-    <!-- scaled -->
-    <g transform="translate(0 110)">
-        <defs>
-            <filter id="f4" filterUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-                <feFlood x="20" y="20" width="20" height="20" result="clipped" />
-                <feFlood flood-opacity="0" />
-                <feMerge>
-                    <feMergeNode in="clipped" />
-                    <feMergeNode />
-                </feMerge>
-            </filter>
-        </defs>
-        <g transform="matrix(1.5 0 0 .75 10 5)">
-            <rect x="5" y="5" width="75" height="75" fill="red" filter="url(#f4)" />
-        </g>
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220"
+	viewBox="0 0 440 220">
+	<!-- translated -->
+	<g transform="translate(0 0)">
+		<defs>
+			<filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0"
+				width="100" height="100">
+				<feFlood x="20" y="20" width="20" height="20"
+					result="clipped" />
+				<feFlood flood-opacity="0" />
+				<feMerge>
+					<feMergeNode in="clipped" />
+					<feMergeNode />
+				</feMerge>
+			</filter>
+		</defs>
+		<g transform="translate(10 15)">
+			<rect x="5" y="5" width="75" height="75" fill="red"
+				filter="url(#f0)" />
+		</g>
+	</g>
+	<!-- reflected -->
+	<g transform="translate(110 0)">
+		<defs>
+			<filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0"
+				width="100" height="100">
+				<feFlood x="20" y="20" width="20" height="20"
+					result="clipped" />
+				<feFlood flood-opacity="0" />
+				<feMerge>
+					<feMergeNode in="clipped" />
+					<feMergeNode />
+				</feMerge>
+			</filter>
+		</defs>
+		<g transform="matrix(-1 0 0 1 70 0)">
+			<rect x="5" y="5" width="75" height="75" fill="red"
+				filter="url(#f1)" />
+		</g>
+	</g>
+	<!-- rotated -->
+	<g transform="translate(220 0)">
+		<defs>
+			<filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0"
+				width="100" height="100">
+				<feFlood x="20" y="20" width="20" height="20"
+					result="clipped" />
+				<feFlood flood-opacity="0" />
+				<feMerge>
+					<feMergeNode in="clipped" />
+					<feMergeNode />
+				</feMerge>
+			</filter>
+		</defs>
+		<g transform="rotate(25 50 50)">
+			<rect x="5" y="5" width="75" height="75" fill="red"
+				filter="url(#f2)" />
+		</g>
+	</g>
+	<!-- sheared -->
+	<g transform="translate(330 0)">
+		<defs>
+			<filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0"
+				width="100" height="100">
+				<feFlood x="20" y="20" width="20" height="20"
+					result="clipped" />
+				<feFlood flood-opacity="0" />
+				<feMerge>
+					<feMergeNode in="clipped" />
+					<feMergeNode />
+				</feMerge>
+			</filter>
+		</defs>
+		<g transform="matrix(1 .25 .5 1 0 0)">
+			<rect x="5" y="5" width="75" height="75" fill="red"
+				filter="url(#f3)" />
+		</g>
+	</g>
+	<!-- scaled -->
+	<g transform="translate(0 110)">
+		<defs>
+			<filter id="f4" filterUnits="userSpaceOnUse" x="0" y="0"
+				width="100" height="100">
+				<feFlood x="20" y="20" width="20" height="20"
+					result="clipped" />
+				<feFlood flood-opacity="0" />
+				<feMerge>
+					<feMergeNode in="clipped" />
+					<feMergeNode />
+				</feMerge>
+			</filter>
+		</defs>
+		<g transform="matrix(1.5 0 0 .75 10 5)">
+			<rect x="5" y="5" width="75" height="75" fill="red"
+				filter="url(#f4)" />
+		</g>
+	</g>
 </svg>

@@ -1,37 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
-  <!-- One octave is the control; four octaves exercise the stitch-wrap recurrence. -->
-  <defs>
-    <filter id="fractalNoise1" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-      <feTurbulence type="fractalNoise" seed="2" baseFrequency="0.071 0.053" numOctaves="1"
-                    stitchTiles="stitch" x="10" y="20" width="37" height="43"/>
-    </filter>
-    <filter id="fractalNoise4" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-      <feTurbulence type="fractalNoise" seed="2" baseFrequency="0.071 0.053" numOctaves="4"
-                    stitchTiles="stitch" x="10" y="20" width="37" height="43"/>
-    </filter>
-    <filter id="turbulence1" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-      <feTurbulence type="turbulence" seed="2" baseFrequency="0.071 0.053" numOctaves="1"
-                    stitchTiles="stitch" x="10" y="20" width="37" height="43"/>
-    </filter>
-    <filter id="turbulence4" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-      <feTurbulence type="turbulence" seed="2" baseFrequency="0.071 0.053" numOctaves="4"
-                    stitchTiles="stitch" x="10" y="20" width="37" height="43"/>
-    </filter>
-  </defs>
-  <!-- fractalNoise, 1 octave(s). -->
-  <g transform="translate(0 0)">
-    <rect x="5" y="5" width="75" height="75" filter="url(#fractalNoise1)"/>
-  </g>
-  <!-- fractalNoise, 4 octave(s). -->
-  <g transform="translate(100 0)">
-    <rect x="5" y="5" width="75" height="75" filter="url(#fractalNoise4)"/>
-  </g>
-  <!-- turbulence, 1 octave(s). -->
-  <g transform="translate(0 100)">
-    <rect x="5" y="5" width="75" height="75" filter="url(#turbulence1)"/>
-  </g>
-  <!-- turbulence, 4 octave(s). -->
-  <g transform="translate(100 100)">
-    <rect x="5" y="5" width="75" height="75" filter="url(#turbulence4)"/>
-  </g>
+	<!-- One octave is the control; four octaves exercise the stitch-wrap recurrence. -->
+	<defs>
+		<filter id="fractalNoise1" filterUnits="userSpaceOnUse"
+			primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+			<feTurbulence type="fractalNoise" seed="2"
+				baseFrequency="0.071 0.053" numOctaves="1" stitchTiles="stitch"
+				x="10" y="20" width="37" height="43" />
+		</filter>
+		<filter id="fractalNoise4" filterUnits="userSpaceOnUse"
+			primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+			<feTurbulence type="fractalNoise" seed="2"
+				baseFrequency="0.071 0.053" numOctaves="4" stitchTiles="stitch"
+				x="10" y="20" width="37" height="43" />
+		</filter>
+		<filter id="turbulence1" filterUnits="userSpaceOnUse"
+			primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+			<feTurbulence type="turbulence" seed="2"
+				baseFrequency="0.071 0.053" numOctaves="1" stitchTiles="stitch"
+				x="10" y="20" width="37" height="43" />
+		</filter>
+		<filter id="turbulence4" filterUnits="userSpaceOnUse"
+			primitiveUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+			<feTurbulence type="turbulence" seed="2"
+				baseFrequency="0.071 0.053" numOctaves="4" stitchTiles="stitch"
+				x="10" y="20" width="37" height="43" />
+		</filter>
+	</defs>
+	<!-- fractalNoise, 1 octave(s). -->
+	<g transform="translate(0 0)">
+		<rect x="5" y="5" width="75" height="75"
+			filter="url(#fractalNoise1)" />
+	</g>
+	<!-- fractalNoise, 4 octave(s). -->
+	<g transform="translate(100 0)">
+		<rect x="5" y="5" width="75" height="75"
+			filter="url(#fractalNoise4)" />
+	</g>
+	<!-- turbulence, 1 octave(s). -->
+	<g transform="translate(0 100)">
+		<rect x="5" y="5" width="75" height="75"
+			filter="url(#turbulence1)" />
+	</g>
+	<!-- turbulence, 4 octave(s). -->
+	<g transform="translate(100 100)">
+		<rect x="5" y="5" width="75" height="75"
+			filter="url(#turbulence4)" />
+	</g>
 </svg>

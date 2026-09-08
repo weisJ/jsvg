@@ -1,36 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="288" height="192">
-  <defs>
-    <filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB" primitiveUnits="objectBoundingBox">
-      <feGaussianBlur stdDeviation="0.125" edgeMode="none"/>
-    </filter>
-    <filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB" primitiveUnits="objectBoundingBox">
-      <feGaussianBlur stdDeviation="0.03125 0.0625" edgeMode="none"/>
-    </filter>
-    <filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB" primitiveUnits="objectBoundingBox">
-      <feGaussianBlur stdDeviation="0.125 0" edgeMode="none"/>
-    </filter>
-    <filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="96"
-            color-interpolation-filters="sRGB" primitiveUnits="objectBoundingBox">
-      <feGaussianBlur stdDeviation="0 0.125" edgeMode="none"/>
-    </filter>
-  </defs>
-  <!-- single value: relative deviations resolve against a 48 by 24 bounding box. -->
-  <g transform="translate(0 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f0)"/>
-  </g>
-  <!-- two values: relative deviations resolve against a 48 by 24 bounding box. -->
-  <g transform="translate(144 0)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f1)"/>
-  </g>
-  <!-- horizontal only: relative deviations resolve against a 48 by 24 bounding box. -->
-  <g transform="translate(0 96)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f2)"/>
-  </g>
-  <!-- vertical only: relative deviations resolve against a 48 by 24 bounding box. -->
-  <g transform="translate(144 96)">
-    <rect x="48" y="32" width="48" height="24" fill="#e08040" filter="url(#f3)"/>
-  </g>
+	<defs>
+		<filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB"
+			primitiveUnits="objectBoundingBox">
+			<feGaussianBlur stdDeviation="0.125" edgeMode="none" />
+		</filter>
+		<filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB"
+			primitiveUnits="objectBoundingBox">
+			<feGaussianBlur stdDeviation="0.03125 0.0625"
+				edgeMode="none" />
+		</filter>
+		<filter id="f2" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB"
+			primitiveUnits="objectBoundingBox">
+			<feGaussianBlur stdDeviation="0.125 0" edgeMode="none" />
+		</filter>
+		<filter id="f3" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="96" color-interpolation-filters="sRGB"
+			primitiveUnits="objectBoundingBox">
+			<feGaussianBlur stdDeviation="0 0.125" edgeMode="none" />
+		</filter>
+	</defs>
+	<!-- single value: relative deviations resolve against a 48 by 24 bounding 
+		box. -->
+	<g transform="translate(0 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f0)" />
+	</g>
+	<!-- two values: relative deviations resolve against a 48 by 24 bounding 
+		box. -->
+	<g transform="translate(144 0)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f1)" />
+	</g>
+	<!-- horizontal only: relative deviations resolve against a 48 by 24 bounding 
+		box. -->
+	<g transform="translate(0 96)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f2)" />
+	</g>
+	<!-- vertical only: relative deviations resolve against a 48 by 24 bounding 
+		box. -->
+	<g transform="translate(144 96)">
+		<rect x="48" y="32" width="48" height="24" fill="#e08040"
+			filter="url(#f3)" />
+	</g>
 </svg>

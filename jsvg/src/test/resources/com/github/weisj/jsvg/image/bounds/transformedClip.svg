@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">
-  <defs>
-    <clipPath id="crop" clipPathUnits="objectBoundingBox">
-      <rect x=".25" y=".25" width=".5" height=".5"/>
-    </clipPath>
-  </defs>
-  <image href="red.svg" x="24" y="16" transform="translate(8 4) scale(2)" clip-path="url(#crop)"/>
+	<defs>
+		<clipPath id="crop" clipPathUnits="objectBoundingBox">
+			<rect x=".25" y=".25" width=".5" height=".5" />
+		</clipPath>
+	</defs>
+	<image href="red.svg" x="24" y="16"
+		transform="translate(8 4) scale(2)" clip-path="url(#crop)" />
 </svg>

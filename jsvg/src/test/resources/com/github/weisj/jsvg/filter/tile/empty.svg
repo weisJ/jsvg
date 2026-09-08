@@ -1,9 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="144" height="100">
-  <defs>
-    <filter id="tile" filterUnits="userSpaceOnUse" x="0" y="0" width="144" height="100">
-      <feFlood width="0"/>
-      <feTile/>
-    </filter>
-  </defs>
-  <rect width="144" height="100" fill="red" filter="url(#tile)"/>
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="144" height="100">
+	<defs>
+		<filter id="tile" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="144" height="100">
+			<feFlood width="0" />
+			<feTile />
+		</filter>
+	</defs>
+	<rect width="144" height="100" fill="red" filter="url(#tile)" />
 </svg>

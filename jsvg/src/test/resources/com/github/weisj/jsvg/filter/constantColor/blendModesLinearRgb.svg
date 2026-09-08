@@ -1,135 +1,192 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
-  <!-- Each swatch compares two translucent inputs. The reference paints the backdrop directly. -->
-  <defs>
-    <filter id="normal" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="normal"/>
-    </filter>
-    <filter id="multiply" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="multiply"/>
-    </filter>
-    <filter id="screen" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="screen"/>
-    </filter>
-    <filter id="overlay" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="overlay"/>
-    </filter>
-    <filter id="darken" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="darken"/>
-    </filter>
-    <filter id="lighten" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="lighten"/>
-    </filter>
-    <filter id="color-dodge" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="color-dodge"/>
-    </filter>
-    <filter id="color-burn" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="color-burn"/>
-    </filter>
-    <filter id="hard-light" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="hard-light"/>
-    </filter>
-    <filter id="soft-light" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="soft-light"/>
-    </filter>
-    <filter id="difference" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="difference"/>
-    </filter>
-    <filter id="exclusion" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="exclusion"/>
-    </filter>
-    <filter id="hue" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="hue"/>
-    </filter>
-    <filter id="saturation" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="saturation"/>
-    </filter>
-    <filter id="color" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="color"/>
-    </filter>
-    <filter id="luminosity" x="0" y="0" width="1" height="1" color-interpolation-filters="linearRGB">
-      <feColorMatrix color-interpolation-filters="sRGB" result="backdrop"
-                     values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5"/>
-      <feColorMatrix color-interpolation-filters="sRGB" result="source"
-                     values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75"/>
-      <feBlend in="source" in2="backdrop" mode="luminosity"/>
-    </filter>
-  </defs>
-  <g fill="red" fill-opacity=".5">
-    <rect x="0" y="0" width="40" height="40" filter="url(#normal)"/>
-    <rect x="40" y="0" width="40" height="40" filter="url(#multiply)"/>
-    <rect x="80" y="0" width="40" height="40" filter="url(#screen)"/>
-    <rect x="120" y="0" width="40" height="40" filter="url(#overlay)"/>
-    <rect x="0" y="40" width="40" height="40" filter="url(#darken)"/>
-    <rect x="40" y="40" width="40" height="40" filter="url(#lighten)"/>
-    <rect x="80" y="40" width="40" height="40" filter="url(#color-dodge)"/>
-    <rect x="120" y="40" width="40" height="40" filter="url(#color-burn)"/>
-    <rect x="0" y="80" width="40" height="40" filter="url(#hard-light)"/>
-    <rect x="40" y="80" width="40" height="40" filter="url(#soft-light)"/>
-    <rect x="80" y="80" width="40" height="40" filter="url(#difference)"/>
-    <rect x="120" y="80" width="40" height="40" filter="url(#exclusion)"/>
-    <rect x="0" y="120" width="40" height="40" filter="url(#hue)"/>
-    <rect x="40" y="120" width="40" height="40" filter="url(#saturation)"/>
-    <rect x="80" y="120" width="40" height="40" filter="url(#color)"/>
-    <rect x="120" y="120" width="40" height="40" filter="url(#luminosity)"/>
-  </g>
+	<!-- Each swatch compares two translucent inputs. The reference paints the 
+		backdrop directly. -->
+	<defs>
+		<filter id="normal" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="normal" />
+		</filter>
+		<filter id="multiply" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="multiply" />
+		</filter>
+		<filter id="screen" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="screen" />
+		</filter>
+		<filter id="overlay" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="overlay" />
+		</filter>
+		<filter id="darken" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="darken" />
+		</filter>
+		<filter id="lighten" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="lighten" />
+		</filter>
+		<filter id="color-dodge" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="color-dodge" />
+		</filter>
+		<filter id="color-burn" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="color-burn" />
+		</filter>
+		<filter id="hard-light" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="hard-light" />
+		</filter>
+		<filter id="soft-light" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="soft-light" />
+		</filter>
+		<filter id="difference" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="difference" />
+		</filter>
+		<filter id="exclusion" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="exclusion" />
+		</filter>
+		<filter id="hue" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="hue" />
+		</filter>
+		<filter id="saturation" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="saturation" />
+		</filter>
+		<filter id="color" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="color" />
+		</filter>
+		<filter id="luminosity" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="backdrop"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix color-interpolation-filters="sRGB"
+				result="source"
+				values="0 0 0 0 .2   0 0 0 0 .6   0 0 0 0 .4   0 0 0 0 .75" />
+			<feBlend in="source" in2="backdrop" mode="luminosity" />
+		</filter>
+	</defs>
+	<g fill="red" fill-opacity=".5">
+		<rect x="0" y="0" width="40" height="40" filter="url(#normal)" />
+		<rect x="40" y="0" width="40" height="40" filter="url(#multiply)" />
+		<rect x="80" y="0" width="40" height="40" filter="url(#screen)" />
+		<rect x="120" y="0" width="40" height="40" filter="url(#overlay)" />
+		<rect x="0" y="40" width="40" height="40" filter="url(#darken)" />
+		<rect x="40" y="40" width="40" height="40" filter="url(#lighten)" />
+		<rect x="80" y="40" width="40" height="40"
+			filter="url(#color-dodge)" />
+		<rect x="120" y="40" width="40" height="40"
+			filter="url(#color-burn)" />
+		<rect x="0" y="80" width="40" height="40"
+			filter="url(#hard-light)" />
+		<rect x="40" y="80" width="40" height="40"
+			filter="url(#soft-light)" />
+		<rect x="80" y="80" width="40" height="40"
+			filter="url(#difference)" />
+		<rect x="120" y="80" width="40" height="40"
+			filter="url(#exclusion)" />
+		<rect x="0" y="120" width="40" height="40" filter="url(#hue)" />
+		<rect x="40" y="120" width="40" height="40"
+			filter="url(#saturation)" />
+		<rect x="80" y="120" width="40" height="40" filter="url(#color)" />
+		<rect x="120" y="120" width="40" height="40"
+			filter="url(#luminosity)" />
+	</g>
 </svg>

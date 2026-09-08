@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="180" height="60">
-  <g fill-opacity=".5">
-    <rect width="60" height="60" fill="red"/>
-    <rect width="60" height="60" fill="blue"/>
-    <rect x="60" width="60" height="60" fill="blue"/>
-    <rect x="60" width="60" height="60" fill="red"/>
-    <rect x="120" width="60" height="60" fill="red"/>
-  </g>
+	<g fill-opacity=".5">
+		<rect width="60" height="60" fill="red" />
+		<rect width="60" height="60" fill="blue" />
+		<rect x="60" width="60" height="60" fill="blue" />
+		<rect x="60" width="60" height="60" fill="red" />
+		<rect x="120" width="60" height="60" fill="red" />
+	</g>
 </svg>

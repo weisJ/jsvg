@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
 import com.github.weisj.jsvg.util.supplier.LazySupplier;
