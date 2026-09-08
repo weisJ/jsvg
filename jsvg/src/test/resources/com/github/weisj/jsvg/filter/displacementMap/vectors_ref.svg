@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="576" height="288">
+  <!-- A red map samples right/up for positive scale, so the visible artwork moves left/down. -->
+  <!-- Translation. -->
+  <g transform="translate(0 0)">
+    <g transform="translate(5 7)">
+      <rect x="35" y="45" width="20" height="12" fill="red"/>
+    </g>
+  </g>
+  <!-- Reflection. -->
+  <g transform="translate(144 0)">
+    <g transform="matrix(-1 0 0 1 120 0)">
+      <rect x="35" y="45" width="20" height="12" fill="red"/>
+    </g>
+  </g>
+  <!-- Rotation and negative scale. -->
+  <g transform="translate(288 0)">
+    <g transform="rotate(90 60 60)">
+      <rect x="45" y="35" width="20" height="12" fill="red"/>
+    </g>
+  </g>
+  <!-- Nonuniform scaling and bounding-box units. -->
+  <g transform="translate(432 0)">
+    <g transform="scale(2 1)">
+      <rect x="35" y="43" width="20" height="12" fill="red"/>
+    </g>
+  </g>
+  <!-- Horizontal shear. -->
+  <g transform="translate(0 144)">
+    <g transform="matrix(1 0 1 1 0 0)">
+      <rect x="35" y="45" width="20" height="12" fill="red"/>
+    </g>
+  </g>
+  <!-- Vertical shear and negative bounding-box scale. -->
+  <g transform="translate(144 144)">
+    <g transform="matrix(1 1 0 1 0 0)">
+      <rect x="45" y="37" width="20" height="12" fill="red"/>
+    </g>
+  </g>
+  <!-- Negative scale without a transform. -->
+  <g transform="translate(288 144)">
+    <g transform="">
+      <rect x="45" y="35" width="20" height="12" fill="red"/>
+    </g>
+  </g>
+</svg>

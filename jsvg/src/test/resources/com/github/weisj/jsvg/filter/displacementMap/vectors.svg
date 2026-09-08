@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="576" height="288">
+  <defs>
+    <filter id="positive" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse"
+            x="0" y="0" width="144" height="144">
+      <feFlood flood-color="red" result="map"/>
+      <feDisplacementMap in="SourceGraphic" in2="map" scale="10"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="negative" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse"
+            x="0" y="0" width="144" height="144">
+      <feFlood flood-color="red" result="map"/>
+      <feDisplacementMap in="SourceGraphic" in2="map" scale="-10"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="boxPositive" filterUnits="userSpaceOnUse" primitiveUnits="objectBoundingBox"
+            x="0" y="0" width="144" height="144">
+      <feFlood flood-color="red" result="map"/>
+      <feDisplacementMap in="SourceGraphic" in2="map" scale="0.5"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="boxNegative" filterUnits="userSpaceOnUse" primitiveUnits="objectBoundingBox"
+            x="0" y="0" width="144" height="144">
+      <feFlood flood-color="red" result="map"/>
+      <feDisplacementMap in="SourceGraphic" in2="map" scale="-0.5"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <!-- Translation. -->
+  <g transform="translate(0 0)">
+    <g transform="translate(5 7)">
+      <rect x="40" y="40" width="20" height="12" fill="red" filter="url(#positive)"/>
+    </g>
+  </g>
+  <!-- Reflection. -->
+  <g transform="translate(144 0)">
+    <g transform="matrix(-1 0 0 1 120 0)">
+      <rect x="40" y="40" width="20" height="12" fill="red" filter="url(#positive)"/>
+    </g>
+  </g>
+  <!-- Rotation and negative scale. -->
+  <g transform="translate(288 0)">
+    <g transform="rotate(90 60 60)">
+      <rect x="40" y="40" width="20" height="12" fill="red" filter="url(#negative)"/>
+    </g>
+  </g>
+  <!-- Nonuniform scaling and bounding-box units. -->
+  <g transform="translate(432 0)">
+    <g transform="scale(2 1)">
+      <rect x="40" y="40" width="20" height="12" fill="red" filter="url(#boxPositive)"/>
+    </g>
+  </g>
+  <!-- Horizontal shear. -->
+  <g transform="translate(0 144)">
+    <g transform="matrix(1 0 1 1 0 0)">
+      <rect x="40" y="40" width="20" height="12" fill="red" filter="url(#positive)"/>
+    </g>
+  </g>
+  <!-- Vertical shear and negative bounding-box scale. -->
+  <g transform="translate(144 144)">
+    <g transform="matrix(1 1 0 1 0 0)">
+      <rect x="40" y="40" width="20" height="12" fill="red" filter="url(#boxNegative)"/>
+    </g>
+  </g>
+  <!-- Negative scale without a transform. -->
+  <g transform="translate(288 144)">
+    <g transform="">
+      <rect x="40" y="40" width="20" height="12" fill="red" filter="url(#negative)"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+  <!-- Inside SourceAlpha, sample five pixels down/right; outside it, sample up/left. -->
+  <g fill="red">
+    <rect x="30" y="30" width="15" height="15"/>
+    <rect x="50" y="35" width="5" height="20"/>
+    <rect x="35" y="50" width="15" height="5"/>
+  </g>
+</svg>

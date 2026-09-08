@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
@@ -110,25 +111,22 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
             displacementScaleY *= elementBounds.getHeight();
         }
 
+        AffineTransform displacementTransform = filterContext.info().output().transform();
+        displacementTransform.scale(displacementScaleX, displacementScaleY);
         ImageFilter displacementFilter = new BufferedImageFilter(
-                new DisplacementOp(displacementInput.pixels(context), filterContext.info().imageBounds(),
-                        displacementScaleX, displacementScaleY));
+                new DisplacementOp(displacementInput.pixels(context), displacementTransform));
         impl().saveResult(input.applyFilter(displacementFilter), filterContext);
     }
 
     private final class DisplacementOp implements BufferedImageOp {
 
         private final @NotNull PixelProvider displacementChannel;
-        private final @NotNull Rectangle2D sourceBounds;
-        private final double displacementScaleX;
-        private final double displacementScaleY;
+        private final @NotNull AffineTransform displacementTransform;
 
-        public DisplacementOp(@NotNull PixelProvider displacementChannel, @NotNull Rectangle2D sourceBounds,
-                double displacementScaleX, double displacementScaleY) {
+        public DisplacementOp(@NotNull PixelProvider displacementChannel,
+                @NotNull AffineTransform displacementTransform) {
             this.displacementChannel = displacementChannel;
-            this.sourceBounds = sourceBounds;
-            this.displacementScaleX = displacementScaleX;
-            this.displacementScaleY = displacementScaleY;
+            this.displacementTransform = displacementTransform;
         }
 
         @Override
@@ -172,11 +170,10 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
             final int w = raster.getWidth();
             final int h = raster.getHeight();
 
-            final double scaleX = sourceBounds.getWidth() / w;
-            final double scaleY = sourceBounds.getHeight() / h;
-
-            final double startX = sourceBounds.getX();
-            final double startY = sourceBounds.getY();
+            final double scaleX = displacementTransform.getScaleX();
+            final double scaleY = displacementTransform.getScaleY();
+            final double shearX = displacementTransform.getShearX();
+            final double shearY = displacementTransform.getShearY();
 
             Raster sourceRaster = src.getRaster();
             Rectangle sourceRasterBounds = sourceRaster.getBounds();
@@ -187,29 +184,24 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
             final int dstAdjust = ImageUtil.getINT_RGBA_DataAdjust(raster);
             int dp = ImageUtil.getINT_RGBA_DataOffset(raster);
 
-            double point0;
-            double point1 = startY;
             int x;
             int y = 0;
             for (int i = 0; i < h; i++) {
                 x = 0;
-                point0 = startX;
                 for (int end = dp + w; dp < end; dp++) {
-                    int displacementRGB = displacementChannel.pixelAt(point0, point1);
+                    int displacementRGB = displacementChannel.pixelAt(x, y);
                     double xDisplacement = xChannelSelector.value(displacementRGB) / 255.0 - 0.5f;
                     double yDisplacement = yChannelSelector.value(displacementRGB) / 255.0 - 0.5f;
-                    int xDest = (int) (x + displacementScaleX * xDisplacement / scaleX);
-                    int yDest = (int) (y + displacementScaleY * yDisplacement / scaleY);
+                    int xDest = (int) (x + scaleX * xDisplacement + shearX * yDisplacement);
+                    int yDest = (int) (y + shearY * xDisplacement + scaleY * yDisplacement);
                     if (sourceRasterBounds.contains(xDest, yDest)) {
                         sourcePixel = sourceRaster.getDataElements(xDest, yDest, sourcePixel);
                         destPixels[dp] = sourceColorModel.getRGB(sourcePixel);
                     } else {
                         destPixels[dp] = 0;
                     }
-                    point0 += scaleX;
                     x++;
                 }
-                point1 += scaleY;
                 dp += dstAdjust;
                 y++;
             }
