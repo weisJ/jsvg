@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="6">
+	<!-- Each 3x3 surface exercises all nine Sobel kernels, with nonuniform 
+		alpha values. Opposing lights make both signs of the gradients visible. -->
+	<defs>
+		<g id="surface">
+			<rect x="0" y="0" width="1" height="1" fill-opacity="0" />
+			<rect x="1" y="0" width="1" height="1" fill-opacity="0.4" />
+			<rect x="2" y="0" width="1" height="1" fill-opacity="0.2" />
+			<rect x="0" y="1" width="1" height="1" fill-opacity="0.8" />
+			<rect x="1" y="1" width="1" height="1" fill-opacity="0.2" />
+			<rect x="2" y="1" width="1" height="1" fill-opacity="0.6" />
+			<rect x="0" y="2" width="1" height="1" fill-opacity="0.4" />
+			<rect x="1" y="2" width="1" height="1" fill-opacity="1" />
+			<rect x="2" y="2" width="1" height="1" fill-opacity="0.8" />
+		</g>
+		<filter id="northwest" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="3" height="3" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="2"
+				kernelUnitLength="1">
+				<feDistantLight azimuth="225" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+		<filter id="southeast" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="3" height="3" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="2"
+				kernelUnitLength="1">
+				<feDistantLight azimuth="45" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+	</defs>
+	<g transform="translate(1 1)">
+		<g filter="url(#northwest)">
+			<use xlink:href="#surface" />
+		</g>
+	</g>
+	<g transform="translate(7 1)">
+		<g filter="url(#southeast)">
+			<use xlink:href="#surface" />
+		</g>
+	</g>
+</svg>
