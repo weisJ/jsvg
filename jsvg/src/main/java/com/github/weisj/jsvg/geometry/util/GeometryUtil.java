@@ -175,6 +175,15 @@ public final class GeometryUtil {
                     Math.min(x, x + width), Math.min(y, y + height),
                     Math.abs(width), Math.abs(height));
         }
+        if (transform.getScaleX() == 0 && transform.getScaleY() == 0) {
+            double x = transform.getShearX() * rect.getY() + transform.getTranslateX();
+            double y = transform.getShearY() * rect.getX() + transform.getTranslateY();
+            double width = transform.getShearX() * rect.getHeight();
+            double height = transform.getShearY() * rect.getWidth();
+            return new Rectangle2D.Double(
+                    Math.min(x, x + width), Math.min(y, y + height),
+                    Math.abs(width), Math.abs(height));
+        }
         return transform.createTransformedShape(rect);
     }
 
