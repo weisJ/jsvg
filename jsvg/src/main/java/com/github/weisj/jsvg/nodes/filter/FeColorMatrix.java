@@ -61,8 +61,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        String type = attributeNode.getValue("type");
-        if (type == null) type = "matrix";
+        String type = attributeNode.getValue("type", "matrix");
         filter = null;
         switch (type.toLowerCase(Locale.ENGLISH)) {
             case "matrix":
