@@ -60,10 +60,7 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
 
         String resultKey = "result";
 
-        String resultId = attributes.get(resultKey);
-        if (resultId == null) {
-            resultId = "dropshadow-" + attributeNode.hashCode();
-        }
+        String resultId = child.getValue(resultKey, "dropshadow-" + attributeNode.hashCode());
         attributes.put(resultKey, resultId);
 
         FeGaussianBlur blur = new FeGaussianBlur();

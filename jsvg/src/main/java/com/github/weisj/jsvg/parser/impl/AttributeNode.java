@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Contract;
@@ -215,12 +216,17 @@ public final class AttributeNode {
     }
 
     public @Nullable String getValue(@NotNull String key) {
-        return getValue(key, null);
+        return getValue(key, (String) null);
     }
 
     @Contract("_,!null -> !null")
     public @Nullable String getValue(@NotNull String key, @Nullable String fallback) {
         return attributes.getOrDefault(key, fallback);
+    }
+
+    public @Nullable String getValue(@NotNull String key, @NotNull Supplier<@Nullable String> fallback) {
+        String value = attributes.get(key);
+        return value != null ? value : fallback.get();
     }
 
     public @NotNull Color getColor(@NotNull String key) {
@@ -547,9 +553,7 @@ public final class AttributeNode {
     }
 
     public @Nullable String getHref() {
-        String href = getValue("href");
-        if (href == null) return getValue("xlink:href");
-        return href;
+        return getValue("href", () -> getValue("xlink:href"));
     }
 
     public @Nullable ViewBox getViewBox() {
