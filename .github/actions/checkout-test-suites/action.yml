@@ -1,0 +1,24 @@
+name: Check out rendering test suites
+description: Initialize resvg and W3C, and fetch only the relevant WPT directories.
+runs:
+  using: composite
+  steps:
+    - name: Initialize reference suites
+      shell: bash
+      run: git -c submodule.wpt-test-suite.update=none submodule update --init --recursive
+    - name: Read pinned WPT revision
+      id: wpt
+      shell: bash
+      run: echo "revision=$(git rev-parse HEAD:wpt-test-suite)" >> "$GITHUB_OUTPUT"
+    - name: Check out WPT SVG tests
+      uses: actions/checkout@v6
+      with:
+        repository: web-platform-tests/wpt
+        ref: ${{ steps.wpt.outputs.revision }}
+        path: wpt-test-suite
+        persist-credentials: false
+        sparse-checkout: |
+          svg
+          fonts
+          images
+          css/support

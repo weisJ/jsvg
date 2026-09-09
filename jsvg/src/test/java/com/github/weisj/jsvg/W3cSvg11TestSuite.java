@@ -76,9 +76,9 @@ class W3cSvg11TestSuite {
             return files.filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().startsWith(category + "-"))
                     .filter(path -> path.toString().endsWith(".svg") || path.toString().endsWith(".svgz"))
-                    .filter(path -> !exclude.contains(path.getFileName().toString()))
                     .sorted()
-                    .map(path -> DynamicTest.dynamicTest(path.getFileName().toString(), new W3cSvg11RefTest(path)))
+                    .map(path -> DynamicTest.dynamicTest(path.getFileName().toString(),
+                            new W3cSvg11RefTest(path, exclude.contains(path.getFileName().toString()))))
                     .toList();
         }
     }
@@ -451,9 +451,14 @@ class W3cSvg11TestSuite {
         }
     }
 
-    record W3cSvg11RefTest(@NotNull Path testFile) implements Executable {
+    record W3cSvg11RefTest(@NotNull Path testFile, boolean excluded) implements Executable {
+        W3cSvg11RefTest(@NotNull Path testFile) {
+            this(testFile, false);
+        }
+
         @Override
         public void execute() throws Throwable {
+            assumeTrue(!excluded, "Excluded W3C SVG 1.1 reference test: " + testFile.getFileName());
             // These references cover cases where Batik rejects the input or disagrees with W3C.
             // Choose the oracle explicitly; never retry a failed comparison against another renderer.
             if (Set.of("masking-mask-02-f.svg", "paths-data-20-f.svg", "struct-image-04-t.svg")

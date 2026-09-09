@@ -45,8 +45,10 @@ public final class ReSvgTestAudit {
         Path base = SvgTestAudit.suitePath("RESVG_TEST_SUITE_PATH");
         if (base == null) return;
         Path report = Path.of(System.getProperty("resvg.audit.reportDir")).toAbsolutePath();
-        Set<Path> enabled = SvgTestAudit.enabledTests(new ReSvgTestSuite()).stream()
-                .map(test -> ((ReSvgTestSuite.ReSVGRefTest) test).testFile().toAbsolutePath())
+        Set<Path> enabled = SvgTestAudit.discoveredTests(new ReSvgTestSuite()).stream()
+                .map(test -> (ReSvgTestSuite.ReSVGRefTest) test)
+                .filter(test -> !test.excluded())
+                .map(test -> test.testFile().toAbsolutePath())
                 .collect(Collectors.toSet());
         List<Reference> candidates;
         try (var paths = Files.walk(base)) {

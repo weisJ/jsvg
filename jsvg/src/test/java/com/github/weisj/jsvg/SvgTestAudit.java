@@ -44,6 +44,8 @@ import org.opentest4j.TestAbortedException;
 /** Shared process isolation and reporting for the optional reference-suite audits. */
 final class SvgTestAudit {
     static final String WORKER = "--case";
+    // HotSpot exits with code 3 on -XX:+ExitOnOutOfMemoryError; keep intentional skips distinct.
+    private static final int SKIPPED_EXIT_CODE = 10;
 
     private SvgTestAudit() {}
 
@@ -70,16 +72,15 @@ final class SvgTestAudit {
         return Path.of(path).toAbsolutePath();
     }
 
-    static List<Executable> enabledTests(Object suite) throws Exception {
-        List<Executable> enabled = new ArrayList<>();
-        // Use the same factories as JUnit, keeping exclusions in the suite as the source of truth.
+    static List<Executable> discoveredTests(Object suite) throws Exception {
+        List<Executable> discovered = new ArrayList<>();
         for (Method method : suite.getClass().getDeclaredMethods()) {
             if (!method.isAnnotationPresent(TestFactory.class) || method.isAnnotationPresent(Disabled.class)) continue;
             for (Object test : (Collection<?>) method.invoke(suite)) {
-                enabled.add(((DynamicTest) test).getExecutable());
+                discovered.add(((DynamicTest) test).getExecutable());
             }
         }
-        return enabled;
+        return discovered;
     }
 
     static void audit(String suiteName, Class<?> worker, Path report, List<Reference> candidates,
@@ -151,7 +152,7 @@ final class SvgTestAudit {
             return switch (process.exitValue()) {
                 case 0 -> Status.PASS;
                 case 1 -> Status.FAIL;
-                case 3 -> Status.SKIP;
+                case SKIPPED_EXIT_CODE -> Status.SKIP;
                 default -> Status.ERROR;
             };
         } finally {
@@ -167,7 +168,7 @@ final class SvgTestAudit {
             reference.execute();
         } catch (TestAbortedException skipped) {
             System.out.println(skipped.getMessage());
-            System.exit(3);
+            System.exit(SKIPPED_EXIT_CODE);
         } catch (AssertionFailedError failure) {
             failure.printStackTrace();
             System.exit(1);
