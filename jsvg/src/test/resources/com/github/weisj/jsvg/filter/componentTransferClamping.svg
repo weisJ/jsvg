@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="32">
+	<defs>
+		<filter id="table" color-interpolation-filters="sRGB">
+			<feComponentTransfer>
+				<feFuncR type="table" tableValues="100 -100" />
+			</feComponentTransfer>
+		</filter>
+		<filter id="large" color-interpolation-filters="sRGB">
+			<feComponentTransfer>
+				<feFuncR type="table" tableValues="3.4e38 -3.4e38" />
+			</feComponentTransfer>
+		</filter>
+		<filter id="discrete" color-interpolation-filters="sRGB">
+			<feComponentTransfer>
+				<feFuncR type="discrete" tableValues="3.4e38 -3.4e38" />
+			</feComponentTransfer>
+		</filter>
+	</defs>
+	<!-- R=64 selects a positive output in each case; G and B remain untouched. -->
+	<g fill="#4080c0">
+		<rect width="32" height="32" filter="url(#table)" />
+		<rect x="32" width="32" height="32" filter="url(#large)" />
+		<rect x="64" width="32" height="32" filter="url(#discrete)" />
+	</g>
+</svg>

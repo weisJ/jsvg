@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+	<defs>
+		<linearGradient id="ordered">
+			<stop offset="0" stop-color="red" />
+			<stop offset=".7" stop-color="yellow" />
+			<stop offset=".7" stop-color="green" />
+		</linearGradient>
+		<linearGradient id="twoStops">
+			<stop offset="0" stop-color="blue" />
+			<stop offset="1" stop-color="yellow" />
+		</linearGradient>
+	</defs>
+	<rect width="32" height="16" fill="url(#ordered)" />
+	<rect x="32" width="32" height="16" fill="url(#twoStops)" />
+	<!-- The empty-gradient tile paints nothing. -->
+	<rect x="32" y="16" width="32" height="16" fill="lime" />
+	<rect y="32" width="64" height="16" fill="blue" />
+	<rect y="48" width="32" height="16" fill="blue" />
+	<rect x="32" y="48" width="32" height="16" fill="lime" />
+</svg>
