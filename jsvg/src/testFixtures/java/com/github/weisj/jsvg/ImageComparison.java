@@ -90,7 +90,19 @@ public final class ImageComparison {
                 .build());
         DiskImage DiskImage = new DiskImage();
 
-        record BatikType() implements RenderType {
+        record BatikType(@Nullable AnimationState animationState,
+                @Nullable Dimension viewportSize) implements RenderType {
+            public BatikType() {
+                this(null, null);
+            }
+
+            public BatikType withAnimationState(@NotNull AnimationState state) {
+                return new BatikType(state, viewportSize);
+            }
+
+            public BatikType withViewportSize(int width, int height) {
+                return new BatikType(animationState, new Dimension(width, height));
+            }
         }
         record JSVGType(@NotNull LoaderContext loaderContext,
                 @NotNull PlatformSupport platformSupport,
@@ -157,16 +169,15 @@ public final class ImageComparison {
             }
         }
 
-        record MemoryImageSource(@NotNull String name, @NotNull String data) implements ImageSource {
+        record MemoryImageSource(@NotNull String name, @NotNull String data, @Nullable URL url) implements ImageSource {
+
+            public MemoryImageSource(@NotNull String name, @NotNull String data) {
+                this(name, data, null);
+            }
 
             @Override
             public @NotNull String name() {
                 return name;
-            }
-
-            @Override
-            public @Nullable URL url() {
-                return null;
             }
 
             @Override
@@ -236,7 +247,8 @@ public final class ImageComparison {
         @NotNull
         public BufferedImage render(@Nullable BufferedImage expectedHint) throws IOException {
             return switch (renderType) {
-                case BatikType() -> renderBatik(source.openStream());
+                case BatikType(AnimationState state, Dimension viewportSize) ->
+                    renderBatik(source, state, viewportSize);
                 case JSVGType(LoaderContext loaderContext, PlatformSupport platformSupport, AnimationState state) -> {
                     Dimension size = null;
                     if (expectedHint != null) {
@@ -409,11 +421,12 @@ public final class ImageComparison {
             @NotNull AnimationState animationState) throws IOException {
         SVGDocument document;
 
-        URL url = imageSource.url();
-        if (url != null) {
-            document = Objects.requireNonNull(new SVGLoader().load(url, loaderContext));
-        } else {
-            document = Objects.requireNonNull(new SVGLoader().load(imageSource.openStream(), null, loaderContext));
+        try (InputStream input = imageSource.openStream()) {
+            URL url = imageSource.url();
+            document = Objects
+                    .requireNonNull(new SVGLoader().load(input, url != null ? url.toURI() : null, loaderContext));
+        } catch (URISyntaxException e) {
+            throw new IOException("Invalid document URI: " + imageSource.url(), e);
         }
 
         FloatSize size = document.size();
@@ -455,7 +468,8 @@ public final class ImageComparison {
         return image;
     }
 
-    private static BufferedImage renderBatik(@NotNull InputStream inputStream) throws IOException {
+    private static BufferedImage renderBatik(@NotNull ImageSource source, @Nullable AnimationState state,
+            @Nullable Dimension viewportSize) throws IOException {
         final BufferedImage[] imagePointer = new BufferedImage[1];
 
         TranscodingHints transcoderHints = new TranscodingHints();
@@ -463,9 +477,19 @@ public final class ImageComparison {
         transcoderHints.put(ImageTranscoder.KEY_DOM_IMPLEMENTATION, SVGDOMImplementation.getDOMImplementation());
         transcoderHints.put(ImageTranscoder.KEY_DOCUMENT_ELEMENT_NAMESPACE_URI, SVGConstants.SVG_NAMESPACE_URI);
         transcoderHints.put(ImageTranscoder.KEY_DOCUMENT_ELEMENT, "svg");
+        if (viewportSize != null) {
+            transcoderHints.put(ImageTranscoder.KEY_WIDTH, (float) viewportSize.width);
+            transcoderHints.put(ImageTranscoder.KEY_HEIGHT, (float) viewportSize.height);
+        }
+        if (state != null) {
+            // Batik requires dynamic mode to sample declarative animations, and uses seconds.
+            transcoderHints.put(ImageTranscoder.KEY_EXECUTE_ONLOAD, Boolean.TRUE);
+            transcoderHints.put(ImageTranscoder.KEY_SNAPSHOT_TIME, state.timestamp() / 1000f);
+        }
 
-        try {
+        try (InputStream inputStream = source.openStream()) {
             TranscoderInput input = new TranscoderInput(inputStream);
+            if (source.url() != null) input.setURI(source.url().toExternalForm());
             ImageTranscoder t = new ImageTranscoder() {
 
                 @Override
