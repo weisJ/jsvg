@@ -88,15 +88,15 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
                 break;
             case "huerotate":
                 float hueRotate = attributeNode.getFloat(KEY_VALUES, 0);
-                if (hueRotate != 1) {
+                if (hueRotate != 0) {
                     double radians = Math.toRadians(hueRotate);
                     double sin = Math.sin(radians);
                     double cos = Math.cos(radians);
                     //@formatter:off
                     filter = new NoAlphaMatrixRGBFilter(
-                        0.213 + cos * 0.787 - sin * 0.2127, 0.715 - 0.715 * cos - 0.715 * sin,0.072 - 0.072 * cos + 0.982 * sin,
+                        0.213 + cos * 0.787 - sin * 0.213, 0.715 - 0.715 * cos - 0.715 * sin,0.072 - 0.072 * cos + 0.928 * sin,
                         0.213 - cos * 0.213 + sin * 0.143, 0.715 + 0.285 * cos + 0.140 * sin,0.072 - 0.072 * cos - 0.283 * sin,
-                        0.213 - cos * 0.213 - sin * 0.787, 0.715 - 0.715 * cos + 0.715 * sin,0.072 + 0.982 * cos + 0.072 * sin);
+                        0.213 - cos * 0.213 - sin * 0.787, 0.715 - 0.715 * cos + 0.715 * sin,0.072 + 0.928 * cos + 0.072 * sin);
                     //@formatter:on
                 }
                 break;
