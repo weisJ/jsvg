@@ -273,10 +273,17 @@ public final class AttributeNode {
 
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
-        // TODO: url(#...) allows specifying a fallback color value.
-        SVGPaint paint = getElementByHref(SVGPaint.class, value, ElementRelation.PAINT_SERVER);
+        String reference = value;
+        String fallback = value;
+        if (value.startsWith("url(")) {
+            int end = Url.functionEnd(value);
+            if (end < 0) return null;
+            reference = value.substring(0, end + 1);
+            fallback = value.substring(end + 1).trim();
+        }
+        SVGPaint paint = getElementByHref(SVGPaint.class, reference, ElementRelation.PAINT_SERVER);
         if (paint != null) return paint;
-        return loadHelper().attributeParser().parsePaint(value, this);
+        return loadHelper().attributeParser().parsePaint(fallback, this);
     }
 
     public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension) {
