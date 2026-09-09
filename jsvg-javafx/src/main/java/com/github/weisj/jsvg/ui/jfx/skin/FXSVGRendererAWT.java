@@ -32,11 +32,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.ui.jfx.FXSVGCanvas;
+import com.github.weisj.jsvg.util.ImageUtil;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
@@ -54,7 +56,7 @@ final class FXSVGRendererAWT implements FXSVGRenderer {
     }
 
     private void setupRenderTargets(int width, int height) {
-        awtImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        awtImage = ImageUtil.createCompatibleTransparentImage(width, height);
         fxImage = new WritableImage(width, height);
         currentRTWidth = width;
         currentRTHeight = height;
@@ -93,7 +95,7 @@ final class FXSVGRendererAWT implements FXSVGRenderer {
         Graphics2D g = awtImage.createGraphics();
         Output output = Output.createForGraphics(g);
         FXRenderingHintsUtil.setupDefaultJFXRenderingHints(output);
-        g.setBackground(new Color(0, 0, 0, 0));
+        g.setBackground(PaintParser.TRANSPARENT_BLACK);
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);

@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 
+import static com.github.weisj.jsvg.util.ColorUtil.clampColor;
 import static com.github.weisj.jsvg.util.ColorUtil.toRgbRange;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
@@ -148,8 +149,7 @@ public abstract class TransferFunctionElement extends AbstractSVGNode {
         float intIntercept = (intercept * 255f) + 0.5f;
         for (int j = 0; j <= 255; j++) {
             int value = (int) (slope * j + intIntercept);
-            value = Math.max(0, Math.min(255, value));
-            table[j] = (byte) (0xff & value);
+            table[j] = (byte) clampColor(value);
         }
         return table;
     }
@@ -158,8 +158,7 @@ public abstract class TransferFunctionElement extends AbstractSVGNode {
         byte[] table = new byte[256];
         for (int j = 0; j <= 255; j++) {
             int value = (int) Math.round(255 * (amplitude * Math.pow(j / 255f, exponent) + offset));
-            value = Math.max(0, Math.min(255, value));
-            table[j] = (byte) (value & 0xff);
+            table[j] = (byte) clampColor(value);
         }
         return table;
     }

@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.CompositeMode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.util.ColorUtil;
 import com.github.weisj.jsvg.util.LinearRGBComposite;
 
 public final class CompositeModeComposite {
@@ -117,7 +118,7 @@ public final class CompositeModeComposite {
         private int arithmetic(int src, int dst) {
             double s = src / 255.0;
             double d = dst / 255.0;
-            return Math.max(0, Math.min(255, (int) Math.round(255 * (k1 * s * d + k2 * s + k3 * d + k4))));
+            return ColorUtil.clampColor((int) Math.round(255 * (k1 * s * d + k2 * s + k3 * d + k4)));
         }
     }
 
