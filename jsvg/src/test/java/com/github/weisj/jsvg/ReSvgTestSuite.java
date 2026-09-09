@@ -201,10 +201,7 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> filters_feDistantLight() {
-        return checkDirectory("filters/feDistantLight", Set.of(
-                "default-attributes.svg",
-                "only-azimuth.svg",
-                "only-elevation.svg"));
+        return checkDirectory("filters/feDistantLight");
     }
 
     @TestFactory
@@ -319,7 +316,6 @@ class ReSvgTestSuite {
                 "global-transform.svg",
                 "huge-region.svg",
                 "in-to-invalid-1.svg",
-                "in-to-invalid-2.svg",
                 "in=BackgroundAlpha-with-enable-background.svg",
                 "in=BackgroundAlpha.svg",
                 "in=BackgroundImage-with-enable-background.svg",
@@ -1000,9 +996,7 @@ class ReSvgTestSuite {
                 "with-custom-use-size.svg",
                 "with-overflow-visible.svg",
                 "with-transform-on-use.svg",
-                "with-transform.svg",
-                "with-viewBox-and-custom-use-rect.svg",
-                "with-viewBox-and-custom-use-size.svg"));
+                "with-transform.svg"));
     }
 
     @TestFactory
@@ -1279,7 +1273,7 @@ class ReSvgTestSuite {
                 "xml-space-2.svg"));
     }
 
-    private record ReSVGRefTest(@NotNull Path testFile) implements Executable {
+    record ReSVGRefTest(@NotNull Path testFile) implements Executable {
 
         @Override
         public void execute() throws Throwable {
