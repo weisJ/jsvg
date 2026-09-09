@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+	<defs>
+		<filter id="blur" filterUnits="userSpaceOnUse" x="-80" y="-80"
+			width="160" height="160" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="2 0.5" />
+		</filter>
+	</defs>
+	<g transform="translate(80 80) rotate(30) scale(2)">
+		<!-- Outline of a 2-unit stroke around the source rectangle, before the 
+			scale of two. -->
+		<path fill-rule="evenodd"
+			d="M -13 -13 H 13 V 13 H -13 Z M -11 -11 H 11 V 11 H -11 Z"
+			filter="url(#blur)" />
+	</g>
+</svg>

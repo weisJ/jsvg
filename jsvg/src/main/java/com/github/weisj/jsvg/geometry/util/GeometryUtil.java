@@ -56,6 +56,12 @@ public final class GeometryUtil {
         return a > -EPS;
     }
 
+    /** Whether transformed coordinate axes remain aligned with the image axes, including quarter turns. */
+    public static boolean isAxisAligned(@NotNull AffineTransform transform) {
+        return (transform.getShearX() == 0 && transform.getShearY() == 0)
+                || (transform.getScaleX() == 0 && transform.getScaleY() == 0);
+    }
+
     public static double scaleXOfTransform(@Nullable AffineTransform at) {
         if (at == null) return 1;
         double sx = at.getScaleX();

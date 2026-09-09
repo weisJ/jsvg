@@ -102,8 +102,7 @@ public final class FeTile extends AbstractFilterPrimitive {
             Rectangle2D pixelRegion = GeometryUtil.containingBoundsAfterTransform(userToPixel, tileRegion);
             Rectangle pixelBounds = pixelRegion.getBounds();
             Rectangle imageBounds = new Rectangle(0, 0, info.imageWidth, info.imageHeight);
-            boolean axisAligned = (userToPixel.getShearX() == 0 && userToPixel.getShearY() == 0)
-                    || (userToPixel.getScaleX() == 0 && userToPixel.getScaleY() == 0);
+            boolean axisAligned = GeometryUtil.isAxisAligned(userToPixel);
             if (axisAligned
                     && pixelRegion.equals(pixelBounds) && input instanceof BufferedImage
                     && imageBounds.contains(pixelBounds)) {
