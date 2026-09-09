@@ -477,9 +477,15 @@ class W3cSvg11TestSuite {
                 return;
             }
             var source = normalizedSource(testFile, false);
-            var result = ImageComparison.compareImages(new ImageComparison.CompareInfo(
+            var comparison = new ImageComparison.CompareInfo(
                     expected(source, RenderType.Batik.withViewportSize(480, 360)),
-                    actual(source, RenderType.JSVG)));
+                    actual(source, RenderType.JSVG));
+            // Dedicated font tests often contain only a few small glyphs. The normal static
+            // tolerance can hide their complete replacement by a fallback font during an audit.
+            if (testFile.getFileName().toString().startsWith("fonts-")) {
+                comparison = new ImageComparison.CompareInfo(comparison.expected(), comparison.actual(), 0.01, 0.1);
+            }
+            var result = ImageComparison.compareImages(comparison);
             assertEquals(SUCCESS, result);
         }
     }
