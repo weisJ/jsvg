@@ -66,6 +66,15 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
     protected abstract @NotNull Overflow defaultOverflow();
 
+    protected final boolean hasEmptyViewBox() {
+        return viewBox != null && (viewBox.width == 0 || viewBox.height == 0);
+    }
+
+    @Override
+    public boolean isVisible(@NotNull RenderContext context) {
+        return !hasEmptyViewBox() && super.isVisible(context);
+    }
+
     @Override
     public @Nullable ViewBox viewBox(@NotNull RenderContext context) {
         return viewBox != null ? viewBox : new ViewBox(size(context));

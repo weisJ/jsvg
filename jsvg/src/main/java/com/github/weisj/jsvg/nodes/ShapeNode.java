@@ -93,6 +93,7 @@ public abstract class ShapeNode extends RenderableSVGNode
 
         shape = buildShape(attributeNode);
         pathLength = attributeNode.getLength("pathLength", PercentageDimension.NONE, Length.UNSPECIFIED);
+        if (pathLength.raw() < 0) pathLength = Length.UNSPECIFIED;
 
         // Todo: These are actually inheritable and hence have to go into the RenderContext
         // Todo: The marker shorthand is a bit more complicated than just being a template.

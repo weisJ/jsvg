@@ -72,10 +72,6 @@ class WptSvgTestSuite {
 
     // Current rendering mismatches. Keep upstream artwork and fuzzy limits unchanged.
     private static final Set<String> EXCLUDED = Set.of(
-            // coordinate-systems: current reference mismatches.
-            "coordinate-systems/viewBox-zero-disables-rendering-marker.svg",
-            "coordinate-systems/viewBox-zero-disables-rendering-pattern.svg",
-            "coordinate-systems/viewBox-zero-disables-rendering-symbol.svg",
             // embedded: current reference mismatches.
             "embedded/image-embedding-svg-viewref-with-viewbox.svg",
             "embedded/image-embedding-svg-with-auto-height.svg",
@@ -90,8 +86,6 @@ class WptSvgTestSuite {
             "geometry/reftests/circle-004.svg",
             "geometry/reftests/ellipse-004.svg",
             "geometry/reftests/rect-004.svg",
-            // linking: current reference mismatches.
-            "linking/reftests/url-processing-whitespace-001.svg",
             // painting: current reference mismatches.
             "painting/currentColor-override-pserver-fill.svg",
             "painting/currentColor-override-pserver-stroke.svg",
@@ -101,7 +95,6 @@ class WptSvgTestSuite {
             "painting/marker-007.svg",
             "painting/marker-008.svg",
             "painting/marker-orient-001.svg",
-            "painting/reftests/fallback-001.svg",
             "painting/reftests/marker-external-reference.svg",
             "painting/reftests/marker-path-001.svg",
             "painting/reftests/marker-path-002.svg",
@@ -130,15 +123,11 @@ class WptSvgTestSuite {
             "path/distance/pathLength-positive.svg",
             "path/distance/pathLength-zero-percentage.svg",
             "path/distance/pathLength-zero.svg",
-            "path/distance/pathlength-path-negative.svg",
             // Zero pathLength stalls Java2D while rasterizing dashes.
             "path/distance/pathlength-path-zero.svg",
-            // Malformed path data exhausts the parser heap.
-            "path/error-handling/render-until-error.svg",
             "path/property/marker-path.svg",
             "path/property/priority.svg",
             // pservers: current reference mismatches.
-            "pservers/reftests/fill-fallback-invalid-uri.svg",
             "pservers/reftests/fill-fallback-none-3.svg",
             "pservers/reftests/gradient-transform-01.svg",
             "pservers/reftests/gradient-transform-02.svg",

@@ -303,8 +303,13 @@ public final class AttributeNode {
     /** Raw string of an SVG-only attribute; re-serialized CSS text in the unexpected case when a stylesheet
      * sets an SVG-only attribute. */
     public @Nullable String getValue(@NotNull String key) {
+        return getValue(key, null);
+    }
+
+    @Contract("_,!null -> !null")
+    public @Nullable String getValue(@NotNull String key, @Nullable String fallback) {
         AttributeValue value = resolvedAttributes.get(key);
-        if (value == null) return null;
+        if (value == null) return fallback;
         if (value instanceof AttributeValue.PlainString) {
             return ((AttributeValue.PlainString) value).string();
         } else {
@@ -392,6 +397,7 @@ public final class AttributeNode {
             if (end < 0) return null;
             reference = value.substring(0, end + 1);
             fallback = value.substring(end + 1).trim();
+            if (fallback.isEmpty()) fallback = "none";
         }
         SVGPaint paint = getElementByHref(SVGPaint.class, reference, ElementRelation.PAINT_SERVER);
         if (paint != null) return paint;
@@ -405,7 +411,15 @@ public final class AttributeNode {
                 SVGPaint paint = getElementByHref(
                         SVGPaint.class, ((Token.Url) token).value(), ElementRelation.PAINT_SERVER);
                 if (paint != null) return paint;
-                return parser().parsePaint(tokens.subList(i + 1, tokens.size()));
+                List<ComponentValue> fallback = tokens.subList(i + 1, tokens.size());
+                boolean hasFallback = false;
+                for (ComponentValue fallbackToken : fallback) {
+                    if (fallbackToken != Token.Static.WHITESPACE) {
+                        hasFallback = true;
+                        break;
+                    }
+                }
+                return hasFallback ? parser().parsePaint(fallback) : PredefinedPaints.NONE;
             }
         }
         return parser().parsePaint(tokens);
@@ -759,7 +773,9 @@ public final class AttributeNode {
 
     public @Nullable ViewBox getViewBox() {
         float[] viewBoxCords = getFloatList("viewBox");
-        return viewBoxCords.length == 4 ? new ViewBox(viewBoxCords) : null;
+        return viewBoxCords.length == 4 && viewBoxCords[2] >= 0 && viewBoxCords[3] >= 0
+                ? new ViewBox(viewBoxCords)
+                : null;
     }
 
     public @NotNull AttributeParser parser() {

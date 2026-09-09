@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="40"
+	fill="none" stroke="blue" stroke-width="4">
+	<!-- The normalized diagonal is 200: an inherited 20% offset is 40. -->
+	<g stroke-dasharray="10 20" stroke-dashoffset="20%">
+		<path d="M10 10 H270" />
+		<path d="M10 30 H270" stroke-dashoffset="0" />
+	</g>
+</svg>

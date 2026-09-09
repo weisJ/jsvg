@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120"
+	fill="none" stroke="blue" stroke-width="4">
+	<path d="M10 10 H230" stroke-dasharray="20 10" />
+	<path d="M10 30 H230" stroke-dasharray="20 10" />
+	<path d="M10 50 H230" stroke-dasharray="20 10" />
+	<path d="M10 70 H230" />
+	<path d="M10 90 H230" stroke-dasharray="20 10" />
+	<path d="M10 110 H230" stroke-dasharray="40 20" />
+</svg>

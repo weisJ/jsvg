@@ -55,6 +55,7 @@ public final class Url {
             urlString = unescape(urlString);
         }
 
+        urlString = urlString.trim();
         String[] split = urlString.split("#", 2);
 
         if (split.length == 0) return null;

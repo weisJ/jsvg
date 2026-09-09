@@ -86,6 +86,12 @@ class FilterTest {
     }
 
     @Test
+    void hueRotation() {
+        // Allow one byte of rounding difference between the two filter implementations.
+        assertEquals(SUCCESS, compareImages("filter/hueRotateBoundaries.svg", 0, 1 / 255f));
+    }
+
+    @Test
     @EnabledForJreRange(min = JRE.JAVA_9)
     void testTurbulence() {
         assertEquals(SUCCESS, compareImages("filter/turbulence1.svg"));
@@ -184,6 +190,13 @@ class FilterTest {
     void testComponentTransfer() {
         assertEquals(SUCCESS, compareImages("filter/componentTransfer.svg", 0.05, 0.05));
         assertEquals(SUCCESS, compareImages("filter/componentTransfer_sRGB.svg", 0.05, 0.05));
+    }
+
+    @Test
+    void componentTransferClampsWithoutOverflow() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("filter/componentTransferClamping_ref.svg"), RenderType.Batik),
+                actual(new PathImageSource("filter/componentTransferClamping.svg"), RenderType.JSVG), 0, 0)));
     }
 
     @Test
