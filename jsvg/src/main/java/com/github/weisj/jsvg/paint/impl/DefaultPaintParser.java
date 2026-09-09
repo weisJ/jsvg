@@ -36,6 +36,7 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.ParserUtil;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
+import com.github.weisj.jsvg.util.ColorUtil;
 
 
 public final class DefaultPaintParser implements PaintParser {
@@ -47,7 +48,7 @@ public final class DefaultPaintParser implements PaintParser {
         if (value.isEmpty()) return null;
         try {
             if (value.charAt(0) == '#') {
-                int rgba = 0xff000000;
+                int rgba;
                 switch (value.length()) {
                     case 4:
                         // Short rgb
@@ -78,7 +79,7 @@ public final class DefaultPaintParser implements PaintParser {
                         rgba = parseHex(value.substring(1).toCharArray());
                         break;
                     default:
-                        break;
+                        return null;
                 }
                 return new Color(rgba, true);
             } else if (value.length() > 3 && value.substring(0, 3).equalsIgnoreCase("rgb")) {
@@ -123,7 +124,7 @@ public final class DefaultPaintParser implements PaintParser {
             parsed = ParserUtil.parseFloat(value, 0);
             if (percentage) parsed *= 255;
         }
-        return Math.min(255, Math.max(0, (int) parsed));
+        return ColorUtil.clampColor((int) parsed);
     }
 
     private int parseHex(char[] chars) {
@@ -140,12 +141,12 @@ public final class DefaultPaintParser implements PaintParser {
     private int charToColorInt(char c) {
         if (c >= '0' && c <= '9') {
             return c - '0';
-        } else if (c >= 'a' && c <= 'z') {
+        } else if (c >= 'a' && c <= 'f') {
             return c - 'a' + 10;
-        } else if (c >= 'A' && c <= 'Z') {
+        } else if (c >= 'A' && c <= 'F') {
             return c - 'A' + 10;
         } else {
-            return 0;
+            throw new IllegalArgumentException("Invalid hexadecimal digit: " + c);
         }
     }
 
