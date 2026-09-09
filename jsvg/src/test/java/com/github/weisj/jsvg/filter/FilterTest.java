@@ -27,7 +27,6 @@ import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
@@ -176,7 +175,6 @@ class FilterTest {
     }
 
     @Test
-    @Disabled("See #70")
     void testFilterPrimitiveRegionClip() {
         assertEquals(SUCCESS, compareImages("filter/filterPrimitiveRegionClip.svg"));
         assertEquals(SUCCESS, compareImages("filter/filterPrimitiveRegionClip2.svg"));
