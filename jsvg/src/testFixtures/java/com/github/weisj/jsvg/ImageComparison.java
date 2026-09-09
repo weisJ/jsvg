@@ -27,7 +27,9 @@ import static com.github.weisj.jsvg.ImageComparison.RenderType.*;
 import static com.github.weisj.jsvg.ImageComparison.RenderType.Batik;
 
 import java.awt.*;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -243,7 +245,7 @@ public final class ImageComparison {
                     yield renderJsvg(source, graphicsMutator, loaderContext, platformSupport, size, state);
                 }
                 case DiskImage() -> {
-                    var img = ImageIO.read(source.openStream());
+                    var img = readReferenceImage(source);
                     var refImg = new ReferenceImage(img.getWidth(), img.getHeight());
                     var g = refImg.createGraphics();
                     g.drawImage(img, 0, 0, null);
@@ -428,6 +430,28 @@ public final class ImageComparison {
         document.renderWithPlatform(platformSupport, output, new ViewBox(size), animationState);
         output.dispose();
         g.dispose();
+        return image;
+    }
+
+    private static @NotNull BufferedImage readReferenceImage(@NotNull ImageSource source) throws IOException {
+        BufferedImage image;
+        try (InputStream stream = source.openStream()) {
+            image = ImageIO.read(stream);
+        }
+        if (image == null) throw new IOException("Unable to decode reference image: " + source.name());
+
+        var colorModel = image.getColorModel();
+        if (colorModel.getColorSpace().equals(ColorSpace.getInstance(ColorSpace.CS_GRAY))) {
+            // Reference PNGs contain sRGB samples, but ImageIO's default gray color space is linear.
+            // Expose gray as R, G and B without converting the samples or copying the backing data.
+            int[] bands = colorModel.hasAlpha() ? new int[] {0, 0, 0, 1} : new int[] {0, 0, 0};
+            var raster = image.getRaster().createWritableChild(
+                    0, 0, image.getWidth(), image.getHeight(), 0, 0, bands);
+            var rgbModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                    colorModel.hasAlpha(), colorModel.isAlphaPremultiplied(), colorModel.getTransparency(),
+                    raster.getTransferType());
+            image = new BufferedImage(rgbModel, raster, colorModel.isAlphaPremultiplied(), null);
+        }
         return image;
     }
 
