@@ -55,7 +55,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     private static final double BOX_BLUR_APPROXIMATION_THRESHOLD = 2;
 
-    private float[] stdDeviation;
+    private float stdDeviationX;
+    private float stdDeviationY;
     private EdgeMode edgeMode;
 
     private double xCurrent;
@@ -72,7 +73,13 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        stdDeviation = attributeNode.getFloatList("stdDeviation");
+        float[] stdDeviation = attributeNode.getFloatList("stdDeviation");
+        stdDeviationX = stdDeviation.length > 0 ? stdDeviation[0] : 0;
+        stdDeviationY = stdDeviation.length > 1 ? stdDeviation[1] : stdDeviationX;
+        if (stdDeviationX < 0 || stdDeviationY < 0) {
+            stdDeviationX = 0;
+            stdDeviationY = 0;
+        }
         edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.None);
     }
 
@@ -83,10 +90,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     private double[] computeStdDeviation(@NotNull UnitType units,
             @NotNull Rectangle2D elementBounds) {
-        if (stdDeviation.length == 0) return new double[] {0, 0};
-        double xSigma = stdDeviation[0];
-        double ySigma = stdDeviation[Math.min(stdDeviation.length - 1, 1)];
-        if (xSigma < 0 || ySigma < 0) return new double[] {0, 0};
+        double xSigma = stdDeviationX;
+        double ySigma = stdDeviationY;
         if (units == UnitType.ObjectBoundingBox) {
             xSigma *= elementBounds.getWidth();
             ySigma *= elementBounds.getHeight();
@@ -98,7 +103,6 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     public boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
         double[] sigma = computeStdDeviation(context.primitiveUnits(), context.elementBounds());
         if (sigma[0] == 0 && sigma[1] == 0) return false;
-        if (GeometryUtil.isAxisAligned(context.transform())) return false;
         // Duplicate and wrap extend the input rectangle along primitive axes, even for a circular kernel.
         if (edgeMode != EdgeMode.None) return true;
         AffineTransform transform = context.transform();
@@ -151,7 +155,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        if (stdDeviation.length == 0) {
+        if (stdDeviationX == 0 && stdDeviationY == 0) {
             impl().noop(filterContext);
             return;
         }
@@ -185,8 +189,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
 
         Rectangle2D inputRegion = filterContext.layout(impl().inputChannelKey()).region();
-        Rectangle sourceBounds =
-                filterContext.info().output().transform().createTransformedShape(inputRegion).getBounds();
+        Rectangle sourceBounds = GeometryUtil.transformBounds(
+                filterContext.info().output().transform(), inputRegion).getBounds();
         ImageProducer output = edgeMode.convolve(context, filterContext, input, sourceBounds,
                 new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, dX, dY));
         impl().saveResult(new ImageProducerChannel(output), filterContext);
@@ -315,6 +319,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
 
         private void horizontalBoxBlur(@NotNull WritableRaster raster) {
+            if (dX == 1) return;
             if ((dX & 0x01) == 0) {
                 InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2);
                 InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2 - 1);
@@ -327,6 +332,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
 
         private void verticalBoxBlur(@NotNull WritableRaster raster) {
+            if (dY == 1) return;
             if ((dY & 0x01) == 0) {
                 InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2);
                 InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2 - 1);
