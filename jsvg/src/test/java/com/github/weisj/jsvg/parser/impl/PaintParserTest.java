@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.parser.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.awt.*;
 import java.util.Collections;
@@ -96,6 +97,17 @@ class PaintParserTest {
         assertEquals(color(255, 0, 0, 17), parsePaint("#f001"));
         assertEquals(color(0, 241, 0, 18), parsePaint("#00F10012"));
         assertEquals(color(0, 241, 0, 18), parsePaint("#00f10012"));
+        assertEquals(color(0x12, 0xab, 0x34, 255), parsePaint("#12Ab34"));
+        assertEquals(color(0x11, 0xaa, 0x33, 0xcc), parsePaint("#1a3c"));
+        assertEquals(color(0x89, 0xab, 0xcd, 0xef), parsePaint("#89abcdef"));
+    }
+
+    @Test
+    void testInvalidHexLiteral() {
+        for (String value : new String[] {"#", "#12", "#12345", "#1234567", "#q00", "#00z", "#-00", "#ff0000gg",
+                "#+ff", "#１２３", "#١٢٣"}) {
+            assertNull(parsePaint(value), value);
+        }
     }
 
     @Test

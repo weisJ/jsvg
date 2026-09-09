@@ -41,6 +41,7 @@ import com.github.weisj.jsvg.parser.css.data.Token;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.ParserUtil;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
+import com.github.weisj.jsvg.util.ColorUtil;
 
 
 public final class DefaultPaintParser implements PaintParser {
@@ -123,8 +124,8 @@ public final class DefaultPaintParser implements PaintParser {
     }
 
     /** {@code #rgb}, {@code #rgba}, {@code #rrggbb} or {@code #rrggbbaa} digits without the leading {@code #}. */
-    private @NotNull Color parseHexColor(@NotNull String hex) {
-        int rgba = 0xff000000;
+    private @Nullable Color parseHexColor(@NotNull String hex) {
+        int rgba;
         switch (hex.length()) {
             case 3:
                 rgba = parseHex(new char[] {
@@ -145,7 +146,7 @@ public final class DefaultPaintParser implements PaintParser {
                 rgba = parseHex(hex.toCharArray());
                 break;
             default:
-                break;
+                return null;
         }
         return new Color(rgba, true);
     }
@@ -192,7 +193,7 @@ public final class DefaultPaintParser implements PaintParser {
             parsed = ParserUtil.parseFloat(value, 0);
             if (percentage) parsed *= 255;
         }
-        return Math.min(255, Math.max(0, (int) parsed));
+        return ColorUtil.clampColor((int) parsed);
     }
 
     private int parseHex(char[] chars) {
@@ -209,12 +210,12 @@ public final class DefaultPaintParser implements PaintParser {
     private int charToColorInt(char c) {
         if (c >= '0' && c <= '9') {
             return c - '0';
-        } else if (c >= 'a' && c <= 'z') {
+        } else if (c >= 'a' && c <= 'f') {
             return c - 'a' + 10;
-        } else if (c >= 'A' && c <= 'Z') {
+        } else if (c >= 'A' && c <= 'F') {
             return c - 'A' + 10;
         } else {
-            return 0;
+            throw new IllegalArgumentException("Invalid hexadecimal digit: " + c);
         }
     }
 
