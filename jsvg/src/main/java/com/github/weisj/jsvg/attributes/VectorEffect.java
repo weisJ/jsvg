@@ -100,8 +100,8 @@ public enum VectorEffect implements HasMatchName {
             @NotNull Stroke stroke, @NotNull Shape shape) {
         // For the stroke not to be scaled we have to pre-multiply the shape by the transform and then paint
         // in the non-transformed coordinate system.
-        AffineTransform shapeTransform = output.transform();
-        shapeTransform.concatenate(GeometryUtil.createInverse(context.hostTransform()));
+        AffineTransform shapeTransform = GeometryUtil.createInverse(context.hostTransform());
+        shapeTransform.concatenate(output.transform());
 
         Shape strokedShape = ShapeUtil.transformShape(shape, shapeTransform);
         strokedShape = stroke.createStrokedShape(strokedShape);

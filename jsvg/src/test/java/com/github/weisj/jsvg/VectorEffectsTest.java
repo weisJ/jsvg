@@ -31,14 +31,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.CompareInfo;
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.ImageComparison.RenderType;
 
 class VectorEffectsTest {
+
+    // Compare stroke geometry without AWT snapping ordinary strokes to the pixel grid.
+    private static final Consumer<Graphics2D> PURE_STROKE =
+            graphics -> graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
     private static void testVectorEffect(String name) {
         assertDoesNotThrow(() -> renderJsvg("vectorEffect/ve-" + name + ".svg"));
@@ -66,15 +73,53 @@ class VectorEffectsTest {
 
     @Test
     void nonScalingStroke() {
-        assertDoesNotThrow(() -> renderJsvg("vectorEffect/nonScalingStroke.svg"));
-        Consumer<Graphics2D> hints =
-                g -> g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new PathImageSource("vectorEffect/nonScalingStroke_bug139_ref.svg"), RenderType.JSVG, hints),
-                actual(new PathImageSource("vectorEffect/nonScalingStroke_bug139.svg"), RenderType.JSVG, hints))));
+                expected(new PathImageSource("vectorEffect/nonScalingStroke_bug139_ref.svg"), RenderType.JSVG,
+                        PURE_STROKE),
+                actual(new PathImageSource("vectorEffect/nonScalingStroke_bug139.svg"), RenderType.JSVG,
+                        PURE_STROKE))));
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new PathImageSource("vectorEffect/nonScalingStroke_bug139_ref.svg"), RenderType.JSVG, hints),
+                expected(new PathImageSource("vectorEffect/nonScalingStroke_bug139_ref.svg"), RenderType.JSVG,
+                        PURE_STROKE),
                 actual(new PathImageSource("vectorEffect/nonScalingStroke_bug139_with_filter.svg"), RenderType.JSVG,
-                        hints))));
+                        PURE_STROKE))));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> nonScalingStrokeGeometry() {
+        return Stream.of("nonScalingStroke", "nonScalingStrokeTransforms", "nonScalingStrokeNestedViewport",
+                "nonScalingStrokeFilteredShear")
+                .map(name -> DynamicTest.dynamicTest(name, () -> compareStrokeReference(name, PURE_STROKE)));
+    }
+
+    @Test
+    void nonScalingStrokeWithHostTransform() {
+        compareStrokeReference("nonScalingStrokeNestedViewport", graphics -> {
+            PURE_STROKE.accept(graphics);
+            graphics.translate(20, 5);
+            graphics.rotate(Math.PI / 12);
+            graphics.scale(1.5, 1.5);
+        });
+    }
+
+    @TestFactory
+    Stream<DynamicTest> effectsWithHostTransform() {
+        Consumer<Graphics2D> transform = graphics -> {
+            graphics.translate(50, 40);
+            graphics.rotate(-Math.PI / 12);
+            graphics.scale(0.8, 1.1);
+        };
+        return Stream.of("nonScalingSize", "nonRotation", "fixedPosition")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
+                        expected(new PathImageSource("vectorEffect/ref-ve-" + name + ".svg"), RenderType.JSVG,
+                                transform),
+                        actual(new PathImageSource("vectorEffect/ve-" + name + ".svg"), RenderType.JSVG, transform),
+                        0, 0)))));
+    }
+
+    private static void compareStrokeReference(String name, Consumer<Graphics2D> hints) {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("vectorEffect/" + name + "_ref.svg"), RenderType.JSVG, hints),
+                actual(new PathImageSource("vectorEffect/" + name + ".svg"), RenderType.JSVG, hints), 0, 0)));
     }
 }
