@@ -141,9 +141,7 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> filters_feBlend() {
-        return checkDirectory("filters/feBlend", Set.of(
-                "mode=color-burn.svg",
-                "mode=hue.svg"));
+        return checkDirectory("filters/feBlend");
     }
 
     @TestFactory
@@ -189,8 +187,6 @@ class ReSvgTestSuite {
                 "single-light-source-with-title.svg",
                 "single-light-source.svg",
                 "surfaceScale=-10.svg",
-                "surfaceScale=0.svg",
-                "surfaceScale=1.33.svg",
                 "surfaceScale=5.svg"));
     }
 
@@ -221,7 +217,6 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> filters_feGaussianBlur() {
         return checkDirectory("filters/feGaussianBlur", Set.of(
-                "complex-transform.svg",
                 "huge-stdDeviation.svg",
                 "simple-case.svg",
                 "small-stdDeviation.svg",
@@ -234,8 +229,7 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> filters_feMerge() {
-        return checkDirectory("filters/feMerge", Set.of(
-                "complex-transform.svg"));
+        return checkDirectory("filters/feMerge");
     }
 
     @TestFactory
@@ -257,6 +251,13 @@ class ReSvgTestSuite {
     }
 
     @TestFactory
+    Collection<DynamicTest> filters_fePointLight() {
+        return checkDirectory("filters/fePointLight", Set.of(
+                "complex-transform.svg",
+                "primitiveUnits=objectBoundingBox.svg"));
+    }
+
+    @TestFactory
     Collection<DynamicTest> filters_feSpotLight() {
         return checkDirectory("filters/feSpotLight", Set.of(
                 "complex-transform.svg",
@@ -264,11 +265,7 @@ class ReSvgTestSuite {
                 "limitingConeAngle-anti-aliasing.svg",
                 "limitingConeAngle=-30.svg",
                 "limitingConeAngle=30.svg",
-                "primitiveUnits=objectBoundingBox.svg",
-                "specularExponent=-10.svg",
-                "specularExponent=0.5.svg",
-                "specularExponent=10.svg",
-                "with-all-pointsAt.svg"));
+                "primitiveUnits=objectBoundingBox.svg"));
     }
 
     @TestFactory
@@ -470,38 +467,16 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> paint_servers_linearGradient() {
         return checkDirectory("paint-servers/linearGradient", Set.of(
-                "attributes-via-xlink-href-complex-order.svg",
-                "attributes-via-xlink-href-from-radialGradient.svg",
-                "attributes-via-xlink-href-from-rect.svg",
-                "attributes-via-xlink-href-only-required.svg",
-                "attributes-via-xlink-href.svg",
-                "default-attributes.svg",
-                "gradientTransform-and-transform.svg",
-                "gradientTransform.svg",
-                "gradientUnits=objectBoundingBox-with-percent.svg",
-                "gradientUnits=userSpaceOnUse-with-percent.svg",
-                "gradientUnits=userSpaceOnUse.svg",
                 "hsla-color.svg",
                 "invalid-child-1.svg",
                 "invalid-child-2.svg",
                 "invalid-gradientTransform.svg",
-                "invalid-gradientUnits.svg",
-                "invalid-spreadMethod.svg",
-                "invalid-xlink-href.svg",
                 "no-stops.svg",
                 "recursive-xlink-href-1.svg",
                 "recursive-xlink-href-2.svg",
                 "recursive-xlink-href-3.svg",
                 "self-recursive-xlink-href.svg",
-                "spreadMethod=pad.svg",
-                "spreadMethod=reflect.svg",
-                "spreadMethod=repeat.svg",
-                "stops-via-xlink-href-complex-order-1.svg",
-                "stops-via-xlink-href-complex-order-2.svg",
-                "stops-via-xlink-href-from-radialGradient.svg",
-                "stops-via-xlink-href-from-rect.svg",
-                "stops-via-xlink-href.svg",
-                "unresolved-xlink-href.svg"));
+                "stops-via-xlink-href-from-rect.svg"));
     }
 
     @TestFactory
@@ -534,46 +509,18 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> paint_servers_radialGradient() {
         return checkDirectory("paint-servers/radialGradient", Set.of(
-                "attributes-via-xlink-href-complex-order.svg",
-                "attributes-via-xlink-href-from-linearGradient.svg",
-                "attributes-via-xlink-href-from-rect.svg",
-                "attributes-via-xlink-href-only-required.svg",
-                "attributes-via-xlink-href.svg",
-                "default-attributes.svg",
                 "focal-point-correction.svg",
                 "fr=-1.svg",
-                "fr=0.2.svg",
                 "fr=0.5.svg",
                 "fr=0.7.svg",
-                "fx-resolving-1.svg",
-                "fx-resolving-2.svg",
-                "fx-resolving-3.svg",
-                "fy-resolving-1.svg",
-                "fy-resolving-2.svg",
-                "fy-resolving-3.svg",
-                "gradientTransform-and-transform.svg",
-                "gradientTransform.svg",
-                "gradientUnits=objectBoundingBox-with-percent.svg",
-                "gradientUnits=userSpaceOnUse-with-percent.svg",
-                "gradientUnits=userSpaceOnUse.svg",
                 "hsla-color.svg",
                 "invalid-gradientTransform.svg",
                 "invalid-gradientUnits.svg",
-                "invalid-spreadMethod.svg",
-                "invalid-xlink-href.svg",
                 "negative-r.svg",
                 "no-stops.svg",
                 "recursive-xlink-href.svg",
                 "self-recursive-xlink-href.svg",
-                "spreadMethod=pad.svg",
-                "spreadMethod=reflect.svg",
-                "spreadMethod=repeat.svg",
-                "stops-via-xlink-href-complex-order.svg",
-                "stops-via-xlink-href-from-linearGradient.svg",
-                "stops-via-xlink-href-from-rect.svg",
-                "stops-via-xlink-href.svg",
-                "unresolved-xlink-href.svg",
-                "xlink-href-not-to-gradient.svg"));
+                "stops-via-xlink-href-from-rect.svg"));
     }
 
     @TestFactory
@@ -588,9 +535,17 @@ class ReSvgTestSuite {
                 "stop-color-with-currentColor-3.svg",
                 "stop-color-with-inherit-1.svg",
                 "stop-with-smaller-offset.svg",
-                "stops-with-equal-offset-5.svg",
-                "stops-with-equal-offset-6.svg",
                 "zero-offset-in-the-middle.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> paint_servers_stop_color() {
+        return checkDirectory("paint-servers/stop-color");
+    }
+
+    @TestFactory
+    Collection<DynamicTest> paint_servers_stop_opacity() {
+        return checkDirectory("paint-servers/stop-opacity");
     }
 
     @TestFactory
@@ -641,11 +596,9 @@ class ReSvgTestSuite {
                 "invalid-#RRGGBB-3.svg",
                 "invalid-FuncIRI-with-a-currentColor-fallback.svg",
                 "invalid-FuncIRI-with-a-fallback-color.svg",
-                "linear-gradient-on-shape.svg",
                 "linear-gradient-on-text.svg",
                 "missing-FuncIRI-with-a-currentColor-fallback.svg",
                 "pattern-on-text.svg",
-                "radial-gradient-on-shape.svg",
                 "radial-gradient-on-text.svg",
                 "rgb-0-127-0-0.5.svg",
                 "rgb-int-int-int.svg",
@@ -720,8 +673,7 @@ class ReSvgTestSuite {
         return checkDirectory("painting/opacity", Set.of(
                 "bBox-impact.svg",
                 "group-opacity.svg",
-                "mixed-group-opacity.svg",
-                "on-an-invalid-element.svg"));
+                "mixed-group-opacity.svg"));
     }
 
     @TestFactory
@@ -797,7 +749,6 @@ class ReSvgTestSuite {
     Collection<DynamicTest> painting_stroke_opacity() {
         return checkDirectory("painting/stroke-opacity", Set.of(
                 "on-text.svg",
-                "with-linearGradient.svg",
                 "with-opacity.svg"));
     }
 
@@ -851,6 +802,8 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> shapes_rect() {
+        // cap/ic/lh/rlh match frame-only PNGs marked UNKNOWN in the upstream results.
+        // Keep them excluded: these comparisons do not establish support for the units.
         return checkDirectory("shapes/rect", Set.of(
                 "cap-values.svg",
                 "ch-values.svg",
@@ -874,10 +827,6 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> structure_defs() {
         return checkDirectory("structure/defs", Set.of(
-                "multiple-defs.svg",
-                "nested-defs.svg",
-                "out-of-order.svg",
-                "simple-case.svg",
                 "style-inheritance-on-text.svg"));
     }
 
@@ -1103,12 +1052,27 @@ class ReSvgTestSuite {
     }
 
     @TestFactory
+    Collection<DynamicTest> text_letter_spacing() {
+        return checkDirectory("text/letter-spacing", Set.of(
+                "-3.svg",
+                "0.svg",
+                "1mm.svg",
+                "3.svg",
+                "5percent.svg",
+                "filter-bbox.svg",
+                "large-negative.svg",
+                "mixed-scripts.svg",
+                "non-ASCII-character.svg",
+                "normal.svg",
+                "on-Arabic.svg"));
+    }
+
+    @TestFactory
     Collection<DynamicTest> text_text() {
         return checkDirectory("text/text", Set.of(
                 "bidi-reordering.svg",
                 "complex-grapheme-split-by-tspan.svg",
                 "complex-graphemes-and-coordinates-list.svg",
-                "complex-graphemes.svg",
                 "compound-emojis-and-coordinates-list.svg",
                 "compound-emojis.svg",
                 "dx-and-dy-instead-of-x-and-y.svg",
@@ -1124,7 +1088,6 @@ class ReSvgTestSuite {
                 "ligatures-handling-in-mixed-fonts-1.svg",
                 "ligatures-handling-in-mixed-fonts-2.svg",
                 "mm-coordinates.svg",
-                "nested.svg",
                 "no-coordinates.svg",
                 "percent-value-on-dx-and-dy.svg",
                 "percent-value-on-x-and-y.svg",
@@ -1161,8 +1124,7 @@ class ReSvgTestSuite {
                 "on-the-first-tspan.svg",
                 "on-tspan-with-arabic.svg",
                 "on-tspan.svg",
-                "start-on-text.svg",
-                "text-anchor-not-on-text-chunk.svg"));
+                "start-on-text.svg"));
     }
 
     @TestFactory
@@ -1191,6 +1153,21 @@ class ReSvgTestSuite {
     }
 
     @TestFactory
+    Collection<DynamicTest> text_textLength() {
+        return checkDirectory("text/textLength", Set.of(
+                "150-on-parent.svg",
+                "150-on-tspan.svg",
+                "150.svg",
+                "40mm.svg",
+                "75percent.svg",
+                "arabic-with-lengthAdjust.svg",
+                "arabic.svg",
+                "inherit.svg",
+                "negative.svg",
+                "on-text-and-tspan.svg"));
+    }
+
+    @TestFactory
     Collection<DynamicTest> text_textPath() {
         return checkDirectory("text/textPath", Set.of(
                 "closed-path.svg",
@@ -1199,7 +1176,6 @@ class ReSvgTestSuite {
                 "invalid-link.svg",
                 "invalid-textPath-in-the-middle.svg",
                 "link-to-rect.svg",
-                "m-A-path.svg",
                 "m-L-Z-path.svg",
                 "method=stretch.svg",
                 "mixed-children-1.svg",
@@ -1212,7 +1188,6 @@ class ReSvgTestSuite {
                 "side=right.svg",
                 "simple-case.svg",
                 "spacing=auto.svg",
-                "startOffset=-100.svg",
                 "startOffset=10percent.svg",
                 "startOffset=30.svg",
                 "startOffset=5mm.svg",
@@ -1222,20 +1197,31 @@ class ReSvgTestSuite {
                 "very-long-text.svg",
                 "with-baseline-shift-and-rotate.svg",
                 "with-baseline-shift.svg",
-                "with-big-letter-spacing.svg",
                 "with-coordinates-on-text.svg",
                 "with-coordinates-on-textPath.svg",
                 "with-filter.svg",
                 "with-invalid-path-and-xlink-href.svg",
-                "with-letter-spacing.svg",
                 "with-path-and-xlink-href.svg",
                 "with-path.svg",
                 "with-rotate.svg",
-                "with-text-anchor.svg",
                 "with-transform-on-a-referenced-path.svg",
                 "with-transform-outside-a-referenced-path.svg",
                 "with-underline.svg",
                 "writing-mode=tb.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> text_tref() {
+        return checkDirectory("text/tref", Set.of(
+                "link-to-a-complex-text.svg",
+                "link-to-a-non-text-element.svg",
+                "link-to-an-external-file-element.svg",
+                "link-to-text.svg",
+                "position-attributes.svg",
+                "style-attributes.svg",
+                "with-a-title-child.svg",
+                "with-text.svg",
+                "xml-space.svg"));
     }
 
     @TestFactory
@@ -1252,7 +1238,6 @@ class ReSvgTestSuite {
                 "nested-whitespaces.svg",
                 "nested.svg",
                 "only-with-y.svg",
-                "outside-the-text.svg",
                 "rotate-and-display-none.svg",
                 "rotate-on-child.svg",
                 "sequential.svg",
@@ -1266,11 +1251,20 @@ class ReSvgTestSuite {
                 "with-dy.svg",
                 "with-filter.svg",
                 "with-mask.svg",
-                "with-opacity.svg",
                 "with-x-and-y.svg",
                 "without-attributes.svg",
                 "xml-space-1.svg",
                 "xml-space-2.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> text_word_spacing() {
+        return checkDirectory("text/word-spacing", Set.of(
+                "-5.svg",
+                "10.svg",
+                "2mm.svg",
+                "5percent.svg",
+                "large-negative.svg"));
     }
 
     record ReSVGRefTest(@NotNull Path testFile) implements Executable {
