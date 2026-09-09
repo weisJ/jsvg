@@ -212,7 +212,7 @@ public final class FXOutputImpl implements Output, CurrentColorProvider {
         int width = (int) ctx.getCanvas().getWidth();
         int height = (int) ctx.getCanvas().getHeight();
 
-        BufferedImage debugImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage debugImage = ImageUtil.createCompatibleTransparentImage(width, height);
         Graphics2D debugGraphics = debugImage.createGraphics();
         debugGraphics.setRenderingHints(renderingHints);
         debugGraphics.setPaint(currentPaint);

@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ImageUtil;
 import com.github.weisj.jsvg.util.ShapeUtil;
 
 final class ClippedChannel implements Channel {
@@ -87,7 +88,7 @@ final class ClippedChannel implements Channel {
 
     @Override
     public @NotNull BufferedImage toBufferedImageNonAliased(@NotNull RenderContext context) {
-        if (empty) return new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB);
+        if (empty) return ImageUtil.createCompatibleTransparentImage(bounds.width, bounds.height);
         BufferedImage result = input.toBufferedImageNonAliased(context);
         if (clip.contains(bounds)) return result;
         Path2D complement = new Path2D.Double(Path2D.WIND_EVEN_ODD);

@@ -44,7 +44,7 @@ public final class ColorUtil {
     }
 
     public static Color withAlpha(@NotNull Color c, float alpha) {
-        int a = Math.max(Math.min(255, (int) (alpha * 255)), 0);
+        int a = clampColor((int) (alpha * 255));
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), a);
     }
 

@@ -140,7 +140,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (lightSource == null) {
             Filter.FilterInfo info = filterContext.info();
-            BufferedImage img = new BufferedImage(info.imageWidth, info.imageHeight, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage img = ImageUtil.createCompatibleTransparentImage(info.imageWidth, info.imageHeight);
             impl().saveResult(new ImageProducerChannel(img.getSource()), filterContext);
             return;
         }
