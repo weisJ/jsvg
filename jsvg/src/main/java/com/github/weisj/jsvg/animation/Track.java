@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -116,7 +116,7 @@ public final class Track {
         ListIterator<@NotNull Interval> iterator = intervals.listIterator(intervals.size());
         while (iterator.hasPrevious()) {
             Interval interval = iterator.previous();
-            if (interval.end().milliseconds() <= timestamp) {
+            if (interval.begin().milliseconds() <= timestamp) {
                 return interval;
             }
         }
@@ -134,7 +134,7 @@ public final class Track {
         float iterationProgress = iterationProgress(duration, time);
         float totalIteration = iterationCount + iterationProgress;
 
-        if (totalIteration > repeatCount) {
+        if (totalIteration >= repeatCount) {
             if (fill == Fill.FREEZE) {
                 return new InterpolationProgress(valueCount - 1, 0);
             } else {
