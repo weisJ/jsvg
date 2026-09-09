@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20">
+	<defs>
+		<filter id="constants" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feFlood flood-color="black" result="black" />
+			<feFlood flood-color="red" flood-opacity="0.5" result="red" />
+			<feFlood flood-color="blue" flood-opacity="0.5" result="blue" />
+			<feMerge>
+				<feMergeNode in="black" />
+				<feMergeNode in="red" />
+				<feMergeNode in="blue" />
+			</feMerge>
+		</filter>
+		<filter id="mixed" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feFlood flood-color="red" flood-opacity="0.5" result="red" />
+			<feFlood flood-color="blue" flood-opacity="0.5" result="blue" />
+			<feMerge>
+				<feMergeNode in="SourceGraphic" />
+				<feMergeNode in="red" />
+				<feMergeNode in="blue" />
+			</feMerge>
+		</filter>
+	</defs>
+	<!-- Both later inputs are constants, including after the merge starts painting 
+		artwork. -->
+	<rect width="16" height="16" fill="black" filter="url(#constants)" />
+	<rect x="20" width="16" height="16" fill="black"
+		filter="url(#mixed)" />
+</svg>

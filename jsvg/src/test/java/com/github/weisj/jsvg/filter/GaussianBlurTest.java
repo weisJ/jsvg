@@ -50,6 +50,30 @@ class GaussianBlurTest {
                                 0, 0)))));
     }
 
+    @TestFactory
+    Stream<DynamicTest> selectedColorSpaceMatchesReferenceRenderer() {
+        return Stream.of("colorSmall", "colorLarge", "colorMixedAlpha")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
+                        // Batik and AWT round convolution and premultiplication separately.
+                        compareImages("filter/gaussianBlur/" + name + ".svg", 0, 2 / 255.0))));
+    }
+
+    @Test
+    void transparentEdgesPreserveWhiteAndAlpha() {
+        // Batik's linearRGB color conversion darkens low-alpha white through rounding.
+        // White is color-space invariant, so use its sRGB blur as the independent reference.
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("filter/gaussianBlur/transparentEdges_ref.svg"), RenderType.Batik),
+                actual(new PathImageSource("filter/gaussianBlur/transparentEdges.svg"), RenderType.JSVG), 0, 0)));
+    }
+
+    @Test
+    void transparentColorsDoNotLeakThroughBlur() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("filter/gaussianBlur/transparentColor_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("filter/gaussianBlur/transparentColor.svg"), RenderType.JSVG), 0, 0)));
+    }
+
     @Test
     void scaledRepaintRetainsBlurSamples() throws IOException {
         Rectangle clip = new Rectangle(112, 72, 12, 12);

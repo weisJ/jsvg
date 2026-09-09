@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="40">
+	<!-- Left: default linearRGB. Right: explicit sRGB. The black/white transition 
+		must be lighter in linearRGB. Artwork continues outside each visible panel. -->
+	<defs>
+		<filter id="linear" filterUnits="userSpaceOnUse" x="-32"
+			y="-32" width="128" height="104">
+			<feGaussianBlur stdDeviation="4" />
+		</filter>
+		<filter id="srgb" filterUnits="userSpaceOnUse" x="-32" y="-32"
+			width="128" height="104" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="4" />
+		</filter>
+	</defs>
+	<svg width="64" height="40">
+		<g filter="url(#linear)">
+			<rect x="-32" y="-32" width="64" height="104" fill="black" />
+			<rect x="32" y="-32" width="64" height="104" fill="white"
+				fill-opacity="1" />
+		</g>
+	</svg>
+	<svg x="64" width="64" height="40">
+		<g filter="url(#srgb)">
+			<rect x="-32" y="-32" width="64" height="104" fill="black" />
+			<rect x="32" y="-32" width="64" height="104" fill="white"
+				fill-opacity="1" />
+		</g>
+	</svg>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="64">
+	<!-- The half-alpha map supplies straight #4080b0 RGB. Only the selected 
+		R/B map components change working space; displaced artwork keeps its colors. -->
+	<defs>
+		<filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="64" height="64" color-interpolation-filters="linearRGB">
+			<feFlood x="16" y="24" width="12" height="12"
+				flood-color="#8040c0" flood-opacity=".5" result="art" />
+			<feDisplacementMap in="art" in2="SourceGraphic"
+				scale="40" xChannelSelector="R" yChannelSelector="B" />
+		</filter>
+		<filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="64" height="64" color-interpolation-filters="sRGB">
+			<feFlood x="16" y="24" width="12" height="12"
+				flood-color="#8040c0" flood-opacity=".5" result="art" />
+			<feDisplacementMap in="art" in2="SourceGraphic"
+				scale="40" xChannelSelector="R" yChannelSelector="B" />
+		</filter>
+	</defs>
+	<g transform="translate(0)">
+		<rect width="64" height="64" fill="#4080b0" fill-opacity=".5"
+			filter="url(#f0)" />
+	</g>
+	<g transform="translate(64)">
+		<rect width="64" height="64" fill="#4080b0" fill-opacity=".5"
+			filter="url(#f1)" />
+	</g>
+</svg>

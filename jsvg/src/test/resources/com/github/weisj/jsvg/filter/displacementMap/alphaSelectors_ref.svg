@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="64">
+	<!-- Linear G is 55, yielding source offset -11.3725 and a twelve-pixel 
+		visible shift. sRGB G and alpha are 128, yielding offset +0.0784 and no integer 
+		sample shift. -->
+	<rect x="28" y="24" width="12" height="12" fill="#8040c0"
+		fill-opacity=".5" />
+	<rect x="80" y="24" width="12" height="12" fill="#8040c0"
+		fill-opacity=".5" />
+	<rect x="144" y="36" width="12" height="12" fill="#8040c0"
+		fill-opacity=".5" />
+</svg>

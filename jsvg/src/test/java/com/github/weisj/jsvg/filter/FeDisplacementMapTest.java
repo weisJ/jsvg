@@ -55,4 +55,16 @@ class FeDisplacementMapTest {
                                     0, 0)));
                         })));
     }
+
+    @TestFactory
+    Stream<DynamicTest> selectedMapComponentsMatchArtwork() {
+        return Stream.of("constantColorSpaces", "rasterColorSpaces", "alphaSelectors")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
+                        compareImages(new CompareInfo(
+                                expected(new PathImageSource("filter/displacementMap/" + name + "_ref.svg"),
+                                        RenderType.JSVG),
+                                actual(new PathImageSource("filter/displacementMap/" + name + ".svg"), RenderType.JSVG),
+                                0, 0)))));
+    }
+
 }

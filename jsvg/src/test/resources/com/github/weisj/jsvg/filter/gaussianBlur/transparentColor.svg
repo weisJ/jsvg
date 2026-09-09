@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="32">
+	<!-- Zero-alpha red must be removed by premultiplication before either blur 
+		path. Making the blurred output opaque reveals any leaked hidden color. -->
+	<defs>
+		<filter id="small" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="32" height="32">
+			<feFlood flood-color="rgba(255,0,0,0)" />
+			<feGaussianBlur stdDeviation="1.5" />
+			<feColorMatrix
+				values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1" />
+		</filter>
+		<filter id="large" filterUnits="userSpaceOnUse" x="32" y="0"
+			width="32" height="32">
+			<feFlood flood-color="rgba(255,0,0,0)" />
+			<feGaussianBlur stdDeviation="4" />
+			<feColorMatrix
+				values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1" />
+		</filter>
+	</defs>
+	<rect width="32" height="32" filter="url(#small)" />
+	<rect x="32" width="32" height="32" filter="url(#large)" />
+</svg>
