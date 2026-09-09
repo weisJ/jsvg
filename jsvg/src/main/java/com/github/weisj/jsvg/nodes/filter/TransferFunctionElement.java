@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,11 +22,14 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 
+import static com.github.weisj.jsvg.util.ColorUtil.toRgbRange;
+
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.filter.TransferFunctionType;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.AbstractSVGNode;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -96,11 +99,7 @@ public abstract class TransferFunctionElement extends AbstractSVGNode {
             case Discrete:
                 float[] table = attributeNode.getFloatList("tableValues");
                 if (table.length == 0) return null;
-                int[] intTable = new int[table.length];
-                for (int i = 0; i < table.length; i++) {
-                    intTable[i] = (int) (255f * table[i]);
-                }
-                return createTableBasedLookupTable(type, intTable);
+                return createTableBasedLookupTable(type, table);
             case Linear:
                 float slope = attributeNode.getFloat("slope", 1);
                 float intercept = attributeNode.getFloat("intercept", 0);
@@ -118,27 +117,24 @@ public abstract class TransferFunctionElement extends AbstractSVGNode {
         return null;
     }
 
-    private static byte @Nullable [] createTableBasedLookupTable(TransferFunctionType type, int[] intTable) {
-        int n = intTable.length;
+    private static byte @Nullable [] createTableBasedLookupTable(TransferFunctionType type, float[] tableValues) {
+        int n = tableValues.length;
         byte[] lookupTable = new byte[256];
         switch (type) {
             case Table:
                 for (int j = 0; j <= 255; j++) {
                     float fi = j * (n - 1) / 255f;
-                    int k = (int) Math.floor(fi);
+                    int k = (int) fi;
                     int kNext = Math.min(k + 1, n - 1);
-                    float r = fi - k;
-                    int value = (int) (intTable[k] + r * (intTable[kNext] - intTable[k])) & 0xff;
-                    lookupTable[j] = (byte) value;
+                    // Use double interpolation so large, finite table entries cannot overflow.
+                    double value = GeometryUtil.lerp(fi - k, (double) tableValues[k], tableValues[kNext]);
+                    lookupTable[j] = (byte) toRgbRange(255 * value);
                 }
                 break;
             case Discrete:
                 for (int j = 0; j <= 255; j++) {
-                    int i = (int) Math.floor(j * n / 255f);
-                    if (i == n) {
-                        i = n - 1;
-                    }
-                    lookupTable[j] = (byte) (intTable[i] & 0xff);
+                    int i = Math.min((int) (j * n / 255f), n - 1);
+                    lookupTable[j] = (byte) toRgbRange(255d * tableValues[i]);
                 }
                 break;
             default:
