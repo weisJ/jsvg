@@ -50,7 +50,8 @@ class DiffuseLightingTest {
 
     @TestFactory
     Stream<DynamicTest> transformedLightingMatchesTheFullRender() {
-        return Stream.of("rotated", "sheared", "rotatedExplicit", "shearedExplicit", "pointLight", "spotLight")
+        return Stream.of("rotated", "sheared", "rotatedExplicit", "shearedExplicit", "shearedSurface",
+                "pointLight", "spotLight")
                 .map(name -> DynamicTest.dynamicTest(name, () -> {
                     Rectangle clip = new Rectangle(78, 76, 9, 11);
                     assertRepaintMatchesFullRender(name, clip);
@@ -59,7 +60,7 @@ class DiffuseLightingTest {
 
     @TestFactory
     Stream<DynamicTest> lightingMatchesReferenceArtwork() {
-        return Stream.of("rotated", "rotatedPoint", "shearedSurface", "kernelDefaults", "normals/asymmetric")
+        return Stream.of("rotated", "rotatedPoint", "kernelDefaults", "normals/asymmetric")
                 .map(name -> referenceArtwork(name, null));
     }
 
@@ -83,6 +84,16 @@ class DiffuseLightingTest {
             assertEquals(SUCCESS, compareImages(new CompareInfo(
                     expected(source, RenderType.Batik), actual(source, RenderType.JSVG), 0, 1.0 / 255)));
         }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> linearHeightRampHasConstantLighting() {
+        return Stream.of("rotatedRamp", "shearedRamp", "reflectedRamp", "fractionalRamp")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
+                        compareImages(new CompareInfo(
+                                expected(new PathImageSource("filter/diffuseLighting/ramp_ref.svg"), RenderType.JSVG),
+                                actual(new PathImageSource("filter/diffuseLighting/" + name + ".svg"), RenderType.JSVG),
+                                0, 0)))));
     }
 
     private static DynamicTest referenceArtwork(String name, Rectangle clip) {
