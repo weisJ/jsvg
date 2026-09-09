@@ -33,6 +33,8 @@ import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 public interface PaintParser {
     @NotNull
     Color DEFAULT_COLOR = Color.BLACK;
+    @NotNull
+    Color TRANSPARENT_BLACK = new Color(0, true);
 
     @Nullable
     Color parseColor(@NotNull String value);

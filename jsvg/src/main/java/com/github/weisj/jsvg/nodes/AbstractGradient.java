@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,7 +25,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -94,23 +93,24 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     }
 
     private void parseStops(@NotNull List<Stop> stops) {
-        stops.sort(Comparator.comparing(Stop::offset));
         List<Color> colorsList = new ArrayList<>();
         List<Percentage> offsetsList = new ArrayList<>();
 
         boolean realGradient = false;
+        float previousOffset = 0;
         for (Stop stop : stops) {
-            // Clamp the offset
-            float stopOffset = Math.max(0, Math.min(1, stop.offset().value()));
+            // Preserve document order and clamp decreasing offsets to the preceding offset.
+            float stopOffset = Math.max(previousOffset, Math.min(1, stop.offset().value()));
+            previousOffset = stopOffset;
             Color stopColor = stop.color();
 
             boolean isFirstStop = offsetsList.isEmpty();
             boolean effectiveStop = isFirstStop
                     || isEffectiveStop(stopOffset, stopColor, offsetsList, colorsList);
-            realGradient = !isFirstStop && effectiveStop;
+            realGradient |= !isFirstStop && effectiveStop;
 
             if (isFirstStop && stopOffset != 0) {
-                // If the first stop is not at 0, we need to add a transparent color at the beginning.
+                // If the first stop is not at 0, we need to extend its color to the beginning.
                 offsetsList.add(Percentage.ZERO);
                 colorsList.add(stopColor);
             }
@@ -122,7 +122,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         }
 
         if (!offsetsList.isEmpty() && offsetsList.get(offsetsList.size() - 1).value() != 1f) {
-            // If the last stop is not at 1, we need to add a transparent color at the end.
+            // If the last stop is not at 1, we need to extend its color to the end.
             offsetsList.add(Percentage.ONE);
             colorsList.add(colorsList.get(colorsList.size() - 1));
         }
@@ -198,7 +198,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
 
     private @NotNull Paint paintForBounds(@NotNull MeasureContext context, @NotNull Rectangle2D bounds) {
         Color[] gradColors = colors();
-        if (gradColors.length == 0) return PaintParser.DEFAULT_COLOR;
+        if (gradColors.length == 0) return PaintParser.TRANSPARENT_BLACK;
         if (gradColors.length == 1) return gradColors[0];
         return gradientForBounds(gradientUnits.deriveMeasure(context), bounds, offsets(), gradColors);
     }
