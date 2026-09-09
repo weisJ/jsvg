@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="48">
+	<!-- Premultiplied white stays white as coverage falls into transparent 
+		surroundings. The separate panels exercise Gaussian and box kernels with 
+		partial alpha. -->
+	<defs>
+		<filter id="small" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="48" height="48">
+			<feGaussianBlur stdDeviation="1.5" />
+		</filter>
+		<filter id="large" filterUnits="userSpaceOnUse" x="48" y="0"
+			width="48" height="48">
+			<feGaussianBlur stdDeviation="4" />
+		</filter>
+	</defs>
+	<rect x="16" y="16" width="16" height="16" fill="white"
+		fill-opacity="0.5" filter="url(#small)" />
+	<rect x="64" y="16" width="16" height="16" fill="white"
+		fill-opacity="0.5" filter="url(#large)" />
+</svg>

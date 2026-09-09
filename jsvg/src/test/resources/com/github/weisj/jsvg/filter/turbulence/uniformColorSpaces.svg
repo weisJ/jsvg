@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="24">
+	<!-- At zero frequency, fractal noise produces 127 in every eight-bit component. 
+		The RGB bytes belong to the selected space; alpha is always 127/255. -->
+	<defs>
+		<filter id="linear" x="0" y="0" width="1" height="1">
+			<feTurbulence type="fractalNoise" baseFrequency="0" />
+		</filter>
+		<filter id="srgb" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feTurbulence type="fractalNoise" baseFrequency="0" />
+		</filter>
+		<filter id="override" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feTurbulence type="fractalNoise" baseFrequency="0"
+				color-interpolation-filters="linearRGB" />
+		</filter>
+		<filter id="zero" x="0" y="0" width="1" height="1">
+			<feTurbulence type="turbulence" baseFrequency="0" />
+		</filter>
+	</defs>
+	<rect width="24" height="24" filter="url(#linear)" />
+	<rect x="24" width="24" height="24" filter="url(#srgb)" />
+	<rect x="48" width="24" height="24" filter="url(#override)" />
+	<rect x="72" width="24" height="24" filter="url(#zero)" />
+</svg>

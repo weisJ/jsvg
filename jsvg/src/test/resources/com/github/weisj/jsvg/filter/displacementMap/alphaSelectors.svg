@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="64">
+	<!-- Mixed G/A selectors: alpha 128/255 stays unchanged in either space. 
+		The first primitive explicitly overrides an sRGB filter with linearRGB. -->
+	<defs>
+		<filter id="linear" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="64" height="64" color-interpolation-filters="sRGB">
+			<feFlood flood-color="#4080b0" flood-opacity=".5"
+				result="map" />
+			<feDisplacementMap in="SourceGraphic" in2="map"
+				scale="40" xChannelSelector="G" yChannelSelector="A"
+				color-interpolation-filters="linearRGB" />
+		</filter>
+		<filter id="srgb" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="64" height="64" color-interpolation-filters="sRGB">
+			<feFlood flood-color="#4080b0" flood-opacity=".5"
+				result="map" />
+			<feDisplacementMap in="SourceGraphic" in2="map"
+				scale="40" xChannelSelector="G" yChannelSelector="A" />
+		</filter>
+		<filter id="alphaX" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="64" height="64">
+			<feFlood flood-color="#4080b0" flood-opacity=".5"
+				result="map" />
+			<feDisplacementMap in="SourceGraphic" in2="map"
+				scale="40" xChannelSelector="A" yChannelSelector="G" />
+		</filter>
+	</defs>
+	<rect x="16" y="24" width="12" height="12" fill="#8040c0"
+		fill-opacity=".5" filter="url(#linear)" />
+	<g transform="translate(64)">
+		<rect x="16" y="24" width="12" height="12" fill="#8040c0"
+			fill-opacity=".5" filter="url(#srgb)" />
+	</g>
+	<g transform="translate(128)">
+		<rect x="16" y="24" width="12" height="12" fill="#8040c0"
+			fill-opacity=".5" filter="url(#alphaX)" />
+	</g>
+</svg>

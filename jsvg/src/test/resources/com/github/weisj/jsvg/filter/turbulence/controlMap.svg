@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40">
+	<!-- Both maps are linearRGB noise, read as sRGB by displacement. Swapping 
+		equal RGB components forces an image-filter consumer in the second panel. -->
+	<defs>
+		<filter id="direct" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="40" height="40">
+			<feTurbulence type="fractalNoise" baseFrequency="0"
+				result="map" />
+			<feDisplacementMap in="SourceGraphic" in2="map"
+				scale="32" xChannelSelector="R" yChannelSelector="R"
+				color-interpolation-filters="sRGB" />
+		</filter>
+		<filter id="filtered" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="40" height="40">
+			<feTurbulence type="fractalNoise" baseFrequency="0" />
+			<feColorMatrix
+				values="0 0 1 0 0  0 1 0 0 0  1 0 0 0 0  0 0 0 1 0" result="map" />
+			<feDisplacementMap in="SourceGraphic" in2="map"
+				scale="32" xChannelSelector="R" yChannelSelector="R"
+				color-interpolation-filters="sRGB" />
+		</filter>
+		<filter id="source" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="40" height="40">
+			<feTurbulence type="fractalNoise" baseFrequency="0"
+				result="noise" />
+			<feFlood flood-color="white" result="map" />
+			<feDisplacementMap in="noise" in2="map" scale="4"
+				xChannelSelector="R" yChannelSelector="R"
+				color-interpolation-filters="sRGB" />
+		</filter>
+	</defs>
+	<rect x="16" y="16" width="8" height="8" fill="#cc8040"
+		filter="url(#direct)" />
+	<g transform="translate(40)">
+		<rect x="16" y="16" width="8" height="8" fill="#cc8040"
+			filter="url(#filtered)" />
+	</g>
+	<!-- Copying turbulence as the visible input also consumes its raster ColorModel. -->
+	<g transform="translate(80)">
+		<rect width="40" height="40" filter="url(#source)" />
+	</g>
+</svg>

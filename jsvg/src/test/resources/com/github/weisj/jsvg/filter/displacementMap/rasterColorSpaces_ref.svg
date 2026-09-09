@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="64">
+	<!-- sRGB R/B = 64/176, linearRGB R/B = 13/111 (raster B may round to 109). 
+		At scale 40, integer source sampling yields visible shifts (+10,-7) and (+18,+3), 
+		respectively. All values avoid sample-boundary ties. -->
+	<rect x="34" y="27" width="12" height="12" fill="#8040c0"
+		fill-opacity=".5" />
+	<rect x="90" y="17" width="12" height="12" fill="#8040c0"
+		fill-opacity=".5" />
+</svg>

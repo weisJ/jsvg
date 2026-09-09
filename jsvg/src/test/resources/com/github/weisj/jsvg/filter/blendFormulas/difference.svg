@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="32" height="32" color-interpolation-filters="sRGB">
+			<feFlood flood-color="#cccccc" result="back" />
+			<feFlood flood-color="#333333" result="front" />
+			<feBlend mode="difference" in="front" in2="back" />
+		</filter>
+	</defs>
+	<g filter="url(#f)">
+		<rect width="32" height="32" fill="black" />
+	</g>
+</svg>

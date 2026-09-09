@@ -49,6 +49,17 @@ class TurbulenceTest {
                 }));
     }
 
+    @TestFactory
+    Stream<DynamicTest> selectedColorSpaceAndConsumersMatchArtwork() {
+        return Stream.of("uniformColorSpaces", "pointFilters", "controlMap")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
+                        compareImages(new CompareInfo(
+                                expected(new PathImageSource("filter/turbulence/" + name + "_ref.svg"),
+                                        RenderType.JSVG),
+                                actual(new PathImageSource("filter/turbulence/" + name + ".svg"), RenderType.JSVG),
+                                0, 0)))));
+    }
+
     @Test
     void boundingBoxUnitsMatchExplicitCoordinates() {
         assertEquals(SUCCESS, compareImages(new CompareInfo(

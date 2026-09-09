@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40">
+	<!-- linearRGB 127 encodes as sRGB 187. The control offset is 32 * (187/255 
+		- 1/2) = 7.4667. Integer source sampling moves the artwork left/up by seven. 
+		This deliberately avoids a sample-boundary rounding tie. -->
+	<rect x="9" y="9" width="8" height="8" fill="#cc8040" />
+	<rect x="49" y="9" width="8" height="8" fill="#cc8040" />
+	<!-- The white map samples the uniform noise two pixels to the right/below. 
+		Samples outside its forty-pixel domain are transparent. -->
+	<rect x="80" width="38" height="38" fill="#bbbbbb"
+		fill-opacity="0.4980392157" />
+</svg>
