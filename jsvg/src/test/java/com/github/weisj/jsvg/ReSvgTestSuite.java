@@ -722,15 +722,14 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> painting_stroke_dasharray() {
         return checkDirectory("painting/stroke-dasharray", Set.of(
+                // Upstream marks these references as undefined.
                 "negative-sum.svg",
-                "negative-values.svg",
-                "zero-sum.svg"));
+                "negative-values.svg"));
     }
 
     @TestFactory
     Collection<DynamicTest> painting_stroke_dashoffset() {
-        return checkDirectory("painting/stroke-dashoffset", Set.of(
-                "percent-units.svg"));
+        return checkDirectory("painting/stroke-dashoffset");
     }
 
     @TestFactory

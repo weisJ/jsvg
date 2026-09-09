@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static com.github.weisj.jsvg.ImageComparison.renderJsvg;
@@ -29,12 +31,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
+
 class GradientTest {
 
     @Test
     void linearGradientRefTest() {
         assertEquals(SUCCESS, compareImages("gradient/linearGradient.svg"));
         assertEquals(SUCCESS, compareImages("gradient/stripes.svg"));
+    }
+
+    @Test
+    void decreasingDuplicateAndMissingStops() {
+        // The reference expresses ordered stops directly. Use the same rasterizer to avoid
+        // unrelated endpoint quantization differences in Batik's gradients.
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("gradient/stopValidation_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("gradient/stopValidation.svg"), RenderType.JSVG), 0, 0)));
     }
 
     @Test

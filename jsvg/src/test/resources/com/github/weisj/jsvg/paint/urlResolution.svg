@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"
+	fill="red">
+	<defs>
+		<linearGradient id="blue">
+			<stop stop-color="blue" />
+		</linearGradient>
+	</defs>
+	<!-- Strip surrounding whitespace after decoding quotes and escapes. -->
+	<rect width="40" height="40" fill="url(' #blue ') red" />
+	<rect x="40" width="40" height="40"
+		fill="url(&quot; #blue &quot;) red" />
+	<rect x="80" width="40" height="40"
+		fill="url('\20 #blue\20 ') red" />
+	<!-- Internal whitespace is preserved, leaving this reference unresolved. -->
+	<rect x="120" width="40" height="40" fill="url(' # blue ') blue" />
+	<!-- Missing paint servers without a fallback must not inherit red. -->
+	<rect x="160" width="40" height="40" fill="blue" />
+	<rect x="160" width="40" height="40" fill="url(#missing)" />
+	<g stroke="red" stroke-width="4">
+		<rect x="202" y="2" width="36" height="36" fill="blue"
+			stroke="url(#missing)" />
+	</g>
+	<!-- Ordinary invalid and empty declarations still inherit paint. -->
+	<rect y="40" width="40" height="40" fill="not-a-color" />
+	<rect x="40" y="40" width="40" height="40" fill="" />
+</svg>

@@ -21,11 +21,17 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+
+import com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
 
 class ViewBoxTest {
 
@@ -34,5 +40,12 @@ class ViewBoxTest {
         assertEquals(SUCCESS, compareImages("viewBox/viewBox.svg"));
         assertEquals(SUCCESS, compareImages("viewBox/viewBox2.svg"));
         assertEquals(SUCCESS, compareImages("viewBox/viewBox3.svg"));
+    }
+
+    @Test
+    void emptyAndInvalidViewBoxes() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("viewBox/emptyAndInvalid_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("viewBox/emptyAndInvalid.svg"), RenderType.JSVG), 0, 0)));
     }
 }

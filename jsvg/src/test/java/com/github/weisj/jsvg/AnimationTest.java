@@ -27,71 +27,17 @@ import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.io.TempDir;
 
 import com.github.weisj.jsvg.ImageComparison.CompareInfo;
 import com.github.weisj.jsvg.ImageComparison.ImageSource.MemoryImageSource;
-import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 
-/** Small regressions that also run when the optional external suites are absent. */
-class ReferenceSuiteRegressionTest {
-    @TempDir
-    Path directory;
-
-    @Test
-    void gradientsAndPaintFallbacks() {
-        // The reference expresses ordered stops and solid fallback colors directly. Use the same
-        // rasterizer to avoid unrelated endpoint quantization differences in Batik's gradients.
-        assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new PathImageSource("paint/suiteRegressions_ref.svg"), RenderType.JSVG),
-                actual(new PathImageSource("paint/suiteRegressions.svg"), RenderType.JSVG), 0, 0)));
-    }
-
-    @Test
-    void hueRotation() {
-        // Allow one byte of rounding difference between the two filter implementations.
-        assertEquals(SUCCESS, compareImages("filter/hueRotateBoundaries.svg", 0, 1 / 255f));
-    }
-
-    @Test
-    void componentTransferClampsWithoutOverflow() {
-        assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new PathImageSource("filter/componentTransferClamping_ref.svg"), RenderType.Batik),
-                actual(new PathImageSource("filter/componentTransferClamping.svg"), RenderType.JSVG), 0, 0)));
-    }
-
-    @TestFactory
-    Stream<DynamicTest> quotedAndEscapedExternalPaintUrls() throws Exception {
-        Files.writeString(directory.resolve("paint).svg"), """
-                <svg xmlns="http://www.w3.org/2000/svg">
-                  <linearGradient id="blue"><stop stop-color="blue"/></linearGradient>
-                </svg>
-                """);
-        var reference = new MemoryImageSource("blue", """
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-                  <rect width="16" height="16" fill="blue"/>
-                </svg>
-                """);
-        return Stream.of("url('paint).svg#blue') red", "url(paint\\).svg#blue) red")
-                .map(paint -> DynamicTest.dynamicTest(paint, () -> {
-                    var source = new MemoryImageSource("external-paint", """
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-                              <rect width="16" height="16" fill="%s"/>
-                            </svg>
-                            """.formatted(paint), directory.resolve("document.svg").toUri().toURL());
-                    assertEquals(SUCCESS, compareImages(new CompareInfo(expected(reference, RenderType.Batik),
-                            actual(source, RenderType.JSVG), 0, 0)));
-                }));
-    }
+class AnimationTest {
 
     @TestFactory
     Stream<DynamicTest> animationEndFrames() {

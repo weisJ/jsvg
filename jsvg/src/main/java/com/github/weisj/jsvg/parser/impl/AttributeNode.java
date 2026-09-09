@@ -215,7 +215,12 @@ public final class AttributeNode {
     }
 
     public @Nullable String getValue(@NotNull String key) {
-        return attributes.get(key);
+        return getValue(key, null);
+    }
+
+    @Contract("_,!null -> !null")
+    public @Nullable String getValue(@NotNull String key, @Nullable String fallback) {
+        return attributes.getOrDefault(key, fallback);
     }
 
     public @NotNull Color getColor(@NotNull String key) {
@@ -280,6 +285,7 @@ public final class AttributeNode {
             if (end < 0) return null;
             reference = value.substring(0, end + 1);
             fallback = value.substring(end + 1).trim();
+            if (fallback.isEmpty()) fallback = "none";
         }
         SVGPaint paint = getElementByHref(SVGPaint.class, reference, ElementRelation.PAINT_SERVER);
         if (paint != null) return paint;
@@ -548,7 +554,9 @@ public final class AttributeNode {
 
     public @Nullable ViewBox getViewBox() {
         float[] viewBoxCords = getFloatList("viewBox");
-        return viewBoxCords.length == 4 ? new ViewBox(viewBoxCords) : null;
+        return viewBoxCords.length == 4 && viewBoxCords[2] >= 0 && viewBoxCords[3] >= 0
+                ? new ViewBox(viewBoxCords)
+                : null;
     }
 
     public @NotNull AttributeParser parser() {
