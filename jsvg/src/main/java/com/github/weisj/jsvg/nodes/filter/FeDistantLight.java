@@ -38,9 +38,7 @@ import com.github.weisj.jsvg.parser.impl.AttributeNode;
 public final class FeDistantLight extends AbstractSVGNode implements LightSource {
     public static final String TAG = "fedistantlight";
 
-    private double x;
-    private double y;
-    private double z;
+    private Light light;
 
     @Override
     public @NotNull String tagName() {
@@ -55,13 +53,12 @@ public final class FeDistantLight extends AbstractSVGNode implements LightSource
         double elevation = Math.toRadians(attributeNode.getFloat("elevation", 0));
         double cosElevation = Math.cos(elevation);
 
-        x = Math.cos(azimuth) * cosElevation;
-        y = Math.sin(azimuth) * cosElevation;
-        z = Math.sin(elevation);
+        light = new Light(Math.cos(azimuth) * cosElevation, Math.sin(azimuth) * cosElevation,
+                Math.sin(elevation), 1);
     }
 
     @Override
     public @NotNull Light lightAt(double x, double y, double z) {
-        return new Light(this.x, this.y, this.z, 1);
+        return light;
     }
 }
