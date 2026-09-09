@@ -385,20 +385,27 @@ public final class AttributeNode {
 
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
-        // TODO: url(#...) allows specifying a fallback color value.
-        SVGPaint paint = getElementByHref(SVGPaint.class, value, ElementRelation.PAINT_SERVER);
+        String reference = value;
+        String fallback = value;
+        if (value.startsWith("url(")) {
+            int end = Url.functionEnd(value);
+            if (end < 0) return null;
+            reference = value.substring(0, end + 1);
+            fallback = value.substring(end + 1).trim();
+        }
+        SVGPaint paint = getElementByHref(SVGPaint.class, reference, ElementRelation.PAINT_SERVER);
         if (paint != null) return paint;
-        return parser().parsePaint(value, this);
+        return parser().parsePaint(fallback, this);
     }
 
     private @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
-        for (ComponentValue token : tokens) {
+        for (int i = 0; i < tokens.size(); i++) {
+            ComponentValue token = tokens.get(i);
             if (token instanceof Token.Url) {
-                // TODO: url(#...) allows specifying a fallback color value.
                 SVGPaint paint = getElementByHref(
                         SVGPaint.class, ((Token.Url) token).value(), ElementRelation.PAINT_SERVER);
                 if (paint != null) return paint;
-                break;
+                return parser().parsePaint(tokens.subList(i + 1, tokens.size()));
             }
         }
         return parser().parsePaint(tokens);
