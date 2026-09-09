@@ -39,6 +39,7 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.util.OffscreenImage;
 
 class Info implements AutoCloseable {
     protected final @NotNull RenderContext context;
@@ -70,7 +71,7 @@ class Info implements AutoCloseable {
 
     static final class InfoWithIsolation extends Info {
 
-        private final @NotNull BlittableImage blittableImage;
+        private final @NotNull OffscreenImage blittableImage;
         private final @NotNull Output imageOutput;
         private final @NotNull Output.SafeState imageOutputState;
         private final @NotNull ElementBounds elementBounds;
@@ -81,7 +82,6 @@ class Info implements AutoCloseable {
                 @NotNull RenderContext context, @NotNull Output output,
                 @NotNull ElementBounds elementBounds, @NotNull IsolationEffects effects) {
 
-            Rectangle2D clipBounds = null;
             Rectangle2D bounds = null;
             Filter.FilterLayout filterLayout = null;
             Filter.FilterInfo filterInfo = null;
@@ -94,7 +94,6 @@ class Info implements AutoCloseable {
                 filterLayout = filter.createFilterLayout(output, context, elementBounds);
                 if (filterLayout != null) {
                     bounds = filterLayout.filterRegion();
-                    clipBounds = filterLayout.effectiveFilterArea();
                 }
             }
             if (mask != null || clipPath != null) {
@@ -107,9 +106,11 @@ class Info implements AutoCloseable {
 
             RenderContext imageContext = RenderContextAccessor.instance().deriveForSurface(context);
 
-            BlittableImage blitImage = BlittableImage.create(
-                    ImageUtil::createCompatibleTransparentImage, context, clipBounds,
-                    bounds, elementBounds.boundingBox(), UnitType.UserSpaceOnUse, imageContext);
+            OffscreenImage blitImage = filterLayout != null
+                    ? filterLayout.createImage(ImageUtil::createCompatibleTransparentImage, context, imageContext,
+                            bounds)
+                    : BlittableImage.create(ImageUtil::createCompatibleTransparentImage, context, null,
+                            bounds, elementBounds.boundingBox(), UnitType.UserSpaceOnUse, imageContext);
             if (blitImage == null) return null;
 
             Graphics2D g = blitImage.createGraphics();
@@ -126,7 +127,7 @@ class Info implements AutoCloseable {
 
         private InfoWithIsolation(@NotNull Renderable renderable, @NotNull RenderContext context,
                 @NotNull Output output, @NotNull Output imageOutput,
-                @NotNull BlittableImage blittableImage,
+                @NotNull OffscreenImage blittableImage,
                 @NotNull ElementBounds elementBounds,
                 @NotNull IsolationEffects isolationEffects, @Nullable Filter.FilterInfo filterInfo) {
             super(renderable, context, output);

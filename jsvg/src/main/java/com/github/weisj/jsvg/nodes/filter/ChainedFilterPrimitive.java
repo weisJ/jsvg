@@ -37,6 +37,14 @@ abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements
     protected abstract @NotNull FilterPrimitive @NotNull [] primitives();
 
     @Override
+    public boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
+        for (FilterPrimitive primitive : primitives()) {
+            if (primitive.isValid() && primitive.requiresAlignedBuffer(context)) return true;
+        }
+        return false;
+    }
+
+    @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
         filterLayoutContext.resultChannels().addAlias(outerLastResult, impl().inputChannelKey());

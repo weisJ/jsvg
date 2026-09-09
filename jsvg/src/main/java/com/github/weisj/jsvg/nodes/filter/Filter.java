@@ -54,6 +54,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.BlittableImage;
+import com.github.weisj.jsvg.util.OffscreenImage;
+import com.github.weisj.jsvg.util.TransformedBlittableImage;
 
 @ElementCategories({/* None */})
 @PermittedContent(
@@ -112,10 +114,6 @@ public final class Filter extends ContainerNode {
             @NotNull ElementBounds elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds.boundingBox(), x, y, width, height);
-        Rectangle2D graphicsClipBounds = output != null
-                ? output.clipBounds()
-                : NO_CLIP_BOUNDS.getBounds2D();
-
         AffineTransform transform;
         if (output != null) {
             transform = output.transform();
@@ -124,9 +122,28 @@ public final class Filter extends ContainerNode {
             transform.concatenate(context.userSpaceTransform());
         }
 
+        if (transform.getDeterminant() == 0) return null;
+
+        Rectangle2D graphicsClipBounds = output != null
+                ? output.clipBounds()
+                : NO_CLIP_BOUNDS.getBounds2D();
+
         FilterLayoutContext filterLayoutContext =
                 new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds,
                         filterRegion, context.measureContext(), transform);
+
+        boolean alignedBuffer = requiresAlignedBuffer(filterLayoutContext);
+        if (alignedBuffer) {
+            // Preserve both axis scales of the complete transform, including the output/device scale.
+            transform = AffineTransform.getScaleInstance(
+                    GeometryUtil.scaleXOfTransform(transform), GeometryUtil.scaleYOfTransform(transform));
+            // Final blitting can use bicubic interpolation, which needs two buffer pixels outside the clip.
+            graphicsClipBounds = GeometryUtil.grow(graphicsClipBounds, new FloatInsets(
+                    (float) (2 / transform.getScaleY()), (float) (2 / transform.getScaleX()),
+                    (float) (2 / transform.getScaleY()), (float) (2 / transform.getScaleX())));
+            filterLayoutContext = new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(),
+                    graphicsClipBounds, filterRegion, context.measureContext(), transform);
+        }
 
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
 
@@ -156,7 +173,17 @@ public final class Filter extends ContainerNode {
                 .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
-        return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds, layouts);
+        return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds, layouts,
+                transform, alignedBuffer);
+    }
+
+    private boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
+        if (GeometryUtil.isAxisAligned(context.transform())) return false;
+        for (SVGNode child : children()) {
+            FilterPrimitive primitive = (FilterPrimitive) child;
+            if (primitive.isValid() && primitive.requiresAlignedBuffer(context)) return true;
+        }
+        return false;
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -209,14 +236,29 @@ public final class Filter extends ContainerNode {
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
         private final @NotNull ChannelStorage<LayoutBounds> layouts;
+        private final @NotNull AffineTransform transform;
+        private final boolean alignedBuffer;
 
         private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
                 @NotNull Rectangle2D effectiveFilterArea,
-                @NotNull ChannelStorage<LayoutBounds> layouts) {
+                @NotNull ChannelStorage<LayoutBounds> layouts, @NotNull AffineTransform transform,
+                boolean alignedBuffer) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
             this.layouts = layouts;
+            this.transform = transform;
+            this.alignedBuffer = alignedBuffer;
+        }
+
+        public @Nullable OffscreenImage createImage(@NotNull BlittableImage.BufferSurfaceSupplier supplier,
+                @NotNull RenderContext context, @NotNull RenderContext imageContext, @NotNull Rectangle2D bounds) {
+            if (alignedBuffer) {
+                return TransformedBlittableImage.create(supplier, context, imageContext,
+                        bounds, effectiveFilterArea, transform);
+            }
+            return BlittableImage.create(supplier, context, effectiveFilterArea, bounds, elementBounds,
+                    UnitType.UserSpaceOnUse, imageContext);
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -242,10 +284,10 @@ public final class Filter extends ContainerNode {
         public final int imageHeight;
 
         private final @NotNull FilterLayout filterLayout;
-        private final @NotNull BlittableImage blittableImage;
+        private final @NotNull OffscreenImage blittableImage;
         private final @NotNull Output imageOutput;
 
-        public FilterInfo(@NotNull BlittableImage blittableImage, @NotNull Output imageOutput,
+        public FilterInfo(@NotNull OffscreenImage blittableImage, @NotNull Output imageOutput,
                 @NotNull FilterLayout filterLayout) {
             BufferedImage image = blittableImage.image();
             this.imageWidth = image.getWidth();

@@ -40,14 +40,13 @@ import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
-import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
 /**
  * Class that encapsulates rendering to an offscreen image.
  * The image is aligned to the pixel boundary of the root image surface. Rendering to the
  * image behaves and the blitting it behaves as if it was rendered directly to the root surface.
  */
-public final class BlittableImage {
+public final class BlittableImage implements OffscreenImage {
 
 
     @FunctionalInterface
@@ -125,6 +124,7 @@ public final class BlittableImage {
         return new BlittableImage(img, imageContext, boundsInDeviceSpace, adjustedBoundsInUserSpace);
     }
 
+    @Override
     public @NotNull RenderContext context() {
         return context;
     }
@@ -133,19 +133,14 @@ public final class BlittableImage {
         return boundsInDeviceSpace;
     }
 
+    @Override
     public @NotNull Rectangle2D clippedUserBounds() {
         return clippedUserBounds;
     }
 
+    @Override
     public @NotNull BufferedImage image() {
         return image;
-    }
-
-    public @NotNull Graphics2D createGraphics() {
-        Graphics2D g = GraphicsUtil.createGraphics(image);
-        g.transform(context.rootTransform());
-        g.transform(context.userSpaceTransform());
-        return g;
     }
 
     public void renderNode(@NotNull Output parentOutput, @NotNull SVGNode node,
@@ -174,6 +169,7 @@ public final class BlittableImage {
         imgGraphics.dispose();
     }
 
+    @Override
     public void prepareForBlitting(@NotNull Output output) {
         output.setTransform(AffineTransform.getTranslateInstance(
                 boundsInDeviceSpace.getX(), boundsInDeviceSpace.getY()));

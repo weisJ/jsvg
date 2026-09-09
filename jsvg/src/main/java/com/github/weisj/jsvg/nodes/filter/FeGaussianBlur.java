@@ -81,7 +81,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         this.onlyAlpha = onlyAlpha;
     }
 
-    private double[] computeAbsoluteStdDeviation(@NotNull AffineTransform at, @NotNull UnitType units,
+    private double[] computeStdDeviation(@NotNull UnitType units,
             @NotNull Rectangle2D elementBounds) {
         if (stdDeviation.length == 0) return new double[] {0, 0};
         double xSigma = stdDeviation[0];
@@ -91,9 +91,33 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             xSigma *= elementBounds.getWidth();
             ySigma *= elementBounds.getHeight();
         }
-        xSigma *= GeometryUtil.scaleXOfTransform(at);
-        ySigma *= GeometryUtil.scaleYOfTransform(at);
         return new double[] {xSigma, ySigma};
+    }
+
+    @Override
+    public boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
+        double[] sigma = computeStdDeviation(context.primitiveUnits(), context.elementBounds());
+        if (sigma[0] == 0 && sigma[1] == 0) return false;
+        if (GeometryUtil.isAxisAligned(context.transform())) return false;
+        // Duplicate and wrap extend the input rectangle along primitive axes, even for a circular kernel.
+        if (edgeMode != EdgeMode.None) return true;
+        AffineTransform transform = context.transform();
+        double xContribution = transform.getScaleX() * transform.getShearY() * sigma[0] * sigma[0];
+        double yContribution = transform.getShearX() * transform.getScaleY() * sigma[1] * sigma[1];
+        // Off-diagonal covariance must vanish for independent horizontal and vertical passes.
+        // Allow rounding when the two contributions cancel, as for a circular kernel under rotation.
+        return Math.abs(xContribution + yContribution) > 8
+                * Math.ulp(Math.max(Math.abs(xContribution), Math.abs(yContribution)));
+    }
+
+    private double[] computeAbsoluteStdDeviation(@NotNull AffineTransform transform, @NotNull UnitType units,
+            @NotNull Rectangle2D elementBounds) {
+        double[] sigma = computeStdDeviation(units, elementBounds);
+        double x = sigma[0];
+        double y = sigma[1];
+        sigma[0] = Math.hypot(transform.getScaleX() * x, transform.getShearX() * y);
+        sigma[1] = Math.hypot(transform.getShearY() * x, transform.getScaleY() * y);
+        return sigma;
     }
 
     @Override

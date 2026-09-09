@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+	<defs>
+		<filter id="blur" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="48" height="32" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="2 0.5" />
+		</filter>
+	</defs>
+	<g transform="rotate(30 64 64)">
+		<g transform="translate(16 24) scale(2)" filter="url(#blur)">
+			<rect x="18" y="12" width="12" height="8" />
+		</g>
+	</g>
+</svg>

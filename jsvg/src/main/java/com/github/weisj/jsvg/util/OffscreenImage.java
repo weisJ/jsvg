@@ -19,45 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.nodes.filter;
+package com.github.weisj.jsvg.util;
 
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.ColorInterpolation;
-import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
-public interface FilterPrimitive {
+/** An offscreen surface with its rendering context and mapping back to the parent output. */
+public interface OffscreenImage {
+    @NotNull
+    BufferedImage image();
 
     @NotNull
-    Length y();
+    RenderContext context();
 
     @NotNull
-    Length x();
+    Rectangle2D clippedUserBounds();
 
-    @NotNull
-    Length width();
-
-    @NotNull
-    Length height();
-
-    default boolean isValid() {
-        return true;
+    default @NotNull Graphics2D createGraphics() {
+        Graphics2D graphics = GraphicsUtil.createGraphics(image());
+        graphics.transform(context().rootTransform());
+        graphics.transform(context().userSpaceTransform());
+        return graphics;
     }
 
-    /**
-     * Whether this primitive needs image pixels aligned with primitive coordinates for the supplied
-     * user-to-image transform. Pointwise operations and operations that already map their samples
-     * through the transform can keep the destination-aligned surface.
-     */
-    default boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
-        return false;
-    }
-
-    void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext);
-
-    void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext);
-
-    ColorInterpolation colorInterpolation(@NotNull FilterContext filterContext);
+    void prepareForBlitting(@NotNull Output output);
 }

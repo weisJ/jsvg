@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"
+	viewBox="0 0 128 128">
+	<defs>
+		<filter id="blur" filterUnits="userSpaceOnUse" x="-64" y="-64"
+			width="256" height="256" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="4 1" />
+		</filter>
+	</defs>
+	<!-- The test supplies a device scale of two; the reference supplies the 
+		equivalent viewBox scale. -->
+	<g transform="translate(64 64) rotate(30) scale(2 0.75)">
+		<rect x="-6" y="-8" width="12" height="16" filter="url(#blur)" />
+	</g>
+</svg>
