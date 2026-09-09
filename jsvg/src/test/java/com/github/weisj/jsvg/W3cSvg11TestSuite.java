@@ -46,7 +46,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
 import org.w3c.dom.Element;
@@ -95,30 +94,32 @@ class W3cSvg11TestSuite {
     Collection<DynamicTest> animate_stroke_inheritance() {
         // This four-second animation fades an inherited stroke from yellow to black, then freezes.
         // Sample the start, intermediate frames, either side of the end, and the frozen state.
-        return animationFrames("animate-elem-28-t.svg", 0, 1000, 2000, 3999, 4001, 6000);
+        return animationFrames("animate-elem-28-t.svg", 0, 1000, 2000, 3999, 4000, 4001, 6000);
     }
 
     @TestFactory
     Collection<DynamicTest> animate_geometry() {
         // x, y, width and height animate together for nine seconds.
-        return animationFrames("animate-elem-22-b.svg", 0, 2250, 4500, 6750, 8999, 9001, 10000);
+        return animationFrames("animate-elem-22-b.svg", 0, 2250, 4500, 6750, 8999, 9000, 9001, 10000);
     }
 
     @TestFactory
     Collection<DynamicTest> animate_attribute_type() {
         // The two animations begin at 3 s and 6 s, each lasting three seconds.
-        return animationFrames("animate-elem-25-t.svg", 0, 2999, 3000, 4500, 5999, 6001, 7500, 8999, 9001, 10000);
+        return animationFrames("animate-elem-25-t.svg", 0, 2999, 3000, 4500, 5999, 6000, 6001, 7500, 8999, 9000, 9001,
+                10000);
     }
 
     @TestFactory
     Collection<DynamicTest> animate_stroke_width() {
         // One stroke animates from 1-5 s, the other from 4-7 s.
-        return animationFrames("animate-elem-26-t.svg", 0, 999, 1000, 3000, 4000, 4999, 5001, 5500, 6999, 7001, 8000);
+        return animationFrames("animate-elem-26-t.svg", 0, 999, 1000, 3000, 4000, 4999, 5000, 5001, 5500, 6999, 7000,
+                7001, 8000);
     }
 
     @TestFactory
     Collection<DynamicTest> animate_value_whitespace() {
-        return animationFrames("animate-elem-88-t.svg", 0, 1000, 2000, 3999, 4001, 6000);
+        return animationFrames("animate-elem-88-t.svg", 0, 1000, 2000, 3999, 4000, 4001, 6000);
     }
 
     private static Collection<DynamicTest> animationFrames(@NotNull String name, long... timestamps) {
@@ -127,16 +128,6 @@ class W3cSvg11TestSuite {
                 .mapToObj(timestamp -> DynamicTest.dynamicTest(name + " at " + timestamp + " ms",
                         new W3cSvg11AnimationFrame(source, timestamp)))
                 .toList();
-    }
-
-    @Disabled("JSVG resets the animated stroke at exactly dur=4000 ms instead of freezing the final value.")
-    @Test
-    void animate_stroke_inheritance_end() throws Throwable {
-        new W3cSvg11AnimationFrame(animationSource(), 4000).execute();
-    }
-
-    private static @NotNull Path animationSource() {
-        return Path.of(W3C_SVG_11_TEST_SUITE_PATH).resolve("svg/animate-elem-28-t.svg");
     }
 
     @TestFactory
@@ -171,7 +162,6 @@ class W3cSvg11TestSuite {
         return checkCategory("filters", Set.of(
                 "filters-background-01-f.svg",
                 "filters-blend-01-b.svg",
-                "filters-color-01-b.svg",
                 "filters-composite-02-b.svg",
                 "filters-composite-03-f.svg",
                 "filters-composite-04-f.svg",
@@ -269,7 +259,6 @@ class W3cSvg11TestSuite {
                 "pservers-grad-05-b.svg",
                 "pservers-grad-06-b.svg",
                 "pservers-grad-08-b.svg",
-                "pservers-grad-16-b.svg",
                 "pservers-grad-17-b.svg",
                 "pservers-grad-18-b.svg",
                 "pservers-grad-20-b.svg",

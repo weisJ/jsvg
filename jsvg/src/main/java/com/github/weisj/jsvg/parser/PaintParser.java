@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -31,6 +31,8 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 public interface PaintParser {
     @NotNull
     Color DEFAULT_COLOR = Color.BLACK;
+    @NotNull
+    Color TRANSPARENT_BLACK = new Color(0, true);
 
     @Nullable
     Color parseColor(@NotNull String value);
