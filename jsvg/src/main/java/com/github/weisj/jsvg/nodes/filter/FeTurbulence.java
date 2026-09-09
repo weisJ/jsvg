@@ -93,19 +93,16 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         Filter.FilterInfo info = filterContext.info();
-        AffineTransform primitiveTransform = info.output().transform();
+        AffineTransform primitiveTransform = filterContext.primitiveUnits()
+                .applyToTransform(info.output().transform(), info.elementBounds());
         Rectangle2D region = filterContext.primitiveRegion(impl());
-        if (filterContext.primitiveUnits() == UnitType.ObjectBoundingBox) {
+        if (stitchTiles && filterContext.primitiveUnits() == UnitType.ObjectBoundingBox) {
             Rectangle2D bounds = info.elementBounds();
-            primitiveTransform.translate(bounds.getX(), bounds.getY());
-            primitiveTransform.scale(bounds.getWidth(), bounds.getHeight());
-            if (stitchTiles) {
-                region = new Rectangle2D.Double(
-                        (region.getX() - bounds.getX()) / bounds.getWidth(),
-                        (region.getY() - bounds.getY()) / bounds.getHeight(),
-                        region.getWidth() / bounds.getWidth(),
-                        region.getHeight() / bounds.getHeight());
-            }
+            region = new Rectangle2D.Double(
+                    (region.getX() - bounds.getX()) / bounds.getWidth(),
+                    (region.getY() - bounds.getY()) / bounds.getHeight(),
+                    region.getWidth() / bounds.getWidth(),
+                    region.getHeight() / bounds.getHeight());
         }
         double xFrequency = baseFrequency[0];
         double yFrequency = baseFrequency[Math.min(baseFrequency.length - 1, 1)];
@@ -194,7 +191,9 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
 
         @Override
         public int pixelAt(double x, double y) {
-            imageToPrimitive.transform(new double[] {x, y}, 0, coordinateBuffer, 0, 1);
+            coordinateBuffer[0] = x;
+            coordinateBuffer[1] = y;
+            imageToPrimitive.transform(coordinateBuffer, 0, coordinateBuffer, 0, 1);
             double primitiveX = coordinateBuffer[0];
             double primitiveY = coordinateBuffer[1];
             perlinTurbulence.turbulence(channels, primitiveX, primitiveY,
