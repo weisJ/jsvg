@@ -84,10 +84,11 @@ class ReSvgTestSuite {
 
     @BeforeAll
     static void checkForReSVGRepositoryAndRegisterFonts() {
-        var exists = Path.of(RESVG_TEST_SUITE_PATH).toFile().exists();
+        var exists = RESVG_TEST_SUITE_PATH != null && !RESVG_TEST_SUITE_PATH.isBlank()
+                && Files.exists(Path.of(RESVG_TEST_SUITE_PATH));
         var message = """
                 The resvg submodule was not found. Skipping ReSVG test suite.
-                Please run `git submodule update --init --recursive` to fetch the submodule.
+                Please run `git submodule update --init resvg-test-suite` to fetch the submodule.
                 """.stripIndent();
         if (!exists) {
             LOGGER.warn(message);

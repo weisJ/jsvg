@@ -74,6 +74,19 @@ tasks {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
         environment("RESVG_TEST_SUITE_PATH" to File(project.rootDir, "resvg-test-suite/tests").absolutePath)
+        environment(
+            "W3C_SVG_11_TEST_SUITE_PATH" to
+                rootProject.file("w3c-svg-11-test-suite/W3C_SVG_11_TestSuite").absolutePath,
+        )
+        // Track optional fixtures so initializing or removing a submodule reruns the tests.
+        inputs.files(
+            rootProject.fileTree("resvg-test-suite") {
+                include("tests/**", "fonts/**")
+            },
+            rootProject.fileTree("w3c-svg-11-test-suite/W3C_SVG_11_TestSuite") {
+                include("svg/**", "png/**", "images/**", "resources/**")
+            },
+        )
         useJUnitPlatform()
         testLogging {
             showStandardStreams = true
