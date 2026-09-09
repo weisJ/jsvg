@@ -31,9 +31,9 @@ import static com.github.weisj.jsvg.renderer.SVGRenderingHints.VALUE_MASK_CLIP_R
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.awt.RenderingHints;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
@@ -109,12 +109,15 @@ class MaskTest {
     }
 
     @Test
-    @Disabled("Batik does not render this correctly")
     void testMaskClipBleedInAccurateModeWithTransparentMask() {
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new PathImageSource("mask/mask_isolation_bug74.svg"), RenderType.Batik),
+                expected(new PathImageSource("mask/mask_isolation_bug74_ref.svg"), RenderType.JSVG),
                 actual(new PathImageSource("mask/mask_isolation_bug74.svg"), RenderType.JSVG,
-                        g -> g.setRenderingHint(KEY_MASK_CLIP_RENDERING, VALUE_MASK_CLIP_RENDERING_ACCURACY)))));
+                        g -> {
+                            g.setRenderingHint(KEY_MASK_CLIP_RENDERING, VALUE_MASK_CLIP_RENDERING_ACCURACY);
+                            g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                        }),
+                0, 0)));
     }
 
     @Test
