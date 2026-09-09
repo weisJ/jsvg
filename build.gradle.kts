@@ -125,7 +125,7 @@ allprojects {
             }
             format("markdown") {
                 target("**/*.md")
-                targetExclude("resvg-test-suite/**/*.md", "w3c-svg-11-test-suite/**/*.md")
+                targetExclude("resvg-test-suite/**/*.md", "w3c-svg-11-test-suite/**/*.md", "wpt-test-suite/**/*.md")
                 endWithNewline()
                 trimTrailingWhitespace()
             }
@@ -135,6 +135,7 @@ allprojects {
                     "**/brokenUpCharContent.svg",
                     "resvg-test-suite/**/*.svg",
                     "w3c-svg-11-test-suite/**/*.svg",
+                    "wpt-test-suite/**/*.svg",
                 )
                 eclipseWtp(EclipseWtpFormatterStep.XML)
             }

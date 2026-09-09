@@ -70,10 +70,10 @@ class ReSvgTestSuite {
         try (var files = Files.walk(tests)) {
             return files
                     .filter(p -> p.toString().endsWith(".svg"))
-                    .filter(p -> !exclude.contains(p.getFileName().toString()))
                     .map(p -> {
                         String testName = basePath.relativize(p).toString();
-                        return DynamicTest.dynamicTest(testName, new ReSVGRefTest(p));
+                        return DynamicTest.dynamicTest(testName,
+                                new ReSVGRefTest(p, exclude.contains(p.getFileName().toString())));
                     })
                     .toList();
         } catch (IOException e) {
@@ -1266,10 +1266,14 @@ class ReSvgTestSuite {
                 "large-negative.svg"));
     }
 
-    record ReSVGRefTest(@NotNull Path testFile) implements Executable {
+    record ReSVGRefTest(@NotNull Path testFile, boolean excluded) implements Executable {
+        ReSVGRefTest(@NotNull Path testFile) {
+            this(testFile, false);
+        }
 
         @Override
         public void execute() throws Throwable {
+            assumeTrue(!excluded, "Excluded resvg reference test: " + testFile.getFileName());
             var pngRef = testFile.resolveSibling(testFile.getFileName().toString().replace(".svg", ".png"));
             var result = ImageComparison.compareImages(new ImageComparison.CompareInfo(
                     expected(new UrlImageSource(pngRef.toUri().toURL()),

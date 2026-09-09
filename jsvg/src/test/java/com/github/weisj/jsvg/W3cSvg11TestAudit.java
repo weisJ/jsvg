@@ -60,12 +60,12 @@ public final class W3cSvg11TestAudit {
         Path report = Path.of(System.getProperty("w3c.audit.reportDir")).toAbsolutePath();
         Set<Reference> enabled = new HashSet<>();
         Set<Path> animatedSources = new HashSet<>();
-        for (var test : SvgTestAudit.enabledTests(new W3cSvg11TestSuite())) {
-            if (test instanceof W3cSvg11RefTest reference) {
+        for (var test : SvgTestAudit.discoveredTests(new W3cSvg11TestSuite())) {
+            if (test instanceof W3cSvg11RefTest reference && !reference.excluded()) {
                 enabled.add(reference(base, reference.testFile(), null));
-            } else if (test instanceof W3cSvg11AnimationFrame frame) {
-                enabled.add(reference(base, frame.testFile(), frame.timestamp()));
-                animatedSources.add(frame.testFile());
+            } else if (test instanceof W3cSvg11AnimationFrame(Path testFile, long timestamp)) {
+                enabled.add(reference(base, testFile, timestamp));
+                animatedSources.add(testFile);
             }
         }
         List<Reference> candidates = new ArrayList<>();
