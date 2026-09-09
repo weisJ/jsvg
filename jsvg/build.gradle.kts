@@ -110,6 +110,23 @@ tasks {
         }
     }
 
+    register<JavaExec>("w3cSvg11TestAudit") {
+        group = "verification"
+        description = "Reports excluded W3C SVG 1.1 reference tests and animation frames that now pass."
+        dependsOn(testClasses, jar)
+        classpath = sourceSets.test.get().runtimeClasspath
+        mainClass.set("com.github.weisj.jsvg.W3cSvg11TestAudit")
+        environment(
+            "W3C_SVG_11_TEST_SUITE_PATH",
+            rootProject.file("w3c-svg-11-test-suite/W3C_SVG_11_TestSuite").absolutePath,
+        )
+        val reportDirectory = layout.buildDirectory.dir("reports/w3c-svg-11-audit")
+        systemProperty("w3c.audit.reportDir", reportDirectory.get().asFile.absolutePath)
+        doFirst {
+            delete(reportDirectory)
+        }
+    }
+
     register<JavaExec>("SVGViewer") {
         group = "application"
         description = "Runs the SVG Viewer application."
