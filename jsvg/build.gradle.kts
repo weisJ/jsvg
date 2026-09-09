@@ -83,6 +83,20 @@ tasks {
         }
     }
 
+    register<JavaExec>("resvgTestAudit") {
+        group = "verification"
+        description = "Reports excluded resvg reference tests that now pass."
+        dependsOn(testClasses, jar)
+        classpath = sourceSets.test.get().runtimeClasspath
+        mainClass.set("com.github.weisj.jsvg.ReSvgTestAudit")
+        environment("RESVG_TEST_SUITE_PATH", rootProject.file("resvg-test-suite/tests").absolutePath)
+        val reportDirectory = layout.buildDirectory.dir("reports/resvg-audit")
+        systemProperty("resvg.audit.reportDir", reportDirectory.get().asFile.absolutePath)
+        doFirst {
+            delete(reportDirectory)
+        }
+    }
+
     register<JavaExec>("SVGViewer") {
         group = "application"
         description = "Runs the SVG Viewer application."
