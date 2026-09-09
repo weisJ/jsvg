@@ -117,22 +117,33 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
             return;
         }
 
+        Composite composite = CompositeModeComposite.inColorSpace(AlphaComposite.SrcOver,
+                colorInterpolation(filterContext));
         Channel result = filterPrimitiveBase.channel(inputChannels[0], filterContext);
         int i = 1;
-        while (result instanceof ConstantColorChannel && i < inputChannels.length) {
+        // Transparent constants are identities even after the result ceases to be constant.
+        while (i < inputChannels.length) {
             Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
-            if (!(channel instanceof ConstantColorChannel)) {
+            if (channel instanceof ConstantColorChannel && ((ConstantColorChannel) channel).color() >>> 24 == 0) {
+                i++;
+                continue;
+            }
+            if (!(result instanceof ConstantColorChannel && channel instanceof ConstantColorChannel)) {
                 break;
             }
-            result = ((ConstantColorChannel) result).composite((ConstantColorChannel) channel, AlphaComposite.SrcOver);
+            result = ((ConstantColorChannel) result).composite((ConstantColorChannel) channel, composite);
             i++;
         }
 
         if (i < inputChannels.length) {
             BufferedImage dst = result.toBufferedImageNonAliased(context);
             Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
+            imgGraphics.setComposite(composite);
             for (; i < inputChannels.length; i++) {
                 Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
+                if (channel instanceof ConstantColorChannel && ((ConstantColorChannel) channel).color() >>> 24 == 0) {
+                    continue;
+                }
                 channel.paint(imgGraphics, context);
             }
             imgGraphics.dispose();

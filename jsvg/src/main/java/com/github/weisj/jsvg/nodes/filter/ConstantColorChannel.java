@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 public final class ConstantColorChannel implements Channel, PixelProvider {
@@ -65,7 +66,7 @@ public final class ConstantColorChannel implements Channel, PixelProvider {
 
     public @NotNull ConstantColorChannel composite(@NotNull ConstantColorChannel source,
             @NotNull Composite composite) {
-        if (AlphaComposite.SrcOver.equals(composite)) {
+        if (GraphicsUtil.isSourceOver(composite)) {
             if (source.color >>> 24 == 0) return this;
             if (source.color >>> 24 == 255) return withColor(source.color);
         }

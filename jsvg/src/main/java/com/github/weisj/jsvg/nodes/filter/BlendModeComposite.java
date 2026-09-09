@@ -90,13 +90,10 @@ public final class BlendModeComposite extends AbstractBlendComposite {
             case Exclusion:
                 return BlendModeComposite::blendExclusion;
             case Hue:
-                return BlendModeComposite::blendHue;
             case Saturation:
-                return BlendModeComposite::blendSaturation;
             case Color:
-                return BlendModeComposite::blendColor;
             case Luminosity:
-                return BlendModeComposite::blendLuminosity;
+                return (src, dst, result) -> blendNonseparable(src, dst, result, blendMode);
         }
         throw new IllegalStateException("Mode not recognized " + blendMode);
     }
@@ -142,24 +139,7 @@ public final class BlendModeComposite extends AbstractBlendComposite {
      * </pre
      */
     private static void blendOverlay(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
-        int srcA = src[3];
-        int dstA = dst[3];
-        int srcM = 255 - dstA;
-        int dstM = 255 - srcA;
-        int dstComp = (dstA * 255) / 2;
-        result[0] = (src[0] <= dstComp)
-                ? div255((src[0] * srcM + 2 * dst[0] * dstM + 2 * src[0] * dst[0]))
-                : src[0] + dst[0]
-                        + div255(dstA * src[0] + srcA * dst[0] - srcA * dstA - 2 * src[0] * dst[0]);
-        result[1] = (src[1] <= dstComp)
-                ? div255((src[1] * srcM + 2 * dst[1] * dstM + 2 * src[1] * dst[1]))
-                : src[1] + dst[1]
-                        + div255(dstA * src[1] + srcA * dst[1] - srcA * dstA - 2 * src[1] * dst[1]);
-        result[2] = (src[2] <= dstComp)
-                ? div255((src[2] * srcM + 2 * dst[2] * dstM + 2 * src[2] * dst[2]))
-                : src[2] + dst[2]
-                        + div255(dstA * src[2] + srcA * dst[2] - srcA * dstA - 2 * src[2] * dst[2]);
-        result[3] = srcA + dstA - div255(srcA * dstA);
+        blendHardLight(dst, src, result);
     }
 
     /**
@@ -228,11 +208,11 @@ public final class BlendModeComposite extends AbstractBlendComposite {
     }
 
     private static int colorDodge(int src, int dst, int srcM, int srcA, int dstM, int dstA) {
-        if (dst == 0) return div255(srcM * src);
-        if (src == srcA) return div255(srcM * srcA + dstM * dst + srcA * dstA);
-        return Math.min(
-                div255(srcM * src + dstM * dst + srcA * dstA),
-                div255(srcM * src + dstM * dst) + Math.round(div255(dstA * src) / (255 - (float) dst / dstA)));
+        int base = srcM * src + dstM * dst;
+        if (dst == 0) return div255(base);
+        if (src == srcA) return div255(base + srcA * dstA);
+        double blended = Math.min(srcA * dstA, (double) srcA * srcA * dst / (srcA - src));
+        return ColorUtil.toRgbRange((base + blended) / 255);
     }
 
     /**
@@ -257,12 +237,11 @@ public final class BlendModeComposite extends AbstractBlendComposite {
     }
 
     private static int colorBurn(int src, int dst, int srcM, int srcA, int dstM, int dstA) {
-        if (dst == dstA) return div255(srcM * src + dstM * dstA + srcA * dstA);
-        if (src == 0) return div255(dstM * dst);
-        float srcC = src / (float) srcA;
-        float dstC = dst / (float) dstA;
-        int b = Math.round(Math.min(255f, (255f - dstC) / srcC));
-        return div255(srcM * src + dstM * dst) + div255(div255(srcA * dstA) * b);
+        int base = srcM * src + dstM * dst;
+        if (dst == dstA) return div255(base + srcA * dstA);
+        if (src == 0) return div255(base);
+        double blended = Math.max(0, srcA * dstA - (double) srcA * srcA * (dstA - dst) / src);
+        return ColorUtil.toRgbRange((base + blended) / 255);
     }
 
     /**
@@ -276,22 +255,17 @@ public final class BlendModeComposite extends AbstractBlendComposite {
     private static void blendHardLight(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
         int srcA = src[3];
         int dstA = dst[3];
-        int srcM = 255 - dstA;
-        int dstM = 255 - srcA;
-        int srcComp = (srcA * 255) / 2;
-        result[0] = (src[0] <= srcComp)
-                ? div255((2 * src[0] * srcM + dst[0] * dstM + 2 * src[0] * dst[0]))
-                : src[0] + dst[0]
-                        + div255(dstA * src[0] + srcA * dst[0] - srcA * dstA - 2 * src[0] * dst[0]);
-        result[1] = (src[1] <= srcComp)
-                ? div255((2 * src[1] * srcM + dst[1] * dstM + 2 * src[1] * dst[1]))
-                : src[1] + dst[1]
-                        + div255(dstA * src[1] + srcA * dst[1] - srcA * dstA - 2 * src[1] * dst[1]);
-        result[2] = (src[2] <= srcComp)
-                ? div255((2 * src[2] * srcM + dst[2] * dstM + 2 * src[2] * dst[2]))
-                : src[2] + dst[2]
-                        + div255(dstA * src[2] + srcA * dst[2] - srcA * dstA - 2 * src[2] * dst[2]);
+        result[0] = hardLight(src[0], dst[0], srcA, dstA);
+        result[1] = hardLight(src[1], dst[1], srcA, dstA);
+        result[2] = hardLight(src[2], dst[2], srcA, dstA);
         result[3] = srcA + dstA - div255(srcA * dstA);
+    }
+
+    private static int hardLight(int src, int dst, int srcA, int dstA) {
+        int base = (255 - dstA) * src + (255 - srcA) * dst;
+        int blended = 2 * src <= srcA ? 2 * src * dst
+                : srcA * dstA - 2 * (srcA - src) * (dstA - dst);
+        return div255(base + blended);
     }
 
     /**
@@ -364,102 +338,77 @@ public final class BlendModeComposite extends AbstractBlendComposite {
     private static void blendExclusion(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
         int srcA = src[3];
         int dstA = dst[3];
-        int srcM = 255 - dstA;
-        int dstM = 255 - srcA;
-        result[0] = div255(srcM * src[0] + dstM * dst[0] + dstA * src[0] + srcA * dst[0]
-                - 2 * div255(src[0] * dst[0]));
-        result[1] = div255(srcM * src[1] + dstM * dst[1] + dstA * src[1] + srcA * dst[1]
-                - 2 * div255(src[1] * dst[1]));
-        result[2] = div255(srcM * src[2] + dstM * dst[2] + dstA * src[2] + srcA * dst[2]
-                - 2 * div255(src[2] * dst[2]));
+        result[0] = div255(255 * (src[0] + dst[0]) - 2 * src[0] * dst[0]);
+        result[1] = div255(255 * (src[1] + dst[1]) - 2 * src[1] * dst[1]);
+        result[2] = div255(255 * (src[2] + dst[2]) - 2 * src[2] * dst[2]);
         result[3] = srcA + dstA - div255(srcA * dstA);
     }
 
-    /**
-     * <pre>
-     * </pre
-     */
-    private static void blendHue(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
+    private static void blendNonseparable(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result,
+            @NotNull BlendMode mode) {
         int srcA = src[3];
         int dstA = dst[3];
+        if (srcA == 0 || dstA == 0) {
+            result[0] = src[0] + dst[0];
+            result[1] = src[1] + dst[1];
+            result[2] = src[2] + dst[2];
+            result[3] = srcA + dstA;
+            return;
+        }
+
+        boolean sourceColor = mode == BlendMode.Hue || mode == BlendMode.Color;
+        int[] color = sourceColor ? src : dst;
+        double alpha = sourceColor ? srcA : dstA;
+        double red = color[0] / alpha;
+        double green = color[1] / alpha;
+        double blue = color[2] / alpha;
+
+        if (mode == BlendMode.Hue || mode == BlendMode.Saturation) {
+            int[] saturationColor = mode == BlendMode.Hue ? dst : src;
+            double saturationAlpha = mode == BlendMode.Hue ? dstA : srcA;
+            double saturation = (Math.max(saturationColor[0], Math.max(saturationColor[1], saturationColor[2]))
+                    - Math.min(saturationColor[0], Math.min(saturationColor[1], saturationColor[2]))) / saturationAlpha;
+            double min = Math.min(red, Math.min(green, blue));
+            double max = Math.max(red, Math.max(green, blue));
+            // SetSat is an affine scaling from [min, max] to [0, saturation].
+            double scale = max > min ? saturation / (max - min) : 0;
+            red = (red - min) * scale;
+            green = (green - min) * scale;
+            blue = (blue - min) * scale;
+        }
+
+        int[] luminosityColor = mode == BlendMode.Luminosity ? src : dst;
+        double luminosityAlpha = mode == BlendMode.Luminosity ? srcA : dstA;
+        double luminosity =
+                ColorUtil.luminosity(luminosityColor[0], luminosityColor[1], luminosityColor[2]) / luminosityAlpha;
+        double delta = luminosity - ColorUtil.luminosity(red, green, blue);
+        red += delta;
+        green += delta;
+        blue += delta;
+
+        // ClipColor preserves luminosity when SetLum pushes components outside [0, 1].
+        double min = Math.min(red, Math.min(green, blue));
+        double max = Math.max(red, Math.max(green, blue));
+        if (min < 0) {
+            double scale = luminosity / (luminosity - min);
+            red = luminosity + (red - luminosity) * scale;
+            green = luminosity + (green - luminosity) * scale;
+            blue = luminosity + (blue - luminosity) * scale;
+        }
+        if (max > 1) {
+            double scale = (1 - luminosity) / (max - luminosity);
+            red = luminosity + (red - luminosity) * scale;
+            green = luminosity + (green - luminosity) * scale;
+            blue = luminosity + (blue - luminosity) * scale;
+        }
+
         int srcM = 255 - dstA;
         int dstM = 255 - srcA;
-        float[] srcHSL = new float[3];
-        ColorUtil.convertRGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
-        float[] dstHSL = new float[3];
-        ColorUtil.convertRGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
-
-        ColorUtil.convertHSLtoRGB(srcHSL[0], dstHSL[1], dstHSL[2], result);
-
-        result[0] = div255(srcM * src[0] + dstM * dst[0] + div255(srcA * dstA) * result[0]);
-        result[1] = div255(srcM * src[1] + dstM * dst[1] + div255(srcA * dstA) * result[1]);
-        result[2] = div255(srcM * src[2] + dstM * dst[2] + div255(srcA * dstA) * result[2]);
-        result[3] = srcA + dstA - div255(srcA * dstA);
+        int overlap = srcA * dstA;
+        result[0] = ColorUtil.toRgbRange((srcM * src[0] + dstM * dst[0] + overlap * red) / 255);
+        result[1] = ColorUtil.toRgbRange((srcM * src[1] + dstM * dst[1] + overlap * green) / 255);
+        result[2] = ColorUtil.toRgbRange((srcM * src[2] + dstM * dst[2] + overlap * blue) / 255);
+        result[3] = srcA + dstA - div255(overlap);
     }
 
-    /**
-     * <pre>
-     * </pre
-     */
-    private static void blendSaturation(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
-        int srcA = src[3];
-        int dstA = dst[3];
-        int srcM = 255 - dstA;
-        int dstM = 255 - srcA;
-        float[] srcHSL = new float[3];
-        ColorUtil.convertRGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
-        float[] dstHSL = new float[3];
-        ColorUtil.convertRGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
-
-        ColorUtil.convertHSLtoRGB(dstHSL[0], srcHSL[1], dstHSL[2], result);
-
-        result[0] = div255(srcM * src[0] + dstM * dst[0] + div255(srcA * dstA) * result[0]);
-        result[1] = div255(srcM * src[1] + dstM * dst[1] + div255(srcA * dstA) * result[1]);
-        result[2] = div255(srcM * src[2] + dstM * dst[2] + div255(srcA * dstA) * result[2]);
-        result[3] = srcA + dstA - div255(srcA * dstA);
-    }
-
-    /**
-     * <pre>
-     * </pre
-     */
-    private static void blendColor(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
-        int srcA = src[3];
-        int dstA = dst[3];
-        int srcM = 255 - dstA;
-        int dstM = 255 - srcA;
-        float[] srcHSL = new float[3];
-        ColorUtil.convertRGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
-        float[] dstHSL = new float[3];
-        ColorUtil.convertRGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
-
-        ColorUtil.convertHSLtoRGB(srcHSL[0], srcHSL[1], dstHSL[2], result);
-
-        result[0] = div255(srcM * src[0] + dstM * dst[0] + div255(srcA * dstA) * result[0]);
-        result[1] = div255(srcM * src[1] + dstM * dst[1] + div255(srcA * dstA) * result[1]);
-        result[2] = div255(srcM * src[2] + dstM * dst[2] + div255(srcA * dstA) * result[2]);
-        result[3] = srcA + dstA - div255(srcA * dstA);
-    }
-
-    /**
-     * <pre>
-     * </pre
-     */
-    private static void blendLuminosity(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
-        int srcA = src[3];
-        int dstA = dst[3];
-        int srcM = 255 - dstA;
-        int dstM = 255 - srcA;
-        float[] srcHSL = new float[3];
-        ColorUtil.convertRGBPretoHSL(src[0], src[1], src[2], srcA, srcHSL);
-        float[] dstHSL = new float[3];
-        ColorUtil.convertRGBPretoHSL(dst[0], dst[1], dst[2], dstA, dstHSL);
-
-        ColorUtil.convertHSLtoRGB(dstHSL[0], dstHSL[1], srcHSL[2], result);
-
-        result[0] = div255(srcM * src[0] + dstM * dst[0] + div255(srcA * dstA) * result[0]);
-        result[1] = div255(srcM * src[1] + dstM * dst[1] + div255(srcA * dstA) * result[1]);
-        result[2] = div255(srcM * src[2] + dstM * dst[2] + div255(srcA * dstA) * result[2]);
-        result[3] = srcA + dstA - div255(srcA * dstA);
-    }
 }

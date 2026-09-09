@@ -28,6 +28,7 @@ import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
+import java.util.function.IntUnaryOperator;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -125,6 +126,27 @@ public final class ImageUtil {
 
     public static int getINT_RGBA_ScanlineStride(@NotNull Raster raster) {
         return ((SinglePixelPackedSampleModel) raster.getSampleModel()).getScanlineStride();
+    }
+
+    /**
+     * Maps packed ARGB samples in place, retaining the raster's origin and scanline stride.
+     * The caller owns the pixels and is responsible for their color space and premultiplication.
+     * This changes samples only; it does not update an image's ColorModel metadata.
+     */
+    public static void mapPixels(@NotNull WritableRaster raster, @NotNull IntUnaryOperator operation) {
+        if (!is_INT_PACK_Data(raster.getSampleModel(), true)) {
+            throw new IllegalArgumentException("Raster must use packed integer ARGB samples");
+        }
+        int[] pixels = getINT_RGBA_DataBank(raster);
+        int offset = getINT_RGBA_DataOffset(raster);
+        int stride = getINT_RGBA_ScanlineStride(raster);
+        for (int y = 0; y < raster.getHeight(); y++) {
+            int end = offset + raster.getWidth();
+            for (int i = offset; i < end; i++) {
+                pixels[i] = operation.applyAsInt(pixels[i]);
+            }
+            offset += stride;
+        }
     }
 
     public static @NotNull BufferedImage copy(@NotNull RenderContext context, @NotNull ImageProducer producer,

@@ -28,6 +28,7 @@ import java.awt.image.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.noise.PerlinTurbulence;
@@ -39,6 +40,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ColorUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.FilterPrimitive)
@@ -113,7 +115,7 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
                 GeometryUtil.createInverse(primitiveTransform),
                 tileRegion,
                 info.imageWidth, info.imageHeight,
-                type,
+                type, colorInterpolation(filterContext),
                 new PerlinTurbulence((int) seed, numOctaves, xFrequency, yFrequency));
         impl().saveResult(turbulenceChannel, filterContext);
     }
@@ -125,6 +127,7 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
         private final int imageWidth;
         private final int imageHeight;
         private final Type type;
+        private final boolean linearRGB;
         private final @NotNull AffineTransform imageToPrimitive;
         private final @Nullable Rectangle2D.Double tileRegion;
         private final PerlinTurbulence.@Nullable StitchInfo stitchInfo;
@@ -133,21 +136,22 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
         private final double[] coordinateBuffer = new double[2];
 
         public TurbulenceChannel(@NotNull AffineTransform imageToPrimitive, @Nullable Rectangle2D.Double tileRegion,
-                int imageWidth, int imageHeight, Type type, @NotNull PerlinTurbulence perlinTurbulence) {
+                int imageWidth, int imageHeight, Type type, @NotNull ColorInterpolation colorInterpolation,
+                @NotNull PerlinTurbulence perlinTurbulence) {
             this.imageToPrimitive = imageToPrimitive;
             this.tileRegion = tileRegion;
             this.stitchInfo = tileRegion != null ? new PerlinTurbulence.StitchInfo() : null;
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
             this.type = type;
+            this.linearRGB = colorInterpolation == ColorInterpolation.LinearRGB;
             this.perlinTurbulence = perlinTurbulence;
         }
 
         private @NotNull BufferedImage ensureImageBackingStore() {
             if (bufferedImage == null) {
-                ColorModel cm = ImageUtil.LINEAR_RGB_COLOR_MODEL;
-                WritableRaster dest = cm.createCompatibleWritableRaster(imageWidth, imageHeight);
-                bufferedImage = new BufferedImage(cm, dest, false, null);
+                bufferedImage = ImageUtil.createCompatibleTransparentImage(imageWidth, imageHeight);
+                WritableRaster dest = bufferedImage.getRaster();
 
                 final int w = dest.getWidth();
                 final int h = dest.getHeight();
@@ -158,7 +162,7 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
 
                 for (int y = 0; y < h; y++) {
                     for (int x = 0; x < w; x++, dp++) {
-                        destPixels[dp] = cm.getRGB(pixelAt(x, y));
+                        destPixels[dp] = pixelAt(x, y);
                     }
                     dp += dstAdjust;
                 }
@@ -198,7 +202,9 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
             double primitiveY = coordinateBuffer[1];
             perlinTurbulence.turbulence(channels, primitiveX, primitiveY,
                     type == Type.fractalNoise, stitchInfo, tileRegion);
-            return channelsToRGB(channels);
+            int argb = channelsToRGB(channels);
+            // Channel consumers receive straight sRGB, including direct pixel sampling.
+            return linearRGB ? ColorUtil.linearRGBtoSRGB(argb) : argb;
         }
 
         private static int channelsToRGB(double[] channels) {
