@@ -30,6 +30,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
@@ -42,6 +43,8 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ColorUtil;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -192,7 +195,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         Rectangle sourceBounds = GeometryUtil.transformBounds(
                 filterContext.info().output().transform(), inputRegion).getBounds();
         ImageProducer output = edgeMode.convolve(context, filterContext, input, sourceBounds,
-                new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, dX, dY));
+                new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, dX, dY,
+                        !onlyAlpha && colorInterpolation(filterContext) == ColorInterpolation.LinearRGB));
         impl().saveResult(new ImageProducerChannel(output), filterContext);
     }
 
@@ -273,12 +277,15 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
         private final int dX;
         private final int dY;
+        private final boolean linearRGB;
 
-        private MixedQualityConvolveOperation(@Nullable Kernel xKernel, @Nullable Kernel yKernel, int dX, int dY) {
+        private MixedQualityConvolveOperation(@Nullable Kernel xKernel, @Nullable Kernel yKernel, int dX, int dY,
+                boolean linearRGB) {
             this.xKernel = xKernel;
             this.yKernel = yKernel;
             this.dX = dX;
             this.dY = dY;
+            this.linearRGB = linearRGB;
         }
 
 
@@ -297,25 +304,31 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
                 throw new IllegalStateException("Image should be premultiplied");
             }
 
+            if (linearRGB) {
+                ImageUtil.mapPixels(raster, ColorUtil::sRGBtoLinearRGBPre);
+            }
+            BufferedImage result;
             if (xKernel != null && yKernel != null) {
                 BufferedImageOp op = new MultiConvolveOp(new ConvolveOp[] {
                         new ConvolveOp(xKernel, awtEdgeMode, hints),
                         new ConvolveOp(yKernel, awtEdgeMode, hints)
                 });
-                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(op));
+                result = op.filter(image, null);
             } else if (xKernel != null) {
                 verticalBoxBlur(raster);
-                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(
-                        new ConvolveOp(xKernel, awtEdgeMode, hints)));
+                result = new ConvolveOp(xKernel, awtEdgeMode, hints).filter(image, null);
             } else if (yKernel != null) {
                 horizontalBoxBlur(raster);
-                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(
-                        new ConvolveOp(yKernel, awtEdgeMode, hints)));
+                result = new ConvolveOp(yKernel, awtEdgeMode, hints).filter(image, null);
             } else {
                 horizontalBoxBlur(raster);
                 verticalBoxBlur(raster);
-                return image.getSource();
+                result = image;
             }
+            if (linearRGB) {
+                ImageUtil.mapPixels(result.getRaster(), ColorUtil::linearRGBtoSRGBPre);
+            }
+            return result.getSource();
         }
 
         private void horizontalBoxBlur(@NotNull WritableRaster raster) {

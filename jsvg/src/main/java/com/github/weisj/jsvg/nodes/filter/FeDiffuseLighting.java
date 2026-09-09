@@ -47,9 +47,9 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
-import com.github.weisj.jsvg.util.NormalizedAlphaSampler;
 import com.github.weisj.jsvg.util.ColorUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.util.NormalizedAlphaSampler;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -246,7 +246,8 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             return result;
         }
 
-        private double diffuseAt(@NotNull NormalizedAlphaSampler samples, int x, int y, @NotNull LightSource.Light light) {
+        private double diffuseAt(@NotNull NormalizedAlphaSampler samples, int x, int y,
+                @NotNull LightSource.Light light) {
             if (!inputRegion.contains(x + 0.5, y + 0.5)) return Math.max(0, light.z);
 
             // Select edges of the input surface, not edges of the clipped backing image.

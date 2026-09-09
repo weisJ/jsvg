@@ -29,6 +29,7 @@ import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.ColorChannel;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
@@ -42,6 +43,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ColorUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.FilterPrimitive)
@@ -113,7 +115,8 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
         AffineTransform displacementTransform = filterContext.info().output().transform();
         displacementTransform.scale(displacementScaleX, displacementScaleY);
         ImageFilter displacementFilter = new BufferedImageFilter(
-                new DisplacementOp(displacementInput.pixels(context), displacementTransform));
+                new DisplacementOp(displacementInput.pixels(context), displacementTransform,
+                        colorInterpolation(filterContext) == ColorInterpolation.LinearRGB));
         impl().saveResult(input.applyFilter(displacementFilter), filterContext);
     }
 
@@ -121,11 +124,15 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
 
         private final @NotNull PixelProvider displacementChannel;
         private final @NotNull AffineTransform displacementTransform;
+        private final boolean convertX;
+        private final boolean convertY;
 
         public DisplacementOp(@NotNull PixelProvider displacementChannel,
-                @NotNull AffineTransform displacementTransform) {
+                @NotNull AffineTransform displacementTransform, boolean linearRGB) {
             this.displacementChannel = displacementChannel;
             this.displacementTransform = displacementTransform;
+            this.convertX = linearRGB && xChannelSelector != ColorChannel.A;
+            this.convertY = linearRGB && yChannelSelector != ColorChannel.A;
         }
 
         @Override
@@ -184,8 +191,16 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
                 x = 0;
                 for (int end = dp + w; dp < end; dp++) {
                     int displacementRGB = displacementChannel.pixelAt(x, y);
-                    double xDisplacement = xChannelSelector.value(displacementRGB) / 255.0 - 0.5f;
-                    double yDisplacement = yChannelSelector.value(displacementRGB) / 255.0 - 0.5f;
+                    int xValue = xChannelSelector.value(displacementRGB);
+                    int yValue = yChannelSelector.value(displacementRGB);
+                    if (convertX) {
+                        xValue = ColorUtil.sRGBtoLinearRGBBand(xValue);
+                    }
+                    if (convertY) {
+                        yValue = ColorUtil.sRGBtoLinearRGBBand(yValue);
+                    }
+                    double xDisplacement = xValue / 255.0 - 0.5f;
+                    double yDisplacement = yValue / 255.0 - 0.5f;
                     int xDest = (int) (x + scaleX * xDisplacement + shearX * yDisplacement);
                     int yDest = (int) (y + shearY * xDisplacement + scaleY * yDisplacement);
                     if (sourceRasterBounds.contains(xDest, yDest)) {

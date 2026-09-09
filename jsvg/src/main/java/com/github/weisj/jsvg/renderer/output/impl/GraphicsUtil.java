@@ -33,12 +33,17 @@ import com.github.weisj.jsvg.logging.Logger.Level;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.util.LinearRGBComposite;
 
 
 public final class GraphicsUtil {
     private static final Logger LOGGER = LogFactory.createLogger(GraphicsUtil.class);
 
     private GraphicsUtil() {}
+
+    public static boolean isSourceOver(@NotNull Composite composite) {
+        return AlphaComposite.SrcOver.equals(composite) || composite == LinearRGBComposite.SrcOver;
+    }
 
     public static void safelySetPaint(@NotNull Output output, @NotNull Graphics2D g, @NotNull Paint paint) {
         g.setPaint(exchangePaint(output, g.getPaint(), paint, true));

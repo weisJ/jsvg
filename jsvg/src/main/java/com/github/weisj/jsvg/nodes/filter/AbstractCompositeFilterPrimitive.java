@@ -28,7 +28,6 @@ import java.awt.image.BufferedImage;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
@@ -95,11 +94,6 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
     }
 
     private @NotNull Composite computeComposite(@NotNull FilterContext filterContext) {
-        Composite comp = composite();
-        if (comp instanceof AbstractBlendComposite) {
-            ColorInterpolation colorInterpolation = colorInterpolation(filterContext);
-            ((AbstractBlendComposite) comp).setConvertToLinearRGB(colorInterpolation == ColorInterpolation.LinearRGB);
-        }
-        return comp;
+        return CompositeModeComposite.inColorSpace(composite(), colorInterpolation(filterContext));
     }
 }
