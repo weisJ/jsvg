@@ -55,7 +55,7 @@ The library is available on maven central:
 
 ````kotlin
 dependencies {
-    implementation("com.github.weisj:jsvg:2.1.0")
+    implementation("com.github.weisj:jsvg:2.2.0")
 }
 ````
 
