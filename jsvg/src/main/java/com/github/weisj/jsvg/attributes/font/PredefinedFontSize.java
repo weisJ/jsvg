@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,8 +36,9 @@ public enum PredefinedFontSize implements HasMatchName, FontSize {
     xLarge("x-large", 3f / 2f),
     xxLarge("xx-large", 2f),
     xxxLarge("xxx-large", 3f),
-    larger(1.3f),
-    smaller(0.7f),
+    // CSS Fonts § font-size steps larger/smaller by ~1.2 (see resvg text/font-size/mixed-values.svg).
+    larger(1.2f),
+    smaller(1 / 1.2f),
     Number(0);
 
     private final @NotNull String matchName;
@@ -62,6 +63,7 @@ public enum PredefinedFontSize implements HasMatchName, FontSize {
     public @NotNull Length size(@NotNull Length parentSize) {
         if (this == Number) throw new UnsupportedOperationException("Number font-size needs to parsed explicitly");
         if (this == smaller || this == larger) return parentSize.multiply(scalingFactor);
-        return Unit.RAW.valueOf(SVGFont.defaultFontSize() * scalingFactor);
+        // Absolute-size keywords are relative to the user-agent default font size, not the parent.
+        return Unit.UA_EM.valueOf(scalingFactor);
     }
 }

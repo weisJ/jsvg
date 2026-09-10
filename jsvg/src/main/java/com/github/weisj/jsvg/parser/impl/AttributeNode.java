@@ -21,11 +21,17 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.awt.*;
+import java.awt.Color;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Contract;
@@ -33,12 +39,26 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.time.Duration;
-import com.github.weisj.jsvg.animation.value.*;
+import com.github.weisj.jsvg.animation.value.AnimatedColor;
+import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
+import com.github.weisj.jsvg.animation.value.AnimatedLength;
+import com.github.weisj.jsvg.animation.value.AnimatedPaint;
+import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
+import com.github.weisj.jsvg.animation.value.AnimatedTransform;
+import com.github.weisj.jsvg.animation.value.NeutralElements;
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
-import com.github.weisj.jsvg.attributes.value.*;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
+import com.github.weisj.jsvg.attributes.value.ConstantFloatList;
+import com.github.weisj.jsvg.attributes.value.ConstantLengthTransform;
+import com.github.weisj.jsvg.attributes.value.ConstantTransform;
+import com.github.weisj.jsvg.attributes.value.FloatListValue;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
+import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
@@ -54,8 +74,13 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.css.CssParser;
-import com.github.weisj.jsvg.parser.css.StyleSheet;
-import com.github.weisj.jsvg.parser.css.impl.SimpleCssParser;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.Declaration;
+import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
+import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.impl.phase3ruleparse.ShorthandExpander;
+import com.github.weisj.jsvg.parser.css.impl.phase4matcher.CascadeResult;
+import com.github.weisj.jsvg.parser.css.impl.phase4matcher.StyleSheets;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
@@ -78,20 +103,45 @@ public final class AttributeNode {
     private static final Length CenterWidth = new Length(Unit.PERCENTAGE_WIDTH, 50f);
     private static final Length Right = new Length(Unit.PERCENTAGE_WIDTH, 100f);
     private static final Length FALLBACK_LENGTH = new Length(Unit.RAW, 0f);
-    private static final Percentage FALLBACK_PERCENTAGE = new Percentage(1f);
     private static final MeasureContext DUMMY_MEASURE_CONTEXT =
-            new MeasureContext(0, 0, 0, 0, 0, new AnimationState(0, 0));
+            new MeasureContext(0, 0, 0, 0, 0, 0, 0, new AnimationState(0, 0));
+
+    /**
+     * Presentation attributes that are also CSS properties (SVG 2 §6.1): when declared on an element their value is
+     * run through the CSS grammar and shorthands expanded. Non-shorthand properties are parsed on demand, so this list
+     * need not be complete.
+     */
+    private static final Set<String> CSS_ATTRIBUTES = new HashSet<>(Arrays.asList(
+            "fill", "fill-opacity", "fill-rule",
+            "stroke", "stroke-opacity", "stroke-width", "stroke-linecap", "stroke-linejoin",
+            "stroke-miterlimit", "stroke-dasharray", "stroke-dashoffset",
+            "color", "opacity",
+            "font", "font-family", "font-size", "font-size-adjust", "font-stretch",
+            "font-style", "font-variant", "font-weight", "line-height",
+            "marker", "marker-start", "marker-mid", "marker-end",
+            "text-anchor", "dominant-baseline", "alignment-baseline", "baseline-shift",
+            "direction", "letter-spacing", "word-spacing", "text-decoration", "writing-mode",
+            "visibility", "display", "overflow",
+            "color-interpolation", "color-interpolation-filters", "shape-rendering", "image-rendering",
+            "clip", "clip-path", "clip-rule", "mask", "filter",
+            "stop-color", "stop-opacity", "flood-color", "flood-opacity", "lighting-color",
+            "solid-color", "solid-opacity",
+            "paint-order", "vector-effect", "mix-blend-mode", "isolation", "pointer-events",
+            "transform", "transform-origin", "transform-box", "transform-style"));
 
     private final @NotNull String tagName;
-    private final @NotNull Map<String, String> attributes;
-    private final @NotNull List<@NotNull StyleSheet> styleSheets;
+    /** SVG attributes declared directly on the node; used for matching attribute selectors */
+    private final @NotNull Map<@NotNull String, @NotNull String> declaredAttributes;
+    private final @NotNull Map<@NotNull String, @NotNull AttributeValue> resolvedAttributes = new HashMap<>();
+    private final @NotNull StyleSheets styleSheets;
+    private boolean selectorsUseElementPositionInDom;
 
     private ParsedElement element = null;
 
-    public AttributeNode(@NotNull String tagName, @NotNull Map<String, String> attributes,
-            @NotNull List<@NotNull StyleSheet> styleSheets) {
+    public AttributeNode(@NotNull String tagName, @NotNull Map<@NotNull String, @NotNull String> declaredAttributes,
+            @NotNull StyleSheets styleSheets) {
         this.tagName = tagName;
-        this.attributes = attributes;
+        this.declaredAttributes = declaredAttributes;
         this.styleSheets = styleSheets;
     }
 
@@ -104,49 +154,58 @@ public final class AttributeNode {
     }
 
     public @NotNull AttributeNode copy() {
-        AttributeNode node = new AttributeNode(tagName, new HashMap<>(attributes), styleSheets);
+        AttributeNode node = new AttributeNode(tagName, new HashMap<>(declaredAttributes), styleSheets);
+        node.resolvedAttributes.putAll(resolvedAttributes);
         node.setElement(element);
         return node;
     }
 
-    void prepareForNodeBuilding() {
-        Map<String, String> styleSheetAttributes = new HashMap<>();
+    /**
+     * Copy for re-matching at a new DOM position: carries over only the declared attributes, leaving the resolved
+     * {@link #resolvedAttributes} and {@link #selectorsUseElementPositionInDom} empty so {@link #prepareForNodeBuilding()}
+     * re-runs the cascade (unlike {@link #copy()}, which keeps resolved values). Caller must
+     * {@link #setElement(ParsedElement)}.
+     */
+    @NotNull
+    AttributeNode copyForReparse() {
+        return new AttributeNode(tagName, new HashMap<>(declaredAttributes), styleSheets);
+    }
 
-        // First process the inline styles. They have the highest priority.
-        String styleStr = attributes.get("style");
-        if (styleStr != null && !AttributeUtil.isBlank(styleStr)) {
-            CssParser cssParser = element.document().loaderContext().cssParser();
-            if (cssParser instanceof SimpleCssParser) {
-                ((SimpleCssParser) cssParser).parseRules(Collections.singletonList(styleStr.toCharArray()))
-                        .forEach(p -> {
-                            styleSheetAttributes.put(p.name(), p.value());
-                        });
+    void prepareForNodeBuilding() {
+        CssParser cssParser = document().loaderContext().cssParser();
+
+        // Presentation attributes: CSS properties are tokenized and shorthand-expanded so the CSS grammar
+        // applies to them; other (SVG-only) attributes are kept as raw strings.
+        for (Map.Entry<String, String> entry : declaredAttributes.entrySet()) {
+            if (CSS_ATTRIBUTES.contains(entry.getKey())) {
+                Declaration declaration =
+                        new Declaration(entry.getKey(), cssParser.parseCssAttribute(entry.getValue()), false);
+                for (NormalizedProperty property : ShorthandExpander.expand(declaration)) {
+                    resolvedAttributes.put(property.name(), new AttributeValue.Parsed(property.value()));
+                }
             } else {
-                // Fallback for external implementations of CssParser
-                StyleSheet sheet = cssParser.parse(
-                        Arrays.asList(
-                                element.tagName().toCharArray(),
-                                new char[] {'{'},
-                                styleStr.toCharArray(),
-                                new char[] {'}'}));
-                sheet.forEachMatchingRule(element, p -> {
-                    styleSheetAttributes.put(p.name(), p.value());
-                });
+                resolvedAttributes.put(entry.getKey(), new AttributeValue.PlainString(entry.getValue()));
             }
         }
 
-        List<StyleSheet> sheets = styleSheets();
-        // Traverse the style sheets in backwards order to only use the newest definition.
-        // FIXME: Only use the newest *valid* definition of a property value.
-        for (int i = sheets.size() - 1; i >= 0; i--) {
-            StyleSheet sheet = sheets.get(i);
-            sheet.forEachMatchingRule(element, p -> {
-                if (!styleSheetAttributes.containsKey(p.name())) {
-                    styleSheetAttributes.put(p.name(), p.value());
-                }
-            });
-        }
-        attributes.putAll(styleSheetAttributes);
+        String styleStr = declaredAttributes.get("style");
+        List<NormalizedProperty> inlineCssDeclarations = styleStr != null && !AttributeUtil.isBlank(styleStr)
+                ? cssParser.parseStyleAttribute(styleStr, document().loaderContext().cssHints())
+                : Collections.emptyList();
+
+        // FIXME: Only use the highest priority *valid* definition of a property value.
+        CascadeResult cascadeResult = styleSheets().matchAndCascade(inlineCssDeclarations, element);
+        selectorsUseElementPositionInDom = cascadeResult.selectorsUseElementPositionInDom;
+        // CSS attributes override SVG presentation attributes (CSS Cascade 4 §6.4).
+        resolvedAttributes.putAll(cascadeResult.attributes);
+    }
+
+    public boolean selectorsUseElementPositionInDom() {
+        return selectorsUseElementPositionInDom;
+    }
+
+    void orSelectorsUseElementPositionInDom(boolean value) {
+        selectorsUseElementPositionInDom |= value;
     }
 
     public @NotNull ParsedDocument document() {
@@ -158,7 +217,7 @@ public final class AttributeNode {
     }
 
     @NotNull
-    List<@NotNull StyleSheet> styleSheets() {
+    StyleSheets styleSheets() {
         return styleSheets;
     }
 
@@ -191,8 +250,17 @@ public final class AttributeNode {
         return null;
     }
 
-    public @NotNull Map<String, String> attributes() {
-        return attributes;
+    public @NotNull Map<String, String> declaredAttributes() {
+        return declaredAttributes;
+    }
+
+    public @NotNull Map<String, AttributeValue> attributes() {
+        return resolvedAttributes;
+    }
+
+    /** Sets a raw (non-CSS) string value on the resolved attribute map, e.g. synthesized scratch attributes. */
+    public void setResolvedNonCssValue(@NotNull String key, @NotNull String value) {
+        resolvedAttributes.put(key, new AttributeValue.PlainString(value));
     }
 
     public @NotNull String tagName() {
@@ -212,8 +280,46 @@ public final class AttributeNode {
         return Arrays.asList(classes);
     }
 
+    /** Returns the tokens created by the CSS parser, or {@code null} if the attribute is not set
+     * or is not a CSS attribute. */
+    public @Nullable List<@NotNull ComponentValue> getTokens(@NotNull String key) {
+        AttributeValue attributeValue = resolvedAttributes.get(key);
+        if (!(attributeValue instanceof AttributeValue.Parsed)) return null;
+        return ((AttributeValue.Parsed) attributeValue).tokens();
+    }
+
+    /** Raw string of an SVG-only attribute; re-serialized CSS text in the unexpected case when a stylesheet
+     * sets an SVG-only attribute. */
     public @Nullable String getValue(@NotNull String key) {
-        return attributes.get(key);
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return null;
+        if (value instanceof AttributeValue.PlainString) {
+            return ((AttributeValue.PlainString) value).string();
+        } else {
+            return ((AttributeValue.Parsed) value).reserialize();
+        }
+    }
+
+    /** Shared token-vs-string dispatch; {@code absent} when there is no value. */
+    private <T> T parseValue(@NotNull String key, T absent,
+            @NotNull Function<@NotNull List<@NotNull ComponentValue>, T> fromTokens,
+            @NotNull Function<@NotNull String, T> fromString) {
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return absent;
+        if (value instanceof AttributeValue.Parsed) {
+            return fromTokens.apply(((AttributeValue.Parsed) value).tokens());
+        } else {
+            return fromString.apply(((AttributeValue.PlainString) value).string());
+        }
+    }
+
+    /** Whether the value is exactly the given keyword, reading the ident token directly (no serialize). */
+    public boolean valueIsOneOfKeywords(@NotNull String key, @NotNull String... keywords) {
+        // Callers (display, visibility) are CSS properties, so a set value is token-valued.
+        List<ComponentValue> tokens = getTokens(key);
+        if (tokens == null) return false;
+        ComponentValue token = AttributeParser.singleToken(tokens);
+        return token != null && token.isOneOfKeywords(keywords);
     }
 
     public @NotNull Color getColor(@NotNull String key) {
@@ -222,9 +328,9 @@ public final class AttributeNode {
 
     @Contract("_,!null -> !null")
     public @Nullable Color getColor(@NotNull String key, @Nullable Color fallback) {
-        String value = getValue(key);
-        if (value == null) return fallback;
-        Color c = loadHelper().attributeParser().paintParser().parseColor(value.toLowerCase(Locale.ENGLISH));
+        // Color attributes are all CSS properties, so a set value is token-valued.
+        List<ComponentValue> tokens = getTokens(key);
+        Color c = tokens != null ? parser().paintParser().parseColor(tokens) : null;
         return c != null ? c : fallback;
     }
 
@@ -235,7 +341,10 @@ public final class AttributeNode {
     @Contract("_,!null,_,_ -> !null")
     public @Nullable SVGPaint getPaint(@NotNull String key, @Nullable SVGPaint fallback,
             Inherited inherited, Animatable animatable) {
-        SVGPaint value = getPaintInternal(key, fallback);
+        // Paint attributes are all CSS properties, so a set value is token-valued.
+        List<ComponentValue> tokens = getTokens(key);
+        SVGPaint paint = tokens != null ? parsePaint(tokens) : null;
+        SVGPaint value = paint != null ? paint : fallback;
         if (animatable == Animatable.YES) {
             SVGPaint initial = value;
             if (initial == null) {
@@ -249,23 +358,29 @@ public final class AttributeNode {
         return value;
     }
 
-    @Contract("_,!null -> !null")
-    private @Nullable SVGPaint getPaintInternal(@NotNull String key, @Nullable SVGPaint fallback) {
-        SVGPaint paint = parsePaint(getValue(key));
-        if (paint == null) return fallback;
-        return paint;
-    }
-
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
         // TODO: url(#...) allows specifying a fallback color value.
         SVGPaint paint = getElementByHref(SVGPaint.class, value, ElementRelation.PAINT_SERVER);
         if (paint != null) return paint;
-        return loadHelper().attributeParser().parsePaint(value, this);
+        return parser().parsePaint(value, this);
+    }
+
+    private @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
+        for (ComponentValue token : tokens) {
+            if (token instanceof Token.Url) {
+                // TODO: url(#...) allows specifying a fallback color value.
+                SVGPaint paint = getElementByHref(
+                        SVGPaint.class, ((Token.Url) token).value(), ElementRelation.PAINT_SERVER);
+                if (paint != null) return paint;
+                break;
+            }
+        }
+        return parser().parsePaint(tokens);
     }
 
     public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension) {
-        return getLength(key, dimension, (Length) null);
+        return getLength(key, dimension, null);
     }
 
     public @NotNull Length getLength(@NotNull String key, @NotNull PercentageDimension dimension, float fallback) {
@@ -308,57 +423,94 @@ public final class AttributeNode {
         return value;
     }
 
+    /** SMIL-only, so never CSS-sourced. */
     public @NotNull Duration getDuration(@NotNull String key, @NotNull Duration fallback) {
-        return loadHelper().attributeParser().parseTimeOffsetValue(getValue(key), fallback);
+        return parser().parseTimeOffsetValue(getValue(key), fallback);
     }
 
     private @NotNull Length getLengthInternal(@NotNull String key, @NotNull PercentageDimension dimension) {
-        return loadHelper().attributeParser().parseLength(getValue(key), FALLBACK_LENGTH, dimension);
+        return parseValue(key, FALLBACK_LENGTH,
+                tokens -> parser().parseLength(tokens, FALLBACK_LENGTH, dimension),
+                text -> parser().parseLength(text, FALLBACK_LENGTH, dimension));
     }
 
     public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key) {
-        return getHorizontalReferenceLength(getValue(key));
+        return parseValue(key, Length.ZERO,
+                this::getHorizontalReferenceLength,
+                this::getHorizontalReferenceLength);
     }
 
     public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key) {
-        return getVerticalReferenceLength(getValue(key));
+        return parseValue(key, Length.ZERO,
+                this::getVerticalReferenceLength,
+                this::getVerticalReferenceLength);
+    }
+
+    private static @Nullable Length horizontalKeyword(@Nullable String value) {
+        if ("left".equalsIgnoreCase(value)) return Left;
+        if ("center".equalsIgnoreCase(value)) return CenterWidth;
+        if ("right".equalsIgnoreCase(value)) return Right;
+        return null;
+    }
+
+    private static @Nullable Length verticalKeyword(@Nullable String value) {
+        if ("top".equalsIgnoreCase(value)) return Top;
+        if ("center".equalsIgnoreCase(value)) return CenterHeight;
+        if ("bottom".equalsIgnoreCase(value)) return Bottom;
+        return null;
     }
 
     public @NotNull Length getHorizontalReferenceLength(@Nullable String value) {
-        if ("left".equals(value)) {
-            return Left;
-        } else if ("center".equals(value)) {
-            return CenterWidth;
-        } else if ("right".equals(value)) {
-            return Right;
-        } else {
-            return loadHelper().attributeParser().parseLength(value, Length.ZERO, PercentageDimension.WIDTH);
-        }
+        Length keyword = horizontalKeyword(value);
+        return keyword != null
+                ? keyword
+                : parser().parseLength(value, Length.ZERO, PercentageDimension.WIDTH);
     }
 
     public @NotNull Length getVerticalReferenceLength(@Nullable String value) {
-        if ("top".equals(value)) {
-            return Top;
-        } else if ("center".equals(value)) {
-            return CenterHeight;
-        } else if ("bottom".equals(value)) {
-            return Bottom;
-        } else {
-            return loadHelper().attributeParser().parseLength(value, Length.ZERO, PercentageDimension.HEIGHT);
-        }
+        Length keyword = verticalKeyword(value);
+        return keyword != null
+                ? keyword
+                : parser().parseLength(value, Length.ZERO, PercentageDimension.HEIGHT);
     }
 
-    public boolean isHorizontalKeyword(@NotNull String value) {
-        return "left".equals(value) || "right".equals(value);
+    public @NotNull Length getHorizontalReferenceLength(@NotNull List<@NotNull ComponentValue> tokens) {
+        Length keyword = horizontalKeyword(AttributeParser.identOf(tokens));
+        return keyword != null
+                ? keyword
+                : parser().parseLength(tokens, Length.ZERO, PercentageDimension.WIDTH);
     }
 
-    public boolean isVerticalKeyword(@NotNull String value) {
-        return "top".equals(value) || "bottom".equals(value);
+    public @NotNull Length getVerticalReferenceLength(@NotNull List<@NotNull ComponentValue> tokens) {
+        Length keyword = verticalKeyword(AttributeParser.identOf(tokens));
+        return keyword != null
+                ? keyword
+                : parser().parseLength(tokens, Length.ZERO, PercentageDimension.HEIGHT);
+    }
+
+    public boolean isHorizontalKeyword(@NotNull List<@NotNull ComponentValue> tokens) {
+        ComponentValue token = AttributeParser.singleToken(tokens);
+        return token != null && token.isOneOfKeywords("left", "right");
+    }
+
+    public boolean isVerticalKeyword(@NotNull List<@NotNull ComponentValue> tokens) {
+        ComponentValue token = AttributeParser.singleToken(tokens);
+        return token != null && token.isOneOfKeywords("top", "bottom");
     }
 
     @Contract("_,!null -> !null")
     public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
-        return loadHelper().attributeParser().parsePercentage(getValue(key), fallback);
+        return parseValue(key, fallback,
+                tokens -> parser().parsePercentage(tokens, fallback),
+                text -> parser().parsePercentage(text, fallback));
+    }
+
+    @Contract("_,!null,_,_ -> !null")
+    public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback, float min,
+            float max) {
+        // Sole caller (font-stretch) is a CSS property, so a set value is token-valued.
+        List<ComponentValue> tokens = getTokens(key);
+        return tokens != null ? parser().parsePercentage(tokens, fallback, min, max) : fallback;
     }
 
     public @Nullable PercentageValue getPercentage(@NotNull String key, Inherited inherited, Animatable animatable) {
@@ -368,9 +520,8 @@ public final class AttributeNode {
     @Contract("_,!null,_,_ -> !null")
     public @Nullable PercentageValue getPercentage(@NotNull String key, @Nullable PercentageValue fallback,
             Inherited inherited, Animatable animatable) {
-        PercentageValue value =
-                loadHelper().attributeParser().parsePercentage(getValue(key), FALLBACK_PERCENTAGE);
-        if (value == FALLBACK_PERCENTAGE) {
+        PercentageValue value = getPercentage(key, (Percentage) null);
+        if (value == null) {
             value = fallback;
         }
 
@@ -398,19 +549,18 @@ public final class AttributeNode {
     @Contract("_,!null,_ -> !null")
     public @NotNull Length @Nullable [] getLengthList(@NotNull String key, @NotNull Length @Nullable [] fallback,
             @NotNull PercentageDimension dimension) {
-        return loadHelper().attributeParser().parseLengthList(getValue(key), fallback, dimension);
+        return parseValue(key, fallback,
+                tokens -> parser().parseLengthList(tokens, fallback, dimension),
+                text -> parser().parseLengthList(text, fallback, dimension));
     }
 
     public float @NotNull [] getFloatList(@NotNull String key) {
-        return loadHelper().attributeParser().parseFloatList(getValue(key));
+        return parser().parseFloatList(getValue(key));
     }
 
     public @NotNull FloatListValue getFloatList(@NotNull String key, Inherited inherited, Animatable animatable) {
-        String value = getValue(key);
-        float[] initialRaw = loadHelper().attributeParser().parseFloatList(getValue(key));
-
-        FloatListValue initial = value != null
-                ? new ConstantFloatList(initialRaw)
+        FloatListValue initial = hasAttribute(key)
+                ? new ConstantFloatList(getFloatList(key))
                 : null;
 
         if (animatable == Animatable.YES) {
@@ -427,27 +577,63 @@ public final class AttributeNode {
     }
 
     public double @NotNull [] getDoubleList(@NotNull String key) {
-        return loadHelper().attributeParser().parseDoubleList(getValue(key));
+        return parser().parseDoubleList(getValue(key));
     }
 
     public <E extends Enum<E>> @NotNull E getEnum(@NotNull String key, @NotNull E fallback) {
-        return loadHelper().attributeParser().parseEnum(getValue(key), fallback);
+        E parsed = getEnumNullable(key, fallback.getDeclaringClass());
+        return parsed != null ? parsed : fallback;
     }
 
     public <E extends Enum<E>> @Nullable E getEnumNullable(@NotNull String key, @NotNull Class<E> enumType) {
-        return loadHelper().attributeParser().parseEnum(getValue(key), enumType);
+        return parseValue(key, null,
+                tokens -> parser().parseEnum(tokens, enumType),
+                text -> parser().parseEnum(text, enumType));
     }
 
     public @Nullable ClipPath getClipPath() {
-        return getElementByUrl(ClipPath.class, getValue("clip-path"));
+        return referencedElement(ClipPath.class, "clip-path");
     }
 
     public @Nullable Mask getMask() {
-        return getElementByUrl(Mask.class, getValue("mask"));
+        return referencedElement(Mask.class, "mask");
     }
 
     public @Nullable Filter getFilter() {
-        return getElementByUrl(Filter.class, getValue("filter"));
+        return referencedElement(Filter.class, "filter");
+    }
+
+    /** Resolves a {@code url(#id)} reference, reading the id from tokens via {@link #urlOf} without serializing. */
+    private <T> @Nullable T referencedElement(@NotNull Class<T> type, @NotNull String key) {
+        // clip-path/mask/filter are CSS properties, so a set value is token-valued.
+        List<ComponentValue> tokens = getTokens(key);
+        if (tokens == null) return null;
+        String url = urlOf(tokens);
+        return url != null ? getElementByUrl(type, url) : null;
+    }
+
+    /** Like {@link #getElementByHref}, but resolves by attribute key and reads {@code url(#id)} via {@link #urlOf}. */
+    public <T> @Nullable T getReference(@NotNull Class<T> type, @NotNull String key,
+            @NotNull ElementRelation relation) {
+        // marker/marker-* are CSS properties, so a set value is token-valued.
+        List<ComponentValue> tokens = getTokens(key);
+        if (tokens == null) return null;
+        String url = urlOf(tokens);
+        return url != null ? getElementByHref(type, url, relation) : null;
+    }
+
+    /** The id of a lone {@code url(#id)}: bare {@link Token.Url}, or a quoted {@code url("#id")} function block. */
+    private static @Nullable String urlOf(@NotNull List<@NotNull ComponentValue> tokens) {
+        ComponentValue token = AttributeParser.singleToken(tokens);
+        if (token instanceof Token.Url) return ((Token.Url) token).value();
+        if (token instanceof ComponentValue.FunctionBlock) {
+            ComponentValue.FunctionBlock function = (ComponentValue.FunctionBlock) token;
+            if (!function.name().equalsIgnoreCase("url")) return null;
+            ComponentValue functionArgument = AttributeParser.singleToken(function.value());
+            if (!(functionArgument instanceof Token.Str)) return null;
+            return ((Token.Str) functionArgument).value();
+        }
+        return null;
     }
 
     public @NotNull FilterChannelKey getFilterChannelKey(@NotNull String key, @NotNull FilterChannelKey fallback) {
@@ -460,6 +646,12 @@ public final class AttributeNode {
         return parseTransform(key, Inherited.NO, Animatable.NO);
     }
 
+    private @Nullable List<TransformPart> parseTransformParts(@NotNull String key) {
+        return parseValue(key, null,
+                tokens -> parser().parseTransform(tokens),
+                text -> parser().parseTransform(text));
+    }
+
     private @NotNull TransformValue createTransformValueFromParts(@NotNull List<TransformPart> parts) {
         for (TransformPart part : parts) {
             if (!part.canBeFlattened()) return new ConstantLengthTransform(parts);
@@ -469,7 +661,7 @@ public final class AttributeNode {
     }
 
     public @Nullable TransformValue parseTransform(@NotNull String key, Inherited inherited, Animatable animatable) {
-        List<TransformPart> parts = loadHelper().attributeParser().parseTransform(getValue(key));
+        List<TransformPart> parts = parseTransformParts(key);
         TransformValue value = parts != null
                 ? createTransformValueFromParts(parts)
                 : null;
@@ -492,20 +684,25 @@ public final class AttributeNode {
     }
 
     public boolean hasAttribute(@NotNull String name) {
-        return attributes.containsKey(name);
+        return resolvedAttributes.containsKey(name);
     }
 
-    public @NotNull String @NotNull [] getStringList(@NotNull String name) {
-        return getStringList(name, SeparatorMode.COMMA_AND_WHITESPACE);
+    /** Token-list form of {@link #getStringList}; {@code null} if not CSS-sourced, empty if it split to nothing. */
+    public @Nullable List<@NotNull List<@NotNull ComponentValue>> getSplitTokenList(@NotNull String name,
+            @NotNull SeparatorMode separatorMode) {
+        List<ComponentValue> tokens = getTokens(name);
+        return tokens != null ? parser().splitList(tokens, separatorMode) : null;
     }
 
-
+    /** String form for SVG-only (never-tokenized) attributes; CSS-sourced ones use {@link #getSplitTokenList}. */
     public @NotNull String @NotNull [] getStringList(@NotNull String name, SeparatorMode separatorMode) {
         return loadHelper().attributeParser().parseStringList(getValue(name), separatorMode);
     }
 
     public float getFloat(@NotNull String name, float fallback) {
-        return loadHelper().attributeParser().parseFloat(getValue(name), fallback);
+        return parseValue(name, fallback,
+                tokens -> parser().parseFloat(tokens, fallback),
+                text -> parser().parseFloat(text, fallback));
     }
 
     public float getNonNegativeFloat(@NotNull String name, float fallback) {
@@ -515,7 +712,7 @@ public final class AttributeNode {
     }
 
     public int getInt(@NotNull String key, int fallback) {
-        return loadHelper().attributeParser().parseInt(getValue(key), fallback);
+        return parser().parseInt(getValue(key), fallback);
     }
 
     public @Nullable String getHref() {
@@ -549,6 +746,7 @@ public final class AttributeNode {
                 .stream()
                 .filter(n -> type.isInstance(n.node()))
                 .map(n -> type.cast(n.nodeEnsuringBuildStatus(document().currentNestingDepth())))
+                .filter(n -> n != null)
                 .collect(Collectors.toList());
         for (T animateNode : animateNodes) {
             document().registerAnimatedElement(animateNode);

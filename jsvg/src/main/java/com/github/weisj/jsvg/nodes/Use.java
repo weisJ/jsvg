@@ -35,7 +35,10 @@ import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.container.CommonInnerViewContainer;
-import com.github.weisj.jsvg.nodes.prototype.*;
+import com.github.weisj.jsvg.nodes.prototype.HasContext;
+import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.nodes.prototype.Instantiator;
+import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
@@ -76,6 +79,10 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         return referencedNode;
     }
 
+    public void setReferencedNode(@Nullable SVGNode referencedNode) {
+        this.referencedNode = referencedNode;
+    }
+
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
         return super.isVisible(context) && referencedNode instanceof Renderable;
@@ -89,9 +96,8 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED);
         height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED);
 
-        String href = attributeNode.getValue("href");
-        if (href == null) href = attributeNode.getValue("xlink:href");
-        referencedNode = attributeNode.getElementByHref(SVGNode.class, href, ElementRelation.PAINTED_CHILD);
+        referencedNode = attributeNode.getElementByHref(
+                SVGNode.class, attributeNode.getHref(), ElementRelation.PAINTED_CHILD);
 
         paintContext = PaintContext.parse(attributeNode);
         fontRenderContext = FontRenderContext.parse(attributeNode);

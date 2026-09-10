@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,15 +21,24 @@
  */
 package com.github.weisj.jsvg.attributes.font;
 
-import java.awt.*;
+import java.awt.Font;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.github.weisj.jsvg.geometry.size.AngleUnit;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.size.Percentage;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.impl.phase3ruleparse.ComponentValueGrammarParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
@@ -38,8 +47,7 @@ public final class FontParser {
 
     // Todo: font-variant
     public static @NotNull AttributeFontSpec parseFontSpec(@NotNull AttributeNode node) {
-        String[] fontFamilies = node.getStringList("font-family", SeparatorMode.COMMA_ONLY);
-        canonicalizeFontFamily(fontFamilies);
+        String[] fontFamilies = parseFontFamily(node);
 
         // Todo: https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#fallback_weights
         @Nullable FontWeight weight = parseWeight(node);
@@ -49,6 +57,156 @@ public final class FontParser {
         @NotNull Percentage stretch = parseStretch(node);
 
         return new AttributeFontSpec(fontFamilies, style, sizeAdjust, stretch, size, weight);
+    }
+
+    /**
+     * Expands a CSS {@code font} shorthand into its longhands (indexed by longhand name) per its
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/font#formal_syntax">formal syntax</a>.
+     * Returns an empty map if the shorthand is invalid.
+     *
+     * @param shorthandValue the shorthand value, excluding {@code !important} and surrounding whitespace
+     */
+    public static @NotNull Map<String, List<ComponentValue>> expandFontShorthand(
+            @NotNull List<@NotNull ComponentValue> shorthandValue) {
+        ComponentValueGrammarParser parser = new ComponentValueGrammarParser(shorthandValue, true);
+
+        // Handle system font keywords
+        if (shorthandValue.size() == 1 && parser.isCurrentOneOfKeywords(
+                "caption",
+                "icon",
+                "menu",
+                "message-box",
+                "small-caption",
+                "status-bar")) {
+            return Collections.singletonMap("font", shorthandValue);
+        }
+
+        // Parse optional font-style, font-variant, font-weight, font-stretch (in any order)
+        @Nullable List<ComponentValue> fontStyle = null;
+        @Nullable List<ComponentValue> fontVariant = null;
+        @Nullable List<ComponentValue> fontWeight = null;
+        @Nullable List<ComponentValue> fontStretch = null;
+        while (!parser.isEof()) {
+            // font-style: normal | italic | left | right| oblique [<angle>]?
+            if (fontStyle == null && parser.isCurrentOneOfKeywords("normal", "italic", "left", "right", "oblique")) {
+                if (parser.isCurrentOneOfKeywords("oblique") && isAngleDimension(parser.peekNext())) {
+                    // a non-angle dimension is the font-size
+                    fontStyle = Arrays.asList(parser.current(), parser.peekNext());
+                    parser.advance();
+                } else {
+                    fontStyle = Collections.singletonList(parser.current());
+                }
+                parser.advance();
+                continue;
+            }
+
+            // font-variant: normal | small-caps
+            if (fontVariant == null && parser.isCurrentOneOfKeywords("small-caps")) {
+                fontVariant = Collections.singletonList(parser.current());
+                parser.advance();
+                continue;
+            }
+
+            // font-weight: normal | bold | bolder | lighter | 1-1000
+            if (fontWeight == null && (parser.isCurrentOneOfKeywords("bold", "bolder", "lighter")
+                    || parser.current().isANumberInRange(1, 1000))) {
+                fontWeight = Collections.singletonList(parser.current());
+                parser.advance();
+                continue;
+            }
+
+            // font-stretch: normal | ultra-condensed | extra-condensed | condensed | semi-condensed |
+            // semi-expanded | expanded | extra-expanded | ultra-expanded
+            if (fontStretch == null && parser.isCurrentOneOfKeywords(
+                    "ultra-condensed",
+                    "extra-condensed",
+                    "condensed",
+                    "semi-condensed",
+                    "semi-expanded",
+                    "expanded",
+                    "extra-expanded",
+                    "ultra-expanded")) {
+                fontStretch = Collections.singletonList(parser.current());
+                parser.advance();
+                continue;
+            }
+
+            // If we get here, we've found font-size (required)
+            break;
+        }
+
+        // Parse required font-size
+        if (parser.isEof()) {
+            return Collections.emptyMap(); // Invalid: font-size is required
+        }
+        @NotNull List<ComponentValue> fontSize = Collections.singletonList(parser.current());
+        parser.advance();
+
+        // Parse optional line-height (preceded by /)
+        @Nullable List<ComponentValue> lineHeight = null;
+        if (!parser.isEof() && parser.current().isSlash()) {
+            parser.advance(); // skip the "/"
+            if (!parser.isEof()) {
+                lineHeight = Collections.singletonList(parser.current());
+                parser.advance();
+            }
+        }
+
+        // Parse required font-family (rest of the tokens)
+        if (parser.isEof()) {
+            return Collections.emptyMap(); // Invalid: font-family is required
+        }
+        @NotNull List<ComponentValue> fontFamily = parser.remainingTokens();
+
+        Map<String, List<ComponentValue>> result = new HashMap<>();
+        List<ComponentValue> normal = Collections.singletonList(new Token.Ident("normal"));
+        result.put("font-style", fontStyle != null ? fontStyle : normal);
+        result.put("font-variant", fontVariant != null ? fontVariant : normal);
+        result.put("font-weight", fontWeight != null ? fontWeight : normal);
+        result.put("font-stretch", fontStretch != null ? fontStretch : normal);
+        result.put("font-size", fontSize);
+        result.put("line-height", lineHeight != null ? lineHeight : normal);
+        result.put("font-family", fontFamily);
+        return result;
+    }
+
+    /** A {@code <dimension>} with an angle unit. */
+    private static boolean isAngleDimension(@Nullable ComponentValue value) {
+        if (!(value instanceof Token.Dimension)) return false;
+        String unit = ((Token.Dimension) value).unit().toLowerCase(Locale.ENGLISH);
+        for (AngleUnit angleUnit : AngleUnit.units()) {
+            if (angleUnit != AngleUnit.Raw && angleUnit.suffix().equals(unit)) return true;
+        }
+        return false;
+    }
+
+    public static @NotNull String @NotNull [] parseFontFamily(@NotNull AttributeNode node) {
+        List<List<ComponentValue>> groups = node.getSplitTokenList("font-family", SeparatorMode.COMMA_ONLY);
+        if (groups == null) return new String[0];
+        String[] families = familyNames(groups);
+        canonicalizeFontFamily(families);
+        return families;
+    }
+
+    private static @NotNull String @NotNull [] familyNames(
+            @NotNull List<@NotNull List<@NotNull ComponentValue>> groups) {
+        String[] families = new String[groups.size()];
+        for (int i = 0; i < families.length; i++) {
+            families[i] = familyName(groups.get(i));
+        }
+        return families;
+    }
+
+    /** {@code <family-name> = <string> | <custom-ident>+}; idents joined by spaces. */
+    private static @NotNull String familyName(@NotNull List<@NotNull ComponentValue> group) {
+        StringBuilder name = new StringBuilder();
+        for (ComponentValue token : group) {
+            if (token instanceof Token.Str) return ((Token.Str) token).value();
+            if (!(token instanceof Token.Ident)) continue;
+            if (name.length() > 0) name.append(' ');
+            name.append(((Token.Ident) token).name());
+        }
+        return name.toString();
     }
 
     private static @NotNull String stripQuotes(@NotNull String str, char quoteChar) {
@@ -87,8 +245,11 @@ public final class FontParser {
         if (weight == PredefinedFontWeight.Number) {
             if (node.hasAttribute(fontWeightKey)) {
                 weight = new NumberFontWeight(
-                        Math.max(1, Math.min(1000, node.getFloat(fontWeightKey,
-                                PredefinedFontWeight.NORMAL_WEIGHT))));
+                        Math.max(
+                                1, Math.min(
+                                        1000, node.getFloat(
+                                                fontWeightKey,
+                                                PredefinedFontWeight.NORMAL_WEIGHT))));
             } else {
                 weight = null;
             }
@@ -99,8 +260,7 @@ public final class FontParser {
     public static @NotNull Percentage parseStretch(@NotNull AttributeNode node) {
         FontStretch stretch = node.getEnum("font-stretch", FontStretch.Percentage);
         return stretch == FontStretch.Percentage
-                ? node.parser().parsePercentage(node.getValue("font-stretch"),
-                        Percentage.UNSPECIFIED, 0.5f, 2f)
+                ? node.getPercentage("font-stretch", Percentage.UNSPECIFIED, 0.5f, 2f)
                 : stretch.percentage();
     }
 
@@ -120,21 +280,19 @@ public final class FontParser {
     }
 
     static @Nullable FontStyle parseFontStyle(@NotNull AttributeNode node) {
-        FontStyle style = null;
-        String styleStr = node.getValue("font-style");
-        if ("normal".equalsIgnoreCase(styleStr)) {
-            style = FontStyle.normal();
-        } else if ("italic".equalsIgnoreCase(styleStr)) {
-            style = FontStyle.italic();
-        } else if (styleStr != null && styleStr.startsWith("oblique")) {
-            String[] comps = styleStr.split(" ", 2);
-            if (comps.length == 2) {
-                style = new FontStyle.Oblique(
-                        node.parser().parseAngle(comps[1], FontStyle.Oblique.DEFAULT_ANGLE));
-            } else {
-                style = FontStyle.oblique();
-            }
+        List<ComponentValue> tokens = node.getTokens("font-style");
+        if (tokens == null) return null;
+        ComponentValueGrammarParser parser = new ComponentValueGrammarParser(tokens, true);
+        if (parser.isEof()) return null;
+        if (parser.isCurrentOneOfKeywords("normal")) return FontStyle.normal();
+        if (parser.isCurrentOneOfKeywords("italic")) return FontStyle.italic();
+        if (parser.isCurrentOneOfKeywords("oblique")) {
+            parser.advance();
+            return parser.isEof()
+                    ? FontStyle.oblique()
+                    : new FontStyle.Oblique(
+                            node.parser().parseAngle(parser.remainingTokens(), FontStyle.Oblique.DEFAULT_ANGLE));
         }
-        return style;
+        return null;
     }
 }

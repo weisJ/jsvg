@@ -85,6 +85,7 @@ final class LinearTextLayoutGroup implements TextLayoutGroup {
     public @NotNull Point2D renderText(@Nullable Point2D start, @NotNull RenderContext context,
             @NotNull Output output) {
         GlyphCursor cursor = createCursor(start);
+        cursor.kerningEnabled = output.isTextKerningEnabled();
         TextOutput textOutput = output.textOutput();
         textOutput.beginText();
         asSegment().prepareSegmentForRendering(cursor, context, textOutput);
@@ -93,6 +94,7 @@ final class LinearTextLayoutGroup implements TextLayoutGroup {
         double offset = start == null
                 ? textAnchorOffset(parent.textAnchor(context), cursor.completeGlyphRunMetrics)
                 : 0;
+        textOutput.textAnchorOffset(offset);
         context.translate(output, -offset, 0);
         asSegment().renderSegmentWithoutLayout(cursor, context, output);
         context.translate(output, offset, 0);

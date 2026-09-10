@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,10 +22,12 @@
 package com.github.weisj.jsvg.attributes;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
@@ -52,21 +54,23 @@ public final class PaintOrder {
     }
 
     public static @Nullable PaintOrder parse(@NotNull AttributeNode attributeNode) {
-        @Nullable String value = attributeNode.getValue("paint-order");
         @NotNull AttributeParser parser = attributeNode.parser();
 
-        if (value == null) return null;
-        if ("inherit".equals(value)) return null;
-        if ("none".equals(value)) return NORMAL;
-        if ("normal".equals(value)) return NORMAL;
+        List<List<ComponentValue>> rawPhases =
+                attributeNode.getSplitTokenList("paint-order", SeparatorMode.COMMA_AND_WHITESPACE);
+        if (rawPhases == null || rawPhases.isEmpty()) return null;
+        if (rawPhases.size() == 1) {
+            ComponentValue only = AttributeParser.singleToken(rawPhases.get(0));
+            if (only != null && only.isOneOfKeywords("inherit")) return null;
+            if (only != null && only.isOneOfKeywords("none", "normal")) return NORMAL;
+        }
 
-        String[] rawPhases = parser.parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE);
         Phase[] phases = new Phase[3];
-        int length = Math.min(phases.length, rawPhases.length);
+        int length = Math.min(phases.length, rawPhases.size());
         int phasesIndex = 0;
         int rawPhasesIndex = 0;
         while (phasesIndex < length && rawPhasesIndex < length) {
-            Phase phase = parser.parseEnum(rawPhases[rawPhasesIndex], Phase.class);
+            Phase phase = parser.parseEnum(rawPhases.get(rawPhasesIndex), Phase.class);
             if (phase != null && !AttributeUtil.arrayContains(phases, phase)) {
                 phases[phasesIndex] = phase;
                 phasesIndex++;

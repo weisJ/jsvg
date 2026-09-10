@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -26,7 +26,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -89,11 +88,6 @@ public class NullOutput implements Output, Output.SafeState {
     @Override
     public void setClip(@Nullable Shape shape) {
         /* do nothing */
-    }
-
-    @Override
-    public Optional<Float> contextFontSize() {
-        return Optional.empty();
     }
 
     @Override

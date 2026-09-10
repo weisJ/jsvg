@@ -86,7 +86,14 @@ public interface Output {
     @Deprecated
     default void setClip(@Nullable Shape shape) {}
 
-    Optional<Float> contextFontSize();
+    /**
+     * @deprecated No longer consulted; the default font size is taken from
+     *             {@link com.github.weisj.jsvg.renderer.PlatformSupport#fontSize()}.
+     */
+    @Deprecated
+    default Optional<Float> contextFontSize() {
+        return Optional.empty();
+    }
 
     @NotNull
     Output createChild();
@@ -136,6 +143,10 @@ public interface Output {
 
     default boolean isSoftClippingEnabled() {
         return renderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING) == SVGRenderingHints.VALUE_SOFT_CLIPPING_ON;
+    }
+
+    default boolean isTextKerningEnabled() {
+        return renderingHint(SVGRenderingHints.KEY_TEXT_KERNING) != SVGRenderingHints.VALUE_TEXT_KERNING_OFF;
     }
 
     default boolean hasMaskedPaint() {

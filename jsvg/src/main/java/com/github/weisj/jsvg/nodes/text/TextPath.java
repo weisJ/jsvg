@@ -156,7 +156,7 @@ public final class TextPath extends TextContainer<TextSegment>
     @Override
     public @NotNull Point2D renderText(@Nullable Point2D start, @NotNull RenderContext context,
             @NotNull Output output) {
-        PathGlyphCursor cursor = createCursorWithAnchorAdjustment(context);
+        PathGlyphCursor cursor = createCursorWithAnchorAdjustment(context, output.isTextKerningEnabled());
         TextOutput textOutput = output.textOutput();
         textOutput.beginText();
         asSegment.prepareSegmentForRendering(cursor, context, textOutput);
@@ -171,7 +171,7 @@ public final class TextPath extends TextContainer<TextSegment>
     @Override
     public @NotNull Point2D appendGlyphShape(@Nullable Point2D start, @NotNull RenderContext context,
             @NotNull Path2D shape) {
-        PathGlyphCursor cursor = createCursorWithAnchorAdjustment(context);
+        PathGlyphCursor cursor = createCursorWithAnchorAdjustment(context, true);
         shape.append(glyphShape(cursor, context), false);
         return GeometryUtil.lastPointOnPath(cursor.pathIterator());
     }
@@ -179,7 +179,7 @@ public final class TextPath extends TextContainer<TextSegment>
     @Override
     @NotNull
     Shape glyphShape(@NotNull RenderContext context) {
-        return glyphShape(createCursorWithAnchorAdjustment(context), context);
+        return glyphShape(createCursorWithAnchorAdjustment(context, true), context);
     }
 
     private @NotNull Shape glyphShape(PathGlyphCursor cursor, @NotNull RenderContext context) {
@@ -194,29 +194,33 @@ public final class TextPath extends TextContainer<TextSegment>
         return null;
     }
 
-    private @NotNull PathGlyphCursor createCursorWithAnchorAdjustment(@NotNull RenderContext context) {
-        return new PathGlyphCursor(
+    private @NotNull PathGlyphCursor createCursorWithAnchorAdjustment(@NotNull RenderContext context,
+            boolean kerningEnabled) {
+        PathGlyphCursor cursor = new PathGlyphCursor(
                 createPathIterator(context),
-                computeAnchorAdjustedStartOffset(context));
+                computeAnchorAdjustedStartOffset(context, kerningEnabled));
+        cursor.kerningEnabled = kerningEnabled;
+        return cursor;
     }
 
-    private float computeAnchorAdjustedStartOffset(@NotNull RenderContext context) {
+    private float computeAnchorAdjustedStartOffset(@NotNull RenderContext context, boolean kerningEnabled) {
         float offset = computeStartOffset(context);
         TextAnchor textAnchor = textAnchor(context);
         switch (textAnchor) {
             case Start:
                 return offset;
             case Middle:
-                return offset - computeTotalTextLength(context) / 2f;
+                return offset - computeTotalTextLength(context, kerningEnabled) / 2f;
             case End:
-                return offset - computeTotalTextLength(context);
+                return offset - computeTotalTextLength(context, kerningEnabled);
             default:
                 throw new IllegalStateException("Unexpected value: " + textAnchor);
         }
     }
 
-    private float computeTotalTextLength(@NotNull RenderContext context) {
-        return (float) asSegment.computeTextMetrics(context, UseTextLengthForCalculation.YES).totalAdjustableLength();
+    private float computeTotalTextLength(@NotNull RenderContext context, boolean kerningEnabled) {
+        return (float) asSegment.computeTextMetrics(context, UseTextLengthForCalculation.YES, kerningEnabled)
+                .totalAdjustableLength();
     }
 
     private float computeStartOffset(@NotNull RenderContext context) {

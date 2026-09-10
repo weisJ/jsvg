@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,6 +34,7 @@ class GlyphCursor {
 
     public final @NotNull AbstractGlyphRun.Metrics completeGlyphRunMetrics;
     protected @NotNull GlyphAdvancement advancement = GlyphAdvancement.defaultAdvancement();
+    protected boolean kerningEnabled = true;
 
     protected float x;
     protected float y;
@@ -71,6 +72,7 @@ class GlyphCursor {
     GlyphCursor(@NotNull GlyphCursor c) {
         this(c.x, c.y, c.transform, c.completeGlyphRunMetrics);
         this.advancement = c.advancement;
+        this.kerningEnabled = c.kerningEnabled;
         this.glyphOffset = 0;
         this.xLocations = c.xLocations;
         this.xOff = c.xOff;
@@ -137,6 +139,10 @@ class GlyphCursor {
 
     void advanceSpacing(float letterSpacing) {
         x += advancement.spacingAdvancement(letterSpacing);
+    }
+
+    void applyKerning(float kerning) {
+        x += advancement.kerningAdvancement(kerning);
     }
 
     private boolean currentGlyphHasXOverride() {

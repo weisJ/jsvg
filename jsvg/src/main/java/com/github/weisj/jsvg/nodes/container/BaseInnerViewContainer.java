@@ -57,6 +57,11 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         return viewBox != null ? viewBox : new ViewBox(size(context));
     }
 
+    /** The viewBox attribute as declared, or null if absent. */
+    public @Nullable ViewBox declaredViewBox() {
+        return viewBox;
+    }
+
     public @NotNull ViewBox staticViewBox(@NotNull FloatSize fallbackSize) {
         return viewBox != null ? viewBox : new ViewBox(fallbackSize);
     }

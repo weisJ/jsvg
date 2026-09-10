@@ -159,6 +159,11 @@ final class PathGlyphCursor extends GlyphCursor {
     }
 
     @Override
+    void applyKerning(float kerning) {
+        advance(advancement.kerningAdvancement(kerning));
+    }
+
+    @Override
     boolean shouldRenderCurrentGlyph() {
         return shouldRenderCurrentGlyph;
     }

@@ -124,6 +124,12 @@ class ReSvgTestSuite {
 
     private record BundledFontSupport(@NotNull Map<String, Font> fonts) implements PlatformSupport {
         @Override
+        public float fontSize() {
+            // The reference images are rendered with resvg, whose default font size is 12.
+            return 12;
+        }
+
+        @Override
         public @Nullable ImageObserver imageObserver() {
             return null;
         }
@@ -216,8 +222,6 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> fillOpacity() {
         return checkDirectory("painting/fill-opacity", Set.of(
-                // We don't do proper kerning
-                "on-text.svg",
                 // Needs investigation
                 "with-linearGradient.svg",
                 "with-opacity.svg"));
@@ -226,11 +230,49 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> strokeOpacity() {
         return checkDirectory("painting/stroke-opacity", Set.of(
-                // We don't do proper kerning
-                "on-text.svg",
                 // Needs investigation
                 "with-linearGradient.svg",
                 "with-opacity.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> fontSize() {
+        return checkDirectory("text/font-size", Set.of(
+                "negative-size.svg" // UB
+        ));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> defs() {
+        return checkDirectory("structure/defs", Set.of(
+                // Gradient color ramp differs from the reference. Needs investigation
+                "multiple-defs.svg",
+                "nested-defs.svg",
+                "out-of-order.svg",
+                "simple-case.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> style() {
+        return checkDirectory("structure/style", Set.of(
+                // @import of external stylesheets is not supported
+                "external-CSS.svg",
+                // We follow SVG 2, where geometry properties can be set via CSS
+                "non-presentational-attribute.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> styleAttribute() {
+        return checkDirectory("structure/style-attribute", Set.of(
+                // We follow SVG 2, where geometry properties can be set via CSS
+                "non-presentational-attribute.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> use() {
+        return checkDirectory("structure/use", Set.of(
+                // References into external documents are not supported
+                "xlink-to-an-external-file.svg"));
     }
 
     private record ReSVGRefTest(@NotNull Path testFile) implements Executable {

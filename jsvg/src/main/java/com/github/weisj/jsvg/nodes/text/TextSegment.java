@@ -45,7 +45,8 @@ interface TextSegment {
         }
 
         @NotNull
-        TextMetrics computeTextMetrics(@NotNull RenderContext context, @NotNull UseTextLengthForCalculation flag);
+        TextMetrics computeTextMetrics(@NotNull RenderContext context, @NotNull UseTextLengthForCalculation flag,
+                boolean applyKerning);
 
         void appendTextShape(@NotNull GlyphCursor cursor, @NotNull MutableGlyphRun glyphRun,
                 @NotNull RenderContext context);

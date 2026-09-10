@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -97,18 +97,14 @@ public abstract class ShapeNode extends RenderableSVGNode
         // Todo: These are actually inheritable and hence have to go into the RenderContext
         // Todo: The marker shorthand is a bit more complicated than just being a template.
         // https://www.w3.org/TR/svg-markers/#MarkerShorthand
-        Marker template = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker"),
-                ElementRelation.TEMPLATE);
-        markerStart = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-start"),
-                ElementRelation.TEMPLATE);
+        Marker template = attributeNode.getReference(Marker.class, "marker", ElementRelation.TEMPLATE);
+        markerStart = attributeNode.getReference(Marker.class, "marker-start", ElementRelation.TEMPLATE);
         if (markerStart == null) markerStart = template;
 
-        markerMid = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-mid"),
-                ElementRelation.TEMPLATE);
+        markerMid = attributeNode.getReference(Marker.class, "marker-mid", ElementRelation.TEMPLATE);
         if (markerMid == null) markerMid = template;
 
-        markerEnd = attributeNode.getElementByHref(Marker.class, attributeNode.getValue("marker-end"),
-                ElementRelation.TEMPLATE);
+        markerEnd = attributeNode.getReference(Marker.class, "marker-end", ElementRelation.TEMPLATE);
         if (markerEnd == null) markerEnd = template;
 
         vectorEffects = VectorEffect.parse(attributeNode);

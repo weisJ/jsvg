@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -35,6 +35,18 @@ public interface TextOutput {
     static @NotNull TextOutput createDefault() {
         return NullTextOutput.INSTANCE;
     }
+
+    /**
+     * Reports the text-anchor offset of the current text element. The glyph transforms passed to
+     * {@link #codepoint} are produced during layout, before the anchor offset is known, and hence do
+     * not include it. Implementations which render glyphs themselves must therefore buffer glyph runs
+     * and shift them by {@code -offset} along the x-axis when rendering.
+     * <p>
+     * Called between {@link #beginText()} and {@link #endText()}, after all codepoints of the text
+     * element have been reported. Not called for text on a path (there the anchor is already part of
+     * the glyph transforms).
+     */
+    default void textAnchorOffset(double offset) {}
 
     void beginText();
 

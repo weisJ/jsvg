@@ -24,13 +24,16 @@ package com.github.weisj.jsvg.attributes;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.ShapeUtil;
@@ -58,10 +61,12 @@ public enum VectorEffect implements HasMatchName {
     }
 
     public static @NotNull Set<VectorEffect> parse(@NotNull AttributeNode attributeNode) {
-        @NotNull String[] vectorEffectsRaw = attributeNode.getStringList("vector-effect");
+        List<List<ComponentValue>> groups =
+                attributeNode.getSplitTokenList("vector-effect", SeparatorMode.COMMA_AND_WHITESPACE);
         EnumSet<VectorEffect> vectorEffects = EnumSet.noneOf(VectorEffect.class);
-        for (String effect : vectorEffectsRaw) {
-            vectorEffects.add(attributeNode.parser().parseEnum(effect, VectorEffect.None));
+        if (groups == null) return vectorEffects;
+        for (List<ComponentValue> group : groups) {
+            vectorEffects.add(attributeNode.parser().parseEnum(group, VectorEffect.None));
         }
         return vectorEffects;
     }

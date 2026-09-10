@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,50 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.css;
+package com.github.weisj.jsvg.parser.css.impl.phase4matcher;
 
-import java.util.Objects;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.google.errorprone.annotations.Immutable;
+import com.github.weisj.jsvg.parser.impl.AttributeValue;
 
-@Immutable
-public final class StyleProperty {
-    private final @NotNull String name;
-    private final @NotNull String value;
+public final class CascadeResult {
+    public final @NotNull Map<@NotNull String, AttributeValue.@NotNull Parsed> attributes;
+    public final boolean selectorsUseElementPositionInDom;
 
-    public StyleProperty(@NotNull String name, @NotNull String value) {
-        this.name = name;
-        this.value = value;
-    }
-
-    public @NotNull String name() {
-        return name;
-    }
-
-    public @NotNull String value() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        StyleProperty that = (StyleProperty) o;
-        return name.equals(that.name) && value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, value);
-    }
-
-    @Override
-    public String toString() {
-        return "StyleProperty{" +
-                "name='" + name + '\'' +
-                ", value='" + value + '\'' +
-                '}';
+    public CascadeResult(@NotNull Map<@NotNull String, AttributeValue.@NotNull Parsed> attributes,
+            boolean selectorsUseElementPositionInDom) {
+        this.attributes = Collections.unmodifiableMap(new HashMap<>(attributes));
+        this.selectorsUseElementPositionInDom = selectorsUseElementPositionInDom;
     }
 }

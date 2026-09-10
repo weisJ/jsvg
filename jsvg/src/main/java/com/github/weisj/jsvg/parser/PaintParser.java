@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,11 +22,13 @@
 package com.github.weisj.jsvg.parser;
 
 import java.awt.*;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 
 public interface PaintParser {
     @NotNull
@@ -37,4 +39,12 @@ public interface PaintParser {
 
     @Nullable
     SVGPaint parsePaint(@Nullable String value);
+
+    /** Parses a {@code <color>} (§CSS Color) directly from already-lexed component values. */
+    @Nullable
+    Color parseColor(@NotNull List<@NotNull ComponentValue> tokens);
+
+    /** Parses a {@code <paint>} keyword/color from already-lexed component values; {@code url(...)} is resolved by the caller. */
+    @Nullable
+    SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens);
 }

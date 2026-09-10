@@ -26,7 +26,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -109,13 +108,6 @@ public class Graphics2DOutput implements Output, CurrentColorProvider {
     @Override
     public void setClip(@Nullable Shape shape) {
         g.setClip(shape);
-    }
-
-    @Override
-    public Optional<Float> contextFontSize() {
-        Font f = g.getFont();
-        if (f != null) return Optional.of(f.getSize2D());
-        return Optional.empty();
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -43,7 +43,8 @@ public final class MeasurableFontSpec extends FontSpec {
         this.currentSize = currentSize;
     }
 
-    public static @NotNull MeasurableFontSpec createDefault() {
+    /** Root of the font-size cascade; {@code defaultEm} is the user-agent default font size. */
+    public static @NotNull MeasurableFontSpec createDefault(float defaultEm) {
         return new MeasurableFontSpec(
                 // Ensure there is always a valid family available.
                 new String[] {SVGFont.defaultFontFamily()},
@@ -51,7 +52,7 @@ public final class MeasurableFontSpec extends FontSpec {
                 null,
                 FontStretch.Normal.percentage(),
                 PredefinedFontWeight.NORMAL_WEIGHT,
-                Unit.RAW.valueOf(SVGFont.defaultFontSize()));
+                Unit.RAW.valueOf(defaultEm));
     }
 
     public @NotNull String[] families() {
@@ -75,6 +76,11 @@ public final class MeasurableFontSpec extends FontSpec {
         return currentSize.resolveFontSize(context);
     }
 
+    /** Resolves the font size against an explicit parent em; used while establishing the child context. */
+    public float emSize(@NotNull MeasureContext context, float parentEm) {
+        return currentSize.resolveFontSize(context, parentEm);
+    }
+
     public float effectiveSize(@NotNull MeasureContext context) {
         // TODO: Choose the size of the font so that its lowercase letters
         // (as determined by the x-height of the font)
@@ -84,6 +90,13 @@ public final class MeasurableFontSpec extends FontSpec {
             return SVGFont.emFromEx(emSize * sizeAdjust.resolveFontSize(context));
         }
         return emSize;
+    }
+
+    /** Replaces the size with its computed value; children inherit it (CSS Fonts, font-size). */
+    public @NotNull MeasurableFontSpec withComputedSize(float size) {
+        Length computedSize = Unit.RAW.valueOf(size);
+        if (computedSize.equals(currentSize)) return this;
+        return new MeasurableFontSpec(families, style, sizeAdjust, stretch, currentWeight, computedSize);
     }
 
     public @NotNull MeasurableFontSpec withFontSize(@Nullable FontSize size, @Nullable Length sizeAdjust) {

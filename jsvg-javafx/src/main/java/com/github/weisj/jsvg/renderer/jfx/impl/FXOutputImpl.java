@@ -191,12 +191,6 @@ public final class FXOutputImpl implements Output, CurrentColorProvider {
     }
 
     @Override
-    public Optional<Float> contextFontSize() {
-        // TODO check this actually returns what we're after
-        return Optional.of((float) ctx.getFont().getSize());
-    }
-
-    @Override
     public @NotNull Output createChild() {
         return new FXOutputImpl(this);
     }

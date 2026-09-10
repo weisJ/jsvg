@@ -71,7 +71,7 @@ class LayoutGroupSegment<E, T extends TextContainer<E> & CursorContext> implemen
         Length length = group.fixedLength();
         if (length != null) {
             return new GlyphAdvancement(
-                    computeTextMetrics(context, UseTextLengthForCalculation.NO),
+                    computeTextMetrics(context, UseTextLengthForCalculation.NO, cursor.kerningEnabled),
                     length.resolve(context.measureContext()), parent.lengthAdjust);
         }
         return cursor.advancement();
@@ -96,8 +96,8 @@ class LayoutGroupSegment<E, T extends TextContainer<E> & CursorContext> implemen
 
     @Override
     public @NotNull TextMetrics computeTextMetrics(@NotNull RenderContext context,
-            @NotNull UseTextLengthForCalculation flag) {
-        return TextMetrics.computeTextMetrics(group, context, flag);
+            @NotNull UseTextLengthForCalculation flag, boolean applyKerning) {
+        return TextMetrics.computeTextMetrics(group, context, flag, applyKerning);
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,6 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.nodes.Rect;
 import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.LoaderContext;
+import com.github.weisj.jsvg.parser.css.impl.phase4matcher.StyleSheets;
 
 public final class ParserTestUtil {
 
@@ -39,8 +39,10 @@ public final class ParserTestUtil {
 
     public static @NotNull AttributeNode createDummyAttributeNode(@NotNull Map<String, String> attrs) {
         ParsedDocument document = new ParsedDocument(null, LoaderContext.createDefault(), LOAD_HELPER);
-        AttributeNode attributeNode = new AttributeNode("dummy", attrs, Collections.emptyList());
-        attributeNode.setElement(new ParsedElement(null, document, null, attributeNode, new Rect()));
+        AttributeNode attributeNode = new AttributeNode("dummy", attrs, new StyleSheets());
+        attributeNode.setElement(new ParsedElement(null, document, null, 1, 1, attributeNode, new Rect()));
+        // Resolve declared attributes into values, as the loader does for real elements.
+        attributeNode.prepareForNodeBuilding();
         return attributeNode;
     }
 }

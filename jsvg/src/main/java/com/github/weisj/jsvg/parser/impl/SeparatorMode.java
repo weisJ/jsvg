@@ -42,6 +42,11 @@ public enum SeparatorMode implements ListSplitter {
         return allowWhitespace;
     }
 
+    /** Separator char, or {@code 0} for whitespace-only. */
+    public char separatorChar() {
+        return separator;
+    }
+
     @Override
     public SplitResult testChar(char c, int subwordIndex, @NotNull String s, int stringIndex) {
         return (separator != 0 && c == separator) ? SplitResult.YES : SplitResult.NO;
