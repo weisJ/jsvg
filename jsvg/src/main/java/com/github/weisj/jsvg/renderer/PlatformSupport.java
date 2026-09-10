@@ -33,6 +33,10 @@ import com.github.weisj.jsvg.attributes.font.SVGFont;
 
 public interface PlatformSupport {
 
+    /**
+     * @deprecated This class is no longer used and will be removed in a future version.
+     */
+    @Deprecated
     interface TargetSurface {
         void repaint();
     }
@@ -40,7 +44,11 @@ public interface PlatformSupport {
     @Nullable
     ImageObserver imageObserver();
 
+    /**
+     * @deprecated This method is no longer used and will be removed in a future version.
+     */
     @Nullable
+    @Deprecated
     TargetSurface targetSurface();
 
     default float fontSize() {
