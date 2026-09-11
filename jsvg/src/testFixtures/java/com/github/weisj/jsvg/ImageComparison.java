@@ -528,7 +528,7 @@ public final class ImageComparison {
         public static final @NotNull ImageComparison.ReferenceTestResult SUCCESS =
                 new ReferenceTestResult(ImageComparisonState.MATCH, () -> "SUCCESS");
         public static final @NotNull ImageComparison.ReferenceTestResult FAILURE =
-                new ReferenceTestResult(ImageComparisonState.MATCH, () -> "FAILURE");
+                new ReferenceTestResult(ImageComparisonState.MISMATCH, () -> "FAILURE");
 
         private final @NotNull ImageComparisonState comparisonState;
         private final @NotNull Supplier<@NotNull String> failureLogSupplier;
