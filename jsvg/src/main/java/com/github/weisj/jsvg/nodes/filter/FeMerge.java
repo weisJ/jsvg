@@ -120,6 +120,10 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
         Composite composite = CompositeModeComposite.inColorSpace(AlphaComposite.SrcOver,
                 colorInterpolation(filterContext));
         Channel result = filterPrimitiveBase.channel(inputChannels[0], filterContext);
+        if (isTransparentConstant(result)) {
+            // Remove any zero alpha colors.
+            result = ((ConstantColorChannel) result).withColor(0);
+        }
         int i = 1;
         // Transparent constants are identities even after the result ceases to be constant.
         while (i < inputChannels.length) {

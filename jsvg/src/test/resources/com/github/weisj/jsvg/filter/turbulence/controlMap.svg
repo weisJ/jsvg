@@ -1,7 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40">
-	<!-- Both maps are linearRGB noise, read as sRGB by displacement. Swapping 
-		equal RGB components forces an image-filter consumer in the second panel. -->
+	<!-- Both maps are linearRGB noise, read as sRGB by displacement. A color-preserving 
+		matrix between the noise and displacement must not change that relationship. -->
 	<defs>
+		<linearGradient id="x" gradientUnits="userSpaceOnUse"
+			x2="64" color-interpolation="sRGB">
+			<stop stop-color="#204080" />
+			<stop offset="1" stop-color="#a04000" />
+		</linearGradient>
+		<linearGradient id="y" gradientUnits="userSpaceOnUse"
+			x2="0" y2="64" color-interpolation="sRGB">
+			<stop stop-color="#002000" />
+			<stop offset="1" stop-color="#00a000" />
+		</linearGradient>
+		<g id="art">
+			<rect width="64" height="64" fill="url(#x)" />
+			<rect width="64" height="64" fill="url(#y)" fill-opacity=".5" />
+		</g>
+		<clipPath id="sample">
+			<rect x="12" y="12" width="16" height="16" />
+		</clipPath>
 		<filter id="direct" filterUnits="userSpaceOnUse" x="0" y="0"
 			width="40" height="40">
 			<feTurbulence type="fractalNoise" baseFrequency="0"
@@ -29,13 +46,18 @@
 				color-interpolation-filters="sRGB" />
 		</filter>
 	</defs>
-	<rect x="16" y="16" width="8" height="8" fill="#cc8040"
-		filter="url(#direct)" />
-	<g transform="translate(40)">
-		<rect x="16" y="16" width="8" height="8" fill="#cc8040"
-			filter="url(#filtered)" />
+	<g clip-path="url(#sample)">
+		<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#art"
+			filter="url(#direct)" />
 	</g>
-	<!-- Copying turbulence as the visible input also consumes its raster ColorModel. -->
+	<g transform="translate(40)">
+		<g clip-path="url(#sample)">
+			<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#art"
+				filter="url(#filtered)" />
+		</g>
+	</g>
+	<!-- The working color space of displacement must not change the colors 
+		of its visible input. -->
 	<g transform="translate(80)">
 		<rect width="40" height="40" filter="url(#source)" />
 	</g>

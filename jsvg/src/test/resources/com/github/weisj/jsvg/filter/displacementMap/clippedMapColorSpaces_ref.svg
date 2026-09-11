@@ -23,6 +23,9 @@
 		<clipPath id="sample">
 			<rect x="20" y="20" width="24" height="24" />
 		</clipPath>
+		<clipPath id="outside">
+			<rect x="56" y="56" width="8" height="8" />
+		</clipPath>
 	</defs>
 	<!-- linearRGB, R/B: dx=-40*(Cx-.5), dy=-40*(Cy-.5). sRGB channels are 64/255, 
 		128/255, 176/255; linear channels use the IEC sRGB transfer function. Alpha 
@@ -39,5 +42,13 @@
 		<g transform="translate(9.9607843137 -7.6078431373)">
 			<use xlink:href="#art" />
 		</g>
+	</g>
+	<!-- Outside the map subregion, transparent black selects zero: both offsets 
+		are +20. -->
+	<g clip-path="url(#outside)">
+		<use xlink:href="#art" transform="translate(20 20)" />
+	</g>
+	<g transform="translate(64)" clip-path="url(#outside)">
+		<use xlink:href="#art" transform="translate(20 20)" />
 	</g>
 </svg>

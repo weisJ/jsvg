@@ -1,30 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="64">
-	<!-- The half-alpha map supplies straight #4080b0 RGB. Only the selected 
-		R/B map components change working space; displaced artwork keeps its colors. -->
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="64">
+	<!-- Sample a smooth two-dimensional color field away from its boundaries. 
+		Fractional displacement is specified, but the interpolation algorithm is 
+		not. Its uncertainty is bounded by the field's one-level-per-unit slope; 
+		the test allows four 8-bit color levels for interpolation and conversion 
+		rounding, without allowing any mismatching pixels. -->
 	<defs>
+		<linearGradient id="x" gradientUnits="userSpaceOnUse"
+			x2="64" color-interpolation="sRGB">
+			<stop stop-color="#204080" />
+			<stop offset="1" stop-color="#a04000" />
+		</linearGradient>
+		<linearGradient id="y" gradientUnits="userSpaceOnUse"
+			x2="0" y2="64" color-interpolation="sRGB">
+			<stop stop-color="#002000" />
+			<stop offset="1" stop-color="#00a000" />
+		</linearGradient>
+		<g id="art">
+			<rect width="64" height="64" fill="url(#x)" />
+			<rect width="64" height="64" fill="url(#y)" fill-opacity=".5" />
+		</g>
+		<clipPath id="sample">
+			<rect x="20" y="20" width="24" height="24" />
+		</clipPath>
 		<filter id="f0" filterUnits="userSpaceOnUse" x="0" y="0"
 			width="64" height="64" color-interpolation-filters="linearRGB">
 			<feFlood flood-color="#4080b0" flood-opacity=".5"
 				result="map" />
 			<feDisplacementMap in="SourceGraphic" in2="map"
-				scale="40" xChannelSelector="R" yChannelSelector="B" />
+				scale="40" xChannelSelector="R" yChannelSelector="B"
+				color-interpolation-filters="linearRGB" />
 		</filter>
 		<filter id="f1" filterUnits="userSpaceOnUse" x="0" y="0"
 			width="64" height="64" color-interpolation-filters="sRGB">
 			<feFlood flood-color="#4080b0" flood-opacity=".5"
 				result="map" />
 			<feDisplacementMap in="SourceGraphic" in2="map"
-				scale="40" xChannelSelector="R" yChannelSelector="B" />
+				scale="40" xChannelSelector="R" yChannelSelector="B"
+				color-interpolation-filters="sRGB" />
 		</filter>
 	</defs>
-	<g transform="translate(0)" filter="url(#f0)">
-		<rect x="16" y="24" width="6" height="12" fill="#8040c0"
-			fill-opacity=".5" />
-		<rect x="22" y="24" width="6" height="12" fill="#40c080" />
+	<g transform="translate(0)" clip-path="url(#sample)">
+		<g filter="url(#f0)">
+			<use xlink:href="#art" />
+		</g>
 	</g>
-	<g transform="translate(64)" filter="url(#f1)">
-		<rect x="16" y="24" width="6" height="12" fill="#8040c0"
-			fill-opacity=".5" />
-		<rect x="22" y="24" width="6" height="12" fill="#40c080" />
+	<g transform="translate(64)" clip-path="url(#sample)">
+		<g filter="url(#f1)">
+			<use xlink:href="#art" />
+		</g>
 	</g>
 </svg>

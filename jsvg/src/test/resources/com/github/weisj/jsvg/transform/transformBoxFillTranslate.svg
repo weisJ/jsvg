@@ -8,11 +8,11 @@
 
 	<g fill="blue">
 		<rect x="10" y="10" width="100" height="100"
-			transform="translate(50%)" />
+			style="transform: translate(50%)" />
 	</g>
 
 	<g transform="translate(0, 110)" fill="red">
 		<rect x="10" y="10" width="100" height="100" id="a"
-			transform="translate(50%)" />
+			style="transform: translate(50%)" />
 	</g>
 </svg>

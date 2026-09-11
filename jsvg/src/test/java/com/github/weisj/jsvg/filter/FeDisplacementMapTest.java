@@ -58,13 +58,15 @@ class FeDisplacementMapTest {
 
     @TestFactory
     Stream<DynamicTest> selectedMapComponentsMatchArtwork() {
-        return Stream.of("constantColorSpaces", "rasterColorSpaces", "alphaSelectors")
+        // These color fields vary by at most one 8-bit level per unit and axis. Fractional sampling
+        // is implementation-defined; four levels cover interpolation and color conversion rounding.
+        return Stream.of("constantColorSpaces", "clippedMapColorSpaces", "alphaSelectors")
                 .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
                         compareImages(new CompareInfo(
                                 expected(new PathImageSource("filter/displacementMap/" + name + "_ref.svg"),
                                         RenderType.JSVG),
                                 actual(new PathImageSource("filter/displacementMap/" + name + ".svg"), RenderType.JSVG),
-                                0, 0)))));
+                                0, 4 / 255.0)))));
     }
 
 }

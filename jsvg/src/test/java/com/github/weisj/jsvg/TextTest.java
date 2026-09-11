@@ -86,11 +86,11 @@ class TextTest {
     @Test
     void dominantBaselineTest() {
         assertDoesNotThrow(() -> renderJsvg("text/dominantBaseline.svg"));
-        // Weaker tolerances as the offset in the reference cannot be determined exactly.
+        // A horizontal text path has the same baseline as ordinary text at that path's y coordinate.
         assertEquals(SUCCESS, compareImages(new CompareInfo(
                 expected(new PathImageSource("text/baselineOnPath_ref.svg"), RenderType.JSVG),
                 actual(new PathImageSource("text/baselineOnPath.svg"), RenderType.JSVG),
-                0.5, 0.1)));
+                0, 0)));
     }
 
     @Test
