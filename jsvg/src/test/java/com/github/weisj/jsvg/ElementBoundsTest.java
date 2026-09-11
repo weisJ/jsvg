@@ -51,13 +51,17 @@ class ElementBoundsTest {
     }
 
     private static ElementBounds bounds(String content) {
+        return bounds(content, context());
+    }
+
+    private static ElementBounds bounds(String content, RenderContext context) {
         AtomicReference<DomDocument> dom = new AtomicReference<>();
         String svg = "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>" + content + "</svg>";
         assertNotNull(new SVGLoader().load(new ByteArrayInputStream(svg.getBytes(StandardCharsets.UTF_8)), null,
                 LoaderContext.builder().preProcessor(root -> dom.set(root.document())).build()));
         SVGNode node = dom.get().getElementById(SVGNode.class, "target");
         assertNotNull(node);
-        return new ElementBounds(node, NodeRenderer.setupRenderContext(node, context()));
+        return new ElementBounds(node, NodeRenderer.setupRenderContext(node, context));
     }
 
     private static void assertBox(Rectangle2D actual, double x, double y, double width, double height) {
@@ -65,6 +69,73 @@ class ElementBoundsTest {
                 () -> assertEquals(y, actual.getY(), 1e-6),
                 () -> assertEquals(width, actual.getWidth(), 1e-6),
                 () -> assertEquals(height, actual.getHeight(), 1e-6));
+    }
+
+    @Test
+    void strokeBoxUsesTheUndashedOutline() {
+        ElementBounds bounds = bounds("""
+                <path id="target" d="M10 20H40" stroke="black" stroke-width="10"
+                    stroke-linecap="round" stroke-dasharray="1 100" stroke-dashoffset="50" pathLength="1"/>
+                """);
+        assertBox(bounds.strokeBox(), 5, 15, 40, 10);
+        assertBox(bounds.boundingBox(), 10, 20, 30, 0);
+    }
+
+    @Test
+    void strokeBoxesOfClosedBasicShapes() {
+        for (String join : new String[] {"miter", "round", "bevel"}) {
+            String stroke = " id='target' stroke='black' stroke-width='10' stroke-linejoin='" + join
+                    + "' stroke-miterlimit='1' stroke-linecap='square' stroke-dasharray='1 100'/>";
+            assertBox(bounds("<rect x='10' y='20' width='30' height='40'" + stroke).strokeBox(), 5, 15, 40, 50);
+            assertBox(bounds("<rect x='10' y='20' width='30' height='40' rx='8' ry='4'" + stroke).strokeBox(),
+                    5, 15, 40, 50);
+            assertBox(bounds("<circle cx='25' cy='40' r='15'" + stroke).strokeBox(), 5, 20, 40, 40);
+            assertBox(bounds("<ellipse cx='25' cy='40' rx='15' ry='20'" + stroke).strokeBox(), 5, 15, 40, 50);
+        }
+    }
+
+    @Test
+    void nonScalingStrokeBoxAccountsForTheCoordinateSystem() {
+        RenderContext context = context();
+        context.userSpaceTransform().scale(2, 4);
+        assertBox(bounds("""
+                <rect id="target" x="10" y="20" width="30" height="40"
+                    stroke="black" stroke-width="10" vector-effect="non-scaling-stroke"/>
+                """, context).strokeBox(), 7.5, 18.75, 35, 42.5);
+    }
+
+    @Test
+    void strokeBoxRespectsButtCapsAndMiterJoins() {
+        assertBox(bounds("""
+                <path id="target" d="M10 20H40" stroke="black" stroke-width="10" stroke-linecap="butt"/>
+                """).strokeBox(), 10, 15, 30, 10);
+        // The two segments have 3:4 slopes. The outer miter extends 5 / 0.6 above the apex.
+        assertBox(bounds("""
+                <path id="target" d="M20 40L35 20L50 40" fill="none"
+                    stroke="black" stroke-width="10" stroke-linejoin="miter" stroke-miterlimit="4"/>
+                """).strokeBox(), 16, 20 - 5 / 0.6, 38, 23 + 5 / 0.6);
+    }
+
+    @Test
+    void strokeBoxIgnoresOpacityAndVisibility() {
+        assertBox(bounds("""
+                <rect id="target" x="10" y="20" width="30" height="40" stroke="black"
+                    stroke-width="10" stroke-opacity="0" opacity="0" visibility="hidden"/>
+                """).strokeBox(), 5, 15, 40, 50);
+        assertBox(bounds("""
+                <rect id="target" x="10" y="20" width="30" height="40"
+                    stroke="rgba(0,0,0,0)" stroke-width="10"/>
+                """).strokeBox(), 5, 15, 40, 50);
+    }
+
+    @Test
+    void strokeBoxExcludesAbsentAndZeroWidthStrokes() {
+        assertBox(bounds("""
+                <rect id="target" x="10" y="20" width="30" height="40" stroke="none" stroke-width="20"/>
+                """).strokeBox(), 10, 20, 30, 40);
+        assertBox(bounds("""
+                <rect id="target" x="10" y="20" width="30" height="40" stroke="black" stroke-width="0"/>
+                """).strokeBox(), 10, 20, 30, 40);
     }
 
     @Test

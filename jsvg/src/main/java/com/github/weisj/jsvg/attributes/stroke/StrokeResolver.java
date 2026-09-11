@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,23 +36,14 @@ public final class StrokeResolver {
     // https://svgwg.org/svg2-draft/painting.html#StrokeMiterlimitProperty
     public static @NotNull Stroke resolve(float pathLengthFactor, @NotNull MeasureContext measureContext,
             @NotNull StrokeContext context) {
-        LengthValue strokeWidth = context.strokeWidth;
-        LineCap lineCap = context.lineCap;
-        LineJoin lineJoin = context.lineJoin;
-        float miterLimit = context.miterLimit;
-
+        BasicStroke solidStroke = resolveUndashed(measureContext, context);
         Length[] dashPattern = context.dashPattern;
         LengthValue dashOffset = context.dashOffset;
 
-        assert strokeWidth != null;
-        assert lineCap != null;
-        assert lineJoin != null;
-        assert Length.isSpecified(miterLimit);
         assert dashOffset != null;
         assert dashPattern != null;
 
-        // In practice, any miter join will exceed a miter limit between 0 and 1.
-        miterLimit = Math.max(1, miterLimit);
+        if (dashPattern.length == 0) return solidStroke;
 
         float[] dashes = new float[dashPattern.length];
         float offsetLength = 0;
@@ -65,12 +56,20 @@ public final class StrokeResolver {
         float phase = dashOffset.resolve(measureContext) * pathLengthFactor;
         if (phase < 0) phase += offsetLength;
 
-        if (dashes.length == 0) {
-            return new BasicStroke(strokeWidth.resolve(measureContext), lineCap.awtCode(), lineJoin.awtCode(),
-                    miterLimit);
-        } else {
-            return new BasicStroke(strokeWidth.resolve(measureContext), lineCap.awtCode(), lineJoin.awtCode(),
-                    miterLimit, dashes, phase);
-        }
+        return new BasicStroke(solidStroke.getLineWidth(), solidStroke.getEndCap(), solidStroke.getLineJoin(),
+                solidStroke.getMiterLimit(), dashes, phase);
+    }
+
+    /** The stroke used for SVG stroke bounds, which ignore dash arrays, offsets and pathLength. */
+    public static @NotNull BasicStroke resolveUndashed(@NotNull MeasureContext measureContext,
+            @NotNull StrokeContext context) {
+        assert context.strokeWidth != null;
+        assert context.lineCap != null;
+        assert context.lineJoin != null;
+        assert Length.isSpecified(context.miterLimit);
+
+        // In practice, any miter join will exceed a miter limit between 0 and 1.
+        return new BasicStroke(context.strokeWidth.resolve(measureContext), context.lineCap.awtCode(),
+                context.lineJoin.awtCode(), Math.max(1, context.miterLimit));
     }
 }

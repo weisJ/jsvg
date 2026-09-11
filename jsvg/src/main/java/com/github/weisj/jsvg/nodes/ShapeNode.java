@@ -34,12 +34,13 @@ import com.github.weisj.jsvg.attributes.VectorEffect;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontSize;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
-import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.stroke.StrokeResolver;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.prototype.*;
+import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
@@ -124,10 +125,10 @@ public abstract class ShapeNode extends RenderableSVGNode
         switch (box) {
             case BoundingBox:
                 return realShape;
-            case StrokeBox:
-                Area area = new Area(realShape);
-                area.add(new Area(computeEffectiveStroke(context).createStrokedShape(realShape)));
-                return area;
+            case StrokeBox: {
+                BasicStroke stroke = strokeForBounds(context);
+                return stroke != null ? strokeBoxShape(context, stroke, realShape) : realShape;
+            }
             default:
                 throw new IllegalStateException("Unexpected value: " + box);
         }
@@ -143,28 +144,46 @@ public abstract class ShapeNode extends RenderableSVGNode
                 if (!context.strokePaint().isVisible(context)) return bounds;
                 Shape sourceShape = shape.shape(context, false);
                 Stroke stroke = computeEffectiveStroke(context);
-                Shape strokedShape;
-                if (VectorEffect.shouldApplyNonScalingStroke(vectorEffects)) {
-                    AffineTransform transform = new AffineTransform(context.rootTransform());
-                    transform.concatenate(context.userSpaceTransform());
-                    strokedShape = VectorEffect.nonScalingStrokeShape(
-                            vectorEffects, transform, context, stroke, sourceShape);
-                } else {
-                    strokedShape = stroke.createStrokedShape(sourceShape);
-                }
+                Shape strokedShape = strokeShape(context, stroke, sourceShape);
                 return bounds.createUnion(strokedShape.getBounds2D());
             }
             case StrokeBox: {
-                LengthValue strokeWidth = RenderContextAccessor.instance().strokeContext(context).strokeWidth;
-                if (strokeWidth != null) {
-                    float stroke = strokeWidth.resolve(context.measureContext());
-                    if (stroke > 0) bounds = GeometryUtil.grow(bounds, stroke);
+                BasicStroke stroke = strokeForBounds(context);
+                if (stroke == null) return bounds;
+                if (shape.canComputeStrokeBoundsByExpansion() && bounds.getWidth() > 0 && bounds.getHeight() > 0
+                        && !VectorEffect.shouldApplyNonScalingStroke(vectorEffects)) {
+                    return GeometryUtil.grow(bounds, stroke.getLineWidth() / 2.0);
                 }
-                return bounds;
+                return bounds.createUnion(strokeBoxShape(context, stroke, shape.shape(context, false)).getBounds2D());
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + box);
         }
+    }
+
+    private static @Nullable BasicStroke strokeForBounds(@NotNull RenderContext context) {
+        // Stroke opacity does not affect the box; only an absent stroke excludes its outline.
+        if (context.strokePaint() == PredefinedPaints.NONE) return null;
+        BasicStroke stroke = StrokeResolver.resolveUndashed(context.measureContext(),
+                RenderContextAccessor.instance().strokeContext(context));
+        return stroke.getLineWidth() != 0 ? stroke : null;
+    }
+
+    private @NotNull Shape strokeBoxShape(@NotNull RenderContext context, @NotNull BasicStroke stroke,
+            @NotNull Shape sourceShape) {
+        Area area = new Area(sourceShape);
+        area.add(new Area(strokeShape(context, stroke, sourceShape)));
+        return area;
+    }
+
+    private @NotNull Shape strokeShape(@NotNull RenderContext context, @NotNull Stroke stroke,
+            @NotNull Shape sourceShape) {
+        if (VectorEffect.shouldApplyNonScalingStroke(vectorEffects)) {
+            AffineTransform transform = new AffineTransform(context.rootTransform());
+            transform.concatenate(context.userSpaceTransform());
+            return VectorEffect.nonScalingStrokeShape(vectorEffects, transform, context, stroke, sourceShape);
+        }
+        return stroke.createStrokedShape(sourceShape);
     }
 
     @Override
