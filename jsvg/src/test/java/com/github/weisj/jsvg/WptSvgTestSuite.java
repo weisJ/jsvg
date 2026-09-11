@@ -224,7 +224,7 @@ class WptSvgTestSuite {
             }
 
             @Override
-            public @Nullable FontLoader fontLoader() {
+            public @NotNull FontLoader fontLoader() {
                 return fontLoader;
             }
         };
