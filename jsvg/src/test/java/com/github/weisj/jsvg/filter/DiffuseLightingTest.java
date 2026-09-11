@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
@@ -60,7 +61,7 @@ class DiffuseLightingTest {
 
     @TestFactory
     Stream<DynamicTest> lightingMatchesReferenceArtwork() {
-        return Stream.of("rotated", "rotatedPoint", "kernelDefaults", "normals/asymmetric")
+        return Stream.of("rotated", "rotatedPoint", "kernelDefaults")
                 .map(name -> referenceArtwork(name, null));
     }
 
@@ -84,6 +85,18 @@ class DiffuseLightingTest {
             assertEquals(SUCCESS, compareImages(new CompareInfo(
                     expected(source, RenderType.Batik), actual(source, RenderType.JSVG), 0, 1.0 / 255)));
         }));
+    }
+
+    @Test
+    void asymmetricNormalsMatchSpecifiedKernels() {
+        // librsvg reference, independently checked at every pixel against the nine specified Sobel
+        // kernels by tools/reference-audit/generate-heightmap.py. The PNG input fixes alpha rounding.
+        // Batik has a left-edge discrepancy on this height field; it is not the oracle for this case.
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("filter/diffuseLighting/normals/asymmetric_ref.png"),
+                        RenderType.DiskImage),
+                actual(new PathImageSource("filter/diffuseLighting/normals/asymmetric.svg"), RenderType.JSVG),
+                0, 1 / 255.0)));
     }
 
     @TestFactory

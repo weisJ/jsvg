@@ -6,8 +6,8 @@
 				operator="over" />
 		</filter>
 	</defs>
-	<!-- Policy reference only: unavailable channels fall back to LastResult 
-		(initially SourceGraphic). -->
+	<!-- Robustness fixture for an unsupported legacy input; no fallback rendering 
+		is asserted. -->
 	<rect x="12" y="12" width="24" height="24" fill="red"
 		filter="url(#f)" />
 </svg>

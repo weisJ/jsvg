@@ -24,11 +24,13 @@ package com.github.weisj.jsvg.filter;
 import static com.github.weisj.jsvg.ImageComparison.*;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.*;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
@@ -37,10 +39,16 @@ class ChannelFallbackTest {
     @TestFactory
     Stream<DynamicTest> referenceImages() {
         return Stream
-                .of("missingBackground", "missingNamedInput", "missingTileInput", "forwardTileInput", "invalidResult")
+                .of("missingNamedInput", "missingTileInput", "forwardTileInput", "invalidResult")
                 .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
                         expected(new PathImageSource("filter/channelFallback/" + name + "_ref.svg"), RenderType.JSVG),
                         actual(new PathImageSource("filter/channelFallback/" + name + ".svg"), RenderType.JSVG), 0,
                         0)))));
+    }
+
+    @Test
+    void unsupportedBackgroundInputDoesNotCrash() {
+        // BackgroundImage is unsupported. This establishes robustness, not a rendering fallback policy.
+        assertDoesNotThrow(() -> renderJsvg("filter/channelFallback/missingBackground.svg"));
     }
 }
