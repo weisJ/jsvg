@@ -59,12 +59,25 @@ class GaussianBlurTest {
     }
 
     @Test
-    void transparentEdgesPreserveWhiteAndAlpha() {
-        // Batik's linearRGB color conversion darkens low-alpha white through rounding.
-        // White is color-space invariant, so use its sRGB blur as the independent reference.
-        assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new PathImageSource("filter/gaussianBlur/transparentEdges_ref.svg"), RenderType.Batik),
-                actual(new PathImageSource("filter/gaussianBlur/transparentEdges.svg"), RenderType.JSVG), 0, 0)));
+    void transparentEdgesPreserveWhiteAndAlpha() throws IOException {
+        // Batik can darken low-alpha white through rounding, even in sRGB on Linux and Windows.
+        // Use its alpha coverage as the independent reference and check white preservation directly.
+        BufferedImage reference = expected(new PathImageSource("filter/gaussianBlur/transparentEdges_ref.svg"),
+                RenderType.Batik).render(null);
+        BufferedImage blurred = actual(new PathImageSource("filter/gaussianBlur/transparentEdges.svg"),
+                RenderType.JSVG).render(null);
+        assertEquals(reference.getWidth(), blurred.getWidth());
+        assertEquals(reference.getHeight(), blurred.getHeight());
+        for (int y = 0; y < reference.getHeight(); y++) {
+            for (int x = 0; x < reference.getWidth(); x++) {
+                int pixel = blurred.getRGB(x, y);
+                int alpha = pixel >>> 24;
+                assertEquals(reference.getRGB(x, y) >>> 24, alpha, "Alpha at " + x + "," + y);
+                if (alpha != 0) {
+                    assertEquals(0xffffff, pixel & 0xffffff, "White at " + x + "," + y);
+                }
+            }
+        }
     }
 
     @Test
