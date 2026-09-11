@@ -172,32 +172,52 @@ public enum EdgeMode {
 
         if (xOff > width || yOff > height || rightPadding > width || bottomPadding > height) {
             // A border wider than the input needs more than one copy of its opposite edge.
-            if (xOff >= 0 && yOff >= 0 && rightPadding >= 0 && bottomPadding >= 0) {
-                BufferedImage tile = edgeModeImage.img.getSubimage(xOff, yOff, width, height);
-                g.setPaint(new TexturePaint(tile, edgeModeImage.sourceBounds));
-                g.fillRect(0, 0, edgeModeImage.img.getWidth(), yOff);
-                g.fillRect(0, yOff + height, edgeModeImage.img.getWidth(), bottomPadding);
-                g.fillRect(0, yOff, xOff, height);
-                g.fillRect(xOff + width, yOff, rightPadding, height);
-            } else {
-                // Only part of the tile is allocated. Keep the full region's repetition period,
-                // and let drawImage clip source pixels outside the backing image.
-                for (int y = Math.floorDiv(-yOff, height); y * height < edgeModeImage.img.getHeight() - yOff; y++) {
-                    for (int x = Math.floorDiv(-xOff, width); x * width < edgeModeImage.img.getWidth() - xOff; x++) {
-                        if (x == 0 && y == 0) {
-                            continue;
-                        }
-                        g.drawImage(edgeModeImage.img,
-                                xOff + x * width, yOff + y * height, xOff + (x + 1) * width, yOff + (y + 1) * height,
-                                xOff, yOff, xOff + width, yOff + height, null);
-                    }
-                }
-            }
-            g.dispose();
-            return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
+            paintRepeatedEdges(g, edgeModeImage.img, edgeModeImage.sourceBounds);
+        } else {
+            paintWrappedEdges(g, edgeModeImage.img, edgeModeImage.sourceBounds);
         }
+        g.dispose();
 
-        BufferedImage img = edgeModeImage.img;
+        return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
+    }
+
+    private static void paintRepeatedEdges(@NotNull Graphics2D g, @NotNull BufferedImage img,
+            @NotNull Rectangle sourceBounds) {
+        int xOff = sourceBounds.x;
+        int yOff = sourceBounds.y;
+        int width = sourceBounds.width;
+        int height = sourceBounds.height;
+        int rightPadding = img.getWidth() - xOff - width;
+        int bottomPadding = img.getHeight() - yOff - height;
+        if (xOff >= 0 && yOff >= 0 && rightPadding >= 0 && bottomPadding >= 0) {
+            BufferedImage tile = img.getSubimage(xOff, yOff, width, height);
+            g.setPaint(new TexturePaint(tile, sourceBounds));
+            g.fillRect(0, 0, img.getWidth(), yOff);
+            g.fillRect(0, yOff + height, img.getWidth(), bottomPadding);
+            g.fillRect(0, yOff, xOff, height);
+            g.fillRect(xOff + width, yOff, rightPadding, height);
+            return;
+        }
+        // Only part of the tile is allocated. Keep the full region's repetition period,
+        // and let drawImage clip source pixels outside the backing image.
+        for (int y = Math.floorDiv(-yOff, height); y * height < img.getHeight() - yOff; y++) {
+            for (int x = Math.floorDiv(-xOff, width); x * width < img.getWidth() - xOff; x++) {
+                if (x == 0 && y == 0) continue;
+                g.drawImage(img,
+                        xOff + x * width, yOff + y * height, xOff + (x + 1) * width, yOff + (y + 1) * height,
+                        xOff, yOff, xOff + width, yOff + height, null);
+            }
+        }
+    }
+
+    private static void paintWrappedEdges(@NotNull Graphics2D g, @NotNull BufferedImage img,
+            @NotNull Rectangle sourceBounds) {
+        int xOff = sourceBounds.x;
+        int yOff = sourceBounds.y;
+        int width = sourceBounds.width;
+        int height = sourceBounds.height;
+        int rightPadding = img.getWidth() - xOff - width;
+        int bottomPadding = img.getHeight() - yOff - height;
         if (yOff > 0) {
             g.drawImage(img, xOff, 0, xOff + width, yOff,
                     xOff, height, xOff + width, yOff + height, null);
@@ -230,9 +250,6 @@ public enum EdgeMode {
             g.drawImage(img, xOff + width, yOff + height, img.getWidth(), img.getHeight(),
                     xOff, yOff, xOff + rightPadding, yOff + bottomPadding, null);
         }
-        g.dispose();
-
-        return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
     }
 
     private static ImageProducer applyConvolutions(@Nullable RenderingHints hints, @NotNull EdgeModeImage image,

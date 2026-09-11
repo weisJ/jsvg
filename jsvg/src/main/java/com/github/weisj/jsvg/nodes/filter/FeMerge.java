@@ -124,14 +124,12 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
         // Transparent constants are identities even after the result ceases to be constant.
         while (i < inputChannels.length) {
             Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
-            if (channel instanceof ConstantColorChannel && ((ConstantColorChannel) channel).color() >>> 24 == 0) {
-                i++;
-                continue;
+            if (!isTransparentConstant(channel)) {
+                if (!(result instanceof ConstantColorChannel && channel instanceof ConstantColorChannel)) {
+                    break;
+                }
+                result = ((ConstantColorChannel) result).composite((ConstantColorChannel) channel, composite);
             }
-            if (!(result instanceof ConstantColorChannel && channel instanceof ConstantColorChannel)) {
-                break;
-            }
-            result = ((ConstantColorChannel) result).composite((ConstantColorChannel) channel, composite);
             i++;
         }
 
@@ -141,7 +139,7 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
             imgGraphics.setComposite(composite);
             for (; i < inputChannels.length; i++) {
                 Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
-                if (channel instanceof ConstantColorChannel && ((ConstantColorChannel) channel).color() >>> 24 == 0) {
+                if (isTransparentConstant(channel)) {
                     continue;
                 }
                 channel.paint(imgGraphics, context);
@@ -151,6 +149,10 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
         }
 
         filterPrimitiveBase.saveResult(result, filterContext);
+    }
+
+    private static boolean isTransparentConstant(@NotNull Channel channel) {
+        return channel instanceof ConstantColorChannel && ((ConstantColorChannel) channel).color() >>> 24 == 0;
     }
 
     @Override

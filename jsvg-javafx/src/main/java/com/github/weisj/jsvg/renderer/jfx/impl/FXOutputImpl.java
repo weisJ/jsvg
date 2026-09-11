@@ -347,10 +347,6 @@ public final class FXOutputImpl implements Output, CurrentColorProvider {
             }
         }
 
-        public @NotNull GraphicsContext context() {
-            return fxOutput.ctx;
-        }
-
         @Override
         public void restore() {
             if (saveClip == SaveClipStack.YES) {

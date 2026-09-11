@@ -28,6 +28,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
@@ -162,6 +163,17 @@ public final class FeTile extends AbstractFilterPrimitive {
         Rectangle2D tileRegion = new Rectangle2D.Double(left, top, right - left, bottom - top);
         if (tileRegion.isEmpty() || outputRegion.isEmpty()) return;
 
+        BufferedImage tile =
+                createTileImage(input, tileRegion, info, userToPixel, context, graphics.getRenderingHints());
+        if (tile == null) return;
+
+        graphics.transform(userToPixel);
+        paintTextureCopies(graphics, tile, region, tileRegion, outputRegion, repeatX, repeatY);
+    }
+
+    private static @Nullable BufferedImage createTileImage(@NotNull Image input, @NotNull Rectangle2D tileRegion,
+            @NotNull Filter.FilterInfo info, @NotNull AffineTransform userToPixel, @NotNull RenderContext context,
+            @NotNull RenderingHints renderingHints) {
         int width = Math.max(1, Math.min(info.imageWidth, (int) Math.ceil(tileRegion.getWidth()
                 * GeometryUtil.scaleXOfTransform(userToPixel))));
         int height = Math.max(1, Math.min(info.imageHeight, (int) Math.ceil(tileRegion.getHeight()
@@ -171,36 +183,47 @@ public final class FeTile extends AbstractFilterPrimitive {
             // Do not interpolate against transparent pixels beyond the tile's raster edges.
             Rectangle crop = GeometryUtil.containingBoundsAfterTransform(userToPixel, tileRegion).getBounds()
                     .intersection(new Rectangle(0, 0, info.imageWidth, info.imageHeight));
-            if (crop.isEmpty()) return;
+            if (crop.isEmpty()) return null;
             input = ((BufferedImage) input).getSubimage(crop.x, crop.y, crop.width, crop.height);
             pixelToUser.translate(crop.x, crop.y);
         }
         BufferedImage tile = ImageUtil.createCompatibleTransparentImage(width, height);
         Graphics2D tileGraphics = tile.createGraphics();
         try {
-            tileGraphics.setRenderingHints(graphics.getRenderingHints());
+            tileGraphics.setRenderingHints(renderingHints);
             tileGraphics.scale(width / tileRegion.getWidth(), height / tileRegion.getHeight());
-            tileGraphics.translate(-left, -top);
+            tileGraphics.translate(-tileRegion.getX(), -tileRegion.getY());
             tileGraphics.drawImage(input, pixelToUser, context.platformSupport().imageObserver());
         } finally {
             tileGraphics.dispose();
         }
+        return tile;
+    }
 
-        graphics.transform(userToPixel);
-        double startX = repeatX ? 0 : Math.floor((outputRegion.getX() - right) / region.getWidth()) + 1;
-        double endX = repeatX ? 1 : Math.ceil((outputRegion.getMaxX() - left) / region.getWidth());
-        double startY = repeatY ? 0 : Math.floor((outputRegion.getY() - bottom) / region.getHeight()) + 1;
-        double endY = repeatY ? 1 : Math.ceil((outputRegion.getMaxY() - top) / region.getHeight());
+    private static void paintTextureCopies(@NotNull Graphics2D graphics, @NotNull BufferedImage tile,
+            @NotNull Rectangle2D region, @NotNull Rectangle2D tileRegion, @NotNull Rectangle2D outputRegion,
+            boolean repeatX, boolean repeatY) {
+        double startX = repeatX ? 0 : Math.floor((outputRegion.getX() - tileRegion.getMaxX()) / region.getWidth()) + 1;
+        double endX = repeatX ? 1 : Math.ceil((outputRegion.getMaxX() - tileRegion.getX()) / region.getWidth());
+        double startY = repeatY ? 0 : Math.floor((outputRegion.getY() - tileRegion.getMaxY()) / region.getHeight()) + 1;
+        double endY = repeatY ? 1 : Math.ceil((outputRegion.getMaxY() - tileRegion.getY()) / region.getHeight());
+        Rectangle2D.Double fillRegion = new Rectangle2D.Double();
         for (int y = 0; y < (int) (endY - startY); y++) {
             for (int x = 0; x < (int) (endX - startX); x++) {
-                Rectangle2D anchor = new Rectangle2D.Double(left + (startX + x) * region.getWidth(),
-                        top + (startY + y) * region.getHeight(), tileRegion.getWidth(), tileRegion.getHeight());
+                Rectangle2D anchor = new Rectangle2D.Double(tileRegion.getX() + (startX + x) * region.getWidth(),
+                        tileRegion.getY() + (startY + y) * region.getHeight(), tileRegion.getWidth(),
+                        tileRegion.getHeight());
                 graphics.setPaint(new TexturePaint(tile, anchor));
-                graphics.fill(new Rectangle2D.Double(
-                        repeatX ? outputRegion.getX() : anchor.getX(),
-                        repeatY ? outputRegion.getY() : anchor.getY(),
-                        repeatX ? outputRegion.getWidth() : anchor.getWidth(),
-                        repeatY ? outputRegion.getHeight() : anchor.getHeight()));
+                fillRegion.setRect(outputRegion);
+                if (!repeatX) {
+                    fillRegion.x = anchor.getX();
+                    fillRegion.width = anchor.getWidth();
+                }
+                if (!repeatY) {
+                    fillRegion.y = anchor.getY();
+                    fillRegion.height = anchor.getHeight();
+                }
+                graphics.fill(fillRegion);
             }
         }
     }

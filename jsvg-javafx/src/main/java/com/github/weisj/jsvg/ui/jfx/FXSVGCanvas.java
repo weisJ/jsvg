@@ -106,9 +106,13 @@ public final class FXSVGCanvas extends Control {
             return;
         }
         timeline.getKeyFrames()
-                .add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(elapsedAnimationTime, 0)));
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.endTime()),
-                new KeyValue(elapsedAnimationTime, animation.endTime())));
+                .add(new KeyFrame(
+                        Duration.millis((double) animation.startTime()),
+                        new KeyValue(elapsedAnimationTime, 0)));
+        timeline.getKeyFrames()
+                .add(new KeyFrame(
+                        Duration.millis((double) animation.endTime()),
+                        new KeyValue(elapsedAnimationTime, animation.endTime())));
         timeline.setCycleCount(INDEFINITE);
         timeline.playFromStart();
     }

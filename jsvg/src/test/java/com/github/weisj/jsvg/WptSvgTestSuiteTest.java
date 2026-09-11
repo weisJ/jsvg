@@ -49,7 +49,7 @@ class WptSvgTestSuiteTest {
         new WptSvgTestSuite.WptSvgRefTest(test).execute();
         // Both documents must retain their own URI, and the linked artwork must be the oracle.
         write("references/shape.svg", "<path id='blue' d='M0 0H16V16H0Z' fill='red'/>");
-        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test));
     }
 
     @Test
@@ -63,10 +63,10 @@ class WptSvgTestSuiteTest {
         new WptSvgTestSuite.WptSvgRefTest(test).execute();
         String source = Files.readString(test);
         Files.writeString(test, source.replace("0-2", "0-1"));
-        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test));
         write("ref.svg", "<rect width='2' height='1' fill='rgb(100,100,100)'/>");
         Files.writeString(test, source.replace("width=\"1\"", "width=\"2\""));
-        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test));
     }
 
     @Test
@@ -76,34 +76,34 @@ class WptSvgTestSuiteTest {
                 <h:link rel="match" href="ref.svg"/>
                 <rect width="1" height="1"/>
                 """);
-        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test));
     }
 
     @Test
     void scriptsInReferencesAreSkipped() throws Exception {
         write("ref.svg", "<script>document.documentElement.setAttribute('fill', 'green');</script>");
         Path test = write("test.svg", "<h:link rel='match' href='ref.svg'/>");
-        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test));
         write("ref.svg", "");
         Files.writeString(test, Files.readString(test).replace("<svg ", "<svg onload='run()' "));
-        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test));
     }
 
     @Test
     void unsupportedReferenceSemanticsAreSkipped() throws Exception {
         write("ref.svg", "");
         Path test = write("test.svg", "<h:link rel='mismatch' href='ref.svg'/>");
-        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test));
         write("test.svg", "<h:link rel='match' href='ref.html'/>");
-        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test));
         write("test.svg", "<h:link rel='match' href='ref.svg'/><h:link rel='match' href='other.svg'/>");
-        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(TestAbortedException.class, new WptSvgTestSuite.WptSvgRefTest(test));
     }
 
     @Test
     void missingSvgReferenceFails() throws Exception {
         Path test = write("test.svg", "<h:link rel='match' href='missing.svg'/>");
-        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test)::execute);
+        assertThrows(AssertionFailedError.class, new WptSvgTestSuite.WptSvgRefTest(test));
     }
 
     private Path write(String name, String content) throws Exception {

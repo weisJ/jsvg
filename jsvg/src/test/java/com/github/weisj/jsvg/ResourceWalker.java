@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +45,7 @@ import com.github.weisj.darklaf.util.StreamUtil;
 
 public final class ResourceWalker implements AutoCloseable {
 
+    private static final Logger LOGGER = Logger.getLogger(ResourceWalker.class.getName());
     private final List<FileSystem> fileSystemList = new ArrayList<>();
     private final String[] packages;
     private Stream<?> stream;
@@ -83,7 +86,8 @@ public final class ResourceWalker implements AutoCloseable {
         for (FileSystem fileSystem : fileSystemList) {
             try {
                 fileSystem.close();
-            } catch (final IOException ignored) {
+            } catch (final IOException e) {
+                LOGGER.log(Level.WARNING, "Unable to close resource file system", e);
             }
         }
         fileSystemList.clear();
@@ -93,6 +97,7 @@ public final class ResourceWalker implements AutoCloseable {
         return new ResourceWalker(packages);
     }
 
+    @SuppressWarnings("StreamResourceLeak") // flatMap closes each mapped Files.walk stream.
     private Stream<String> walk(final String path) {
         String pack = path.replace('.', '/');
         pack = pack.endsWith("/") ? pack : pack + "/";

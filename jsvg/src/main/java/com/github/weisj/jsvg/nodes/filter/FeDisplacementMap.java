@@ -120,6 +120,11 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
         impl().saveResult(input.applyFilter(displacementFilter), filterContext);
     }
 
+    private static double displacement(int value, boolean convertToLinearRgb) {
+        int band = convertToLinearRgb ? ColorUtil.sRGBtoLinearRGBBand(value) : value;
+        return band / 255.0 - 0.5;
+    }
+
     private final class DisplacementOp implements BufferedImageOp {
 
         private final @NotNull PixelProvider displacementChannel;
@@ -191,16 +196,8 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
                 x = 0;
                 for (int end = dp + w; dp < end; dp++) {
                     int displacementRGB = displacementChannel.pixelAt(x, y);
-                    int xValue = xChannelSelector.value(displacementRGB);
-                    int yValue = yChannelSelector.value(displacementRGB);
-                    if (convertX) {
-                        xValue = ColorUtil.sRGBtoLinearRGBBand(xValue);
-                    }
-                    if (convertY) {
-                        yValue = ColorUtil.sRGBtoLinearRGBBand(yValue);
-                    }
-                    double xDisplacement = xValue / 255.0 - 0.5f;
-                    double yDisplacement = yValue / 255.0 - 0.5f;
+                    double xDisplacement = displacement(xChannelSelector.value(displacementRGB), convertX);
+                    double yDisplacement = displacement(yChannelSelector.value(displacementRGB), convertY);
                     int xDest = (int) (x + scaleX * xDisplacement + shearX * yDisplacement);
                     int yDest = (int) (y + shearY * xDisplacement + scaleY * yDisplacement);
                     if (sourceRasterBounds.contains(xDest, yDest)) {

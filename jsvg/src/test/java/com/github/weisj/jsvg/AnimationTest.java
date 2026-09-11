@@ -50,7 +50,7 @@ class AnimationTest {
                               </rect>
                             </svg>
                             """.formatted(fill));
-                    double width = timestamp < 500 || timestamp >= 1500 && fill.equals("remove") ? 4
+                    double width = timestamp < 500 || (timestamp >= 1500 && fill.equals("remove")) ? 4
                             : timestamp >= 1500 ? 16 : 4 + 12 * (timestamp - 500) / 1000d;
                     var reference = new MemoryImageSource("static-width-" + fill + "-" + timestamp, """
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8">

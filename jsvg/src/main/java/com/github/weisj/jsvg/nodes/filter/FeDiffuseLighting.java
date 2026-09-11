@@ -257,6 +257,9 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             boolean hasBottom = y + 0.5 + sampleStep.y < inputRegion.getMaxY();
             SobelKernel kernel = SobelKernel.at(hasLeft, hasRight, hasTop, hasBottom);
 
+            // If neither neighbor exists on an axis, the surface is constant along that axis.
+            double stepX = hasLeft || hasRight ? sampleStep.x : 0;
+            double stepY = hasTop || hasBottom ? sampleStep.y : 0;
             double gradientX = 0;
             double gradientY = 0;
             for (int row = 0; row < 3; row++) {
@@ -266,10 +269,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
                     int ky = kernel.ky[index];
                     if (kx == 0 && ky == 0) continue;
 
-                    // If neither neighbor exists on an axis, the surface is constant along that axis.
-                    int dx = hasLeft || hasRight ? column - 1 : 0;
-                    int dy = hasTop || hasBottom ? row - 1 : 0;
-                    double alpha = samples.at(x + dx * sampleStep.x, y + dy * sampleStep.y);
+                    double alpha = samples.at(x + (column - 1) * stepX, y + (row - 1) * stepY);
                     gradientX += kx * alpha;
                     gradientY += ky * alpha;
                 }
@@ -298,6 +298,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
      *
      * @see <a href="https://drafts.csswg.org/filter-effects/#feDiffuseLightingElement">Surface normals</a>
      */
+    @SuppressWarnings("ImmutableEnumChecker") // Coefficient arrays are private, never exposed or modified.
     private enum SobelKernel {
         // @formatter:off
         TOP_LEFT(2.0 / 3, 2.0 / 3,
@@ -398,18 +399,19 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
         private static @NotNull SobelKernel at(boolean hasLeft, boolean hasRight,
                 boolean hasTop, boolean hasBottom) {
             if (!hasTop && hasBottom) {
-                if (!hasLeft && hasRight) return TOP_LEFT;
-                if (hasLeft && !hasRight) return TOP_RIGHT;
-                return TOP;
-            } else if (hasTop && !hasBottom) {
-                if (!hasLeft && hasRight) return BOTTOM_LEFT;
-                if (hasLeft && !hasRight) return BOTTOM_RIGHT;
-                return BOTTOM;
-            } else {
-                if (!hasLeft && hasRight) return LEFT;
-                if (hasLeft && !hasRight) return RIGHT;
-                return INTERIOR;
+                return atColumn(hasLeft, hasRight, TOP_LEFT, TOP, TOP_RIGHT);
             }
+            if (hasTop && !hasBottom) {
+                return atColumn(hasLeft, hasRight, BOTTOM_LEFT, BOTTOM, BOTTOM_RIGHT);
+            }
+            return atColumn(hasLeft, hasRight, LEFT, INTERIOR, RIGHT);
+        }
+
+        private static @NotNull SobelKernel atColumn(boolean hasLeft, boolean hasRight,
+                @NotNull SobelKernel left, @NotNull SobelKernel interior, @NotNull SobelKernel right) {
+            if (!hasLeft && hasRight) return left;
+            if (hasLeft && !hasRight) return right;
+            return interior;
         }
     }
 }

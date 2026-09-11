@@ -44,8 +44,9 @@ import com.github.weisj.jsvg.ImageComparison.RenderType;
 class VectorEffectsTest {
 
     // Compare stroke geometry without AWT snapping ordinary strokes to the pixel grid.
-    private static final Consumer<Graphics2D> PURE_STROKE =
-            graphics -> graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+    private static void pureStroke(Graphics2D graphics) {
+        graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+    }
 
     private static void testVectorEffect(String name) {
         assertDoesNotThrow(() -> renderJsvg("vectorEffect/ve-" + name + ".svg"));
@@ -75,27 +76,28 @@ class VectorEffectsTest {
     void nonScalingStroke() {
         assertEquals(SUCCESS, compareImages(new CompareInfo(
                 expected(new PathImageSource("vectorEffect/nonScalingStroke_bug139_ref.svg"), RenderType.JSVG,
-                        PURE_STROKE),
+                        VectorEffectsTest::pureStroke),
                 actual(new PathImageSource("vectorEffect/nonScalingStroke_bug139.svg"), RenderType.JSVG,
-                        PURE_STROKE))));
+                        VectorEffectsTest::pureStroke))));
         assertEquals(SUCCESS, compareImages(new CompareInfo(
                 expected(new PathImageSource("vectorEffect/nonScalingStroke_bug139_ref.svg"), RenderType.JSVG,
-                        PURE_STROKE),
+                        VectorEffectsTest::pureStroke),
                 actual(new PathImageSource("vectorEffect/nonScalingStroke_bug139_with_filter.svg"), RenderType.JSVG,
-                        PURE_STROKE))));
+                        VectorEffectsTest::pureStroke))));
     }
 
     @TestFactory
     Stream<DynamicTest> nonScalingStrokeGeometry() {
         return Stream.of("nonScalingStroke", "nonScalingStrokeTransforms", "nonScalingStrokeNestedViewport",
                 "nonScalingStrokeFilteredShear")
-                .map(name -> DynamicTest.dynamicTest(name, () -> compareStrokeReference(name, PURE_STROKE)));
+                .map(name -> DynamicTest.dynamicTest(name,
+                        () -> compareStrokeReference(name, VectorEffectsTest::pureStroke)));
     }
 
     @Test
     void nonScalingStrokeWithHostTransform() {
         compareStrokeReference("nonScalingStrokeNestedViewport", graphics -> {
-            PURE_STROKE.accept(graphics);
+            pureStroke(graphics);
             graphics.translate(20, 5);
             graphics.rotate(Math.PI / 12);
             graphics.scale(1.5, 1.5);

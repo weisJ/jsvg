@@ -34,6 +34,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -88,7 +89,7 @@ public final class ImageComparison {
         JSVGType JSVG = new JSVGType(LoaderContext.builder()
                 .externalResourcePolicy(ResourcePolicy.ALLOW_ALL)
                 .build());
-        DiskImage DiskImage = new DiskImage();
+        DiskImageType DiskImage = new DiskImageType();
 
         record BatikType(@Nullable AnimationState animationState,
                 @Nullable Dimension viewportSize) implements RenderType {
@@ -120,7 +121,7 @@ public final class ImageComparison {
             }
         }
 
-        record DiskImage() implements RenderType {
+        record DiskImageType() implements RenderType {
         }
     }
 
@@ -256,7 +257,7 @@ public final class ImageComparison {
                     }
                     yield renderJsvg(source, graphicsMutator, loaderContext, platformSupport, size, state);
                 }
-                case DiskImage() -> {
+                case DiskImageType() -> {
                     var img = readReferenceImage(source);
                     var refImg = new ReferenceImage(img.getWidth(), img.getHeight());
                     var g = refImg.createGraphics();
@@ -342,7 +343,8 @@ public final class ImageComparison {
             Files.deleteIfExists(diffFile.toPath());
             Files.deleteIfExists(expectedFile.toPath());
             Files.deleteIfExists(actualFile.toPath());
-        } catch (IOException ignore) {
+        } catch (IOException e) {
+            throw new UncheckedIOException("Unable to remove previous comparison images for " + name, e);
         }
 
         ImageComparisonResult comparison = comp.compareImages();
