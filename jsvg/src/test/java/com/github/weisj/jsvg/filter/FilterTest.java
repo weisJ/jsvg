@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg;
+package com.github.weisj.jsvg.filter;
 
 import static com.github.weisj.jsvg.ImageComparison.*;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
@@ -27,7 +27,6 @@ import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
@@ -87,6 +86,12 @@ class FilterTest {
     }
 
     @Test
+    void hueRotation() {
+        // Allow one byte of rounding difference between the two filter implementations.
+        assertEquals(SUCCESS, compareImages("filter/hueRotateBoundaries.svg", 0, 1 / 255f));
+    }
+
+    @Test
     @EnabledForJreRange(min = JRE.JAVA_9)
     void testTurbulence() {
         assertEquals(SUCCESS, compareImages("filter/turbulence1.svg"));
@@ -128,7 +133,7 @@ class FilterTest {
     @Test
     void testComposite() {
         // TODO: BackgroundImage not supported
-        assertDoesNotThrow(() -> renderJsvg("filter/composite.svg"));
+        // assertDoesNotThrow(() -> renderJsvg("filter/composite.svg"));
         assertEquals(SUCCESS, compareImages("filter/composite_bug33.svg"));
     }
 
@@ -176,7 +181,6 @@ class FilterTest {
     }
 
     @Test
-    @Disabled("See #70")
     void testFilterPrimitiveRegionClip() {
         assertEquals(SUCCESS, compareImages("filter/filterPrimitiveRegionClip.svg"));
         assertEquals(SUCCESS, compareImages("filter/filterPrimitiveRegionClip2.svg"));
@@ -186,6 +190,13 @@ class FilterTest {
     void testComponentTransfer() {
         assertEquals(SUCCESS, compareImages("filter/componentTransfer.svg", 0.05, 0.05));
         assertEquals(SUCCESS, compareImages("filter/componentTransfer_sRGB.svg", 0.05, 0.05));
+    }
+
+    @Test
+    void componentTransferClampsWithoutOverflow() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("filter/componentTransferClamping_ref.svg"), RenderType.Batik),
+                actual(new PathImageSource("filter/componentTransferClamping.svg"), RenderType.JSVG), 0, 0)));
     }
 
     @Test

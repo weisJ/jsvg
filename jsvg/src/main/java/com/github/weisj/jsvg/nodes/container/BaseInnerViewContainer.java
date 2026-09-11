@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.nodes.prototype.ViewContainer;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -39,7 +40,7 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 
-public abstract class BaseInnerViewContainer extends CommonRenderableContainerNode {
+public abstract class BaseInnerViewContainer extends CommonRenderableContainerNode implements ViewContainer {
 
     protected ViewBox viewBox;
     protected PreserveAspectRatio preserveAspectRatio;
@@ -49,10 +50,32 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
     protected abstract @Nullable Point2D anchorLocation(@NotNull MeasureContext context);
 
-    public abstract @NotNull FloatSize size(@NotNull RenderContext context);
+    /** Reference-point adjustment in the outer viewport's coordinates. */
+    protected @Nullable Point2D anchorLocation(@NotNull MeasureContext context,
+            @Nullable AffineTransform viewTransform) {
+        Point2D anchor = anchorLocation(context);
+        if (anchor != null && viewTransform != null) {
+            // anchorLocation returns the negated content reference point.
+            viewTransform.deltaTransform(anchor, anchor);
+            anchor.setLocation(
+                    anchor.getX() - viewTransform.getTranslateX(),
+                    anchor.getY() - viewTransform.getTranslateY());
+        }
+        return anchor;
+    }
 
     protected abstract @NotNull Overflow defaultOverflow();
 
+    protected final boolean hasEmptyViewBox() {
+        return viewBox != null && (viewBox.width == 0 || viewBox.height == 0);
+    }
+
+    @Override
+    public boolean isVisible(@NotNull RenderContext context) {
+        return !hasEmptyViewBox() && super.isVisible(context);
+    }
+
+    @Override
     public @Nullable ViewBox viewBox(@NotNull RenderContext context) {
         return viewBox != null ? viewBox : new ViewBox(size(context));
     }
@@ -71,31 +94,17 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         overflow = attributeNode.getEnum("overflow", defaultOverflow());
     }
 
-    public void renderWithEstablishedViewBox(@NotNull RenderContext context, @NotNull Output output) {
-        super.render(context, output);
-    }
-
-    @Override
-    public void render(@NotNull RenderContext context, @NotNull Output output) {
-        renderWithSize(size(context), viewBox(context), context, output);
-    }
-
-    public final void renderWithSize(@NotNull FloatSize useSiteSize, @Nullable ViewBox view,
-            @NotNull RenderContext context, @NotNull Output output) {
-        RenderContext innerContext = createInnerContextForViewBox(useSiteSize, view, context, output);
-        renderWithEstablishedViewBox(innerContext, output);
-    }
-
     protected boolean inheritAttributes() {
         return true;
     }
 
-    private @NotNull RenderContext createInnerContext(@NotNull RenderContext context,
+    protected final @NotNull RenderContext createInnerContext(@NotNull RenderContext context,
             @NotNull ViewBox viewBox) {
         return NodeRenderer.setupInnerViewRenderContext(viewBox, context, inheritAttributes());
     }
 
-    private @NotNull ViewBox computeOuterViewBox(@NotNull RenderContext context, @NotNull FloatSize useSiteSize) {
+    protected final @NotNull ViewBox computeOuterViewBox(@NotNull RenderContext context,
+            @NotNull FloatSize useSiteSize) {
         MeasureContext measureContext = context.measureContext();
         Point2D outerPos = outerLocation(measureContext);
         ViewBox vb = new ViewBox(outerPos, useSiteSize);
@@ -109,6 +118,7 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         return vb;
     }
 
+    @Override
     public final @NotNull RenderContext createInnerContextForViewBox(@NotNull FloatSize useSiteSize,
             @Nullable ViewBox view, @NotNull RenderContext context, @NotNull Output output) {
         ViewBox outerViewBox = computeOuterViewBox(context, useSiteSize);
@@ -126,31 +136,25 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
 
         RenderContext innerContext = createInnerContext(context, innerViewBox);
         MeasureContext innerMeasure = innerContext.measureContext();
-        Point2D anchorPos = anchorLocation(innerMeasure);
+        Point2D anchorPos = anchorLocation(innerMeasure, viewTransform);
 
         // Clip the viewbox established at the use-site e.g. where an <svg> node is instantiated with <use>
         if (overflow.establishesClip()) {
             ViewBox clipViewBox = new ViewBox(outerViewBox);
             if (anchorPos != null) {
-                Point2D clipAnchor = anchorPos;
-                if (viewTransform != null) {
-                    clipAnchor = new Point2D.Double();
-                    viewTransform.transform(anchorPos, clipAnchor);
-                }
-                clipViewBox.x += (float) clipAnchor.getX();
-                clipViewBox.y += (float) clipAnchor.getY();
+                clipViewBox.x += (float) anchorPos.getX();
+                clipViewBox.y += (float) anchorPos.getY();
             }
             output.applyClip(clipViewBox);
         }
 
         innerContext.translate(output, outerViewBox.location());
+        if (anchorPos != null) {
+            innerContext.translate(output, anchorPos);
+        }
         if (viewTransform != null) {
             // This also applies the translation to the inner viewbox location.
             innerContext.transform(output, viewTransform);
-        }
-
-        if (anchorPos != null) {
-            innerContext.translate(output, anchorPos);
         }
 
         return innerContext;

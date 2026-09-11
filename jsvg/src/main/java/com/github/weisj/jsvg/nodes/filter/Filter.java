@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.Objects;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
+import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
@@ -52,6 +54,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.BlittableImage;
+import com.github.weisj.jsvg.util.OffscreenImage;
+import com.github.weisj.jsvg.util.TransformedBlittableImage;
 
 @ElementCategories({/* None */})
 @PermittedContent(
@@ -79,29 +83,18 @@ public final class Filter extends ContainerNode {
     private UnitType filterPrimitiveUnits;
     private ColorInterpolation colorInterpolation;
 
-    private boolean isValid;
-
     @Override
     public @NotNull String tagName() {
         return TAG;
     }
 
     public boolean hasEffect() {
-        return isValid && !children().isEmpty();
+        return !children().isEmpty();
     }
 
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-
-        isValid = true;
-        for (SVGNode child : children()) {
-            FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-            if (!filterPrimitive.isValid()) {
-                isValid = false;
-                break;
-            }
-        }
 
         filterUnits = attributeNode.getEnum("filterUnits", UnitType.ObjectBoundingBox);
         filterPrimitiveUnits = attributeNode.getEnum("primitiveUnits", UnitType.UserSpaceOnUse);
@@ -117,52 +110,80 @@ public final class Filter extends ContainerNode {
                 .coercePercentageToCorrectUnit(filterUnits, PercentageDimension.HEIGHT);
     }
 
-    public @Nullable FilterBounds createFilterBounds(@Nullable Output output, @NotNull RenderContext context,
+    public @Nullable FilterLayout createFilterLayout(@Nullable Output output, @NotNull RenderContext context,
             @NotNull ElementBounds elementBounds) {
         Rectangle2D.Double filterRegion = filterUnits.computeViewBounds(
                 context.measureContext(), elementBounds.boundingBox(), x, y, width, height);
+        AffineTransform transform;
+        if (output != null) {
+            transform = output.transform();
+        } else {
+            transform = new AffineTransform(context.rootTransform());
+            transform.concatenate(context.userSpaceTransform());
+        }
+
+        if (transform.getDeterminant() == 0) return null;
+
         Rectangle2D graphicsClipBounds = output != null
                 ? output.clipBounds()
                 : NO_CLIP_BOUNDS.getBounds2D();
 
         FilterLayoutContext filterLayoutContext =
-                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds);
+                new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(), graphicsClipBounds,
+                        filterRegion, context.measureContext(), transform);
 
-        Rectangle2D clippedElementBounds = elementBounds.geometryBox().createIntersection(graphicsClipBounds);
+        boolean alignedBuffer = requiresAlignedBuffer(filterLayoutContext);
+        if (alignedBuffer) {
+            // Preserve both axis scales of the complete transform, including the output/device scale.
+            transform = AffineTransform.getScaleInstance(
+                    GeometryUtil.scaleXOfTransform(transform), GeometryUtil.scaleYOfTransform(transform));
+            // Final blitting can use bicubic interpolation, which needs two buffer pixels outside the clip.
+            graphicsClipBounds = GeometryUtil.grow(graphicsClipBounds, new FloatInsets(
+                    (float) (2 / transform.getScaleY()), (float) (2 / transform.getScaleX()),
+                    (float) (2 / transform.getScaleY()), (float) (2 / transform.getScaleX())));
+            filterLayoutContext = new FilterLayoutContext(filterPrimitiveUnits, elementBounds.boundingBox(),
+                    graphicsClipBounds, filterRegion, context.measureContext(), transform);
+        }
+
         Rectangle2D effectiveFilterRegion = filterRegion.createIntersection(graphicsClipBounds);
 
         if (effectiveFilterRegion.isEmpty()) return null;
 
-        LayoutBounds elementLayoutBounds = new LayoutBounds(effectiveFilterRegion, new FloatInsets());
-        LayoutBounds clippedElementLayoutBounds = new LayoutBounds(clippedElementBounds, new FloatInsets());
-        LayoutBounds sourceDependentBounds = elementLayoutBounds.transform(
-                (data, flags) -> flags.operatesOnWholeFilterRegion
-                        ? data
-                        : clippedElementLayoutBounds.resolve(flags));
-
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.LastResult, elementLayoutBounds);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceDependentBounds);
-        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, sourceDependentBounds);
+        // Sampling primitives may need source pixels outside the repaint clip.
+        LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(elementBounds.sourceBox(), filterRegion);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, elementLayoutBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, elementLayoutBounds);
+        filterLayoutContext.resultChannels().addAlias(DefaultFilterChannel.LastResult,
+                DefaultFilterChannel.SourceGraphic);
 
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-                filterPrimitive.layoutFilter(context, filterLayoutContext);
+                layoutPrimitive(filterPrimitive, context, filterLayoutContext);
             } catch (IllegalFilterStateException ignored) {
                 // Just carry on doing layout
             }
         }
 
-        LayoutBounds.Data clipHeuristic = filterLayoutContext.resultChannels()
-                .get(DefaultFilterChannel.LastResult)
-                .resolve(LayoutBounds.ComputeFlags.INITIAL);
+        ChannelStorage<LayoutBounds> layouts = filterLayoutContext.resultChannels();
+        LayoutBounds clipHeuristic = layouts.get(DefaultFilterChannel.LastResult);
 
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
         Rectangle2D clipHeuristicBounds = clipHeuristic.bounds()
                 .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 
-        return new FilterBounds(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds);
+        return new FilterLayout(elementBounds.boundingBox(), filterRegion, clipHeuristicBounds, layouts,
+                transform, alignedBuffer);
+    }
+
+    private boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
+        if (GeometryUtil.isAxisAligned(context.transform())) return false;
+        for (SVGNode child : children()) {
+            FilterPrimitive primitive = (FilterPrimitive) child;
+            if (primitive.isValid() && primitive.requiresAlignedBuffer(context)) return true;
+        }
+        return false;
     }
 
     public @NotNull BufferedImage applyFilter(@NotNull Output output, @NotNull RenderContext context,
@@ -172,25 +193,37 @@ public final class Filter extends ContainerNode {
         FilterContext filterContext =
                 new FilterContext(filterInfo, filterPrimitiveUnits, colorInterpolation, output.renderingHints());
 
-        Channel sourceChannel = new ImageProducerChannel(producer);
+        Channel sourceChannel = new ImageProducerChannel(producer).clip(filterInfo.filterRegion(), filterContext);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, sourceChannel);
-        filterContext.resultChannels().addResult(DefaultFilterChannel.LastResult, sourceChannel);
+        filterContext.resultChannels().addAlias(DefaultFilterChannel.LastResult, DefaultFilterChannel.SourceGraphic);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha,
                 () -> new SourceAlphaChannel(sourceChannel.alphaChannel().producer()));
 
+        // TODO: Track if a primitive is actually used and skip applying unused primitives.
         for (SVGNode child : children()) {
             try {
                 FilterPrimitive filterPrimitive = (FilterPrimitive) child;
-                filterPrimitive.applyFilter(context, filterContext);
+                applyPrimitive(filterPrimitive, context, filterContext);
             } catch (IllegalFilterStateException e) {
                 // Just carry on applying filters
                 LOGGER.log(Level.INFO, "Exception during filter", e);
             }
-            // Todo: Respect filterPrimitiveRegion
         }
 
         Channel result = Objects.requireNonNull(filterContext.getChannel(DefaultFilterChannel.LastResult));
         return result.toBufferedImageNonAliased(context);
+    }
+
+    static void layoutPrimitive(@NotNull FilterPrimitive primitive, @NotNull RenderContext context,
+            @NotNull FilterLayoutContext filterLayoutContext) {
+        if (!primitive.isValid()) return;
+        primitive.layoutFilter(context, filterLayoutContext);
+    }
+
+    static void applyPrimitive(@NotNull FilterPrimitive primitive, @NotNull RenderContext context,
+            @NotNull FilterContext filterContext) {
+        if (!primitive.isValid()) return;
+        primitive.applyFilter(context, filterContext);
     }
 
     @Override
@@ -198,16 +231,34 @@ public final class Filter extends ContainerNode {
         return node instanceof FilterPrimitive && super.acceptChild(id, node);
     }
 
-    public static final class FilterBounds {
+    public static final class FilterLayout {
         private final @NotNull Rectangle2D elementBounds;
         private final @NotNull Rectangle2D filterRegion;
         private final @NotNull Rectangle2D effectiveFilterArea;
+        private final @NotNull ChannelStorage<LayoutBounds> layouts;
+        private final @NotNull AffineTransform transform;
+        private final boolean alignedBuffer;
 
-        private FilterBounds(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
-                @NotNull Rectangle2D effectiveFilterArea) {
+        private FilterLayout(@NotNull Rectangle2D elementBounds, @NotNull Rectangle2D filterRegion,
+                @NotNull Rectangle2D effectiveFilterArea,
+                @NotNull ChannelStorage<LayoutBounds> layouts, @NotNull AffineTransform transform,
+                boolean alignedBuffer) {
             this.elementBounds = elementBounds;
             this.filterRegion = filterRegion;
             this.effectiveFilterArea = effectiveFilterArea;
+            this.layouts = layouts;
+            this.transform = transform;
+            this.alignedBuffer = alignedBuffer;
+        }
+
+        public @Nullable OffscreenImage createImage(@NotNull BlittableImage.BufferSurfaceSupplier supplier,
+                @NotNull RenderContext context, @NotNull RenderContext imageContext, @NotNull Rectangle2D bounds) {
+            if (alignedBuffer) {
+                return TransformedBlittableImage.create(supplier, context, imageContext,
+                        bounds, effectiveFilterArea, transform);
+            }
+            return BlittableImage.create(supplier, context, effectiveFilterArea, bounds, elementBounds,
+                    UnitType.UserSpaceOnUse, imageContext);
         }
 
         public @NotNull Rectangle2D elementBounds() {
@@ -221,23 +272,28 @@ public final class Filter extends ContainerNode {
         public @NotNull Rectangle2D effectiveFilterArea() {
             return effectiveFilterArea;
         }
+
+        @NotNull
+        LayoutBounds layout(@NotNull FilterChannelKey key) {
+            return layouts.get(key);
+        }
     }
 
     public static final class FilterInfo {
         public final int imageWidth;
         public final int imageHeight;
 
-        private final @NotNull FilterBounds filterBounds;
-        private final @NotNull BlittableImage blittableImage;
+        private final @NotNull FilterLayout filterLayout;
+        private final @NotNull OffscreenImage blittableImage;
         private final @NotNull Output imageOutput;
 
-        public FilterInfo(@NotNull BlittableImage blittableImage, @NotNull Output imageOutput,
-                @NotNull FilterBounds filterBounds) {
+        public FilterInfo(@NotNull OffscreenImage blittableImage, @NotNull Output imageOutput,
+                @NotNull FilterLayout filterLayout) {
             BufferedImage image = blittableImage.image();
             this.imageWidth = image.getWidth();
             this.imageHeight = image.getHeight();
             this.blittableImage = blittableImage;
-            this.filterBounds = filterBounds;
+            this.filterLayout = filterLayout;
             this.imageOutput = imageOutput;
         }
 
@@ -246,11 +302,16 @@ public final class Filter extends ContainerNode {
         }
 
         public @NotNull Rectangle2D filterRegion() {
-            return filterBounds.filterRegion();
+            return filterLayout.filterRegion();
         }
 
         public @NotNull Rectangle2D elementBounds() {
-            return filterBounds.elementBounds();
+            return filterLayout.elementBounds();
+        }
+
+        @NotNull
+        LayoutBounds layout(@NotNull FilterChannelKey key) {
+            return filterLayout.layout(key);
         }
 
         public @NotNull Output output() {

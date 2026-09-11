@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="270" height="70">
+	<defs>
+		<filter id="blend" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="90" height="70" color-interpolation-filters="sRGB">
+			<feColorMatrix result="red" x="10" y="10" width="40"
+				height="40" values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 1" />
+			<feColorMatrix result="blue" x="30" y="20" width="50"
+				height="40" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 1" />
+			<feBlend in="blue" in2="red" mode="multiply" />
+		</filter>
+		<filter id="merge" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="90" height="70" color-interpolation-filters="sRGB">
+			<feColorMatrix result="red" x="10" y="10" width="40"
+				height="40" values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 1" />
+			<feColorMatrix result="blue" x="30" y="20" width="50"
+				height="40" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 1" />
+			<feMerge>
+				<feMergeNode in="red" />
+				<feMergeNode in="blue" />
+			</feMerge>
+		</filter>
+		<filter id="composite" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="90" height="70" color-interpolation-filters="sRGB">
+			<feColorMatrix result="red" x="10" y="10" width="40"
+				height="40" values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 1" />
+			<feColorMatrix result="blue" x="30" y="20" width="50"
+				height="40" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 1" />
+			<feComposite in="blue" in2="red" operator="in" />
+		</filter>
+	</defs>
+	<rect width="90" height="70" filter="url(#blend)" />
+	<g transform="translate(90 0)">
+		<rect width="90" height="70" filter="url(#merge)" />
+	</g>
+	<g transform="translate(180 0)">
+		<rect width="90" height="70" filter="url(#composite)" />
+	</g>
+</svg>

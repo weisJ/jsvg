@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="100" height="100">
+			<feFlood x="12" y="12" width="24" height="24"
+				flood-color="red" />
+			<feGaussianBlur stdDeviation="-1" result="invalid" />
+			<feOffset in="invalid" />
+		</filter>
+	</defs>
+	<!-- The invalid primitive is skipped, so its missing result falls back 
+		to the preceding flood. -->
+	<rect width="100" height="100" fill="blue" filter="url(#f)" />
+</svg>

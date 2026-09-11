@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+	<defs>
+		<linearGradient id="blue">
+			<stop stop-color="blue" />
+		</linearGradient>
+	</defs>
+	<rect x="32" y="16" width="32" height="16"
+		fill="url(#missing) lime" />
+	<rect y="32" width="32" height="16" fill="url('#blue') red" />
+	<rect x="32" y="32" width="32" height="16"
+		fill="url(&quot;#blue&quot;) lime" />
+	<rect y="48" width="32" height="16" fill="url(#\62lue) red" />
+	<g fill="lime">
+		<rect x="32" y="48" width="32" height="16" fill="#q00" />
+	</g>
+</svg>

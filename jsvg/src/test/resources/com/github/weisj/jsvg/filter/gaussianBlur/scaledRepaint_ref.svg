@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="160">
+	<!-- The same geometry and blur authored directly in output coordinates. -->
+	<defs>
+		<filter id="blur" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="256" height="160" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="4.4" edgeMode="none" />
+		</filter>
+	</defs>
+	<rect x="32" y="32" width="192" height="96" fill="red"
+		filter="url(#blur)" />
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="32">
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="64" height="32">
+			<feFlood x="8" y="8" width="8" height="8" flood-color="red" />
+			<feTile in="later" result="tiled" />
+			<feFlood x="40" y="8" width="8" height="8" flood-color="blue"
+				result="later" />
+			<feOffset in="tiled" />
+		</filter>
+	</defs>
+	<!-- Both pixels and saved input layout must use the previous red flood 
+		at the tile's pass. -->
+	<rect width="64" height="32" filter="url(#f)" />
+</svg>

@@ -89,8 +89,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED);
         height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED);
 
-        String href = attributeNode.getValue("href");
-        if (href == null) href = attributeNode.getValue("xlink:href");
+        String href = attributeNode.getHref();
         referencedNode = attributeNode.getElementByHref(SVGNode.class, href, ElementRelation.PAINTED_CHILD);
 
         paintContext = PaintContext.parse(attributeNode);
@@ -102,18 +101,23 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     @Override
     public @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {
         if (!(referencedNode instanceof HasShape)) return AWTSVGShape.EMPTY_SHAPE;
-        // Todo: Inner views need to handle this differently
-        return ((HasShape) referencedNode).elementShape(
-                NodeRenderer.createChildContext((Renderable) referencedNode, context, this),
-                box);
+        RenderContext childContext = NodeRenderer.createChildContext((Renderable) referencedNode, context, this);
+        if (referencedNode instanceof CommonInnerViewContainer) {
+            return ((CommonInnerViewContainer) referencedNode).elementShape(childContext, box, useSiteSize(context));
+        }
+        return ((HasShape) referencedNode).elementShape(childContext, box);
     }
 
     @Override
-    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
+    public @NotNull Rectangle2D computeUntransformedBounds(@NotNull RenderContext context, Box box) {
         if (!(referencedNode instanceof HasShape)) return AWTSVGShape.EMPTY_SHAPE;
-        // Todo: Inner views need to handle this differently
-        return ((HasShape) referencedNode).elementBounds(
-                NodeRenderer.createChildContext((Renderable) referencedNode, context, this), box);
+        RenderContext childContext = NodeRenderer.createChildContext((Renderable) referencedNode, context, this);
+        Box childBox = box.forChildNode();
+        if (referencedNode instanceof CommonInnerViewContainer) {
+            return ((CommonInnerViewContainer) referencedNode)
+                    .computeTransformedBoundsWithSize(childContext, childBox, useSiteSize(context));
+        }
+        return new ElementBounds(referencedNode, childContext).transformedBounds(childBox);
     }
 
     @Override
@@ -151,19 +155,19 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
     @Override
     public void render(@NotNull RenderContext context, @NotNull Output output) {
         if (referencedNode == null) return;
-        MeasureContext measureContext = context.measureContext();
-
         // Todo: Vector Effects
 
         if (referencedNode instanceof CommonInnerViewContainer) {
-            FloatSize targetViewBox = new FloatSize(Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
-            if (width.isSpecified()) targetViewBox.width = width.resolve(measureContext);
-            if (height.isSpecified()) targetViewBox.height = height.resolve(measureContext);
             CommonInnerViewContainer view = (CommonInnerViewContainer) referencedNode;
-            NodeRenderer.renderWithSize(view, targetViewBox, context, output, this);
+            NodeRenderer.renderWithSize(view, useSiteSize(context), context, output, this);
         } else {
             NodeRenderer.renderNode(referencedNode, context, output, this);
         }
+    }
+
+    private @NotNull FloatSize useSiteSize(@NotNull RenderContext context) {
+        MeasureContext measure = context.measureContext();
+        return new FloatSize(width.resolve(measure), height.resolve(measure));
     }
 
     @Override

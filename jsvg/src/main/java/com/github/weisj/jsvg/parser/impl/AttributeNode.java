@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Contract;
@@ -51,7 +52,9 @@ import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.StyleSheet;
@@ -213,7 +216,17 @@ public final class AttributeNode {
     }
 
     public @Nullable String getValue(@NotNull String key) {
-        return attributes.get(key);
+        return getValue(key, (String) null);
+    }
+
+    @Contract("_,!null -> !null")
+    public @Nullable String getValue(@NotNull String key, @Nullable String fallback) {
+        return attributes.getOrDefault(key, fallback);
+    }
+
+    public @Nullable String getValue(@NotNull String key, @NotNull Supplier<@Nullable String> fallback) {
+        String value = attributes.get(key);
+        return value != null ? value : fallback.get();
     }
 
     public @NotNull Color getColor(@NotNull String key) {
@@ -226,6 +239,19 @@ public final class AttributeNode {
         if (value == null) return fallback;
         Color c = loadHelper().attributeParser().paintParser().parseColor(value.toLowerCase(Locale.ENGLISH));
         return c != null ? c : fallback;
+    }
+
+    @Contract("_,!null,_ -> !null")
+    public @Nullable SVGPaint getColor(@NotNull String key, @Nullable Color fallback, @NotNull Animatable animatable) {
+        boolean currentColor = "currentColor".equalsIgnoreCase(getValue(key));
+        Color color = currentColor ? null : getColor(key, fallback);
+        if (animatable == Animatable.YES) {
+            ColorValue initial = color != null ? new RGBColor(color) : RGBColor.INHERITED;
+            AnimatedColor animatedColor = getAnimatedColor(key, initial);
+            if (animatedColor != null) return animatedColor;
+        }
+        if (currentColor) return PredefinedPaints.CURRENT_COLOR;
+        return color != null ? new AwtSVGPaint(color) : null;
     }
 
     public @Nullable SVGPaint getPaint(@NotNull String key, Inherited inherited, Animatable animatable) {
@@ -258,10 +284,18 @@ public final class AttributeNode {
 
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
-        // TODO: url(#...) allows specifying a fallback color value.
-        SVGPaint paint = getElementByHref(SVGPaint.class, value, ElementRelation.PAINT_SERVER);
+        String reference = value;
+        String fallback = value;
+        if (value.startsWith("url(")) {
+            int end = Url.functionEnd(value);
+            if (end < 0) return null;
+            reference = value.substring(0, end + 1);
+            fallback = value.substring(end + 1).trim();
+            if (fallback.isEmpty()) fallback = "none";
+        }
+        SVGPaint paint = getElementByHref(SVGPaint.class, reference, ElementRelation.PAINT_SERVER);
         if (paint != null) return paint;
-        return loadHelper().attributeParser().parsePaint(value, this);
+        return loadHelper().attributeParser().parsePaint(fallback, this);
     }
 
     public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension) {
@@ -316,15 +350,15 @@ public final class AttributeNode {
         return loadHelper().attributeParser().parseLength(getValue(key), FALLBACK_LENGTH, dimension);
     }
 
-    public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key) {
-        return getHorizontalReferenceLength(getValue(key));
+    public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key, @NotNull Length fallback) {
+        return getHorizontalReferenceLength(getValue(key), fallback);
     }
 
-    public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key) {
-        return getVerticalReferenceLength(getValue(key));
+    public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key, @NotNull Length fallback) {
+        return getVerticalReferenceLength(getValue(key), fallback);
     }
 
-    public @NotNull Length getHorizontalReferenceLength(@Nullable String value) {
+    public @NotNull Length getHorizontalReferenceLength(@Nullable String value, @NotNull Length fallback) {
         if ("left".equals(value)) {
             return Left;
         } else if ("center".equals(value)) {
@@ -332,11 +366,11 @@ public final class AttributeNode {
         } else if ("right".equals(value)) {
             return Right;
         } else {
-            return loadHelper().attributeParser().parseLength(value, Length.ZERO, PercentageDimension.WIDTH);
+            return loadHelper().attributeParser().parseLength(value, fallback, PercentageDimension.WIDTH);
         }
     }
 
-    public @NotNull Length getVerticalReferenceLength(@Nullable String value) {
+    public @NotNull Length getVerticalReferenceLength(@Nullable String value, @NotNull Length fallback) {
         if ("top".equals(value)) {
             return Top;
         } else if ("center".equals(value)) {
@@ -344,7 +378,7 @@ public final class AttributeNode {
         } else if ("bottom".equals(value)) {
             return Bottom;
         } else {
-            return loadHelper().attributeParser().parseLength(value, Length.ZERO, PercentageDimension.HEIGHT);
+            return loadHelper().attributeParser().parseLength(value, fallback, PercentageDimension.HEIGHT);
         }
     }
 
@@ -519,14 +553,14 @@ public final class AttributeNode {
     }
 
     public @Nullable String getHref() {
-        String href = getValue("href");
-        if (href == null) return getValue("xlink:href");
-        return href;
+        return getValue("href", () -> getValue("xlink:href"));
     }
 
     public @Nullable ViewBox getViewBox() {
         float[] viewBoxCords = getFloatList("viewBox");
-        return viewBoxCords.length == 4 ? new ViewBox(viewBoxCords) : null;
+        return viewBoxCords.length == 4 && viewBoxCords[2] >= 0 && viewBoxCords[3] >= 0
+                ? new ViewBox(viewBoxCords)
+                : null;
     }
 
     public @NotNull AttributeParser parser() {
@@ -559,7 +593,7 @@ public final class AttributeNode {
     private static <T, A extends T, N extends BaseAnimationNode> @Nullable A makeAnimated(
             @NotNull List<N> animationNodes,
             @NotNull T initial,
-            @NotNull BiFunction<N, T, A> factory) {
+            @NotNull BiFunction<@NotNull N, @NotNull T, A> factory) {
         if (animationNodes.isEmpty()) return null;
 
         @NotNull T currentInitial = initial;

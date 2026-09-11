@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="32">
+	<defs>
+		<filter id="zero" color-interpolation-filters="sRGB">
+			<feColorMatrix type="hueRotate" values="0" />
+		</filter>
+		<filter id="one" color-interpolation-filters="sRGB">
+			<feColorMatrix type="hueRotate" values="1" />
+		</filter>
+		<filter id="quarterTurn" color-interpolation-filters="sRGB">
+			<feColorMatrix type="hueRotate" values="90" />
+		</filter>
+	</defs>
+	<!-- Include a blue component: both mistyped coefficients affect it. -->
+	<g fill="#2846c8">
+		<rect width="32" height="32" filter="url(#zero)" />
+		<rect x="32" width="32" height="32" filter="url(#one)" />
+		<rect x="64" width="32" height="32" filter="url(#quarterTurn)" />
+	</g>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+	<defs>
+		<filter id="flood" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="100" height="100">
+			<feFlood x="20" y="30" width="40" height="20"
+				flood-color="currentColor" />
+		</filter>
+	</defs>
+	<rect width="10" height="10" color="red" filter="url(#flood)">
+		<animate attributeName="color" values="red;blue" dur="1s"
+			fill="freeze" />
+	</rect>
+</svg>

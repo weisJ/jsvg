@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -91,7 +91,7 @@ public class SealedClassProcessor extends AbstractProcessor {
         for (TypeMirror iface : classElement.getInterfaces()) {
             if (type.equals(typeUtils.asElement(iface))) return true;
         }
-        return type.asType().equals(classElement.getSuperclass());
+        return typeUtils.isSameType(type.asType(), classElement.getSuperclass());
     }
 
     public TypeElement[] getPermittedClasses(@NotNull TypeElement element, @NotNull Types typeUtils) {

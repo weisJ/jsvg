@@ -27,6 +27,7 @@ dependencies {
     testImplementation(testLibs.bundles.batik)
     testImplementation(testLibs.svgSalamander)
     testImplementation(testLibs.sizeof)
+    testImplementation(testLibs.fontVerter)
     testImplementation(gradleApi())
 
     testRuntimeOnly(testLibs.junit.engine)
@@ -73,13 +74,75 @@ tasks {
         doFirst {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
-        environment("RESVG_TEST_SUITE_PATH" to File(project.rootDir, "resvg-test-suite/tests").absolutePath)
+        environment(
+            "RESVG_TEST_SUITE_PATH" to rootProject.file("resvg-test-suite/tests").absolutePath,
+            "WPT_TEST_SUITE_PATH" to rootProject.file("wpt-test-suite").absolutePath,
+            "W3C_SVG_11_TEST_SUITE_PATH" to
+                rootProject.file("w3c-svg-11-test-suite/W3C_SVG_11_TestSuite").absolutePath,
+        )
+        // Track optional fixtures so initializing or removing a submodule reruns the tests.
+        inputs.files(
+            rootProject.fileTree("wpt-test-suite") {
+                include("svg/**", "fonts/**", "images/**", "css/support/**")
+            },
+            rootProject.fileTree("resvg-test-suite") {
+                include("tests/**", "fonts/**")
+            },
+            rootProject.fileTree("w3c-svg-11-test-suite/W3C_SVG_11_TestSuite") {
+                include("svg/**", "png/**", "images/**", "resources/**")
+            },
+        )
         useJUnitPlatform()
         testLogging {
             showStandardStreams = true
             showExceptions = true
             showStackTraces = true
             exceptionFormat = TestExceptionFormat.FULL
+        }
+    }
+
+    register<JavaExec>("resvgTestAudit") {
+        group = "verification"
+        description = "Reports excluded resvg reference tests that now pass."
+        dependsOn(testClasses, jar)
+        classpath = sourceSets.test.get().runtimeClasspath
+        mainClass.set("com.github.weisj.jsvg.ReSvgTestAudit")
+        environment("RESVG_TEST_SUITE_PATH", rootProject.file("resvg-test-suite/tests").absolutePath)
+        val reportDirectory = layout.buildDirectory.dir("reports/resvg-audit")
+        systemProperty("resvg.audit.reportDir", reportDirectory.get().asFile.absolutePath)
+        doFirst {
+            delete(reportDirectory)
+        }
+    }
+
+    register<JavaExec>("w3cSvg11TestAudit") {
+        group = "verification"
+        description = "Reports excluded W3C SVG 1.1 reference tests and animation frames that now pass."
+        dependsOn(testClasses, jar)
+        classpath = sourceSets.test.get().runtimeClasspath
+        mainClass.set("com.github.weisj.jsvg.W3cSvg11TestAudit")
+        environment(
+            "W3C_SVG_11_TEST_SUITE_PATH",
+            rootProject.file("w3c-svg-11-test-suite/W3C_SVG_11_TestSuite").absolutePath,
+        )
+        val reportDirectory = layout.buildDirectory.dir("reports/w3c-svg-11-audit")
+        systemProperty("w3c.audit.reportDir", reportDirectory.get().asFile.absolutePath)
+        doFirst {
+            delete(reportDirectory)
+        }
+    }
+
+    register<JavaExec>("wptSvgTestAudit") {
+        group = "verification"
+        description = "Reports excluded WPT SVG reference tests that now pass."
+        dependsOn(testClasses, jar)
+        classpath = sourceSets.test.get().runtimeClasspath
+        mainClass.set("com.github.weisj.jsvg.WptSvgTestAudit")
+        environment("WPT_TEST_SUITE_PATH", rootProject.file("wpt-test-suite").absolutePath)
+        val reportDirectory = layout.buildDirectory.dir("reports/wpt-svg-audit")
+        systemProperty("wpt.audit.reportDir", reportDirectory.get().asFile.absolutePath)
+        doFirst {
+            delete(reportDirectory)
         }
     }
 

@@ -27,11 +27,14 @@ import static com.github.weisj.jsvg.ImageComparison.RenderType.*;
 import static com.github.weisj.jsvg.ImageComparison.RenderType.Batik;
 
 import java.awt.*;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -67,6 +70,8 @@ import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.ColorUtil;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
@@ -84,18 +89,39 @@ public final class ImageComparison {
         JSVGType JSVG = new JSVGType(LoaderContext.builder()
                 .externalResourcePolicy(ResourcePolicy.ALLOW_ALL)
                 .build());
-        DiskImage DiskImage = new DiskImage();
+        DiskImageType DiskImage = new DiskImageType();
 
-        record BatikType() implements RenderType {
+        record BatikType(@Nullable AnimationState animationState,
+                @Nullable Dimension viewportSize) implements RenderType {
+            public BatikType() {
+                this(null, null);
+            }
+
+            public BatikType withAnimationState(@NotNull AnimationState state) {
+                return new BatikType(state, viewportSize);
+            }
+
+            public BatikType withViewportSize(int width, int height) {
+                return new BatikType(animationState, new Dimension(width, height));
+            }
         }
         record JSVGType(@NotNull LoaderContext loaderContext,
-                @NotNull PlatformSupport platformSupport) implements RenderType {
+                @NotNull PlatformSupport platformSupport,
+                @NotNull AnimationState animationState) implements RenderType {
+            JSVGType(@NotNull LoaderContext loaderContext, @NotNull PlatformSupport platformSupport) {
+                this(loaderContext, platformSupport, AnimationState.NO_ANIMATION);
+            }
+
             JSVGType(@NotNull LoaderContext loaderContext) {
                 this(loaderContext, NullPlatformSupport.INSTANCE);
             }
+
+            public JSVGType withAnimationState(@NotNull AnimationState state) {
+                return new JSVGType(loaderContext, platformSupport, state);
+            }
         }
 
-        record DiskImage() implements RenderType {
+        record DiskImageType() implements RenderType {
         }
     }
 
@@ -144,16 +170,15 @@ public final class ImageComparison {
             }
         }
 
-        record MemoryImageSource(@NotNull String name, @NotNull String data) implements ImageSource {
+        record MemoryImageSource(@NotNull String name, @NotNull String data, @Nullable URL url) implements ImageSource {
+
+            public MemoryImageSource(@NotNull String name, @NotNull String data) {
+                this(name, data, null);
+            }
 
             @Override
             public @NotNull String name() {
                 return name;
-            }
-
-            @Override
-            public @Nullable URL url() {
-                return null;
             }
 
             @Override
@@ -221,18 +246,19 @@ public final class ImageComparison {
         }
 
         @NotNull
-        BufferedImage render(@Nullable BufferedImage expectedHint) throws IOException {
+        public BufferedImage render(@Nullable BufferedImage expectedHint) throws IOException {
             return switch (renderType) {
-                case BatikType() -> renderBatik(source.openStream());
-                case JSVGType(LoaderContext loaderContext, PlatformSupport platformSupport) -> {
+                case BatikType(AnimationState state, Dimension viewportSize) ->
+                    renderBatik(source, state, viewportSize);
+                case JSVGType(LoaderContext loaderContext, PlatformSupport platformSupport, AnimationState state) -> {
                     Dimension size = null;
                     if (expectedHint != null) {
                         size = new Dimension(expectedHint.getWidth(), expectedHint.getHeight());
                     }
-                    yield renderJsvg(source, graphicsMutator, loaderContext, platformSupport, size);
+                    yield renderJsvg(source, graphicsMutator, loaderContext, platformSupport, size, state);
                 }
-                case DiskImage() -> {
-                    var img = ImageIO.read(source.openStream());
+                case DiskImageType() -> {
+                    var img = readReferenceImage(source);
                     var refImg = new ReferenceImage(img.getWidth(), img.getHeight());
                     var g = refImg.createGraphics();
                     g.drawImage(img, 0, 0, null);
@@ -280,7 +306,7 @@ public final class ImageComparison {
         return compareImages(name, svgContent, DEFAULT_TOLERANCE);
     }
 
-    static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull CompareInfo compareInfo) {
+    public static @NotNull ImageComparison.ReferenceTestResult compareImages(@NotNull CompareInfo compareInfo) {
         try {
             BufferedImage expected = compareInfo.expected.render(null);
             BufferedImage actual = compareInfo.actual.render(expected);
@@ -317,7 +343,8 @@ public final class ImageComparison {
             Files.deleteIfExists(diffFile.toPath());
             Files.deleteIfExists(expectedFile.toPath());
             Files.deleteIfExists(actualFile.toPath());
-        } catch (IOException ignore) {
+        } catch (IOException e) {
+            throw new UncheckedIOException("Unable to remove previous comparison images for " + name, e);
         }
 
         ImageComparisonResult comparison = comp.compareImages();
@@ -374,7 +401,8 @@ public final class ImageComparison {
 
     public static @NotNull BufferedImage renderJsvg(@NotNull String path) {
         try {
-            return renderJsvg(new PathImageSource(path), null, JSVG.loaderContext(), JSVG.platformSupport(), null);
+            return renderJsvg(new PathImageSource(path), null, JSVG.loaderContext(), JSVG.platformSupport(), null,
+                    AnimationState.NO_ANIMATION);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -391,14 +419,16 @@ public final class ImageComparison {
 
     private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
             @Nullable Consumer<Graphics2D> graphicsMutator, LoaderContext loaderContext,
-            @NotNull PlatformSupport platformSupport, @Nullable Dimension sizeHint) throws IOException {
+            @NotNull PlatformSupport platformSupport, @Nullable Dimension sizeHint,
+            @NotNull AnimationState animationState) throws IOException {
         SVGDocument document;
 
-        URL url = imageSource.url();
-        if (url != null) {
-            document = Objects.requireNonNull(new SVGLoader().load(url, loaderContext));
-        } else {
-            document = Objects.requireNonNull(new SVGLoader().load(imageSource.openStream(), null, loaderContext));
+        try (InputStream input = imageSource.openStream()) {
+            URL url = imageSource.url();
+            document = Objects
+                    .requireNonNull(new SVGLoader().load(input, url != null ? url.toURI() : null, loaderContext));
+        } catch (URISyntaxException e) {
+            throw new IOException("Invalid document URI: " + imageSource.url(), e);
         }
 
         FloatSize size = document.size();
@@ -411,12 +441,37 @@ public final class ImageComparison {
         g.setColor(ColorUtil.withAlpha(Color.WHITE, 0));
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         if (graphicsMutator != null) graphicsMutator.accept(g);
-        document.renderWithPlatform(platformSupport, g, new ViewBox(size));
+        Output output = Output.createForGraphics(g);
+        document.renderWithPlatform(platformSupport, output, new ViewBox(size), animationState);
+        output.dispose();
         g.dispose();
         return image;
     }
 
-    private static BufferedImage renderBatik(@NotNull InputStream inputStream) throws IOException {
+    private static @NotNull BufferedImage readReferenceImage(@NotNull ImageSource source) throws IOException {
+        BufferedImage image;
+        try (InputStream stream = source.openStream()) {
+            image = ImageIO.read(stream);
+        }
+        if (image == null) throw new IOException("Unable to decode reference image: " + source.name());
+
+        var colorModel = image.getColorModel();
+        if (colorModel.getColorSpace().equals(ColorSpace.getInstance(ColorSpace.CS_GRAY))) {
+            // Reference PNGs contain sRGB samples, but ImageIO's default gray color space is linear.
+            // Expose gray as R, G and B without converting the samples or copying the backing data.
+            int[] bands = colorModel.hasAlpha() ? new int[] {0, 0, 0, 1} : new int[] {0, 0, 0};
+            var raster = image.getRaster().createWritableChild(
+                    0, 0, image.getWidth(), image.getHeight(), 0, 0, bands);
+            var rgbModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                    colorModel.hasAlpha(), colorModel.isAlphaPremultiplied(), colorModel.getTransparency(),
+                    raster.getTransferType());
+            image = new BufferedImage(rgbModel, raster, colorModel.isAlphaPremultiplied(), null);
+        }
+        return image;
+    }
+
+    private static BufferedImage renderBatik(@NotNull ImageSource source, @Nullable AnimationState state,
+            @Nullable Dimension viewportSize) throws IOException {
         final BufferedImage[] imagePointer = new BufferedImage[1];
 
         TranscodingHints transcoderHints = new TranscodingHints();
@@ -424,9 +479,19 @@ public final class ImageComparison {
         transcoderHints.put(ImageTranscoder.KEY_DOM_IMPLEMENTATION, SVGDOMImplementation.getDOMImplementation());
         transcoderHints.put(ImageTranscoder.KEY_DOCUMENT_ELEMENT_NAMESPACE_URI, SVGConstants.SVG_NAMESPACE_URI);
         transcoderHints.put(ImageTranscoder.KEY_DOCUMENT_ELEMENT, "svg");
+        if (viewportSize != null) {
+            transcoderHints.put(ImageTranscoder.KEY_WIDTH, (float) viewportSize.width);
+            transcoderHints.put(ImageTranscoder.KEY_HEIGHT, (float) viewportSize.height);
+        }
+        if (state != null) {
+            // Batik requires dynamic mode to sample declarative animations, and uses seconds.
+            transcoderHints.put(ImageTranscoder.KEY_EXECUTE_ONLOAD, Boolean.TRUE);
+            transcoderHints.put(ImageTranscoder.KEY_SNAPSHOT_TIME, state.timestamp() / 1000f);
+        }
 
-        try {
+        try (InputStream inputStream = source.openStream()) {
             TranscoderInput input = new TranscoderInput(inputStream);
+            if (source.url() != null) input.setURI(source.url().toExternalForm());
             ImageTranscoder t = new ImageTranscoder() {
 
                 @Override
@@ -465,7 +530,7 @@ public final class ImageComparison {
         public static final @NotNull ImageComparison.ReferenceTestResult SUCCESS =
                 new ReferenceTestResult(ImageComparisonState.MATCH, () -> "SUCCESS");
         public static final @NotNull ImageComparison.ReferenceTestResult FAILURE =
-                new ReferenceTestResult(ImageComparisonState.MATCH, () -> "FAILURE");
+                new ReferenceTestResult(ImageComparisonState.MISMATCH, () -> "FAILURE");
 
         private final @NotNull ImageComparisonState comparisonState;
         private final @NotNull Supplier<@NotNull String> failureLogSupplier;

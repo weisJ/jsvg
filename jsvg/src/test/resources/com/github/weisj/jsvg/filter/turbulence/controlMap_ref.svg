@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="40">
+	<!-- Zero-frequency fractal noise is .5. sRGB encoding is 1.055*.5^(1/2.4)-.055. 
+		Displacement is -32*(encoded-.5), without rounding to an integer sample. -->
+	<defs>
+		<linearGradient id="x" gradientUnits="userSpaceOnUse"
+			x2="64" color-interpolation="sRGB">
+			<stop stop-color="#204080" />
+			<stop offset="1" stop-color="#a04000" />
+		</linearGradient>
+		<linearGradient id="y" gradientUnits="userSpaceOnUse"
+			x2="0" y2="64" color-interpolation="sRGB">
+			<stop stop-color="#002000" />
+			<stop offset="1" stop-color="#00a000" />
+		</linearGradient>
+		<g id="art">
+			<rect width="64" height="64" fill="url(#x)" />
+			<rect width="64" height="64" fill="url(#y)" fill-opacity=".5" />
+		</g>
+		<clipPath id="sample">
+			<rect x="12" y="12" width="16" height="16" />
+		</clipPath>
+	</defs>
+	<g clip-path="url(#sample)">
+		<use xlink:href="#art"
+			transform="translate(-7.5314234577 -7.5314234577)" />
+	</g>
+	<g transform="translate(40)" clip-path="url(#sample)">
+		<use xlink:href="#art"
+			transform="translate(-7.5314234577 -7.5314234577)" />
+	</g>
+	<!-- White selects a two-unit displacement; the noise's alpha is .5. -->
+	<rect x="80" width="38" height="38"
+		fill="rgb(73.5356983052%,73.5356983052%,73.5356983052%)"
+		fill-opacity=".5" />
+</svg>

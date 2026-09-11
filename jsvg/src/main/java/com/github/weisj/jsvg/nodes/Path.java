@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,12 +21,9 @@
  */
 package com.github.weisj.jsvg.nodes;
 
-import java.awt.*;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.FillRule;
-import com.github.weisj.jsvg.geometry.AWTSVGShape;
 import com.github.weisj.jsvg.geometry.SVGShape;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
@@ -46,8 +43,7 @@ public final class Path extends ShapeNode {
 
     @Override
     protected @NotNull SVGShape buildShape(@NotNull AttributeNode attributeNode) {
-        String pathValue = attributeNode.getValue("d");
-        if (pathValue == null) return new AWTSVGShape<>(new Rectangle());
+        String pathValue = attributeNode.getValue("d", "");
         return PathUtil.parseFromPathData(pathValue, FillRule.Nonzero);
     }
 

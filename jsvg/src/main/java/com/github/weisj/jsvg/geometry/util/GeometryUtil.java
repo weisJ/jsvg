@@ -56,6 +56,12 @@ public final class GeometryUtil {
         return a > -EPS;
     }
 
+    /** Whether transformed coordinate axes remain aligned with the image axes, including quarter turns. */
+    public static boolean isAxisAligned(@NotNull AffineTransform transform) {
+        return (transform.getShearX() == 0 && transform.getShearY() == 0)
+                || (transform.getScaleX() == 0 && transform.getScaleY() == 0);
+    }
+
     public static double scaleXOfTransform(@Nullable AffineTransform at) {
         if (at == null) return 1;
         double sx = at.getScaleX();
@@ -157,6 +163,30 @@ public final class GeometryUtil {
         return r1;
     }
 
+    public static @NotNull Shape transformBounds(@NotNull AffineTransform transform, @NotNull Rectangle2D rect) {
+        if (rect.isEmpty() || transform.isIdentity()) return rect;
+
+        if (transform.getShearX() == 0 && transform.getShearY() == 0) {
+            double x = transform.getScaleX() * rect.getX() + transform.getTranslateX();
+            double y = transform.getScaleY() * rect.getY() + transform.getTranslateY();
+            double width = transform.getScaleX() * rect.getWidth();
+            double height = transform.getScaleY() * rect.getHeight();
+            return new Rectangle2D.Double(
+                    Math.min(x, x + width), Math.min(y, y + height),
+                    Math.abs(width), Math.abs(height));
+        }
+        if (transform.getScaleX() == 0 && transform.getScaleY() == 0) {
+            double x = transform.getShearX() * rect.getY() + transform.getTranslateX();
+            double y = transform.getShearY() * rect.getX() + transform.getTranslateY();
+            double width = transform.getShearX() * rect.getHeight();
+            double height = transform.getShearY() * rect.getWidth();
+            return new Rectangle2D.Double(
+                    Math.min(x, x + width), Math.min(y, y + height),
+                    Math.abs(width), Math.abs(height));
+        }
+        return transform.createTransformedShape(rect);
+    }
+
     public static float left(@NotNull Rectangle2D rect) {
         return (float) rect.getX();
     }
@@ -171,6 +201,14 @@ public final class GeometryUtil {
 
     public static float bottom(@NotNull Rectangle2D rect) {
         return (float) (rect.getY() + rect.getHeight());
+    }
+
+    public static @NotNull FloatInsets sum(@NotNull FloatInsets a, @NotNull FloatInsets b) {
+        return new FloatInsets(
+                a.top() + b.top(),
+                a.left() + b.left(),
+                a.bottom() + b.bottom(),
+                a.right() + b.right());
     }
 
     public static @NotNull Rectangle2D grow(@NotNull Rectangle2D bounds, FloatInsets grow) {
@@ -272,6 +310,17 @@ public final class GeometryUtil {
             pathIterator.next();
         }
         return lastPoint;
+    }
+
+    public static Rectangle2D union(@NotNull Rectangle2D a, @NotNull Rectangle2D b) {
+        if (a.isEmpty()) return b;
+        if (b.isEmpty() || b.equals(a)) return a;
+        return a.createUnion(b);
+    }
+
+    public static @NotNull Rectangle2D.Double toDoubleRectangle(@NotNull Rectangle2D r) {
+        if (r instanceof Rectangle2D.Double) return (Rectangle2D.Double) r;
+        return new Rectangle2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
     }
 
     public enum Space {

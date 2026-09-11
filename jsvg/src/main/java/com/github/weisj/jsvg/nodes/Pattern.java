@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -143,7 +143,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return !width.isZero() && !height.isZero() && SVGPaint.super.isVisible(context);
+        return !width.isZero() && !height.isZero() && !hasEmptyViewBox() && SVGPaint.super.isVisible(context);
     }
 
     @Override
@@ -180,7 +180,8 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
             if (patternContentUnits == UnitType.UserSpaceOnUse) {
                 ctx.translate(out, patternBounds.getX(), patternBounds.getY());
             }
-            renderWithSize(new FloatSize(patternBounds), viewBox, ctx, out);
+            RenderContext innerContext = createInnerContextForViewBox(new FloatSize(patternBounds), viewBox, ctx, out);
+            render(innerContext, out);
         });
 
         // Fixme: When patternTransform != null antialiasing is broken

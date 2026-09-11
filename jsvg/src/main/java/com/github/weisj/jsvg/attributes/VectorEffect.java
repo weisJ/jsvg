@@ -95,13 +95,22 @@ public enum VectorEffect implements HasMatchName {
         output.applyTransform(shapeTransform);
     }
 
-    // https://svgwg.org/svg2-draft/painting.html#PaintingVectorEffects
-    public static @NotNull Shape applyNonScalingStroke(@NotNull Output output, @NotNull RenderContext context,
-            @NotNull Stroke stroke, @NotNull Shape shape) {
+    public static boolean shouldApplyNonScalingStroke(@NotNull Set<VectorEffect> effects) {
+        return effects.contains(NonScalingStroke) && !effects.contains(NonScalingSize);
+    }
+
+    /**
+     * Computes the non-scaling stroke outline.
+     *
+     * @see <a href="https://svgwg.org/svg2-draft/painting.html#PaintingVectorEffects">Vector effects</a>
+     */
+    public static @Nullable Shape nonScalingStrokeShape(@NotNull Set<VectorEffect> effects,
+            @NotNull AffineTransform transform,
+            @NotNull RenderContext context, @NotNull Stroke stroke, @NotNull Shape shape) {
         // For the stroke not to be scaled we have to pre-multiply the shape by the transform and then paint
         // in the non-transformed coordinate system.
-        AffineTransform shapeTransform = output.transform();
-        shapeTransform.concatenate(GeometryUtil.createInverse(context.hostTransform()));
+        AffineTransform shapeTransform = GeometryUtil.createInverse(context.hostTransform());
+        shapeTransform.concatenate(transform);
 
         Shape strokedShape = ShapeUtil.transformShape(shape, shapeTransform);
         strokedShape = stroke.createStrokedShape(strokedShape);

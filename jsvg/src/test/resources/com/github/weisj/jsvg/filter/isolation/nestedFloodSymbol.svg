@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="32">
+	<defs>
+		<filter id="identity" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="96" height="32">
+			<feOffset />
+		</filter>
+		<filter id="flood" filterUnits="userSpaceOnUse" x="10" y="20"
+			width="6" height="10">
+			<feFlood flood-color="blue" />
+		</filter>
+		<symbol id="generated" viewBox="10 20 6 10"
+			filter="url(#flood)" />
+	</defs>
+	<!-- Map generated bounds through the symbol's viewBox and use-site viewport. -->
+	<g filter="url(#identity)">
+		<rect x="4" y="4" width="12" height="20" fill="red" />
+		<use href="#generated" x="40" y="4" width="12" height="20" />
+	</g>
+</svg>

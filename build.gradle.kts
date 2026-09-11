@@ -125,7 +125,7 @@ allprojects {
             }
             format("markdown") {
                 target("**/*.md")
-                targetExclude("resvg-test-suite/**/*.md")
+                targetExclude("resvg-test-suite/**/*.md", "w3c-svg-11-test-suite/**/*.md", "wpt-test-suite/**/*.md")
                 endWithNewline()
                 trimTrailingWhitespace()
             }
@@ -134,6 +134,8 @@ allprojects {
                 targetExclude(
                     "**/brokenUpCharContent.svg",
                     "resvg-test-suite/**/*.svg",
+                    "w3c-svg-11-test-suite/**/*.svg",
+                    "wpt-test-suite/**/*.svg",
                 )
                 eclipseWtp(EclipseWtpFormatterStep.XML)
             }
@@ -222,7 +224,8 @@ allprojects {
                 }
             }
             tasks.withType<JavaCompile>().configureEach {
-                options.compilerArgs.addAll(listOf("-Xmaxerrs", "10000", "-Xmaxwarns", "10000"))
+                // Java 8 remains the library target; newer JDKs warn that this target is obsolete.
+                options.compilerArgs.addAll(listOf("-Xlint:-options", "-Xmaxerrs", "10000", "-Xmaxwarns", "10000"))
                 if (props.bool("Werror", false)) {
                     options.compilerArgs.add("-Werror")
                 }

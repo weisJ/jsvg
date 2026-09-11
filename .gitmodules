@@ -1,3 +1,10 @@
 [submodule "resvg-test-suite"]
 	path = resvg-test-suite
 	url = https://github.com/RazrFalcon/resvg-test-suite.git
+[submodule "w3c-svg-11-test-suite"]
+	path = w3c-svg-11-test-suite
+	url = https://github.com/wieslawsoltes/W3C_SVG_11_TestSuite.git
+[submodule "wpt-test-suite"]
+	path = wpt-test-suite
+	url = https://github.com/web-platform-tests/wpt.git
+	shallow = true

@@ -154,6 +154,7 @@ public final class RenderContext {
                     @NotNull AffineTransform rootTransform,
                     @NotNull AffineTransform userSpaceTransform) {
                 context.setRootTransform(rootTransform, userSpaceTransform);
+                context.setHostTransform(hostTransform);
             }
 
             @Override
@@ -244,7 +245,8 @@ public final class RenderContext {
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
         AffineTransform newRootTransform = rootTransform != null ? rootTransform : this.rootTransform;
 
-        return new RenderContext(platformSupport, newRootTransform, hostTransform,
+        AffineTransform newHostTransform = rootTransform != null ? new AffineTransform(hostTransform) : hostTransform;
+        return new RenderContext(platformSupport, newRootTransform, newHostTransform,
                 new AffineTransform(userSpaceTransform),
                 newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newContextAttributes);
     }
@@ -322,6 +324,10 @@ public final class RenderContext {
 
     public @NotNull SVGPaint fillPaint() {
         return PaintResolver.resolvePaint(paintContext.fillPaint, paintContext, contextElementAttributes);
+    }
+
+    public @Nullable Color resolveColor(@Nullable SVGPaint paint) {
+        return PaintResolver.resolveColor(paint, paintContext, contextElementAttributes, measureContext);
     }
 
     public float rawOpacity() {

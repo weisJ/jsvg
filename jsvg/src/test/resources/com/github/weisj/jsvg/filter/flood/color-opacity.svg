@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="70">
+	<defs>
+		<filter id="opaque" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="160" height="70">
+			<feFlood x="10" y="10" width="20" height="40"
+				flood-color="#336699" />
+		</filter>
+		<filter id="translucent" filterUnits="userSpaceOnUse" x="0"
+			y="0" width="160" height="70">
+			<feFlood x="50" y="10" width="20" height="40"
+				flood-color="rgba(51,102,153,0.5)" flood-opacity="0.5" />
+		</filter>
+		<filter id="invisible" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="160" height="70">
+			<feFlood x="90" y="10" width="20" height="40"
+				flood-color="#336699" flood-opacity="0" />
+		</filter>
+		<filter id="hidden-rgb" filterUnits="userSpaceOnUse" x="0"
+			y="0" width="160" height="70" color-interpolation-filters="sRGB">
+			<feFlood x="130" y="10" width="20" height="40"
+				flood-color="#33669900" />
+			<feComponentTransfer>
+				<feFuncA type="linear" slope="0" intercept="1" />
+			</feComponentTransfer>
+		</filter>
+	</defs>
+	<rect width="10" height="10" fill="red" filter="url(#opaque)" />
+	<rect width="10" height="10" fill="red" filter="url(#translucent)" />
+	<rect width="10" height="10" fill="red" filter="url(#invisible)" />
+	<rect width="10" height="10" fill="red" filter="url(#hidden-rgb)" />
+</svg>

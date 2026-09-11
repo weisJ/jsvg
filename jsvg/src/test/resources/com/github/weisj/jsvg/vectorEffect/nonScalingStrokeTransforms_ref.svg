@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+	<!-- The three paths expressed directly in viewport coordinates, with ordinary 
+		strokes. -->
+	<path d="M20 20 H68 L80 44 Z" fill="#ccddee" stroke="#234567"
+		stroke-width="6" />
+	<path d="M16 76 H136" fill="none" stroke="black" stroke-width="4"
+		stroke-dasharray="10 6" stroke-dashoffset="3" stroke-linecap="round" />
+	<path d="M140 116 H76 L94 134" fill="none" stroke="black"
+		stroke-width="6" stroke-linecap="square" stroke-linejoin="bevel" />
+</svg>

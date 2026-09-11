@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,17 +21,20 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
+import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -40,6 +43,8 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ColorUtil;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -53,7 +58,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     private static final double BOX_BLUR_APPROXIMATION_THRESHOLD = 2;
 
-    private float[] stdDeviation;
+    private float stdDeviationX;
+    private float stdDeviationY;
     private EdgeMode edgeMode;
 
     private double xCurrent;
@@ -70,8 +76,14 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        stdDeviation = attributeNode.getFloatList("stdDeviation");
-        edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.Duplicate);
+        float[] stdDeviation = attributeNode.getFloatList("stdDeviation");
+        stdDeviationX = stdDeviation.length > 0 ? stdDeviation[0] : 0;
+        stdDeviationY = stdDeviation.length > 1 ? stdDeviation[1] : stdDeviationX;
+        if (stdDeviationX < 0 || stdDeviationY < 0) {
+            stdDeviationX = 0;
+            stdDeviationY = 0;
+        }
+        edgeMode = attributeNode.getEnum("edgeMode", EdgeMode.None);
     }
 
     @ApiStatus.Internal
@@ -79,34 +91,80 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         this.onlyAlpha = onlyAlpha;
     }
 
-    private double[] computeAbsoluteStdDeviation(@Nullable AffineTransform at) {
-        if (stdDeviation.length == 0) return new double[] {0, 0};
-        double xSigma = stdDeviation[0];
-        double ySigma = stdDeviation[Math.min(stdDeviation.length - 1, 1)];
-        if (at != null) {
-            xSigma *= GeometryUtil.scaleXOfTransform(at);
-            ySigma *= GeometryUtil.scaleYOfTransform(at);
+    private double[] computeStdDeviation(@NotNull UnitType units,
+            @NotNull Rectangle2D elementBounds) {
+        double xSigma = stdDeviationX;
+        double ySigma = stdDeviationY;
+        if (units == UnitType.ObjectBoundingBox) {
+            xSigma *= elementBounds.getWidth();
+            ySigma *= elementBounds.getHeight();
         }
         return new double[] {xSigma, ySigma};
     }
 
     @Override
+    public boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
+        double[] sigma = computeStdDeviation(context.primitiveUnits(), context.elementBounds());
+        if (sigma[0] == 0 && sigma[1] == 0) return false;
+        // Duplicate and wrap extend the input rectangle along primitive axes, even for a circular kernel.
+        if (edgeMode != EdgeMode.None) return true;
+        AffineTransform transform = context.transform();
+        double xContribution = transform.getScaleX() * transform.getShearY() * sigma[0] * sigma[0];
+        double yContribution = transform.getShearX() * transform.getScaleY() * sigma[1] * sigma[1];
+        // Off-diagonal covariance must vanish for independent horizontal and vertical passes.
+        // Allow rounding when the two contributions cancel, as for a circular kernel under rotation.
+        return Math.abs(xContribution + yContribution) > 8
+                * Math.ulp(Math.max(Math.abs(xContribution), Math.abs(yContribution)));
+    }
+
+    private double[] computeAbsoluteStdDeviation(@NotNull AffineTransform transform, @NotNull UnitType units,
+            @NotNull Rectangle2D elementBounds) {
+        double[] sigma = computeStdDeviation(units, elementBounds);
+        double x = sigma[0];
+        double y = sigma[1];
+        sigma[0] = Math.hypot(transform.getScaleX() * x, transform.getShearX() * y);
+        sigma[1] = Math.hypot(transform.getShearY() * x, transform.getScaleY() * y);
+        return sigma;
+    }
+
+    @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
-        double[] sigma = computeAbsoluteStdDeviation(null);
-        int hExtend = kernelDiameterForStandardDeviation(sigma[0]);
-        int vExtend = kernelDiameterForStandardDeviation(sigma[1]);
-        impl().saveLayoutResult(input.grow(hExtend, vExtend, filterLayoutContext), filterLayoutContext);
+        AffineTransform transform = filterLayoutContext.transform();
+        double[] sigma = computeAbsoluteStdDeviation(transform,
+                filterLayoutContext.primitiveUnits(), filterLayoutContext.elementBounds());
+        int dX = kernelDiameterForStandardDeviation(sigma[0]);
+        int dY = kernelDiameterForStandardDeviation(sigma[1]);
+        float hExtend = extendForKernelDiameter(sigma[0], dX);
+        float vExtend = extendForKernelDiameter(sigma[1], dY);
+        // Kernel sizes are rounded in device pixels; layout grows in user coordinates.
+        AffineTransform inverse = filterLayoutContext.inverseTransform();
+        float hUserExtend = (float) (Math.abs(inverse.getScaleX()) * hExtend
+                + Math.abs(inverse.getShearX()) * vExtend);
+        float vUserExtend = (float) (Math.abs(inverse.getShearY()) * hExtend
+                + Math.abs(inverse.getScaleY()) * vExtend);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        // Wrapping can repeat content anywhere; duplication only adds content outside the input region.
+        boolean extendsInput = edgeMode == EdgeMode.Wrap
+                || (edgeMode == EdgeMode.Duplicate && !input.region().contains(region));
+        boolean nonZeroKernel = sigma[0] > 0 || sigma[1] > 0;
+        CoversWholeRegion coversWholeRegion = extendsInput && nonZeroKernel && !input.region().isEmpty()
+                ? CoversWholeRegion.YES
+                : CoversWholeRegion.NO;
+        LayoutBounds bounds =
+                input.grow(hUserExtend, vUserExtend, filterLayoutContext).withRegion(region, coversWholeRegion);
+        impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        if (stdDeviation.length == 0) {
+        if (stdDeviationX == 0 && stdDeviationY == 0) {
             impl().noop(filterContext);
             return;
         }
 
-        double[] sigma = computeAbsoluteStdDeviation(filterContext.info().output().transform());
+        double[] sigma = computeAbsoluteStdDeviation(filterContext.info().output().transform(),
+                filterContext.primitiveUnits(), filterContext.info().elementBounds());
         double xSigma = sigma[0];
         double ySigma = sigma[1];
 
@@ -130,11 +188,15 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             xBlurKernel = createConvolveKernel(dX, xSigma, true);
         }
         if (ySigma > 0 && ySigma < BOX_BLUR_APPROXIMATION_THRESHOLD) {
-            yBlurKernel = createConvolveKernel(dX, ySigma, false);
+            yBlurKernel = createConvolveKernel(dY, ySigma, false);
         }
 
-        ImageProducer output = edgeMode.convolve(context, filterContext, input,
-                new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, dX, dY));
+        Rectangle2D inputRegion = filterContext.layout(impl().inputChannelKey()).region();
+        Rectangle sourceBounds = GeometryUtil.transformBounds(
+                filterContext.info().output().transform(), inputRegion).getBounds();
+        ImageProducer output = edgeMode.convolve(context, filterContext, input, sourceBounds,
+                new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, dX, dY,
+                        !onlyAlpha && colorInterpolation(filterContext) == ColorInterpolation.LinearRGB));
         impl().saveResult(new ImageProducerChannel(output), filterContext);
     }
 
@@ -185,7 +247,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         return data;
     }
 
-    public static int kernelDiameterForStandardDeviation(double standardDeviation) {
+    private static int kernelDiameterForStandardDeviation(double standardDeviation) {
         if (standardDeviation < BOX_BLUR_APPROXIMATION_THRESHOLD) {
             float areaSum = (float) (0.5 / (standardDeviation * SQRT_2_PI));
             int i = 0;
@@ -199,6 +261,14 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
     }
 
+    private static float extendForKernelDiameter(double standardDeviation, int diameter) {
+        return standardDeviation < BOX_BLUR_APPROXIMATION_THRESHOLD ? diameter / 2.0f : boxRadius(diameter);
+    }
+
+    private static int boxRadius(int diameter) {
+        // Both layout and padding must cover all three box passes.
+        return (diameter & 1) == 0 ? 3 * (diameter / 2) - 1 : 3 * (diameter / 2);
+    }
 
     private static final class MixedQualityConvolveOperation implements EdgeMode.ConvolveOperation {
 
@@ -207,20 +277,23 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
         private final int dX;
         private final int dY;
+        private final boolean linearRGB;
 
-        private MixedQualityConvolveOperation(@Nullable Kernel xKernel, @Nullable Kernel yKernel, int dX, int dY) {
+        private MixedQualityConvolveOperation(@Nullable Kernel xKernel, @Nullable Kernel yKernel, int dX, int dY,
+                boolean linearRGB) {
             this.xKernel = xKernel;
             this.yKernel = yKernel;
             this.dX = dX;
             this.dY = dY;
+            this.linearRGB = linearRGB;
         }
 
 
         @Override
-        public @NotNull Dimension maximumKernelSize() {
+        public @NotNull Dimension kernelRadius() {
             return new Dimension(
-                    xKernel != null ? xKernel.getXOrigin() : dX,
-                    yKernel != null ? yKernel.getXOrigin() : dY);
+                    xKernel != null ? xKernel.getXOrigin() : boxRadius(dX),
+                    yKernel != null ? yKernel.getYOrigin() : boxRadius(dY));
         }
 
         @Override
@@ -231,28 +304,35 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
                 throw new IllegalStateException("Image should be premultiplied");
             }
 
+            if (linearRGB) {
+                ImageUtil.mapPixels(raster, ColorUtil::sRGBtoLinearRGBPre);
+            }
+            BufferedImage result;
             if (xKernel != null && yKernel != null) {
                 BufferedImageOp op = new MultiConvolveOp(new ConvolveOp[] {
                         new ConvolveOp(xKernel, awtEdgeMode, hints),
                         new ConvolveOp(yKernel, awtEdgeMode, hints)
                 });
-                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(op));
+                result = op.filter(image, null);
             } else if (xKernel != null) {
                 verticalBoxBlur(raster);
-                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(
-                        new ConvolveOp(xKernel, awtEdgeMode, hints)));
+                result = new ConvolveOp(xKernel, awtEdgeMode, hints).filter(image, null);
             } else if (yKernel != null) {
                 horizontalBoxBlur(raster);
-                return new FilteredImageSource(image.getSource(), new BufferedImageFilter(
-                        new ConvolveOp(yKernel, awtEdgeMode, hints)));
+                result = new ConvolveOp(yKernel, awtEdgeMode, hints).filter(image, null);
             } else {
                 horizontalBoxBlur(raster);
                 verticalBoxBlur(raster);
-                return image.getSource();
+                result = image;
             }
+            if (linearRGB) {
+                ImageUtil.mapPixels(result.getRaster(), ColorUtil::linearRGBtoSRGBPre);
+            }
+            return result.getSource();
         }
 
         private void horizontalBoxBlur(@NotNull WritableRaster raster) {
+            if (dX == 1) return;
             if ((dX & 0x01) == 0) {
                 InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2);
                 InplaceBoxBlurFilter.horizontalPass(raster, raster, 0, 0, dX, dX / 2 - 1);
@@ -265,6 +345,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
 
         private void verticalBoxBlur(@NotNull WritableRaster raster) {
+            if (dY == 1) return;
             if ((dY & 0x01) == 0) {
                 InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2);
                 InplaceBoxBlurFilter.verticalPass(raster, raster, 0, 0, dY, dY / 2 - 1);

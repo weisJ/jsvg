@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
+	<!-- Alpha rises by 1/255 per primitive unit. The interior Sobel Kx is 8/255 
+		and FACTORx is 1/4, so N = normalize(-128/255, 0, 1) for surfaceScale=64. 
+		The distant light is (1, 0, 1)/sqrt(2). The diffuse intensity is (1 - 128/255)/sqrt(2 
+		* (1 + (128/255)^2)), which rounds to 80 in each sRGB band. All samples are 
+		inside the ramp. -->
+	<rect width="96" height="96" fill="#505050" />
+</svg>

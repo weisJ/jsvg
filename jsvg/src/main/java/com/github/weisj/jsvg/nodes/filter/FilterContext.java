@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 
 public final class FilterContext {
 
@@ -60,6 +62,15 @@ public final class FilterContext {
 
     public @NotNull ChannelStorage<Channel> resultChannels() {
         return resultChannels;
+    }
+
+    public @NotNull Rectangle2D primitiveRegion(@NotNull FilterPrimitiveBase primitive) {
+        return info.layout(primitive).region();
+    }
+
+    public @NotNull LayoutBounds layout(@NotNull FilterChannelKey key) {
+        // Rendering's aliases identify the input at this pass, even after the layout pass has finished.
+        return info.layout(resultChannels.resolveKey(key));
     }
 
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {

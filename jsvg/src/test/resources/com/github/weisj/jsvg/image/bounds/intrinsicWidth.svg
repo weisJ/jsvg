@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">
+	<defs>
+		<!-- Crop to the center half of the image/group positioning bounds. -->
+		<filter id="crop" x="25%" y="25%" width="50%" height="50%">
+			<feColorMatrix />
+		</filter>
+	</defs>
+	<g filter="url(#crop)">
+		<image href="red.svg" x="20%" y="20%" preserveAspectRatio="none"
+			height="16" />
+	</g>
+</svg>

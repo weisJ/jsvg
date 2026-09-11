@@ -83,6 +83,7 @@ dependencyResolutionManagement {
             }
             idv("imageCompare", "com.github.weisj:image-comparison")
             idv("sizeof", "org.ehcache:sizeof")
+            idv("fontVerter", "net.mabboud.fontverter:FontVerter")
         }
         create("toolLibs") {
             bundle("errorprone") {

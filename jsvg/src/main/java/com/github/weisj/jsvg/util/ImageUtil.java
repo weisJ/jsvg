@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,8 +25,10 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 
 import java.awt.*;
+import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
+import java.util.function.IntUnaryOperator;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,12 +39,24 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
 public final class ImageUtil {
+    public static final @NotNull ColorModel LINEAR_RGB_COLOR_MODEL = new DirectColorModel(
+            ColorSpace.getInstance(ColorSpace.CS_LINEAR_RGB), 32,
+            0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000, false, DataBuffer.TYPE_INT);
 
     private ImageUtil() {}
 
     public enum Premultiplied {
         Yes,
         No
+    }
+
+    public static @NotNull BufferedImage createCompatibleDestImage(@NotNull BufferedImage src,
+            @Nullable ColorModel dstCM) {
+        if (dstCM == null) {
+            dstCM = src.getColorModel();
+        }
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()),
+                dstCM.isAlphaPremultiplied(), null);
     }
 
     public static @NotNull BufferedImage createCompatibleTransparentImage(@NotNull Output output,
@@ -112,6 +126,27 @@ public final class ImageUtil {
 
     public static int getINT_RGBA_ScanlineStride(@NotNull Raster raster) {
         return ((SinglePixelPackedSampleModel) raster.getSampleModel()).getScanlineStride();
+    }
+
+    /**
+     * Maps packed ARGB samples in place, retaining the raster's origin and scanline stride.
+     * The caller owns the pixels and is responsible for their color space and premultiplication.
+     * This changes samples only; it does not update an image's ColorModel metadata.
+     */
+    public static void mapPixels(@NotNull WritableRaster raster, @NotNull IntUnaryOperator operation) {
+        if (!is_INT_PACK_Data(raster.getSampleModel(), true)) {
+            throw new IllegalArgumentException("Raster must use packed integer ARGB samples");
+        }
+        int[] pixels = getINT_RGBA_DataBank(raster);
+        int offset = getINT_RGBA_DataOffset(raster);
+        int stride = getINT_RGBA_ScanlineStride(raster);
+        for (int y = 0; y < raster.getHeight(); y++) {
+            int end = offset + raster.getWidth();
+            for (int i = offset; i < end; i++) {
+                pixels[i] = operation.applyAsInt(pixels[i]);
+            }
+            offset += stride;
+        }
     }
 
     public static @NotNull BufferedImage copy(@NotNull RenderContext context, @NotNull ImageProducer producer,

@@ -21,15 +21,18 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
-import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
+import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.noise.PerlinTurbulence;
-import com.github.weisj.jsvg.geometry.size.FloatInsets;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -37,6 +40,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.util.ColorUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 @ElementCategories(Category.FilterPrimitive)
@@ -56,6 +60,7 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
     private int numOctaves;
 
     private Type type;
+    private boolean stitchTiles;
 
     @Override
     public @NotNull String tagName() {
@@ -78,23 +83,40 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
         numOctaves = Math.min(numOctaves, 8);
 
         type = attributeNode.getEnum("type", Type.fractalNoise);
+        stitchTiles = "stitch".equals(attributeNode.getValue("stitchTiles"));
     }
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        impl().saveLayoutResult(
-                new LayoutBounds(
-                        filterLayoutContext.filterPrimitiveRegion(context.measureContext(), this),
-                        new FloatInsets()),
-                filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), filterLayoutContext.filterRegion());
+        impl().saveLayoutResult(LayoutBounds.createInitial(region, region), filterLayoutContext);
     }
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         Filter.FilterInfo info = filterContext.info();
-        Channel turbulenceChannel =
-                new TurbulenceChannel(info.imageBounds(), info.imageWidth, info.imageHeight, seed, numOctaves,
-                        baseFrequency[0], baseFrequency.length > 1 ? baseFrequency[1] : baseFrequency[0], type);
+        AffineTransform primitiveTransform = filterContext.primitiveUnits()
+                .applyToTransform(info.output().transform(), info.elementBounds());
+        Rectangle2D region = filterContext.primitiveRegion(impl());
+        if (stitchTiles && filterContext.primitiveUnits() == UnitType.ObjectBoundingBox) {
+            Rectangle2D bounds = info.elementBounds();
+            region = new Rectangle2D.Double(
+                    (region.getX() - bounds.getX()) / bounds.getWidth(),
+                    (region.getY() - bounds.getY()) / bounds.getHeight(),
+                    region.getWidth() / bounds.getWidth(),
+                    region.getHeight() / bounds.getHeight());
+        }
+        double xFrequency = baseFrequency[0];
+        double yFrequency = baseFrequency[Math.min(baseFrequency.length - 1, 1)];
+        Rectangle2D.Double tileRegion = stitchTiles && !region.isEmpty()
+                ? GeometryUtil.toDoubleRectangle(region)
+                : null;
+        Channel turbulenceChannel = new TurbulenceChannel(
+                GeometryUtil.createInverse(primitiveTransform),
+                tileRegion,
+                info.imageWidth, info.imageHeight,
+                type, colorInterpolation(filterContext),
+                new PerlinTurbulence((int) seed, numOctaves, xFrequency, yFrequency));
         impl().saveResult(turbulenceChannel, filterContext);
     }
 
@@ -105,50 +127,43 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
         private final int imageWidth;
         private final int imageHeight;
         private final Type type;
-        private final Rectangle2D tileBounds;
+        private final boolean linearRGB;
+        private final @NotNull AffineTransform imageToPrimitive;
+        private final @Nullable Rectangle2D.Double tileRegion;
+        private final PerlinTurbulence.@Nullable StitchInfo stitchInfo;
         private BufferedImage bufferedImage;
 
-        public TurbulenceChannel(@NotNull Rectangle2D tileBounds, int imageWidth, int imageHeight,
-                float seed, int octaves, double xFrequency, double yFrequency, Type type) {
-            this.tileBounds = tileBounds;
+        private final double[] coordinateBuffer = new double[2];
+
+        public TurbulenceChannel(@NotNull AffineTransform imageToPrimitive, @Nullable Rectangle2D.Double tileRegion,
+                int imageWidth, int imageHeight, Type type, @NotNull ColorInterpolation colorInterpolation,
+                @NotNull PerlinTurbulence perlinTurbulence) {
+            this.imageToPrimitive = imageToPrimitive;
+            this.tileRegion = tileRegion;
+            this.stitchInfo = tileRegion != null ? new PerlinTurbulence.StitchInfo() : null;
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
             this.type = type;
-            this.perlinTurbulence = new PerlinTurbulence((int) seed, octaves, xFrequency, yFrequency);
+            this.linearRGB = colorInterpolation == ColorInterpolation.LinearRGB;
+            this.perlinTurbulence = perlinTurbulence;
         }
 
         private @NotNull BufferedImage ensureImageBackingStore() {
             if (bufferedImage == null) {
-                ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_LINEAR_RGB);
-                ColorModel cm = new DirectColorModel(cs, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
-                        false, DataBuffer.TYPE_INT);
-                WritableRaster dest = cm.createCompatibleWritableRaster(imageWidth, imageHeight);
-                bufferedImage = new BufferedImage(cm, dest, false, null);
+                bufferedImage = ImageUtil.createCompatibleTransparentImage(imageWidth, imageHeight);
+                WritableRaster dest = bufferedImage.getRaster();
 
                 final int w = dest.getWidth();
                 final int h = dest.getHeight();
-
-                final double scaleX = tileBounds.getWidth() / w;
-                final double scaleY = tileBounds.getHeight() / h;
-
-                final double startX = tileBounds.getX();
-                final double startY = tileBounds.getY();
-
-                boolean fractalNoise = type == Type.fractalNoise;
 
                 final int[] destPixels = ImageUtil.getINT_RGBA_DataBank(dest);
                 final int dstAdjust = ImageUtil.getINT_RGBA_DataAdjust(dest);
                 int dp = ImageUtil.getINT_RGBA_DataOffset(dest);
 
-                double point1 = startY;
-                for (int i = 0; i < h; i++) {
-                    double point0 = startX;
-                    for (int end = dp + w; dp < end; dp++) {
-                        perlinTurbulence.turbulence(channels, point0, point1, fractalNoise, null, null);
-                        destPixels[dp] = cm.getRGB(channelsToRGB(channels));
-                        point0 += scaleX;
+                for (int y = 0; y < h; y++) {
+                    for (int x = 0; x < w; x++, dp++) {
+                        destPixels[dp] = pixelAt(x, y);
                     }
-                    point1 += scaleY;
                     dp += dstAdjust;
                 }
             }
@@ -180,8 +195,16 @@ public final class FeTurbulence extends AbstractFilterPrimitive {
 
         @Override
         public int pixelAt(double x, double y) {
-            perlinTurbulence.turbulence(channels, x, y, type == Type.fractalNoise, null, null);
-            return channelsToRGB(channels);
+            coordinateBuffer[0] = x;
+            coordinateBuffer[1] = y;
+            imageToPrimitive.transform(coordinateBuffer, 0, coordinateBuffer, 0, 1);
+            double primitiveX = coordinateBuffer[0];
+            double primitiveY = coordinateBuffer[1];
+            perlinTurbulence.turbulence(channels, primitiveX, primitiveY,
+                    type == Type.fractalNoise, stitchInfo, tileRegion);
+            int argb = channelsToRGB(channels);
+            // Channel consumers receive straight sRGB, including direct pixel sampling.
+            return linearRGB ? ColorUtil.linearRGBtoSRGB(argb) : argb;
         }
 
         private static int channelsToRGB(double[] channels) {

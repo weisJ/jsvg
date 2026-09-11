@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+	<defs>
+		<!-- Decreasing offsets must clamp in document order. -->
+		<linearGradient id="decreasing">
+			<stop offset="0" stop-color="red" />
+			<stop offset=".7" stop-color="yellow" />
+			<stop offset=".1" stop-color="green" />
+		</linearGradient>
+		<!-- A duplicate final stop must not discard the gradient. -->
+		<linearGradient id="redundant">
+			<stop offset="0" stop-color="blue" />
+			<stop offset="1" stop-color="yellow" />
+			<stop offset="1" stop-color="yellow" />
+		</linearGradient>
+		<linearGradient id="empty" />
+	</defs>
+	<rect width="32" height="16" fill="url(#decreasing)" />
+	<rect x="32" width="32" height="16" fill="url(#redundant)" />
+	<rect y="16" width="32" height="16" fill="url(#empty)" />
+</svg>

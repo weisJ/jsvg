@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static com.github.weisj.jsvg.ImageComparison.renderJsvg;
@@ -28,12 +30,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.io.TempDir;
 
+import com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.MemoryImageSource;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 
 class PaintsTest {
+    @TempDir
+    Path directory;
 
     @Test
     void testCurrentColor() {
@@ -52,5 +66,43 @@ class PaintsTest {
     @Test
     void testStringRepresentation() {
         assertEquals("AwtSVGPaint{paint=Color{r=0,g=0,b=0,a=255}}", new AwtSVGPaint(Color.BLACK).toString());
+    }
+
+    @Test
+    void urlResolution() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("paint/urlResolution_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("paint/urlResolution.svg"), RenderType.JSVG), 0, 0)));
+    }
+
+    @Test
+    void quotedAndEscapedPaintUrlsAndFallbacks() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("paint/urlsAndFallbacks_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("paint/urlsAndFallbacks.svg"), RenderType.JSVG), 0, 0)));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> quotedAndEscapedExternalPaintUrls() throws Exception {
+        Files.writeString(directory.resolve("paint).svg"), """
+                <svg xmlns="http://www.w3.org/2000/svg">
+                  <linearGradient id="blue"><stop stop-color="blue"/></linearGradient>
+                </svg>
+                """);
+        var reference = new MemoryImageSource("blue", """
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <rect width="16" height="16" fill="blue"/>
+                </svg>
+                """);
+        return Stream.of("url('paint).svg#blue') red", "url(paint\\).svg#blue) red")
+                .map(paint -> DynamicTest.dynamicTest(paint, () -> {
+                    var source = new MemoryImageSource("external-paint", """
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                              <rect width="16" height="16" fill="%s"/>
+                            </svg>
+                            """.formatted(paint), directory.resolve("document.svg").toUri().toURL());
+                    assertEquals(SUCCESS, compareImages(new CompareInfo(expected(reference, RenderType.Batik),
+                            actual(source, RenderType.JSVG), 0, 0)));
+                }));
     }
 }

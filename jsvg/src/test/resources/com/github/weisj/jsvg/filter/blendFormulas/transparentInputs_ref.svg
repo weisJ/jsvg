@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="40">
+	<rect x="0" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="0" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+	<rect x="20" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="20" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+	<rect x="40" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="40" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+	<rect x="60" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="60" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+	<rect x="80" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="80" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+	<rect x="100" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="100" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+	<rect x="120" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="120" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+	<rect x="140" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="140" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+	<rect x="160" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" />
+	<rect x="160" y="20" width="16" height="16" fill="red"
+		fill-opacity="0.6666666666666666" />
+</svg>
