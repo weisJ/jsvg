@@ -59,10 +59,18 @@ public interface PlatformSupport {
         return SVGFont.defaultFontFamily();
     }
 
-    /** Custom font for a family not registered with the platform, or null if none is provided.
-     * The family is CSS-canonicalized (lower-cased); implementations must match accordingly. */
     @ApiStatus.Experimental
-    default @Nullable Font customFont(@NotNull String family) {
+    interface FontLoader {
+        /**
+         * Custom font for a CSS-canonicalized family, or null to use the platform font.
+         * Custom fonts are cached per font loader instance.
+         */
+        @Nullable
+        Font customFont(@NotNull String family);
+    }
+
+    @ApiStatus.Experimental
+    default @Nullable FontLoader fontLoader() {
         return null;
     }
 

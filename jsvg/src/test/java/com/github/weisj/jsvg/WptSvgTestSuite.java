@@ -23,12 +23,12 @@ package com.github.weisj.jsvg;
 
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.io.StringWriter;
 import java.net.URI;
 import java.nio.file.Files;
@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
@@ -45,6 +46,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
@@ -58,7 +60,6 @@ import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
-import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 
 /** Standalone, static SVG reftests from Web Platform Tests. */
@@ -68,7 +69,9 @@ class WptSvgTestSuite {
     private static final String HTML = "http://www.w3.org/1999/xhtml";
     private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
-    private static PlatformSupport fonts = NullPlatformSupport.INSTANCE;
+    public static final Pattern FONT_FACE_PATTERN = Pattern.compile("@font-face\\s*\\{([^}]+)}");
+    private static final @NotNull PlatformSupport.FontLoader NULL_FONT_LOADER = family -> null;
+    private static @NotNull PlatformSupport.FontLoader fonts = NULL_FONT_LOADER;
 
     // Current rendering mismatches. Keep upstream artwork and fuzzy limits unchanged.
     private static final Set<String> EXCLUDED = Set.of(
@@ -208,6 +211,25 @@ class WptSvgTestSuite {
             "text/reftests/textpath-shape-001.svg",
             "text/reftests/tspan-opacity-mixed-direction.svg");
 
+    private static @NotNull PlatformSupport asPlatformSupport(@NotNull PlatformSupport.FontLoader fontLoader) {
+        return new PlatformSupport() {
+            @Override
+            public @Nullable ImageObserver imageObserver() {
+                return null;
+            }
+
+            @Override
+            public @Nullable TargetSurface targetSurface() {
+                return null;
+            }
+
+            @Override
+            public @Nullable FontLoader fontLoader() {
+                return fontLoader;
+            }
+        };
+    }
+
     static @NotNull Set<String> excludedTests() {
         return EXCLUDED;
     }
@@ -225,7 +247,7 @@ class WptSvgTestSuite {
 
     @AfterAll
     static void clearFonts() {
-        fonts = NullPlatformSupport.INSTANCE;
+        fonts = NULL_FONT_LOADER;
         FontResolver.clearFontCache();
     }
 
@@ -247,13 +269,13 @@ class WptSvgTestSuite {
                 }));
             }
         }
-        assertTrue(!tests.isEmpty(), "No WPT SVG reftests found in " + base);
+        assertFalse(tests.isEmpty(), "No WPT SVG reftests found in " + base);
         return tests;
     }
 
     @TestFactory
     Collection<DynamicTest> registeredFonts() {
-        return List.of("Ahem", "FreeSans").stream().map(family -> DynamicTest.dynamicTest(family, () -> {
+        return Stream.of("Ahem", "FreeSans").map(family -> DynamicTest.dynamicTest(family, () -> {
             // Compare JSVG's family lookup with Java2D drawing directly from the bundled font.
             var source = new MemoryImageSource("wpt-font-" + family, """
                     <svg xmlns="http://www.w3.org/2000/svg" width="160" height="80">
@@ -269,7 +291,7 @@ class WptSvgTestSuite {
                     graphics.getFont().createGlyphVector(graphics.getFontRenderContext(), "B").getOutline(10, 50));
             graphics.dispose();
             FontResolver.clearFontCache();
-            var renderer = new RenderType.JSVGType(LoaderContext.builder().build(), fonts);
+            var renderer = new RenderType.JSVGType(LoaderContext.builder().build(), asPlatformSupport(fonts));
             var rendered = actual(source, renderer).render(null);
             assertEquals(SUCCESS, ImageComparison.compareImageRasterization(
                     expected, rendered, source.name(), 0, 0));
@@ -327,7 +349,7 @@ class WptSvgTestSuite {
                         "Requires a browser stylesheet loader or an unregistered font.");
             }
             if ("style".equals(element.getLocalName())) {
-                var faces = Pattern.compile("@font-face\\s*\\{([^}]+)}").matcher(element.getTextContent());
+                var faces = FONT_FACE_PATTERN.matcher(element.getTextContent());
                 while (faces.find()) {
                     // These are the only inline font-face declarations in the selected SVG pairs.
                     assumeTrue(faces.group(1).contains("font-family: FreeSans;")
@@ -350,7 +372,7 @@ class WptSvgTestSuite {
         var source = new MemoryImageSource(path.toString(), xml.toString(), path.toUri().toURL());
         // External document caches belong to one rendering, just as each browser reftest loads a new page.
         var renderer = new RenderType.JSVGType(LoaderContext.builder()
-                .externalResourcePolicy(ResourcePolicy.ALLOW_RELATIVE).build(), fonts);
+                .externalResourcePolicy(ResourcePolicy.ALLOW_RELATIVE).build(), asPlatformSupport(fonts));
         FontResolver.clearFontCache();
         BufferedImage rendered = actual(source, renderer).render(null);
         BufferedImage page = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -415,7 +437,7 @@ class WptSvgTestSuite {
                 String value = meta.getAttribute("content");
                 assumeTrue(!value.contains(":"), "Reference-specific fuzzy metadata is not supported.");
                 String[] parts = value.replace("maxDifference=", "").replace("totalPixels=", "").split(";");
-                assertTrue(parts.length == 2, "Invalid WPT fuzzy metadata: " + value);
+                assertEquals(2, parts.length, "Invalid WPT fuzzy metadata: " + value);
                 int[] difference = range(parts[0]);
                 int[] pixels = range(parts[1]);
                 return new Fuzzy(difference[0], difference[1], pixels[0], pixels[1]);

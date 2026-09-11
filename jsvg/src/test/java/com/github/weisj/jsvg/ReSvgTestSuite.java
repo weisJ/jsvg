@@ -123,7 +123,20 @@ class ReSvgTestSuite {
         return new BundledFontSupport(fonts);
     }
 
-    private record BundledFontSupport(@NotNull Map<String, Font> fonts) implements PlatformSupport {
+    private static class BundledFontSupport implements PlatformSupport {
+        private final @NotNull Map<String, Font> fonts;
+        private final FontLoader fontLoader = new FontLoader() {
+            @Override
+            public @Nullable Font customFont(@NotNull String family) {
+                return fonts.get(family.toLowerCase(Locale.US));
+            }
+        };
+
+        private BundledFontSupport(@NotNull Map<String, Font> fonts) {
+            this.fonts = fonts;
+        }
+
+
         @Override
         public float fontSize() {
             // The reference images are rendered with resvg, whose default font size is 12.
@@ -141,8 +154,8 @@ class ReSvgTestSuite {
         }
 
         @Override
-        public @Nullable Font customFont(@NotNull String family) {
-            return fonts.get(family.toLowerCase(Locale.US));
+        public @Nullable FontLoader fontLoader() {
+            return fontLoader;
         }
     }
 
@@ -1248,6 +1261,17 @@ class ReSvgTestSuite {
         @Override
         public void execute() throws Throwable {
             assumeTrue(!excluded, "Excluded resvg reference test: " + testFile.getFileName());
+            // Generic families select platform fonts. The checked-in PNGs use different fonts
+            // from Java on Linux/Windows (and even from the suite's current Noto configuration).
+            // Compare these cases against Batik on the same platform; keep the original SVG.
+            if (testFile.getParent().endsWith(Path.of("text", "font-family"))
+                    && Set.of("serif.svg", "monospace.svg").contains(testFile.getFileName().toString())) {
+                var source = new UrlImageSource(testFile.toUri().toURL());
+                assertEquals(SUCCESS, ImageComparison.compareImages(new ImageComparison.CompareInfo(
+                        expected(source, RenderType.Batik.withViewportSize(500, 500)),
+                        actual(source, jsvgRenderType))));
+                return;
+            }
             var pngRef = testFile.resolveSibling(testFile.getFileName().toString().replace(".svg", ".png"));
             var result = ImageComparison.compareImages(new ImageComparison.CompareInfo(
                     expected(new UrlImageSource(pngRef.toUri().toURL()),
