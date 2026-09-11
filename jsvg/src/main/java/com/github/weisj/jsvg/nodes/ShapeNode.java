@@ -138,6 +138,7 @@ public abstract class ShapeNode extends RenderableSVGNode
         switch (box) {
             case BoundingBox:
                 return bounds;
+            case GeometryBox:
             case StrokeBox: {
                 LengthValue strokeWidth = RenderContextAccessor.instance().strokeContext(context).strokeWidth;
                 if (strokeWidth != null) {

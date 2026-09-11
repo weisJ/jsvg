@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -35,7 +35,8 @@ public interface HasShape extends SVGNode {
 
     enum Box {
         BoundingBox,
-        StrokeBox
+        StrokeBox,
+        GeometryBox
     }
 
     default @NotNull Shape elementShape(@NotNull RenderContext context, Box box) {
@@ -52,7 +53,9 @@ public interface HasShape extends SVGNode {
     Shape untransformedElementShape(@NotNull RenderContext context, Box box);
 
     default @NotNull Rectangle2D elementBounds(@NotNull RenderContext context, Box box) {
-        Rectangle2D shape = untransformedElementBounds(context, box);
+        Rectangle2D shape = box == Box.GeometryBox
+                ? new ElementBounds(this, context).geometryBox()
+                : untransformedElementBounds(context, box);
         if (!GeometryUtil.isValidRect(shape)) return shape;
         if (this instanceof Transformable) {
             return ((Transformable) this).transformShape(shape, context,

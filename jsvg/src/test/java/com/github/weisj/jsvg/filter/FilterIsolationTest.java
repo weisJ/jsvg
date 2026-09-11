@@ -36,6 +36,15 @@ import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
 class FilterIsolationTest {
     @TestFactory
+    Stream<DynamicTest> descendantFilterBounds() {
+        return Stream.of("nestedFlood", "nestedFloodUse", "nestedFloodSymbol", "nestedOffset")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
+                        expected(new PathImageSource("filter/isolation/descendantFilterBounds_ref.svg"),
+                                RenderType.JSVG),
+                        actual(new PathImageSource("filter/isolation/" + name + ".svg"), RenderType.JSVG), 0, 0)))));
+    }
+
+    @TestFactory
     Stream<DynamicTest> referenceImages() {
         return Stream.of("imageTranslation", "imageScale", "nestedTranslation", "nestedViewBox",
                 "nestedPrimitiveRegion", "nestedObjectBounds", "nestedPercentages",

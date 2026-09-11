@@ -25,6 +25,7 @@ import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasFilter;
@@ -57,6 +58,9 @@ public class ElementBounds {
             case StrokeBox:
                 elementBounds.strokeBox = bounds;
                 break;
+            case GeometryBox:
+                elementBounds.geometryBox = bounds;
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + box);
         }
@@ -72,7 +76,9 @@ public class ElementBounds {
 
     public @NotNull Rectangle2D geometryBox() {
         if (geometryBox == null) {
-            geometryBox = strokeBox();
+            // A container's source includes its children's filtered output, even when a child
+            // generates pixels without having any shape geometry of its own.
+            geometryBox = elementBounds(node, context, HasShape.Box.GeometryBox);
             if (node instanceof HasFilter) {
                 geometryBox = filterBounds((HasFilter) node, context, geometryBox);
             }
@@ -109,7 +115,7 @@ public class ElementBounds {
         if (filter == null) return elementBounds;
         Filter.FilterLayout filterLayout = filter.createFilterLayout(null, context, this);
         if (filterLayout == null) return elementBounds;
-        return elementBounds.createUnion(filterLayout.effectiveFilterArea());
+        return GeometryUtil.union(elementBounds, filterLayout.effectiveFilterArea());
     }
 
 }
