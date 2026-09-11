@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg;
 
 import java.awt.Font;
-import java.awt.image.ImageObserver;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,7 +42,7 @@ import org.mabb.fontverter.woff.WoffTable;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 
 /** Fonts declared by the standalone SVG reftests; scoped to this suite's renderer. */
-record WptFontSupport(@NotNull Map<String, Font> fonts) implements PlatformSupport {
+record WptFontSupport(@NotNull Map<String, Font> fonts) implements PlatformSupport.FontLoader {
     static @NotNull WptFontSupport load(@NotNull Path repository) throws Exception {
         Font ahem = Font.createFont(Font.TRUETYPE_FONT, repository.resolve("fonts/Ahem.ttf").toFile());
         // The reftests use FreeSans.woff, but their old relative fonts/ URLs are missing upstream.
@@ -83,16 +82,6 @@ record WptFontSupport(@NotNull Map<String, Font> fonts) implements PlatformSuppo
             throw new IOException("Expected the bundled CFF FreeSans font with a head table");
         }
         return font.getData();
-    }
-
-    @Override
-    public @Nullable ImageObserver imageObserver() {
-        return null;
-    }
-
-    @Override
-    public @Nullable TargetSurface targetSurface() {
-        return null;
     }
 
     @Override

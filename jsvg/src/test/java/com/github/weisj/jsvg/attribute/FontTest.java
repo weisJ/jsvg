@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.font.AWTSVGFont;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
@@ -62,7 +63,7 @@ class FontTest {
                 entry("font-size", "11"));
         SVGFont font1 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
         SVGFont font2 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
-        Assertions.assertSame(font1, font2);
+        Assertions.assertSame(awtFont(font1), awtFont(font2));
     }
 
     @Test
@@ -92,9 +93,64 @@ class FontTest {
         Assertions.assertEquals(12f, font.size());
     }
 
+    @Test
+    void customFontOverridesGenericFamily() {
+        SVGFont font = FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "serif"),
+                entry("font-size", "12")), MEASURE_CONTEXT, getSupport());
+
+        Assertions.assertEquals(Font.SERIF, queriedFontFamily);
+        Assertions.assertEquals(12f, font.size());
+    }
+
+    @Test
+    void customFontMissUsesRequestedPlatformFamily() {
+        MeasurableFontSpec spec = createFontSpec(entry("font-family", "monospace"));
+        PlatformSupport support = getSupport(family -> null);
+        SVGFont cached = FontResolver.resolve(spec, MEASURE_CONTEXT, support);
+        SVGFont uncached = FontResolver.resolveWithoutCache(spec, MEASURE_CONTEXT, support);
+
+        Assertions.assertEquals(Font.MONOSPACED, cached.family());
+        Assertions.assertEquals(uncached.family(), cached.family());
+        Assertions.assertSame(awtFont(cached), awtFont(FontResolver.resolve(spec, MEASURE_CONTEXT, support)));
+    }
+
+    @Test
+    void customFontCachesAreScopedToLoader() {
+        MeasurableFontSpec spec = createFontSpec(entry("font-family", "serif"));
+        SVGFont platform = FontResolver.resolve(spec, MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
+        PlatformSupport first = getSupport(family -> new Font(Font.DIALOG, Font.PLAIN, 1));
+        PlatformSupport second = getSupport(family -> new Font(Font.MONOSPACED, Font.PLAIN, 1));
+        SVGFont firstFont = FontResolver.resolve(spec, MEASURE_CONTEXT, first);
+        SVGFont secondFont = FontResolver.resolve(spec, MEASURE_CONTEXT, second);
+
+        Assertions.assertEquals(Font.SERIF, platform.family());
+        Assertions.assertEquals(Font.DIALOG, firstFont.family());
+        Assertions.assertEquals(Font.MONOSPACED, secondFont.family());
+        Assertions.assertSame(awtFont(firstFont), awtFont(FontResolver.resolve(spec, MEASURE_CONTEXT, first)));
+        Assertions.assertSame(awtFont(secondFont), awtFont(FontResolver.resolve(spec, MEASURE_CONTEXT, second)));
+        Assertions.assertSame(awtFont(platform),
+                awtFont(FontResolver.resolve(spec, MEASURE_CONTEXT, NullPlatformSupport.INSTANCE)));
+    }
+
+    private static @NotNull Font awtFont(@NotNull SVGFont font) {
+        return ((AWTSVGFont) font).font();
+    }
+
     private @NotNull PlatformSupport getSupport() {
         Font stub = new Font(Font.DIALOG, Font.PLAIN, 1);
-        PlatformSupport support = new PlatformSupport() {
+        PlatformSupport.FontLoader fontLoader = new PlatformSupport.FontLoader() {
+            @Override
+            public @NotNull Font customFont(@NotNull String family) {
+                queriedFontFamily = family;
+                return stub;
+            }
+        };
+        return getSupport(fontLoader);
+    }
+
+    private static @NotNull PlatformSupport getSupport(PlatformSupport.FontLoader fontLoader) {
+        return new PlatformSupport() {
             @Override
             public ImageObserver imageObserver() {
                 return null;
@@ -106,12 +162,10 @@ class FontTest {
             }
 
             @Override
-            public @NotNull Font customFont(@NotNull String family) {
-                queriedFontFamily = family;
-                return stub;
+            public @NotNull FontLoader fontLoader() {
+                return fontLoader;
             }
         };
-        return support;
     }
 
     private static @NotNull MeasurableFontSpec createFontSpec(@NotNull AttributeEntry... attributes) {
