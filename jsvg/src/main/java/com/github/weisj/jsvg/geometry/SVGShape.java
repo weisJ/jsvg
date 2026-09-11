@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -43,6 +43,14 @@ public interface SVGShape {
 
     @NotNull
     Rectangle2D bounds(@NotNull RenderContext context, boolean validate);
+
+    /**
+     * Whether, for positive width and height, expanding the geometry bounds by half the stroke width
+     * gives the exact bounds of any undashed BasicStroke in the same coordinate system.
+     */
+    default boolean canComputeStrokeBoundsByExpansion() {
+        return false;
+    }
 
     double pathLength(@NotNull RenderContext context);
 
