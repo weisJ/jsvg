@@ -95,19 +95,40 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     }
 
     @Override
+    public boolean xSpecified() {
+        return filterPrimitiveBase.xSpecified();
+    }
+
+    @Override
+    public boolean ySpecified() {
+        return filterPrimitiveBase.ySpecified();
+    }
+
+    @Override
+    public boolean widthSpecified() {
+        return filterPrimitiveBase.widthSpecified();
+    }
+
+    @Override
+    public boolean heightSpecified() {
+        return filterPrimitiveBase.heightSpecified();
+    }
+
+    @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
+        filterPrimitiveBase.saveLayoutResult(inputLayout(filterLayoutContext), filterLayoutContext);
+    }
+
+    @Override
+    public @NotNull LayoutBounds inputLayout(@NotNull FilterLayoutContext filterLayoutContext) {
         if (inputChannels.length == 0) {
-            filterPrimitiveBase.saveLayoutResult(
-                    filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic),
-                    filterLayoutContext);
-            return;
+            return filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic);
         }
         LayoutBounds result = filterLayoutContext.resultChannels().get(inputChannels[0]);
         for (int i = 1; i < inputChannels.length; i++) {
-            LayoutBounds channelBounds = filterLayoutContext.resultChannels().get(inputChannels[i]);
-            result = result.union(channelBounds);
+            result = result.union(filterLayoutContext.resultChannels().get(inputChannels[i]));
         }
-        filterPrimitiveBase.saveLayoutResult(result, filterLayoutContext);
+        return result;
     }
 
     @Override

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.AbstractSVGNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
@@ -66,7 +67,32 @@ public abstract class AbstractFilterPrimitive extends AbstractSVGNode implements
     }
 
     @Override
+    public boolean xSpecified() {
+        return impl().xSpecified();
+    }
+
+    @Override
+    public boolean ySpecified() {
+        return impl().ySpecified();
+    }
+
+    @Override
+    public boolean widthSpecified() {
+        return impl().widthSpecified();
+    }
+
+    @Override
+    public boolean heightSpecified() {
+        return impl().heightSpecified();
+    }
+
+    @Override
     public ColorInterpolation colorInterpolation(@NotNull FilterContext filterContext) {
         return impl().colorInterpolation(filterContext);
+    }
+
+    @Override
+    public @NotNull LayoutBounds inputLayout(@NotNull FilterLayoutContext filterLayoutContext) {
+        return impl().layoutInput(filterLayoutContext);
     }
 }
