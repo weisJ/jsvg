@@ -33,8 +33,14 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -57,6 +63,12 @@ import com.github.weisj.jsvg.renderer.animation.AnimationState;
 
 class W3cSvg11TestSuite {
     private static final String W3C_SVG_11_TEST_SUITE_PATH = System.getenv("W3C_SVG_11_TEST_SUITE_PATH");
+    private static final Map<String, String> PORTABLE_FONTS = Map.of(
+            "svgfreesansascii", "SansSerif",
+            "arial", "SansSerif",
+            "verdana", "SansSerif",
+            "impact", "SansSerif");
+    private static final Pattern FONT_FAMILY_DECLARATION = Pattern.compile("(?i)(font-family\\s*:\\s*)([^;{}]+)");
 
     @BeforeAll
     static void checkForW3cRepository() {
@@ -68,7 +80,7 @@ class W3cSvg11TestSuite {
     }
 
     // As in ReSvgTestSuite, exclusions record current reference mismatches. Normalize the
-    // suite's label font for both renderers and retain the standard comparison tolerances.
+    // suite's platform fonts for both renderers and retain the standard comparison tolerances.
     private static Collection<DynamicTest> checkCategory(@NotNull String category, @NotNull Set<String> exclude)
             throws IOException {
         Path base = Path.of(W3C_SVG_11_TEST_SUITE_PATH);
@@ -363,8 +375,12 @@ class W3cSvg11TestSuite {
                 "text-fonts-203-t.svg",
                 "text-intro-01-t.svg",
                 "text-intro-03-b.svg",
+                // Requires bidi layout; platform fonts could hide the reversed Hebrew in the tolerance.
+                "text-intro-04-t.svg",
                 "text-intro-06-t.svg",
                 "text-intro-07-t.svg",
+                // Requires embedded SVG fonts and bidi layout; the static tolerance hid this on macOS.
+                "text-intro-09-b.svg",
                 "text-intro-10-f.svg",
                 "text-intro-11-t.svg",
                 "text-intro-12-t.svg",
@@ -408,8 +424,9 @@ class W3cSvg11TestSuite {
                         "Requires explicit animation frames or interaction.");
             }
         }
-        // Only replace the suite's common label font. Keep text, its styling and all other
-        // font declarations intact, so typography and text effects remain testable.
+        // Use the same logical fonts in both renderers for platform-specific families. Otherwise
+        // missing Arial/Verdana/etc. resolve to different fallbacks on Linux and Windows.
+        // Keep embedded test fonts, text content and text styling intact.
         var faces = document.getElementsByTagNameNS(svgNamespace, "font-face");
         for (int i = faces.getLength() - 1; i >= 0; i--) {
             Element face = (Element) faces.item(i);
@@ -420,20 +437,36 @@ class W3cSvg11TestSuite {
         var elements = document.getElementsByTagNameNS(svgNamespace, "*");
         for (int i = 0; i < elements.getLength(); i++) {
             Element element = (Element) elements.item(i);
-            for (String attribute : Set.of("font-family", "style")) {
-                if (element.hasAttribute(attribute)) {
-                    element.setAttribute(attribute, element.getAttribute(attribute)
-                            .replace("SVGFreeSansASCII", "SansSerif"));
-                }
+            if (element.hasAttribute("font-family")) {
+                element.setAttribute("font-family", portableFontFamilies(element.getAttribute("font-family")));
+            }
+            if (element.hasAttribute("style")) {
+                element.setAttribute("style", portableStyleFonts(element.getAttribute("style")));
             }
             if ("style".equals(element.getLocalName())) {
-                element.setTextContent(element.getTextContent().replace("SVGFreeSansASCII", "SansSerif"));
+                element.setTextContent(portableStyleFonts(element.getTextContent()));
             }
         }
         StringWriter xml = new StringWriter();
         TransformerFactory.newInstance().newTransformer().transform(new DOMSource(document), new StreamResult(xml));
         // Preserve the original document URI for relative images, stylesheets and external SVGs.
         return new MemoryImageSource(testFile.getFileName().toString(), xml.toString(), testFile.toUri().toURL());
+    }
+
+    private static @NotNull String portableFontFamilies(@NotNull String value) {
+        return Stream.of(value.split(",", -1)).map(family -> {
+            String name = family.strip();
+            if (name.length() >= 2 && ((name.startsWith("'") && name.endsWith("'"))
+                    || (name.startsWith("\"") && name.endsWith("\"")))) {
+                name = name.substring(1, name.length() - 1);
+            }
+            return PORTABLE_FONTS.getOrDefault(name.toLowerCase(Locale.ROOT), family);
+        }).collect(Collectors.joining(","));
+    }
+
+    private static @NotNull String portableStyleFonts(@NotNull String style) {
+        return FONT_FAMILY_DECLARATION.matcher(style)
+                .replaceAll(match -> Matcher.quoteReplacement(match.group(1) + portableFontFamilies(match.group(2))));
     }
 
     record W3cSvg11AnimationFrame(@NotNull Path testFile, long timestamp) implements Executable {

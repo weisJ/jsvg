@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.gradle.api.logging.Logger;
@@ -49,7 +50,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.function.Executable;
 
 import com.github.weisj.jsvg.ImageComparison.RenderType;
-import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 
 class ReSvgTestSuite {
@@ -96,8 +96,6 @@ class ReSvgTestSuite {
         assumeTrue(exists, message);
 
         jsvgRenderType = new RenderType.JSVGType(RenderType.JSVG.loaderContext(), loadBundledFonts());
-        // Drop any fallback fonts a prior test cached for these families in the shared JVM.
-        FontResolver.clearFontCache();
     }
 
     private static @NotNull PlatformSupport loadBundledFonts() {
@@ -120,6 +118,12 @@ class ReSvgTestSuite {
         } catch (IOException e) {
             LOGGER.warn("Failed to walk font directory " + fontDir, e);
         }
+        // Match the generic-family configuration in resvg-test-suite/tools/vdiff/src/render.cpp.
+        // FontParser canonicalizes the first three CSS generic names to Java logical names.
+        Map.of(Font.SERIF, "noto serif", Font.SANS_SERIF, "noto sans", Font.MONOSPACED, "noto mono",
+                "cursive", "yellowtail", "fantasy", "sedgwick ave display")
+                .forEach((generic, family) -> fonts.put(generic.toLowerCase(Locale.ROOT),
+                        Objects.requireNonNull(fonts.get(family), "Missing bundled font: " + family)));
         return new BundledFontSupport(fonts);
     }
 
@@ -148,7 +152,7 @@ class ReSvgTestSuite {
         }
 
         @Override
-        public @Nullable FontLoader fontLoader() {
+        public @NotNull FontLoader fontLoader() {
             return fontLoader;
         }
     }
@@ -1037,7 +1041,8 @@ class ReSvgTestSuite {
                 "fallback-1.svg",
                 "fallback-2.svg",
                 "fantasy.svg",
-                "sans-serif.svg"));
+                // This PNG predates the bundled Noto Serif font and still uses the old font.
+                "serif.svg"));
     }
 
     @TestFactory
@@ -1286,17 +1291,6 @@ class ReSvgTestSuite {
         @Override
         public void execute() throws Throwable {
             assumeTrue(!excluded, "Excluded resvg reference test: " + testFile.getFileName());
-            // Generic families select platform fonts. The checked-in PNGs use different fonts
-            // from Java on Linux/Windows (and even from the suite's current Noto configuration).
-            // Compare these cases against Batik on the same platform; keep the original SVG.
-            if (testFile.getParent().endsWith(Path.of("text", "font-family"))
-                    && Set.of("serif.svg", "monospace.svg").contains(testFile.getFileName().toString())) {
-                var source = new UrlImageSource(testFile.toUri().toURL());
-                assertEquals(SUCCESS, ImageComparison.compareImages(new ImageComparison.CompareInfo(
-                        expected(source, RenderType.Batik.withViewportSize(500, 500)),
-                        actual(source, jsvgRenderType))));
-                return;
-            }
             var pngRef = testFile.resolveSibling(testFile.getFileName().toString().replace(".svg", ".png"));
             var result = ImageComparison.compareImages(new ImageComparison.CompareInfo(
                     expected(new UrlImageSource(pngRef.toUri().toURL()),
