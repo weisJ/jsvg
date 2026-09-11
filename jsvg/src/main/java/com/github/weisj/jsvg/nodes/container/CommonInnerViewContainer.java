@@ -95,9 +95,14 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
             innerViewBox = new ViewBox(outerViewBox.size());
         }
         RenderContext innerContext = createInnerContext(context, innerViewBox);
-        Shape shape = boundsOnly
-                ? untransformedElementBounds(innerContext, box)
-                : untransformedElementShape(innerContext, box);
+        Shape shape;
+        if (boundsOnly && box == Box.GeometryBox) {
+            shape = new ElementBounds(this, innerContext).geometryBox();
+        } else {
+            shape = boundsOnly
+                    ? untransformedElementBounds(innerContext, box)
+                    : untransformedElementShape(innerContext, box);
+        }
         if (!GeometryUtil.isValidRect(shape.getBounds2D())) return shape;
 
         AffineTransform viewTransform = preserveAspectRatio.computeViewportTransform(outerViewBox.size(), innerViewBox);

@@ -109,6 +109,7 @@ abstract class TextContainer<T> extends BaseContainerNode<T>
             case BoundingBox:
                 return shape;
             case StrokeBox:
+            case GeometryBox:
                 Area area = new Area(shape);
                 area.add(new Area(context.stroke(1).createStrokedShape(shape)));
                 return area;
