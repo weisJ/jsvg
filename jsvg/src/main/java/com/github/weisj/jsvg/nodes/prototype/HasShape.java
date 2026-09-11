@@ -34,9 +34,18 @@ import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 public interface HasShape extends SVGNode {
 
     enum Box {
+        /** SVG object bounding box; also the CSS fill-box. */
         BoundingBox,
+        /** SVG stroke bounding box. */
         StrokeBox,
-        GeometryBox
+        /** Rendering intermediate: content including child effects, before this element's filter. */
+        SourceBox,
+        /** Rendering intermediate: conservative extent including this element's filter. */
+        OutputBox;
+
+        public Box forChildNode() {
+            return this == SourceBox ? OutputBox : this;
+        }
     }
 
     default @NotNull Shape elementShape(@NotNull RenderContext context, Box box) {
@@ -52,10 +61,8 @@ public interface HasShape extends SVGNode {
     @NotNull
     Shape untransformedElementShape(@NotNull RenderContext context, Box box);
 
-    default @NotNull Rectangle2D elementBounds(@NotNull RenderContext context, Box box) {
-        Rectangle2D shape = box == Box.GeometryBox
-                ? new ElementBounds(this, context).geometryBox()
-                : untransformedElementBounds(context, box);
+    default @NotNull Rectangle2D computeTransformedBounds(@NotNull RenderContext context, Box box) {
+        Rectangle2D shape = new ElementBounds(this, context).bounds(box);
         if (!GeometryUtil.isValidRect(shape)) return shape;
         if (this instanceof Transformable) {
             return ((Transformable) this).transformShape(shape, context,
@@ -65,5 +72,5 @@ public interface HasShape extends SVGNode {
     }
 
     @NotNull
-    Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box);
+    Rectangle2D computeUntransformedBounds(@NotNull RenderContext context, Box box);
 }

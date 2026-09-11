@@ -104,7 +104,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         boolean useCache = surfaceSupplier.useCache(output, context);
         BlittableImage blitImage = BlittableImage.create(
                 surfaceSupplier.surfaceSupplier(useCache), context, output.clipBounds(),
-                maskBounds.createIntersection(elementBounds.geometryBox()), elementBounds.boundingBox(),
+                maskBounds.createIntersection(elementBounds.outputBox()), elementBounds.boundingBox(),
                 maskContentUnits);
 
         if (blitImage == null) return PaintParser.DEFAULT_COLOR;

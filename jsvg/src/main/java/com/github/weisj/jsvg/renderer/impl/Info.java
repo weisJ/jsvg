@@ -97,7 +97,7 @@ class Info implements AutoCloseable {
                 }
             }
             if (mask != null || clipPath != null) {
-                bounds = elementBounds.geometryBox();
+                bounds = elementBounds.outputBox();
             }
 
             if (bounds == null) {

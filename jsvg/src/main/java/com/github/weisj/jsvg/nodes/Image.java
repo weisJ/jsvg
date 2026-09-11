@@ -148,11 +148,11 @@ public final class Image extends RenderableSVGNode implements HasShape {
 
     @Override
     public @NotNull Shape untransformedElementShape(@NotNull RenderContext context, Box box) {
-        return untransformedElementBounds(context, box);
+        return computeUntransformedBounds(context, box);
     }
 
     @Override
-    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
+    public @NotNull Rectangle2D computeUntransformedBounds(@NotNull RenderContext context, Box box) {
         MeasureContext measure = context.measureContext();
         RenderableResource resource = fetchImage(context);
         if (resource == null) {

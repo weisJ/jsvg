@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -124,10 +124,9 @@ public final class ShapeRenderer {
                 case STROKE:
                     PaintShape strokeShape = null;
                     Shape shape = paintShape.shape;
-                    if (vectorEffects.contains(VectorEffect.NonScalingStroke)
-                            && !vectorEffects.contains(VectorEffect.NonScalingSize)) {
-                        Shape stroked = VectorEffect.applyNonScalingStroke(
-                                output, phaseContext, shapePaintContext.stroke, paintShape.shape);
+                    if (VectorEffect.shouldApplyNonScalingStroke(vectorEffects)) {
+                        Shape stroked = VectorEffect.nonScalingStrokeShape(shapePaintContext.vectorEffects,
+                                output.transform(), phaseContext, shapePaintContext.stroke, paintShape.shape);
                         strokeShape = new PaintShape(stroked, stroked.getBounds2D());
                     }
                     ShapeRenderer.renderShapeStroke(phaseContext, output,

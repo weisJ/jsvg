@@ -150,7 +150,7 @@ public final class Filter extends ContainerNode {
         if (effectiveFilterRegion.isEmpty()) return null;
 
         // Sampling primitives may need source pixels outside the repaint clip.
-        LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(elementBounds.geometryBox(), filterRegion);
+        LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(elementBounds.sourceBox(), filterRegion);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, elementLayoutBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, elementLayoutBounds);
         filterLayoutContext.resultChannels().addAlias(DefaultFilterChannel.LastResult,

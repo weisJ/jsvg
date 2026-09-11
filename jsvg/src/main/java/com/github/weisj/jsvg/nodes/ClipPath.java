@@ -110,7 +110,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         boolean useCache = surfaceSupplier.useCache(output, context);
         BlittableImage blitImage = BlittableImage.create(
                 surfaceSupplier.surfaceSupplier(useCache), context, output.clipBounds(),
-                transformedClipBounds.createIntersection(elementBounds.geometryBox()),
+                transformedClipBounds.createIntersection(elementBounds.outputBox()),
                 elementBounds.boundingBox(), clipPathUnits);
 
         if (blitImage == null) return PaintParser.DEFAULT_COLOR;
@@ -133,7 +133,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
     public void applyClip(@NotNull Output output, @NotNull RenderContext context,
             @NotNull ElementBounds elementBounds) {
         if (output.isSoftClippingEnabled()) {
-            Rectangle2D bounds = elementBounds.geometryBox();
+            Rectangle2D bounds = elementBounds.outputBox();
             if (!bounds.isEmpty()) {
                 output.setPaint(() -> {
                     Shape childClipShape = clipShape(context, elementBounds, true);

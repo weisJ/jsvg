@@ -74,16 +74,17 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
         return elementShape(context, box, size(context));
     }
 
-    @Override
-    public @NotNull Rectangle2D elementBounds(@NotNull RenderContext context, Box box) {
-        return elementBounds(context, box, size(context));
-    }
-
     public @NotNull Shape elementShape(@NotNull RenderContext context, Box box, @NotNull FloatSize useSiteSize) {
         return geometryInOuterSpace(context, box, useSiteSize, false);
     }
 
-    public @NotNull Rectangle2D elementBounds(@NotNull RenderContext context, Box box, @NotNull FloatSize useSiteSize) {
+    @Override
+    public @NotNull Rectangle2D computeTransformedBounds(@NotNull RenderContext context, Box box) {
+        return computeTransformedBoundsWithSize(context, box, size(context));
+    }
+
+    public @NotNull Rectangle2D computeTransformedBoundsWithSize(@NotNull RenderContext context, Box box,
+            @NotNull FloatSize useSiteSize) {
         return geometryInOuterSpace(context, box, useSiteSize, true).getBounds2D();
     }
 
@@ -95,14 +96,9 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
             innerViewBox = new ViewBox(outerViewBox.size());
         }
         RenderContext innerContext = createInnerContext(context, innerViewBox);
-        Shape shape;
-        if (boundsOnly && box == Box.GeometryBox) {
-            shape = new ElementBounds(this, innerContext).geometryBox();
-        } else {
-            shape = boundsOnly
-                    ? untransformedElementBounds(innerContext, box)
-                    : untransformedElementShape(innerContext, box);
-        }
+        Shape shape = boundsOnly
+                ? new ElementBounds(this, innerContext).bounds(box)
+                : untransformedElementShape(innerContext, box);
         if (!GeometryUtil.isValidRect(shape.getBounds2D())) return shape;
 
         AffineTransform viewTransform = preserveAspectRatio.computeViewportTransform(outerViewBox.size(), innerViewBox);

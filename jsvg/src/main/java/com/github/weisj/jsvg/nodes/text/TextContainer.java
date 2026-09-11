@@ -109,7 +109,7 @@ abstract class TextContainer<T> extends BaseContainerNode<T>
             case BoundingBox:
                 return shape;
             case StrokeBox:
-            case GeometryBox:
+            case SourceBox:
                 Area area = new Area(shape);
                 area.add(new Area(context.stroke(1).createStrokedShape(shape)));
                 return area;
@@ -119,7 +119,7 @@ abstract class TextContainer<T> extends BaseContainerNode<T>
     }
 
     @Override
-    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
+    public @NotNull Rectangle2D computeUntransformedBounds(@NotNull RenderContext context, Box box) {
         // TODO: Bounding-box is specified by the character box.
         return untransformedElementShape(context, box).getBounds2D();
     }
