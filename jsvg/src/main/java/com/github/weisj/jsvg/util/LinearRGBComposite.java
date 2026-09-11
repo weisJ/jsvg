@@ -87,8 +87,18 @@ public final class LinearRGBComposite implements Composite {
         if (dstAlpha == 0) return rule == AlphaComposite.SRC_ATOP ? 0 : src;
         if (rule == AlphaComposite.SRC_OVER && srcAlpha == 255) return src;
 
-        int srcFactor = rule == AlphaComposite.SRC_OVER ? 255
-                : rule == AlphaComposite.SRC_ATOP ? dstAlpha : 255 - dstAlpha;
+        int srcFactor;
+        switch (rule) {
+            case AlphaComposite.SRC_OVER:
+                srcFactor = 255;
+                break;
+            case AlphaComposite.SRC_ATOP:
+                srcFactor = dstAlpha;
+                break;
+            default:
+                srcFactor = 255 - dstAlpha;
+                break;
+        }
         int srcWeight = srcAlpha * srcFactor;
         int dstWeight = dstAlpha * (255 - srcAlpha);
         int weight = srcWeight + dstWeight;

@@ -138,8 +138,9 @@ public final class BlendModeComposite extends AbstractBlendComposite {
      *          B(Cb, Cs) = Screen(2 x Cb - 1, Cs)
      * </pre
      */
+    @SuppressWarnings("java:S2234") // Overlay is hard-light with source and backdrop exchanged.
     private static void blendOverlay(int @NotNull [] src, int @NotNull [] dst, int @NotNull [] result) {
-        blendHardLight(dst, src, result);
+        blendHardLight(/* src= */ dst, /* dst= */ src, result);
     }
 
     /**
@@ -211,7 +212,7 @@ public final class BlendModeComposite extends AbstractBlendComposite {
         int base = srcM * src + dstM * dst;
         if (dst == 0) return div255(base);
         if (src == srcA) return div255(base + srcA * dstA);
-        double blended = Math.min(srcA * dstA, (double) srcA * srcA * dst / (srcA - src));
+        double blended = Math.min((double) srcA * dstA, (double) srcA * srcA * dst / (srcA - src));
         return ColorUtil.toRgbRange((base + blended) / 255);
     }
 
@@ -358,14 +359,14 @@ public final class BlendModeComposite extends AbstractBlendComposite {
 
         boolean sourceColor = mode == BlendMode.Hue || mode == BlendMode.Color;
         int[] color = sourceColor ? src : dst;
-        double alpha = sourceColor ? srcA : dstA;
+        double alpha = color[3];
         double red = color[0] / alpha;
         double green = color[1] / alpha;
         double blue = color[2] / alpha;
 
         if (mode == BlendMode.Hue || mode == BlendMode.Saturation) {
             int[] saturationColor = mode == BlendMode.Hue ? dst : src;
-            double saturationAlpha = mode == BlendMode.Hue ? dstA : srcA;
+            double saturationAlpha = saturationColor[3];
             double saturation = (Math.max(saturationColor[0], Math.max(saturationColor[1], saturationColor[2]))
                     - Math.min(saturationColor[0], Math.min(saturationColor[1], saturationColor[2]))) / saturationAlpha;
             double min = Math.min(red, Math.min(green, blue));
@@ -378,7 +379,7 @@ public final class BlendModeComposite extends AbstractBlendComposite {
         }
 
         int[] luminosityColor = mode == BlendMode.Luminosity ? src : dst;
-        double luminosityAlpha = mode == BlendMode.Luminosity ? srcA : dstA;
+        double luminosityAlpha = luminosityColor[3];
         double luminosity =
                 ColorUtil.luminosity(luminosityColor[0], luminosityColor[1], luminosityColor[2]) / luminosityAlpha;
         double delta = luminosity - ColorUtil.luminosity(red, green, blue);

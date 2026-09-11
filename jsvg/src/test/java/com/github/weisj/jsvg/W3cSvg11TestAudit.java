@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.opentest4j.TestAbortedException;
 
@@ -72,7 +73,7 @@ public final class W3cSvg11TestAudit {
         try (var paths = Files.list(base.resolve("svg"))) {
             paths.filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".svg") || path.toString().endsWith(".svgz"))
-                    .filter(path -> !animatedSources.contains(path))
+                    .filter(Predicate.not(animatedSources::contains))
                     .map(path -> reference(base, path, null)).forEach(candidates::add);
         }
         // Curated terminal frames for the timelines already covered by the suite. Never promote

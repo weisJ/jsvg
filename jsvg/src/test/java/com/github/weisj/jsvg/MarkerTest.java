@@ -55,7 +55,7 @@ class MarkerTest {
         return Stream.of("omittedReferences", "explicitZero", "onlyRefX", "onlyRefY", "alignedClip")
                 .flatMap(name -> Stream.of(RenderType.JSVG, RenderType.Batik)
                         .map(renderer -> DynamicTest.dynamicTest(
-                                name + (renderer == RenderType.Batik ? " Batik" : " JSVG"),
+                                name + (renderer.equals(RenderType.Batik) ? " Batik" : " JSVG"),
                                 () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
                                         expected(new PathImageSource("marker/anchors/" + name + "_ref.svg"),
                                                 RenderType.JSVG),

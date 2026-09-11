@@ -99,7 +99,10 @@ public final class NodeRenderer {
 
             ClipPath clipPath = setupClip((HasClip) renderable, elementBounds, childContext, childOutput);
             // Elements with an invalid clip shouldn't be painted
-            if (clipPath != null && !clipPath.isValid()) return null;
+            if (clipPath != null && !clipPath.isValid()) {
+                childOutput.dispose();
+                return null;
+            }
 
             if (useAccurateMasking(childOutput)) {
                 clipPathForIsolation = clipPath;
@@ -112,6 +115,14 @@ public final class NodeRenderer {
         }
 
         IsolationEffects isolation = new IsolationEffects(filter, maskForIsolation, clipPathForIsolation);
+        return createInfoWithIsolation(renderable, childContext, childOutput, elementBounds, isolation);
+    }
+
+    // The isolation factory returns null for absent effects or an empty/unallocatable surface.
+    @SuppressWarnings("java:S2583")
+    private static @Nullable Info createInfoWithIsolation(@NotNull Renderable renderable,
+            @NotNull RenderContext childContext, @NotNull Output childOutput, @NotNull ElementBounds elementBounds,
+            @NotNull IsolationEffects isolation) {
         Info info = Info.InfoWithIsolation.create(renderable, childContext, childOutput, elementBounds, isolation);
         if (info != null) {
             return info;

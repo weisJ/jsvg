@@ -45,14 +45,8 @@ public final class Url {
 
         String urlString = value;
         if (urlString.startsWith("url(")) {
-            if (functionEnd(urlString) != urlString.length() - 1) return null;
-            urlString = urlString.substring(4, urlString.length() - 1).trim();
-            if (urlString.startsWith("\"") || urlString.startsWith("'")) {
-                if (urlString.length() < 2 || urlString.charAt(urlString.length() - 1) != urlString.charAt(0))
-                    return null;
-                urlString = urlString.substring(1, urlString.length() - 1);
-            }
-            urlString = unescape(urlString);
+            urlString = functionArgument(urlString);
+            if (urlString == null) return null;
         }
 
         urlString = urlString.trim();
@@ -69,11 +63,22 @@ public final class Url {
         return new Url(urlString, url, fragment);
     }
 
+    private static @Nullable String functionArgument(@NotNull String value) {
+        if (functionEnd(value) != value.length() - 1) return null;
+        String argument = value.substring(4, value.length() - 1).trim();
+        if (argument.startsWith("\"") || argument.startsWith("'")) {
+            if (argument.length() < 2 || argument.charAt(argument.length() - 1) != argument.charAt(0)) return null;
+            argument = argument.substring(1, argument.length() - 1);
+        }
+        return unescape(argument);
+    }
+
     // Locate the closing parenthesis without splitting quoted or escaped URL characters.
     static int functionEnd(@NotNull String value) {
         char quote = 0;
-        for (int i = 4; i < value.length(); i++) {
-            char c = value.charAt(i);
+        int i = 4;
+        while (i < value.length()) {
+            char c = value.charAt(i++);
             if (c == '\\') {
                 i++;
             } else if (quote != 0) {
@@ -81,7 +86,7 @@ public final class Url {
             } else if (c == '\'' || c == '"') {
                 quote = c;
             } else if (c == ')') {
-                return i;
+                return i - 1;
             }
         }
         return -1;
@@ -90,31 +95,43 @@ public final class Url {
     private static @NotNull String unescape(@NotNull String value) {
         if (value.indexOf('\\') < 0) return value;
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            if (c == '\\' && i + 1 < value.length()) {
-                int start = ++i;
-                while (i < value.length() && i - start < 6 && Character.digit(value.charAt(i), 16) >= 0) {
-                    i++;
-                }
-                if (i > start) {
-                    int codePoint = Integer.parseInt(value.substring(start, i), 16);
-                    result.appendCodePoint(codePoint == 0 || !Character.isValidCodePoint(codePoint)
-                            || codePoint >= 0xd800 && codePoint <= 0xdfff ? 0xfffd : codePoint);
-                    if (i < value.length() && Character.isWhitespace(value.charAt(i))) {
-                        if (value.charAt(i) == '\r' && i + 1 < value.length() && value.charAt(i + 1) == '\n') i++;
-                    } else {
-                        i--;
-                    }
-                    continue;
-                }
-                c = value.charAt(i);
-                if (c == '\r' && i + 1 < value.length() && value.charAt(i + 1) == '\n') i++;
-                if (c == '\n' || c == '\r' || c == '\f') continue;
+        int i = 0;
+        while (i < value.length()) {
+            char c = value.charAt(i++);
+            if (c == '\\' && i < value.length()) {
+                i = appendEscape(value, i, result);
+            } else {
+                result.append(c);
             }
-            result.append(c);
         }
         return result.toString();
+    }
+
+    private static int appendEscape(@NotNull String value, int start, @NotNull StringBuilder result) {
+        int end = start;
+        while (end < value.length() && end - start < 6 && Character.digit(value.charAt(end), 16) >= 0) {
+            end++;
+        }
+        if (end > start) {
+            int codePoint = Integer.parseInt(value.substring(start, end), 16);
+            result.appendCodePoint(codePoint == 0 || !Character.isValidCodePoint(codePoint)
+                    || (codePoint >= 0xd800 && codePoint <= 0xdfff) ? 0xfffd : codePoint);
+            if (end < value.length() && Character.isWhitespace(value.charAt(end))) {
+                return skipEscapeWhitespace(value, end);
+            }
+            return end;
+        }
+        char c = value.charAt(start);
+        if (c == '\n' || c == '\r' || c == '\f') return skipEscapeWhitespace(value, start);
+        result.append(c);
+        return start + 1;
+    }
+
+    private static int skipEscapeWhitespace(@NotNull String value, int index) {
+        if (value.charAt(index) == '\r' && index + 1 < value.length() && value.charAt(index + 1) == '\n') {
+            return index + 2;
+        }
+        return index + 1;
     }
 
     private static @Nullable String nullIfEmpty(@Nullable String s) {
