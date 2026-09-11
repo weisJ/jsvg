@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 
 public interface ShapedContainer<E> extends Container<E>, HasShape {
@@ -46,12 +47,13 @@ public interface ShapedContainer<E> extends Container<E>, HasShape {
     }
 
     @Override
-    default @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
+    default @NotNull Rectangle2D computeUntransformedBounds(@NotNull RenderContext context, Box box) {
         Rectangle2D bounds = null;
+        Box childBox = box.forChildNode();
         for (E child : children()) {
             if (!(child instanceof HasShape)) continue;
             RenderContext childContext = NodeRenderer.setupRenderContext(child, context);
-            Rectangle2D childBounds = ((HasShape) child).elementBounds(childContext, box);
+            Rectangle2D childBounds = new ElementBounds((HasShape) child, childContext).transformedBounds(childBox);
             if (!GeometryUtil.isValidRect(childBounds) || childBounds.isEmpty()) continue;
             if (bounds == null) {
                 bounds = childBounds;

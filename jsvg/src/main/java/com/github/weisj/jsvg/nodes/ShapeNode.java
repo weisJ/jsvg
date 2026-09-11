@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.util.Set;
@@ -133,12 +134,26 @@ public abstract class ShapeNode extends RenderableSVGNode
     }
 
     @Override
-    public @NotNull Rectangle2D untransformedElementBounds(@NotNull RenderContext context, Box box) {
+    public @NotNull Rectangle2D computeUntransformedBounds(@NotNull RenderContext context, Box box) {
         Rectangle2D bounds = shape.bounds(context, true);
         switch (box) {
             case BoundingBox:
                 return bounds;
-            case GeometryBox:
+            case SourceBox: {
+                if (!context.strokePaint().isVisible(context)) return bounds;
+                Shape sourceShape = shape.shape(context, false);
+                Stroke stroke = computeEffectiveStroke(context);
+                Shape strokedShape;
+                if (VectorEffect.shouldApplyNonScalingStroke(vectorEffects)) {
+                    AffineTransform transform = new AffineTransform(context.rootTransform());
+                    transform.concatenate(context.userSpaceTransform());
+                    strokedShape = VectorEffect.nonScalingStrokeShape(
+                            vectorEffects, transform, context, stroke, sourceShape);
+                } else {
+                    strokedShape = stroke.createStrokedShape(sourceShape);
+                }
+                return bounds.createUnion(strokedShape.getBounds2D());
+            }
             case StrokeBox: {
                 LengthValue strokeWidth = RenderContextAccessor.instance().strokeContext(context).strokeWidth;
                 if (strokeWidth != null) {

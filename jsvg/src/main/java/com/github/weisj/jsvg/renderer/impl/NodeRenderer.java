@@ -163,7 +163,7 @@ public final class NodeRenderer {
         Mask mask = renderable.mask();
         if (mask == null) return null;
 
-        Rectangle2D bounds = elementBounds.geometryBox();
+        Rectangle2D bounds = elementBounds.outputBox();
         if (bounds.isEmpty()) return null;
 
         if (useAccurateMasking(childOutput)) return mask;
