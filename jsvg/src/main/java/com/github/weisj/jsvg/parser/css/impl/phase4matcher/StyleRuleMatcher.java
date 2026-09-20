@@ -117,8 +117,7 @@ public class StyleRuleMatcher {
             return attributeRules.hasAttributeName.computeIfAbsent(selectorName, k -> new ArrayList<>());
         }
 
-        boolean caseSensitive = selector.caseSensitive() != null ? selector.caseSensitive()
-                : !ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES.contains(selector.name());
+        boolean caseSensitive = selector.caseSensitiveWithDefault();
         // if Selector.operator is set, then Selector.value is also set (otherwise parsing would have
         // failed)
         @NotNull String selectorValue = caseSensitive
