@@ -161,7 +161,7 @@ public final class MediaAtRuleConditionEvaluator {
     }
 
     private @NotNull Match evalMediaNot() throws ParseException {
-        if (parser.isCurrentOneOfKeywords("not")) {
+        if (!parser.isCurrentOneOfKeywords("not")) {
             throw new ParseException();
         }
         parser.advance();

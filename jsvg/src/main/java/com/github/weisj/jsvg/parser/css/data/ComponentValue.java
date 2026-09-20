@@ -212,7 +212,7 @@ public interface ComponentValue {
     }
 
     default boolean isColon() {
-        return this instanceof Token.Delim && ((Token.Delim) this).value() == ":".codePointAt(0);
+        return this == Token.Static.COLON;
     }
 
     default boolean isLt() {
