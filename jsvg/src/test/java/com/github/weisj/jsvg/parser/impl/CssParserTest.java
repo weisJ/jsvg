@@ -324,4 +324,22 @@ class CssParserTest {
         assertRejected.accept("[foo=bar i s]");
         assertRejected.accept("[foo==bar]");
     }
+
+    @Test
+    void propertyNamesAreCaseInsensitive() {
+        FullCssParser cssParser = new FullCssParser();
+        Function<List<? extends NormalizedProperty>, List<String>> names =
+                props -> props.stream().map(NormalizedProperty::name).toList();
+
+        // CSS 2 §4.1.3: property names are ASCII case-insensitive.
+        StyleRuleList sheet = cssParser.parseStyleSheet(
+                inputFromString("#a { FILL: red; Font-Size: 3px; sTrOkE-wIdTh: 2 }"), CssHints.DEFAULT);
+        assertEquals(List.of("fill", "font-size", "stroke-width"), names.apply(sheet.rules().get(0).declarations()));
+        assertEquals(List.of("stroke", "fill"),
+                names.apply(cssParser.parseStyleAttribute("STROKE: blue; Fill: red", CssHints.DEFAULT)));
+        // Normalizing before phase 3 lets shorthands expand regardless of spelling.
+        assertEquals(
+                names.apply(cssParser.parseStyleAttribute("font: 12px serif", CssHints.DEFAULT)),
+                names.apply(cssParser.parseStyleAttribute("FONT: 12px serif", CssHints.DEFAULT)));
+    }
 }
