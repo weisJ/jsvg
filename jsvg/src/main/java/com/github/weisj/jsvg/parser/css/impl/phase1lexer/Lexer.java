@@ -172,13 +172,13 @@ public final class Lexer {
         String name = consumeIdentSequence();
         if (equalsIgnoreCaseAscii(name, "url") && look.peek(0) == '(') {
             look.advance(); // skip over '('
-            while (look.peek(0) == ' ' && look.peek(1) == ' ') {
+            while (isWhitespace(look.peek(0)) && isWhitespace(look.peek(1))) {
                 look.advance();
             }
 
             int first = look.peek(0);
             int second = look.peek(1);
-            if (first == '"' || first == '\'' || (first == ' ' && (second == '"' || second == '\''))) {
+            if (first == '"' || first == '\'' || (isWhitespace(first) && (second == '"' || second == '\''))) {
                 return new Token.Function(name);
             }
             return consumeUrlToken();
