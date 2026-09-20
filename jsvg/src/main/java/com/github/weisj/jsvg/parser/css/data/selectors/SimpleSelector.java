@@ -253,6 +253,15 @@ public interface SimpleSelector {
             return caseSensitive;
         }
 
+        /**
+         * Resolves the {@code i}/{@code s} flag: absent means case-sensitive unless the attribute is in
+         * {@link StyleRuleMatcher#ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES}.
+         */
+        public boolean caseSensitiveWithDefault() {
+            return caseSensitive != null ? caseSensitive
+                    : !StyleRuleMatcher.ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES.contains(name);
+        }
+
         @Override
         public @NotNull Specificity specificity() {
             return Specificity.ONE_CLASS;
@@ -260,8 +269,7 @@ public interface SimpleSelector {
 
         @Override
         public @NotNull MatchResult matches(@NotNull ParsedElement targetElement) {
-            boolean caseSensitiveWithDefault = this.caseSensitive != null ? this.caseSensitive
-                    : StyleRuleMatcher.ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES.contains(name);
+            boolean caseSensitiveWithDefault = caseSensitiveWithDefault();
 
             String attributeValue = targetElement.attributeNode().declaredAttributes().get(name);
 
