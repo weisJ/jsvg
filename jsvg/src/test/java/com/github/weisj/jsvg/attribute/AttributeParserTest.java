@@ -21,17 +21,28 @@
  */
 package com.github.weisj.jsvg.attribute;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.awt.geom.AffineTransform;
+import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.transform.TransformPart;
 import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.NumberListSplitter;
+import com.github.weisj.jsvg.parser.css.impl.phase2basicparse.BasicParser;
+import com.github.weisj.jsvg.parser.css.impl.phase2basicparse.BasicParserInput;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.util.RandomData;
 
 class AttributeParserTest {
@@ -125,5 +136,89 @@ class AttributeParserTest {
             }
         }
         return builder.toString();
+    }
+
+    private static @NotNull AffineTransform resolve(@Nullable List<TransformPart> parts) {
+        assertNotNull(parts);
+        MeasureContext ctx = new MeasureContext(0, 0, 0, 0, 0, 0, 0, new AnimationState(0, 0));
+        AffineTransform t = new AffineTransform();
+        for (TransformPart part : parts) {
+            t = part.applyToTransform(t, ctx);
+        }
+        return t;
+    }
+
+    private static void assertTransform(@NotNull AffineTransform expected, @Nullable List<TransformPart> parts) {
+        AffineTransform actual = resolve(parts);
+        double[] e = new double[6];
+        double[] a = new double[6];
+        expected.getMatrix(e);
+        actual.getMatrix(a);
+        Assertions.assertArrayEquals(e, a, 1e-6, "expected " + expected + " but was " + actual);
+    }
+
+    private @Nullable List<TransformPart> parseTokens(@NotNull String css) {
+        return parser.parseTransform(BasicParser.parseListOfComponentValues(BasicParserInput.fromString(css)));
+    }
+
+    @Test
+    void transformSvgAttributeGrammar() {
+        // Unitless arguments are user units and degrees (SVG 1.1 §7.6), both separators are allowed.
+        AffineTransform rotate90 = AffineTransform.getRotateInstance(Math.PI / 2);
+        assertTransform(rotate90, parseTokens("rotate(90)"));
+        assertTransform(AffineTransform.getRotateInstance(Math.PI / 2, 10, 20), parseTokens("rotate(90 10 20)"));
+        assertTransform(AffineTransform.getRotateInstance(Math.PI / 2, 10, 20), parseTokens("rotate(90,10,20)"));
+        assertTransform(AffineTransform.getTranslateInstance(10, 20), parseTokens("translate(10 20)"));
+        assertTransform(AffineTransform.getTranslateInstance(10, 20), parseTokens("translate(10, 20)"));
+        assertTransform(AffineTransform.getTranslateInstance(10, 0), parseTokens("translate(10)"));
+        assertTransform(AffineTransform.getScaleInstance(2, 2), parseTokens("scale(2)"));
+        assertTransform(AffineTransform.getScaleInstance(2, 3), parseTokens("scale(2 3)"));
+        assertTransform(AffineTransform.getShearInstance(1, 0), parseTokens("skewX(45)"));
+        assertTransform(AffineTransform.getShearInstance(0, 1), parseTokens("skewY(45)"));
+        assertTransform(new AffineTransform(1, 2, 3, 4, 5, 6), parseTokens("matrix(1 2 3 4 5 6)"));
+
+        AffineTransform composed = AffineTransform.getTranslateInstance(10, 20);
+        composed.rotate(Math.PI / 2);
+        assertTransform(composed, parseTokens("translate(10 20) rotate(90)"));
+        assertTransform(composed, parseTokens("translate(10,20),rotate(90)"));
+
+        // The string parser (SVG-only attributes, SMIL values) agrees.
+        assertTransform(rotate90, parser.parseTransform("rotate(90)"));
+        assertTransform(AffineTransform.getRotateInstance(Math.PI / 2, 10, 20),
+                parser.parseTransform("rotate(90 10 20)"));
+        assertTransform(AffineTransform.getShearInstance(1, 0), parser.parseTransform("skewX(45)"));
+        assertTransform(composed, parser.parseTransform("translate(10,20),rotate(90)"));
+
+        Assertions.assertNull(parseTokens("none"));
+        Assertions.assertNull(parser.parseTransform("none"));
+        Assertions.assertNull(parseTokens("rotate()"));
+        Assertions.assertNull(parseTokens("frobnicate(1)"));
+    }
+
+    @Test
+    void transformAnglesAcceptUnits() {
+        // <angle> units (allowed in the attribute by SVG 2 §8.5) resolve like unitless degrees.
+        AffineTransform rotate45 = resolve(parseTokens("rotate(45)"));
+        assertTransform(rotate45, parseTokens("rotate(45deg)"));
+        assertTransform(rotate45, parseTokens("rotate(50grad)"));
+        assertTransform(rotate45, parseTokens("rotate(0.125turn)"));
+        assertTransform(rotate45, parseTokens("rotate(0.7853982rad)"));
+        assertTransform(resolve(parseTokens("rotate(45 10 20)")), parseTokens("rotate(45deg, 10, 20)"));
+
+        assertTransform(resolve(parseTokens("skewX(30)")), parseTokens("skewX(30deg)"));
+        assertTransform(resolve(parseTokens("skewY(30)")), parseTokens("skewY(30DEG)"));
+        assertTransform(resolve(parseTokens("skew(10 20)")), parseTokens("skew(10deg, 20deg)"));
+
+        // The string parser (SVG-only attributes, SMIL values) follows the same grammar.
+        assertTransform(rotate45, parser.parseTransform("rotate(45deg)"));
+        assertTransform(rotate45, parser.parseTransform("rotate(50grad)"));
+        assertTransform(resolve(parser.parseTransform("skewX(30)")), parser.parseTransform("skewX(30deg)"));
+
+        // Lengths are not angles.
+        Assertions.assertNull(parseTokens("rotate(45px)"));
+        Assertions.assertNull(parseTokens("skewX(30px)"));
+        Assertions.assertNull(parser.parseTransform("rotate(45px)"));
+        // Scale factors stay plain numbers.
+        Assertions.assertNull(parseTokens("scale(2deg)"));
     }
 }
