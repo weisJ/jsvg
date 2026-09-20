@@ -282,4 +282,46 @@ class CssParserTest {
         }
         throw new AssertionError("No token produced for: " + value);
     }
+
+    @Test
+    void attributeSelectors() {
+        FullCssParser cssParser = new FullCssParser();
+        Function<String, SimpleSelector> parseSingle = css -> {
+            StyleRuleList sheet = cssParser.parseStyleSheet(inputFromString(css + " { c : d; }"), CssHints.DEFAULT);
+            assertEquals(1, sheet.rules().size(), css);
+            return sheet.rules().get(0).selector().sequences().get(0).simpleSelectors().get(0);
+        };
+        Consumer<String> assertRejected = css -> assertEquals(List.of(),
+                cssParser.parseStyleSheet(inputFromString(css + " { c : d; }"), CssHints.DEFAULT).rules(), css);
+
+        // The case-sensitivity flag is optional.
+        assertEquals(new SimpleSelector.Attribute("foo", null, null, null), parseSingle.apply("[foo]"));
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.EQUALS, "bar", null),
+                parseSingle.apply("[foo=bar]"));
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.EQUALS, "bar", null),
+                parseSingle.apply("[ foo = \"bar\" ]"));
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.INCLUDES, "bar", null),
+                parseSingle.apply("[foo~=bar]"));
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.DASH_MATCH, "bar", null),
+                parseSingle.apply("[foo|=bar]"));
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.PREFIX, "bar", null),
+                parseSingle.apply("[foo^=bar]"));
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.SUFFIX, "bar", null),
+                parseSingle.apply("[foo$=bar]"));
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.SUBSTRING, "bar", null),
+                parseSingle.apply("[foo*=bar]"));
+
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.EQUALS, "bar", false),
+                parseSingle.apply("[foo=bar i]"));
+        assertEquals(new SimpleSelector.Attribute("foo", SimpleSelector.Attribute.Operator.EQUALS, "bar", true),
+                parseSingle.apply("[foo=\"bar\" S]"));
+
+        assertRejected.accept("[]");
+        assertRejected.accept("[=bar]");
+        assertRejected.accept("[foo=]");
+        assertRejected.accept("[foo bar]");
+        assertRejected.accept("[foo=bar x]");
+        assertRejected.accept("[foo=bar i s]");
+        assertRejected.accept("[foo==bar]");
+    }
 }
