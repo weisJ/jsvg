@@ -223,7 +223,8 @@ public final class SelectorParser {
         }
         p++;
         p = skipWs(contents, p);
-        if (p >= contents.size()) return null;
+        // The case-sensitivity flag is optional (Selectors 4 §6.4); null keeps the per-attribute default.
+        if (p >= contents.size()) return new SimpleSelector.Attribute(name, op, value, null);
         ComponentValue caseSensitivityCv = contents.get(p);
         Boolean caseSensitive = null;
         if (isPreservedTokenOf(caseSensitivityCv, TokenType.IDENT)) {
