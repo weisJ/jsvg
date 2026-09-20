@@ -65,7 +65,7 @@ public final class PreProcessor {
 
         switch (ch) {
             case '\r':
-                if (peekChar() == '\n') ++characterIndex; // \r\n -> \n
+                if (peekChar() == '\n') consumePeekedChar(); // \r\n -> \n
                 return '\n';
             case '\f':
                 return '\n';
@@ -76,7 +76,7 @@ public final class PreProcessor {
                 if (Character.isHighSurrogate(ch)) {
                     char nextChar = peekChar();
                     if (nextChar != (char) EOF && Character.isLowSurrogate(nextChar)) {
-                        ++characterIndex; // consumes both characters
+                        consumePeekedChar(); // consumes both characters
                         return Character.toCodePoint(ch, nextChar);
                     }
                     // lonely high surrogate Unicode character (invalid)
@@ -86,6 +86,12 @@ public final class PreProcessor {
                 if (Character.isLowSurrogate(ch)) return REPLACEMENT_CHARACTER;
                 return ch;
         }
+    }
+
+    /** Consumes the character {@link #peekChar()} returned, which may live in a later segment. */
+    private void consumePeekedChar() {
+        skipEmptySegments();
+        ++characterIndex;
     }
 
     private char peekChar() {
