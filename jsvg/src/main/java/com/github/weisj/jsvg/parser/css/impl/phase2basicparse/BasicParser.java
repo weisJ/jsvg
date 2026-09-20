@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser.css.impl.phase2basicparse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -265,13 +266,18 @@ public final class BasicParser {
         }
     }
 
+    /** Property names are ASCII case-insensitive (CSS 2 §4.1.3), except custom properties (css-variables-1 §2). */
+    private static @NotNull String normalizePropertyName(@NotNull String name) {
+        return name.startsWith("--") ? name : name.toLowerCase(Locale.ENGLISH);
+    }
+
     /**
      * §5.4.6 Consume a declaration from a component-value list. Returns {@code null} on parse error.
      * <p>
      * Assumes that the next input token has already been checked to be an {@code <ident-token>}.
      */
     private @Nullable Declaration consumeDeclaration() {
-        String declarationName = ((Token.Ident) componentValueCursor.next()).name();
+        String declarationName = normalizePropertyName(((Token.Ident) componentValueCursor.next()).name());
 
         skipWhitespace();
 
