@@ -287,6 +287,18 @@ public final class AttributeParser {
         return new RawTransformFunction(i, name, args);
     }
 
+    /**
+     * Parses a transform list from either origin: the SVG attributes ({@code transform}, {@code gradientTransform},
+     * {@code patternTransform}, {@code animateTransform} values) and the CSS {@code transform} property.
+     * <p>
+     * The grammar is the SVG attribute one (SVG 1.1 §7.6, SVG 2 §8.5): arguments are unitless {@code <number>}s (user
+     * units, degrees), separated by whitespace and/or commas, with the 3-argument {@code rotate(a cx cy)}. As SVG 2
+     * allows, CSS spellings are accepted too: {@code <length>}/{@code <percentage>} for translations, {@code <angle>}
+     * units for rotations and skews, and the {@code translateX}-style names.
+     * <p>
+     * Since the origin is not known here, CSS values get the same relaxed grammar; the stricter CSS Transforms rules
+     * (unitless only for {@code 0}, commas required) are not enforced.
+     */
     public @Nullable List<@NotNull TransformPart> parseTransform(@Nullable String value) {
         if (value == null) return null;
         if ("none".equals(value)) return null;
@@ -378,16 +390,15 @@ public final class AttributeParser {
             case ROTATE:
                 if (values.length > 2) {
                     lengths = toNonnullArray(
-                            parseNumber(values[0], null),
+                            parseTransformAngle(values[0]),
                             parseLength(values[1], null, PercentageDimension.WIDTH),
                             parseLength(values[2], null, PercentageDimension.HEIGHT));
                 } else {
                     lengths = toNonnullArray(
-                            parseNumber(values[0], null));
+                            parseTransformAngle(values[0]));
                 }
                 break;
             case SCALE:
-            case SKEW:
                 if (values.length == 1) {
                     lengths = toNonnullArray(
                             parseNumber(values[0], null));
@@ -397,17 +408,42 @@ public final class AttributeParser {
                             parseNumber(values[1], null));
                 }
                 break;
+            case SKEW:
+                if (values.length == 1) {
+                    lengths = toNonnullArray(
+                            parseTransformAngle(values[0]));
+                } else {
+                    lengths = toNonnullArray(
+                            parseTransformAngle(values[0]),
+                            parseTransformAngle(values[1]));
+                }
+                break;
             case SCALE_X:
             case SCALE_Y:
+                lengths = toNonnullArray(
+                        parseLength(values[0], null, PercentageDimension.NONE));
+                break;
             case SKEW_X:
             case SKEW_Y:
                 lengths = toNonnullArray(
-                        parseLength(values[0], null, PercentageDimension.NONE));
+                        parseTransformAngle(values[0]));
                 break;
             default:
                 lengths = null;
         }
         return lengths;
+    }
+
+    /** Transform angle argument in degrees: {@code <number>} or {@code <angle>}; null if neither. */
+    private @Nullable Length parseTransformAngle(@NotNull String value) {
+        String lower = value.toLowerCase(Locale.ENGLISH);
+        for (AngleUnit unit : AngleUnit.units()) {
+            if (unit != AngleUnit.Raw && lower.endsWith(unit.suffix())) {
+                Length number = parseNumber(value.substring(0, value.length() - unit.suffix().length()), null);
+                return number != null ? Unit.RAW.valueOf(unit.toDegrees(number.raw())) : null;
+            }
+        }
+        return parseNumber(value, null);
     }
 
     // Token-native parsing (CSS Syntax §5): consume already-lexed component values directly instead of
@@ -522,13 +558,14 @@ public final class AttributeParser {
         return end == group.size() ? group : group.subList(0, end);
     }
 
+    /** Token form of {@link #parseTransform(String)}, same grammar. */
     public @Nullable List<@NotNull TransformPart> parseTransform(@NotNull List<@NotNull ComponentValue> tokens) {
         ComponentValue singleToken = singleToken(tokens);
         if (singleToken != null && singleToken.isOneOfKeywords("none")) return null;
 
         List<TransformPart> parts = new ArrayList<>();
         for (ComponentValue token : tokens) {
-            if (token == Token.Static.WHITESPACE) continue;
+            if (isSeparator(token)) continue; // comma-wsp between functions (SVG 1.1 §7.6)
             if (!(token instanceof ComponentValue.FunctionBlock)) return null;
             ComponentValue.FunctionBlock function = (ComponentValue.FunctionBlock) token;
             TransformPart.TransformType type =
@@ -574,21 +611,24 @@ public final class AttributeParser {
                         0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.HEIGHT) : null);
             case ROTATE:
                 if (args.size() > 2) {
-                    return toNonnullArray(number(args, 0),
+                    return toNonnullArray(angle(args, 0),
                             1 < args.size() ? lengthFromToken(args.get(1), PercentageDimension.WIDTH) : null,
                             2 < args.size() ? lengthFromToken(args.get(2), PercentageDimension.HEIGHT) : null);
                 }
-                return toNonnullArray(number(args, 0));
+                return toNonnullArray(angle(args, 0));
             case SCALE:
-            case SKEW:
                 if (args.size() == 1) return toNonnullArray(number(args, 0));
                 return toNonnullArray(number(args, 0), number(args, 1));
+            case SKEW:
+                if (args.size() == 1) return toNonnullArray(angle(args, 0));
+                return toNonnullArray(angle(args, 0), angle(args, 1));
             case SCALE_X:
             case SCALE_Y:
-            case SKEW_X:
-            case SKEW_Y:
                 return toNonnullArray(
                         0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.NONE) : null);
+            case SKEW_X:
+            case SKEW_Y:
+                return toNonnullArray(angle(args, 0));
             default:
                 return null;
         }
@@ -598,6 +638,19 @@ public final class AttributeParser {
         if (index >= args.size()) return null;
         ComponentValue token = args.get(index);
         return token instanceof Token.Number ? Unit.RAW.valueOf(((Token.Number) token).value()) : null;
+    }
+
+    /** Transform angle argument in degrees: {@code <number>} or {@code <angle>}; null if neither. */
+    private @Nullable Length angle(@NotNull List<@NotNull ComponentValue> args, int index) {
+        if (index >= args.size()) return null;
+        ComponentValue token = args.get(index);
+        if (token instanceof Token.Number) return Unit.RAW.valueOf(((Token.Number) token).value());
+        if (token instanceof Token.Dimension) {
+            Token.Dimension dimension = (Token.Dimension) token;
+            AngleUnit unit = AngleUnit.fromSuffix(dimension.unit());
+            return unit != null ? Unit.RAW.valueOf(unit.toDegrees(dimension.value())) : null;
+        }
+        return null;
     }
 
     private static boolean isSeparator(@NotNull ComponentValue token) {

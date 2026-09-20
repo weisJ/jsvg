@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.geometry.size;
 import java.util.Locale;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 public enum AngleUnit {
@@ -53,6 +54,21 @@ public enum AngleUnit {
 
     public @NotNull String suffix() {
         return suffix;
+    }
+
+    /** The unit for a CSS {@code <angle>} suffix (case-insensitive), or null if it isn't one. */
+    public static @Nullable AngleUnit fromSuffix(@NotNull String suffix) {
+        String lower = suffix.toLowerCase(Locale.ENGLISH);
+        for (AngleUnit unit : units) {
+            if (unit != Raw && unit.suffix.equals(lower)) return unit;
+        }
+        return null;
+    }
+
+    /** Converts a value in this unit to degrees. */
+    public float toDegrees(float value) {
+        if (this == Raw || this == Deg) return value; // avoid a lossy round trip through radians
+        return (float) Math.toDegrees(toRadians(value));
     }
 
     public float toRadians(float value) {
