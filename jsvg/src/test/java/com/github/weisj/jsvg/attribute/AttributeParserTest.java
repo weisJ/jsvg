@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 
+import com.github.weisj.jsvg.view.FloatSize;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -140,7 +141,7 @@ class AttributeParserTest {
 
     private static @NotNull AffineTransform resolve(@Nullable List<TransformPart> parts) {
         assertNotNull(parts);
-        MeasureContext ctx = new MeasureContext(0, 0, 0, 0, 0, 0, 0, new AnimationState(0, 0));
+        MeasureContext ctx = MeasureContext.createInitial(new FloatSize(0, 0), 0, 0, new AnimationState(0, 0));
         AffineTransform t = new AffineTransform();
         for (TransformPart part : parts) {
             t = part.applyToTransform(t, ctx);
