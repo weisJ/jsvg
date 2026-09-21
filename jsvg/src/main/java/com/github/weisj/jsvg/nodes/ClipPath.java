@@ -46,7 +46,7 @@ import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
 import com.github.weisj.jsvg.util.ImageUtil;
 import com.github.weisj.jsvg.util.ShapeUtil;
 
-@ElementCategories({/* None */})
+@ElementCategories(value = {}, neverRendered = true)
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape},
     anyOf = {Use.class, Text.class}

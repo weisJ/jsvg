@@ -36,7 +36,7 @@ import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 
-@ElementCategories({Category.Container, Category.Structural})
+@ElementCategories(value = {Category.Container, Category.Structural}, neverRendered = true)
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*

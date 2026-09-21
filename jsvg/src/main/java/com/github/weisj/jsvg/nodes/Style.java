@@ -36,7 +36,7 @@ import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.CssHints;
 
-@ElementCategories({/* None */})
+@ElementCategories(value = {}, neverRendered = true)
 @PermittedContent(any = true, charData = true)
 public final class Style extends MetaSVGNode {
     public static final String TAG = "style";

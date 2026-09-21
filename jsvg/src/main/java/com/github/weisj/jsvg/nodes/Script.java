@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,14 +23,13 @@ package com.github.weisj.jsvg.nodes;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 
-@ElementCategories(value = Category.Descriptive, neverRendered = true)
+@ElementCategories(value = {}, neverRendered = true)
 @PermittedContent(any = true, charData = true)
-public final class Title extends MetaSVGNode {
-    public static final String TAG = "title";
+public final class Script extends MetaSVGNode {
+    public static final String TAG = "script";
 
     @Override
     public @NotNull String tagName() {

@@ -43,7 +43,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.view.FloatSize;
 
-@ElementCategories(Category.Container)
+@ElementCategories(value = Category.Container, neverRendered = true)
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*

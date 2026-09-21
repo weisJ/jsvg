@@ -142,6 +142,7 @@ public final class NodeSupplier {
     private void populateMetaNodeConstructors() {
         constructorMap.put(Desc.TAG, () -> new Desc());
         constructorMap.put(Metadata.TAG, () -> new Metadata());
+        constructorMap.put(Script.TAG, () -> new Script());
         constructorMap.put(Title.TAG, () -> new Title());
     }
 

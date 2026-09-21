@@ -49,7 +49,7 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.CachedSurfaceSupplier;
 
-@ElementCategories(Category.Container)
+@ElementCategories(value = Category.Container, neverRendered = true)
 @PermittedContent(
     categories = {Category.Animation, Category.Descriptive, Category.Shape, Category.Structural, Category.Gradient},
     /*
