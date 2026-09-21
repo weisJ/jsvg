@@ -30,11 +30,13 @@ import com.github.weisj.jsvg.parser.impl.*;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.CssHints;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The context providing all necessary components for loading an SVG document.
  * The context returned by {@link #createDefault()} can be used across multiple documents and threads.
  */
+@ProviderType
 public interface LoaderContext {
     @Nullable
     DomProcessor preProcessor();
@@ -69,6 +71,7 @@ public interface LoaderContext {
         return builder().build();
     }
 
+    @ProviderType
     interface Builder {
 
         @NotNull
