@@ -375,10 +375,10 @@ public final class Lexer {
     }
 
     private static final class NumberValue {
-        final float value;
+        final double value;
         final @NotNull Token.NumericType numericType;
 
-        NumberValue(float value, @NotNull Token.NumericType numericType) {
+        NumberValue(double value, @NotNull Token.NumericType numericType) {
             this.value = value;
             this.numericType = numericType;
         }
@@ -477,29 +477,17 @@ public final class Lexer {
         return (c >= 0 && c <= 0x08) || c == 0x0B || (c >= 0x0E && c <= 0x1F) || c == 0x7F;
     }
 
+    private static final Pattern NUMBER_PATTERN =
+            Pattern.compile("^[-+]?(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?$");
+
     /**
-     * §4.3.13 Converts a string to a number. Computed in double, then narrowed to the float used
-     * throughout the geometry layer. Assumes that the string is a valid CSS number.
+     * §4.3.13 Converts a string to a number. Assumes that the string is a valid CSS number.
      */
-    private static float convertStringToNumber(String str) {
+    private static double convertStringToNumber(String str) {
         Matcher matcher = NUMBER_PATTERN.matcher(str);
         if (!matcher.matches())
             throw new ParserException();
-        String sign = matcher.group("s") != null ? matcher.group("s") : "";
-        String integer = matcher.group("i") != null ? matcher.group("i") : "";
-        String fraction = matcher.group("f") != null ? matcher.group("f") : "";
-        String exponentSign = matcher.group("t") != null ? matcher.group("t") : "";
-        String exponent = matcher.group("e") != null ? matcher.group("e") : "";
-
-        int s = sign.equals("-") ? -1 : 1; // sign of the number
-        long i = integer.isEmpty() ? 0 : Long.parseUnsignedLong(integer); // integer part
-        // fractional part as integer
-        long f = fraction.isEmpty() ? 0 : Long.parseUnsignedLong(fraction.replaceFirst("^0+", ""));
-        int d = fraction.length(); // number of fractional digits
-        int t = exponentSign.equals("-") ? -1 : 1; // exponent sign
-        long e = exponent.isEmpty() ? 0 : Long.parseUnsignedLong(exponent); // exponent
-
-        return (float) (s * (i + f * Math.pow(10, -d)) * Math.pow(10, t * e));
+        return Double.parseDouble(str);
     }
 
     private static boolean equalsIgnoreCaseAscii(@NotNull String a, @NotNull String b) {
@@ -513,9 +501,6 @@ public final class Lexer {
         }
         return true;
     }
-
-    private static final Pattern NUMBER_PATTERN =
-            Pattern.compile("^(?<s>[-+]?)(?<i>[0-9]*+)\\.?(?<f>[0-9]*+)(?:[eE](?<t>[-+]?)(?<e>[0-9]*+))?$");
 
     /**
      * Sliding window of code points over a {@link PreProcessor}. Owns the circular-buffer
