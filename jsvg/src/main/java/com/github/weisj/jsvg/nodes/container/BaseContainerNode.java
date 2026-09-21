@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -67,7 +67,7 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
         }
         if (allowedNodes.any()) return true;
 
-        Category[] categories = Category.categoriesOf(node);
+        Category[] categories = Category.elementCategoriesOf(node).value();
         Class<? extends SVGNode> nodeType = node.getClass();
         CategoryCheckResult result = doIntersect(allowedNodes.categories(), categories);
         if (result == CategoryCheckResult.Allowed) return true;

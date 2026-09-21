@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +43,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.DomElement;
 import com.github.weisj.jsvg.parser.TextContent;
+import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
 public final class ParsedElement implements DomElement {
     private static final Logger LOGGER = LogFactory.createLogger(ParsedElement.class);
@@ -64,6 +66,8 @@ public final class ParsedElement implements DomElement {
     private final int oneBasedIndexAmongSiblingsWithSameTagName;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
+    private final @NotNull Supplier<@NotNull CategoryMetadata> categoryMetadata = new LazySupplier<>(
+            () -> new CategoryMetadata(Category.elementCategoriesOf(node())));
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
     private final @NotNull Map<String, Integer> childCountsByTagName = new HashMap<>();
@@ -252,7 +256,7 @@ public final class ParsedElement implements DomElement {
     }
 
     void addChild(@NotNull ParsedElement parsedElement) {
-        if (Category.hasCategory(parsedElement.node, Category.Animation)) {
+        if (categoryMetadata.get().hasCategory(Category.Animation)) {
             String attributeName = BaseAnimationNode.attributeName(parsedElement.attributeNode());
             animationElements.computeIfAbsent(attributeName, k -> new ArrayList<>()).add(parsedElement);
         }
@@ -333,17 +337,18 @@ public final class ParsedElement implements DomElement {
 
     @SuppressWarnings({"RedundantIfStatement", "java:S1126"})
     private boolean participatesInRenderedTree() {
-        if (Category.isNeverRendered(node)) return false;
+        CategoryMetadata metadata = categoryMetadata.get();
+
+        if (metadata.isNeverRendered()) return false;
 
         // Filter definitions and their processing nodes produce an effect when referenced; they are not
-        // rendered as
-        // ordinary document-tree elements.
+        // rendered as ordinary document-tree elements.
         // https://www.w3.org/TR/filter-effects-1/#FilterElement
         // https://www.w3.org/TR/filter-effects-1/#FilterPrimitivesOverview
         if (Filter.TAG.equals(tagName())
-                || Category.hasCategory(node, Category.FilterPrimitive)
-                || Category.hasCategory(node, Category.LightSource)
-                || Category.hasCategory(node, Category.TransferFunctionElement))
+                || metadata.hasCategory(Category.FilterPrimitive)
+                || metadata.hasCategory(Category.LightSource)
+                || metadata.hasCategory(Category.TransferFunctionElement))
             return false;
 
         return true;

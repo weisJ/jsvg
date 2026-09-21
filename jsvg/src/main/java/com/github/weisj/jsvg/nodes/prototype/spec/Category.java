@@ -59,15 +59,7 @@ public enum Category {
         return effectivelyAllowed;
     }
 
-    public static @NotNull Category @NotNull [] categoriesOf(@NotNull SVGNode node) {
-        return elementCategoriesOf(node).value();
-    }
-
-    public static boolean isNeverRendered(@NotNull SVGNode node) {
-        return elementCategoriesOf(node).neverRendered();
-    }
-
-    private static @NotNull ElementCategories elementCategoriesOf(@NotNull SVGNode node) {
+    public static @NotNull ElementCategories elementCategoriesOf(@NotNull SVGNode node) {
         Class<? extends SVGNode> nodeType = node.getClass();
         ElementCategories categories = nodeType.getAnnotation(ElementCategories.class);
         if (categories == null) {
@@ -75,13 +67,5 @@ public enum Category {
                     "Element <" + node.tagName() + "> doesn't specify element category information");
         }
         return categories;
-    }
-
-    public static boolean hasCategory(@NotNull SVGNode node, @NotNull Category category) {
-        Category[] categories = categoriesOf(node);
-        for (Category c : categories) {
-            if (c == category) return true;
-        }
-        return false;
     }
 }

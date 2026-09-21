@@ -726,7 +726,8 @@ public final class AttributeNode {
     }
 
     public @Nullable String getHref() {
-        // Linking attributes are not CSS presentation properties, so only declared attributes are considered
+        // Linking attributes are not CSS presentation properties, so only declared attributes are
+        // considered
         String href = declaredAttributes.get("href");
         if (href == null) href = declaredAttributes.get("xlink:href");
         return href;
