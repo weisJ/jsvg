@@ -25,7 +25,6 @@ import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
-import java.text.AttributedCharacterIterator;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -46,7 +45,7 @@ public final class FontResolver {
     public static @NotNull SVGFont resolve(@NotNull MeasurableFontSpec fontSpec,
             @NotNull MeasureContext measureContext, @NotNull PlatformSupport platformSupport) {
         // Compute font attributes only once and avoid computing them if the font has been cached.
-        Supplier<Map<AttributedCharacterIterator.Attribute, Object>> attributes = new LazySupplier<>(
+        Supplier<Map<@NotNull TextAttribute, Object>> attributes = new LazySupplier<>(
                 () -> computeFontAttributes(fontSpec, measureContext));
 
         PlatformSupport.FontLoader customFontLoader = platformSupport.fontLoader();
@@ -59,7 +58,7 @@ public final class FontResolver {
 
     private static @Nullable SVGFont resolve(@NotNull MeasurableFontSpec fontSpec,
             @NotNull MeasureContext measureContext,
-            @NotNull Supplier<Map<AttributedCharacterIterator.Attribute, Object>> attributes,
+            @NotNull Supplier<Map<@NotNull TextAttribute, Object>> attributes,
             @Nullable PlatformSupport.FontLoader loader) {
         if (loader == null) return null;
         FontCache.CacheKey key = new FontCache.CacheKey(fontSpec, measureContext);
@@ -78,7 +77,7 @@ public final class FontResolver {
 
     private static @NotNull Font resolveAWTFontWithoutCache(@NotNull MeasurableFontSpec fontSpec,
             @NotNull MeasureContext measureContext, @NotNull PlatformSupport platformSupport) {
-        Map<AttributedCharacterIterator.Attribute, Object> attributes = computeFontAttributes(fontSpec, measureContext);
+        Map<@NotNull TextAttribute, Object> attributes = computeFontAttributes(fontSpec, measureContext);
         Font font = resolveAWTFont(fontSpec, platformSupport.fontLoader(), attributes);
         if (font != null) return font;
 
@@ -88,13 +87,13 @@ public final class FontResolver {
         return fallbackFont(attributes, platformSupport);
     }
 
-    private static @NotNull Font fallbackFont(@NotNull Map<AttributedCharacterIterator.Attribute, Object> attributes,
+    private static @NotNull Font fallbackFont(@NotNull Map<@NotNull TextAttribute, Object> attributes,
             @NotNull PlatformSupport platformSupport) {
         attributes.put(TextAttribute.FAMILY, platformSupport.fontFamily());
         return new Font(attributes);
     }
 
-    private static @NotNull Map<AttributedCharacterIterator.Attribute, Object> computeFontAttributes(
+    private static @NotNull Map<@NotNull TextAttribute, Object> computeFontAttributes(
             @NotNull MeasurableFontSpec fontSpec, @NotNull MeasureContext measureContext) {
         FontStyle style = fontSpec.style();
 
@@ -102,7 +101,7 @@ public final class FontResolver {
         float size = fontSpec.effectiveSize(measureContext);
         float stretch = fontSpec.stretch().orElseIfUnspecified(1).value();
 
-        Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<>(5, 1f);
+        Map<@NotNull TextAttribute, Object> attributes = new HashMap<>(5, 1f);
         attributes.put(TextAttribute.SIZE, size);
         attributes.put(TextAttribute.WEIGHT, weight);
         attributes.put(TextAttribute.WIDTH, stretch);
@@ -120,17 +119,12 @@ public final class FontResolver {
 
     /** Resolves and sets the first matching font family based on {@code fontSpec.families}. */
     private static @Nullable Font resolveAWTFont(@NotNull MeasurableFontSpec fontSpec,
-            @Nullable PlatformSupport.FontLoader fontLoader,
-            @NotNull Map<AttributedCharacterIterator.Attribute, Object> attributes) {
+            @Nullable PlatformSupport.FontLoader fontLoader, @NotNull Map<@NotNull TextAttribute, Object> attributes) {
         if (fontLoader == null) return null;
         for (String family : fontSpec.families()) {
             // A supplied font makes font selection deterministic, including for CSS generic families.
-            Font customFont = fontLoader.customFont(family);
-            if (customFont != null) {
-                // No FAMILY attribute: deriveFont discards the created font handle if it doesn't
-                // match the font's name exactly and falls back to a system font lookup.
-                return customFont.deriveFont(attributes);
-            }
+            Font customFont = fontLoader.customFont(family, attributes);
+            if (customFont != null) return customFont;
         }
         return null;
     }
@@ -171,9 +165,11 @@ public final class FontResolver {
         }
 
         @Override
-        public @Nullable Font customFont(@NotNull String family) {
+        public @Nullable Font customFont(@NotNull String family,
+                @NotNull Map<@NotNull TextAttribute, Object> attributes) {
             if (!isSupportedFontFamily(family)) return null;
-            return new Font(family, Font.PLAIN, (int) SVGFont.defaultFontSize());
+            attributes.put(TextAttribute.FAMILY, family);
+            return new Font(attributes);
         }
     }
 

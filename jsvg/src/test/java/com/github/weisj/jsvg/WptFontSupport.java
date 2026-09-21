@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg;
 
 import java.awt.Font;
+import java.awt.font.TextAttribute;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -85,7 +86,9 @@ record WptFontSupport(@NotNull Map<String, Font> fonts) implements PlatformSuppo
     }
 
     @Override
-    public @Nullable Font customFont(@NotNull String family) {
-        return fonts.get(family.toLowerCase(Locale.ROOT));
+    public @Nullable Font customFont(@NotNull String family,
+            @NotNull Map<@NotNull TextAttribute, Object> attributes) {
+        Font font = fonts.get(family.toLowerCase(Locale.ROOT));
+        return font != null ? font.deriveFont(attributes) : null;
     }
 }

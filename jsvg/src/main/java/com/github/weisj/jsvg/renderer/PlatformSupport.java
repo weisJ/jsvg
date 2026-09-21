@@ -22,8 +22,10 @@
 package com.github.weisj.jsvg.renderer;
 
 import java.awt.*;
+import java.awt.font.TextAttribute;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
+import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +68,7 @@ public interface PlatformSupport {
          * Custom fonts are cached per font loader instance.
          */
         @Nullable
-        Font customFont(@NotNull String family);
+        Font customFont(@NotNull String family, @NotNull Map<@NotNull TextAttribute, Object> attributes);
     }
 
     @ApiStatus.Experimental

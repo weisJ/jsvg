@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.awt.*;
+import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.StringWriter;
@@ -36,6 +37,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -70,7 +72,7 @@ class WptSvgTestSuite {
     private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
     public static final Pattern FONT_FACE_PATTERN = Pattern.compile("@font-face\\s*\\{([^}]+)}");
-    private static final @NotNull PlatformSupport.FontLoader NULL_FONT_LOADER = family -> null;
+    private static final @NotNull PlatformSupport.FontLoader NULL_FONT_LOADER = (family, attributes) -> null;
     private static @NotNull PlatformSupport.FontLoader fonts = NULL_FONT_LOADER;
 
     // Current rendering mismatches. Keep upstream artwork and fuzzy limits unchanged.
@@ -286,7 +288,8 @@ class WptSvgTestSuite {
             var graphics = expected.createGraphics();
             graphics.setRenderingHints(ImageComparison.referenceHintSet());
             graphics.setColor(Color.BLACK);
-            graphics.setFont(java.util.Objects.requireNonNull(fonts.customFont(family)).deriveFont(40f));
+            graphics.setFont(java.util.Objects.requireNonNull(
+                    fonts.customFont(family, Map.of(TextAttribute.SIZE, 40f))));
             graphics.fill(
                     graphics.getFont().createGlyphVector(graphics.getFontRenderContext(), "B").getOutline(10, 50));
             graphics.dispose();
@@ -345,7 +348,8 @@ class WptSvgTestSuite {
                 }
             }
             if ("link".equals(element.getLocalName()) && "stylesheet".equals(element.getAttribute("rel"))) {
-                assumeTrue("/fonts/ahem.css".equals(element.getAttribute("href")) && fonts.customFont("ahem") != null,
+                assumeTrue("/fonts/ahem.css".equals(element.getAttribute("href"))
+                        && fonts.customFont("ahem", Map.of()) != null,
                         "Requires a browser stylesheet loader or an unregistered font.");
             }
             if ("style".equals(element.getLocalName())) {
@@ -353,7 +357,8 @@ class WptSvgTestSuite {
                 while (faces.find()) {
                     // These are the only inline font-face declarations in the selected SVG pairs.
                     assumeTrue(faces.group(1).contains("font-family: FreeSans;")
-                            && faces.group(1).contains("FreeSans.woff") && fonts.customFont("freesans") != null,
+                            && faces.group(1).contains("FreeSans.woff")
+                            && fonts.customFont("freesans", Map.of()) != null,
                             "Requires an unregistered custom font: " + path);
                 }
             }

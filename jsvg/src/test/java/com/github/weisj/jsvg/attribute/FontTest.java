@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.attribute;
 
 import java.awt.Font;
+import java.awt.font.TextAttribute;
 import java.awt.image.ImageObserver;
 import java.util.HashMap;
 import java.util.List;
@@ -179,7 +180,7 @@ class FontTest {
     @Test
     void customFontMissUsesRequestedPlatformFamily() {
         MeasurableFontSpec spec = createFontSpec(entry("font-family", "monospace"));
-        PlatformSupport support = getSupport(family -> null);
+        PlatformSupport support = getSupport((family, attributes) -> null);
         SVGFont cached = FontResolver.resolve(spec, MEASURE_CONTEXT, support);
         SVGFont uncached = FontResolver.resolveWithoutCache(spec, MEASURE_CONTEXT, support);
 
@@ -192,8 +193,10 @@ class FontTest {
     void customFontCachesAreScopedToLoader() {
         MeasurableFontSpec spec = createFontSpec(entry("font-family", "serif"));
         SVGFont platform = FontResolver.resolve(spec, MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
-        PlatformSupport first = getSupport(family -> new Font(Font.DIALOG, Font.PLAIN, 1));
-        PlatformSupport second = getSupport(family -> new Font(Font.MONOSPACED, Font.PLAIN, 1));
+        PlatformSupport first =
+                getSupport((family, attributes) -> new Font(Font.DIALOG, Font.PLAIN, 1).deriveFont(attributes));
+        PlatformSupport second =
+                getSupport((family, attributes) -> new Font(Font.MONOSPACED, Font.PLAIN, 1).deriveFont(attributes));
         SVGFont firstFont = FontResolver.resolve(spec, MEASURE_CONTEXT, first);
         SVGFont secondFont = FontResolver.resolve(spec, MEASURE_CONTEXT, second);
 
@@ -214,9 +217,10 @@ class FontTest {
         Font stub = new Font(Font.DIALOG, Font.PLAIN, 1);
         PlatformSupport.FontLoader fontLoader = new PlatformSupport.FontLoader() {
             @Override
-            public @NotNull Font customFont(@NotNull String family) {
+            public @NotNull Font customFont(@NotNull String family,
+                    @NotNull Map<@NotNull TextAttribute, Object> attributes) {
                 queriedFontFamily = family;
-                return stub;
+                return stub.deriveFont(attributes);
             }
         };
         return getSupport(fontLoader);
