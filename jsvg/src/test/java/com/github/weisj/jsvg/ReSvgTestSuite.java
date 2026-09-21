@@ -417,7 +417,6 @@ class ReSvgTestSuite {
                 "unresolved-xlink-href.svg",
                 "with-clip-path-and-mask.svg",
                 "with-clip-path.svg",
-                "with-mask-on-parent.svg",
                 "with-mask.svg",
                 "with-multiple-transforms-1.svg",
                 "with-multiple-transforms-2.svg",
@@ -487,13 +486,9 @@ class ReSvgTestSuite {
                 "clip-path-on-children.svg",
                 "clip-path-on-self-2.svg",
                 "clip-path-on-self.svg",
-                "clip-path-with-transform-on-text.svg",
                 "clip-rule-from-parent-node.svg",
                 "clip-rule=evenodd.svg",
                 "clipping-with-complex-text-1.svg",
-                "clipping-with-complex-text-2.svg",
-                "clipping-with-complex-text-and-clip-rule.svg",
-                "clipping-with-text.svg",
                 "g-is-not-a-valid-child.svg",
                 "invalid-clip-path-on-child.svg",
                 "invalid-clip-path-on-self.svg",
@@ -506,7 +501,6 @@ class ReSvgTestSuite {
                 "on-the-root-svg-without-size.svg",
                 "recursive-on-child.svg",
                 "recursive-on-self.svg",
-                "self-recursive.svg",
                 "transform-on-clipPath.svg"));
     }
 
@@ -535,18 +529,12 @@ class ReSvgTestSuite {
     Collection<DynamicTest> paint_servers_linearGradient() {
         return checkDirectory("paint-servers/linearGradient", Set.of(
                 "hsla-color.svg",
-                "invalid-child-2.svg",
-                "invalid-gradientTransform.svg",
-                "recursive-xlink-href-1.svg",
-                "recursive-xlink-href-2.svg",
-                "recursive-xlink-href-3.svg",
-                "self-recursive-xlink-href.svg"));
+                "invalid-gradientTransform.svg"));
     }
 
     @TestFactory
     Collection<DynamicTest> paint_servers_pattern() {
         return checkDirectory("paint-servers/pattern", Set.of(
-                "child-with-invalid-FuncIRI.svg",
                 "children-via-xlink-href.svg",
                 "everything-via-xlink-href.svg",
                 "invalid-patternTransform.svg",
@@ -580,9 +568,7 @@ class ReSvgTestSuite {
                 "hsla-color.svg",
                 "invalid-gradientTransform.svg",
                 "invalid-gradientUnits.svg",
-                "negative-r.svg",
-                "recursive-xlink-href.svg",
-                "self-recursive-xlink-href.svg"));
+                "negative-r.svg"));
     }
 
     @TestFactory
@@ -629,7 +615,6 @@ class ReSvgTestSuite {
         return checkDirectory("painting/display", Set.of(
                 "bBox-impact.svg",
                 "none-on-tref.svg",
-                "none-on-tspan-1.svg",
                 "none-on-tspan-2.svg"));
     }
 
@@ -637,7 +622,6 @@ class ReSvgTestSuite {
     Collection<DynamicTest> painting_fill() {
         return checkDirectory("painting/fill", Set.of(
                 "currentColor-without-parent.svg",
-                "funcIRI-to-an-unsupported-element.svg",
                 "hsl-120-100percent-25percent.svg",
                 "hsl-120-200percent-25percent.svg",
                 "hsl-360-100percent-25percent.svg",
@@ -647,10 +631,8 @@ class ReSvgTestSuite {
                 "icc-color.svg",
                 "invalid-FuncIRI-with-a-currentColor-fallback.svg",
                 "invalid-FuncIRI-with-a-fallback-color.svg",
-                "linear-gradient-on-text.svg",
                 "pattern-on-text.svg",
                 "radial-gradient-on-text.svg",
-                "rgb-0-127-0-0.5.svg",
                 "rgb-int-int-int.svg",
                 "rgba-0-50percent-0-0.5.svg"));
     }
@@ -679,15 +661,11 @@ class ReSvgTestSuite {
         return checkDirectory("painting/marker", Set.of(
                 "inheritance-1.svg",
                 "inheritance-2.svg",
-                "marker-on-text.svg",
                 "on-ArcTo.svg",
                 "orient=auto-on-M-C-C-6.svg",
                 "orient=auto-on-M-C-C-7.svg",
                 "percent-values.svg",
-                "recursive-1.svg",
-                "recursive-2.svg",
                 "recursive-3.svg",
-                "recursive-4.svg",
                 "recursive-5.svg",
                 "target-with-subpaths-2.svg",
                 "the-marker-property.svg",
@@ -736,14 +714,13 @@ class ReSvgTestSuite {
     Collection<DynamicTest> painting_paint_order() {
         return checkDirectory("painting/paint-order", Set.of(
                 "duplicates.svg",
-                "on-text.svg",
-                "on-tspan.svg",
                 "stroke-invalid.svg",
                 "trailing-data.svg"));
     }
 
     @TestFactory
     Collection<DynamicTest> painting_shape_rendering() {
+        // Unsupported: shape-rendering.
         return checkDirectory("painting/shape-rendering", Set.of(
                 "optimizeSpeed-on-text.svg"));
     }
@@ -756,20 +733,15 @@ class ReSvgTestSuite {
                 "gradient-with-objectBoundingBox-on-path-without-a-bbox-1.svg",
                 "gradient-with-objectBoundingBox-on-path-without-a-bbox-2.svg",
                 "gradient-with-objectBoundingBox-on-shape-without-a-bbox.svg",
-                "linear-gradient-on-text.svg",
                 "linear-gradient.svg",
                 "pattern-on-text.svg",
                 "pattern-with-objectBoundingBox-fallback-on-zero-bbox-shape.svg",
-                "radial-gradient-on-text.svg",
                 "radial-gradient.svg"));
     }
 
     @TestFactory
     Collection<DynamicTest> painting_stroke_dasharray() {
-        return checkDirectory("painting/stroke-dasharray", Set.of(
-                // Upstream marks these references as undefined.
-                "negative-sum.svg",
-                "negative-values.svg"));
+        return checkDirectory("painting/stroke-dasharray");
     }
 
     @TestFactory
@@ -810,10 +782,9 @@ class ReSvgTestSuite {
         return checkDirectory("painting/visibility", Set.of(
                 "bbox-impact-1.svg",
                 "bbox-impact-2.svg",
+                // Too close to the tolerance cutoff.
                 "bbox-impact-3.svg",
-                "collapse-on-tspan.svg",
-                "hidden-on-group.svg",
-                "hidden-on-tspan.svg"));
+                "hidden-on-group.svg"));
     }
 
     @TestFactory
@@ -863,7 +834,6 @@ class ReSvgTestSuite {
         return checkDirectory("structure/a", Set.of(
                 "inside-text.svg",
                 "inside-tspan.svg",
-                "on-text.svg",
                 "on-tspan.svg"));
     }
 
@@ -874,8 +844,7 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> structure_g() {
-        return checkDirectory("structure/g", Set.of(
-                "recursive-inheritance.svg"));
+        return checkDirectory("structure/g");
     }
 
     @TestFactory
@@ -975,10 +944,6 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> structure_symbol() {
         return checkDirectory("structure/symbol", Set.of(
-                "indirect-symbol-reference.svg",
-                "with-custom-use-size.svg",
-                "with-overflow-visible.svg",
-                "with-transform-on-use.svg",
                 "with-transform.svg"));
     }
 
@@ -1006,8 +971,7 @@ class ReSvgTestSuite {
                 "on-image.svg",
                 "on-pattern-object-bounding-box.svg",
                 "on-pattern-user-space-on-use.svg",
-                "on-text-path.svg",
-                "on-text.svg"));
+                "on-text-path.svg"));
     }
 
     @TestFactory
@@ -1017,22 +981,40 @@ class ReSvgTestSuite {
     }
 
     @TestFactory
+    Collection<DynamicTest> text_alignment_baseline() {
+        return checkDirectory("text/alignment-baseline", Set.of(
+                "after-edge.svg",
+                "baseline.svg",
+                "before-edge.svg",
+                "central.svg",
+                "hanging-and-baseline-shift-eq-20-on-tspan.svg",
+                "hanging-on-tspan.svg",
+                "hanging-on-vertical.svg",
+                "hanging-with-underline.svg",
+                "hanging.svg",
+                "ideographic.svg",
+                "inherit.svg",
+                "mathematical.svg",
+                "middle-on-textPath.svg",
+                "text-after-edge.svg",
+                "text-before-edge.svg",
+                "two-textPath-with-middle-on-first.svg"));
+    }
+
+    // Unsupported: baseline-shift.
+
+    @TestFactory
     Collection<DynamicTest> text_dominant_baseline() {
         return checkDirectory("text/dominant-baseline", Set.of(
                 "alignment-baseline-and-baseline-shift-on-tspans.svg",
-                "alphabetic.svg",
-                "auto.svg",
                 "central.svg",
-                "complex.svg",
                 "different-alignment-baseline-on-tspan.svg",
                 "equal-alignment-baseline-on-tspan.svg",
                 "hanging.svg",
                 "ideographic.svg",
                 "inherit.svg",
                 "mathematical.svg",
-                "middle.svg",
                 "nested.svg",
-                "no-change.svg",
                 "reset-size.svg",
                 "sequential.svg",
                 "text-after-edge.svg",
@@ -1041,16 +1023,23 @@ class ReSvgTestSuite {
     }
 
     @TestFactory
+    Collection<DynamicTest> text_font() {
+        return checkDirectory("text/font", Set.of(
+                "simple-case.svg"));
+    }
+
+    @TestFactory
     Collection<DynamicTest> text_font_family() {
         return checkDirectory("text/font-family", Set.of(
                 "bold-sans-serif.svg",
                 "cursive.svg",
                 "fallback-1.svg",
-                "fallback-2.svg",
                 "fantasy.svg",
                 // This PNG predates the bundled Noto Serif font and still uses the old font.
                 "serif.svg"));
     }
+
+    // Unsupported: CSS font-kerning.
 
     @TestFactory
     Collection<DynamicTest> text_font_size() {
@@ -1065,18 +1054,32 @@ class ReSvgTestSuite {
     }
 
     @TestFactory
+    Collection<DynamicTest> text_font_weight() {
+        return checkDirectory("text/font-weight", Set.of(
+                "650.svg",
+                "bold.svg",
+                "bolder-with-clamping.svg",
+                "bolder-without-parent.svg",
+                "bolder.svg",
+                "lighter.svg"));
+    }
+
+    @TestFactory
+    Collection<DynamicTest> text_length_adjust() {
+        return checkDirectory("text/lengthAdjust", Set.of(
+                "text-on-path.svg",
+                "vertical.svg",
+                "with-underline.svg"));
+    }
+
+    @TestFactory
     Collection<DynamicTest> text_letter_spacing() {
         return checkDirectory("text/letter-spacing", Set.of(
-                "-3.svg",
-                "0.svg",
-                "1mm.svg",
-                "3.svg",
                 "5percent.svg",
                 "filter-bbox.svg",
                 "large-negative.svg",
                 "mixed-scripts.svg",
                 "non-ASCII-character.svg",
-                "normal.svg",
                 "on-Arabic.svg"));
     }
 
@@ -1088,35 +1091,24 @@ class ReSvgTestSuite {
                 "complex-graphemes-and-coordinates-list.svg",
                 "compound-emojis-and-coordinates-list.svg",
                 "compound-emojis.svg",
-                "dx-and-dy-instead-of-x-and-y.svg",
                 "dx-and-dy-with-less-values-than-characters.svg",
                 "dx-and-dy-with-more-values-than-characters.svg",
                 "dx-and-dy-with-multiple-values.svg",
-                "em-and-ex-coordinates.svg",
                 "emojis.svg",
-                "escaped-text-1.svg",
-                "escaped-text-3.svg",
                 "fill-rule=evenodd.svg",
                 "filter-bbox.svg",
                 "ligatures-handling-in-mixed-fonts-1.svg",
                 "ligatures-handling-in-mixed-fonts-2.svg",
-                "mm-coordinates.svg",
-                "no-coordinates.svg",
                 "percent-value-on-dx-and-dy.svg",
                 "percent-value-on-x-and-y.svg",
                 "real-text-height.svg",
                 "rotate-on-Arabic.svg",
-                "rotate-with-an-invalid-angle.svg",
                 "rotate-with-less-values-than-characters.svg",
                 "rotate-with-more-values-than-characters.svg",
                 "rotate-with-multiple-values-and-complex-text.svg",
                 "rotate-with-multiple-values-underline-and-pattern.svg",
                 "rotate-with-multiple-values.svg",
                 "rotate.svg",
-                "simple-case.svg",
-                "transform.svg",
-                "x-and-y-with-dx-and-dy-lists.svg",
-                "x-and-y-with-dx-and-dy.svg",
                 "x-and-y-with-multiple-values-and-arabic-text.svg",
                 "x-and-y-with-multiple-values-and-tspan.svg",
                 "xml-lang=ja.svg",
@@ -1128,20 +1120,17 @@ class ReSvgTestSuite {
     Collection<DynamicTest> text_text_anchor() {
         return checkDirectory("text/text-anchor", Set.of(
                 "coordinates-list.svg",
-                "end-on-text.svg",
                 "end-with-letter-spacing.svg",
                 "inheritance-2.svg",
                 "inheritance-3.svg",
-                "invalid-value-on-text.svg",
-                "middle-on-text.svg",
                 "on-the-first-tspan.svg",
                 "on-tspan-with-arabic.svg",
-                "on-tspan.svg",
-                "start-on-text.svg"));
+                "on-tspan.svg"));
     }
 
     @TestFactory
     Collection<DynamicTest> text_text_decoration() {
+        // Unsupported: text-decoration.
         return checkDirectory("text/text-decoration", Set.of(
                 "all-types-inline-comma-separated.svg",
                 "all-types-inline-no-spaces.svg",
@@ -1168,16 +1157,9 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> text_textLength() {
         return checkDirectory("text/textLength", Set.of(
-                "150-on-parent.svg",
-                "150-on-tspan.svg",
-                "150.svg",
-                "40mm.svg",
                 "75percent.svg",
                 "arabic-with-lengthAdjust.svg",
-                "arabic.svg",
-                "inherit.svg",
-                "negative.svg",
-                "on-text-and-tspan.svg"));
+                "arabic.svg"));
     }
 
     @TestFactory
@@ -1196,7 +1178,6 @@ class ReSvgTestSuite {
                 "nested.svg",
                 "no-link.svg",
                 "path-with-ClosePath.svg",
-                "path-with-subpaths-and-startOffset.svg",
                 "path-with-subpaths.svg",
                 "side=right.svg",
                 "simple-case.svg",
@@ -1245,30 +1226,25 @@ class ReSvgTestSuite {
                 "mixed-xml-space-1.svg",
                 "mixed-xml-space-2.svg",
                 "mixed-xml-space-3.svg",
-                "mixed.svg",
                 "multiple-coordinates.svg",
                 "nested-rotate.svg",
-                "nested-whitespaces.svg",
                 "nested.svg",
-                "only-with-y.svg",
                 "rotate-and-display-none.svg",
                 "rotate-on-child.svg",
-                "sequential.svg",
-                "style-override.svg",
                 "text-shaping-across-multiple-tspan-1.svg",
                 "text-shaping-across-multiple-tspan-2.svg",
-                "transform.svg",
                 "tspan-bbox-1.svg",
                 "tspan-bbox-2.svg",
                 "with-clip-path.svg",
-                "with-dy.svg",
                 "with-filter.svg",
                 "with-mask.svg",
-                "with-x-and-y.svg",
-                "without-attributes.svg",
                 "xml-space-1.svg",
                 "xml-space-2.svg"));
     }
+
+    // Unsupported: text-rendering.
+
+    // Unsupported: writing-mode.
 
     @TestFactory
     Collection<DynamicTest> text_word_spacing() {

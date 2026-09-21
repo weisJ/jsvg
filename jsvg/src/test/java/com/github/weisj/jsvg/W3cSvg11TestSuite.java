@@ -335,17 +335,11 @@ class W3cSvg11TestSuite {
     @TestFactory
     Collection<DynamicTest> styling() throws IOException {
         return checkCategory("styling", Set.of(
-                "styling-css-02-b.svg",
-                "styling-css-03-b.svg",
-                "styling-css-04-f.svg",
                 "styling-css-05-b.svg",
                 "styling-css-06-b.svg",
-                "styling-css-08-f.svg",
                 "styling-css-09-f.svg",
                 "styling-css-10-f.svg",
-                "styling-elem-01-b.svg",
                 "styling-inherit-01-b.svg",
-                "styling-pres-04-f.svg",
                 "styling-pres-05-f.svg"));
     }
 
@@ -373,6 +367,7 @@ class W3cSvg11TestSuite {
                 "text-fonts-04-t.svg",
                 "text-fonts-05-f.svg",
                 "text-fonts-203-t.svg",
+                // Unsupported: bidi layout.
                 "text-intro-01-t.svg",
                 "text-intro-03-b.svg",
                 // Requires bidi layout; platform fonts could hide the reversed Hebrew in the tolerance.
@@ -394,6 +389,8 @@ class W3cSvg11TestSuite {
                 "text-text-12-t.svg",
                 "text-tref-02-b.svg",
                 "text-tref-03-b.svg",
+                // Unsupported: embedded SVG fonts.
+                "text-tspan-01-b.svg",
                 "text-tspan-02-b.svg",
                 "text-ws-02-t.svg",
                 "text-ws-03-t.svg"));
