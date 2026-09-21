@@ -129,7 +129,7 @@ class UseResolutionTest {
                 "pattern", "radialgradient", "script", "style", "title", "symbol"
         }) {
             SVGNode node = Objects.requireNonNull(nodeSupplier.create(tagName));
-            assertTrue(Category.isNeverRendered(node), tagName);
+            assertTrue(Category.elementCategoriesOf(node).neverRendered(), tagName);
         }
     }
 
