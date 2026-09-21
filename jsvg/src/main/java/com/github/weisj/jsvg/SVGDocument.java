@@ -165,10 +165,11 @@ public final class SVGDocument {
         float defaultEm = platformSupport.fontSize();
         float defaultEx = SVGFont.exFromEm(defaultEm);
         AnimationState animState = animationState != null ? animationState : AnimationState.NO_ANIMATION;
-        MeasureContext initialMeasure = viewportBounds != null
-                ? MeasureContext.createInitial(viewportBounds.size(), defaultEm, defaultEx, animState)
-                : MeasureContext.createInitial(root.sizeForTopLevel(null, defaultEm, defaultEx),
-                        defaultEm, defaultEx, animState);
+        FloatSize initialViewportSize = viewportBounds != null
+                ? viewportBounds.size()
+                : root.sizeForTopLevel(null, defaultEm, defaultEx);
+        MeasureContext initialMeasure =
+                MeasureContext.createInitial(initialViewportSize, defaultEm, defaultEx, animState);
         SVGPaint currentColor = null;
         if (output instanceof CurrentColorProvider) {
             currentColor = ((CurrentColorProvider) output).currentColor();
