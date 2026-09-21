@@ -1,3 +1,4 @@
+import aQute.bnd.gradle.Baseline
 import com.diffplug.spotless.extra.wtp.EclipseWtpFormatterStep
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
@@ -17,6 +18,7 @@ plugins {
     id("com.github.vlsi.gradle-extensions")
     id("com.gradleup.nmcp.aggregation")
     id("net.ltgt.errorprone") apply false
+    id("biz.aQute.bnd.builder") apply false
 }
 
 val skipJavadoc by props()
@@ -36,6 +38,13 @@ val projectVersion = "jsvg".v
 
 val snapshotIdentifier = if (!isRelease && snapshotName.isNotEmpty()) "-$snapshotName" else ""
 val buildVersion = "$projectVersion$snapshotIdentifier" + (if (isRelease) "" else "-SNAPSHOT")
+
+val nonPublishedProjects =
+    setOf(
+        project(":annotations"),
+        project(":annotations-processor"),
+    )
+val publishedProjects = subprojects - nonPublishedProjects
 
 println("Building: JSVG $buildVersion")
 println("     JDK: " + System.getProperty("java.home"))
@@ -89,10 +98,70 @@ nmcpAggregation {
     }
 }
 
+// Resolve baselines outside the bundle projects so Gradle does not select the local
+// project in place of the published module with the same coordinates.
+val publishedBaselines =
+    publishedProjects.associateWith { bundleProject ->
+        configurations.create("${bundleProject.name}PublishedBaseline") {
+            isCanBeConsumed = false
+            isCanBeResolved = true
+            isTransitive = false
+            resolutionStrategy.cacheDynamicVersionsFor(0, "seconds")
+        }
+    }
+
 dependencies {
+    publishedBaselines.forEach { (bundleProject, baselineConfiguration) ->
+        add(baselineConfiguration.name, "com.github.weisj:${bundleProject.name}") {
+            version {
+                strictly("(0,$projectVersion[")
+            }
+            isTransitive = false
+        }
+    }
+
     allprojects {
         nmcpAggregation(project(path))
     }
+}
+
+publishedBaselines.forEach { (bundleProject, baselineConfiguration) ->
+    val sourceDirectory = bundleProject.file("src/main/java")
+    val baselinePackageFilters =
+        bundleProject.providers.provider {
+            val internalExportAnnotation =
+                Regex("""@org\.osgi\.annotation\.bundle\.Export\s*\(\s*attribute\s*=\s*"x-internal"\s*\)""")
+            val internalPackages =
+                bundleProject
+                    .fileTree(sourceDirectory) {
+                        include("**/package-info.java")
+                    }.filter { internalExportAnnotation.containsMatchIn(it.readText()) }
+                    .map {
+                        it.parentFile
+                            .relativeTo(sourceDirectory)
+                            .invariantSeparatorsPath
+                            .replace('/', '.')
+                    }.sorted()
+            internalPackages.map { "!$it" } + "*"
+        }
+
+    bundleProject.pluginManager.withPlugin("biz.aQute.bnd.builder") {
+        bundleProject.tasks.named<Baseline>("baseline") {
+            setBaseline(baselineConfiguration)
+            // Baseline the public API of exported packages, not manifest headers or
+            // raw JAR resources. Those implementation details otherwise dominate the report.
+            diffignore("*")
+            // bnd considers x-internal exports part of the API by default. Derive exclusions
+            // from their package annotations so the baseline follows the existing API boundary.
+            diffpackages.set(baselinePackageFilters)
+        }
+    }
+}
+
+tasks.register("baselineAll") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Baselines all published bundles against their latest prior releases."
+    dependsOn(publishedProjects.map { "${it.path}:baseline" })
 }
 
 allprojects {
@@ -307,7 +376,7 @@ allprojects {
         apply(plugin = "com.gradleup.nmcp")
         apply(plugin = "signing")
 
-        if (project.path !in listOf(":", ":annotations", ":annotations-processor")) {
+        if (project in publishedProjects) {
             if (!isRelease) {
                 configure<PublishingExtension> {
                     repositories {
@@ -333,10 +402,6 @@ allprojects {
             }
 
             configure<PublishingExtension> {
-                if (project.path in listOf(":", ":annotations", ":annotations-processor")) {
-                    return@configure
-                }
-
                 publications {
                     create<MavenPublication>(project.name) {
                         artifactId = "${project.name}$snapshotIdentifier"
