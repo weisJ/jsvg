@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -23,7 +23,9 @@ package com.github.weisj.jsvg.parser.impl;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +41,8 @@ public class ParsedDocument implements DomDocument {
     private final @Nullable URI rootURI;
     private final @NotNull LoaderContext loaderContext;
     private final @NotNull LoadHelper loadHelper;
+    /** Final render target per local {@code <use>} source; copied targets are created lazily. */
+    private final @NotNull Map<ParsedElement, Supplier<ParsedElement>> useTargets = new IdentityHashMap<>();
     private int currentDepth;
 
     private @NotNull AnimationPeriod animationPeriod = new AnimationPeriod(0, 0, false);
@@ -79,13 +83,28 @@ public class ParsedDocument implements DomDocument {
         if (id == null) return null;
         Object node = namedElements.get(id);
         if (!type.equals(ParsedElement.class) && node instanceof ParsedElement) {
-            node = ((ParsedElement) node).nodeEnsuringBuildStatus(currentNestingDepth());
+            node = ((ParsedElement) node).nodeEnsuringBuildStatus(
+                    currentNestingDepth(), ParsedElement.BuildMode.ALL);
         }
         return type.isInstance(node) ? type.cast(node) : null;
     }
 
     public boolean hasElementWithId(@NotNull String id) {
         return namedElements.containsKey(id);
+    }
+
+    void registerUseTarget(@NotNull ParsedElement source, @NotNull Supplier<ParsedElement> renderTarget) {
+        useTargets.put(source, renderTarget);
+    }
+
+    boolean hasUseTarget(@NotNull ParsedElement source) {
+        return useTargets.containsKey(source);
+    }
+
+    @Nullable
+    ParsedElement useTargetFor(@NotNull ParsedElement source) {
+        Supplier<ParsedElement> supplier = useTargets.get(source);
+        return supplier != null ? supplier.get() : null;
     }
 
     @Override

@@ -31,11 +31,8 @@ import com.github.weisj.jsvg.parser.impl.AttributeValue;
 
 public final class CascadeResult {
     public final @NotNull Map<@NotNull String, AttributeValue.@NotNull Parsed> attributes;
-    public final boolean selectorsUseElementPositionInDom;
 
-    public CascadeResult(@NotNull Map<@NotNull String, AttributeValue.@NotNull Parsed> attributes,
-            boolean selectorsUseElementPositionInDom) {
+    public CascadeResult(@NotNull Map<@NotNull String, AttributeValue.@NotNull Parsed> attributes) {
         this.attributes = Collections.unmodifiableMap(new HashMap<>(attributes));
-        this.selectorsUseElementPositionInDom = selectorsUseElementPositionInDom;
     }
 }

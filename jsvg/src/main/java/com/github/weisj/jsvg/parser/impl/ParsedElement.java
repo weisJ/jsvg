@@ -35,6 +35,7 @@ import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.Use;
 import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
+import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -44,6 +45,11 @@ import com.github.weisj.jsvg.parser.TextContent;
 
 public final class ParsedElement implements DomElement {
     private static final Logger LOGGER = LogFactory.createLogger(ParsedElement.class);
+
+    enum BuildMode {
+        ALL,
+        RENDERED_TREE
+    }
 
     private enum BuildStatus {
         NOT_BUILT,
@@ -69,6 +75,7 @@ public final class ParsedElement implements DomElement {
     private @NotNull BuildStatus buildStatus = BuildStatus.NOT_BUILT;
     private boolean partOfCycle = false;
     private int outgoingPaths = -1;
+    private boolean selectorsUseElementPositionInDom;
 
     ParsedElement(@Nullable String id,
             @NotNull ParsedDocument document,
@@ -188,14 +195,15 @@ public final class ParsedElement implements DomElement {
     }
 
     /** Returns null if resolving the node would close a reference cycle. */
-    public @Nullable SVGNode nodeEnsuringBuildStatus(int depth) {
+    @Nullable
+    SVGNode nodeEnsuringBuildStatus(int depth, @NotNull BuildMode buildMode) {
         if (buildStatus == BuildStatus.IN_PROGRESS) {
             // Referencing an element currently being built closes a cycle; treat as unresolvable.
             cyclicDependencyDetected();
             return null;
         }
         if (buildStatus == BuildStatus.NOT_BUILT) {
-            build(depth);
+            build(depth, buildMode);
         }
         return node;
     }
@@ -284,7 +292,7 @@ public final class ParsedElement implements DomElement {
         }
     }
 
-    void build(int depth) {
+    void build(int depth, @NotNull BuildMode buildMode) {
         if (buildStatus == BuildStatus.FINISHED) return;
         if (buildStatus == BuildStatus.IN_PROGRESS) {
             // A containment cycle: this element is building further up the stack and its reference
@@ -309,26 +317,50 @@ public final class ParsedElement implements DomElement {
         // Build depth first to ensure child nodes are processed first.
         // e.g. LinearGradient depends on its stops to be build first.
         for (ParsedElement child : children) {
-            child.build(depth + 1);
+            if (buildMode == BuildMode.ALL || child.participatesInRenderedTree()) {
+                child.build(depth + 1, buildMode);
+            }
         }
-
-        // Children are built depth-first above, so each child's flag already covers its own subtree.
-        updateSelectorsUseElementPositionInDomWithChildrenValues();
 
         document().setCurrentNestingDepth(depth);
         node.build(attributeNode);
         if (partOfCycle && node instanceof Use) {
             // The reference resolved during node.build closes a cycle; sever it (SVG 1.1 § 5.6).
-            ((Use) node).setReferencedNode(null);
+            ((Use) node).clearReferencedNode();
         }
         buildStatus = BuildStatus.FINISHED;
     }
 
-    private void updateSelectorsUseElementPositionInDomWithChildrenValues() {
+    @SuppressWarnings({"RedundantIfStatement", "java:S1126"})
+    private boolean participatesInRenderedTree() {
+        if (Category.isNeverRendered(node)) return false;
+
+        // Filter definitions and their processing nodes produce an effect when referenced; they are not
+        // rendered as
+        // ordinary document-tree elements.
+        // https://www.w3.org/TR/filter-effects-1/#FilterElement
+        // https://www.w3.org/TR/filter-effects-1/#FilterPrimitivesOverview
+        if (Filter.TAG.equals(tagName())
+                || Category.hasCategory(node, Category.FilterPrimitive)
+                || Category.hasCategory(node, Category.LightSource)
+                || Category.hasCategory(node, Category.TransferFunctionElement))
+            return false;
+
+        return true;
+    }
+
+    /** Detects position-dependent selector matching for this unbuilt source subtree. */
+    boolean detectSelectorsUseElementPositionInDom() {
+        selectorsUseElementPositionInDom = attributeNode.styleSheets()
+                .selectorsUseElementPositionInDom(this);
         for (ParsedElement child : children) {
-            attributeNode.orSelectorsUseElementPositionInDom(
-                    child.attributeNode.selectorsUseElementPositionInDom());
+            selectorsUseElementPositionInDom |= child.detectSelectorsUseElementPositionInDom();
         }
+        return selectorsUseElementPositionInDom;
+    }
+
+    boolean selectorsUseElementPositionInDom() {
+        return selectorsUseElementPositionInDom;
     }
 
     /*

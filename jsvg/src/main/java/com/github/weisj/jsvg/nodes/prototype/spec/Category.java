@@ -60,13 +60,21 @@ public enum Category {
     }
 
     public static @NotNull Category @NotNull [] categoriesOf(@NotNull SVGNode node) {
+        return elementCategoriesOf(node).value();
+    }
+
+    public static boolean isNeverRendered(@NotNull SVGNode node) {
+        return elementCategoriesOf(node).neverRendered();
+    }
+
+    private static @NotNull ElementCategories elementCategoriesOf(@NotNull SVGNode node) {
         Class<? extends SVGNode> nodeType = node.getClass();
         ElementCategories categories = nodeType.getAnnotation(ElementCategories.class);
         if (categories == null) {
             throw new IllegalStateException(
                     "Element <" + node.tagName() + "> doesn't specify element category information");
         }
-        return categories.value();
+        return categories;
     }
 
     public static boolean hasCategory(@NotNull SVGNode node, @NotNull Category category) {

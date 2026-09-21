@@ -64,6 +64,7 @@ import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
+import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
 import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
@@ -134,7 +135,6 @@ public final class AttributeNode {
     private final @NotNull Map<@NotNull String, @NotNull String> declaredAttributes;
     private final @NotNull Map<@NotNull String, @NotNull AttributeValue> resolvedAttributes = new HashMap<>();
     private final @NotNull StyleSheets styleSheets;
-    private boolean selectorsUseElementPositionInDom;
 
     private ParsedElement element = null;
 
@@ -162,8 +162,8 @@ public final class AttributeNode {
 
     /**
      * Copy for re-matching at a new DOM position: carries over only the declared attributes, leaving the resolved
-     * {@link #resolvedAttributes} and {@link #selectorsUseElementPositionInDom} empty so {@link #prepareForNodeBuilding()}
-     * re-runs the cascade (unlike {@link #copy()}, which keeps resolved values). Caller must
+     * {@link #resolvedAttributes} empty so {@link #prepareForNodeBuilding()} re-runs the cascade
+     * (unlike {@link #copy()}, which keeps resolved values). Caller must
      * {@link #setElement(ParsedElement)}.
      */
     @NotNull
@@ -195,17 +195,8 @@ public final class AttributeNode {
 
         // FIXME: Only use the highest priority *valid* definition of a property value.
         CascadeResult cascadeResult = styleSheets().matchAndCascade(inlineCssDeclarations, element);
-        selectorsUseElementPositionInDom = cascadeResult.selectorsUseElementPositionInDom;
         // CSS attributes override SVG presentation attributes (CSS Cascade 4 §6.4).
         resolvedAttributes.putAll(cascadeResult.attributes);
-    }
-
-    public boolean selectorsUseElementPositionInDom() {
-        return selectorsUseElementPositionInDom;
-    }
-
-    void orSelectorsUseElementPositionInDom(boolean value) {
-        selectorsUseElementPositionInDom |= value;
     }
 
     public @NotNull ParsedDocument document() {
@@ -238,6 +229,25 @@ public final class AttributeNode {
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @Nullable String value, ElementRelation relation) {
         return recordIndirectChild(getElementByUrl(type, value), value, relation);
+    }
+
+    /**
+     * Resolves the final render target of a {@code <use>} reference. If the local target has a registered
+     * use-instance tree, that tree is built and returned instead of the source node.
+     */
+    public @Nullable SVGNode getSVGNodeByHref(@Nullable String value) {
+        if (value == null) return null;
+
+        ParsedElement targetElement = getElementByUrl(ParsedElement.class, value);
+        if (targetElement == null) {
+            return getElementByHref(SVGNode.class, value, ElementRelation.PAINTED_CHILD);
+        }
+
+        element().addIndirectChild(targetElement);
+        ParsedElement renderTarget = document().useTargetFor(targetElement);
+        if (renderTarget == null) renderTarget = targetElement;
+        return renderTarget.nodeEnsuringBuildStatus(
+                renderTarget.document().currentNestingDepth(), ParsedElement.BuildMode.RENDERED_TREE);
     }
 
     public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @NotNull Category category,
@@ -716,8 +726,9 @@ public final class AttributeNode {
     }
 
     public @Nullable String getHref() {
-        String href = getValue("href");
-        if (href == null) return getValue("xlink:href");
+        // Linking attributes are not CSS presentation properties, so only declared attributes are considered
+        String href = declaredAttributes.get("href");
+        if (href == null) href = declaredAttributes.get("xlink:href");
         return href;
     }
 
@@ -745,7 +756,8 @@ public final class AttributeNode {
         List<T> animateNodes = parsedElements
                 .stream()
                 .filter(n -> type.isInstance(n.node()))
-                .map(n -> type.cast(n.nodeEnsuringBuildStatus(document().currentNestingDepth())))
+                .map(n -> type.cast(n.nodeEnsuringBuildStatus(
+                        document().currentNestingDepth(), ParsedElement.BuildMode.ALL)))
                 .filter(n -> n != null)
                 .collect(Collectors.toList());
         for (T animateNode : animateNodes) {

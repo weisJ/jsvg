@@ -44,19 +44,13 @@ import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.impl.phase4matcher.StyleSheets;
 import com.github.weisj.jsvg.renderer.CssHints;
+import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
+import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
 public final class SVGDocumentBuilder {
     private final @NotNull ParsedDocument parsedDocument;
     /** All the <use> nodes */
     private final @NotNull List<@NotNull ParsedElement> useElements = new ArrayList<>();
-    /** Map from (element ids in the href attributes of <use> elements) to (the corresponding target element). */
-    private final @NotNull Map<@NotNull String, @NotNull ParsedElement> useTargets = new HashMap<>();
-    /**
-     * Map from (element ids in the href attributes of <use> elements) to (a copy of the corresponding target node).
-     * Each target element (distinct by id) is copied at most once and reused across all <use> elements.
-     * The target element is only copied if its AttributeNode.selectorsUseElementPositionInDom is true.
-     */
-    private final @NotNull Map<@NotNull String, @NotNull SVGNode> copiedUseTargets = new HashMap<>();
     private final @NotNull List<@NotNull ParsedElement> styleElements = new ArrayList<>();
     private final @NotNull StyleSheets styleSheets = new StyleSheets();
 
@@ -189,10 +183,9 @@ public final class SVGDocumentBuilder {
         preProcess();
         processStyleSheets();
         processUseElements();
-        rootNode.build(0);
+        rootNode.build(0, ParsedElement.BuildMode.RENDERED_TREE);
         validatePathCount();
         validateUseElementsDepth();
-        copyUseElementTargets();
         return DocumentConstructorAccessor.constructor().create((SVG) rootNode.node());
     }
 
@@ -201,7 +194,7 @@ public final class SVGDocumentBuilder {
         CssParser cssParser = loaderContext.cssParser();
         CssHints cssHints = loaderContext.cssHints();
         for (ParsedElement styleElement : styleElements) {
-            styleElement.build(0);
+            styleElement.build(0, ParsedElement.BuildMode.ALL);
             Style styleNode = (Style) styleElement.node();
             styleNode.parseStyleSheet(styleElement.attributeNode(), cssParser, cssHints);
             styleSheets.add(styleNode.styleSheet());
@@ -209,35 +202,24 @@ public final class SVGDocumentBuilder {
     }
 
     private void processUseElements() {
-        // sets this.useTargets
-        for (ParsedElement parsedElement : useElements) {
-            parsedElement.build(0); // sets Use.referencedNode()
-            Use useElement = (Use) parsedElement.node();
-            SVGNode referencedNode = useElement.referencedNode();
-            if (referencedNode != null) { // id is non-null because the referencedNode was referenced by id
-                @NotNull String useTargetId = referencedNode.id();
-                ParsedElement targetElement = parsedDocument.getElementById(ParsedElement.class, useTargetId);
-                // Skip targets in external documents: they cascade against their own document's stylesheets,
-                // so the host-DOM re-match the copy performs doesn't apply. Identity (not id) detects locality,
-                // since ids may collide across documents.
-                if (targetElement != null && targetElement.node() == referencedNode) {
-                    // one copy is enough for all <use> instances that target the same element
-                    useTargets.put(useTargetId, targetElement);
-                }
+        if (useElements.isEmpty()) return;
+        rootNode.detectSelectorsUseElementPositionInDom();
+        for (ParsedElement useElement : useElements) {
+            String href = useElement.attributeNode().getHref();
+            ParsedElement useTarget = loaderContext.elementLoader()
+                    .loadElement(ParsedElement.class, href, parsedDocument);
+            // External targets keep their own document's build and stylesheet scope.
+            if (useTarget == null || useTarget.document() != parsedDocument) continue;
+            if (parsedDocument.hasUseTarget(useTarget)) continue;
+
+            if (useTarget.selectorsUseElementPositionInDom()) {
+                parsedDocument.registerUseTarget(
+                        useTarget,
+                        new LazySupplier<>(() -> useTarget.copyAsUseInstance(nodeSupplier)));
+            } else {
+                parsedDocument.registerUseTarget(useTarget, new ConstantSupplier<>(useTarget));
             }
         }
-
-        // sets this.copiedUseTargets
-        for (ParsedElement useTarget : useTargets.values()) {
-            if (useTarget.attributeNode().selectorsUseElementPositionInDom()
-                    && !copiedUseTargets.containsKey(useTarget.id())) {
-                // one copy is enough for all <use> instances that target the same element
-                ParsedElement copy = useTarget.copyAsUseInstance(nodeSupplier);
-                copy.build(0);
-                copiedUseTargets.put(useTarget.id(), copy.node());
-            }
-        }
-
     }
 
     private void validatePathCount() {
@@ -263,18 +245,6 @@ public final class SVGDocumentBuilder {
                         "Maximum nesting depth for <use> exceeded %d > %d starting from node with id '%s'%n",
                         depth, useNestingLimit, useElement.id())
                         + "Note: You can configure this using LoaderContext#documentLimits()");
-            }
-        }
-    }
-
-    private void copyUseElementTargets() {
-        for (ParsedElement useElement : useElements) {
-            Use useNode = (Use) useElement.node();
-            if (useNode.referencedNode() != null) {
-                SVGNode targetCopy = copiedUseTargets.get(useNode.referencedNode().id());
-                if (targetCopy != null) {
-                    useNode.setReferencedNode(targetCopy);
-                }
             }
         }
     }

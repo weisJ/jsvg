@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -28,4 +28,12 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ElementCategories {
     Category[] value();
+
+    /**
+     * Whether this element type is never directly rendered. Such an element can still affect rendering when it is
+     * referenced, and {@code symbol} is rendered when it is the instance root of a {@code use} shadow tree.
+     *
+     * @see <a href="https://www.w3.org/TR/SVG/render.html#Definitions">SVG 2 rendering-tree definitions</a>
+     */
+    boolean neverRendered() default false;
 }

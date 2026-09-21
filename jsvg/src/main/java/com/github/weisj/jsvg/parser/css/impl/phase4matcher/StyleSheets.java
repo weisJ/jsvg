@@ -52,6 +52,10 @@ public class StyleSheets {
         return rules.matchAndCascade(inlineDeclarations, targetElement);
     }
 
+    public boolean selectorsUseElementPositionInDom(@NotNull ParsedElement targetElement) {
+        return rules.selectorsUseElementPositionInDom(targetElement);
+    }
+
     private void updateSourceOrders(@NotNull StyleRule rule) {
         // done here because parsing of @media rules as well as shorthand attribute expansions create
         // declarations after the rest of the parsing is done, so they would get incorrect source orders

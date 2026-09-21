@@ -164,8 +164,6 @@ public class StyleRuleMatcher {
         // keeps the highest priority value according to the cascade for each attribute
         // and updates it for every match
         Map<String, MatchedValue> mostSpecificValuePerAttributeName = new HashMap<>();
-        // set if any evaluated selector's outcome depends on the element's position in the DOM
-        boolean[] selectorsUseElementPositionInDom = {false};
 
         // add inline declarations (they always match)
         for (NormalizedProperty property : inlineDeclarations) {
@@ -180,7 +178,6 @@ public class StyleRuleMatcher {
         forEachCandidateMatch(targetElement, candidates -> {
             for (StyleRule candidateRule : candidates) {
                 MatchResult matchResult = candidateRule.selector().matches(targetElement);
-                selectorsUseElementPositionInDom[0] |= matchResult.selectorsUseElementPositionInDom;
                 if (matchResult.matches) {
                     for (NormalizedProperty property : candidateRule.declarations()) {
                         MatchedValue max = mostSpecificValuePerAttributeName.get(property.name());
@@ -197,7 +194,22 @@ public class StyleRuleMatcher {
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> entry.getValue().value()));
-        return new CascadeResult(results, selectorsUseElementPositionInDom[0]);
+        return new CascadeResult(results);
+    }
+
+    /**
+     * Returns whether matching any candidate rule against {@code targetElement} consults its DOM position.
+     * This is intentionally separate from cascading so callers can inspect the parsed tree without building nodes.
+     */
+    public boolean selectorsUseElementPositionInDom(@NotNull ParsedElement targetElement) {
+        boolean[] result = {false};
+        forEachCandidateMatch(targetElement, candidates -> {
+            for (StyleRule candidateRule : candidates) {
+                result[0] |= candidateRule.selector()
+                        .matches(targetElement).selectorsUseElementPositionInDom;
+            }
+        });
+        return result[0];
     }
 
     private void forEachCandidateMatch(@NotNull ParsedElement targetElement,

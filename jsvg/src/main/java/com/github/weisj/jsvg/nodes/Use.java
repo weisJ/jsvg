@@ -43,7 +43,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
-import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
@@ -79,8 +78,8 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         return referencedNode;
     }
 
-    public void setReferencedNode(@Nullable SVGNode referencedNode) {
-        this.referencedNode = referencedNode;
+    public void clearReferencedNode() {
+        referencedNode = null;
     }
 
     @Override
@@ -96,8 +95,7 @@ public final class Use extends RenderableSVGNode implements HasContext, HasShape
         width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED);
         height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED);
 
-        referencedNode = attributeNode.getElementByHref(
-                SVGNode.class, attributeNode.getHref(), ElementRelation.PAINTED_CHILD);
+        referencedNode = attributeNode.getSVGNodeByHref(attributeNode.getHref());
 
         paintContext = PaintContext.parse(attributeNode);
         fontRenderContext = FontRenderContext.parse(attributeNode);
