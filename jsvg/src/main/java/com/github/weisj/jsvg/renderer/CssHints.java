@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 /** Hints controlling how CSS media queries are evaluated. May move into {@link PlatformSupport} (or similar). */
 @ApiStatus.Experimental
-public class CssHints {
+public final class CssHints {
     public static final MediaType DEFAULT_MEDIA_TYPE = MediaType.SCREEN;
     public static final ColorScheme DEFAULT_COLOR_SCHEME = ColorScheme.LIGHT;
 
@@ -54,6 +54,10 @@ public class CssHints {
     private CssHints(@NotNull MediaType mediaType, @NotNull ColorScheme colorScheme) {
         this.mediaType = mediaType;
         this.colorScheme = colorScheme;
+    }
+
+    public static @NotNull CssHints.Builder builder() {
+        return new Builder();
     }
 
     /** The media type the document is rendered to. */
