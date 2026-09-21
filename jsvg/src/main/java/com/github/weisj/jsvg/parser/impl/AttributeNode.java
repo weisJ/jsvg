@@ -413,9 +413,10 @@ public final class AttributeNode {
     private @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
         for (int i = 0; i < tokens.size(); i++) {
             ComponentValue token = tokens.get(i);
-            if (token instanceof Token.Url) {
+            String url = urlOf(token);
+            if (url != null) {
                 SVGPaint paint = getElementByHref(
-                        SVGPaint.class, ((Token.Url) token).value(), ElementRelation.PAINT_SERVER);
+                        SVGPaint.class, url, ElementRelation.PAINT_SERVER);
                 if (paint != null) return paint;
                 List<ComponentValue> fallback = tokens.subList(i + 1, tokens.size());
                 boolean hasFallback = false;
@@ -679,6 +680,10 @@ public final class AttributeNode {
     /** The id of a lone {@code url(#id)}: bare {@link Token.Url}, or a quoted {@code url("#id")} function block. */
     private static @Nullable String urlOf(@NotNull List<@NotNull ComponentValue> tokens) {
         ComponentValue token = AttributeParser.singleToken(tokens);
+        return token != null ? urlOf(token) : null;
+    }
+
+    private static @Nullable String urlOf(@NotNull ComponentValue token) {
         if (token instanceof Token.Url) return ((Token.Url) token).value();
         if (token instanceof ComponentValue.FunctionBlock) {
             ComponentValue.FunctionBlock function = (ComponentValue.FunctionBlock) token;
