@@ -239,6 +239,7 @@ public final class SVGDocumentBuilder {
         int useNestingLimit = parsedDocument.loaderContext().documentLimits().maxUseNestingDepth();
         for (ParsedElement parsedElement : useElements) {
             Use useElement = (Use) parsedElement.node();
+            if (useElement.referencedNode() == null) continue;
             int depth = nestingDepthOf(useElement, checkedNodes);
             if (depth > useNestingLimit) {
                 throw new IllegalStateException(String.format(

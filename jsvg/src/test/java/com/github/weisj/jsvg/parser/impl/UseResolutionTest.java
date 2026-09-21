@@ -122,6 +122,26 @@ class UseResolutionTest {
     }
 
     @Test
+    void doesNotMaterializeUseCycleBelowNonRenderedTree() throws XMLStreamException {
+        SVGDocumentBuilder builder = parse("""
+                <svg xmlns='http://www.w3.org/2000/svg'>
+                  <defs>
+                    <use id='first' href='#second'/>
+                    <use id='second' href='#first'/>
+                  </defs>
+                </svg>
+                """);
+        ParsedDocument document = builder.parsedDocument();
+        ParsedElement firstElement = Objects.requireNonNull(document.getElementById(ParsedElement.class, "first"));
+        ParsedElement secondElement = Objects.requireNonNull(document.getElementById(ParsedElement.class, "second"));
+
+        builder.build();
+
+        assertNull(((Use) firstElement.node()).referencedNode());
+        assertNull(((Use) secondElement.node()).referencedNode());
+    }
+
+    @Test
     void specNeverRenderedElementsAreMarkedInTheirMetadata() {
         NodeSupplier nodeSupplier = new NodeSupplier();
         for (String tagName : new String[] {

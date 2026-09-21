@@ -125,8 +125,8 @@ class FXOutputTest {
             "nonScalingStroke_bug139_with_filter.svg" // Due to smallish deviations.
     );
 
-    // SVG files that are expected to fail loading due to invalid structure (e.g., use cycles or
-    // excessive nesting). These are tested explicitly to verify they produce no valid document.
+    // SVG files that are expected to fail loading because they exceed configured document limits.
+    // These are tested explicitly to verify they produce no valid document.
     private static final Set<String> INVALID_SVG_FILES = Set.of(
             "manyImplicitPathsThroughUse.svg",
             "useNesting.svg");
