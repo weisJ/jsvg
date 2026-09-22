@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
@@ -46,6 +47,11 @@ public class SVGResource implements RenderableResource {
     @Override
     public void render(@NotNull Output output, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
         output.applyTransform(imgTransform);
-        document.renderWithPlatform(context.platformSupport(), output, null);
+        document.render(output, RenderConfig.builder()
+                .platformSupport(context.platformSupport())
+                .fontLoader(context.fontLoader())
+                .fontSize(context.measureContext().defaultEm())
+                .defaultFontFamily(context.defaultFontFamily())
+                .build());
     }
 }

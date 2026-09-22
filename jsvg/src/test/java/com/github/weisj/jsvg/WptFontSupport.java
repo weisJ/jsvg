@@ -40,10 +40,10 @@ import org.mabb.fontverter.woff.WoffFont;
 import org.mabb.fontverter.woff.WoffParser;
 import org.mabb.fontverter.woff.WoffTable;
 
-import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.FontLoader;
 
 /** Fonts declared by the standalone SVG reftests; scoped to this suite's renderer. */
-record WptFontSupport(@NotNull Map<String, Font> fonts) implements PlatformSupport.FontLoader {
+record WptFontSupport(@NotNull Map<String, Font> fonts) implements FontLoader {
     static @NotNull WptFontSupport load(@NotNull Path repository) throws Exception {
         Font ahem = Font.createFont(Font.TRUETYPE_FONT, repository.resolve("fonts/Ahem.ttf").toFile());
         // The reftests use FreeSans.woff, but their old relative fonts/ URLs are missing upstream.

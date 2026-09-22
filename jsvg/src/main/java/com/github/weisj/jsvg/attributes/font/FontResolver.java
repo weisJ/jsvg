@@ -31,8 +31,8 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.renderer.FontLoader;
 import com.github.weisj.jsvg.renderer.MeasureContext;
-import com.github.weisj.jsvg.renderer.PlatformSupport;
 import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
 public final class FontResolver {
@@ -43,23 +43,23 @@ public final class FontResolver {
     }
 
     public static @NotNull SVGFont resolve(@NotNull MeasurableFontSpec fontSpec,
-            @NotNull MeasureContext measureContext, @NotNull PlatformSupport platformSupport) {
+            @NotNull MeasureContext measureContext, @NotNull String defaultFontFamily,
+            @Nullable FontLoader customFontLoader) {
         // Compute font attributes only once and avoid computing them if the font has been cached.
         Supplier<Map<@NotNull TextAttribute, Object>> attributes = new LazySupplier<>(
                 () -> computeFontAttributes(fontSpec, measureContext));
 
-        PlatformSupport.FontLoader customFontLoader = platformSupport.fontLoader();
         SVGFont font = resolve(fontSpec, measureContext, attributes, customFontLoader);
         if (font != null) return font;
         font = resolve(fontSpec, measureContext, attributes, DefaultFontLoader.INSTANCE);
         if (font != null) return font;
-        return new AWTSVGFont(fallbackFont(attributes.get(), platformSupport));
+        return new AWTSVGFont(fallbackFont(attributes.get(), defaultFontFamily));
     }
 
     private static @Nullable SVGFont resolve(@NotNull MeasurableFontSpec fontSpec,
             @NotNull MeasureContext measureContext,
             @NotNull Supplier<Map<@NotNull TextAttribute, Object>> attributes,
-            @Nullable PlatformSupport.FontLoader loader) {
+            @Nullable FontLoader loader) {
         if (loader == null) return null;
         FontCache.CacheKey key = new FontCache.CacheKey(fontSpec, measureContext);
 
@@ -71,25 +71,27 @@ public final class FontResolver {
     }
 
     public static @NotNull SVGFont resolveWithoutCache(@NotNull MeasurableFontSpec fontSpec,
-            @NotNull MeasureContext measureContext, @NotNull PlatformSupport platformSupport) {
-        return new AWTSVGFont(resolveAWTFontWithoutCache(fontSpec, measureContext, platformSupport));
+            @NotNull MeasureContext measureContext, @NotNull String defaultFontFamily,
+            @Nullable FontLoader fontLoader) {
+        return new AWTSVGFont(resolveAWTFontWithoutCache(fontSpec, measureContext, defaultFontFamily, fontLoader));
     }
 
     private static @NotNull Font resolveAWTFontWithoutCache(@NotNull MeasurableFontSpec fontSpec,
-            @NotNull MeasureContext measureContext, @NotNull PlatformSupport platformSupport) {
+            @NotNull MeasureContext measureContext, @NotNull String defaultFontFamily,
+            @Nullable FontLoader fontLoader) {
         Map<@NotNull TextAttribute, Object> attributes = computeFontAttributes(fontSpec, measureContext);
-        Font font = resolveAWTFont(fontSpec, platformSupport.fontLoader(), attributes);
+        Font font = resolveAWTFont(fontSpec, fontLoader, attributes);
         if (font != null) return font;
 
         font = resolveAWTFont(fontSpec, DefaultFontLoader.INSTANCE, attributes);
         if (font != null) return font;
 
-        return fallbackFont(attributes, platformSupport);
+        return fallbackFont(attributes, defaultFontFamily);
     }
 
     private static @NotNull Font fallbackFont(@NotNull Map<@NotNull TextAttribute, Object> attributes,
-            @NotNull PlatformSupport platformSupport) {
-        attributes.put(TextAttribute.FAMILY, platformSupport.fontFamily());
+            @NotNull String defaultFontFamily) {
+        attributes.put(TextAttribute.FAMILY, defaultFontFamily);
         return new Font(attributes);
     }
 
@@ -119,7 +121,7 @@ public final class FontResolver {
 
     /** Resolves and sets the first matching font family based on {@code fontSpec.families}. */
     private static @Nullable Font resolveAWTFont(@NotNull MeasurableFontSpec fontSpec,
-            @Nullable PlatformSupport.FontLoader fontLoader, @NotNull Map<@NotNull TextAttribute, Object> attributes) {
+            @Nullable FontLoader fontLoader, @NotNull Map<@NotNull TextAttribute, Object> attributes) {
         if (fontLoader == null) return null;
         for (String family : fontSpec.families()) {
             // A supplied font makes font selection deterministic, including for CSS generic families.
@@ -148,7 +150,7 @@ public final class FontResolver {
     }
 
     @SuppressWarnings("ImmutableEnumChecker")
-    private enum DefaultFontLoader implements PlatformSupport.FontLoader {
+    private enum DefaultFontLoader implements FontLoader {
         INSTANCE;
 
         private final @NotNull String[] supportedFonts;
@@ -177,7 +179,7 @@ public final class FontResolver {
     private enum FontCache {
         INSTANCE;
 
-        private final WeakHashMap<PlatformSupport.FontLoader, Cache> loaderToCache = new WeakHashMap<>();
+        private final WeakHashMap<FontLoader, Cache> loaderToCache = new WeakHashMap<>();
 
         private static final class Cache {
             private final HashMap<CacheKey, Font> fonts = new HashMap<>();

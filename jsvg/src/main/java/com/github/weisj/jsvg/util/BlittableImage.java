@@ -73,6 +73,8 @@ public final class BlittableImage implements OffscreenImage {
             @NotNull Rectangle2D bounds, @NotNull Rectangle2D objectBounds, @NotNull UnitType contentUnits) {
         RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
         RenderContext imageContext = accessor.createInitial(accessor.currentColor(context), context.platformSupport(),
+                context.fontLoader(),
+                context.defaultFontFamily(),
                 contentUnits.deriveMeasure(context.measureContext()));
         return create(bufferSurfaceSupplier, context, clipBounds, bounds, objectBounds, contentUnits, imageContext);
     }

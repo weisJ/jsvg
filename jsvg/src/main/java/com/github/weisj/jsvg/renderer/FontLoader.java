@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,38 +21,21 @@
  */
 package com.github.weisj.jsvg.renderer;
 
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
+import java.awt.Font;
+import java.awt.font.TextAttribute;
+import java.util.Map;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface PlatformSupport {
-
+/** Resolves custom fonts for use during rendering. */
+@ApiStatus.Experimental
+public interface FontLoader {
     /**
-     * @deprecated This class is no longer used and will be removed in a future version.
-     */
-    @Deprecated
-    interface TargetSurface {
-        void repaint();
-    }
-
-    @Nullable
-    ImageObserver imageObserver();
-
-    /**
-     * @deprecated This method is no longer used and will be removed in a future version.
+     * Returns a custom font for a CSS-canonicalized family, or {@code null} to use a platform font.
+     * Custom fonts are cached per font loader instance.
      */
     @Nullable
-    @Deprecated
-    TargetSurface targetSurface();
-
-    default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
-        return Toolkit.getDefaultToolkit().createImage(imageProducer);
-    }
-
-    default boolean isLongLived() {
-        return false;
-    }
+    Font customFont(@NotNull String family, @NotNull Map<@NotNull TextAttribute, Object> attributes);
 }

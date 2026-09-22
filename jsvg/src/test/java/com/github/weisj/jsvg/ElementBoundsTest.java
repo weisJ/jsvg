@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
 import com.github.weisj.jsvg.parser.DomDocument;
@@ -46,7 +47,8 @@ import com.github.weisj.jsvg.view.FloatSize;
 
 class ElementBoundsTest {
     private static RenderContext context() {
-        return RenderContextAccessor.instance().createInitial(null, NullPlatformSupport.INSTANCE,
+        return RenderContextAccessor.instance().createInitial(null, NullPlatformSupport.INSTANCE, null,
+                SVGFont.defaultFontFamily(),
                 MeasureContext.createInitial(new FloatSize(200, 200), 16, 8, AnimationState.NO_ANIMATION));
     }
 

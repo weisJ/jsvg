@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.StringWriter;
 import java.net.URI;
 import java.nio.file.Files;
@@ -48,7 +47,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
@@ -62,7 +60,8 @@ import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
-import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.FontLoader;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 
 /** Standalone, static SVG reftests from Web Platform Tests. */
 class WptSvgTestSuite {
@@ -72,8 +71,8 @@ class WptSvgTestSuite {
     private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
     public static final Pattern FONT_FACE_PATTERN = Pattern.compile("@font-face\\s*\\{([^}]+)}");
-    private static final @NotNull PlatformSupport.FontLoader NULL_FONT_LOADER = (family, attributes) -> null;
-    private static @NotNull PlatformSupport.FontLoader fonts = NULL_FONT_LOADER;
+    private static final @NotNull FontLoader NULL_FONT_LOADER = (family, attributes) -> null;
+    private static @NotNull FontLoader fonts = NULL_FONT_LOADER;
 
     // Current rendering mismatches. Keep upstream artwork and fuzzy limits unchanged.
     private static final Set<String> EXCLUDED = Set.of(
@@ -206,25 +205,6 @@ class WptSvgTestSuite {
             "text/reftests/textpath-shape-001.svg",
             "text/reftests/tspan-opacity-mixed-direction.svg");
 
-    private static @NotNull PlatformSupport asPlatformSupport(@NotNull PlatformSupport.FontLoader fontLoader) {
-        return new PlatformSupport() {
-            @Override
-            public @Nullable ImageObserver imageObserver() {
-                return null;
-            }
-
-            @Override
-            public @Nullable TargetSurface targetSurface() {
-                return null;
-            }
-
-            @Override
-            public @NotNull FontLoader fontLoader() {
-                return fontLoader;
-            }
-        };
-    }
-
     static @NotNull Set<String> excludedTests() {
         return EXCLUDED;
     }
@@ -287,7 +267,7 @@ class WptSvgTestSuite {
                     graphics.getFont().createGlyphVector(graphics.getFontRenderContext(), "B").getOutline(10, 50));
             graphics.dispose();
             FontResolver.clearFontCache();
-            var renderer = new RenderType.JSVGType(LoaderContext.builder().build(), asPlatformSupport(fonts));
+            var renderer = new RenderType.JSVGType(LoaderContext.builder().build(), fonts);
             var rendered = actual(source, renderer).render(null);
             assertEquals(SUCCESS, ImageComparison.compareImageRasterization(
                     expected, rendered, source.name(), 0, 0));
@@ -370,7 +350,10 @@ class WptSvgTestSuite {
         var source = new MemoryImageSource(path.toString(), xml.toString(), path.toUri().toURL());
         // External document caches belong to one rendering, just as each browser reftest loads a new page.
         var renderer = new RenderType.JSVGType(LoaderContext.builder()
-                .externalResourcePolicy(ResourcePolicy.ALLOW_RELATIVE).build(), asPlatformSupport(fonts));
+                .externalResourcePolicy(ResourcePolicy.ALLOW_RELATIVE).build(),
+                RenderConfig.builder()
+                        .fontLoader(fonts)
+                        .build());
         FontResolver.clearFontCache();
         BufferedImage rendered = actual(source, renderer).render(null);
         BufferedImage page = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);

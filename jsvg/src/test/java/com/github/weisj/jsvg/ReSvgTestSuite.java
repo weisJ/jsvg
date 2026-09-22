@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.font.TextAttribute;
-import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +51,8 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.attributes.font.FontStretch;
-import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.FontLoader;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 
 class ReSvgTestSuite {
 
@@ -97,10 +97,14 @@ class ReSvgTestSuite {
         }
         assumeTrue(exists, message);
 
-        jsvgRenderType = new RenderType.JSVGType(RenderType.JSVG.loaderContext(), loadBundledFonts());
+        jsvgRenderType = new RenderType.JSVGType(RenderType.JSVG.loaderContext(), RenderConfig.builder()
+                .fontLoader(loadBundledFonts())
+                // The reference images are rendered with resvg, whose default font size is 12.
+                .fontSize(12f)
+                .build());
     }
 
-    private static @NotNull PlatformSupport loadBundledFonts() {
+    private static @NotNull FontLoader loadBundledFonts() {
         Map<String, Font> fonts = new HashMap<>();
         Map<String, Font> extraCondensedFonts = new HashMap<>();
         Path fontDir = Path.of(RESVG_TEST_SUITE_PATH).getParent().resolve("fonts");
@@ -133,28 +137,9 @@ class ReSvgTestSuite {
         return new BundledFontSupport(fonts, extraCondensedFonts);
     }
 
-    private static class BundledFontSupport implements PlatformSupport {
+    private static class BundledFontSupport implements FontLoader {
         private final @NotNull Map<String, Font> fonts;
         private final @NotNull Map<String, Font> extraCondensedFonts;
-        private final FontLoader fontLoader = new FontLoader() {
-            @Override
-            public @Nullable Font customFont(@NotNull String family,
-                    @NotNull Map<@NotNull TextAttribute, Object> attributes) {
-                Font font = fonts.get(family.toLowerCase(Locale.US));
-                if (font == null) return null;
-
-                Object width = attributes.get(TextAttribute.WIDTH);
-                if (Objects.equals(width, FontStretch.ExtraCondensed.percentage().value())
-                        && font.equals(fonts.get("noto sans"))) {
-                    font = extraCondensedFonts.get("noto sans");
-                    if (font == null) return null;
-                    Map<TextAttribute, Object> remainingAttributes = new HashMap<>(attributes);
-                    remainingAttributes.remove(TextAttribute.WIDTH);
-                    return font.deriveFont(remainingAttributes);
-                }
-                return font.deriveFont(attributes);
-            }
-        };
 
         private BundledFontSupport(@NotNull Map<String, Font> fonts,
                 @NotNull Map<String, Font> extraCondensedFonts) {
@@ -164,24 +149,21 @@ class ReSvgTestSuite {
 
 
         @Override
-        public float fontSize() {
-            // The reference images are rendered with resvg, whose default font size is 12.
-            return 12;
-        }
+        public @Nullable Font customFont(@NotNull String family,
+                @NotNull Map<@NotNull TextAttribute, Object> attributes) {
+            Font font = fonts.get(family.toLowerCase(Locale.US));
+            if (font == null) return null;
 
-        @Override
-        public @Nullable ImageObserver imageObserver() {
-            return null;
-        }
-
-        @Override
-        public @Nullable TargetSurface targetSurface() {
-            return null;
-        }
-
-        @Override
-        public @NotNull FontLoader fontLoader() {
-            return fontLoader;
+            Object width = attributes.get(TextAttribute.WIDTH);
+            if (Objects.equals(width, FontStretch.ExtraCondensed.percentage().value())
+                    && font.equals(fonts.get("noto sans"))) {
+                font = extraCondensedFonts.get("noto sans");
+                if (font == null) return null;
+                Map<TextAttribute, Object> remainingAttributes = new HashMap<>(attributes);
+                remainingAttributes.remove(TextAttribute.WIDTH);
+                return font.deriveFont(remainingAttributes);
+            }
+            return font.deriveFont(attributes);
         }
     }
 

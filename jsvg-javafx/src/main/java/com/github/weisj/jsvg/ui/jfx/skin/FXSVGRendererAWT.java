@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
 import com.github.weisj.jsvg.renderer.output.Output;
@@ -99,7 +100,11 @@ final class FXSVGRendererAWT implements FXSVGRenderer {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
             g.clearRect(0, 0, width, height);
-            svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, viewBox, animationState);
+            svgDocument.render(output, RenderConfig.builder()
+                    .platformSupport(NullPlatformSupport.INSTANCE)
+                    .viewBox(viewBox)
+                    .animationState(animationState)
+                    .build());
         } finally {
             g.dispose();
         }

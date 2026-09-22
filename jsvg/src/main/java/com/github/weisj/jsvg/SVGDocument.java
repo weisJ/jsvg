@@ -23,6 +23,7 @@ package com.github.weisj.jsvg;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Area;
@@ -40,9 +41,9 @@ import com.github.weisj.jsvg.parser.impl.DocumentConstructorAccessor;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.animation.Animation;
-import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
@@ -85,7 +86,7 @@ public final class SVGDocument {
 
     public @NotNull Shape computeShape(@Nullable ViewBox viewBox) {
         Area accumulator = new Area(new Path2D.Float());
-        renderWithPlatform(NullPlatformSupport.INSTANCE, new ShapeOutput(accumulator), viewBox);
+        render(new ShapeOutput(accumulator), RenderConfig.builder().viewBox(viewBox).build());
         return accumulator;
     }
 
@@ -105,29 +106,34 @@ public final class SVGDocument {
         PlatformSupport platformSupport = component != null
                 ? new AwtComponentPlatformSupport(component)
                 : NullPlatformSupport.INSTANCE;
-        renderWithPlatform(platformSupport, graphics2D, bounds);
+        RenderConfig.Builder config = RenderConfig.builder()
+                .platformSupport(platformSupport)
+                .viewBox(bounds);
+        Font componentFont = component != null ? component.getFont() : null;
+        if (componentFont != null) {
+            config.fontSize(componentFont.getSize2D())
+                    .defaultFontFamily(componentFont.getFamily());
+        }
+        render(graphics2D, config.build());
     }
 
-    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Graphics2D graphics2D,
-            @Nullable ViewBox bounds) {
+    public void render(@NotNull Graphics2D graphics2D, @NotNull RenderConfig config) {
         Output output = Output.createForGraphics(graphics2D);
-        renderWithPlatform(platformSupport, output, bounds);
-        output.dispose();
+        try {
+            render(output, config);
+        } finally {
+            output.dispose();
+        }
     }
 
-    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
-            @Nullable ViewBox viewportBounds) {
-        renderWithPlatform(platformSupport, output, viewportBounds, null);
-    }
-
-    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
-            @Nullable ViewBox viewportBounds, @Nullable AnimationState animationState) {
+    public void render(@NotNull Output output, @NotNull RenderConfig config) {
+        ViewBox viewportBounds = config.viewBox();
 
         if (viewportBounds != null) {
             output.translate(viewportBounds.x, viewportBounds.y);
         }
 
-        RenderContext context = prepareRenderContext(platformSupport, output, viewportBounds, animationState);
+        RenderContext context = prepareRenderContext(config, output);
 
         // Needed for the non-scaling-stroke vector-effect to work properly.
         RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
@@ -158,23 +164,23 @@ public final class SVGDocument {
     }
 
     private @NotNull RenderContext prepareRenderContext(
-            @NotNull PlatformSupport platformSupport,
-            @NotNull Output output,
-            @Nullable ViewBox viewportBounds,
-            @Nullable AnimationState animationState) {
-        float defaultEm = platformSupport.fontSize();
+            @NotNull RenderConfig config,
+            @NotNull Output output) {
+        PlatformSupport platformSupport = config.platformSupport();
+        ViewBox viewportBounds = config.viewBox();
+        float defaultEm = config.fontSize();
         float defaultEx = SVGFont.exFromEm(defaultEm);
-        AnimationState animState = animationState != null ? animationState : AnimationState.NO_ANIMATION;
         FloatSize initialViewportSize = viewportBounds != null
                 ? viewportBounds.size()
                 : root.sizeForTopLevel(null, defaultEm, defaultEx);
         MeasureContext initialMeasure =
-                MeasureContext.createInitial(initialViewportSize, defaultEm, defaultEx, animState);
+                MeasureContext.createInitial(initialViewportSize, defaultEm, defaultEx, config.animationState());
         SVGPaint currentColor = null;
         if (output instanceof CurrentColorProvider) {
             currentColor = ((CurrentColorProvider) output).currentColor();
         }
-        return RenderContextAccessor.instance().createInitial(currentColor, platformSupport, initialMeasure);
+        return RenderContextAccessor.instance().createInitial(
+                currentColor, platformSupport, config.fontLoader(), config.defaultFontFamily(), initialMeasure);
     }
 
 }

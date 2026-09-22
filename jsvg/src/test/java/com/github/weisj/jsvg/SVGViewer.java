@@ -43,6 +43,7 @@ import com.github.weisj.darklaf.iconset.AllIcons;
 import com.github.weisj.darklaf.ui.button.ButtonConstants;
 import com.github.weisj.jsvg.parser.*;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
 import com.github.weisj.jsvg.renderer.output.Output;
@@ -379,11 +380,11 @@ public final class SVGViewer {
                                 viewport.height / 2 - floatSize.height / 2,
                                 floatSize.width,
                                 floatSize.height);
-                        document.renderWithPlatform(
-                                new AwtComponentPlatformSupport(this),
-                                output,
-                                vb,
-                                animationPlayer.animationState());
+                        document.render(output, RenderConfig.builder()
+                                .platformSupport(new AwtComponentPlatformSupport(this))
+                                .viewBox(vb)
+                                .animationState(animationPlayer.animationState())
+                                .build());
                         output.dispose();
                     }
 

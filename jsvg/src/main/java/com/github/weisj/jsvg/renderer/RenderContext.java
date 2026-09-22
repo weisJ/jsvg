@@ -48,6 +48,8 @@ import com.github.weisj.jsvg.view.ViewBox;
 public final class RenderContext {
 
     private final @NotNull PlatformSupport platformSupport;
+    private final @Nullable FontLoader fontLoader;
+    private final @NotNull String defaultFontFamily;
     private final @NotNull MeasureContext measureContext;
     private final @NotNull PaintContext paintContext;
 
@@ -66,8 +68,11 @@ public final class RenderContext {
             @Override
             public @NotNull RenderContext createInitial(@Nullable SVGPaint currentColor,
                     @NotNull PlatformSupport awtSupport,
+                    @Nullable FontLoader fontLoader,
+                    @NotNull String defaultFontFamily,
                     @NotNull MeasureContext measureContext) {
-                return RenderContext.createInitial(currentColor, awtSupport, measureContext);
+                return RenderContext.createInitial(currentColor, awtSupport, fontLoader, defaultFontFamily,
+                        measureContext);
             }
 
             @Override
@@ -102,6 +107,8 @@ public final class RenderContext {
                             Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
                     return new RenderContext(
                             context.platformSupport(),
+                            context.fontLoader(),
+                            context.defaultFontFamily(),
                             new AffineTransform(),
                             context.hostTransform,
                             new AffineTransform(),
@@ -168,21 +175,27 @@ public final class RenderContext {
 
     private static @NotNull RenderContext createInitial(@Nullable SVGPaint currentColor,
             @NotNull PlatformSupport awtSupport,
+            @Nullable FontLoader fontLoader,
+            @NotNull String defaultFontFamily,
             @NotNull MeasureContext measureContext) {
         SVGPaint color = currentColor != null ? currentColor : PredefinedPaints.DEFAULT_PAINT;
         return new RenderContext(awtSupport,
+                fontLoader,
+                defaultFontFamily,
                 new AffineTransform(),
                 new AffineTransform(),
                 new AffineTransform(),
                 PaintContext.createDefault(color),
                 measureContext,
                 FontRenderContext.createDefault(),
-                // Seed the cascade root with the UA default font size (from PlatformSupport).
+                // Seed the cascade root with the configured user-agent default font size.
                 MeasurableFontSpec.createDefault(measureContext.defaultEm()),
                 null);
     }
 
     private RenderContext(@NotNull PlatformSupport platformSupport,
+            @Nullable FontLoader fontLoader,
+            @NotNull String defaultFontFamily,
             @NotNull AffineTransform rootTransform,
             @NotNull AffineTransform hostTransform,
             @NotNull AffineTransform userSpaceTransform,
@@ -192,6 +205,8 @@ public final class RenderContext {
             @NotNull MeasurableFontSpec fontSpec,
             @Nullable ContextElementAttributes contextElementAttributes) {
         this.platformSupport = platformSupport;
+        this.fontLoader = fontLoader;
+        this.defaultFontFamily = defaultFontFamily;
         this.rootTransform = rootTransform;
         this.hostTransform = hostTransform;
         this.userSpaceTransform = userSpaceTransform;
@@ -252,7 +267,7 @@ public final class RenderContext {
         AffineTransform newRootTransform = rootTransform != null ? rootTransform : this.rootTransform;
 
         AffineTransform newHostTransform = rootTransform != null ? new AffineTransform(hostTransform) : hostTransform;
-        return new RenderContext(platformSupport, newRootTransform, newHostTransform,
+        return new RenderContext(platformSupport, fontLoader, defaultFontFamily, newRootTransform, newHostTransform,
                 new AffineTransform(userSpaceTransform),
                 newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newContextAttributes);
     }
@@ -320,6 +335,14 @@ public final class RenderContext {
         return platformSupport;
     }
 
+    public @Nullable FontLoader fontLoader() {
+        return fontLoader;
+    }
+
+    public @NotNull String defaultFontFamily() {
+        return defaultFontFamily;
+    }
+
     public @NotNull MeasureContext measureContext() {
         return measureContext;
     }
@@ -382,7 +405,7 @@ public final class RenderContext {
     }
 
     private @NotNull SVGFont font() {
-        return FontResolver.resolve(this.fontSpec, this.measureContext, platformSupport);
+        return FontResolver.resolve(this.fontSpec, this.measureContext, defaultFontFamily, fontLoader);
     }
 
     private void setRootTransform(@NotNull AffineTransform rootTransform) {
@@ -403,6 +426,8 @@ public final class RenderContext {
     public String toString() {
         return "RenderContext{" +
                 "platformSupport=" + platformSupport +
+                ", fontLoader=" + fontLoader +
+                ", defaultFontFamily='" + defaultFontFamily + '\'' +
                 ", measureContext=" + measureContext +
                 ", paintContext=" + paintContext +
                 ", fontRenderContext=" + fontRenderContext +

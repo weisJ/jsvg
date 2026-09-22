@@ -67,8 +67,9 @@ import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
-import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.FontLoader;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.output.Output;
@@ -105,19 +106,29 @@ public final class ImageComparison {
                 return new BatikType(animationState, new Dimension(width, height));
             }
         }
-        record JSVGType(@NotNull LoaderContext loaderContext,
-                @NotNull PlatformSupport platformSupport,
-                @NotNull AnimationState animationState) implements RenderType {
+        record JSVGType(@NotNull LoaderContext loaderContext, @NotNull RenderConfig renderConfig)
+                implements
+                    RenderType {
             JSVGType(@NotNull LoaderContext loaderContext, @NotNull PlatformSupport platformSupport) {
-                this(loaderContext, platformSupport, AnimationState.NO_ANIMATION);
+                this(loaderContext, RenderConfig.builder().platformSupport(platformSupport).build());
+            }
+
+            JSVGType(@NotNull LoaderContext loaderContext, @NotNull FontLoader fontLoader) {
+                this(loaderContext, RenderConfig.builder().fontLoader(fontLoader).build());
             }
 
             JSVGType(@NotNull LoaderContext loaderContext) {
-                this(loaderContext, NullPlatformSupport.INSTANCE);
+                this(loaderContext, RenderConfig.builder().build());
             }
 
             public JSVGType withAnimationState(@NotNull AnimationState state) {
-                return new JSVGType(loaderContext, platformSupport, state);
+                return new JSVGType(loaderContext, RenderConfig.builder()
+                        .platformSupport(renderConfig.platformSupport())
+                        .fontLoader(renderConfig.fontLoader())
+                        .fontSize(renderConfig.fontSize())
+                        .defaultFontFamily(renderConfig.defaultFontFamily())
+                        .animationState(state)
+                        .build());
             }
         }
 
@@ -250,12 +261,12 @@ public final class ImageComparison {
             return switch (renderType) {
                 case BatikType(AnimationState state, Dimension viewportSize) ->
                     renderBatik(source, state, viewportSize);
-                case JSVGType(LoaderContext loaderContext, PlatformSupport platformSupport, AnimationState state) -> {
+                case JSVGType(LoaderContext loaderContext, RenderConfig renderConfig) -> {
                     Dimension size = null;
                     if (expectedHint != null) {
                         size = new Dimension(expectedHint.getWidth(), expectedHint.getHeight());
                     }
-                    yield renderJsvg(source, graphicsMutator, loaderContext, platformSupport, size, state);
+                    yield renderJsvg(source, graphicsMutator, loaderContext, renderConfig, size);
                 }
                 case DiskImageType() -> {
                     var img = readReferenceImage(source);
@@ -401,8 +412,7 @@ public final class ImageComparison {
 
     public static @NotNull BufferedImage renderJsvg(@NotNull String path) {
         try {
-            return renderJsvg(new PathImageSource(path), null, JSVG.loaderContext(), JSVG.platformSupport(), null,
-                    AnimationState.NO_ANIMATION);
+            return renderJsvg(new PathImageSource(path), null, JSVG.loaderContext(), JSVG.renderConfig(), null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -419,8 +429,7 @@ public final class ImageComparison {
 
     private static BufferedImage renderJsvg(@NotNull ImageSource imageSource,
             @Nullable Consumer<Graphics2D> graphicsMutator, LoaderContext loaderContext,
-            @NotNull PlatformSupport platformSupport, @Nullable Dimension sizeHint,
-            @NotNull AnimationState animationState) throws IOException {
+            @NotNull RenderConfig baseConfig, @Nullable Dimension sizeHint) throws IOException {
         SVGDocument document;
 
         try (InputStream input = imageSource.openStream()) {
@@ -442,7 +451,14 @@ public final class ImageComparison {
         g.fillRect(0, 0, image.getWidth(), image.getHeight());
         if (graphicsMutator != null) graphicsMutator.accept(g);
         Output output = Output.createForGraphics(g);
-        document.renderWithPlatform(platformSupport, output, new ViewBox(size), animationState);
+        document.render(output, RenderConfig.builder()
+                .platformSupport(baseConfig.platformSupport())
+                .fontLoader(baseConfig.fontLoader())
+                .fontSize(baseConfig.fontSize())
+                .defaultFontFamily(baseConfig.defaultFontFamily())
+                .viewBox(new ViewBox(size))
+                .animationState(baseConfig.animationState())
+                .build());
         output.dispose();
         g.dispose();
         return image;

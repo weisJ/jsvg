@@ -89,7 +89,7 @@ public interface Output {
 
     /**
      * @deprecated No longer consulted; the default font size is taken from
-     *             {@link com.github.weisj.jsvg.renderer.PlatformSupport#fontSize()}.
+     *             {@link com.github.weisj.jsvg.renderer.RenderConfig#fontSize()}.
      */
     @SuppressWarnings("java:S1133") // Retained for source and binary compatibility.
     @Deprecated

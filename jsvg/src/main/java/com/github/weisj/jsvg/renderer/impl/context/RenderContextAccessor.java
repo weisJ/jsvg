@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.renderer.FontLoader;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
 import com.github.weisj.jsvg.renderer.RenderContext;
@@ -43,6 +44,8 @@ public final class RenderContextAccessor {
 
         @NotNull
         RenderContext createInitial(@Nullable SVGPaint currentColor, @NotNull PlatformSupport awtSupport,
+                @Nullable FontLoader fontLoader,
+                @NotNull String defaultFontFamily,
                 @NotNull MeasureContext measureContext);
 
         @NotNull

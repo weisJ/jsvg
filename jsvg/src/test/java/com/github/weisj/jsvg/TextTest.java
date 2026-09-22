@@ -44,6 +44,7 @@ import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.nodes.text.GlyphRunTextOutput;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
@@ -149,7 +150,7 @@ class TextTest {
         SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
 
         StringBuilder textBuilder = new StringBuilder();
-        document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
+        document.render(new NullOutput() {
             @Override
             public @NotNull TextOutput textOutput() {
                 return new TextOutput() {
@@ -176,7 +177,9 @@ class TextTest {
                     }
                 };
             }
-        }, null);
+        }, RenderConfig.builder()
+                .platformSupport(NullPlatformSupport.INSTANCE)
+                .build());
 
         assertEquals("A B C D E F", textBuilder.toString());
     }
@@ -188,7 +191,7 @@ class TextTest {
         SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
 
         List<String> runs = new ArrayList<>();
-        document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
+        document.render(new NullOutput() {
             @Override
             public @NotNull TextOutput textOutput() {
                 return new GlyphRunTextOutput() {
@@ -209,7 +212,9 @@ class TextTest {
                     }
                 };
             }
-        }, null);
+        }, RenderConfig.builder()
+                .platformSupport(NullPlatformSupport.INSTANCE)
+                .build());
 
         assertEquals(List.of("A ", "B", " ", "C ", "D", " E", " F ", "0", "123456", "789"), runs);
     }
