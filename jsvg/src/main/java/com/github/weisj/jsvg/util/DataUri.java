@@ -57,6 +57,7 @@ import org.jetbrains.annotations.Nullable;
  *  Note: This file has been modified for usage in the JSVG project.
  */
 final class DataUri {
+    private static final String DATA_SCHEME = "data:";
     private static final String CHARSET_OPTION_NAME = "charset";
     private static final String FILENAME_OPTION_NAME = "filename";
     private static final String CONTENT_DISPOSITION_OPTION_NAME = "content-disposition";
@@ -143,7 +144,7 @@ final class DataUri {
     public static DataUri parse(@NotNull String uri, Charset charset) throws MalformedDataUriException {
 
         // If URI does not start with a case-insensitive "data:": Throw a MALFORMED_URI exception.
-        if (!uri.toLowerCase(Locale.ENGLISH).startsWith("data:"))
+        if (!uri.toLowerCase(Locale.ENGLISH).startsWith(DATA_SCHEME))
             throw new MalformedDataUriException("URI must start with a case-insensitive `data:'");
 
         // If URI does not contain a ",": Throw a MALFORMED_URI exception.
@@ -187,7 +188,7 @@ final class DataUri {
 
         // Let temp be the substring of URI from, and including,
         // position 5 to, and excluding, the comma position. (between "data:" and first ",")
-        String temp = uri.substring("data:".length(), comma);
+        String temp = uri.substring(DATA_SCHEME.length(), comma);
 
         // Let headers be an array of strings returned by splitting temp by ";".
         String[] headers = temp.split(";");
@@ -330,7 +331,7 @@ final class DataUri {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("data:").append(this.mime()).append(";");
+        s.append(DATA_SCHEME).append(this.mime()).append(";");
 
         if (this.charset != null) s.append(CHARSET_OPTION_NAME + "=").append(this.charset.name()).append(";");
         if (this.contentDisposition != null)

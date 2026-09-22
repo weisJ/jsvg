@@ -26,12 +26,12 @@ import org.jetbrains.annotations.Nullable;
 
 public final class Url {
     private final @NotNull String rawUrl;
-    private final @Nullable String url;
+    private final @Nullable String documentUrl;
     private final @Nullable String fragment;
 
     public Url(@NotNull String rawUrl, @Nullable String url, @Nullable String fragment) {
         this.rawUrl = rawUrl;
-        this.url = url;
+        this.documentUrl = url;
         this.fragment = fragment;
     }
 
@@ -144,7 +144,7 @@ public final class Url {
 
 
     public @Nullable String url() {
-        return url;
+        return documentUrl;
     }
 
     public @Nullable String fragment() {

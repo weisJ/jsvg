@@ -120,14 +120,14 @@ public interface SimpleSelector {
     /** Id selector: {@code #foo}. Specificity {@code (1,0,0)}. */
     @Immutable
     final class Id implements SimpleSelector {
-        private final @NotNull String id;
+        private final @NotNull String value;
 
         public Id(@NotNull String id) {
-            this.id = id;
+            this.value = id;
         }
 
         public @NotNull String id() {
-            return id;
+            return value;
         }
 
         @Override
@@ -137,24 +137,24 @@ public interface SimpleSelector {
 
         @Override
         public @NotNull MatchResult matches(@NotNull ParsedElement targetElement) {
-            return new MatchResult(id.equals(targetElement.id()), false);
+            return new MatchResult(value.equals(targetElement.id()), false);
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof Id)) return false;
-            return id.equals(((Id) o).id);
+            return value.equals(((Id) o).value);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(id);
+            return Objects.hash(value);
         }
 
         @Override
         public String toString() {
-            return "#" + id;
+            return "#" + value;
         }
     }
 

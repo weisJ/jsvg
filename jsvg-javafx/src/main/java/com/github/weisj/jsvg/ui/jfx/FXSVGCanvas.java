@@ -80,8 +80,8 @@ public final class FXSVGCanvas extends Control {
         document.addListener(animationModificationListener);
 
         showTransparentPatternProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue) getStyleClass().remove(STYLE_CLASS_TRANSPARENT_PATTERN);
-            if (newValue) getStyleClass().add(STYLE_CLASS_TRANSPARENT_PATTERN);
+            if (Boolean.TRUE.equals(oldValue)) getStyleClass().remove(STYLE_CLASS_TRANSPARENT_PATTERN);
+            if (Boolean.TRUE.equals(newValue)) getStyleClass().add(STYLE_CLASS_TRANSPARENT_PATTERN);
         });
 
     }
