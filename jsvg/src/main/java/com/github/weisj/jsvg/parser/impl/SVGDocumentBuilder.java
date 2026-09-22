@@ -41,7 +41,6 @@ import com.github.weisj.jsvg.nodes.Use;
 import com.github.weisj.jsvg.nodes.container.CommonRenderableContainerNode;
 import com.github.weisj.jsvg.parser.DomProcessor;
 import com.github.weisj.jsvg.parser.LoaderContext;
-import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.impl.phase4matcher.StyleSheets;
 import com.github.weisj.jsvg.renderer.CssHints;
 import com.github.weisj.jsvg.util.supplier.ConstantSupplier;
@@ -78,9 +77,7 @@ public final class SVGDocumentBuilder {
             @Nullable URI rootURI,
             @NotNull LoaderContext loaderContext,
             @NotNull NodeSupplier nodeSupplier) {
-        LoadHelper loadHelper = new LoadHelper(
-                new AttributeParser(loaderContext.paintParser()),
-                loaderContext);
+        LoadHelper loadHelper = new LoadHelper(AttributeParser.INSTANCE, loaderContext);
         this.loaderContext = loaderContext;
         this.nodeSupplier = nodeSupplier;
         this.parsedDocument = new ParsedDocument(rootURI, loaderContext, loadHelper);
@@ -191,12 +188,12 @@ public final class SVGDocumentBuilder {
 
     private void processStyleSheets() {
         if (styleElements.isEmpty()) return;
-        CssParser cssParser = loaderContext.cssParser();
+        AttributeParser attributeParser = parsedDocument.loadHelper().attributeParser();
         CssHints cssHints = loaderContext.cssHints();
         for (ParsedElement styleElement : styleElements) {
             styleElement.build(0, ParsedElement.BuildMode.ALL);
             Style styleNode = (Style) styleElement.node();
-            styleNode.parseStyleSheet(styleElement.attributeNode(), cssParser, cssHints);
+            styleNode.parseStyleSheet(styleElement.attributeNode(), attributeParser, cssHints);
             styleSheets.add(styleNode.styleSheet());
         }
     }

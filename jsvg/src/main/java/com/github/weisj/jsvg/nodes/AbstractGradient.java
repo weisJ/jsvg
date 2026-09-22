@@ -36,7 +36,6 @@ import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.paint.SVGPaint;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
@@ -198,7 +197,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
 
     private @NotNull Paint paintForBounds(@NotNull MeasureContext context, @NotNull Rectangle2D bounds) {
         Color[] gradColors = colors();
-        if (gradColors.length == 0) return PaintParser.TRANSPARENT_BLACK;
+        if (gradColors.length == 0) return new Color(0, true);
         if (gradColors.length == 1) return gradColors[0];
         return gradientForBounds(gradientUnits.deriveMeasure(context), bounds, offsets(), gradColors);
     }

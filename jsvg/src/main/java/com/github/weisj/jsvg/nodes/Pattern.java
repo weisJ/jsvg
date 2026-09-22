@@ -43,7 +43,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.TransformedPaint;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
@@ -174,7 +173,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
                 ImageUtil::createCompatibleTransparentImage, context, null,
                 patternBounds, bounds, patternContentUnits);
 
-        if (blittableImage == null) return PaintParser.DEFAULT_COLOR;
+        if (blittableImage == null) return Color.BLACK;
 
         blittableImage.render(output, (out, ctx) -> {
             if (patternContentUnits == UnitType.UserSpaceOnUse) {

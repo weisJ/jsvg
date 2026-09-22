@@ -75,12 +75,11 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.paint.impl.RGBColor;
-import com.github.weisj.jsvg.parser.PaintParser;
-import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.data.Declaration;
 import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
 import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.impl.CssParser;
 import com.github.weisj.jsvg.parser.css.impl.phase3ruleparse.ShorthandExpander;
 import com.github.weisj.jsvg.parser.css.impl.phase4matcher.CascadeResult;
 import com.github.weisj.jsvg.parser.css.impl.phase4matcher.StyleSheets;
@@ -175,7 +174,7 @@ public final class AttributeNode {
     }
 
     void prepareForNodeBuilding() {
-        CssParser cssParser = document().loaderContext().cssParser();
+        CssParser cssParser = parser().cssParser();
 
         // Presentation attributes: CSS properties are tokenized and shorthand-expanded so the CSS grammar
         // applies to them; other (SVG-only) attributes are kept as raw strings.
@@ -346,14 +345,14 @@ public final class AttributeNode {
     }
 
     public @NotNull Color getColor(@NotNull String key) {
-        return getColor(key, PaintParser.DEFAULT_COLOR);
+        return getColor(key, Color.BLACK);
     }
 
     @Contract("_,!null -> !null")
     public @Nullable Color getColor(@NotNull String key, @Nullable Color fallback) {
         // Color attributes are all CSS properties, so a set value is token-valued.
         List<ComponentValue> tokens = getTokens(key);
-        Color c = tokens != null ? parser().paintParser().parseColor(tokens) : null;
+        Color c = tokens != null ? parser().parseColor(tokens) : null;
         return c != null ? c : fallback;
     }
 

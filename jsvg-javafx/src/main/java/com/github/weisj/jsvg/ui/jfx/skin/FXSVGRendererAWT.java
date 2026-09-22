@@ -32,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
@@ -95,7 +94,7 @@ final class FXSVGRendererAWT implements FXSVGRenderer {
         Graphics2D g = awtImage.createGraphics();
         Output output = Output.createForGraphics(g);
         FXRenderingHintsUtil.setupDefaultJFXRenderingHints(output);
-        g.setBackground(PaintParser.TRANSPARENT_BLACK);
+        g.setBackground(new Color(0, true));
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);

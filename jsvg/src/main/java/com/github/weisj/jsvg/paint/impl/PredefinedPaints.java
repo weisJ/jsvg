@@ -21,13 +21,14 @@
  */
 package com.github.weisj.jsvg.paint.impl;
 
+import java.awt.Color;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.paint.SVGPaint;
-import com.github.weisj.jsvg.parser.PaintParser;
 
 public final class PredefinedPaints {
-    public static final @NotNull AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(PaintParser.DEFAULT_COLOR);
+    public static final @NotNull AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(Color.BLACK);
     public static final @NotNull SVGPaint NONE = new NonePaint();
     public static final @NotNull SVGPaint CURRENT_COLOR = new SentinelPaint("currentColor");
     public static final @NotNull SVGPaint CONTEXT_FILL = new SentinelPaint("contextFill");

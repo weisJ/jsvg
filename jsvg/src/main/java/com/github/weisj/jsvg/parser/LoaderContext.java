@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
 
-import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.impl.*;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
@@ -40,12 +39,6 @@ import com.github.weisj.jsvg.renderer.CssHints;
 public interface LoaderContext {
     @Nullable
     DomProcessor preProcessor();
-
-    @NotNull
-    CssParser cssParser();
-
-    @NotNull
-    PaintParser paintParser();
 
     @NotNull
     ResourceLoader resourceLoader();
@@ -76,12 +69,6 @@ public interface LoaderContext {
 
         @NotNull
         Builder preProcessor(@Nullable DomProcessor preProcessor);
-
-        @NotNull
-        Builder cssParser(@NotNull CssParser cssParser);
-
-        @NotNull
-        Builder paintParser(@NotNull PaintParser paintParser);
 
         @NotNull
         Builder resourceLoader(@NotNull ResourceLoader resourceLoader);

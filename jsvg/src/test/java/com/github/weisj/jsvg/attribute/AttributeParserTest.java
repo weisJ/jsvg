@@ -35,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
-import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.NumberListSplitter;
 import com.github.weisj.jsvg.parser.css.impl.phase2basicparse.BasicParser;
 import com.github.weisj.jsvg.parser.css.impl.phase2basicparse.BasicParserInput;
@@ -52,7 +51,7 @@ class AttributeParserTest {
 
     @BeforeEach
     void setup() {
-        parser = new AttributeParser(new DefaultPaintParser());
+        parser = AttributeParser.INSTANCE;
     }
 
     @Test

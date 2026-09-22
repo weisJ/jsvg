@@ -36,7 +36,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.paint.impl.MaskedPaint;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
@@ -113,7 +112,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
                 transformedClipBounds.createIntersection(elementBounds.outputBox()),
                 elementBounds.boundingBox(), clipPathUnits);
 
-        if (blitImage == null) return PaintParser.DEFAULT_COLOR;
+        if (blitImage == null) return Color.BLACK;
 
         blitImage.clearBackground(Color.BLACK);
         blitImage.render(output, g -> {
@@ -126,7 +125,7 @@ public final class ClipPath extends ContainerNode implements ShapedContainer<SVG
         }
 
         Point2D offset = GeometryUtil.getLocation(blitImage.imageBoundsInDeviceSpace());
-        return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
+        return new MaskedPaint(Color.BLACK, blitImage.image().getRaster(), offset,
                 surfaceSupplier.resourceCleaner(output, useCache), MaskType.Luminance);
     }
 

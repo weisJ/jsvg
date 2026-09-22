@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser.impl;
 
 import static com.github.weisj.jsvg.util.AttributeUtil.toNonnullArray;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -48,17 +49,26 @@ import com.github.weisj.jsvg.logging.Logger.Level;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.NumberListSplitter;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
 import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.impl.CssParser;
+import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
+import com.github.weisj.jsvg.parser.impl.paint.PaintParser;
+import com.github.weisj.jsvg.renderer.CssHints;
 
 public final class AttributeParser {
 
+    public static final @NotNull AttributeParser INSTANCE =
+            new AttributeParser(new PaintParser(), new FullCssParser());
+
     private static final Logger LOGGER = LogFactory.createLogger(AttributeParser.class);
     private final @NotNull PaintParser paintParser;
+    private final @NotNull CssParser cssParser;
 
-    public AttributeParser(@NotNull PaintParser paintParser) {
+    AttributeParser(@NotNull PaintParser paintParser, @NotNull CssParser cssParser) {
         this.paintParser = paintParser;
+        this.cssParser = cssParser;
     }
 
     @Contract("_,!null,_ -> !null")
@@ -216,6 +226,18 @@ public final class AttributeParser {
 
     public @Nullable SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode attributeNode) {
         return paintParser.parsePaint(value);
+    }
+
+    public @Nullable Color parseColor(@NotNull List<@NotNull ComponentValue> tokens) {
+        return paintParser.parseColor(tokens);
+    }
+
+    public @Nullable Color parseColor(@NotNull String value) {
+        return paintParser.parseColor(value);
+    }
+
+    public @NotNull StyleRuleList parseStyleSheet(@NotNull List<char[]> input, @NotNull CssHints hints) {
+        return cssParser.parseStyleSheet(input, hints);
     }
 
     public <E extends Enum<E>> @NotNull E parseEnum(@Nullable String value, @NotNull E fallback) {
@@ -713,8 +735,9 @@ public final class AttributeParser {
         return Math.max(min, Math.min(max, value));
     }
 
-    public @NotNull PaintParser paintParser() {
-        return paintParser;
+    @NotNull
+    CssParser cssParser() {
+        return cssParser;
     }
 
 }

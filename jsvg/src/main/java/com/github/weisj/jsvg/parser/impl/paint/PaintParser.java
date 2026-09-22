@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.paint.impl;
+package com.github.weisj.jsvg.parser.impl.paint;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -35,7 +35,8 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
-import com.github.weisj.jsvg.parser.PaintParser;
+import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.data.Token;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
@@ -44,11 +45,12 @@ import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 import com.github.weisj.jsvg.util.ColorUtil;
 
 
-public final class DefaultPaintParser implements PaintParser {
-    private static final Logger LOGGER = LogFactory.createLogger(DefaultPaintParser.class);
+public final class PaintParser {
+    private static final Logger LOGGER = LogFactory.createLogger(PaintParser.class);
+    public static final @NotNull Color DEFAULT_COLOR = Color.BLACK;
+    public static final @NotNull Color TRANSPARENT_BLACK = new Color(0, true);
 
     // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
-    @Override
     public @Nullable Color parseColor(@NotNull String value) {
         if (value.isEmpty()) return null;
         try {
@@ -73,7 +75,6 @@ public final class DefaultPaintParser implements PaintParser {
         }
     }
 
-    @Override
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
         String lower = value.toLowerCase(Locale.ENGLISH);
@@ -84,7 +85,6 @@ public final class DefaultPaintParser implements PaintParser {
         return new AwtSVGPaint(color);
     }
 
-    @Override
     public @Nullable Color parseColor(@NotNull List<@NotNull ComponentValue> tokens) {
         ComponentValue token = AttributeParser.singleToken(tokens);
         try {
@@ -103,7 +103,6 @@ public final class DefaultPaintParser implements PaintParser {
         return null;
     }
 
-    @Override
     public @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
         ComponentValue token = AttributeParser.singleToken(tokens);
         if (token instanceof Token.Ident) {

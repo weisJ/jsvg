@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2026 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,34 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser;
+package com.github.weisj.jsvg.parser.css.impl;
 
-import java.awt.*;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
+import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
+import com.github.weisj.jsvg.renderer.CssHints;
 
-public interface PaintParser {
+public interface CssParser {
+    /**
+     * Parse a stylesheet, evaluating {@code @media} at-rules against the given hints.
+     * CSS shorthand attributes like font are replaced with multiple declarations.
+     */
     @NotNull
-    Color DEFAULT_COLOR = Color.BLACK;
+    StyleRuleList parseStyleSheet(@NotNull List<char[]> input, @NotNull CssHints hints);
+
+    /** Parse an SVG style attribute. Shorthands like {@code font} are expanded into their longhands. */
     @NotNull
-    Color TRANSPARENT_BLACK = new Color(0, true);
+    List<@NotNull NormalizedProperty> parseStyleAttribute(@NotNull String input, @NotNull CssHints hints);
 
-    @Nullable
-    Color parseColor(@NotNull String value);
+    @NotNull
+    List<@NotNull ComponentValue> parseCssAttribute(@NotNull String input);
 
-    @Nullable
-    SVGPaint parsePaint(@Nullable String value);
-
-    /** Parses a {@code <color>} (§CSS Color) directly from already-lexed component values. */
-    @Nullable
-    Color parseColor(@NotNull List<@NotNull ComponentValue> tokens);
-
-    /** Parses a {@code <paint>} keyword/color from already-lexed component values; {@code url(...)} is resolved by the caller. */
-    @Nullable
-    SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens);
+    @NotNull
+    List<@NotNull List<@NotNull ComponentValue>> parseCommaSeparatedCssAttribute(@NotNull String input);
 }
