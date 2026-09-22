@@ -103,9 +103,9 @@ public final class ResourceWalker implements AutoCloseable {
         pack = pack.endsWith("/") ? pack : pack + "/";
         String pathName = pack;
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Stream<URL> stream = StreamUtil.enumerationAsStream(
+        Stream<URL> resourceUrls = StreamUtil.enumerationAsStream(
                 Lambdas.orDefault(classLoader::getResources, Collections.<URL>emptyEnumeration()).apply(pathName));
-        return stream.map(Lambdas.wrap(URL::toURI)).flatMap(uri -> {
+        return resourceUrls.map(Lambdas.wrap(URL::toURI)).flatMap(uri -> {
             if ("jar".equals(uri.getScheme())) {
                 try {
                     FileSystem fileSystem;

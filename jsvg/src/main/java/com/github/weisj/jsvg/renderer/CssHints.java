@@ -73,8 +73,6 @@ public final class CssHints {
         private @NotNull MediaType mediaType = DEFAULT_MEDIA_TYPE;
         private @NotNull ColorScheme colorScheme = DEFAULT_COLOR_SCHEME;
 
-        public Builder() {}
-
         public @NotNull Builder mediaType(@NotNull CssHints.MediaType mediaType) {
             this.mediaType = mediaType;
             return this;

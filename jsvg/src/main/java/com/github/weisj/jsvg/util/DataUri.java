@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2013-2024 Jannis Weis
+ * Copyright (c) 2013-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -253,17 +253,12 @@ final class DataUri {
                     // If name is found case-insensitively in supportedContentEncodings:
                     final String nameCaseInsensitive = name.toLowerCase(Locale.ENGLISH);
 
-                    if (supportedContentEncodings.contains(nameCaseInsensitive)) {
+                    if (supportedContentEncodings.contains(nameCaseInsensitive) && !contentEncodingAlreadySet) {
+                        // Let contentEncoding equal name.
+                        contentEncoding = name;
 
-                        // If contentEncodingAlreadySet is false:
-                        if (!contentEncodingAlreadySet) {
-
-                            // Let contentEncoding equal name.
-                            contentEncoding = name;
-
-                            // Let contentEncodingAlreadySet equal true.
-                            contentEncodingAlreadySet = true;
-                        }
+                        // Let contentEncodingAlreadySet equal true.
+                        contentEncodingAlreadySet = true;
                     }
 
                     // Else:

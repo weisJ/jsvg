@@ -81,7 +81,7 @@ public interface Output {
     void applyClip(@NotNull Shape clipShape);
 
     /**
-     * Use {@link #applyClip(Shape)} instead
+     * @deprecated Use {@link #applyClip(Shape)} instead.
      */
     @Deprecated
     default void setClip(@Nullable Shape shape) {}

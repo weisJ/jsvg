@@ -597,18 +597,18 @@ public final class AttributeParser {
             case TRANSLATE:
                 if (args.size() == 1) {
                     return toNonnullArray(
-                            0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null,
+                            !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null,
                             Length.ZERO);
                 }
                 return toNonnullArray(
-                        0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null,
+                        !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null,
                         1 < args.size() ? lengthFromToken(args.get(1), PercentageDimension.HEIGHT) : null);
             case TRANSLATE_X:
                 return toNonnullArray(
-                        0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null);
+                        !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null);
             case TRANSLATE_Y:
                 return toNonnullArray(
-                        0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.HEIGHT) : null);
+                        !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.HEIGHT) : null);
             case ROTATE:
                 if (args.size() > 2) {
                     return toNonnullArray(angle(args, 0),
@@ -625,7 +625,7 @@ public final class AttributeParser {
             case SCALE_X:
             case SCALE_Y:
                 return toNonnullArray(
-                        0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.NONE) : null);
+                        !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.NONE) : null);
             case SKEW_X:
             case SKEW_Y:
                 return toNonnullArray(angle(args, 0));

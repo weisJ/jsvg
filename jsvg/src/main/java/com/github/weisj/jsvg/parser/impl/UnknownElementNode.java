@@ -52,5 +52,7 @@ final class UnknownElementNode implements SVGNode {
     }
 
     @Override
-    public void build(@NotNull AttributeNode attributeNode) {}
+    public void build(@NotNull AttributeNode attributeNode) {
+        // Unknown elements intentionally have no renderable state to build.
+    }
 }

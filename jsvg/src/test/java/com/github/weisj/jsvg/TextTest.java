@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.ImageComparison.CompareInfo;
@@ -143,83 +142,75 @@ class TextTest {
     }
 
     @Test
-    void testExtractingText() {
-        try {
-            String path = "text/extractText.svg";
-            URL url = Objects.requireNonNull(ImageComparison.class.getResource(path), path);
-            SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
+    void testExtractingText() throws Exception {
+        String path = "text/extractText.svg";
+        URL url = Objects.requireNonNull(ImageComparison.class.getResource(path), path);
+        SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
 
-            StringBuilder textBuilder = new StringBuilder();
-            document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
-                @Override
-                public @NotNull TextOutput textOutput() {
-                    return new TextOutput() {
+        StringBuilder textBuilder = new StringBuilder();
+        document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
+            @Override
+            public @NotNull TextOutput textOutput() {
+                return new TextOutput() {
 
-                        @Override
-                        public void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform,
-                                @NotNull RenderContext context) {
-                            textBuilder.append(codepoint);
-                        }
+                    @Override
+                    public void codepoint(@NotNull String codepoint, @NotNull AffineTransform glyphTransform,
+                            @NotNull RenderContext context) {
+                        textBuilder.append(codepoint);
+                    }
 
-                        @Override
-                        public void beginText() {
-                            // Do nothing
-                        }
+                    @Override
+                    public void beginText() {
+                        // Do nothing
+                    }
 
-                        @Override
-                        public void glyphRunBreak() {
-                            // Do nothing
-                        }
+                    @Override
+                    public void glyphRunBreak() {
+                        // Do nothing
+                    }
 
-                        @Override
-                        public void endText() {
-                            // Do nothing
-                        }
-                    };
-                }
-            }, null);
+                    @Override
+                    public void endText() {
+                        // Do nothing
+                    }
+                };
+            }
+        }, null);
 
-            assertEquals("A B C D E F", textBuilder.toString());
-        } catch (Exception e) {
-            Assertions.fail(e);
-        }
+        assertEquals("A B C D E F", textBuilder.toString());
     }
 
     @Test
-    void testExtractingGlyphRunsText() {
-        try {
-            String path = "text/extractText2.svg";
-            URL url = Objects.requireNonNull(ImageComparison.class.getResource(path), path);
-            SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
+    void testExtractingGlyphRunsText() throws Exception {
+        String path = "text/extractText2.svg";
+        URL url = Objects.requireNonNull(ImageComparison.class.getResource(path), path);
+        SVGDocument document = Objects.requireNonNull(new SVGLoader().load(url));
 
-            List<String> runs = new ArrayList<>();
-            document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
-                @Override
-                public @NotNull TextOutput textOutput() {
-                    return new GlyphRunTextOutput() {
-                        @Override
-                        protected void glyphRun(@NotNull String codepoints, @NotNull AffineTransform glyphTransform,
-                                @NotNull RenderContext context) {
-                            runs.add(codepoints);
-                        }
+        List<String> runs = new ArrayList<>();
+        document.renderWithPlatform(NullPlatformSupport.INSTANCE, new NullOutput() {
+            @Override
+            public @NotNull TextOutput textOutput() {
+                return new GlyphRunTextOutput() {
+                    @Override
+                    protected void glyphRun(@NotNull String codepoints, @NotNull AffineTransform glyphTransform,
+                            @NotNull RenderContext context) {
+                        runs.add(codepoints);
+                    }
 
-                        @Override
-                        protected void onTextStart() {
-                            // Do nothing
-                        }
+                    @Override
+                    protected void onTextStart() {
+                        // Do nothing
+                    }
 
-                        @Override
-                        protected void onTextEnd() {
-                            // Do nothing
-                        }
-                    };
-                }
-            }, null);
+                    @Override
+                    protected void onTextEnd() {
+                        // Do nothing
+                    }
+                };
+            }
+        }, null);
 
-            assertEquals(List.of("A ", "B", " ", "C ", "D", " E", " F ", "0", "123456", "789"), runs);
-        } catch (Exception e) {
-            Assertions.fail(e);
-        }
+        assertEquals(List.of("A ", "B", " ", "C ", "D", " E", " F ", "0", "123456", "789"), runs);
     }
 
     @Test

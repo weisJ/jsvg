@@ -301,7 +301,7 @@ public class StyleRuleMatcher {
      * case-sensitive; attribute names are always case-sensitive). Per the
      * <a href="https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors">HTML Standard</a>.
      */
-    public static final @NotNull Set<String> ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES = new HashSet<>(Arrays.asList(
+    private static final @NotNull Set<String> ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES = new HashSet<>(Arrays.asList(
             "accept",
             "accept-charset",
             "align",
@@ -348,4 +348,8 @@ public class StyleRuleMatcher {
             "valign",
             "valuetype",
             "vlink"));
+
+    public static boolean isAttributeValueCaseInsensitive(@NotNull String name) {
+        return ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES.contains(name);
+    }
 }

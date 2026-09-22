@@ -76,9 +76,12 @@ public final class CssNormalizer {
 
     private static @NotNull Stream<@NotNull StyleRule> normalizeStyleSheet(
             @NotNull Stream<Rule> parsedRules, @NotNull CssHints hints, boolean allowAtRules) {
-        return parsedRules.flatMap(rule -> rule instanceof Rule.QualifiedRule
-                ? normalizeStyleRule((Rule.QualifiedRule) rule)
-                : (allowAtRules ? normalizeAtRule((Rule.AtRule) rule, hints) : Stream.empty()));
+        return parsedRules.flatMap(rule -> {
+            if (rule instanceof Rule.QualifiedRule) {
+                return normalizeStyleRule((Rule.QualifiedRule) rule);
+            }
+            return allowAtRules ? normalizeAtRule((Rule.AtRule) rule, hints) : Stream.empty();
+        });
     }
 
     /** Each selector in the comma-separated list produces its own {@link StyleRule}. */

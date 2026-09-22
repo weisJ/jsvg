@@ -256,11 +256,10 @@ public interface SimpleSelector {
 
         /**
          * Resolves the {@code i}/{@code s} flag: absent means case-sensitive unless the attribute is in
-         * {@link StyleRuleMatcher#ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES}.
+         * {@link StyleRuleMatcher#isAttributeValueCaseInsensitive(String)}.
          */
         public boolean caseSensitiveWithDefault() {
-            return caseSensitive != null ? caseSensitive
-                    : !StyleRuleMatcher.ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES.contains(name);
+            return caseSensitive != null ? caseSensitive : !StyleRuleMatcher.isAttributeValueCaseInsensitive(name);
         }
 
         @Override

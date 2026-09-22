@@ -84,14 +84,19 @@ public final class PerlinTurbulence {
     private void init(int seed) {
         int lSeed = setupSeed(seed);
 
-        int i, j, k;
+        int i;
+        int j;
+        int k;
 
         for (k = 0; k < 4; k++) {
             for (i = 0; i < BSize; i++) {
-                double u, v;
+                double u;
+                double v;
                 do {
-                    u = ((lSeed = random(lSeed)) % (BSize + BSize)) - (double) BSize;
-                    v = ((lSeed = random(lSeed)) % (BSize + BSize)) - (double) BSize;
+                    lSeed = random(lSeed);
+                    u = (lSeed % (BSize + BSize)) - (double) BSize;
+                    lSeed = random(lSeed);
+                    v = (lSeed % (BSize + BSize)) - (double) BSize;
                 } while (u == 0 && v == 0);
 
                 double s = Math.sqrt(u * u + v * v);
@@ -106,7 +111,8 @@ public final class PerlinTurbulence {
 
         while (--i > 0) {
             k = uLatticeSelector[i];
-            j = (lSeed = random(lSeed)) % BSize;
+            lSeed = random(lSeed);
+            j = lSeed % BSize;
             uLatticeSelector[i] = uLatticeSelector[j];
             uLatticeSelector[j] = k;
 

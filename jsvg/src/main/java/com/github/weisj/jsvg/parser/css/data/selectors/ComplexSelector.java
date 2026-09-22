@@ -78,7 +78,9 @@ public final class ComplexSelector {
 
     /** Sum of the specificity contributions of every compound selector in the chain. */
     private @NotNull Specificity computeSpecificity() {
-        int idSelectors = 0, classSelectors = 0, typeSelectors = 0;
+        int idSelectors = 0;
+        int classSelectors = 0;
+        int typeSelectors = 0;
         for (CompoundSelector compound : sequences) {
             for (SimpleSelector simple : compound.simpleSelectors()) {
                 idSelectors += simple.specificity().idSelectors();
