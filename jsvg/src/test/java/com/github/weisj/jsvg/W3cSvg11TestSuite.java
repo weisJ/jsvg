@@ -59,6 +59,7 @@ import org.w3c.dom.Element;
 import com.github.weisj.jsvg.ImageComparison.ImageSource.MemoryImageSource;
 import com.github.weisj.jsvg.ImageComparison.ImageSource.UrlImageSource;
 import com.github.weisj.jsvg.ImageComparison.RenderType;
+import com.github.weisj.jsvg.renderer.SVGRenderingHints;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 
 class W3cSvg11TestSuite {
@@ -466,6 +467,14 @@ class W3cSvg11TestSuite {
                 .replaceAll(match -> Matcher.quoteReplacement(match.group(1) + portableFontFamilies(match.group(2))));
     }
 
+    private static @NotNull ImageComparison.ImageInfo.Actual actualWithoutKerning(
+            @NotNull ImageComparison.ImageSource source, @NotNull RenderType.JSVGType renderType) {
+        // Batik does not apply AWT font kerning. Leaving it enabled for JSVG makes the
+        // comparison depend on the physical font backing SansSerif on the current OS.
+        return actual(source, renderType, graphics -> graphics.setRenderingHint(
+                SVGRenderingHints.KEY_TEXT_KERNING, SVGRenderingHints.VALUE_TEXT_KERNING_OFF));
+    }
+
     record W3cSvg11AnimationFrame(@NotNull Path testFile, long timestamp) implements Executable {
         @Override
         public void execute() throws Throwable {
@@ -476,7 +485,7 @@ class W3cSvg11TestSuite {
             var result = ImageComparison.compareImages(new ImageComparison.CompareInfo(
                     expected(source, RenderType.Batik.withViewportSize(480, 360).withAnimationState(state)),
                     // Keep small animated features significant; static-suite tolerance could hide them.
-                    actual(source, RenderType.JSVG.withAnimationState(state)), 0.01, 0.1));
+                    actualWithoutKerning(source, RenderType.JSVG.withAnimationState(state)), 0.01, 0.1));
             assertEquals(SUCCESS, result, testFile.getFileName() + " at " + timestamp + " ms");
         }
     }
@@ -497,13 +506,13 @@ class W3cSvg11TestSuite {
                         .resolve(testFile.getFileName().toString().replace(".svg", ".png"));
                 assertEquals(SUCCESS, ImageComparison.compareImages(new ImageComparison.CompareInfo(
                         expected(new UrlImageSource(png.toUri().toURL()), RenderType.DiskImage),
-                        actual(new UrlImageSource(testFile.toUri().toURL()), RenderType.JSVG))));
+                        actualWithoutKerning(new UrlImageSource(testFile.toUri().toURL()), RenderType.JSVG))));
                 return;
             }
             var source = normalizedSource(testFile, false);
             var comparison = new ImageComparison.CompareInfo(
                     expected(source, RenderType.Batik.withViewportSize(480, 360)),
-                    actual(source, RenderType.JSVG));
+                    actualWithoutKerning(source, RenderType.JSVG));
             // Dedicated font tests often contain only a few small glyphs. The normal static
             // tolerance can hide their complete replacement by a fallback font during an audit.
             if (testFile.getFileName().toString().startsWith("fonts-")) {
