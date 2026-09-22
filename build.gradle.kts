@@ -293,8 +293,7 @@ allprojects {
                 }
             }
             tasks.withType<JavaCompile>().configureEach {
-                // Java 8 remains the library target; newer JDKs warn that this target is obsolete.
-                options.compilerArgs.addAll(listOf("-Xlint:-options", "-Xmaxerrs", "10000", "-Xmaxwarns", "10000"))
+                options.compilerArgs.addAll(listOf("-Xmaxerrs", "10000", "-Xmaxwarns", "10000"))
                 if (props.bool("Werror", false)) {
                     options.compilerArgs.add("-Werror")
                 }
@@ -315,6 +314,8 @@ allprojects {
             withType<JavaCompile>().configureEach {
                 options.encoding = "UTF-8"
                 options.release.set(8)
+                // Java 8 remains the library target; newer JDKs warn that this target is obsolete.
+                options.compilerArgs.add("-Xlint:-options")
             }
 
             withType<ProcessResources>().configureEach {

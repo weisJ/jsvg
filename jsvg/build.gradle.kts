@@ -11,7 +11,9 @@ dependencies {
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(toolLibs.errorprone.annotations)
     compileOnly(projects.annotations)
-    compileOnly(libs.bndAnnotations)
+    compileOnly(libs.bndAnnotations) {
+        isTransitive = false
+    }
     compileOnly(libs.osgiAnnotations)
 
     annotationProcessor(projects.annotationsProcessor)
