@@ -234,6 +234,8 @@ class W3cSvg11TestSuite {
                 "masking-mask-01-b.svg",
                 "masking-path-01-b.svg",
                 "masking-path-03-b.svg",
+                // Text clip outlines differ between Batik and JSVG with platform fonts.
+                "masking-path-04-b.svg",
                 "masking-path-06-b.svg",
                 "masking-path-07-b.svg",
                 "masking-path-08-b.svg",
