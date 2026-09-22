@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.util.supplier.LazySupplier;
 import com.github.weisj.jsvg.view.FloatSize;
@@ -78,11 +79,12 @@ public final class MissingImageResource implements RenderableResource {
     public void render(@NotNull Output output, @NotNull RenderContext context, @NotNull AffineTransform transform) {
         output.applyTransform(transform);
         synchronized (missingImage) {
+            RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
             missingImage.get().render(output, RenderConfig.builder()
                     .platformSupport(context.platformSupport())
-                    .fontLoader(context.fontLoader())
+                    .fontLoader(accessor.fontLoader(context))
                     .fontSize(context.measureContext().defaultEm())
-                    .defaultFontFamily(context.defaultFontFamily())
+                    .defaultFontFamily(accessor.defaultFontFamily(context))
                     .viewBox(new ViewBox(0, 0, SIZE, SIZE))
                     .build());
         }

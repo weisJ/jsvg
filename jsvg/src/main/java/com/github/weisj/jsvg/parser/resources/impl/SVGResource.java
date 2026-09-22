@@ -29,6 +29,7 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
 
@@ -47,11 +48,12 @@ public class SVGResource implements RenderableResource {
     @Override
     public void render(@NotNull Output output, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
         output.applyTransform(imgTransform);
+        RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
         document.render(output, RenderConfig.builder()
                 .platformSupport(context.platformSupport())
-                .fontLoader(context.fontLoader())
+                .fontLoader(accessor.fontLoader(context))
                 .fontSize(context.measureContext().defaultEm())
-                .defaultFontFamily(context.defaultFontFamily())
+                .defaultFontFamily(accessor.defaultFontFamily(context))
                 .build());
     }
 }

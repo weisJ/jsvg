@@ -39,6 +39,7 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -73,7 +74,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         Filter.FilterInfo info = filterContext.info();
         float opacity = floodOpacity.get(context.measureContext());
-        Color color = context.resolveColor(floodColor);
+        Color color = RenderContextAccessor.instance().resolveColor(context, floodColor);
         if (color == null) {
             throw new IllegalFilterStateException("The resolved flood color is not a solid color");
         }

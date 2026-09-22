@@ -47,9 +47,7 @@ import com.github.weisj.jsvg.view.ViewBox;
 
 public final class RenderContext {
 
-    private final @NotNull PlatformSupport platformSupport;
-    private final @Nullable FontLoader fontLoader;
-    private final @NotNull String defaultFontFamily;
+    private final @NotNull RenderEnvironment environment;
     private final @NotNull MeasureContext measureContext;
     private final @NotNull PaintContext paintContext;
 
@@ -59,9 +57,7 @@ public final class RenderContext {
 
     private final @Nullable ContextElementAttributes contextElementAttributes;
 
-    private final @NotNull AffineTransform rootTransform;
-    private final @NotNull AffineTransform hostTransform;
-    private final @NotNull AffineTransform userSpaceTransform;
+    private final @NotNull RenderTransforms transforms;
 
     static {
         RenderContextAccessor.setInstance(new RenderContextAccessor.Accessor() {
@@ -106,12 +102,11 @@ public final class RenderContext {
                     MeasureContext newMeasure = context.measureContext().derive(viewBox,
                             Length.UNSPECIFIED_RAW, Length.UNSPECIFIED_RAW);
                     return new RenderContext(
-                            context.platformSupport(),
-                            context.fontLoader(),
-                            context.defaultFontFamily(),
-                            new AffineTransform(),
-                            context.hostTransform,
-                            new AffineTransform(),
+                            context.environment,
+                            new RenderTransforms(
+                                    new AffineTransform(),
+                                    context.transforms.host,
+                                    new AffineTransform()),
                             PaintContext.createDefault(PredefinedPaints.DEFAULT_PAINT),
                             newMeasure,
                             FontRenderContext.createDefault(),
@@ -153,6 +148,21 @@ public final class RenderContext {
             }
 
             @Override
+            public @Nullable FontLoader fontLoader(@NotNull RenderContext context) {
+                return context.fontLoader();
+            }
+
+            @Override
+            public @NotNull String defaultFontFamily(@NotNull RenderContext context) {
+                return context.defaultFontFamily();
+            }
+
+            @Override
+            public @Nullable Color resolveColor(@NotNull RenderContext context, @Nullable SVGPaint paint) {
+                return context.resolveColor(paint);
+            }
+
+            @Override
             public void setTransforms(@NotNull RenderContext context, @NotNull AffineTransform rootTransform) {
                 context.setRootTransform(rootTransform);
             }
@@ -179,12 +189,9 @@ public final class RenderContext {
             @NotNull String defaultFontFamily,
             @NotNull MeasureContext measureContext) {
         SVGPaint color = currentColor != null ? currentColor : PredefinedPaints.DEFAULT_PAINT;
-        return new RenderContext(awtSupport,
-                fontLoader,
-                defaultFontFamily,
-                new AffineTransform(),
-                new AffineTransform(),
-                new AffineTransform(),
+        RenderEnvironment environment = new RenderEnvironment(awtSupport, fontLoader, defaultFontFamily);
+        return new RenderContext(environment,
+                RenderTransforms.createInitial(),
                 PaintContext.createDefault(color),
                 measureContext,
                 FontRenderContext.createDefault(),
@@ -193,23 +200,15 @@ public final class RenderContext {
                 null);
     }
 
-    private RenderContext(@NotNull PlatformSupport platformSupport,
-            @Nullable FontLoader fontLoader,
-            @NotNull String defaultFontFamily,
-            @NotNull AffineTransform rootTransform,
-            @NotNull AffineTransform hostTransform,
-            @NotNull AffineTransform userSpaceTransform,
+    private RenderContext(@NotNull RenderEnvironment environment,
+            @NotNull RenderTransforms transforms,
             @NotNull com.github.weisj.jsvg.renderer.impl.context.PaintContext paintContext,
             @NotNull MeasureContext measureContext,
             @NotNull FontRenderContext fontRenderContext,
             @NotNull MeasurableFontSpec fontSpec,
             @Nullable ContextElementAttributes contextElementAttributes) {
-        this.platformSupport = platformSupport;
-        this.fontLoader = fontLoader;
-        this.defaultFontFamily = defaultFontFamily;
-        this.rootTransform = rootTransform;
-        this.hostTransform = hostTransform;
-        this.userSpaceTransform = userSpaceTransform;
+        this.environment = environment;
+        this.transforms = transforms;
         this.paintContext = paintContext;
         this.measureContext = measureContext;
         this.fontRenderContext = fontRenderContext;
@@ -264,11 +263,14 @@ public final class RenderContext {
         }
 
         FontRenderContext effectiveFrc = fontRenderContext.derive(frc);
-        AffineTransform newRootTransform = rootTransform != null ? rootTransform : this.rootTransform;
+        AffineTransform newRootTransform = rootTransform != null ? rootTransform : transforms.root;
 
-        AffineTransform newHostTransform = rootTransform != null ? new AffineTransform(hostTransform) : hostTransform;
-        return new RenderContext(platformSupport, fontLoader, defaultFontFamily, newRootTransform, newHostTransform,
-                new AffineTransform(userSpaceTransform),
+        AffineTransform newHostTransform = rootTransform != null
+                ? new AffineTransform(transforms.host)
+                : transforms.host;
+        RenderTransforms newTransforms = new RenderTransforms(
+                newRootTransform, newHostTransform, new AffineTransform(transforms.userSpace));
+        return new RenderContext(environment, newTransforms,
                 newPaintContext, newMeasureContext, effectiveFrc, newFontSpec, newContextAttributes);
     }
 
@@ -279,7 +281,7 @@ public final class RenderContext {
 
     private @NotNull RenderContext deriveForSurface() {
         return deriveImpl(t -> t, null, null, null, null,
-                new AffineTransform(rootTransform), EstablishRootMeasure.NO);
+                new AffineTransform(transforms.root), EstablishRootMeasure.NO);
     }
 
     private @NotNull RenderContext deriveForNode(
@@ -296,15 +298,15 @@ public final class RenderContext {
     }
 
     public @NotNull AffineTransform rootTransform() {
-        return rootTransform;
+        return transforms.root;
     }
 
     public @NotNull AffineTransform hostTransform() {
-        return hostTransform;
+        return transforms.host;
     }
 
     public @NotNull AffineTransform userSpaceTransform() {
-        return userSpaceTransform;
+        return transforms.userSpace;
     }
 
     public void translate(@NotNull Output output, @NotNull Point2D dp) {
@@ -313,34 +315,26 @@ public final class RenderContext {
 
     public void translate(@NotNull Output output, double dx, double dy) {
         output.translate(dx, dy);
-        userSpaceTransform.translate(dx, dy);
+        transforms.userSpace.translate(dx, dy);
     }
 
     public void scale(@NotNull Output output, double sx, double sy) {
         output.scale(sx, sy);
-        userSpaceTransform.scale(sx, sy);
+        transforms.userSpace.scale(sx, sy);
     }
 
     public void rotate(@NotNull Output output, double angle) {
         output.rotate(angle);
-        userSpaceTransform.rotate(angle);
+        transforms.userSpace.rotate(angle);
     }
 
     public void transform(@NotNull Output output, @NotNull AffineTransform at) {
         output.applyTransform(at);
-        userSpaceTransform.concatenate(at);
+        transforms.userSpace.concatenate(at);
     }
 
     public @NotNull PlatformSupport platformSupport() {
-        return platformSupport;
-    }
-
-    public @Nullable FontLoader fontLoader() {
-        return fontLoader;
-    }
-
-    public @NotNull String defaultFontFamily() {
-        return defaultFontFamily;
+        return environment.platformSupport;
     }
 
     public @NotNull MeasureContext measureContext() {
@@ -353,10 +347,6 @@ public final class RenderContext {
 
     public @NotNull SVGPaint fillPaint() {
         return PaintResolver.resolvePaint(paintContext.fillPaint, paintContext, contextElementAttributes);
-    }
-
-    public @Nullable Color resolveColor(@Nullable SVGPaint paint) {
-        return PaintResolver.resolveColor(paint, paintContext, contextElementAttributes, measureContext);
     }
 
     public float rawOpacity() {
@@ -394,6 +384,18 @@ public final class RenderContext {
         return contextElementAttributes;
     }
 
+    private @Nullable FontLoader fontLoader() {
+        return environment.fontLoader;
+    }
+
+    private @NotNull String defaultFontFamily() {
+        return environment.defaultFontFamily;
+    }
+
+    private @Nullable Color resolveColor(@Nullable SVGPaint paint) {
+        return PaintResolver.resolveColor(paint, paintContext, contextElementAttributes, measureContext);
+    }
+
     private @NotNull FillRule fillRule() {
         FillRule fillRule = paintContext.fillRule;
         return fillRule != null ? fillRule : FillRule.Nonzero;
@@ -405,37 +407,34 @@ public final class RenderContext {
     }
 
     private @NotNull SVGFont font() {
-        return FontResolver.resolve(this.fontSpec, this.measureContext, defaultFontFamily, fontLoader);
+        return FontResolver.resolve(this.fontSpec, this.measureContext,
+                environment.defaultFontFamily, environment.fontLoader);
     }
 
     private void setRootTransform(@NotNull AffineTransform rootTransform) {
-        this.rootTransform.setTransform(rootTransform);
-        this.userSpaceTransform.setToIdentity();
+        transforms.root.setTransform(rootTransform);
+        transforms.userSpace.setToIdentity();
     }
 
     private void setRootTransform(@NotNull AffineTransform rootTransform, @NotNull AffineTransform userSpaceTransform) {
-        this.rootTransform.setTransform(rootTransform);
-        this.userSpaceTransform.setTransform(userSpaceTransform);
+        transforms.root.setTransform(rootTransform);
+        transforms.userSpace.setTransform(userSpaceTransform);
     }
 
     private void setHostTransform(@NotNull AffineTransform hostTransform) {
-        this.hostTransform.setTransform(hostTransform);
+        transforms.host.setTransform(hostTransform);
     }
 
     @Override
     public String toString() {
         return "RenderContext{" +
-                "platformSupport=" + platformSupport +
-                ", fontLoader=" + fontLoader +
-                ", defaultFontFamily='" + defaultFontFamily + '\'' +
+                "environment=" + environment +
                 ", measureContext=" + measureContext +
                 ", paintContext=" + paintContext +
                 ", fontRenderContext=" + fontRenderContext +
                 ", fontSpec=" + fontSpec +
                 ", contextElementAttributes=" + contextElementAttributes +
-                ", rootTransform=" + rootTransform +
-                ", hostTransform=" + hostTransform +
-                ", userSpaceTransform=" + userSpaceTransform +
+                ", transforms=" + transforms +
                 '}';
     }
 }

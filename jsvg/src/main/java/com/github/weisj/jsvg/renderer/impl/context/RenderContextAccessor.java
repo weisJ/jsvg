@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.renderer.impl.context;
 
+import java.awt.Color;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
@@ -84,6 +85,15 @@ public final class RenderContextAccessor {
 
         @Nullable
         SVGPaint currentColor(@NotNull RenderContext context);
+
+        @Nullable
+        FontLoader fontLoader(@NotNull RenderContext context);
+
+        @NotNull
+        String defaultFontFamily(@NotNull RenderContext context);
+
+        @Nullable
+        Color resolveColor(@NotNull RenderContext context, @Nullable SVGPaint paint);
 
         void setTransforms(@NotNull RenderContext context, @NotNull AffineTransform rootTransform);
 
