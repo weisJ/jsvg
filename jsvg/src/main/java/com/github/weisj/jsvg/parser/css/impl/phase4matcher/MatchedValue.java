@@ -30,7 +30,7 @@ import com.github.weisj.jsvg.parser.css.data.selectors.ComplexSelector;
 import com.github.weisj.jsvg.parser.css.data.selectors.Specificity;
 import com.github.weisj.jsvg.parser.impl.AttributeValue;
 
-class MatchedValue implements Comparable<MatchedValue> {
+class MatchedValue {
     private final @NotNull AttributeValue.@NotNull Parsed value;
     private final boolean important;
     private final @NotNull Specificity specificity;
@@ -76,8 +76,7 @@ class MatchedValue implements Comparable<MatchedValue> {
                     .thenComparing(MatchedValue::specificity)
                     .thenComparingInt(MatchedValue::sourceOrder);
 
-    @Override
-    public int compareTo(@NotNull MatchedValue o) {
-        return COMPARATOR.compare(this, o);
+    public boolean hasHigherPriorityThan(@NotNull MatchedValue other) {
+        return COMPARATOR.compare(this, other) > 0;
     }
 }

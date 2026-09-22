@@ -169,7 +169,7 @@ public class StyleRuleMatcher {
         for (NormalizedProperty property : inlineDeclarations) {
             MatchedValue max = mostSpecificValuePerAttributeName.get(property.name());
             MatchedValue match = MatchedValue.fromInlineDeclaration(property);
-            if (max == null || match.compareTo(max) > 0) {
+            if (max == null || match.hasHigherPriorityThan(max)) {
                 mostSpecificValuePerAttributeName.put(property.name(), match);
             }
         }
@@ -182,7 +182,7 @@ public class StyleRuleMatcher {
                     for (NormalizedProperty property : candidateRule.declarations()) {
                         MatchedValue max = mostSpecificValuePerAttributeName.get(property.name());
                         MatchedValue match = MatchedValue.fromStylesheetDeclaration(candidateRule.selector(), property);
-                        if (max == null || match.compareTo(max) > 0) {
+                        if (max == null || match.hasHigherPriorityThan(max)) {
                             mostSpecificValuePerAttributeName.put(property.name(), match);
                         }
                     }
