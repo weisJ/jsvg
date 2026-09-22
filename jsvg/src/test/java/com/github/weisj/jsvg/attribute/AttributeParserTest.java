@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 
-import com.github.weisj.jsvg.view.FloatSize;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -45,6 +44,7 @@ import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.util.RandomData;
+import com.github.weisj.jsvg.view.FloatSize;
 
 class AttributeParserTest {
 
