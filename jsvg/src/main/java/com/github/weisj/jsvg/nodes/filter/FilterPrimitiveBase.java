@@ -39,6 +39,10 @@ public final class FilterPrimitiveBase {
     final @NotNull Length y;
     final @NotNull Length width;
     final @NotNull Length height;
+    private final boolean xSpecified;
+    private final boolean ySpecified;
+    private final boolean widthSpecified;
+    private final boolean heightSpecified;
 
     private final @NotNull FilterChannelKey inputChannel;
     private final @NotNull FilterChannelKey resultChannel;
@@ -49,6 +53,10 @@ public final class FilterPrimitiveBase {
         y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(0));
         width = attributeNode.getLength("width", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(100));
         height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(100));
+        xSpecified = attributeNode.hasAttribute("x");
+        ySpecified = attributeNode.hasAttribute("y");
+        widthSpecified = attributeNode.hasAttribute("width");
+        heightSpecified = attributeNode.hasAttribute("height");
 
         inputChannel = attributeNode.getFilterChannelKey("in", DefaultFilterChannel.LastResult);
         resultChannel = attributeNode.getFilterChannelKey("result", DefaultFilterChannel.LastResult);
@@ -70,6 +78,22 @@ public final class FilterPrimitiveBase {
 
     public @NotNull LayoutBounds layoutInput(@NotNull FilterLayoutContext context) {
         return context.resultChannels().get(inputChannel);
+    }
+
+    public boolean xSpecified() {
+        return xSpecified;
+    }
+
+    public boolean ySpecified() {
+        return ySpecified;
+    }
+
+    public boolean widthSpecified() {
+        return widthSpecified;
+    }
+
+    public boolean heightSpecified() {
+        return heightSpecified;
     }
 
     public void noop(@NotNull FilterContext context) {

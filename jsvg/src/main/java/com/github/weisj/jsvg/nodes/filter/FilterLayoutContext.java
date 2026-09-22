@@ -35,12 +35,14 @@ public final class FilterLayoutContext {
     private final @NotNull UnitType primitiveUnits;
     private final @NotNull Rectangle2D elementBounds;
     private final @NotNull Rectangle2D clipBounds;
+    private final @NotNull Rectangle2D filterRegion;
 
     public FilterLayoutContext(@NotNull UnitType primitiveUnits, @NotNull Rectangle2D elementBounds,
-            @NotNull Rectangle2D clipBounds) {
+            @NotNull Rectangle2D clipBounds, @NotNull Rectangle2D filterRegion) {
         this.primitiveUnits = primitiveUnits;
         this.elementBounds = elementBounds;
         this.clipBounds = clipBounds;
+        this.filterRegion = filterRegion;
     }
 
     public @NotNull UnitType primitiveUnits() {
@@ -53,8 +55,13 @@ public final class FilterLayoutContext {
 
     public @NotNull Rectangle2D filterPrimitiveRegion(@NotNull MeasureContext context,
             @NotNull FilterPrimitive filterPrimitive) {
-        return primitiveUnits.computeViewBounds(context, elementBounds,
+        Rectangle2D.Double explicitRegion = primitiveUnits.computeViewBounds(context, elementBounds,
                 filterPrimitive.x(), filterPrimitive.y(), filterPrimitive.width(), filterPrimitive.height());
+        return new Rectangle2D.Double(
+                filterPrimitive.xSpecified() ? explicitRegion.x : filterRegion.getX(),
+                filterPrimitive.ySpecified() ? explicitRegion.y : filterRegion.getY(),
+                filterPrimitive.widthSpecified() ? explicitRegion.width : filterRegion.getWidth(),
+                filterPrimitive.heightSpecified() ? explicitRegion.height : filterRegion.getHeight());
     }
 
     public @NotNull ChannelStorage<LayoutBounds> resultChannels() {
