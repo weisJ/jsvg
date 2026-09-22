@@ -36,7 +36,7 @@ import com.google.errorprone.annotations.Immutable;
  * {@code combinators[i]} relates {@code sequences[i]} to {@code sequences[i+1]}.
  */
 @Immutable
-@SuppressWarnings("Immutable") // Internal ownership and the covariant list types are intentional.
+@SuppressWarnings({"Immutable", "java:S1452", "java:S4968"}) // Internal ownership and covariance are intentional.
 public final class ComplexSelector {
 
     private final @NotNull List<? extends @NotNull CompoundSelector> sequences;

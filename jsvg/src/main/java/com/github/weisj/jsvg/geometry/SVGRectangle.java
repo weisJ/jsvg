@@ -61,6 +61,7 @@ public final class SVGRectangle implements SVGShape {
     }
 
     @Override
+    @SuppressWarnings("java:S4144") // Shape and bounds are distinct API contracts for a rectangle.
     public @NotNull Rectangle2D bounds(@NotNull RenderContext context, boolean validate) {
         if (validate) validateShape(context.measureContext());
         return rect;

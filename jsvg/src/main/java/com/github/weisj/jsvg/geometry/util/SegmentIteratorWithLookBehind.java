@@ -103,6 +103,8 @@ public final class SegmentIteratorWithLookBehind {
         lookBehindCursor++;
     }
 
+    // The label exits both the switch and its enclosing path-segment scan.
+    @SuppressWarnings("java:S1119")
     public void moveToNext() {
         if (lookBehindCursor >= 0) {
             lookBehindCursor--;

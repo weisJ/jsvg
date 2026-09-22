@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.parser.css.data.selectors.SelectorList;
  * A resolved style rule: a single {@link ComplexSelector} (one entry of a qualified rule's
  * {@link SelectorList}) paired with its block normalized into {@link NormalizedProperty}s.
  */
+@SuppressWarnings({"java:S1452", "java:S4968"}) // Internal ownership and covariance are intentional.
 public final class StyleRule {
 
     private final @NotNull ComplexSelector selector;

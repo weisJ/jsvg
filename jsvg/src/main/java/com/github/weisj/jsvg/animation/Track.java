@@ -74,6 +74,7 @@ public final class Track {
     }
 
     @NotNull
+    @SuppressWarnings("javabugs:S2259") // The nullable parser result is checked before insertion.
     private static List<Duration> parseBegin(@NotNull AttributeNode attributeNode) {
         String[] beginsRaw = attributeNode.getStringList("begin", SeparatorMode.SEMICOLON_ONLY);
         List<Duration> begins;

@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.parser.css.impl.phase3ruleparse.CssNormalizer;
  * {@link CssNormalizer}. Matching {@code @media} at-rules have been flattened in; other at-rules and
  * non-matching {@code @media} queries are dropped.
  */
+@SuppressWarnings({"java:S1452", "java:S4968"}) // Internal ownership and covariance are intentional.
 public final class StyleRuleList {
 
     private final @NotNull List<? extends @NotNull StyleRule> rules;

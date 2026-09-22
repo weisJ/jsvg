@@ -67,6 +67,7 @@ public final class Stop extends AbstractSVGNode {
     }
 
     @Override
+    @SuppressWarnings("javabugs:S2259") // getColor supplies the non-null default color.
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         Color c = attributeNode.getColor("stop-color");

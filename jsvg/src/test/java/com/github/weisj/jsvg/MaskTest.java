@@ -64,6 +64,7 @@ class MaskTest {
     }
 
     @Test
+    @SuppressWarnings("java:S125") // Keep the flaky comparison visible for future re-enablement.
     void referenceTests() {
         assertEquals(SUCCESS, compareImages("mask/mask1.svg"));
         assertEquals(SUCCESS, compareImages("mask/mask2.svg"));

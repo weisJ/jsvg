@@ -83,6 +83,7 @@ public interface Output {
     /**
      * @deprecated Use {@link #applyClip(Shape)} instead.
      */
+    @SuppressWarnings("java:S1133") // Retained for source and binary compatibility.
     @Deprecated
     default void setClip(@Nullable Shape shape) {}
 
@@ -90,6 +91,7 @@ public interface Output {
      * @deprecated No longer consulted; the default font size is taken from
      *             {@link com.github.weisj.jsvg.renderer.PlatformSupport#fontSize()}.
      */
+    @SuppressWarnings("java:S1133") // Retained for source and binary compatibility.
     @Deprecated
     default Optional<Float> contextFontSize() {
         return Optional.empty();

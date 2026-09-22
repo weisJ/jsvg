@@ -85,6 +85,7 @@ public final class CssNormalizer {
     }
 
     /** Each selector in the comma-separated list produces its own {@link StyleRule}. */
+    @SuppressWarnings("java:S4968") // Preserve covariance while filtering the selector stream.
     private static @NotNull Stream<@NotNull StyleRule> normalizeStyleRule(@NotNull Rule.QualifiedRule qr) {
         SelectorList selectors = new SelectorParser(qr.prelude()).parse();
         if (selectors == null) {

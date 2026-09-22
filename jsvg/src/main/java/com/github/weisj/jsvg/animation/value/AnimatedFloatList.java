@@ -55,6 +55,7 @@ public final class AnimatedFloatList implements FloatListValue {
     }
 
     @Override
+    @SuppressWarnings("javabugs:S6466") // Initial progress returns before the animation values are indexed.
     public float @NotNull [] get(@NotNull MeasureContext context) {
         long ts = context.timestamp();
         if (ts != this.timestamp) {

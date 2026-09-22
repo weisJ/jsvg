@@ -477,6 +477,8 @@ public final class Lexer {
         return (c >= 0 && c <= 0x08) || c == 0x0B || (c >= 0x0E && c <= 0x1F) || c == 0x7F;
     }
 
+    // This is the CSS number grammar; ASCII digits and its explicit structure are intentional.
+    @SuppressWarnings({"java:S5843", "java:S6353"})
     private static final Pattern NUMBER_PATTERN =
             Pattern.compile("^[-+]?(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?$");
 

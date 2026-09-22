@@ -51,6 +51,8 @@ import com.github.weisj.jsvg.renderer.output.Output;
     categories = Category.Descriptive,
     anyOf = {MeshRow.class, Animate.class, AnimateTransform.class, Set.class /* <script> */ }
 )
+// Coordinates and the measure context are retained for the pending mesh-gradient transform implementation.
+@SuppressWarnings({"java:S1172", "java:S1450"})
 public final class MeshGradient extends ContainerNode implements SVGPaint {
     public static final String TAG = "meshgradient";
 

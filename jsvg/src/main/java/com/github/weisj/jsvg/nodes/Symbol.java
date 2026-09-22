@@ -48,6 +48,8 @@ import com.github.weisj.jsvg.renderer.MeasureContext;
     anyOf = {Anchor.class, ClipPath.class, Filter.class, Image.class, Mask.class, Marker.class, Pattern.class,
             Style.class, Text.class, View.class}
 )
+// The inheritance depth follows the SVG element and rendering model hierarchy.
+@SuppressWarnings("java:S110")
 public final class Symbol extends CommonInnerViewContainer {
     public static final String TAG = "symbol";
 

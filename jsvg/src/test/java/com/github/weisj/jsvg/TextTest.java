@@ -81,6 +81,7 @@ class TextTest {
     }
 
     @Test
+    @SuppressWarnings("java:S125") // The disabled assertion documents a known platform-dependent comparison.
     void lengthAdjustTest() {
         // Font rendering is not pixel perfect, so this test is flaky.
         assertDoesNotThrow(() -> renderJsvg("text/lengthAdjust.svg"));

@@ -92,6 +92,7 @@ abstract class TextContainer<T> extends BaseContainerNode<T>
         return children;
     }
 
+    @SuppressWarnings("java:S1172") // Renderable requires the context parameter; subclasses use it.
     public boolean isVisible(@NotNull RenderContext context) {
         return isVisible;
     }

@@ -186,6 +186,7 @@ public final class PreserveAspectRatio {
         return parse(preserveAspectRation, null, parser);
     }
 
+    @SuppressWarnings("javabugs:S2259") // parseStringList returns a non-null array for this overload.
     public static @NotNull PreserveAspectRatio parse(@Nullable String preserveAspectRation,
             @Nullable PreserveAspectRatio fallback, @NotNull AttributeParser parser) {
         Align align = Align.xMidYMid;

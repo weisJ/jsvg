@@ -38,6 +38,8 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 
+// The underscored method names mirror the packed raster layouts they inspect and expose.
+@SuppressWarnings("java:S100")
 public final class ImageUtil {
     public static final @NotNull ColorModel LINEAR_RGB_COLOR_MODEL = new DirectColorModel(
             ColorSpace.getInstance(ColorSpace.CS_LINEAR_RGB), 32,

@@ -40,7 +40,7 @@ import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
 
-@SuppressWarnings("Convert2MethodRef")
+@SuppressWarnings({"Convert2MethodRef", "java:S1612"}) // Lambdas defer loading the implementation classes.
 public final class NodeSupplier {
 
     private final Map<String, Supplier<SVGNode>> constructorMap;

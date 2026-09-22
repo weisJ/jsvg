@@ -50,6 +50,7 @@ public final class SolidColor extends AbstractSVGNode implements SimplePaintSVGP
     }
 
     @Override
+    @SuppressWarnings("javabugs:S2259") // getColor supplies the non-null default color.
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         Color c = attributeNode.getColor("solid-color");

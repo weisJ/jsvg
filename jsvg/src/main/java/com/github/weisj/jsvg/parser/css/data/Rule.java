@@ -41,7 +41,7 @@ public interface Rule {
 
     /** A qualified rule (§5.4.2): {@code <prelude> { <block> }}. In SVG, this is a style rule. */
     @Immutable
-    @SuppressWarnings("Immutable") // Internal ownership and the covariant list type are intentional.
+    @SuppressWarnings({"Immutable", "java:S1452"}) // Internal ownership and covariance are intentional.
     final class QualifiedRule implements Rule {
         private final @NotNull List<? extends @NotNull ComponentValue> prelude;
         private final @NotNull ComponentValue.SimpleBlock.Brace block;
@@ -84,7 +84,7 @@ public interface Rule {
 
     /** An at-rule (§5.4.2): {@code @<name> <prelude> [ ; | { <block> } ]}. */
     @Immutable
-    @SuppressWarnings("Immutable") // Internal ownership and the covariant list type are intentional.
+    @SuppressWarnings({"Immutable", "java:S1452"}) // Internal ownership and covariance are intentional.
     final class AtRule implements Rule, DeclarationListItem {
         private final @NotNull String name;
         private final @NotNull List<? extends @NotNull ComponentValue> prelude;

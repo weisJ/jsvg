@@ -71,6 +71,7 @@ public final class ParserUtil {
         }
     }
 
+    @SuppressWarnings("javabugs:S2259") // The explicit fallback makes parseStringList non-null.
     public static float @NotNull [] parseFloatList(@Nullable String value) {
         String[] values = parseStringList(value, SeparatorMode.COMMA_AND_WHITESPACE, new String[0]);
         float[] ret = new float[values.length];
