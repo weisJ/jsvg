@@ -36,11 +36,9 @@ import javax.swing.*;
 import org.apache.batik.swing.JSVGCanvas;
 import org.ehcache.sizeof.SizeOf;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.darklaf.Customization;
 import com.github.weisj.darklaf.LafManager;
-import com.github.weisj.darklaf.iconset.AllIcons;
-import com.github.weisj.darklaf.ui.button.ButtonConstants;
 import com.github.weisj.jsvg.parser.*;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.RenderConfig;
@@ -53,143 +51,256 @@ import com.github.weisj.jsvg.view.ViewBox;
 import com.kitfox.svg.app.beans.SVGIcon;
 
 public final class SVGViewer {
+    private static final String NO_VIEW = "<None>";
 
     private SVGViewer() {}
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
+            installLookAndFeel();
+            JFrame frame = createFrame();
+            frame.setVisible(true);
+        });
+    }
+
+    private static void installLookAndFeel() {
+        try {
             LafManager.installTheme(LafManager.getPreferredThemeStyle());
-            JFrame frame = new JFrame("SVGViewer");
+        } catch (LinkageError e) {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (ReflectiveOperationException | UnsupportedLookAndFeelException ignored) {
+                // Keep Swing's cross-platform look and feel.
+            }
+        }
+    }
 
-            JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
-            iconBox.setSelectedItem("tmp.svg");
+    private static @NotNull JFrame createFrame() {
+        JFrame frame = new JFrame("SVGViewer");
 
-            JComponent contentPane = (JComponent) frame.getContentPane();
-            contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
-                    KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.META_DOWN_MASK),
-                    "selectPreviousIcon");
-            contentPane.getActionMap().put("selectPreviousIcon", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    int nextIndex = Math.max(0, iconBox.getSelectedIndex() - 1);
-                    iconBox.setSelectedIndex(nextIndex);
-                }
-            });
-            contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
-                    KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.META_DOWN_MASK),
-                    "selectNextIcon");
-            contentPane.getActionMap().put("selectNextIcon", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    int nextIndex = Math.min(iconBox.getItemCount() - 1, iconBox.getSelectedIndex() + 1);
-                    iconBox.setSelectedIndex(nextIndex);
-                }
-            });
+        JComboBox<String> iconBox = new JComboBox<>(new DefaultComboBoxModel<>(findIcons()));
+        iconBox.setSelectedItem("tmp.svg");
+        iconBox.setToolTipText("Select an SVG document (⌘← / ⌘→)");
+        Dimension selectorSize = iconBox.getPreferredSize();
+        selectorSize.width = 420;
+        iconBox.setPreferredSize(selectorSize);
 
-            SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
-            svgPanel.setPreferredSize(new Dimension(1000, 600));
-            iconBox.addItemListener(e -> svgPanel.selectIcon((String) iconBox.getSelectedItem()));
+        JComponent contentPane = (JComponent) frame.getContentPane();
+        installIconSelectionShortcuts(contentPane, iconBox);
 
-            Box box = Box.createHorizontalBox();
-            box.add(Box.createHorizontalGlue());
-            box.add(iconBox);
-            box.add(Box.createHorizontalGlue());
+        SVGPanel svgPanel = new SVGPanel((String) Objects.requireNonNull(iconBox.getSelectedItem()));
+        svgPanel.setPreferredSize(new Dimension(1000, 600));
+        iconBox.addActionListener(e -> svgPanel.selectIcon((String) Objects.requireNonNull(iconBox.getSelectedItem())));
 
-            frame.add(box, BorderLayout.NORTH);
-            frame.add(svgPanel, BorderLayout.CENTER);
+        frame.add(createDocumentSelector(iconBox), BorderLayout.NORTH);
+        frame.add(svgPanel, BorderLayout.CENTER);
+        frame.add(createControls(svgPanel), BorderLayout.SOUTH);
 
-            Box controls = Box.createVerticalBox();
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        return frame;
+    }
 
-            Box renderingMode = Box.createHorizontalBox();
-            JRadioButton jsvg = new JRadioButton(RenderingMode.JSVG.name());
-            jsvg.setSelected(true);
-            jsvg.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.JSVG));
-            JRadioButton svgSalamander = new JRadioButton(RenderingMode.SVG_SALAMANDER.name());
-            svgSalamander.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.SVG_SALAMANDER));
-            JRadioButton batik = new JRadioButton(RenderingMode.BATIK.name());
-            batik.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.BATIK));
+    private static @NotNull JComponent createDocumentSelector(@NotNull JComboBox<String> iconBox) {
+        JPanel selector = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 6));
+        selector.add(createSectionLabel("Document"));
+        selector.add(iconBox);
+        return selector;
+    }
 
-            ButtonGroup bg = new ButtonGroup();
-            bg.add(jsvg);
-            bg.add(svgSalamander);
-            bg.add(batik);
-            renderingMode.add(jsvg);
-            renderingMode.add(svgSalamander);
-            renderingMode.add(batik);
-            renderingMode.add(Box.createHorizontalStrut(5));
+    private static @NotNull JComponent createControls(@NotNull SVGPanel svgPanel) {
+        Box controls = Box.createVerticalBox();
+        controls.setBorder(BorderFactory.createEmptyBorder(4, 8, 6, 8));
 
-            JCheckBox paintShape = new JCheckBox("Paint SVG shape");
-            paintShape.addActionListener(e -> svgPanel.setPaintSVGShape(paintShape.isSelected()));
-            renderingMode.add(paintShape);
-            renderingMode.add(Box.createHorizontalStrut(5));
+        Box renderingControls = createRenderingControls(svgPanel);
+        renderingControls.setAlignmentX(Component.LEFT_ALIGNMENT);
+        controls.add(renderingControls);
+        controls.add(Box.createVerticalStrut(4));
 
-            JCheckBox softClipping = new JCheckBox("Soft clipping");
-            softClipping.addActionListener(e -> svgPanel.setSoftClipping(softClipping.isSelected()));
-            softClipping.doClick();
-            renderingMode.add(softClipping);
-            renderingMode.add(Box.createHorizontalStrut(5));
+        Box displayControls = createDisplayControls(svgPanel);
+        displayControls.setAlignmentX(Component.LEFT_ALIGNMENT);
+        controls.add(displayControls);
+        controls.add(Box.createVerticalStrut(4));
 
-            JCheckBox lowRes = new JCheckBox("Render at intrinsic resolution");
-            lowRes.addActionListener(e -> svgPanel.setRenderAtLowResolution(lowRes.isSelected()));
-            renderingMode.add(lowRes);
-            renderingMode.add(Box.createHorizontalStrut(5));
+        DocumentControls documentControls = new DocumentControls(svgPanel);
+        documentControls.setAlignmentX(Component.LEFT_ALIGNMENT);
+        controls.add(documentControls);
+        return controls;
+    }
 
-            JCheckBox intrinsicSize = new JCheckBox("Render at intrinsic size");
-            intrinsicSize.addActionListener(e -> svgPanel.setRenderAtIntrinsicSize(intrinsicSize.isSelected()));
-            renderingMode.add(intrinsicSize);
-            renderingMode.add(Box.createHorizontalStrut(5));
+    private static void installIconSelectionShortcuts(
+            @NotNull JComponent contentPane,
+            @NotNull JComboBox<String> iconBox) {
+        contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.META_DOWN_MASK),
+                "selectPreviousIcon");
+        contentPane.getActionMap().put("selectPreviousIcon", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int nextIndex = Math.max(0, iconBox.getSelectedIndex() - 1);
+                iconBox.setSelectedIndex(nextIndex);
+            }
+        });
+        contentPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.META_DOWN_MASK),
+                "selectNextIcon");
+        contentPane.getActionMap().put("selectNextIcon", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int nextIndex = Math.min(iconBox.getItemCount() - 1, iconBox.getSelectedIndex() + 1);
+                iconBox.setSelectedIndex(nextIndex);
+            }
+        });
+    }
 
-            JCheckBox strictRendering = new JCheckBox("Strict Mask Rendering");
-            strictRendering.addActionListener(e -> svgPanel.setStrictMaskRendering(strictRendering.isSelected()));
-            renderingMode.add(strictRendering);
-            renderingMode.add(Box.createHorizontalGlue());
+    private static @NotNull Box createRenderingControls(@NotNull SVGPanel svgPanel) {
+        Box controls = Box.createHorizontalBox();
+        controls.add(createSectionLabel("Renderer"));
+        controls.add(Box.createHorizontalStrut(6));
 
-            JButton resourceInfo = new JButton("Print Memory");
-            resourceInfo.addActionListener(e -> svgPanel.printMemory());
-            renderingMode.add(resourceInfo);
+        JRadioButton jsvg = new JRadioButton("JSVG");
+        jsvg.setSelected(true);
+        jsvg.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.JSVG));
+        JRadioButton svgSalamander = new JRadioButton("SVG Salamander");
+        svgSalamander.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.SVG_SALAMANDER));
+        JRadioButton batik = new JRadioButton("Batik");
+        batik.addActionListener(e -> svgPanel.setRenderingMode(RenderingMode.BATIK));
 
-            controls.add(renderingMode);
+        ButtonGroup bg = new ButtonGroup();
+        bg.add(jsvg);
+        bg.add(svgSalamander);
+        bg.add(batik);
+        controls.add(jsvg);
+        controls.add(svgSalamander);
+        controls.add(batik);
+        controls.add(Box.createHorizontalGlue());
 
-            Box animationControls = Box.createHorizontalBox();
+        JButton resourceInfo = new JButton("Print memory usage");
+        resourceInfo.setToolTipText("Print estimated renderer memory usage to the console");
+        resourceInfo.addActionListener(e -> svgPanel.printMemory());
+        controls.add(resourceInfo);
+        return controls;
+    }
 
-            JButton restartAnimation = new JButton(AllIcons.Action.Refresh.get());
-            restartAnimation.putClientProperty(Customization.Button.KEY_SQUARE, true);
-            restartAnimation.putClientProperty(Customization.Button.KEY_VARIANT, ButtonConstants.VARIANT_BORDERLESS);
-            restartAnimation.setDisabledIcon(AllIcons.Action.Refresh.disabled());
+    private static @NotNull Box createDisplayControls(@NotNull SVGPanel svgPanel) {
+        Box controls = Box.createHorizontalBox();
+        controls.add(createSectionLabel("Display"));
+        controls.add(Box.createHorizontalStrut(6));
 
-            JToggleButton pauseAnimation = new JToggleButton(AllIcons.Action.Pause.get());
-            pauseAnimation.putClientProperty(Customization.Button.KEY_SQUARE, true);
-            pauseAnimation.putClientProperty(Customization.Button.KEY_VARIANT, ButtonConstants.VARIANT_BORDERLESS);
+        JCheckBox paintShape = new JCheckBox("Shape preview");
+        paintShape.setToolTipText("Render the computed SVG shape in magenta instead of its normal paint");
+        paintShape.addActionListener(e -> svgPanel.setPaintSVGShape(paintShape.isSelected()));
+        controls.add(paintShape);
 
-            pauseAnimation.setDisabledIcon(AllIcons.Action.Pause.disabled());
-            pauseAnimation.setSelectedIcon(AllIcons.Action.Play.get());
-            pauseAnimation.setDisabledSelectedIcon(AllIcons.Action.Play.disabled());
-            pauseAnimation.setSelected(false);
+        JCheckBox softClipping = new JCheckBox("Soft clipping");
+        softClipping.setToolTipText("Use antialiased clipping for SVG clip paths");
+        softClipping.addActionListener(e -> svgPanel.setSoftClipping(softClipping.isSelected()));
+        softClipping.doClick();
+        controls.add(softClipping);
 
+        JCheckBox lowRes = new JCheckBox("Intrinsic resolution");
+        lowRes.setToolTipText("Render at the SVG's intrinsic resolution, then scale the result");
+        lowRes.addActionListener(e -> svgPanel.setRenderAtLowResolution(lowRes.isSelected()));
+        controls.add(lowRes);
+
+        JCheckBox intrinsicSize = new JCheckBox("Intrinsic size");
+        intrinsicSize.setToolTipText("Center the SVG at its intrinsic size instead of filling the viewer");
+        intrinsicSize.addActionListener(e -> svgPanel.setRenderAtIntrinsicSize(intrinsicSize.isSelected()));
+        controls.add(intrinsicSize);
+
+        JCheckBox strictRendering = new JCheckBox("Accurate masks");
+        strictRendering.setToolTipText("Prefer mask rendering accuracy over speed");
+        strictRendering.addActionListener(e -> svgPanel.setStrictMaskRendering(strictRendering.isSelected()));
+        controls.add(strictRendering);
+        controls.add(Box.createHorizontalGlue());
+        return controls;
+    }
+
+    private static @NotNull JLabel createSectionLabel(@NotNull String text) {
+        JLabel label = new JLabel(text + ":");
+        label.setFont(label.getFont().deriveFont(Font.BOLD));
+        return label;
+    }
+
+    private static void addSectionSeparator(@NotNull Container controls) {
+        controls.add(Box.createHorizontalStrut(8));
+        JSeparator separator = new JSeparator(SwingConstants.VERTICAL);
+        separator.setMaximumSize(new Dimension(1, 22));
+        separator.setPreferredSize(new Dimension(1, 22));
+        controls.add(separator);
+        controls.add(Box.createHorizontalStrut(8));
+    }
+
+    private static final class DocumentControls extends JPanel {
+        private final @NotNull JLabel animationLabel = createSectionLabel("Animation");
+        private final @NotNull JButton restartAnimation = new JButton("Restart");
+        private final @NotNull JToggleButton pauseAnimation = new JToggleButton("Pause");
+        private final @NotNull JLabel viewLabel = createSectionLabel("SVG view");
+        private final @NotNull JComboBox<String> viewSelection = new JComboBox<>();
+
+        private DocumentControls(@NotNull SVGPanel svgPanel) {
+            setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+            setOpaque(false);
+
+            restartAnimation.setToolTipText("Restart the animation from the beginning");
             restartAnimation.addActionListener(e -> {
                 svgPanel.restartAnimation();
                 pauseAnimation.setSelected(false);
             });
-            pauseAnimation.addActionListener(e -> {
-                svgPanel.setAnimationState(!pauseAnimation.isSelected());
+
+            pauseAnimation.setToolTipText("Pause the animation");
+            pauseAnimation.addItemListener(e -> updatePauseButton());
+            pauseAnimation.addActionListener(e -> svgPanel.setAnimationState(!pauseAnimation.isSelected()));
+
+            Dimension viewSize = viewSelection.getPreferredSize();
+            viewSize.width = 220;
+            viewSelection.setPreferredSize(viewSize);
+            viewSelection.setMaximumSize(viewSize);
+            viewSelection.setToolTipText("Select a named <view> declared by this SVG");
+            viewSelection.addActionListener(e -> {
+                String selectedView = (String) viewSelection.getSelectedItem();
+                svgPanel.setViewName(NO_VIEW.equals(selectedView) ? null : selectedView);
             });
 
-            animationControls.add(Box.createHorizontalStrut(5));
-            animationControls.add(restartAnimation);
-            animationControls.add(Box.createHorizontalStrut(5));
-            animationControls.add(pauseAnimation);
-            animationControls.add(Box.createHorizontalGlue());
+            add(animationLabel);
+            add(Box.createHorizontalStrut(6));
+            add(restartAnimation);
+            add(Box.createHorizontalStrut(4));
+            add(pauseAnimation);
+            addSectionSeparator(this);
+            add(viewLabel);
+            add(Box.createHorizontalStrut(6));
+            add(viewSelection);
+            add(Box.createHorizontalGlue());
 
-            controls.add(animationControls);
-            controls.add(Box.createVerticalStrut(5));
+            svgPanel.addPropertyChangeListener(
+                    SVGPanel.DOCUMENT_PROPERTY, e -> updateDocument((SVGDocument) e.getNewValue()));
+            updateDocument(svgPanel.document());
+        }
 
-            frame.add(controls, BorderLayout.SOUTH);
+        private void updatePauseButton() {
+            boolean paused = pauseAnimation.isSelected();
+            pauseAnimation.setText(paused ? "Resume" : "Pause");
+            pauseAnimation.setToolTipText(paused ? "Resume the animation" : "Pause the animation");
+        }
 
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-        });
+        private void updateDocument(@Nullable SVGDocument document) {
+            boolean animated = document != null && document.isAnimated();
+            animationLabel.setEnabled(animated);
+            restartAnimation.setEnabled(animated);
+            pauseAnimation.setEnabled(animated);
+            pauseAnimation.setSelected(false);
+
+            DefaultComboBoxModel<String> views = new DefaultComboBoxModel<>();
+            views.addElement(NO_VIEW);
+            if (document != null) document.viewNames().forEach(views::addElement);
+            viewSelection.setModel(views);
+
+            boolean hasViews = views.getSize() > 1;
+            viewLabel.setEnabled(hasViews);
+            viewSelection.setEnabled(hasViews);
+        }
     }
 
     private static String[] findIcons() {
@@ -203,9 +314,12 @@ public final class SVGViewer {
     }
 
     private static final class SVGPanel extends JPanel {
+        private static final String DOCUMENT_PROPERTY = "document";
+
         private final Map<String, SVGDocument> iconCache = new HashMap<>();
-        private SVGDocument document;
-        private String selectedIconName;
+        private @Nullable SVGDocument document;
+        private @Nullable String selectedIconName;
+        private @Nullable com.github.weisj.jsvg.view.View selectedView;
         private RenderingMode mode = RenderingMode.JSVG;
         private final SVGIcon icon = new SVGIcon() {
             @Override
@@ -229,11 +343,15 @@ public final class SVGViewer {
 
 
         public SVGPanel(@NotNull String iconName) {
-            selectIcon(iconName);
             setBackground(Color.WHITE);
             setOpaque(true);
             icon.setAutosize(SVGIcon.AUTOSIZE_BESTFIT);
             icon.setAntiAlias(true);
+            selectIcon(iconName);
+        }
+
+        private @Nullable SVGDocument document() {
+            return document;
         }
 
         private void printMemory() {
@@ -248,7 +366,7 @@ public final class SVGViewer {
         }
 
         private void restartAnimation() {
-            if (document == null) return;
+            if (document == null || !document.isAnimated()) return;
             animationPlayer.stop();
             animationPlayer.start();
         }
@@ -263,26 +381,37 @@ public final class SVGViewer {
         }
 
         private void selectIcon(@NotNull String name) {
+            if (name.equals(selectedIconName)) return;
+
             animationPlayer.stop();
+            SVGDocument oldDocument = document;
+            document = iconCache.computeIfAbsent(name, this::loadDocument);
+            selectedIconName = name;
+            selectedView = null;
+            animationPlayer.setAnimation(document != null ? document.animation() : null);
+            if (document != null && document.isAnimated()) restartAnimation();
+
+            configureRenderer();
+            firePropertyChange(DOCUMENT_PROPERTY, oldDocument, document);
+        }
+
+        private @Nullable SVGDocument loadDocument(@NotNull String name) {
+            SVGLoader loader = new SVGLoader();
+            LoaderContext loaderContext = LoaderContext.builder()
+                    .externalResourcePolicy(ResourcePolicy.ALLOW_ALL)
+                    .build();
+            return loader.load(iconUrl(name), loaderContext);
+        }
+
+        private void configureRenderer() {
+            String iconName = Objects.requireNonNull(selectedIconName);
             remove(jsvgCanvas);
             switch (mode) {
                 case JSVG -> {
-                    document = iconCache.computeIfAbsent(name, n -> {
-                        URL url = Objects.requireNonNull(SVGViewer.class.getResource(n));
-                        SVGLoader loader = new SVGLoader();
-                        LoaderContext loaderContext = LoaderContext.builder()
-                                .externalResourcePolicy(ResourcePolicy.ALLOW_ALL)
-                                .build();
-                        return loader.load(url, loaderContext);
-                    });
-                    if (document != null) {
-                        animationPlayer.setAnimation(document.animation());
-                        restartAnimation();
-                    }
                 }
                 case SVG_SALAMANDER -> {
                     try {
-                        icon.setSvgURI(Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI());
+                        icon.setSvgURI(iconUrl(iconName).toURI());
                     } catch (URISyntaxException e) {
                         throw new IllegalStateException(e);
                     }
@@ -290,15 +419,18 @@ public final class SVGViewer {
                 case BATIK -> {
                     add(jsvgCanvas);
                     try {
-                        jsvgCanvas.setURI(
-                                Objects.requireNonNull(SVGViewer.class.getResource(name)).toURI().toASCIIString());
+                        jsvgCanvas.setURI(iconUrl(iconName).toURI().toASCIIString());
                     } catch (URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
-            this.selectedIconName = name;
+            revalidate();
             repaint();
+        }
+
+        private static @NotNull URL iconUrl(@NotNull String name) {
+            return Objects.requireNonNull(SVGViewer.class.getResource(name));
         }
 
         @Override
@@ -308,8 +440,14 @@ public final class SVGViewer {
         }
 
         private void setRenderingMode(@NotNull RenderingMode mode) {
+            if (this.mode == mode) return;
             this.mode = mode;
-            selectIcon(selectedIconName);
+            configureRenderer();
+        }
+
+        private void setViewName(@Nullable String viewName) {
+            selectedView = viewName != null ? com.github.weisj.jsvg.view.View.named(viewName) : null;
+            repaint();
         }
 
         public void setPaintSVGShape(boolean paintShape) {
@@ -355,11 +493,13 @@ public final class SVGViewer {
             System.out.println("======");
             switch (mode) {
                 case JSVG:
+                    SVGDocument currentDocument = document;
+                    if (currentDocument == null) return;
                     ViewBox viewport = new ViewBox(0, 0, getWidth(), getHeight());
                     Graphics2D renderGraphics = (Graphics2D) g.create();
                     BufferedImage img = null;
                     if (this.lowResolution) {
-                        viewport = new ViewBox(document.size());
+                        viewport = new ViewBox(currentDocument.size());
                         img = new BufferedImage((int) viewport.width, (int) viewport.height,
                                 BufferedImage.TYPE_INT_ARGB);
                         Graphics2D imgGraphics = img.createGraphics();
@@ -367,22 +507,23 @@ public final class SVGViewer {
                         renderGraphics = imgGraphics;
                     }
                     if (paintShape) {
-                        Shape shape = document.computeShape(viewport);
+                        Shape shape = currentDocument.computeShape(viewport);
                         renderGraphics.setColor(Color.MAGENTA);
                         renderGraphics.fill(shape);
                     } else {
                         Output output = Output.createForGraphics(renderGraphics);
                         FloatSize floatSize = intrinsicSize
-                                ? document.sizeForViewport(viewport)
+                                ? currentDocument.sizeForViewport(viewport)
                                 : new FloatSize(getWidth(), getHeight());
                         ViewBox vb = new ViewBox(
                                 viewport.width / 2 - floatSize.width / 2,
                                 viewport.height / 2 - floatSize.height / 2,
                                 floatSize.width,
                                 floatSize.height);
-                        document.render(output, RenderConfig.builder()
+                        currentDocument.render(output, RenderConfig.builder()
                                 .platformSupport(new AwtComponentPlatformSupport(this))
                                 .viewBox(vb)
+                                .view(selectedView)
                                 .animationState(animationPlayer.animationState())
                                 .build());
                         output.dispose();
