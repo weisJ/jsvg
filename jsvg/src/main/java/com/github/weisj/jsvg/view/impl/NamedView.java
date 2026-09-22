@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025-2026 Jannis Weis
+ * Copyright (c) 2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,44 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.parser.impl;
+package com.github.weisj.jsvg.view.impl;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.nodes.SVG;
-import com.github.weisj.jsvg.nodes.View;
+import com.github.weisj.jsvg.view.FloatSize;
 
-public class DocumentConstructorAccessor {
+public final class NamedView implements ViewImpl {
+    private final @NotNull String name;
 
-    public interface DocumentConstructor {
-        @NotNull
-        SVGDocument create(@NotNull SVG rootNode, @NotNull Map<@NotNull String, @NotNull View> views);
+    public NamedView(@NotNull String name) {
+        this.name = Objects.requireNonNull(name);
     }
 
-    private static DocumentConstructor documentConstructor;
-
-    static {
-        try {
-            Class.forName(SVGDocument.class.getName());
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    public static void setDocumentConstructor(@NotNull DocumentConstructor constructor) {
-        if (documentConstructor != null) {
-            throw new IllegalStateException("Document constructor already set");
-        }
-        documentConstructor = constructor;
-    }
-
-    static DocumentConstructor constructor() {
-        if (documentConstructor == null) {
-            throw new IllegalStateException("Document constructor not set");
-        }
-        return documentConstructor;
+    @Override
+    public @NotNull ResolvedView resolve(
+            @NotNull Map<String, com.github.weisj.jsvg.nodes.View> views,
+            @NotNull FloatSize documentSize) {
+        com.github.weisj.jsvg.nodes.View view = views.get(name);
+        return view != null
+                ? new ResolvedView(view.viewBox(), view.preserveAspectRatio())
+                : ResolvedView.DEFAULT;
     }
 }

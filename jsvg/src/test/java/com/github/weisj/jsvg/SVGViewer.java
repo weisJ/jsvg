@@ -522,7 +522,7 @@ public final class SVGViewer {
                                 floatSize.height);
                         currentDocument.render(output, RenderConfig.builder()
                                 .platformSupport(new AwtComponentPlatformSupport(this))
-                                .viewBox(vb)
+                                .viewport(vb)
                                 .view(selectedView)
                                 .animationState(animationPlayer.animationState())
                                 .build());

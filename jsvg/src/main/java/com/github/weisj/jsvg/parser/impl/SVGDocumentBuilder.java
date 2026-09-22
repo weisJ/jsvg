@@ -26,6 +26,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,7 @@ import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.Style;
 import com.github.weisj.jsvg.nodes.Use;
+import com.github.weisj.jsvg.nodes.View;
 import com.github.weisj.jsvg.nodes.container.CommonRenderableContainerNode;
 import com.github.weisj.jsvg.parser.DomProcessor;
 import com.github.weisj.jsvg.parser.LoaderContext;
@@ -50,6 +52,7 @@ public final class SVGDocumentBuilder {
     private final @NotNull ParsedDocument parsedDocument;
     /** All the <use> nodes */
     private final @NotNull List<@NotNull ParsedElement> useElements = new ArrayList<>();
+    private final @NotNull List<@NotNull ParsedElement> viewElements = new ArrayList<>();
     private final @NotNull List<@NotNull ParsedElement> styleElements = new ArrayList<>();
     private final @NotNull StyleSheets styleSheets = new StyleSheets();
 
@@ -136,6 +139,10 @@ public final class SVGDocumentBuilder {
             useElements.add(parsedElement);
         }
 
+        if (parsedElement.node() instanceof View) {
+            viewElements.add(parsedElement);
+        }
+
         currentNodeStack.push(new ParsedElementAnnotated(parsedElement));
         return true;
     }
@@ -183,7 +190,19 @@ public final class SVGDocumentBuilder {
         rootNode.build(0, ParsedElement.BuildMode.RENDERED_TREE);
         validatePathCount();
         validateUseElementsDepth();
-        return DocumentConstructorAccessor.constructor().create((SVG) rootNode.node());
+        Map<String, View> views = processViews();
+        return DocumentConstructorAccessor.constructor().create((SVG) rootNode.node(), views);
+    }
+
+    private @NotNull Map<@NotNull String, @NotNull View> processViews() {
+        Map<String, View> views = new LinkedHashMap<>();
+        for (ParsedElement viewElement : viewElements) {
+            String id = viewElement.id();
+            if (id == null || parsedDocument.getElementById(ParsedElement.class, id) != viewElement) continue;
+            viewElement.build(0, ParsedElement.BuildMode.ALL);
+            views.put(id, (View) viewElement.node());
+        }
+        return views;
     }
 
     private void processStyleSheets() {

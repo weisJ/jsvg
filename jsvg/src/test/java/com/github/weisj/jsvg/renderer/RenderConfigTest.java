@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.view.View;
 import com.github.weisj.jsvg.view.ViewBox;
 
 class RenderConfigTest {
@@ -39,14 +40,16 @@ class RenderConfigTest {
         assertNull(config.fontLoader());
         assertEquals(SVGFont.defaultFontSize(), config.fontSize());
         assertEquals(SVGFont.defaultFontFamily(), config.defaultFontFamily());
-        assertNull(config.viewBox());
+        assertNull(config.viewport());
+        assertNull(config.view());
         assertSame(AnimationState.NO_ANIMATION, config.animationState());
     }
 
     @Test
     void configuredValues() {
         FontLoader fontLoader = (family, attributes) -> null;
-        ViewBox viewBox = new ViewBox(1, 2, 3, 4);
+        ViewBox viewport = new ViewBox(1, 2, 3, 4);
+        View view = View.named("detail");
         AnimationState animationState = new AnimationState(2, 10);
 
         RenderConfig config = RenderConfig.builder()
@@ -54,14 +57,16 @@ class RenderConfigTest {
                 .fontLoader(fontLoader)
                 .fontSize(24f)
                 .defaultFontFamily("Custom")
-                .viewBox(viewBox)
+                .viewport(viewport)
+                .view(view)
                 .animationState(animationState)
                 .build();
 
         assertSame(fontLoader, config.fontLoader());
         assertEquals(24f, config.fontSize());
         assertEquals("Custom", config.defaultFontFamily());
-        assertSame(viewBox, config.viewBox());
+        assertSame(viewport, config.viewport());
+        assertSame(view, config.view());
         assertSame(animationState, config.animationState());
     }
 

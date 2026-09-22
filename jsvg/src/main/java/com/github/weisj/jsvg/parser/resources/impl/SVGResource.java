@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.parser.resources.impl;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
@@ -32,12 +33,15 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.View;
 
 public class SVGResource implements RenderableResource {
     private final @NotNull SVGDocument document;
+    private final @Nullable View view;
 
-    public SVGResource(@NotNull SVGDocument document) {
+    public SVGResource(@NotNull SVGDocument document, @Nullable View view) {
         this.document = document;
+        this.view = view;
     }
 
     @Override
@@ -54,6 +58,7 @@ public class SVGResource implements RenderableResource {
                 .fontLoader(accessor.fontLoader(context))
                 .fontSize(context.measureContext().defaultEm())
                 .defaultFontFamily(accessor.defaultFontFamily(context))
+                .view(view)
                 .build());
     }
 }

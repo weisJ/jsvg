@@ -102,7 +102,7 @@ final class FXSVGRendererAWT implements FXSVGRenderer {
             g.clearRect(0, 0, width, height);
             svgDocument.render(output, RenderConfig.builder()
                     .platformSupport(NullPlatformSupport.INSTANCE)
-                    .viewBox(viewBox)
+                    .viewport(viewBox)
                     .animationState(animationState)
                     .build());
         } finally {

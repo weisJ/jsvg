@@ -77,7 +77,6 @@ class WptSvgTestSuite {
     // Current rendering mismatches. Keep upstream artwork and fuzzy limits unchanged.
     private static final Set<String> EXCLUDED = Set.of(
             // embedded: current reference mismatches.
-            "embedded/image-embedding-svg-viewref-with-viewbox.svg",
             "embedded/image-embedding-svg-with-auto-height.svg",
             "embedded/image-embedding-svg-with-fractional-viewbox.svg",
             "embedded/image-embedding-svg-with-viewport-units-inline-style.svg",

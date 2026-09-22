@@ -126,13 +126,19 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
     @Override
     public final @NotNull RenderContext createInnerContextForViewBox(@NotNull FloatSize useSiteSize,
             @Nullable ViewBox view, @NotNull RenderContext context, @NotNull Output output) {
+        return createInnerContextForViewBox(useSiteSize, view, preserveAspectRatio, context, output);
+    }
+
+    public final @NotNull RenderContext createInnerContextForViewBox(@NotNull FloatSize useSiteSize,
+            @Nullable ViewBox view, @NotNull PreserveAspectRatio aspectRatio,
+            @NotNull RenderContext context, @NotNull Output output) {
         ViewBox outerViewBox = computeOuterViewBox(context, useSiteSize);
         ViewBox innerViewBox = view;
 
         // innerViewBox == null should behave as if it were (0,0,width,height).
         // If no viewBox is specified we can avoid the computation of the transform.
         AffineTransform viewTransform = innerViewBox != null
-                ? preserveAspectRatio.computeViewportTransform(outerViewBox.size(), innerViewBox)
+                ? aspectRatio.computeViewportTransform(outerViewBox.size(), innerViewBox)
                 : null;
 
         if (innerViewBox == null) {
@@ -163,5 +169,9 @@ public abstract class BaseInnerViewContainer extends CommonRenderableContainerNo
         }
 
         return innerContext;
+    }
+
+    public final @NotNull PreserveAspectRatio preserveAspectRatio() {
+        return preserveAspectRatio;
     }
 }

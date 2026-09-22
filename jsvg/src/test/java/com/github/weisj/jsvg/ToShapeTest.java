@@ -162,7 +162,7 @@ class ToShapeTest {
         g.setColor(Color.BLACK);
         document.render(new BlackAndWhiteOutput(g), RenderConfig.builder()
                 .platformSupport(NullPlatformSupport.INSTANCE)
-                .viewBox(new ViewBox(0, 0, img.getWidth(), img.getHeight()))
+                .viewport(new ViewBox(0, 0, img.getWidth(), img.getHeight()))
                 .build());
         g.dispose();
         return img;

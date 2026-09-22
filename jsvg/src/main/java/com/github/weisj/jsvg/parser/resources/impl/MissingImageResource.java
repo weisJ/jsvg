@@ -85,7 +85,7 @@ public final class MissingImageResource implements RenderableResource {
                     .fontLoader(accessor.fontLoader(context))
                     .fontSize(context.measureContext().defaultEm())
                     .defaultFontFamily(accessor.defaultFontFamily(context))
-                    .viewBox(new ViewBox(0, 0, SIZE, SIZE))
+                    .viewport(new ViewBox(0, 0, SIZE, SIZE))
                     .build());
         }
     }

@@ -22,12 +22,9 @@
 package com.github.weisj.jsvg.util;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -211,7 +208,7 @@ final class DataUri {
             if (-1 == eq) {
 
                 // Let name equal the result of percent-decoding s.
-                name = percentDecode(s, charset);
+                name = UriUtil.percentDecode(s, charset);
 
                 // Let name equal the result of trimming leading and trailing white-space from name.
                 name = name.trim();
@@ -223,7 +220,7 @@ final class DataUri {
                 name = s.substring(0, eq);
 
                 // Let name equal the result of percent-decoding name.
-                name = percentDecode(name, charset);
+                name = UriUtil.percentDecode(name, charset);
 
                 // Let name equal the result of trimming leading and trailing white-space from name.
                 name = name.trim();
@@ -232,7 +229,7 @@ final class DataUri {
                 value = s.substring(eq + 1);
 
                 // Let value equal the result of percent-decoding value.
-                value = percentDecode(value, charset);
+                value = UriUtil.percentDecode(value, charset);
 
                 // Let value equal the result of trimming leading and trailing white-space from value.
                 value = value.trim();
@@ -295,7 +292,7 @@ final class DataUri {
         String data = uri.substring(comma + 1);
 
         // Let data be the result of percent-decoding data.
-        data = percentDecode(data, charset);
+        data = UriUtil.percentDecode(data, charset);
 
         // Let dataURIObject be an object consisting of the mimeType,
         // contentEncoding, data and supportedValues objects.
@@ -343,19 +340,4 @@ final class DataUri {
         return s.toString();
     }
 
-    private static final Pattern PLUS = Pattern.compile("+", Pattern.LITERAL);
-
-    private static String percentDecode(String s, Charset cs) {
-        try {
-            // We only need to decode %hh escape sequences, while
-            // URLDecoder.decode in addition to that also replaces '+' with space.
-            // As a workaround we first replace all pluses with %2B sequence,
-            // so that they are preserved after decoding.
-            s = PLUS.matcher(s).replaceAll("%2B");
-
-            return URLDecoder.decode(s, cs.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("Charset `" + cs.name() + "' not supported", e);
-        }
-    }
 }

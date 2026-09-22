@@ -97,6 +97,50 @@ class ImageComparisonTest {
     }
 
     @TestFactory
+    Stream<DynamicTest> svgImageFragmentsSelectViewsAndUseRootFallback() throws Exception {
+        Files.writeString(directory.resolve("views.svg"), """
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="10" viewBox="0 0 20 10"
+                     preserveAspectRatio="none">
+                  <view id="right" viewBox="10 0 10 10" preserveAspectRatio="none"/>
+                  <view id="right&amp;encoded" viewBox="10 0 10 10" preserveAspectRatio="none"/>
+                  <view id="right=encoded" viewBox="10 0 10 10" preserveAspectRatio="none"/>
+                  <rect width="10" height="10" fill="red"/>
+                  <rect id="blue" x="10" width="10" height="10" fill="blue"/>
+                </svg>
+                """);
+        var source = new MemoryImageSource("image-views", """
+                <svg xmlns="http://www.w3.org/2000/svg" width="90" height="10">
+                  <image width="10" height="10" preserveAspectRatio="none" href="views.svg#right"/>
+                  <image x="10" width="20" height="10" href="views.svg#blue"/>
+                  <image x="30" width="10" height="10" preserveAspectRatio="none"
+                         href="views.svg#svgView(viewBox(10,0,10,10)%3BpreserveAspectRatio(none))&amp;t=5"/>
+                  <image x="40" width="10" height="10" preserveAspectRatio="none"
+                         href="views.svg#xywh=10,0,10,10"/>
+                  <image x="50" width="10" height="10" preserveAspectRatio="none"
+                         href="views.svg#xywh=percent:50,0,50,100"/>
+                  <image x="60" width="10" height="10" preserveAspectRatio="none"
+                         href="views.svg#%74=5&amp;xywh=pixel:10,0,10,10"/>
+                  <image x="70" width="10" height="10" preserveAspectRatio="none"
+                         href="views.svg#right%26encoded"/>
+                  <image x="80" width="10" height="10" preserveAspectRatio="none"
+                         href="views.svg#right%3Dencoded"/>
+                </svg>
+                """, directory.resolve("document.svg").toUri().toURL());
+        var reference = new MemoryImageSource("image-views-reference", """
+                <svg xmlns="http://www.w3.org/2000/svg" width="90" height="10">
+                  <rect width="10" height="10" fill="blue"/>
+                  <rect x="10" width="10" height="10" fill="red"/>
+                  <rect x="20" width="10" height="10" fill="blue"/>
+                  <rect x="30" width="60" height="10" fill="blue"/>
+                </svg>
+                """);
+        return Stream.of(RenderType.JSVG)
+                .map(renderer -> DynamicTest.dynamicTest(renderer.getClass().getSimpleName(),
+                        () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
+                                expected(reference, RenderType.JSVG), actual(source, renderer), 0, 0)))));
+    }
+
+    @TestFactory
     Stream<DynamicTest> grayscaleReferencesPreserveColorAndAlpha() {
         return Stream.of("gray", "grayAlpha").flatMap(name -> Stream.of(8, 16).map(depth -> DynamicTest
                 .dynamicTest(name + depth, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(

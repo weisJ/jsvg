@@ -65,11 +65,10 @@ public class DefaultResourcePolicy implements ResourcePolicy {
 
     private static @NotNull String cleanup(@NotNull String path) {
         if (path.startsWith("data")) {
-            // Note: Only spaces should be removed but there are programs generating invaid svgs with
-            // newlines in the data uri. So we remove all whitespace characters.
-            // These newlines are produced by encoding them as &#10;
+            // Preserve whitespace in the payload while making it legal URI syntax. This also accepts
+            // newlines produced by programs which encode them as &#10;.
             // See https://github.com/weisJ/jsvg/issues/164
-            return WHITESPACE_PATTERN.matcher(path).replaceAll("");
+            return WHITESPACE_PATTERN.matcher(path).replaceAll("%20");
         }
         return path;
     }

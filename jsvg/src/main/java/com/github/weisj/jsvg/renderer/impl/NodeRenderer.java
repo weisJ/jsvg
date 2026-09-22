@@ -82,7 +82,9 @@ public final class NodeRenderer {
         Output childOutput = output.createChild();
         ElementBounds elementBounds = new ElementBounds(node, childContext);
 
-        applyTransform(renderable, childOutput, childContext, elementBounds);
+        if (instantiator != DocumentInstantiator.INSTANCE_OVERRIDE_TRANSFORM) {
+            applyTransform(renderable, childOutput, childContext, elementBounds);
+        }
 
         if (node instanceof ViewContainer && ((ViewContainer) node).establishesViewBox()) {
             ViewContainer view = (ViewContainer) node;

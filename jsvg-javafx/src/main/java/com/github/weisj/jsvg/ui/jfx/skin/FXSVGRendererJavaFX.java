@@ -76,7 +76,7 @@ final class FXSVGRendererJavaFX implements FXSVGRenderer {
             Output output = FXOutput.createForGraphicsContext(graphics);
             svgDocument.render(output, RenderConfig.builder()
                     .platformSupport(NullPlatformSupport.INSTANCE)
-                    .viewBox(viewBox)
+                    .viewport(viewBox)
                     .animationState(animationState)
                     .build());
             output.dispose();

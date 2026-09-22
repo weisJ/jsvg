@@ -27,28 +27,37 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.view.View;
 import com.github.weisj.jsvg.view.ViewBox;
 
-/** Immutable configuration for a single SVG render operation. */
+/**
+ * Immutable configuration for a single SVG render operation.
+ * <p>
+ * The {@link #view() view} selects the source region and aspect-ratio mapping from the SVG document, while the
+ * {@link #viewport() viewport} defines the destination rectangle into which that view is rendered.
+ */
 public final class RenderConfig {
     private final @NotNull PlatformSupport platformSupport;
     private final @Nullable FontLoader fontLoader;
     private final @Nullable Float fontSize;
     private final @Nullable String defaultFontFamily;
-    private final @Nullable ViewBox viewBox;
+    private final @Nullable ViewBox viewport;
+    private final @Nullable View view;
     private final @NotNull AnimationState animationState;
 
     private RenderConfig(@NotNull PlatformSupport platformSupport,
             @Nullable FontLoader fontLoader,
             @Nullable Float fontSize,
             @Nullable String defaultFontFamily,
-            @Nullable ViewBox viewBox,
+            @Nullable ViewBox viewport,
+            @Nullable View view,
             @NotNull AnimationState animationState) {
         this.platformSupport = platformSupport;
         this.fontLoader = fontLoader;
         this.fontSize = fontSize;
         this.defaultFontFamily = defaultFontFamily;
-        this.viewBox = viewBox;
+        this.viewport = viewport;
+        this.view = view;
         this.animationState = animationState;
     }
 
@@ -78,9 +87,17 @@ public final class RenderConfig {
         return defaultFontFamily != null ? defaultFontFamily : SVGFont.defaultFontFamily();
     }
 
-    /** Returns the target viewport, or {@code null} to use the document's intrinsic size. */
-    public @Nullable ViewBox viewBox() {
-        return viewBox;
+    /**
+     * Returns the destination viewport into which the selected document {@link #view() view} is rendered, or
+     * {@code null} to use the document's intrinsic size.
+     */
+    public @Nullable ViewBox viewport() {
+        return viewport;
+    }
+
+    /** Returns the source document view selected for rendering, or {@code null} for the root view. */
+    public @Nullable View view() {
+        return view;
     }
 
     /** Returns the animation state used to resolve animated values. */
@@ -94,7 +111,8 @@ public final class RenderConfig {
         private @Nullable FontLoader fontLoader;
         private @Nullable Float fontSize;
         private @Nullable String defaultFontFamily;
-        private @Nullable ViewBox viewBox;
+        private @Nullable ViewBox viewport;
+        private @Nullable View view;
         private @NotNull AnimationState animationState = AnimationState.NO_ANIMATION;
 
         private Builder() {}
@@ -124,9 +142,18 @@ public final class RenderConfig {
             return this;
         }
 
-        /** Sets the target viewport, or {@code null} to use the document's intrinsic size. */
-        public @NotNull Builder viewBox(@Nullable ViewBox viewBox) {
-            this.viewBox = viewBox;
+        /**
+         * Sets the destination viewport into which the selected document {@link #view(View) view} is rendered, or
+         * {@code null} to use the document's intrinsic size.
+         */
+        public @NotNull Builder viewport(@Nullable ViewBox viewport) {
+            this.viewport = viewport;
+            return this;
+        }
+
+        /** Selects the source document view, or {@code null} to use the root view. */
+        public @NotNull Builder view(@Nullable View view) {
+            this.view = view;
             return this;
         }
 
@@ -138,7 +165,8 @@ public final class RenderConfig {
 
         /** Creates an immutable render configuration. */
         public @NotNull RenderConfig build() {
-            return new RenderConfig(platformSupport, fontLoader, fontSize, defaultFontFamily, viewBox, animationState);
+            return new RenderConfig(
+                    platformSupport, fontLoader, fontSize, defaultFontFamily, viewport, view, animationState);
         }
     }
 }

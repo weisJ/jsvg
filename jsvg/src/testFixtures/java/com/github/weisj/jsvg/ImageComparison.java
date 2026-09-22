@@ -456,7 +456,8 @@ public final class ImageComparison {
                 .fontLoader(baseConfig.fontLoader())
                 .fontSize(baseConfig.fontSize())
                 .defaultFontFamily(baseConfig.defaultFontFamily())
-                .viewBox(new ViewBox(size))
+                .viewport(new ViewBox(size))
+                .view(baseConfig.view())
                 .animationState(baseConfig.animationState())
                 .build());
         output.dispose();
