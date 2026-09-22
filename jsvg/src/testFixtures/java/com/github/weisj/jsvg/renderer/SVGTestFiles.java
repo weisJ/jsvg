@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 public class SVGTestFiles {
@@ -49,7 +50,7 @@ public class SVGTestFiles {
             try (Stream<Path> stream = Files.walk(dir.toPath(), 2)) {
                 return stream.map(Path::toFile)
                         .filter(File::isFile)
-                        .filter(f -> f.getName().toLowerCase().endsWith(".svg"))
+                        .filter(f -> f.getName().toLowerCase(Locale.ROOT).endsWith(".svg"))
                         .map(File::getAbsolutePath)
                         .toList();
             } catch (IOException e) {

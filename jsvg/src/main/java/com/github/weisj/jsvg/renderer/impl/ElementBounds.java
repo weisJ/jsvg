@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,92 +24,79 @@ package com.github.weisj.jsvg.renderer.impl;
 import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.HasFilter;
 import com.github.weisj.jsvg.nodes.prototype.HasShape;
+import com.github.weisj.jsvg.nodes.prototype.HasShape.Box;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.view.ViewBox;
 
 public class ElementBounds {
-
     private final @NotNull SVGNode node;
-    private final RenderContext context;
+    private final @NotNull RenderContext context;
+    private final @Nullable Box suppliedBox;
+    private final @Nullable Rectangle2D suppliedBounds;
 
-    private Rectangle2D boundingBox;
-    private Rectangle2D strokeBox;
-    private Rectangle2D geometryBox;
+    public ElementBounds(@NotNull SVGNode node, @NotNull RenderContext context) {
+        this(node, context, null, null);
+    }
 
-    public ElementBounds(@NotNull SVGNode node, RenderContext context) {
+    private ElementBounds(@NotNull SVGNode node, @NotNull RenderContext context,
+            @Nullable Box suppliedBox, @Nullable Rectangle2D suppliedBounds) {
         this.node = node;
         this.context = context;
+        this.suppliedBox = suppliedBox;
+        this.suppliedBounds = suppliedBounds;
     }
 
     public static @NotNull ElementBounds fromUntransformedBounds(@NotNull SVGNode node, @NotNull RenderContext context,
-            @NotNull Rectangle2D bounds, HasShape.Box box) {
-        ElementBounds elementBounds = new ElementBounds(node, context);
-        switch (box) {
-            case BoundingBox:
-                elementBounds.boundingBox = bounds;
-                break;
-            case StrokeBox:
-                elementBounds.strokeBox = bounds;
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + box);
-        }
-        return elementBounds;
+            @NotNull Rectangle2D bounds, @NotNull Box box) {
+        return new ElementBounds(node, context, box, bounds);
     }
 
     public @NotNull Rectangle2D boundingBox() {
-        if (boundingBox == null) {
-            boundingBox = elementBounds(node, context, HasShape.Box.BoundingBox);
-        }
-        return boundingBox;
-    }
-
-    public @NotNull Rectangle2D geometryBox() {
-        if (geometryBox == null) {
-            geometryBox = strokeBox();
-            if (node instanceof HasFilter) {
-                geometryBox = filterBounds((HasFilter) node, context, geometryBox);
-            }
-        }
-        return geometryBox;
-    }
-
-    public @NotNull Rectangle2D strokeBox() {
-        if (strokeBox == null) {
-            strokeBox = elementBounds(node, context, HasShape.Box.StrokeBox);
-        }
-        return strokeBox;
+        return bounds(Box.BoundingBox);
     }
 
     public @NotNull Rectangle2D fillBox() {
         return boundingBox();
     }
 
-    private static @NotNull Rectangle2D elementBounds(@NotNull SVGNode node, @NotNull RenderContext context,
-            HasShape.Box box) {
-        Rectangle2D elementBounds;
-        if (node instanceof HasShape) {
-            elementBounds = ((HasShape) node).untransformedElementBounds(context, box);
-        } else {
-            MeasureContext measureContext = context.measureContext();
-            elementBounds = new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());
+    public @NotNull Rectangle2D strokeBox() {
+        return bounds(Box.StrokeBox);
+    }
+
+    public @NotNull Rectangle2D sourceBox() {
+        return bounds(Box.SourceBox);
+    }
+
+    public @NotNull Rectangle2D outputBox() {
+        return bounds(Box.OutputBox);
+    }
+
+    public @NotNull Rectangle2D bounds(@NotNull Box box) {
+        if (box == suppliedBox && suppliedBounds != null) return suppliedBounds;
+        if (box == Box.OutputBox) {
+            Rectangle2D source = sourceBox();
+            Filter filter = node instanceof HasFilter ? ((HasFilter) node).filter() : null;
+            if (filter == null) return source;
+            Filter.FilterLayout layout = filter.createFilterLayout(null, context, this);
+            return layout != null ? GeometryUtil.union(source, layout.effectiveFilterArea()) : source;
         }
-        return elementBounds;
+        if (node instanceof HasShape) return ((HasShape) node).computeUntransformedBounds(context, box);
+        MeasureContext measureContext = context.measureContext();
+        return new ViewBox(measureContext.viewWidth(), measureContext.viewHeight());
     }
 
-    private @NotNull Rectangle2D filterBounds(@NotNull HasFilter node, @NotNull RenderContext context,
-            @NotNull Rectangle2D elementBounds) {
-        Filter filter = node.filter();
-        if (filter == null) return elementBounds;
-        Filter.FilterBounds filterBounds = filter.createFilterBounds(null, context, this);
-        if (filterBounds == null) return elementBounds;
-        return elementBounds.createUnion(filterBounds.effectiveFilterArea());
+    /** Bounds in the parent coordinate system. */
+    public @NotNull Rectangle2D transformedBounds(@NotNull Box box) {
+        return node instanceof HasShape
+                ? ((HasShape) node).computeTransformedBounds(context, box)
+                : bounds(box);
     }
-
 }

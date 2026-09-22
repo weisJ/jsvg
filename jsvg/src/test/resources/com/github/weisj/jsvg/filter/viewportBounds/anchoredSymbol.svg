@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="80">
+	<defs>
+		<filter id="identity" x="0" y="0" width="100%" height="100%">
+			<feColorMatrix />
+		</filter>
+		<symbol id="content" refX="14" refY="24" viewBox="10 20 40 20">
+			<rect x="14" y="24" width="16" height="8" fill="red" />
+		</symbol>
+	</defs>
+	<!-- Use-site dimensions must also participate when the enclosing group 
+		measures the nested SVG. -->
+	<g filter="url(#identity)">
+		<use xlink:href="#content" x="24" y="16" width="80" height="40" />
+	</g>
+</svg>

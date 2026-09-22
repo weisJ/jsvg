@@ -36,6 +36,7 @@ import com.google.errorprone.annotations.Immutable;
  * most specific matching selector, so it can only be computed at match time.
  */
 @Immutable
+@SuppressWarnings({"Immutable", "java:S1452", "java:S4968"}) // Internal ownership and covariance are intentional.
 public final class SelectorList {
 
     private final @NotNull List<? extends @NotNull ComplexSelector> selectors;

@@ -40,7 +40,7 @@ public final class FXOutput {
      * Example usage:
      * <pre><code>
      *     Output output = FXOutput.createForGraphicsContext(graphics);
-     *     svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null, null);
+     *     svgDocument.render(output, RenderConfig.builder().build());
      *     output.dispose();
      * </code></pre>
      */

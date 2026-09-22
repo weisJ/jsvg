@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,10 @@
  */
 package com.github.weisj.jsvg.nodes.container;
 
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
@@ -29,12 +32,16 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.ShapedContainer;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.ElementBounds;
+import com.github.weisj.jsvg.util.ShapeUtil;
 import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 
 public abstract class CommonInnerViewContainer extends BaseInnerViewContainer implements ShapedContainer<SVGNode> {
     protected Length x;
@@ -60,6 +67,50 @@ public abstract class CommonInnerViewContainer extends BaseInnerViewContainer im
         return new FloatSize(
                 width.orElseIfUnspecified(measure.viewWidth()).resolve(measure),
                 height.orElseIfUnspecified(measure.viewHeight()).resolve(measure));
+    }
+
+    @Override
+    public @NotNull Shape elementShape(@NotNull RenderContext context, Box box) {
+        return elementShape(context, box, size(context));
+    }
+
+    public @NotNull Shape elementShape(@NotNull RenderContext context, Box box, @NotNull FloatSize useSiteSize) {
+        return geometryInOuterSpace(context, box, useSiteSize, false);
+    }
+
+    @Override
+    public @NotNull Rectangle2D computeTransformedBounds(@NotNull RenderContext context, Box box) {
+        return computeTransformedBoundsWithSize(context, box, size(context));
+    }
+
+    public @NotNull Rectangle2D computeTransformedBoundsWithSize(@NotNull RenderContext context, Box box,
+            @NotNull FloatSize useSiteSize) {
+        return geometryInOuterSpace(context, box, useSiteSize, true).getBounds2D();
+    }
+
+    private @NotNull Shape geometryInOuterSpace(@NotNull RenderContext context, Box box,
+            @NotNull FloatSize useSiteSize, boolean boundsOnly) {
+        ViewBox outerViewBox = computeOuterViewBox(context, useSiteSize);
+        ViewBox innerViewBox = viewBox(context);
+        if (innerViewBox == null) {
+            innerViewBox = new ViewBox(outerViewBox.size());
+        }
+        RenderContext innerContext = createInnerContext(context, innerViewBox);
+        Shape shape = boundsOnly
+                ? new ElementBounds(this, innerContext).bounds(box)
+                : untransformedElementShape(innerContext, box);
+        if (!GeometryUtil.isValidRect(shape.getBounds2D())) return shape;
+
+        AffineTransform viewTransform = preserveAspectRatio.computeViewportTransform(outerViewBox.size(), innerViewBox);
+        Point2D anchor = anchorLocation(innerContext.measureContext(), viewTransform);
+        AffineTransform placement = AffineTransform.getTranslateInstance(outerViewBox.x, outerViewBox.y);
+        if (anchor != null) {
+            placement.translate(anchor.getX(), anchor.getY());
+        }
+        placement.concatenate(viewTransform);
+        shape = ShapeUtil.transformShape(shape, placement);
+        return transformShape(shape, context,
+                ElementBounds.fromUntransformedBounds(this, context, shape.getBounds2D(), box));
     }
 
     @Override

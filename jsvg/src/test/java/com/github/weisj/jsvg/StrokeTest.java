@@ -21,11 +21,17 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+
+import com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
 
 class StrokeTest {
 
@@ -41,5 +47,20 @@ class StrokeTest {
     @Test
     void invalidMiterlimitTest() {
         assertEquals(SUCCESS, compareImages("stroke/stroke_miterlimit_invalid.svg"));
+    }
+
+    @Test
+    void invalidDashArraysAndPathLengths() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("stroke/dashValidation_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("stroke/dashValidation.svg"), RenderType.JSVG), 0, 0)));
+    }
+
+    @Test
+    void percentageDashoffset() {
+        // In a 280 x 40 viewport, 20% of the normalized diagonal is 40 user units.
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("stroke/percentageDashoffset_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("stroke/percentageDashoffset.svg"), RenderType.JSVG), 0, 0)));
     }
 }

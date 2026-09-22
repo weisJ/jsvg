@@ -43,7 +43,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.TransformedPaint;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
@@ -143,7 +142,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return !width.isZero() && !height.isZero() && SVGPaint.super.isVisible(context);
+        return !width.isZero() && !height.isZero() && !hasEmptyViewBox() && SVGPaint.super.isVisible(context);
     }
 
     @Override
@@ -174,13 +173,14 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
                 ImageUtil::createCompatibleTransparentImage, context, null,
                 patternBounds, bounds, patternContentUnits);
 
-        if (blittableImage == null) return PaintParser.DEFAULT_COLOR;
+        if (blittableImage == null) return Color.BLACK;
 
         blittableImage.render(output, (out, ctx) -> {
             if (patternContentUnits == UnitType.UserSpaceOnUse) {
                 ctx.translate(out, patternBounds.getX(), patternBounds.getY());
             }
-            renderWithSize(new FloatSize(patternBounds), viewBox, ctx, out);
+            RenderContext innerContext = createInnerContextForViewBox(new FloatSize(patternBounds), viewBox, ctx, out);
+            render(innerContext, out);
         });
 
         // Fixme: When patternTransform != null antialiasing is broken

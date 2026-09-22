@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+	<!-- Reduction requires more than one user unit for each neighboring image 
+		pixel. Compare repaint pixels at the alpha discontinuity with a full render. -->
+	<defs>
+		<filter id="lighting" filterUnits="userSpaceOnUse" x="-200"
+			y="-200" width="600" height="600" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="8">
+				<feDistantLight azimuth="35" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+	</defs>
+	<g filter="url(#lighting)" transform="matrix(0.25 0 0 0.5 60 40)">
+		<rect x="40" y="40" width="40" height="40" />
+		<rect x="80" y="80" width="40" height="40" fill-opacity="0.5" />
+	</g>
+</svg>

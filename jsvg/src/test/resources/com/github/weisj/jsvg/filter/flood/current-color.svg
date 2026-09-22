@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="70"
+	color="#336699">
+	<defs>
+		<filter id="flood" x="0" y="0" width="1" height="1">
+			<feFlood flood-color="currentColor" flood-opacity="0.5" />
+		</filter>
+	</defs>
+	<!-- One filter is reused with a different render-context color for each 
+		shape. -->
+	<rect x="10" y="10" width="30" height="40" fill="red"
+		filter="url(#flood)" />
+	<rect x="60" y="10" width="30" height="40" color="#339966"
+		fill="red" filter="url(#flood)" />
+	<rect x="110" y="10" width="30" height="40"
+		color="rgba(153,51,102,0.5)" fill="red" filter="url(#flood)" />
+</svg>

@@ -26,13 +26,12 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.nodes.Rect;
-import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.css.impl.phase4matcher.StyleSheets;
 
 public final class ParserTestUtil {
 
-    private static final AttributeParser ATTRIBUTE_PARSER = new AttributeParser(new DefaultPaintParser());
+    private static final AttributeParser ATTRIBUTE_PARSER = AttributeParser.INSTANCE;
     private static final LoadHelper LOAD_HELPER = new LoadHelper(ATTRIBUTE_PARSER, LoaderContext.builder().build());
 
     private ParserTestUtil() {}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+	<!-- Offset moves the artwork outside SourceAlpha; transparent map pixels 
+		move it another (5,5). -->
+	<rect x="45" y="15" width="10" height="10" fill="red" />
+</svg>

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2013-2024 Jannis Weis
+ * Copyright (c) 2013-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,12 +22,9 @@
 package com.github.weisj.jsvg.util;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
  *  Note: This file has been modified for usage in the JSVG project.
  */
 final class DataUri {
+    private static final String DATA_SCHEME = "data:";
     private static final String CHARSET_OPTION_NAME = "charset";
     private static final String FILENAME_OPTION_NAME = "filename";
     private static final String CONTENT_DISPOSITION_OPTION_NAME = "content-disposition";
@@ -143,7 +141,7 @@ final class DataUri {
     public static DataUri parse(@NotNull String uri, Charset charset) throws MalformedDataUriException {
 
         // If URI does not start with a case-insensitive "data:": Throw a MALFORMED_URI exception.
-        if (!uri.toLowerCase(Locale.ENGLISH).startsWith("data:"))
+        if (!uri.toLowerCase(Locale.ENGLISH).startsWith(DATA_SCHEME))
             throw new MalformedDataUriException("URI must start with a case-insensitive `data:'");
 
         // If URI does not contain a ",": Throw a MALFORMED_URI exception.
@@ -187,7 +185,7 @@ final class DataUri {
 
         // Let temp be the substring of URI from, and including,
         // position 5 to, and excluding, the comma position. (between "data:" and first ",")
-        String temp = uri.substring("data:".length(), comma);
+        String temp = uri.substring(DATA_SCHEME.length(), comma);
 
         // Let headers be an array of strings returned by splitting temp by ";".
         String[] headers = temp.split(";");
@@ -210,7 +208,7 @@ final class DataUri {
             if (-1 == eq) {
 
                 // Let name equal the result of percent-decoding s.
-                name = percentDecode(s, charset);
+                name = UriUtil.percentDecode(s, charset);
 
                 // Let name equal the result of trimming leading and trailing white-space from name.
                 name = name.trim();
@@ -222,7 +220,7 @@ final class DataUri {
                 name = s.substring(0, eq);
 
                 // Let name equal the result of percent-decoding name.
-                name = percentDecode(name, charset);
+                name = UriUtil.percentDecode(name, charset);
 
                 // Let name equal the result of trimming leading and trailing white-space from name.
                 name = name.trim();
@@ -231,7 +229,7 @@ final class DataUri {
                 value = s.substring(eq + 1);
 
                 // Let value equal the result of percent-decoding value.
-                value = percentDecode(value, charset);
+                value = UriUtil.percentDecode(value, charset);
 
                 // Let value equal the result of trimming leading and trailing white-space from value.
                 value = value.trim();
@@ -253,17 +251,12 @@ final class DataUri {
                     // If name is found case-insensitively in supportedContentEncodings:
                     final String nameCaseInsensitive = name.toLowerCase(Locale.ENGLISH);
 
-                    if (supportedContentEncodings.contains(nameCaseInsensitive)) {
+                    if (supportedContentEncodings.contains(nameCaseInsensitive) && !contentEncodingAlreadySet) {
+                        // Let contentEncoding equal name.
+                        contentEncoding = name;
 
-                        // If contentEncodingAlreadySet is false:
-                        if (!contentEncodingAlreadySet) {
-
-                            // Let contentEncoding equal name.
-                            contentEncoding = name;
-
-                            // Let contentEncodingAlreadySet equal true.
-                            contentEncodingAlreadySet = true;
-                        }
+                        // Let contentEncodingAlreadySet equal true.
+                        contentEncodingAlreadySet = true;
                     }
 
                     // Else:
@@ -299,7 +292,7 @@ final class DataUri {
         String data = uri.substring(comma + 1);
 
         // Let data be the result of percent-decoding data.
-        data = percentDecode(data, charset);
+        data = UriUtil.percentDecode(data, charset);
 
         // Let dataURIObject be an object consisting of the mimeType,
         // contentEncoding, data and supportedValues objects.
@@ -335,7 +328,7 @@ final class DataUri {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("data:").append(this.mime()).append(";");
+        s.append(DATA_SCHEME).append(this.mime()).append(";");
 
         if (this.charset != null) s.append(CHARSET_OPTION_NAME + "=").append(this.charset.name()).append(";");
         if (this.contentDisposition != null)
@@ -347,19 +340,4 @@ final class DataUri {
         return s.toString();
     }
 
-    private static final Pattern PLUS = Pattern.compile("+", Pattern.LITERAL);
-
-    private static String percentDecode(String s, Charset cs) {
-        try {
-            // We only need to decode %hh escape sequences, while
-            // URLDecoder.decode in addition to that also replaces '+' with space.
-            // As a workaround we first replace all pluses with %2B sequence,
-            // so that they are preserved after decoding.
-            s = PLUS.matcher(s).replaceAll("%2B");
-
-            return URLDecoder.decode(s, cs.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("Charset `" + cs.name() + "' not supported", e);
-        }
-    }
 }

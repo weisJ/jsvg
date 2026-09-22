@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+	<!-- Enlarging an identity primitive's subregion must not recover previously 
+		clipped flood pixels. -->
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="40" height="40">
+			<feFlood flood-color="blue" result="background" />
+			<feFlood x="8" y="8" width="8" height="8" flood-color="red" />
+			<feComponentTransfer x="24" y="8" width="8"
+				height="8" />
+			<feMerge>
+				<feMergeNode in="background" />
+				<feMergeNode />
+			</feMerge>
+		</filter>
+	</defs>
+	<rect width="40" height="40" filter="url(#f)" />
+</svg>

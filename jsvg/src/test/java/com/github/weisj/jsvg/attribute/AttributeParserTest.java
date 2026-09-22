@@ -35,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.attributes.transform.TransformPart;
-import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.NumberListSplitter;
 import com.github.weisj.jsvg.parser.css.impl.phase2basicparse.BasicParser;
 import com.github.weisj.jsvg.parser.css.impl.phase2basicparse.BasicParserInput;
@@ -44,6 +43,7 @@ import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.util.RandomData;
+import com.github.weisj.jsvg.view.FloatSize;
 
 class AttributeParserTest {
 
@@ -51,7 +51,7 @@ class AttributeParserTest {
 
     @BeforeEach
     void setup() {
-        parser = new AttributeParser(new DefaultPaintParser());
+        parser = AttributeParser.INSTANCE;
     }
 
     @Test
@@ -140,7 +140,7 @@ class AttributeParserTest {
 
     private static @NotNull AffineTransform resolve(@Nullable List<TransformPart> parts) {
         assertNotNull(parts);
-        MeasureContext ctx = new MeasureContext(0, 0, 0, 0, 0, 0, 0, new AnimationState(0, 0));
+        MeasureContext ctx = MeasureContext.createInitial(new FloatSize(0, 0), 0, 0, new AnimationState(0, 0));
         AffineTransform t = new AffineTransform();
         for (TransformPart part : parts) {
             t = part.applyToTransform(t, ctx);

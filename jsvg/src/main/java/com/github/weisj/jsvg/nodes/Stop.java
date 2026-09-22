@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,7 +34,6 @@ import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.util.ColorUtil;
 
@@ -45,7 +44,7 @@ import com.github.weisj.jsvg.util.ColorUtil;
 public final class Stop extends AbstractSVGNode {
     public static final String TAG = "stop";
 
-    private @NotNull Color color = PaintParser.DEFAULT_COLOR;
+    private @NotNull Color color = Color.BLACK;
     private Percentage offset;
     private @Nullable BezierPathCommand path;
 
@@ -67,6 +66,7 @@ public final class Stop extends AbstractSVGNode {
     }
 
     @Override
+    @SuppressWarnings("javabugs:S2259") // getColor supplies the non-null default color.
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         Color c = attributeNode.getColor("stop-color");

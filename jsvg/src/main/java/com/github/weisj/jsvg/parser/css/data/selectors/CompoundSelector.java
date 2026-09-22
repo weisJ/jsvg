@@ -34,6 +34,7 @@ import com.google.errorprone.annotations.Immutable;
  * simple selectors not separated by a combinator, all matching the same element (e.g. {@code a.bar#baz}).
  */
 @Immutable
+@SuppressWarnings({"Immutable", "java:S1452"}) // Internal ownership and covariance are intentional.
 public final class CompoundSelector {
 
     private final @NotNull List<? extends @NotNull SimpleSelector> simpleSelectors;

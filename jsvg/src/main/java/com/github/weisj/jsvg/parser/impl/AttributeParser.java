@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser.impl;
 
 import static com.github.weisj.jsvg.util.AttributeUtil.toNonnullArray;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -48,17 +49,26 @@ import com.github.weisj.jsvg.logging.Logger.Level;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.NumberListSplitter;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
 import com.github.weisj.jsvg.parser.css.data.Token;
+import com.github.weisj.jsvg.parser.css.impl.CssParser;
+import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
+import com.github.weisj.jsvg.parser.impl.paint.PaintParser;
+import com.github.weisj.jsvg.renderer.CssHints;
 
 public final class AttributeParser {
 
+    public static final @NotNull AttributeParser INSTANCE =
+            new AttributeParser(new PaintParser(), new FullCssParser());
+
     private static final Logger LOGGER = LogFactory.createLogger(AttributeParser.class);
     private final @NotNull PaintParser paintParser;
+    private final @NotNull CssParser cssParser;
 
-    public AttributeParser(@NotNull PaintParser paintParser) {
+    AttributeParser(@NotNull PaintParser paintParser, @NotNull CssParser cssParser) {
         this.paintParser = paintParser;
+        this.cssParser = cssParser;
     }
 
     @Contract("_,!null,_ -> !null")
@@ -216,6 +226,18 @@ public final class AttributeParser {
 
     public @Nullable SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode attributeNode) {
         return paintParser.parsePaint(value);
+    }
+
+    public @Nullable Color parseColor(@NotNull List<@NotNull ComponentValue> tokens) {
+        return paintParser.parseColor(tokens);
+    }
+
+    public @Nullable Color parseColor(@NotNull String value) {
+        return paintParser.parseColor(value);
+    }
+
+    public @NotNull StyleRuleList parseStyleSheet(@NotNull List<char[]> input, @NotNull CssHints hints) {
+        return cssParser.parseStyleSheet(input, hints);
     }
 
     public <E extends Enum<E>> @NotNull E parseEnum(@Nullable String value, @NotNull E fallback) {
@@ -460,25 +482,25 @@ public final class AttributeParser {
     /** {@code <number>}/{@code <length>}/{@code <percentage>} from one token, or {@code null} if it is neither. */
     private @Nullable Length lengthFromToken(@Nullable ComponentValue token, @NotNull PercentageDimension dimension) {
         if (token instanceof Token.Number) {
-            return Unit.RAW.valueOf(((Token.Number) token).value());
+            return Unit.RAW.valueOf((float) ((Token.Number) token).value());
         }
         if (token instanceof Token.Dimension) {
             Token.Dimension dimensionToken = (Token.Dimension) token;
             Unit unit = Unit.fromNonPercentageSuffix(dimensionToken.unit().toLowerCase(Locale.ENGLISH));
             if (unit == null) return null;
-            return unit.valueOf(dimensionToken.value());
+            return unit.valueOf((float) dimensionToken.value());
         }
         if (token instanceof Token.Percentage) {
             Unit unit = dimension.unit();
             if (unit == null) return null;
-            return unit.valueOf(((Token.Percentage) token).value());
+            return unit.valueOf((float) ((Token.Percentage) token).value());
         }
         return null;
     }
 
     public float parseFloat(@NotNull List<@NotNull ComponentValue> tokens, float fallback) {
         ComponentValue token = singleToken(tokens);
-        if (token instanceof Token.Number) return ((Token.Number) token).value();
+        if (token instanceof Token.Number) return (float) ((Token.Number) token).value();
         return fallback;
     }
 
@@ -490,14 +512,14 @@ public final class AttributeParser {
     /** {@code <angle>} from one token; bare {@code <number>} = degrees. */
     private static @Nullable Angle angleFromToken(@Nullable ComponentValue token) {
         if (token instanceof Token.Number) {
-            return new Angle(AngleUnit.Raw, ((Token.Number) token).value());
+            return new Angle(AngleUnit.Raw, (float) ((Token.Number) token).value());
         }
         if (token instanceof Token.Dimension) {
             Token.Dimension dimension = (Token.Dimension) token;
             String suffix = dimension.unit().toLowerCase(Locale.ENGLISH);
             for (AngleUnit unit : AngleUnit.units()) {
                 if (unit != AngleUnit.Raw && unit.suffix().equals(suffix)) {
-                    return new Angle(unit, dimension.value());
+                    return new Angle(unit, (float) dimension.value());
                 }
             }
         }
@@ -597,18 +619,18 @@ public final class AttributeParser {
             case TRANSLATE:
                 if (args.size() == 1) {
                     return toNonnullArray(
-                            0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null,
+                            !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null,
                             Length.ZERO);
                 }
                 return toNonnullArray(
-                        0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null,
+                        !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null,
                         1 < args.size() ? lengthFromToken(args.get(1), PercentageDimension.HEIGHT) : null);
             case TRANSLATE_X:
                 return toNonnullArray(
-                        0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null);
+                        !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.WIDTH) : null);
             case TRANSLATE_Y:
                 return toNonnullArray(
-                        0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.HEIGHT) : null);
+                        !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.HEIGHT) : null);
             case ROTATE:
                 if (args.size() > 2) {
                     return toNonnullArray(angle(args, 0),
@@ -625,7 +647,7 @@ public final class AttributeParser {
             case SCALE_X:
             case SCALE_Y:
                 return toNonnullArray(
-                        0 < args.size() ? lengthFromToken(args.get(0), PercentageDimension.NONE) : null);
+                        !args.isEmpty() ? lengthFromToken(args.get(0), PercentageDimension.NONE) : null);
             case SKEW_X:
             case SKEW_Y:
                 return toNonnullArray(angle(args, 0));
@@ -637,18 +659,18 @@ public final class AttributeParser {
     private @Nullable Length number(@NotNull List<@NotNull ComponentValue> args, int index) {
         if (index >= args.size()) return null;
         ComponentValue token = args.get(index);
-        return token instanceof Token.Number ? Unit.RAW.valueOf(((Token.Number) token).value()) : null;
+        return token instanceof Token.Number ? Unit.RAW.valueOf((float) ((Token.Number) token).value()) : null;
     }
 
     /** Transform angle argument in degrees: {@code <number>} or {@code <angle>}; null if neither. */
     private @Nullable Length angle(@NotNull List<@NotNull ComponentValue> args, int index) {
         if (index >= args.size()) return null;
         ComponentValue token = args.get(index);
-        if (token instanceof Token.Number) return Unit.RAW.valueOf(((Token.Number) token).value());
+        if (token instanceof Token.Number) return Unit.RAW.valueOf((float) ((Token.Number) token).value());
         if (token instanceof Token.Dimension) {
             Token.Dimension dimension = (Token.Dimension) token;
             AngleUnit unit = AngleUnit.fromSuffix(dimension.unit());
-            return unit != null ? Unit.RAW.valueOf(unit.toDegrees(dimension.value())) : null;
+            return unit != null ? Unit.RAW.valueOf(unit.toDegrees((float) dimension.value())) : null;
         }
         return null;
     }
@@ -668,10 +690,10 @@ public final class AttributeParser {
             @Nullable Percentage fallback, float min, float max) {
         ComponentValue token = singleToken(tokens);
         if (token instanceof Token.Percentage) {
-            return new Percentage(clamp(min, max, ((Token.Percentage) token).value() / 100f));
+            return new Percentage((float) clamp(min, max, ((Token.Percentage) token).value() / 100.0));
         }
         if (token instanceof Token.Number) {
-            return new Percentage(clamp(min, max, ((Token.Number) token).value()));
+            return new Percentage((float) clamp(min, max, ((Token.Number) token).value()));
         }
         return fallback;
     }
@@ -709,12 +731,13 @@ public final class AttributeParser {
         return token instanceof Token.Ident ? ((Token.Ident) token).name() : null;
     }
 
-    private static float clamp(float min, float max, float value) {
+    private static double clamp(double min, double max, double value) {
         return Math.max(min, Math.min(max, value));
     }
 
-    public @NotNull PaintParser paintParser() {
-        return paintParser;
+    @NotNull
+    CssParser cssParser() {
+        return cssParser;
     }
 
 }

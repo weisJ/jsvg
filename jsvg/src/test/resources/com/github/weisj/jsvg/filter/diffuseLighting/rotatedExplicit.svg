@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+	<!-- Transformed sampling directions must stay stable when the repaint changes 
+		image bounds. Compare repaint pixels at the alpha discontinuity with a full 
+		render. -->
+	<defs>
+		<filter id="lighting" filterUnits="userSpaceOnUse" x="-200"
+			y="-200" width="600" height="600" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="8"
+				kernelUnitLength="4">
+				<feDistantLight azimuth="35" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+	</defs>
+	<g filter="url(#lighting)" transform="matrix(0 1 -1 0 160 0)">
+		<rect x="40" y="40" width="40" height="40" />
+		<rect x="80" y="80" width="40" height="40" fill-opacity="0.5" />
+	</g>
+</svg>

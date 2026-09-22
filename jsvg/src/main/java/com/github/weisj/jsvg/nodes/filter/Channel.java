@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,12 +22,15 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.util.ImageUtil;
 
@@ -38,6 +41,11 @@ public interface Channel {
 
     default @NotNull Image toImage(@NotNull RenderContext context) {
         return context.platformSupport().createImage(producer());
+    }
+
+    default void paint(@NotNull Graphics2D graphics, @NotNull RenderContext context) {
+        graphics.drawImage(context.platformSupport().createImage(producer()),
+                null, context.platformSupport().imageObserver());
     }
 
     default @NotNull BufferedImage toBufferedImageNonAliased(@NotNull RenderContext context) {
@@ -61,5 +69,17 @@ public interface Channel {
 
     default @NotNull Channel alphaChannel() {
         return this.applyFilter(new AlphaImageFilter());
+    }
+
+    default @NotNull Channel clip(@NotNull Rectangle2D region, @NotNull FilterContext context) {
+        Filter.FilterInfo info = context.info();
+        AffineTransform transform = info.output().transform();
+        Shape clip = GeometryUtil.transformBounds(transform, region);
+        if (clip.contains(0, 0, info.imageWidth, info.imageHeight)) return this;
+        if (this instanceof ClippedChannel) {
+            return ((ClippedChannel) this).clipTo(clip);
+        } else {
+            return new ClippedChannel(this, clip, info.imageWidth, info.imageHeight);
+        }
     }
 }

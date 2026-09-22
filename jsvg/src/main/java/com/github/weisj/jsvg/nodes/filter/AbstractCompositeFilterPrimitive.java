@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,15 +22,16 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
@@ -47,6 +48,10 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
 
     protected abstract @NotNull Composite composite();
 
+    protected boolean affectsTransparentBlack() {
+        return false;
+    }
+
     private @NotNull Channel sourceChannel(@NotNull FilterPrimitiveBase impl, @NotNull FilterContext filterContext) {
         return impl.inputChannel(filterContext);
     }
@@ -60,29 +65,35 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds in = impl().layoutInput(filterLayoutContext);
         LayoutBounds in2 = filterLayoutContext.resultChannels().get(inputChannel2);
-        impl().saveLayoutResult(in.union(in2), filterLayoutContext);
+        LayoutBounds bounds = in.union(in2);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), bounds.region());
+        bounds = bounds.withRegion(region,
+                affectsTransparentBlack() ? CoversWholeRegion.YES : CoversWholeRegion.NO);
+        impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         FilterPrimitiveBase impl = impl();
-        BufferedImage dst = destinationChannel(impl, filterContext).toBufferedImageNonAliased(context);
+        Channel source = sourceChannel(impl, filterContext);
+        Channel destination = destinationChannel(impl, filterContext);
+        Composite composite = computeComposite(filterContext);
+        if (source instanceof ConstantColorChannel && destination instanceof ConstantColorChannel) {
+            impl.saveResult(((ConstantColorChannel) destination).composite((ConstantColorChannel) source, composite),
+                    filterContext);
+            return;
+        }
+        BufferedImage dst = destination.toBufferedImageNonAliased(context);
 
-        Image other = context.platformSupport().createImage(sourceChannel(impl, filterContext).producer());
         Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
-        imgGraphics.setComposite(computeComposite(filterContext));
-        imgGraphics.drawImage(other, null, context.platformSupport().imageObserver());
+        imgGraphics.setComposite(composite);
+        source.paint(imgGraphics, context);
         imgGraphics.dispose();
 
         impl.saveResult(new ImageProducerChannel(dst.getSource()), filterContext);
     }
 
     private @NotNull Composite computeComposite(@NotNull FilterContext filterContext) {
-        Composite comp = composite();
-        if (comp instanceof AbstractBlendComposite) {
-            ColorInterpolation colorInterpolation = colorInterpolation(filterContext);
-            ((AbstractBlendComposite) comp).setConvertToLinearRGB(colorInterpolation == ColorInterpolation.LinearRGB);
-        }
-        return comp;
+        return CompositeModeComposite.inColorSpace(composite(), colorInterpolation(filterContext));
     }
 }

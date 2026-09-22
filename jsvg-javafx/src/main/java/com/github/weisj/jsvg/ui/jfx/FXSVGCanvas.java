@@ -80,8 +80,8 @@ public final class FXSVGCanvas extends Control {
         document.addListener(animationModificationListener);
 
         showTransparentPatternProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue) getStyleClass().remove(STYLE_CLASS_TRANSPARENT_PATTERN);
-            if (newValue) getStyleClass().add(STYLE_CLASS_TRANSPARENT_PATTERN);
+            if (Boolean.TRUE.equals(oldValue)) getStyleClass().remove(STYLE_CLASS_TRANSPARENT_PATTERN);
+            if (Boolean.TRUE.equals(newValue)) getStyleClass().add(STYLE_CLASS_TRANSPARENT_PATTERN);
         });
 
     }
@@ -106,9 +106,13 @@ public final class FXSVGCanvas extends Control {
             return;
         }
         timeline.getKeyFrames()
-                .add(new KeyFrame(Duration.millis(animation.startTime()), new KeyValue(elapsedAnimationTime, 0)));
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animation.endTime()),
-                new KeyValue(elapsedAnimationTime, animation.endTime())));
+                .add(new KeyFrame(
+                        Duration.millis((double) animation.startTime()),
+                        new KeyValue(elapsedAnimationTime, 0)));
+        timeline.getKeyFrames()
+                .add(new KeyFrame(
+                        Duration.millis((double) animation.endTime()),
+                        new KeyValue(elapsedAnimationTime, animation.endTime())));
         timeline.setCycleCount(INDEFINITE);
         timeline.playFromStart();
     }

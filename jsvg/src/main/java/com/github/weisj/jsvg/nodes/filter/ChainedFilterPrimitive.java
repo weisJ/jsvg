@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,9 +21,13 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.Rectangle2D;
+
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.renderer.RenderContext;
 
 abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements FilterPrimitive {
@@ -33,19 +37,33 @@ abstract class ChainedFilterPrimitive extends AbstractFilterPrimitive implements
     protected abstract @NotNull FilterPrimitive @NotNull [] primitives();
 
     @Override
-    public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        filterLayoutContext.resultChannels().addResult(outerLastResult, impl().layoutInput(filterLayoutContext));
+    public boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
         for (FilterPrimitive primitive : primitives()) {
-            primitive.layoutFilter(context, filterLayoutContext);
+            if (primitive.isValid() && primitive.requiresAlignedBuffer(context)) return true;
         }
+        return false;
+    }
+
+    @Override
+    public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
+        LayoutBounds input = impl().layoutInput(filterLayoutContext);
+        filterLayoutContext.resultChannels().addAlias(outerLastResult, impl().inputChannelKey());
+        for (FilterPrimitive primitive : primitives()) {
+            Filter.layoutPrimitive(primitive, context, filterLayoutContext);
+        }
+        // The chain implements one primitive, whose default subregion comes from its original input.
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        LayoutBounds result = filterLayoutContext.resultChannels().get(DefaultFilterChannel.LastResult);
+        impl().saveLayoutResult(result.withRegion(region), filterLayoutContext);
     }
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        filterContext.resultChannels().addResult(outerLastResult, impl().inputChannel(filterContext));
+        filterContext.resultChannels().addAlias(outerLastResult, impl().inputChannelKey());
         for (FilterPrimitive primitive : primitives()) {
-            primitive.applyFilter(context, filterContext);
+            Filter.applyPrimitive(primitive, context, filterContext);
         }
+        impl().saveResult(filterContext.getChannel(DefaultFilterChannel.LastResult), filterContext);
     }
 
     private static final class OuterLastResult implements FilterChannelKey {

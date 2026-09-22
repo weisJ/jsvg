@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -55,7 +55,8 @@ final class InplaceBoxBlurFilter {
         int[] dstPixels = ImageUtil.getINT_RGBA_DataBank(dst);
 
         int[] buffer = new int[boxSize];
-        int curr, prev;
+        int curr;
+        int prev;
         int scale = (1 << 24) / boxSize;
 
         for (int y = skipY; y < (height - skipY); y++) {
@@ -135,7 +136,8 @@ final class InplaceBoxBlurFilter {
         int[] dstPixels = ImageUtil.getINT_RGBA_DataBank(dst);
 
         int[] buffer = new int[boxSize];
-        int curr, prev;
+        int curr;
+        int prev;
 
         final int scale = (1 << 24) / boxSize;
 

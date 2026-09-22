@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+	<defs>
+		<filter id="blur" filterUnits="userSpaceOnUse" x="-64" y="-64"
+			width="256" height="256" color-interpolation-filters="sRGB">
+			<feFlood x="48" y="48" width="32" height="32"
+				flood-color="black" />
+			<feGaussianBlur x="-64" y="-64" width="256"
+				height="256" stdDeviation="1 0" edgeMode="wrap" />
+		</filter>
+	</defs>
+	<!-- The constant flood extends as opaque black through either edge mode. -->
+	<g transform="rotate(30 64 64)">
+		<rect x="48" y="48" width="32" height="32" filter="url(#blur)" />
+	</g>
+</svg>

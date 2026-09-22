@@ -35,6 +35,8 @@ import com.google.errorprone.annotations.Immutable;
  * The leading {@code inline} flag ranks inline (style-attribute) declarations above all stylesheet rules.
  */
 @Immutable
+// "inline" is the SVG/CSS specificity term used consistently by the constant, field, and accessor.
+@SuppressWarnings("java:S1845")
 public final class Specificity implements Comparable<Specificity> {
 
     public static final @NotNull Specificity ZERO_IN_STYLESHEET = new Specificity(false, 0, 0, 0);

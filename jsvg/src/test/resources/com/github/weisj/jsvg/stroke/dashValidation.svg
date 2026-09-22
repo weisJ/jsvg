@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120"
+	fill="none" stroke="blue" stroke-width="4">
+	<g stroke-dasharray="20 10">
+		<!-- Invalid dash entries preserve the inherited pattern. -->
+		<path d="M10 10 H230" stroke-dasharray="20 -4" />
+		<path d="M10 30 H230" stroke-dasharray="-4 20" />
+		<path d="M10 50 H230" stroke-dasharray="20 10 -4" />
+		<!-- An all-zero list overrides inherited dashes with a solid stroke. -->
+		<path d="M10 70 H230" stroke-dasharray="0 0" />
+		<!-- Ignore negative pathLength; preserve positive scaling. -->
+		<path d="M10 90 H230" pathLength="-20" />
+		<path d="M10 110 H230" pathLength="110" />
+	</g>
+</svg>

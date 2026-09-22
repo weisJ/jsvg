@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="144" height="72">
+	<!-- Crossing translucent ramps form an asymmetric height field. The field 
+		reaches every filter boundary, so opposing lights exercise interior, edge 
+		and corner normals. -->
+	<defs>
+		<!-- The raster INPUT fixes alpha quantization independently of each engine's 
+			gradient painter. Generated from two crossing linear opacity ramps by tools/reference-audit/generate-heightmap.py. -->
+		<g id="surface">
+			<image xlink:href="asymmetric-height.png" width="64"
+				height="64" />
+		</g>
+		<filter id="northwest" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="64" height="64" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="12"
+				kernelUnitLength="1">
+				<feDistantLight azimuth="225" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+		<filter id="southeast" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="64" height="64" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="12"
+				kernelUnitLength="1">
+				<feDistantLight azimuth="45" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+	</defs>
+	<g transform="translate(4 4)">
+		<g filter="url(#northwest)">
+			<use xlink:href="#surface" />
+		</g>
+	</g>
+	<g transform="translate(76 4)">
+		<g filter="url(#southeast)">
+			<use xlink:href="#surface" />
+		</g>
+	</g>
+</svg>

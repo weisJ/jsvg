@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="100" height="100">
+			<feComposite in="SourceGraphic" in2="BackgroundImage"
+				operator="over" />
+		</filter>
+	</defs>
+	<!-- Robustness fixture for an unsupported legacy input; no fallback rendering 
+		is asserted. -->
+	<rect x="12" y="12" width="24" height="24" fill="red"
+		filter="url(#f)" />
+</svg>

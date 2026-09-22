@@ -44,13 +44,18 @@ public final class ColorUtil {
     }
 
     public static Color withAlpha(@NotNull Color c, float alpha) {
-        int a = Math.max(Math.min(255, (int) (alpha * 255)), 0);
+        int a = clampColor((int) (alpha * 255));
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), a);
     }
 
     public static String toString(@Nullable Color c) {
         if (c == null) return "null";
         return String.format("Color[%d,%d,%d,%d]", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+    }
+
+    /** The CSS compositing Lum function; input and result use the same component scale. */
+    public static double luminosity(double red, double green, double blue) {
+        return 0.3 * red + 0.59 * green + 0.11 * blue;
     }
 
     public static void convertRGBPretoHSL(int r, int g, int b, int a, float @NotNull [] hsl) {
@@ -241,6 +246,20 @@ public final class ColorUtil {
         argb[0] = table[argb[0]];
         argb[1] = table[argb[1]];
         argb[2] = table[argb[2]];
+    }
+
+    /** Converts packed premultiplied sRGB to premultiplied linearRGB, preserving alpha. */
+    public static int sRGBtoLinearRGBPre(int argb) {
+        int[] table = SRGBtoLinearRGBPre[argb >>> 24];
+        return (argb & 0xff000000) | (table[(argb >>> 16) & 0xff] << 16)
+                | (table[(argb >>> 8) & 0xff] << 8) | table[argb & 0xff];
+    }
+
+    /** Converts packed premultiplied linearRGB to premultiplied sRGB, preserving alpha. */
+    public static int linearRGBtoSRGBPre(int argb) {
+        int[] table = LinearRGBtoSRGBPre[argb >>> 24];
+        return (argb & 0xff000000) | (table[(argb >>> 16) & 0xff] << 16)
+                | (table[(argb >>> 8) & 0xff] << 8) | table[argb & 0xff];
     }
 
     public static int sRGBtoLinearRGBBand(int value) {

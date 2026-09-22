@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="24">
+	<!-- Encoding linear 127/255 yields sRGB 187/255. Turbulence (not fractalNoise) 
+		at zero frequency is transparent black. -->
+	<rect width="24" height="24" fill="#bbbbbb"
+		fill-opacity="0.4980392157" />
+	<rect x="24" width="24" height="24" fill="#7f7f7f"
+		fill-opacity="0.4980392157" />
+	<rect x="48" width="24" height="24" fill="#bbbbbb"
+		fill-opacity="0.4980392157" />
+</svg>

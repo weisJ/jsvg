@@ -53,4 +53,11 @@ class PathTest {
                 expected(new PathImageSource("path/partiallyValid.svg"), RenderType.JSVG),
                 actual(new PathImageSource("path/partiallyValid_ref.svg"), RenderType.JSVG))));
     }
+
+    @Test
+    void errorRecovery() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("path/errorRecovery_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("path/errorRecovery.svg"), RenderType.JSVG), 0, 0)));
+    }
 }

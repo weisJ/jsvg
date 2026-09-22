@@ -39,9 +39,11 @@ import com.google.errorprone.annotations.Immutable;
  * Expands CSS shorthand properties into their longhands, or wraps a non-shorthand declaration as-is.
  */
 @Immutable
-public class ShorthandExpander {
+public final class ShorthandExpander {
     private static final String FONT_KEY = "font";
     private static final String MARKER_KEY = "marker";
+
+    private ShorthandExpander() {}
 
     public static @NotNull List<NormalizedProperty> expand(@NotNull Declaration declaration) {
         switch (declaration.name()) {

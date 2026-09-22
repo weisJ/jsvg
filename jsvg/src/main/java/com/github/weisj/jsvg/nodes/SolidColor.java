@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -50,6 +50,7 @@ public final class SolidColor extends AbstractSVGNode implements SimplePaintSVGP
     }
 
     @Override
+    @SuppressWarnings("javabugs:S2259") // getColor supplies the non-null default color.
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         Color c = attributeNode.getColor("solid-color");

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,7 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
 import com.github.weisj.jsvg.attributes.filter.TransferFunctionType;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -52,6 +54,8 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
     private FilterPrimitiveBase filterPrimitiveBase;
     private ByteLookupTable sRGBlookupTable;
     private ByteLookupTable linearRGBlookupTable;
+    private boolean affectsTransparentBlack;
+    private boolean constantOutput;
 
     @Override
     public @NotNull String tagName() {
@@ -99,6 +103,13 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
 
         if (redValid || greenValid || blueValid || alphaValid) {
             sRGBlookupTable = new ByteLookupTable(0, tables);
+            constantOutput = true;
+            for (byte[] table : tables) {
+                affectsTransparentBlack |= table[0] != 0;
+                for (byte value : table) {
+                    constantOutput &= value == table[0];
+                }
+            }
         }
         children().clear();
     }
@@ -130,9 +141,10 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        LayoutBounds bounds = filterPrimitiveBase
-                .layoutInput(filterLayoutContext)
-                .withFlags(new LayoutBounds.ComputeFlags(true));
+        LayoutBounds bounds = filterPrimitiveBase.layoutInput(filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, bounds.region());
+        bounds = bounds.withRegion(region,
+                affectsTransparentBlack ? CoversWholeRegion.YES : CoversWholeRegion.NO);
         filterPrimitiveBase.saveLayoutResult(bounds, filterLayoutContext);
     }
 
@@ -143,7 +155,8 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
         }
         if (linearRGBlookupTable == null) {
             byte[][] tables = sRGBlookupTable.getTable();
-            for (int j = 0; j < tables.length; j++) {
+            // Alpha is coverage and is independent of the RGB interpolation space.
+            for (int j = 0; j < 3; j++) {
                 byte[] table = tables[j];
                 if (table == TransferFunctionElement.IDENTITY_LOOKUP_TABLE) continue;
                 byte[] lRGBtable = new byte[table.length];
@@ -164,7 +177,24 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
             filterPrimitiveBase.noop(filterContext);
             return;
         }
-        ImageFilter f = new BufferedImageFilter(new LookupOp(lookup, filterContext.renderingHints()));
-        filterPrimitiveBase.saveResult(filterPrimitiveBase.inputChannel(filterContext).applyFilter(f), filterContext);
+        Channel input = filterPrimitiveBase.inputChannel(filterContext);
+        Channel result;
+        if (constantOutput) {
+            Filter.FilterInfo info = filterContext.info();
+            result = new ConstantColorChannel(info.imageWidth, info.imageHeight, filterColor(lookup, 0));
+        } else if (input instanceof ConstantColorChannel) {
+            ConstantColorChannel constant = (ConstantColorChannel) input;
+            result = constant.withColor(filterColor(lookup, constant.color()));
+        } else {
+            ImageFilter f = new BufferedImageFilter(new LookupOp(lookup, filterContext.renderingHints()));
+            result = input.applyFilter(f);
+        }
+        filterPrimitiveBase.saveResult(result, filterContext);
+    }
+
+    private static int filterColor(@NotNull LookupTable lookup, int argb) {
+        int[] rgba = {(argb >> 16) & 0xff, (argb >> 8) & 0xff, argb & 0xff, argb >>> 24};
+        lookup.lookupPixel(rgba, rgba);
+        return ((rgba[3] & 0xff) << 24) | ((rgba[0] & 0xff) << 16) | ((rgba[1] & 0xff) << 8) | (rgba[2] & 0xff);
     }
 }

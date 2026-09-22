@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,6 +39,7 @@ import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.util.BlittableImage;
 import com.github.weisj.jsvg.util.ImageUtil;
+import com.github.weisj.jsvg.util.OffscreenImage;
 
 class Info implements AutoCloseable {
     protected final @NotNull RenderContext context;
@@ -70,8 +71,9 @@ class Info implements AutoCloseable {
 
     static final class InfoWithIsolation extends Info {
 
-        private final @NotNull BlittableImage blittableImage;
+        private final @NotNull OffscreenImage blittableImage;
         private final @NotNull Output imageOutput;
+        private final @NotNull Output.SafeState imageOutputState;
         private final @NotNull ElementBounds elementBounds;
         private final @NotNull IsolationEffects isolationEffects;
         private final @Nullable Filter.FilterInfo filterInfo;
@@ -80,9 +82,8 @@ class Info implements AutoCloseable {
                 @NotNull RenderContext context, @NotNull Output output,
                 @NotNull ElementBounds elementBounds, @NotNull IsolationEffects effects) {
 
-            Rectangle2D clipBounds = null;
             Rectangle2D bounds = null;
-            Filter.FilterBounds filterBounds = null;
+            Filter.FilterLayout filterLayout = null;
             Filter.FilterInfo filterInfo = null;
 
             Filter filter = effects.filter;
@@ -90,14 +91,13 @@ class Info implements AutoCloseable {
             ClipPath clipPath = effects.clipPath;
 
             if (filter != null) {
-                filterBounds = filter.createFilterBounds(output, context, elementBounds);
-                if (filterBounds != null) {
-                    bounds = filterBounds.filterRegion();
-                    clipBounds = filterBounds.effectiveFilterArea();
+                filterLayout = filter.createFilterLayout(output, context, elementBounds);
+                if (filterLayout != null) {
+                    bounds = filterLayout.filterRegion();
                 }
             }
             if (mask != null || clipPath != null) {
-                bounds = elementBounds.geometryBox();
+                bounds = elementBounds.outputBox();
             }
 
             if (bounds == null) {
@@ -106,17 +106,19 @@ class Info implements AutoCloseable {
 
             RenderContext imageContext = RenderContextAccessor.instance().deriveForSurface(context);
 
-            BlittableImage blitImage = BlittableImage.create(
-                    ImageUtil::createCompatibleTransparentImage, context, clipBounds,
-                    bounds, elementBounds.boundingBox(), UnitType.UserSpaceOnUse, imageContext);
+            OffscreenImage blitImage = filterLayout != null
+                    ? filterLayout.createImage(ImageUtil::createCompatibleTransparentImage, context, imageContext,
+                            bounds)
+                    : BlittableImage.create(ImageUtil::createCompatibleTransparentImage, context, null,
+                            bounds, elementBounds.boundingBox(), UnitType.UserSpaceOnUse, imageContext);
             if (blitImage == null) return null;
 
             Graphics2D g = blitImage.createGraphics();
             g.setRenderingHints(output.renderingHints());
             Output imageOutput = new Graphics2DOutput(g);
 
-            if (filter != null && filterBounds != null) {
-                filterInfo = new Filter.FilterInfo(blitImage, imageOutput, filterBounds);
+            if (filter != null && filterLayout != null) {
+                filterInfo = new Filter.FilterInfo(blitImage, imageOutput, filterLayout);
             }
 
             return new InfoWithIsolation(
@@ -125,12 +127,13 @@ class Info implements AutoCloseable {
 
         private InfoWithIsolation(@NotNull Renderable renderable, @NotNull RenderContext context,
                 @NotNull Output output, @NotNull Output imageOutput,
-                @NotNull BlittableImage blittableImage,
+                @NotNull OffscreenImage blittableImage,
                 @NotNull ElementBounds elementBounds,
                 @NotNull IsolationEffects isolationEffects, @Nullable Filter.FilterInfo filterInfo) {
             super(renderable, context, output);
             this.blittableImage = blittableImage;
             this.imageOutput = imageOutput;
+            this.imageOutputState = imageOutput.safeState();
             this.elementBounds = elementBounds;
             this.isolationEffects = isolationEffects;
             this.filterInfo = filterInfo;
@@ -148,6 +151,8 @@ class Info implements AutoCloseable {
 
         @Override
         public void close() {
+            // Source rendering may change the output transform, for example when drawing an image.
+            imageOutputState.restore();
             Output previousOutput = this.output;
             BufferedImage result = this.blittableImage.image();
 

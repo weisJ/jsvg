@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="32">
+	<defs>
+		<filter id="identity" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="96" height="32">
+			<feOffset />
+		</filter>
+		<filter id="flood" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="12" height="20">
+			<feFlood flood-color="blue" />
+		</filter>
+		<g id="generated" filter="url(#flood)" />
+	</defs>
+	<!-- Include referenced filter output and the use-site translation in the 
+		ancestor bounds. -->
+	<g filter="url(#identity)">
+		<rect x="4" y="4" width="12" height="20" fill="red" />
+		<use href="#generated" x="40" y="4" />
+	</g>
+</svg>

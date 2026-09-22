@@ -120,14 +120,14 @@ public interface SimpleSelector {
     /** Id selector: {@code #foo}. Specificity {@code (1,0,0)}. */
     @Immutable
     final class Id implements SimpleSelector {
-        private final @NotNull String id;
+        private final @NotNull String value;
 
         public Id(@NotNull String id) {
-            this.id = id;
+            this.value = id;
         }
 
         public @NotNull String id() {
-            return id;
+            return value;
         }
 
         @Override
@@ -137,29 +137,30 @@ public interface SimpleSelector {
 
         @Override
         public @NotNull MatchResult matches(@NotNull ParsedElement targetElement) {
-            return new MatchResult(id.equals(targetElement.id()), false);
+            return new MatchResult(value.equals(targetElement.id()), false);
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof Id)) return false;
-            return id.equals(((Id) o).id);
+            return value.equals(((Id) o).value);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(id);
+            return Objects.hash(value);
         }
 
         @Override
         public String toString() {
-            return "#" + id;
+            return "#" + value;
         }
     }
 
     /** Class selector: {@code .foo}. Specificity {@code (0,1,0)}. */
     @Immutable
+    @SuppressWarnings("JavaLangClash") // CSS calls this selector kind a class.
     final class Class implements SimpleSelector {
         private final @NotNull String name;
 
@@ -255,11 +256,10 @@ public interface SimpleSelector {
 
         /**
          * Resolves the {@code i}/{@code s} flag: absent means case-sensitive unless the attribute is in
-         * {@link StyleRuleMatcher#ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES}.
+         * {@link StyleRuleMatcher#isAttributeValueCaseInsensitive(String)}.
          */
         public boolean caseSensitiveWithDefault() {
-            return caseSensitive != null ? caseSensitive
-                    : !StyleRuleMatcher.ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES.contains(name);
+            return caseSensitive != null ? caseSensitive : !StyleRuleMatcher.isAttributeValueCaseInsensitive(name);
         }
 
         @Override
@@ -365,13 +365,13 @@ public interface SimpleSelector {
             BEFORE
         }
 
-        private final @NotNull Kind kind;
+        private final @NotNull PseudoElement.Kind kind;
 
-        public PseudoElement(@NotNull Kind kind) {
+        public PseudoElement(@NotNull PseudoElement.Kind kind) {
             this.kind = kind;
         }
 
-        public @NotNull Kind kind() {
+        public @NotNull PseudoElement.Kind kind() {
             return kind;
         }
 
@@ -399,7 +399,7 @@ public interface SimpleSelector {
 
         @Override
         public String toString() {
-            return "::" + kind.name().toLowerCase();
+            return "::" + kind.name().toLowerCase(Locale.ROOT);
         }
     }
 
@@ -426,21 +426,21 @@ public interface SimpleSelector {
             NTH_LAST_OF_TYPE
         }
 
-        private final @NotNull Kind kind;
+        private final @NotNull PseudoClass.Kind kind;
         private final int a;
         private final int b;
 
-        public PseudoClass(@NotNull Kind kind) {
+        public PseudoClass(@NotNull PseudoClass.Kind kind) {
             this(kind, 0, 0);
         }
 
-        public PseudoClass(@NotNull Kind kind, int a, int b) {
+        public PseudoClass(@NotNull PseudoClass.Kind kind, int a, int b) {
             this.kind = kind;
             this.a = a;
             this.b = b;
         }
 
-        public @NotNull Kind kind() {
+        public @NotNull PseudoClass.Kind kind() {
             return kind;
         }
 
@@ -459,10 +459,10 @@ public interface SimpleSelector {
 
         @Override
         public @NotNull MatchResult matches(@NotNull ParsedElement targetElement) {
-            if (kind == Kind.ROOT) {
+            if (kind == PseudoClass.Kind.ROOT) {
                 return new MatchResult(targetElement.parent() == null, true);
             }
-            if (kind == Kind.EMPTY) {
+            if (kind == PseudoClass.Kind.EMPTY) {
                 return new MatchResult(
                         targetElement.children().isEmpty() && !targetElement.hasNonWhitespaceText(), false);
             }

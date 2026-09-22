@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120">
+	<defs>
+		<filter id="blur" filterUnits="userSpaceOnUse" x="-20" y="-20"
+			width="80" height="40" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="2 0.5" />
+		</filter>
+	</defs>
+	<!-- Shear and unequal scaling require the filter's buffer to follow the 
+		primitive axes. -->
+	<g transform="translate(32 40) rotate(30) matrix(2 0 1 1 0 0)">
+		<path d="M0 0 H40" fill="none" stroke="black" stroke-width="4"
+			vector-effect="non-scaling-stroke" filter="url(#blur)" />
+	</g>
+</svg>

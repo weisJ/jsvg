@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80">
+	<defs>
+		<filter id="constantFirst" filterUnits="userSpaceOnUse" x="0"
+			y="0" width="120" height="80" color-interpolation-filters="sRGB">
+			<feColorMatrix result="red"
+				values="0 0 0 0 1   0 0 0 0 0   0 0 0 0 0   0 0 0 0 .5" />
+			<feColorMatrix result="blue"
+				values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 1   0 0 0 0 .5" />
+			<feMerge>
+				<feMergeNode in="red" />
+				<feMergeNode in="blue" />
+				<feMergeNode in="SourceGraphic" />
+				<feMergeNode in="red" />
+				<feMergeNode in="blue" />
+			</feMerge>
+		</filter>
+		<filter id="artworkFirst" filterUnits="userSpaceOnUse" x="0"
+			y="0" width="120" height="80" color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity=".5" result="red" />
+			<feFlood flood-color="blue" flood-opacity=".5" result="blue" />
+			<feMerge>
+				<feMergeNode in="SourceGraphic" />
+				<feMergeNode in="red" />
+				<feMergeNode in="blue" />
+			</feMerge>
+		</filter>
+	</defs>
+	<!-- Reuse the initial colors after artwork has been merged. -->
+	<path d="M20 60 L60 20 L100 60 Z" fill="lime"
+		filter="url(#constantFirst)" />
+	<!-- The first input may already be artwork. -->
+	<g transform="translate(120 0)">
+		<path d="M20 60 L60 20 L100 60 Z" fill="lime"
+			filter="url(#artworkFirst)" />
+	</g>
+</svg>

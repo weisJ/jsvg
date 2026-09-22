@@ -21,9 +21,11 @@
  */
 package com.github.weisj.jsvg.nodes;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.Overflow;
 import com.github.weisj.jsvg.geometry.size.Length;
@@ -46,6 +48,8 @@ import com.github.weisj.jsvg.renderer.MeasureContext;
     anyOf = {Anchor.class, ClipPath.class, Filter.class, Image.class, Mask.class, Marker.class, Pattern.class,
             Style.class, Text.class, View.class}
 )
+// The inheritance depth follows the SVG element and rendering model hierarchy.
+@SuppressWarnings("java:S110")
 public final class Symbol extends CommonInnerViewContainer {
     public static final String TAG = "symbol";
 
@@ -59,7 +63,22 @@ public final class Symbol extends CommonInnerViewContainer {
 
     @Override
     protected @NotNull Point2D anchorLocation(@NotNull MeasureContext context) {
-        return new Point2D.Float(-refX.resolve(context), -refY.resolve(context));
+        return new Point2D.Float(
+                -refX.orElseIfUnspecified(0).resolve(context),
+                -refY.orElseIfUnspecified(0).resolve(context));
+    }
+
+    @Override
+    protected @Nullable Point2D anchorLocation(@NotNull MeasureContext context,
+            @Nullable AffineTransform viewTransform) {
+        if (refX.isUnspecified() && refY.isUnspecified()) return null;
+        Point2D anchor = super.anchorLocation(context, viewTransform);
+        assert anchor != null;
+        // An omitted component leaves the corresponding viewport edge at the use-site position.
+        anchor.setLocation(
+                refX.isSpecified() ? anchor.getX() : 0,
+                refY.isSpecified() ? anchor.getY() : 0);
+        return anchor;
     }
 
     @Override
@@ -70,8 +89,8 @@ public final class Symbol extends CommonInnerViewContainer {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        refX = attributeNode.getHorizontalReferenceLengthFromKey("refX");
-        refY = attributeNode.getVerticalReferenceLengthFromKey("refY");
+        refX = attributeNode.getHorizontalReferenceLengthFromKey("refX", Length.UNSPECIFIED);
+        refY = attributeNode.getVerticalReferenceLengthFromKey("refY", Length.UNSPECIFIED);
     }
 
     @Override

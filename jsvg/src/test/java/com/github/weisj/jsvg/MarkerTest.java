@@ -21,11 +21,21 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+
+import com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
 
 class MarkerTest {
 
@@ -39,4 +49,18 @@ class MarkerTest {
     void testMarkerReferencePointWithViewportTransform() {
         assertEquals(SUCCESS, compareImages("marker/marker_bug157.svg"));
     }
+
+    @TestFactory
+    Stream<DynamicTest> markerAnchorsMatchReferenceArtwork() {
+        return Stream.of("omittedReferences", "explicitZero", "onlyRefX", "onlyRefY", "alignedClip")
+                .flatMap(name -> Stream.of(RenderType.JSVG, RenderType.Batik)
+                        .map(renderer -> DynamicTest.dynamicTest(
+                                name + (renderer.equals(RenderType.Batik) ? " Batik" : " JSVG"),
+                                () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
+                                        expected(new PathImageSource("marker/anchors/" + name + "_ref.svg"),
+                                                RenderType.JSVG),
+                                        actual(new PathImageSource("marker/anchors/" + name + ".svg"), renderer), 0,
+                                        0))))));
+    }
+
 }

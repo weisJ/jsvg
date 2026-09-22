@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -47,6 +47,7 @@ import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
 import com.github.weisj.jsvg.parser.resources.impl.ImageResource;
 import com.github.weisj.jsvg.parser.resources.impl.SVGResource;
+import com.github.weisj.jsvg.view.impl.FragmentView;
 
 public final class ResourceUtil {
 
@@ -67,28 +68,50 @@ public final class ResourceUtil {
                 .resolveResourceURI(document.rootURI(), uri);
         if (resourceUri == null) return null;
 
-        String path = resourceUri.getPath();
-        if (path != null && path.endsWith(".svg")) {
-            SVGLoader loader = new SVGLoader();
-            try {
-                SVGDocument imageDocument = loader.load(uri.toURL(), document.loaderContext());
-                if (imageDocument != null) {
-                    return new SVGResource(imageDocument);
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Could not load svg resource", e);
-            }
+        URI documentUri = UriUtil.removeFragment(resourceUri);
+        DataUri dataUri = null;
+        if ("data".equals(resourceUri.getScheme())) {
+            dataUri = DataUri.parse(documentUri.toString(), StandardCharsets.UTF_8);
         }
 
-        BufferedImage img = loadToBufferedImage(uri);
+        String path = resourceUri.getPath();
+        if ((path != null && path.endsWith(".svg"))
+                || (dataUri != null && "image/svg+xml".equalsIgnoreCase(dataUri.mime()))) {
+            RenderableResource svg = loadSvg(document, resourceUri, documentUri, dataUri);
+            if (svg != null) return svg;
+        }
+
+        BufferedImage img = loadToBufferedImage(resourceUri, dataUri);
         if (img == null) return null;
         return new ImageResource(img);
     }
 
-    private static @Nullable BufferedImage loadToBufferedImage(@NotNull URI uri) throws IOException {
+    private static @Nullable RenderableResource loadSvg(@NotNull DomDocument document, @NotNull URI resourceUri,
+            @NotNull URI documentUri, @Nullable DataUri dataUri) {
+        SVGLoader loader = new SVGLoader();
+        try {
+            SVGDocument imageDocument = dataUri != null
+                    ? loader.load(new ByteArrayInputStream(dataUri.data()), documentUri, document.loaderContext())
+                    : loader.load(documentUri.toURL(), document.loaderContext());
+            if (imageDocument == null) return null;
+
+            // URI components must be separated before percent-encoded octets are decoded:
+            // https://www.w3.org/TR/media-frags/#processing-name-value-components
+            String fragment = resourceUri.getRawFragment();
+            return new SVGResource(imageDocument, fragment != null ? FragmentView.parse(fragment) : null);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Could not load svg resource", e);
+            return null;
+        }
+    }
+
+    private static @Nullable BufferedImage loadToBufferedImage(@NotNull URI uri, @Nullable DataUri parsedDataUri)
+            throws IOException {
         String scheme = uri.getScheme();
         if ("data".equals(scheme)) {
-            DataUri dataUri = DataUri.parse(uri.toString(), StandardCharsets.UTF_8);
+            DataUri dataUri = parsedDataUri != null
+                    ? parsedDataUri
+                    : DataUri.parse(UriUtil.removeFragment(uri).toString(), StandardCharsets.UTF_8);
             if (!isSupportedMimeType(dataUri.mime())) throw new IOException("Unsupported Mime type " + dataUri.mime());
             try (ByteArrayInputStream in = new ByteArrayInputStream(dataUri.data())) {
                 return readPossiblyCorruptedFile(in);

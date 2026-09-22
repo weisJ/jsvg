@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -70,11 +71,6 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     }
 
     @Override
-    public boolean isValid() {
-        return inputChannels.length > 0;
-    }
-
-    @Override
     public @NotNull Length x() {
         return filterPrimitiveBase.x;
     }
@@ -97,8 +93,9 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         if (inputChannels.length == 0) {
-            filterPrimitiveBase.saveLayoutResult(
-                    filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic),
+            LayoutBounds input = filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic);
+            Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, input.region());
+            filterPrimitiveBase.saveLayoutResult(LayoutBounds.createInitial(new Rectangle2D.Double(), region),
                     filterLayoutContext);
             return;
         }
@@ -107,30 +104,59 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
             LayoutBounds channelBounds = filterLayoutContext.resultChannels().get(inputChannels[i]);
             result = result.union(channelBounds);
         }
-        filterPrimitiveBase.saveLayoutResult(result, filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, result.region());
+        filterPrimitiveBase.saveLayoutResult(result.withRegion(region), filterLayoutContext);
     }
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (inputChannels.length == 0) {
-            filterPrimitiveBase.saveResult(
-                    filterPrimitiveBase.channel(DefaultFilterChannel.SourceGraphic, filterContext),
-                    filterContext);
+            Filter.FilterInfo info = filterContext.info();
+            Channel result = new ConstantColorChannel(info.imageWidth, info.imageHeight, 0);
+            filterPrimitiveBase.saveResult(result, filterContext);
             return;
         }
-        Channel in = filterPrimitiveBase.channel(inputChannels[0], filterContext);
-        Channel result = in;
-        if (inputChannels.length > 1) {
-            BufferedImage dst = in.toBufferedImageNonAliased(context);
-            Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
-            for (int i = 1; i < inputChannels.length; i++) {
-                Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
-                imgGraphics.drawImage(context.platformSupport().createImage(channel.producer()),
-                        null, context.platformSupport().imageObserver());
+
+        Composite composite = CompositeModeComposite.inColorSpace(AlphaComposite.SrcOver,
+                colorInterpolation(filterContext));
+        Channel result = filterPrimitiveBase.channel(inputChannels[0], filterContext);
+        if (isTransparentConstant(result)) {
+            // Remove any zero alpha colors.
+            result = ((ConstantColorChannel) result).withColor(0);
+        }
+        int i = 1;
+        // Transparent constants are identities even after the result ceases to be constant.
+        while (i < inputChannels.length) {
+            Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
+            if (!isTransparentConstant(channel)) {
+                if (!(result instanceof ConstantColorChannel && channel instanceof ConstantColorChannel)) {
+                    break;
+                }
+                result = ((ConstantColorChannel) result).composite((ConstantColorChannel) channel, composite);
             }
+            i++;
+        }
+
+        if (i < inputChannels.length) {
+            BufferedImage dst = result.toBufferedImageNonAliased(context);
+            Graphics2D imgGraphics = GraphicsUtil.createGraphics(dst);
+            imgGraphics.setComposite(composite);
+            for (; i < inputChannels.length; i++) {
+                Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
+                if (isTransparentConstant(channel)) {
+                    continue;
+                }
+                channel.paint(imgGraphics, context);
+            }
+            imgGraphics.dispose();
             result = new ImageProducerChannel(dst.getSource());
         }
+
         filterPrimitiveBase.saveResult(result, filterContext);
+    }
+
+    private static boolean isTransparentConstant(@NotNull Channel channel) {
+        return channel instanceof ConstantColorChannel && ((ConstantColorChannel) channel).color() >>> 24 == 0;
     }
 
     @Override

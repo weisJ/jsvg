@@ -41,7 +41,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.paint.impl.MaskedPaint;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
@@ -104,10 +103,10 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         boolean useCache = surfaceSupplier.useCache(output, context);
         BlittableImage blitImage = BlittableImage.create(
                 surfaceSupplier.surfaceSupplier(useCache), context, output.clipBounds(),
-                maskBounds.createIntersection(elementBounds.geometryBox()), elementBounds.boundingBox(),
+                maskBounds.createIntersection(elementBounds.outputBox()), elementBounds.boundingBox(),
                 maskContentUnits);
 
-        if (blitImage == null) return PaintParser.DEFAULT_COLOR;
+        if (blitImage == null) return Color.BLACK;
 
         if (maskType == MaskType.Luminance) {
             blitImage.clearBackground(Color.BLACK);
@@ -124,7 +123,7 @@ public final class Mask extends CommonRenderableContainerNode implements Instant
         }
 
         Point2D offset = GeometryUtil.getLocation(blitImage.imageBoundsInDeviceSpace());
-        return new MaskedPaint(PaintParser.DEFAULT_COLOR, blitImage.image().getRaster(), offset,
+        return new MaskedPaint(Color.BLACK, blitImage.image().getRaster(), offset,
                 surfaceSupplier.resourceCleaner(output, useCache), maskType);
     }
 
