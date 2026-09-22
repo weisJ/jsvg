@@ -71,7 +71,6 @@ import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
 import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
@@ -254,11 +253,11 @@ public final class AttributeNode {
                 renderTarget.document().currentNestingDepth(), ParsedElement.BuildMode.RENDERED_TREE);
     }
 
-    public <T> @Nullable T getElementByHref(@NotNull Class<T> type, @NotNull Category category,
+    public <T extends SVGNode> @Nullable T getElementByHref(@NotNull Class<T> type, @NotNull Category category,
             @Nullable String value, ElementRelation relation) {
         T e = getElementByUrl(type, value);
         if (e == null) return null;
-        for (Category cat : e.getClass().getAnnotation(ElementCategories.class).value()) {
+        for (Category cat : Category.elementCategoriesOf(e).value()) {
             if (cat == category) return recordIndirectChild(e, value, relation);
         }
         return null;

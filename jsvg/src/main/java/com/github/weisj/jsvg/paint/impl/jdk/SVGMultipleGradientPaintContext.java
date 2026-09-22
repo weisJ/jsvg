@@ -74,7 +74,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * The PaintContext's ColorModel.  This is ARGB if colors are not all
      * opaque, otherwise it is RGB.
      */
-    protected ColorModel model;
+    protected @NotNull ColorModel model;
 
     /**
      * Color model used if gradient colors are all opaque.
@@ -237,7 +237,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
             }
         } else {
             // use the values cached in the MultipleGradientPaint instance
-            this.model = mgp.model;
+            this.model = Objects.requireNonNull(mgp.model);
             this.normalizedIntervals = mgp.normalizedIntervals;
             this.isSimpleLookup = mgp.isSimpleLookup;
             this.gradient = grad;
@@ -582,7 +582,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * rasters for use by any other instance, as long as they are sufficiently
      * large.
      */
-    private static synchronized Raster getCachedRaster(ColorModel cm, int w, int h) {
+    private static synchronized Raster getCachedRaster(@NotNull ColorModel cm, int w, int h) {
         if (Objects.equals(cm, cachedModel) && cached != null) {
             Raster ras = cached.get();
             if (ras != null && ras.getWidth() >= w && ras.getHeight() >= h) {

@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.attributes.stroke;
 
 import java.awt.*;
+import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -63,13 +64,15 @@ public final class StrokeResolver {
     /** The stroke used for SVG stroke bounds, which ignore dash arrays, offsets and pathLength. */
     public static @NotNull BasicStroke resolveUndashed(@NotNull MeasureContext measureContext,
             @NotNull StrokeContext context) {
-        assert context.strokeWidth != null;
-        assert context.lineCap != null;
-        assert context.lineJoin != null;
-        assert Length.isSpecified(context.miterLimit);
+        LengthValue strokeWidth = Objects.requireNonNull(context.strokeWidth, "strokeWidth");
+        LineCap lineCap = Objects.requireNonNull(context.lineCap, "lineCap");
+        LineJoin lineJoin = Objects.requireNonNull(context.lineJoin, "lineJoin");
+        if (Length.isUnspecified(context.miterLimit)) {
+            throw new IllegalStateException("miterLimit is unspecified");
+        }
 
         // In practice, any miter join will exceed a miter limit between 0 and 1.
-        return new BasicStroke(context.strokeWidth.resolve(measureContext), context.lineCap.awtCode(),
-                context.lineJoin.awtCode(), Math.max(1, context.miterLimit));
+        return new BasicStroke(strokeWidth.resolve(measureContext), lineCap.awtCode(),
+                lineJoin.awtCode(), Math.max(1, context.miterLimit));
     }
 }

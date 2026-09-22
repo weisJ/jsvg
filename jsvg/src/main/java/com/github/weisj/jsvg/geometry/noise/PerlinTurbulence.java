@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.geometry.noise;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -198,19 +199,19 @@ public final class PerlinTurbulence {
         double baseFrequencyX = xFrequency;
         double baseFrequencyY = yFrequency;
         if (stitchInfo != null) {
-            assert tile != null;
+            Rectangle2D.Double tileBounds = Objects.requireNonNull(tile, "tile");
             if (baseFrequencyX != 0) {
-                baseFrequencyX = adjustFrequency(baseFrequencyX, tile.width);
+                baseFrequencyX = adjustFrequency(baseFrequencyX, tileBounds.width);
             }
             if (baseFrequencyY != 0) {
-                baseFrequencyY = adjustFrequency(baseFrequencyY, tile.height);
+                baseFrequencyY = adjustFrequency(baseFrequencyY, tileBounds.height);
             }
 
-            stitchInfo.width = (int) (tile.width * baseFrequencyX + 0.5f);
-            stitchInfo.wrapX = (int) (tile.x * baseFrequencyX + PerlinN + stitchInfo.width);
+            stitchInfo.width = (int) (tileBounds.width * baseFrequencyX + 0.5f);
+            stitchInfo.wrapX = (int) (tileBounds.x * baseFrequencyX + PerlinN + stitchInfo.width);
 
-            stitchInfo.height = (int) (tile.height * baseFrequencyY + 0.5f);
-            stitchInfo.wrapY = (int) (tile.y * baseFrequencyY + PerlinN + stitchInfo.height);
+            stitchInfo.height = (int) (tileBounds.height * baseFrequencyY + 0.5f);
+            stitchInfo.wrapY = (int) (tileBounds.y * baseFrequencyY + PerlinN + stitchInfo.height);
         }
 
         final double[] fSum = fractalSum

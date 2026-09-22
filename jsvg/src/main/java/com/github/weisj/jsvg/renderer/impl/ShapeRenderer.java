@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.renderer.impl;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.util.Objects;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
@@ -311,7 +312,7 @@ public final class ShapeRenderer {
             @NotNull Output output, @Nullable MarkerOrientation.MarkerType type, @Nullable Marker marker,
             float x, float y, float dxIn, float dyIn, float dxOut, float dyOut) {
         if (marker == null) return;
-        assert type != null;
+        Objects.requireNonNull(type, "type");
 
         MarkerOrientation orientation = marker.orientation();
         float rotation = orientation.orientationFor(type, dxIn, dyIn, dxOut, dyOut);
