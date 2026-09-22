@@ -64,7 +64,9 @@ final class PathGlyphCursor extends GlyphCursor {
 
     private void setupInitialData() {
         this.currentSegment = segmentIterator.currentSegment();
-        this.segmentLength = this.remainingSegmentLength = (float) currentSegment.length();
+        float currentSegmentLength = (float) currentSegment.length();
+        this.remainingSegmentLength = currentSegmentLength;
+        this.segmentLength = currentSegmentLength;
         this.x = currentSegment.xStart;
         this.y = currentSegment.yStart;
     }

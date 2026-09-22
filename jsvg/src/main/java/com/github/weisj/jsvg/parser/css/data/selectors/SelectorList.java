@@ -36,6 +36,7 @@ import com.google.errorprone.annotations.Immutable;
  * most specific matching selector, so it can only be computed at match time.
  */
 @Immutable
+@SuppressWarnings("Immutable") // Internal ownership and the covariant list type are intentional.
 public final class SelectorList {
 
     private final @NotNull List<? extends @NotNull ComplexSelector> selectors;

@@ -35,6 +35,7 @@ import com.google.errorprone.annotations.Immutable;
  * <a href="https://www.w3.org/TR/css-cascade-4/#importance">CSS Cascade Level 4, §6.3</a>).
  */
 @Immutable
+@SuppressWarnings("Immutable") // Internal ownership is intentional.
 public final class Declaration implements DeclarationListItem {
     private final @NotNull String name;
     private final @NotNull List<@NotNull ComponentValue> value;

@@ -40,6 +40,7 @@ public interface Token extends ComponentValue {
     @NotNull
     TokenType type();
 
+    @Override
     String serialize();
 
     /** Type flag of a {@code <hash-token>} per §4.2. */
@@ -386,6 +387,7 @@ public interface Token extends ComponentValue {
 
     /** {@code <number-token>} per §4.2: numeric value plus type flag. */
     @Immutable
+    @SuppressWarnings("JavaLangClash") // CSS calls this token kind a number.
     final class Number implements Token {
         private final double value;
         private final @NotNull NumericType numericType;

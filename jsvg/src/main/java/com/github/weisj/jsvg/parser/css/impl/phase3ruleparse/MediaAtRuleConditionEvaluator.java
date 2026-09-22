@@ -266,7 +266,7 @@ public final class MediaAtRuleConditionEvaluator {
             }
             return m;
         }
-        if (parser.current() instanceof ComponentValue.SimpleBlock.FunctionBlock) {
+        if (parser.current() instanceof ComponentValue.FunctionBlock) {
             return Match.UNKNOWN; // <general-enclosed> allows function blocks but are not supported
         }
         throw new ParseException(); // nothing else is allowed

@@ -495,8 +495,8 @@ public final class Lexer {
         for (int i = 0; i < a.length(); i++) {
             char ca = a.charAt(i);
             char cb = b.charAt(i);
-            if (ca >= 'A' && ca <= 'Z') ca += 32;
-            if (cb >= 'A' && cb <= 'Z') cb += 32;
+            if (ca >= 'A' && ca <= 'Z') ca = (char) (ca + 32);
+            if (cb >= 'A' && cb <= 'Z') cb = (char) (cb + 32);
             if (ca != cb) return false;
         }
         return true;

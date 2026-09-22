@@ -145,7 +145,7 @@ class ReSvgTestSuite {
 
                 Object width = attributes.get(TextAttribute.WIDTH);
                 if (Objects.equals(width, FontStretch.ExtraCondensed.percentage().value())
-                        && font == fonts.get("noto sans")) {
+                        && font.equals(fonts.get("noto sans"))) {
                     font = extraCondensedFonts.get("noto sans");
                     if (font == null) return null;
                     Map<TextAttribute, Object> remainingAttributes = new HashMap<>(attributes);

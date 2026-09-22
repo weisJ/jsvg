@@ -160,6 +160,7 @@ public interface SimpleSelector {
 
     /** Class selector: {@code .foo}. Specificity {@code (0,1,0)}. */
     @Immutable
+    @SuppressWarnings("JavaLangClash") // CSS calls this selector kind a class.
     final class Class implements SimpleSelector {
         private final @NotNull String name;
 
@@ -365,13 +366,13 @@ public interface SimpleSelector {
             BEFORE
         }
 
-        private final @NotNull Kind kind;
+        private final @NotNull PseudoElement.Kind kind;
 
-        public PseudoElement(@NotNull Kind kind) {
+        public PseudoElement(@NotNull PseudoElement.Kind kind) {
             this.kind = kind;
         }
 
-        public @NotNull Kind kind() {
+        public @NotNull PseudoElement.Kind kind() {
             return kind;
         }
 
@@ -399,7 +400,7 @@ public interface SimpleSelector {
 
         @Override
         public String toString() {
-            return "::" + kind.name().toLowerCase();
+            return "::" + kind.name().toLowerCase(Locale.ROOT);
         }
     }
 
@@ -426,21 +427,21 @@ public interface SimpleSelector {
             NTH_LAST_OF_TYPE
         }
 
-        private final @NotNull Kind kind;
+        private final @NotNull PseudoClass.Kind kind;
         private final int a;
         private final int b;
 
-        public PseudoClass(@NotNull Kind kind) {
+        public PseudoClass(@NotNull PseudoClass.Kind kind) {
             this(kind, 0, 0);
         }
 
-        public PseudoClass(@NotNull Kind kind, int a, int b) {
+        public PseudoClass(@NotNull PseudoClass.Kind kind, int a, int b) {
             this.kind = kind;
             this.a = a;
             this.b = b;
         }
 
-        public @NotNull Kind kind() {
+        public @NotNull PseudoClass.Kind kind() {
             return kind;
         }
 
@@ -459,10 +460,10 @@ public interface SimpleSelector {
 
         @Override
         public @NotNull MatchResult matches(@NotNull ParsedElement targetElement) {
-            if (kind == Kind.ROOT) {
+            if (kind == PseudoClass.Kind.ROOT) {
                 return new MatchResult(targetElement.parent() == null, true);
             }
-            if (kind == Kind.EMPTY) {
+            if (kind == PseudoClass.Kind.EMPTY) {
                 return new MatchResult(
                         targetElement.children().isEmpty() && !targetElement.hasNonWhitespaceText(), false);
             }

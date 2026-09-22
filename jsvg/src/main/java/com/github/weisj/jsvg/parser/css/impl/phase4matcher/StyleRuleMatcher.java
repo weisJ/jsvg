@@ -225,7 +225,7 @@ public class StyleRuleMatcher {
         for (Map.Entry<String, String> declaredAttr : targetElement.attributeNode().declaredAttributes().entrySet()) {
             String name = declaredAttr.getKey();
             String value = declaredAttr.getValue();
-            String valueLc = value.toLowerCase();
+            String valueLc = value.toLowerCase(Locale.ROOT);
 
             consumer.accept(attributeRules.hasAttributeName.getOrDefault(name, Collections.emptyList()));
 
