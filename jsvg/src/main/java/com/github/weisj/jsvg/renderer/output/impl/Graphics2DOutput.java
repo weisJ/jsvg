@@ -106,11 +106,6 @@ public class Graphics2DOutput implements Output, CurrentColorProvider {
     }
 
     @Override
-    public void setClip(@Nullable Shape shape) {
-        g.setClip(shape);
-    }
-
-    @Override
     public @NotNull Output createChild() {
         return new Graphics2DOutput((Graphics2D) g.create());
     }

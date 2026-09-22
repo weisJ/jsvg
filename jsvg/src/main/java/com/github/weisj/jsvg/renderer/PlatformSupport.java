@@ -30,23 +30,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface PlatformSupport {
 
-    /**
-     * @deprecated This class is no longer used and will be removed in a future version.
-     */
-    @Deprecated
-    interface TargetSurface {
-        void repaint();
-    }
-
     @Nullable
     ImageObserver imageObserver();
-
-    /**
-     * @deprecated This method is no longer used and will be removed in a future version.
-     */
-    @Nullable
-    @Deprecated
-    TargetSurface targetSurface();
 
     default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
         return Toolkit.getDefaultToolkit().createImage(imageProducer);

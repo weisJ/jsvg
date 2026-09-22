@@ -37,11 +37,6 @@ public final class AwtComponentPlatformSupport implements PlatformSupport {
     }
 
     @Override
-    public @NotNull TargetSurface targetSurface() {
-        return component::repaint;
-    }
-
-    @Override
     public boolean isLongLived() {
         return true;
     }
