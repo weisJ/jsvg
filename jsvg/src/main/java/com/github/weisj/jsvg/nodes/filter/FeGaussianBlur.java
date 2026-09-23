@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeSourceBounds;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -143,16 +143,18 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
                 + Math.abs(inverse.getShearX()) * vExtend);
         float vUserExtend = (float) (Math.abs(inverse.getShearY()) * hExtend
                 + Math.abs(inverse.getScaleY()) * vExtend);
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.sourceBounds());
         // Wrapping can repeat content anywhere; duplication only adds content outside the input region.
         boolean extendsInput = edgeMode == EdgeMode.Wrap
-                || (edgeMode == EdgeMode.Duplicate && !input.region().contains(region));
+                || (edgeMode == EdgeMode.Duplicate && !input.sourceBounds().contains(region));
         boolean nonZeroKernel = sigma[0] > 0 || sigma[1] > 0;
-        CoversWholeRegion coversWholeRegion = extendsInput && nonZeroKernel && !input.region().isEmpty()
-                ? CoversWholeRegion.YES
-                : CoversWholeRegion.NO;
+        CoversWholeSourceBounds coversWholeSourceBounds =
+                extendsInput && nonZeroKernel && !input.sourceBounds().isEmpty()
+                        ? CoversWholeSourceBounds.YES
+                        : CoversWholeSourceBounds.NO;
         LayoutBounds bounds =
-                input.grow(hUserExtend, vUserExtend, filterLayoutContext).withRegion(region, coversWholeRegion);
+                input.grow(hUserExtend, vUserExtend, filterLayoutContext)
+                        .withSourceBounds(region, coversWholeSourceBounds);
         impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
@@ -191,7 +193,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             yBlurKernel = createConvolveKernel(dY, ySigma, false);
         }
 
-        Rectangle2D inputRegion = filterContext.layout(impl().inputChannelKey()).region();
+        Rectangle2D inputRegion = filterContext.layout(impl().inputChannelKey()).sourceBounds();
         Rectangle sourceBounds = GeometryUtil.transformBounds(
                 filterContext.info().output().transform(), inputRegion).getBounds();
         ImageProducer output = edgeMode.convolve(context, filterContext, input, sourceBounds,

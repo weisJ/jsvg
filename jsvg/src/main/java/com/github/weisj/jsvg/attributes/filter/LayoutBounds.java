@@ -31,70 +31,105 @@ import com.github.weisj.jsvg.nodes.filter.FilterLayoutContext;
 
 public final class LayoutBounds {
 
-    public enum CoversWholeRegion {
+    public enum CoversWholeSourceBounds {
         YES,
         NO
     }
 
-    private final @NotNull Rectangle2D bounds;
+    /**
+     * A conservative tight bound around pixels which can contribute to the result, including input
+     * samples needed by a clipped repaint.
+     * This is used to optimize backing buffer allocation by tracking the area where pixels are non-transparent
+     * and can contribute to the output.
+     */
+    private final @NotNull Rectangle2D tightSourceBounds;
     private final @NotNull FloatInsets clipBoundsEscapeInsets;
-    private final @NotNull Rectangle2D region;
+    /**
+     * The logical extent of the filter image. Pixels inside this rectangle but outside
+     * {@link #tightSourceBounds} are transparent and still belong to the image.
+     * Filter primitives use these bounds for clipping and edge sampling.
+     * For SourceGraphic and SourceAlpha this is the filter region.
+     * For a primitive result it is that primitive's subregion.
+     */
+    private final @NotNull Rectangle2D sourceBounds;
 
-    public static @NotNull LayoutBounds createInitial(@NotNull Rectangle2D bounds, @NotNull Rectangle2D region) {
-        return new LayoutBounds(bounds, new FloatInsets(), region);
+    public static @NotNull LayoutBounds createInitial(@NotNull Rectangle2D tightSourceBounds,
+            @NotNull Rectangle2D sourceBounds) {
+        return new LayoutBounds(tightSourceBounds, new FloatInsets(), sourceBounds);
     }
 
-    public LayoutBounds(@NotNull Rectangle2D bounds, @NotNull FloatInsets clipBoundsEscapeInsets,
-            @NotNull Rectangle2D region) {
-        this.bounds = bounds;
+    public LayoutBounds(@NotNull Rectangle2D tightSourceBounds, @NotNull FloatInsets clipBoundsEscapeInsets,
+            @NotNull Rectangle2D sourceBounds) {
+        this.tightSourceBounds = tightSourceBounds;
         this.clipBoundsEscapeInsets = clipBoundsEscapeInsets;
-        this.region = region;
+        this.sourceBounds = sourceBounds;
     }
 
-    public @NotNull Rectangle2D bounds() {
-        return bounds;
+    public @NotNull Rectangle2D tightSourceBounds() {
+        return tightSourceBounds;
     }
 
     public @NotNull FloatInsets clipBoundsEscapeInsets() {
         return clipBoundsEscapeInsets;
     }
 
-    public @NotNull Rectangle2D region() {
-        return region;
+    public @NotNull Rectangle2D sourceBounds() {
+        return sourceBounds;
     }
 
-    public @NotNull LayoutBounds withRegion(@NotNull Rectangle2D region) {
-        return withRegion(region, CoversWholeRegion.NO);
+    public @NotNull LayoutBounds withTightSourceBounds(@NotNull Rectangle2D tightSourceBounds) {
+        if (this.tightSourceBounds.equals(tightSourceBounds)) return this;
+        return new LayoutBounds(tightSourceBounds, clipBoundsEscapeInsets, sourceBounds);
     }
 
-    public @NotNull LayoutBounds withRegion(@NotNull Rectangle2D region,
-            @NotNull CoversWholeRegion coversWholeRegion) {
-        if (coversWholeRegion == CoversWholeRegion.YES && !region.isEmpty() && !bounds.contains(region)) {
-            return new LayoutBounds(GeometryUtil.union(bounds, region), clipBoundsEscapeInsets, region);
+    public @NotNull LayoutBounds withSourceBounds(@NotNull Rectangle2D sourceBounds) {
+        return withSourceBounds(sourceBounds, CoversWholeSourceBounds.NO);
+    }
+
+    public @NotNull LayoutBounds withSourceBounds(@NotNull Rectangle2D sourceBounds,
+            @NotNull CoversWholeSourceBounds coversWholeSourceBounds) {
+        if (coversWholeSourceBounds == CoversWholeSourceBounds.YES
+                && !sourceBounds.isEmpty()
+                && !tightSourceBounds.contains(sourceBounds)) {
+            return new LayoutBounds(
+                    GeometryUtil.union(tightSourceBounds, sourceBounds), clipBoundsEscapeInsets, sourceBounds);
         }
-        if (this.region.equals(region)) return this;
-        return new LayoutBounds(bounds, clipBoundsEscapeInsets, region);
+        if (this.sourceBounds.equals(sourceBounds)) return this;
+        return new LayoutBounds(tightSourceBounds, clipBoundsEscapeInsets, sourceBounds);
     }
 
     public @NotNull LayoutBounds union(@NotNull LayoutBounds other) {
         return new LayoutBounds(
-                GeometryUtil.union(bounds, other.bounds),
+                GeometryUtil.union(tightSourceBounds, other.tightSourceBounds),
                 GeometryUtil.max(clipBoundsEscapeInsets, other.clipBoundsEscapeInsets),
-                GeometryUtil.union(region, other.region));
+                GeometryUtil.union(sourceBounds, other.sourceBounds));
     }
 
     public @NotNull LayoutBounds grow(float horizontal, float vertical, @NotNull FilterLayoutContext context) {
+        if (tightSourceBounds.isEmpty()) return this;
         Rectangle2D clipBounds = context.clipBounds();
         FloatInsets growInsets = new FloatInsets(vertical, horizontal, vertical, horizontal);
-        Rectangle2D newBounds = GeometryUtil.grow(bounds, growInsets);
+        Rectangle2D newBounds = GeometryUtil.grow(tightSourceBounds, growInsets);
         FloatInsets requiredInsets = GeometryUtil.sum(clipBoundsEscapeInsets, growInsets);
         FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, newBounds), requiredInsets);
-        return new LayoutBounds(newBounds, GeometryUtil.max(clipBoundsEscapeInsets, ins), region);
+        return new LayoutBounds(newBounds, GeometryUtil.max(clipBoundsEscapeInsets, ins), sourceBounds);
+    }
+
+    /**
+     * Keeps the affected output bounds unchanged while ensuring that {@code requiredRect} is present
+     * in the filter backing image.
+     */
+    public @NotNull LayoutBounds ensuringRectIsAvailable(@NotNull Rectangle2D requiredRect,
+            @NotNull FilterLayoutContext context) {
+        FloatInsets requiredInsets = GeometryUtil.overhangInsets(context.clipBounds(), requiredRect);
+        return new LayoutBounds(
+                tightSourceBounds, GeometryUtil.max(clipBoundsEscapeInsets, requiredInsets), sourceBounds);
     }
 
     public @NotNull LayoutBounds translate(float dx, float dy, @NotNull FilterLayoutContext context) {
+        if (tightSourceBounds.isEmpty()) return this;
         Rectangle2D clipBounds = context.clipBounds();
-        Rectangle2D newBounds = GeometryUtil.grow(bounds, new FloatInsets(
+        Rectangle2D newBounds = GeometryUtil.grow(tightSourceBounds, new FloatInsets(
                 Math.max(-dy, 0),
                 Math.max(-dx, 0),
                 Math.max(dy, 0),
@@ -106,15 +141,15 @@ public final class LayoutBounds {
                 Math.max(-dy, 0),
                 Math.max(-dx, 0)));
         FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, newBounds), requiredInsets);
-        return new LayoutBounds(newBounds, GeometryUtil.max(clipBoundsEscapeInsets, ins), region);
+        return new LayoutBounds(newBounds, GeometryUtil.max(clipBoundsEscapeInsets, ins), sourceBounds);
     }
 
     @Override
     public String toString() {
         return "LayoutBounds{" +
-                "bounds=" + GeometryUtil.compactRepresentation(bounds) +
+                "tightSourceBounds=" + GeometryUtil.compactRepresentation(tightSourceBounds) +
                 ", clipBoundsEscapeInsets=" + clipBoundsEscapeInsets +
-                ", region=" + GeometryUtil.compactRepresentation(region) +
+                ", sourceBounds=" + GeometryUtil.compactRepresentation(sourceBounds) +
                 '}';
     }
 }

@@ -34,7 +34,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeSourceBounds;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
@@ -117,14 +117,15 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.sourceBounds());
         AffineTransform primitiveToImage = filterLayoutContext.primitiveUnits().applyToTransform(
                 new AffineTransform(filterLayoutContext.transform()), filterLayoutContext.elementBounds());
         Point2D.Double step = samplingStep(primitiveToImage);
         filterLayoutContext.inverseTransform().deltaTransform(step, step);
         // Normals need neighboring height samples beyond the repaint clip.
         LayoutBounds bounds = input.grow((float) Math.abs(step.x), (float) Math.abs(step.y), filterLayoutContext);
-        impl().saveLayoutResult(bounds.withRegion(region, CoversWholeRegion.YES), filterLayoutContext);
+        impl().saveLayoutResult(
+                bounds.withSourceBounds(region, CoversWholeSourceBounds.YES), filterLayoutContext);
     }
 
     private @NotNull Point2D.Double samplingStep(@NotNull AffineTransform transform) {
@@ -147,7 +148,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
 
         AffineTransform primitiveToImage = filterContext.info().output().transform();
         Rectangle2D inputRegion = GeometryUtil.transformBounds(
-                primitiveToImage, filterContext.layout(impl().inputChannelKey()).region()).getBounds2D();
+                primitiveToImage, filterContext.layout(impl().inputChannelKey()).sourceBounds()).getBounds2D();
         filterContext.primitiveUnits().applyToTransform(primitiveToImage, filterContext.info().elementBounds());
         ImageFilter lightingFilter = new BufferedImageFilter(
                 new DiffuseLightingOp(lightSource, primitiveToImage, inputRegion, colorInterpolation(filterContext)));

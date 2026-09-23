@@ -94,8 +94,9 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         if (inputChannels.length == 0) {
             LayoutBounds input = filterLayoutContext.resultChannels().get(DefaultFilterChannel.SourceGraphic);
-            Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, input.region());
-            filterPrimitiveBase.saveLayoutResult(LayoutBounds.createInitial(new Rectangle2D.Double(), region),
+            Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, input.sourceBounds());
+            filterPrimitiveBase.saveLayoutResult(
+                    LayoutBounds.createInitial(new Rectangle2D.Double(), region),
                     filterLayoutContext);
             return;
         }
@@ -104,8 +105,9 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
             LayoutBounds channelBounds = filterLayoutContext.resultChannels().get(inputChannels[i]);
             result = result.union(channelBounds);
         }
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, result.region());
-        filterPrimitiveBase.saveLayoutResult(result.withRegion(region), filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(
+                filterPrimitiveBase, result.sourceBounds());
+        filterPrimitiveBase.saveLayoutResult(result.withSourceBounds(region), filterLayoutContext);
     }
 
     @Override

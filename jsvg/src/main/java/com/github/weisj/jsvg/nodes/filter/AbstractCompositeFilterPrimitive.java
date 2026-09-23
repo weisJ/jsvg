@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeSourceBounds;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
@@ -66,9 +66,9 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
         LayoutBounds in = impl().layoutInput(filterLayoutContext);
         LayoutBounds in2 = filterLayoutContext.resultChannels().get(inputChannel2);
         LayoutBounds bounds = in.union(in2);
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), bounds.region());
-        bounds = bounds.withRegion(region,
-                affectsTransparentBlack() ? CoversWholeRegion.YES : CoversWholeRegion.NO);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), bounds.sourceBounds());
+        bounds = bounds.withSourceBounds(region,
+                affectsTransparentBlack() ? CoversWholeSourceBounds.YES : CoversWholeSourceBounds.NO);
         impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 

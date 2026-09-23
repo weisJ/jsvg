@@ -53,8 +53,8 @@ public final class DummyFilterPrimitive extends AbstractFilterPrimitive {
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
-        impl().saveLayoutResult(input.withRegion(region), filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.sourceBounds());
+        impl().saveLayoutResult(input.withSourceBounds(region), filterLayoutContext);
     }
 
     @Override

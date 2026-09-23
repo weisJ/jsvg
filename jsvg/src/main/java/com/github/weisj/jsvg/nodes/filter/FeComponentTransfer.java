@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeSourceBounds;
 import com.github.weisj.jsvg.attributes.filter.TransferFunctionType;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -142,9 +142,10 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         LayoutBounds bounds = filterPrimitiveBase.layoutInput(filterLayoutContext);
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(filterPrimitiveBase, bounds.region());
-        bounds = bounds.withRegion(region,
-                affectsTransparentBlack ? CoversWholeRegion.YES : CoversWholeRegion.NO);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(
+                filterPrimitiveBase, bounds.sourceBounds());
+        bounds = bounds.withSourceBounds(region,
+                affectsTransparentBlack ? CoversWholeSourceBounds.YES : CoversWholeSourceBounds.NO);
         filterPrimitiveBase.saveLayoutResult(bounds, filterLayoutContext);
     }
 

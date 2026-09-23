@@ -149,7 +149,9 @@ public final class Filter extends ContainerNode {
 
         if (effectiveFilterRegion.isEmpty()) return null;
 
-        // Sampling primitives may need source pixels outside the repaint clip.
+        // SourceGraphic and SourceAlpha logically cover the filter region. Keep the painted source
+        // bounds separately so the backing raster can still be allocated tightly.
+        // https://github.com/w3c/fxtf-drafts/issues/324#issuecomment-531676051
         LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(elementBounds.sourceBox(), filterRegion);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, elementLayoutBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, elementLayoutBounds);
@@ -169,7 +171,7 @@ public final class Filter extends ContainerNode {
         LayoutBounds clipHeuristic = layouts.get(DefaultFilterChannel.LastResult);
 
         FloatInsets insets = clipHeuristic.clipBoundsEscapeInsets();
-        Rectangle2D clipHeuristicBounds = clipHeuristic.bounds()
+        Rectangle2D clipHeuristicBounds = clipHeuristic.tightSourceBounds()
                 .createIntersection(GeometryUtil.grow(graphicsClipBounds, insets));
         GeometryUtil.adjustForAliasing(clipHeuristicBounds);
 

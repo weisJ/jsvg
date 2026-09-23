@@ -82,8 +82,8 @@ public final class FeOffset extends AbstractFilterPrimitive {
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
         Point2D.Double off = offset(null, filterLayoutContext.primitiveUnits(), filterLayoutContext.elementBounds());
         LayoutBounds result = input.translate((float) off.x, (float) off.y, filterLayoutContext);
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.region());
-        impl().saveLayoutResult(result.withRegion(region), filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.sourceBounds());
+        impl().saveLayoutResult(result.withSourceBounds(region), filterLayoutContext);
     }
 
     @Override

@@ -91,8 +91,8 @@ public final class FeDisplacementMap extends AbstractFilterPrimitive {
         LayoutBounds displacementInput = filterLayoutContext.resultChannels().get(inputChannel2);
         LayoutBounds layoutBounds = scale == 0 ? input : input.grow(growX, growY, filterLayoutContext);
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(),
-                GeometryUtil.union(input.region(), displacementInput.region()));
-        impl().saveLayoutResult(layoutBounds.withRegion(region), filterLayoutContext);
+                GeometryUtil.union(input.sourceBounds(), displacementInput.sourceBounds()));
+        impl().saveLayoutResult(layoutBounds.withSourceBounds(region), filterLayoutContext);
     }
 
     @Override

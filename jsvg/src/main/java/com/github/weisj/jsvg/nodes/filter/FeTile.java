@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeRegion;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeSourceBounds;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -59,14 +59,15 @@ public final class FeTile extends AbstractFilterPrimitive {
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
         Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), filterLayoutContext.filterRegion());
         LayoutBounds input = impl().layoutInput(filterLayoutContext);
-        boolean repeats = !input.region().isEmpty() && !input.region().contains(region);
-        LayoutBounds layout = input.withRegion(region, repeats ? CoversWholeRegion.YES : CoversWholeRegion.NO);
+        boolean repeats = !input.sourceBounds().isEmpty() && !input.sourceBounds().contains(region);
+        LayoutBounds layout = input.withSourceBounds(
+                region, repeats ? CoversWholeSourceBounds.YES : CoversWholeSourceBounds.NO);
         if (repeats) {
             // Retain the original tile and the upstream samples needed to produce it.
             // TODO: Allocation could avoid the unused gap between a distant input and the visible copies.
             FloatInsets insets = GeometryUtil.max(input.clipBoundsEscapeInsets(),
-                    GeometryUtil.overhangInsets(filterLayoutContext.clipBounds(), input.bounds()));
-            layout = new LayoutBounds(layout.bounds(), insets, region);
+                    GeometryUtil.overhangInsets(filterLayoutContext.clipBounds(), input.tightSourceBounds()));
+            layout = new LayoutBounds(layout.tightSourceBounds(), insets, region);
         }
         impl().saveLayoutResult(layout, filterLayoutContext);
     }
@@ -74,7 +75,7 @@ public final class FeTile extends AbstractFilterPrimitive {
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         Filter.FilterInfo info = filterContext.info();
-        Rectangle2D tileRegion = filterContext.layout(impl().inputChannelKey()).region();
+        Rectangle2D tileRegion = filterContext.layout(impl().inputChannelKey()).sourceBounds();
         Rectangle2D primitiveRegion = filterContext.primitiveRegion(impl());
         if (tileRegion.contains(primitiveRegion)) {
             impl().noop(filterContext);
