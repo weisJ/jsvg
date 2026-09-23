@@ -113,9 +113,7 @@ public final class FeTile extends AbstractFilterPrimitive {
                 graphics.fillRect(0, 0, imageBounds.width, imageBounds.height);
             } else {
                 Rectangle2D outputRegion = primitiveRegion.createIntersection(info.imageBounds());
-                if (!paintCopies(graphics, input, tileRegion, outputRegion, userToPixel, context)) {
-                    paintTile(graphics, input, tileRegion, outputRegion, info, userToPixel, context);
-                }
+                paintRepeatedTile(graphics, input, tileRegion, outputRegion, info, userToPixel, context);
             }
         } finally {
             graphics.dispose();
@@ -124,7 +122,24 @@ public final class FeTile extends AbstractFilterPrimitive {
         impl().saveResult(new ImageProducerChannel(output.getSource()), filterContext);
     }
 
-    private static boolean paintCopies(@NotNull Graphics2D graphics, @NotNull Image input,
+    private static void paintRepeatedTile(@NotNull Graphics2D graphics, @NotNull Image input,
+            @NotNull Rectangle2D tileRegion, @NotNull Rectangle2D outputRegion, @NotNull Filter.FilterInfo info,
+            @NotNull AffineTransform userToPixel, @NotNull RenderContext context) {
+        // Prefer drawing copies of the existing device raster. This preserves its exact samples and
+        // is cheapest while the number of visible copies remains bounded.
+        if (paintDirectCopies(graphics, input, tileRegion, outputRegion, userToPixel, context)) return;
+
+        // A dense lattice would require too many direct draws. If both transformed tile vectors
+        // land on integer pixels, build one bounded device-pixel period and repeat it exactly.
+        if (paintIntegerLatticePeriod(graphics, input, tileRegion, info, userToPixel, context)) return;
+
+        // Fractional or excessively large lattices have no suitably small exact device-pixel
+        // period. Resample one tile and use TexturePaint as the general bounded-work fallback.
+        paintResampledTile(graphics, input, tileRegion, outputRegion, info, userToPixel, context);
+    }
+
+    /** Paints every visible tile as a translated copy of the existing device raster. */
+    private static boolean paintDirectCopies(@NotNull Graphics2D graphics, @NotNull Image input,
             @NotNull Rectangle2D tileRegion, @NotNull Rectangle2D outputRegion,
             @NotNull AffineTransform userToPixel, @NotNull RenderContext context) {
         if (outputRegion.isEmpty()) return true;
@@ -148,7 +163,87 @@ public final class FeTile extends AbstractFilterPrimitive {
         return true;
     }
 
-    private static void paintTile(@NotNull Graphics2D graphics, @NotNull Image input,
+    /** Paints a dense integer lattice by constructing and repeating one exact device-pixel period. */
+    private static boolean paintIntegerLatticePeriod(@NotNull Graphics2D graphics, @NotNull Image input,
+            @NotNull Rectangle2D tileRegion, @NotNull Filter.FilterInfo info,
+            @NotNull AffineTransform userToPixel, @NotNull RenderContext context) {
+        Rectangle pixelPeriod = integerLatticePeriod(tileRegion, userToPixel, info.imageWidth, info.imageHeight);
+        if (pixelPeriod == null) return false;
+
+        Rectangle2D userPeriod = GeometryUtil.containingBoundsAfterTransform(
+                GeometryUtil.createInverse(userToPixel), pixelPeriod);
+        if (requiredCopyCount(tileRegion, userPeriod) > MAX_DIRECT_COPIES) return false;
+
+        // Build one bounded repeat period using translated copies of the existing raster.
+        // This avoids the inverse resampling used by the general TexturePaint fallback.
+        BufferedImage tile = ImageUtil.createCompatibleTransparentImage(pixelPeriod.width, pixelPeriod.height);
+        Graphics2D tileGraphics = tile.createGraphics();
+        try {
+            tileGraphics.setRenderingHints(graphics.getRenderingHints());
+            paintDirectCopies(tileGraphics, input, tileRegion, userPeriod, userToPixel, context);
+        } finally {
+            tileGraphics.dispose();
+        }
+        graphics.setPaint(new TexturePaint(tile, pixelPeriod));
+        graphics.fillRect(0, 0, info.imageWidth, info.imageHeight);
+        return true;
+    }
+
+    private static @Nullable Rectangle integerLatticePeriod(@NotNull Rectangle2D tileRegion,
+            @NotNull AffineTransform userToPixel, int maxWidth, int maxHeight) {
+        Point2D horizontal = userToPixel.deltaTransform(
+                new Point2D.Double(tileRegion.getWidth(), 0), null);
+        Point2D vertical = userToPixel.deltaTransform(
+                new Point2D.Double(0, tileRegion.getHeight()), null);
+        if (!hasIntegerCoordinates(horizontal) || !hasIntegerCoordinates(vertical)) return null;
+
+        long horizontalX = Math.round(horizontal.getX());
+        long horizontalY = Math.round(horizontal.getY());
+        long verticalX = Math.round(vertical.getX());
+        long verticalY = Math.round(vertical.getY());
+        long determinant = Math.abs(horizontalX * verticalY - horizontalY * verticalX);
+        if (determinant == 0) return null;
+
+        // An integer lattice has exact horizontal and vertical raster periods. The determinant is
+        // the lattice-cell area; dividing it by the corresponding component GCD gives each period.
+        long periodWidth = determinant / gcd(horizontalY, verticalY);
+        long periodHeight = determinant / gcd(horizontalX, verticalX);
+        if (periodWidth > maxWidth || periodHeight > maxHeight) return null;
+        return new Rectangle((int) periodWidth, (int) periodHeight);
+    }
+
+    private static boolean hasIntegerCoordinates(@NotNull Point2D vector) {
+        return isIntegerCoordinate(vector.getX()) && isIntegerCoordinate(vector.getY());
+    }
+
+    private static boolean isIntegerCoordinate(double value) {
+        return Math.abs(value) <= Integer.MAX_VALUE && value == Math.rint(value);
+    }
+
+    private static double requiredCopyCount(@NotNull Rectangle2D tileRegion, @NotNull Rectangle2D outputRegion) {
+        return copyCount(tileRegion.getX(), tileRegion.getWidth(), outputRegion.getX(), outputRegion.getMaxX())
+                * copyCount(tileRegion.getY(), tileRegion.getHeight(), outputRegion.getY(), outputRegion.getMaxY());
+    }
+
+    private static double copyCount(double tileStart, double tileSize, double outputStart, double outputEnd) {
+        double firstCopy = Math.floor((outputStart - tileStart) / tileSize);
+        double endCopy = Math.ceil((outputEnd - tileStart) / tileSize);
+        return endCopy - firstCopy;
+    }
+
+    private static long gcd(long first, long second) {
+        first = Math.abs(first);
+        second = Math.abs(second);
+        while (second != 0) {
+            long remainder = first % second;
+            first = second;
+            second = remainder;
+        }
+        return first;
+    }
+
+    /** Paints an arbitrary lattice by resampling a tile for a bounded TexturePaint operation. */
+    private static void paintResampledTile(@NotNull Graphics2D graphics, @NotNull Image input,
             @NotNull Rectangle2D region, @NotNull Rectangle2D outputRegion, @NotNull Filter.FilterInfo info,
             @NotNull AffineTransform userToPixel, @NotNull RenderContext context) {
         // Crop only dimensions larger than the backing image. The other dimensions can repeat in one
@@ -164,14 +259,15 @@ public final class FeTile extends AbstractFilterPrimitive {
         if (tileRegion.isEmpty() || outputRegion.isEmpty()) return;
 
         BufferedImage tile =
-                createTileImage(input, tileRegion, info, userToPixel, context, graphics.getRenderingHints());
+                createResampledTileImage(input, tileRegion, info, userToPixel, context, graphics.getRenderingHints());
         if (tile == null) return;
 
         graphics.transform(userToPixel);
         paintTextureCopies(graphics, tile, region, tileRegion, outputRegion, repeatX, repeatY);
     }
 
-    private static @Nullable BufferedImage createTileImage(@NotNull Image input, @NotNull Rectangle2D tileRegion,
+    private static @Nullable BufferedImage createResampledTileImage(@NotNull Image input,
+            @NotNull Rectangle2D tileRegion,
             @NotNull Filter.FilterInfo info, @NotNull AffineTransform userToPixel, @NotNull RenderContext context,
             @NotNull RenderingHints renderingHints) {
         int width = Math.max(1, Math.min(info.imageWidth, (int) Math.ceil(tileRegion.getWidth()

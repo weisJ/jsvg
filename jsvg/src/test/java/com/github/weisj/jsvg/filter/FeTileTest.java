@@ -74,6 +74,17 @@ class FeTileTest {
                 }));
     }
 
+    @TestFactory
+    Stream<DynamicTest> denseIntegerLatticesPreserveRasterization() {
+        return Stream.of("sheared", "reflected").map(name -> latticeReference(name, null));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> clippedRenderingPreservesIntegerLatticePhase() {
+        Rectangle clip = new Rectangle(44, 44, 40, 40);
+        return Stream.of("sheared", "reflected").map(name -> latticeReference(name, clip));
+    }
+
     @Test
     void clippedRenderingRetainsBlurSamplesOutsideTheTile() throws IOException {
         Rectangle clip = new Rectangle(70, 70, 10, 10);
@@ -83,6 +94,15 @@ class FeTileTest {
         assertEquals(SUCCESS, compareImageRasterization(
                 full.getSubimage(clip.x, clip.y, clip.width, clip.height),
                 partial.getSubimage(clip.x, clip.y, clip.width, clip.height), "tile-blur-repaint", 0, 0));
+    }
+
+    private static DynamicTest latticeReference(String name, Rectangle clip) {
+        String path = "filter/tileLattice/" + name;
+        String description = clip == null ? name : name + " clipped to " + clip;
+        return DynamicTest.dynamicTest(description, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource(path + "_ref.svg"), RenderType.JSVG, graphics -> graphics.setClip(clip)),
+                actual(new PathImageSource(path + ".svg"), RenderType.JSVG, graphics -> graphics.setClip(clip)), 0,
+                0))));
     }
 
 }

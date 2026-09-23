@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+	<defs>
+		<g id="t">
+			<rect x="1" y="1" width="2" height="6" fill="#e04020" />
+			<rect x="4" y="1" width="3" height="6" fill="#2040e0" />
+		</g>
+	</defs>
+	<g transform="matrix(-1 .25 -.25 1 120 8)">
+		<use href="#t" x="0" y="0" />
+		<use href="#t" x="8" y="0" />
+		<use href="#t" x="16" y="0" />
+		<use href="#t" x="24" y="0" />
+		<use href="#t" x="32" y="0" />
+		<use href="#t" x="40" y="0" />
+		<use href="#t" x="48" y="0" />
+		<use href="#t" x="56" y="0" />
+		<use href="#t" x="64" y="0" />
+		<use href="#t" x="72" y="0" />
+		<use href="#t" x="0" y="8" />
+		<use href="#t" x="8" y="8" />
+		<use href="#t" x="16" y="8" />
+		<use href="#t" x="24" y="8" />
+		<use href="#t" x="32" y="8" />
+		<use href="#t" x="40" y="8" />
+		<use href="#t" x="48" y="8" />
+		<use href="#t" x="56" y="8" />
+		<use href="#t" x="64" y="8" />
+		<use href="#t" x="72" y="8" />
+		<use href="#t" x="0" y="16" />
+		<use href="#t" x="8" y="16" />
+		<use href="#t" x="16" y="16" />
+		<use href="#t" x="24" y="16" />
+		<use href="#t" x="32" y="16" />
+		<use href="#t" x="40" y="16" />
+		<use href="#t" x="48" y="16" />
+		<use href="#t" x="56" y="16" />
+		<use href="#t" x="64" y="16" />
+		<use href="#t" x="72" y="16" />
+		<use href="#t" x="0" y="24" />
+		<use href="#t" x="8" y="24" />
+		<use href="#t" x="16" y="24" />
+		<use href="#t" x="24" y="24" />
+		<use href="#t" x="32" y="24" />
+		<use href="#t" x="40" y="24" />
+		<use href="#t" x="48" y="24" />
+		<use href="#t" x="56" y="24" />
+		<use href="#t" x="64" y="24" />
+		<use href="#t" x="72" y="24" />
+		<use href="#t" x="0" y="32" />
+		<use href="#t" x="8" y="32" />
+		<use href="#t" x="16" y="32" />
+		<use href="#t" x="24" y="32" />
+		<use href="#t" x="32" y="32" />
+		<use href="#t" x="40" y="32" />
+		<use href="#t" x="48" y="32" />
+		<use href="#t" x="56" y="32" />
+		<use href="#t" x="64" y="32" />
+		<use href="#t" x="72" y="32" />
+		<use href="#t" x="0" y="40" />
+		<use href="#t" x="8" y="40" />
+		<use href="#t" x="16" y="40" />
+		<use href="#t" x="24" y="40" />
+		<use href="#t" x="32" y="40" />
+		<use href="#t" x="40" y="40" />
+		<use href="#t" x="48" y="40" />
+		<use href="#t" x="56" y="40" />
+		<use href="#t" x="64" y="40" />
+		<use href="#t" x="72" y="40" />
+		<use href="#t" x="0" y="48" />
+		<use href="#t" x="8" y="48" />
+		<use href="#t" x="16" y="48" />
+		<use href="#t" x="24" y="48" />
+		<use href="#t" x="32" y="48" />
+		<use href="#t" x="40" y="48" />
+		<use href="#t" x="48" y="48" />
+		<use href="#t" x="56" y="48" />
+		<use href="#t" x="64" y="48" />
+		<use href="#t" x="72" y="48" />
+		<use href="#t" x="0" y="56" />
+		<use href="#t" x="8" y="56" />
+		<use href="#t" x="16" y="56" />
+		<use href="#t" x="24" y="56" />
+		<use href="#t" x="32" y="56" />
+		<use href="#t" x="40" y="56" />
+		<use href="#t" x="48" y="56" />
+		<use href="#t" x="56" y="56" />
+		<use href="#t" x="64" y="56" />
+		<use href="#t" x="72" y="56" />
+		<use href="#t" x="0" y="64" />
+		<use href="#t" x="8" y="64" />
+		<use href="#t" x="16" y="64" />
+		<use href="#t" x="24" y="64" />
+		<use href="#t" x="32" y="64" />
+		<use href="#t" x="40" y="64" />
+		<use href="#t" x="48" y="64" />
+		<use href="#t" x="56" y="64" />
+		<use href="#t" x="64" y="64" />
+		<use href="#t" x="72" y="64" />
+		<use href="#t" x="0" y="72" />
+		<use href="#t" x="8" y="72" />
+		<use href="#t" x="16" y="72" />
+		<use href="#t" x="24" y="72" />
+		<use href="#t" x="32" y="72" />
+		<use href="#t" x="40" y="72" />
+		<use href="#t" x="48" y="72" />
+		<use href="#t" x="56" y="72" />
+		<use href="#t" x="64" y="72" />
+		<use href="#t" x="72" y="72" />
+	</g>
+</svg>
