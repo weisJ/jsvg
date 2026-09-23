@@ -25,7 +25,9 @@ simpler reference SVG where the required appearance is replicated manually and t
 both SVG files is the same.
 
 Keep each test focused, use the existing loading and comparison helpers, and avoid brittle assertions
-about implementation details. Use the smallest practical image-comparison tolerance.
+about implementation details. Use the smallest practical image-comparison tolerance. When practical,
+render image-comparison tests at a viewport of at least 500 by 500 pixels. Small native-size renders can
+hide scaling, rounding, and sampling errors that become visible at realistic display sizes.
 
 Run a single test class with:
 

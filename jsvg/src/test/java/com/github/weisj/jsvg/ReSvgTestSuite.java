@@ -266,6 +266,7 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> filters_feGaussianBlur() {
         return checkDirectory("filters/feGaussianBlur", Set.of(
+                // This is a crash-only fixture. Its PNG is specific to resvg's blur approximation.
                 "huge-stdDeviation.svg",
                 "simple-case.svg",
                 "small-stdDeviation.svg",

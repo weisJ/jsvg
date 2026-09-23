@@ -49,13 +49,15 @@ class FilterBufferTest {
     }
 
     @TestFactory
-    Stream<DynamicTest> transformedEdgeModes() {
+    Stream<DynamicTest> singleAxisTransformedEdgeModes() {
         return Stream.of("duplicate", "wrap")
                 .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
                         compareImages(new CompareInfo(
-                                expected(new PathImageSource("filter/backingBuffer/constant_ref.svg"), RenderType.JSVG),
+                                expected(new PathImageSource("filter/backingBuffer/singleAxisEdgeMode_ref.svg"),
+                                        RenderType.JSVG),
                                 actual(new PathImageSource("filter/backingBuffer/" + name + ".svg"), RenderType.JSVG),
-                                0, 2 / 255.0)))));
+                                // The transformed hard edge is rasterized from different input subregions.
+                                0.06, 2 / 255.0)))));
     }
 
     @TestFactory

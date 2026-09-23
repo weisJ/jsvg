@@ -28,13 +28,144 @@ import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.Utils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
+import com.github.weisj.jsvg.ImageComparison.ImageSource.MemoryImageSource;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.attributes.filter.EdgeMode;
+
 class EdgeModeTest {
+    private static final int TEST_WIDTH = 900;
+    private static final int TEST_HEIGHT = 500;
+
+    @TestFactory
+    Stream<DynamicTest> zeroDeviationAxisSubregionReferences() {
+        return Stream.of("duplicateHorizontal", "duplicateVertical", "wrapHorizontal", "wrapVertical")
+                .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS,
+                        compareImages(new CompareInfo(
+                                expected(new PathImageSource("filter/edgeMode/" + name + "_ref.svg"),
+                                        RenderType.JSVG),
+                                actual(new PathImageSource("filter/edgeMode/" + name + ".svg"), RenderType.JSVG),
+                                0, 2 / 255.0)))));
+    }
+
+    @Test
+    void zeroRadiusOmitsAxis() {
+        BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB_PRE);
+        List<EdgeMode.Axis> convolvedAxes = new ArrayList<>();
+
+        EdgeMode.None.convolveSeparable(image, new Rectangle(0, 0, 2, 2), null,
+                new EdgeMode.SeparableConvolveOperation() {
+                    @Override
+                    public int radius(EdgeMode.@NotNull Axis axis) {
+                        return axis == EdgeMode.Axis.Horizontal ? 0 : 1;
+                    }
+
+                    @Override
+                    public @NotNull BufferedImage convolve(@NotNull BufferedImage image,
+                            EdgeMode.@NotNull Axis axis, RenderingHints hints) {
+                        convolvedAxes.add(axis);
+                        return image;
+                    }
+                });
+
+        assertEquals(List.of(EdgeMode.Axis.Vertical), convolvedAxes);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> edgeModesOperateOnTheSameDestinationPixels() {
+        return Stream.of(EdgeMode.values()).map(mode -> DynamicTest.dynamicTest(mode.name(), () -> {
+            BufferedImage image = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB_PRE);
+            List<Dimension> convolutionSizes = new ArrayList<>();
+
+            mode.convolveSeparable(image, new Rectangle(5, 5, 10, 10), null,
+                    new EdgeMode.SeparableConvolveOperation() {
+                        @Override
+                        public int radius(EdgeMode.@NotNull Axis axis) {
+                            return axis == EdgeMode.Axis.Horizontal ? 2 : 0;
+                        }
+
+                        @Override
+                        public @NotNull BufferedImage convolve(@NotNull BufferedImage paddedImage,
+                                EdgeMode.@NotNull Axis axis, RenderingHints hints) {
+                            convolutionSizes.add(new Dimension(paddedImage.getWidth(), paddedImage.getHeight()));
+                            return paddedImage;
+                        }
+                    });
+
+            // edgeMode changes the samples outside the logical source bounds. It must not change
+            // the destination raster on which the convolution runs.
+            assertEquals(List.of(new Dimension(24, 20)), convolutionSizes);
+        }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> sourceGraphicUsesFilterRegionAsImageBounds() {
+        return Stream.of("duplicate", "wrap").map(mode -> DynamicTest.dynamicTest(mode, () -> {
+            int width = 600;
+            int height = 500;
+            String artwork = element("g").attributes("filter='url(#f)'").children(
+                    rectangle(250, 200, 100, 100, 0xffe08040)).build();
+            String actual = filterDocument(width, height,
+                    element("feGaussianBlur")
+                            .attributes("stdDeviation='12'", "edgeMode='" + mode + "'")
+                            .build(),
+                    artwork, "", "color-interpolation-filters='sRGB'");
+            String reference = filterDocument(width, height,
+                    element("feGaussianBlur")
+                            .attributes("stdDeviation='12' edgeMode='none'")
+                            .build(),
+                    artwork, "", "color-interpolation-filters='sRGB'");
+
+            // The painted rectangle is tightly bounded, but the logical SourceGraphic also
+            // contains the transparent remainder of the filter region. Its edges are therefore
+            // too far away for duplicate or wrap to affect this blur.
+            compareSvg("source-graphic-filter-region-" + mode, actual, reference);
+        }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> clippedRenderingRetainsInputSamples() {
+        return Stream.of("duplicate", "wrap").map(mode -> DynamicTest.dynamicTest(mode, () -> {
+            int width = 600;
+            int height = 500;
+            String primitive = element("feGaussianBlur")
+                    .attributes("stdDeviation='12 0'")
+                    .attributes(Map.of("edgeMode", mode)).build();
+            String artwork = element("g").attributes("filter='url(#f)'").children(
+                    rectangle(0, 0, width, height, 0xff204060),
+                    rectangle(230, 0, 90, height, 0xffe08040),
+                    rectangle(570, 0, 30, height, 0xff40c080)).build();
+            String svg = filterDocument(width, height, primitive, artwork, "",
+                    "color-interpolation-filters='sRGB'");
+            Rectangle clip = mode.equals("wrap")
+                    ? new Rectangle(0, 200, 40, 100)
+                    : new Rectangle(250, 200, 50, 100);
+            MemoryImageSource source = new MemoryImageSource("edge-mode-repaint-" + mode, svg);
+            BufferedImage full = expected(source, RenderType.JSVG).render(null);
+            BufferedImage partial = actual(source, RenderType.JSVG,
+                    graphics -> graphics.setClip(clip)).render(null);
+
+            assertEquals(SUCCESS, compareImageRasterization(
+                    full.getSubimage(clip.x, clip.y, clip.width, clip.height),
+                    partial.getSubimage(clip.x, clip.y, clip.width, clip.height),
+                    "edge-mode-repaint-" + mode, 0, 0));
+        }));
+    }
+
     @TestFactory
     Stream<DynamicTest> duplicateAndWrapMatchContinuedArtwork() {
         return Stream.of("duplicate", "wrap").flatMap(mode -> Stream.of("1.5", "4", "12", "1.5 0", "0 1.5")
@@ -95,9 +226,13 @@ class EdgeModeTest {
         String artwork = element("g").attributes("filter='url(#f)'").children(tile(32, 24)).build();
         String svg = filterDocument(144, 80, primitives, artwork, "", "color-interpolation-filters='sRGB'");
         // Explicitly continue the artwork, so the reference needs only transparent-edge blur.
+        boolean horizontal = hasBlurOnAxis(deviation, 0);
+        boolean vertical = hasBlurOnAxis(deviation, 1);
         String reference = filterDocument(144, 80,
-                element("feGaussianBlur").attributes(Map.of("stdDeviation", deviation, "edgeMode", "none")).build(),
-                element("g").attributes("filter='url(#f)'").children(continuedTile(mode)).build(),
+                element("feGaussianBlur")
+                        .attributes(Map.of("stdDeviation", deviation, "edgeMode", "none")).build(),
+                element("g").attributes("filter='url(#f)'")
+                        .children(continuedTile(mode, horizontal, vertical)).build(),
                 "x='-100' y='-100' width='344' height='280'", "color-interpolation-filters='sRGB'");
         compareSvg("edge-mode-subregion-" + mode + "-" + deviation + "-" + named, svg, reference);
     }
@@ -117,8 +252,10 @@ class EdgeModeTest {
                     element("g").attributes("filter='url(#f)'").children(tile(32, 24)).build(), "",
                     "color-interpolation-filters='sRGB'");
             String reference = filterDocument(144, 80,
-                    element("feGaussianBlur").attributes("stdDeviation='1.5' edgeMode='none'").build(),
-                    element("g").attributes("filter='url(#f)'").children(continuedTile(mode)).build(),
+                    element("feGaussianBlur")
+                            .attributes("stdDeviation='1.5' edgeMode='none'")
+                            .build(),
+                    element("g").attributes("filter='url(#f)'").children(continuedTile(mode, true, true)).build(),
                     "x='-100' y='-100' width='344' height='280'", "color-interpolation-filters='sRGB'");
             compareSvg("edge-mode-chained-" + mode, svg, reference);
         }));
@@ -128,11 +265,22 @@ class EdgeModeTest {
     Stream<DynamicTest> transparentInputEdgesStayTransparent() {
         return Stream.of("duplicate", "wrap")
                 .map(mode -> DynamicTest.dynamicTest(mode + " transparent edge", () -> {
-                    String input = element("feOffset").attributes("x='20' y='12' width='48' height='40'").build();
-                    String blur = element("feGaussianBlur").attributes("stdDeviation='1.5'")
+                    String input = element("feOffset")
+                            .attributes("x='20' y='12' width='48' height='40' result='artwork'").build()
+                            + element("feFlood")
+                                    .attributes(
+                                            "x='20' y='12' width='48' height='40' flood-opacity='0' result='extent'")
+                                    .build()
+                            + element("feMerge").attributes("result='input'").children(
+                                    element("feMergeNode").attributes("in='extent'"),
+                                    element("feMergeNode").attributes("in='artwork'"))
+                                    .build();
+                    String blur = element("feGaussianBlur").attributes("in='input' stdDeviation='1.5'")
                             .attributes(Map.of("edgeMode", mode)).build();
-                    String referenceBlur =
-                            element("feGaussianBlur").attributes("stdDeviation='1.5' edgeMode='none'").build();
+                    String referenceBlur = element("feGaussianBlur")
+                            .attributes("x='20' y='12' width='48' height='40'",
+                                    "stdDeviation='1.5' edgeMode='none'")
+                            .build();
                     String artwork =
                             element("g").attributes("filter='url(#f)' opacity='0.5'").children(tile(32, 24)).build();
                     compareSvg("edge-mode-transparent-" + mode,
@@ -155,9 +303,17 @@ class EdgeModeTest {
     }
 
     private static void compareSvg(String name, String svg, String reference) {
-        assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new ImageSource.MemoryImageSource(name + "-ref", reference), RenderType.JSVG),
-                actual(new ImageSource.MemoryImageSource(name, svg), RenderType.JSVG), 0, 2 / 255.0)));
+        try {
+            BufferedImage sizeHint = new BufferedImage(TEST_WIDTH, TEST_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage expectedImage = expected(
+                    new ImageSource.MemoryImageSource(name + "-ref", reference), RenderType.JSVG).render(sizeHint);
+            BufferedImage actualImage = actual(
+                    new ImageSource.MemoryImageSource(name, svg), RenderType.JSVG).render(expectedImage);
+            assertEquals(SUCCESS, compareImageRasterization(
+                    expectedImage, actualImage, name, 0, 2 / 255.0));
+        } catch (IOException e) {
+            throw new AssertionError("Could not render " + name, e);
+        }
     }
 
     private static String tile(int x, int y) {
@@ -168,18 +324,32 @@ class EdgeModeTest {
                 rectangle(x + 12, y + 8, 12, 8, 0xff8040c0)).build();
     }
 
-    private static String continuedTile(String mode) {
+    private static boolean hasBlurOnAxis(String deviation, int axis) {
+        String[] values = deviation.split(" ");
+        String value = values.length == 1 ? values[0] : values[axis];
+        return Double.parseDouble(value) > 0;
+    }
+
+    private static String continuedTile(String mode, boolean horizontal, boolean vertical) {
         if (mode.equals("none")) return tile(32, 24);
         ElementBuilder artwork = element("g");
         if (mode.equals("duplicate")) {
+            int left = horizontal ? -100 : 32;
+            int right = horizontal ? 244 : 56;
+            int top = vertical ? -100 : 24;
+            int bottom = vertical ? 180 : 40;
             artwork.children(
-                    rectangle(-100, -100, 144, 132, 0xffe08040),
-                    rectangle(44, -100, 200, 132, 0xff40c080),
-                    rectangle(-100, 32, 144, 148, 0xff204060),
-                    rectangle(44, 32, 200, 148, 0xff8040c0));
+                    rectangle(left, top, 44 - left, 32 - top, 0xffe08040),
+                    rectangle(44, top, right - 44, 32 - top, 0xff40c080),
+                    rectangle(left, 32, 44 - left, bottom - 32, 0xff204060),
+                    rectangle(44, 32, right - 44, bottom - 32, 0xff8040c0));
         } else {
-            for (int y = 24 - 16 * 8; y < 180; y += 16) {
-                for (int x = 32 - 24 * 6; x < 244; x += 24) {
+            int firstY = vertical ? 24 - 16 * 8 : 24;
+            int bottom = vertical ? 180 : 40;
+            int firstX = horizontal ? 32 - 24 * 6 : 32;
+            int right = horizontal ? 244 : 56;
+            for (int y = firstY; y < bottom; y += 16) {
+                for (int x = firstX; x < right; x += 24) {
                     artwork.children(tile(x, y));
                 }
             }
@@ -199,7 +369,8 @@ class EdgeModeTest {
         String name = "edge-mode-" + mode + "-" + deviation;
         // Allow small rounding differences between the two renderers' blur implementations.
         assertEquals(SUCCESS, compareImages(new CompareInfo(
-                expected(new ImageSource.MemoryImageSource(name + "-ref", reference), RenderType.Batik),
-                actual(new ImageSource.MemoryImageSource(name, svg), RenderType.JSVG), 0, 2 / 255.0)));
+                expected(new ImageSource.MemoryImageSource(name + "-ref", reference),
+                        RenderType.Batik.withViewportSize(TEST_WIDTH, TEST_HEIGHT)),
+                actual(new ImageSource.MemoryImageSource(name, svg), RenderType.JSVG), 0.002, 2 / 255.0)));
     }
 }

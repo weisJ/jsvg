@@ -23,239 +23,319 @@ package com.github.weisj.jsvg.attributes.filter;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.nodes.filter.FilterContext;
-import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.impl.GraphicsUtil;
 import com.github.weisj.jsvg.util.ImageUtil;
 
 public enum EdgeMode {
-    Duplicate {
-        @Override
-        public ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-                @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
-                @NotNull ConvolveOperation convolveOperation) {
-            return convolveDuplicate(context, filterContext, producer, sourceBounds, convolveOperation);
-        }
-    },
-    Wrap {
-        @Override
-        public ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-                @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
-                @NotNull ConvolveOperation convolveOperation) {
-            return convolveWrap(context, filterContext, producer, sourceBounds, convolveOperation);
-        }
-    },
-    None {
-        @Override
-        public ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-                @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
-                @NotNull ConvolveOperation convolveOperation) {
-            EdgeModeImage image = prepareEdgeModeImage(context, producer, sourceBounds, convolveOperation);
-            return applyConvolutions(filterContext.renderingHints(), image, convolveOperation);
-        }
-    };
+    Duplicate,
+    Wrap,
+    None;
 
-    public abstract ImageProducer convolve(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-            @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
-            @NotNull ConvolveOperation convolveOperation);
+    public enum Axis {
+        Horizontal,
+        Vertical;
 
-    public interface ConvolveOperation {
+        private @NotNull Axis other() {
+            return this == Horizontal ? Vertical : Horizontal;
+        }
+    }
+
+    public interface SeparableConvolveOperation {
+
+        int radius(@NotNull Axis axis);
 
         @NotNull
-        Dimension kernelRadius();
+        BufferedImage convolve(@NotNull BufferedImage image, @NotNull Axis axis, @Nullable RenderingHints hints);
 
-        @NotNull
-        ImageProducer convolve(@NotNull BufferedImage image, @Nullable RenderingHints hints, int awtEdgeMode);
+        default @NotNull Axis firstAxis() {
+            return Axis.Horizontal;
+        }
+    }
+
+    public @NotNull BufferedImage convolveSeparable(@NotNull BufferedImage image,
+            @NotNull Rectangle sourceBounds, @Nullable RenderingHints hints,
+            @NotNull SeparableConvolveOperation operation) {
+        if (!image.getColorModel().isAlphaPremultiplied()) {
+            throw new IllegalArgumentException("Image must be premultiplied");
+        }
+        if (!ImageUtil.is_INT_PACK_Data(image.getSampleModel(), true)) {
+            throw new IllegalArgumentException("Image must use packed integer ARGB samples");
+        }
+
+        Rectangle resultBounds = resultBounds(image);
+        if (resultBounds.isEmpty()) return image;
+
+        int horizontalRadius = operation.radius(Axis.Horizontal);
+        int verticalRadius = operation.radius(Axis.Vertical);
+        if (horizontalRadius == 0 && verticalRadius == 0) return image;
+
+        int horizontalWidth = paddedDimension(resultBounds.width, horizontalRadius);
+        int verticalHeight = paddedDimension(resultBounds.height, verticalRadius);
+        int backingBufferSize = checkedBackingBufferSize(
+                (long) horizontalWidth * resultBounds.height,
+                (long) resultBounds.width * verticalHeight);
+        // Shared backing storage for the padded image to avoid allocating a new array for each axis pass.
+        int[] backingBuffer = new int[backingBufferSize];
+
+        Axis firstAxis = operation.firstAxis();
+        int firstRadius = radiusForAxis(firstAxis, horizontalRadius, verticalRadius);
+        int secondRadius = radiusForAxis(firstAxis.other(), horizontalRadius, verticalRadius);
+        if (firstRadius == 0 && secondRadius > 0) {
+            // A zero-radius pass produces no intermediate result.
+            // It is convenient to just run the non-zero pass first, so swap the axes and radii.
+            firstAxis = firstAxis.other();
+            firstRadius = secondRadius;
+            secondRadius = 0;
+        }
+
+        // sourceBounds is possibly smaller than resultBounds.
+        // We only copy the necessary row/column from the sourceBounds which is enough to process the
+        // sourceBounds.
+        // After the first axis pass we need to copy the complete resultBounds row/column to process the
+        // second axis.
+        AxisConvolutionContext axisContext =
+                new AxisConvolutionContext(resultBounds, hints, operation, backingBuffer);
+        convolveAxis(axisContext, image, sourceBounds, firstAxis, firstRadius);
+        if (secondRadius > 0) {
+            Rectangle intermediateBounds = sourceBoundsAfterAxis(sourceBounds, resultBounds, firstAxis);
+            convolveAxis(axisContext, image, intermediateBounds, firstAxis.other(), secondRadius);
+        }
+        return image;
+    }
+
+    private static @NotNull Rectangle sourceBoundsAfterAxis(@NotNull Rectangle sourceBounds,
+            @NotNull Rectangle resultBounds, @NotNull Axis processedAxis) {
+        Rectangle bounds = new Rectangle(sourceBounds);
+        if (processedAxis == Axis.Horizontal) {
+            bounds.x = resultBounds.x;
+            bounds.width = resultBounds.width;
+        } else {
+            bounds.y = resultBounds.y;
+            bounds.height = resultBounds.height;
+        }
+        return bounds;
+    }
+
+    private static int radiusForAxis(@NotNull Axis axis, int horizontalRadius, int verticalRadius) {
+        return axis == Axis.Horizontal ? horizontalRadius : verticalRadius;
+    }
+
+    private static final class AxisConvolutionContext {
+        private final @NotNull Rectangle resultBounds;
+        private final @Nullable RenderingHints hints;
+        private final @NotNull SeparableConvolveOperation operation;
+        private final int @NotNull [] backingBuffer;
+
+
+        private AxisConvolutionContext(@NotNull Rectangle resultBounds, @Nullable RenderingHints hints,
+                @NotNull SeparableConvolveOperation operation, int @NotNull [] backingBuffer) {
+            this.resultBounds = resultBounds;
+            this.hints = hints;
+            this.operation = operation;
+            this.backingBuffer = backingBuffer;
+        }
+    }
+
+    private void convolveAxis(@NotNull AxisConvolutionContext axisContext,
+            @NotNull BufferedImage unpaddedImage,
+            @NotNull Rectangle sourceBounds, @NotNull Axis axis, int radius) {
+        if (radius == 0) return;
+
+        Rectangle resultBounds = axisContext.resultBounds;
+
+        int horizontalRadius = axis == Axis.Horizontal ? radius : 0;
+        int verticalRadius = axis == Axis.Vertical ? radius : 0;
+        EdgeModeImage extended = createExtendedImage(axisContext, unpaddedImage, sourceBounds,
+                horizontalRadius, verticalRadius);
+
+        BufferedImage filteredImage = axisContext.operation.convolve(extended.img, axis, axisContext.hints);
+        if (filteredImage.getWidth() != extended.img.getWidth()
+                || filteredImage.getHeight() != extended.img.getHeight()) {
+            throw new IllegalArgumentException("Convolution must preserve the padded image dimensions");
+        }
+        Raster unpaddedResult = filteredImage.getRaster().createChild(
+                extended.xOff, extended.yOff, resultBounds.width, resultBounds.height,
+                resultBounds.x, resultBounds.y, null);
+        unpaddedImage.getRaster().setRect(unpaddedResult);
+    }
+
+    private static @NotNull Rectangle resultBounds(@NotNull BufferedImage source) {
+        return new Rectangle(0, 0, source.getWidth(), source.getHeight());
+    }
+
+    private @NotNull EdgeModeImage createExtendedImage(@NotNull AxisConvolutionContext axisContext,
+            @NotNull BufferedImage source,
+            @NotNull Rectangle sourceBounds,
+            int horizontalRadius, int verticalRadius) {
+        Rectangle resultBounds = axisContext.resultBounds;
+        int paddedWidth = paddedDimension(resultBounds.width, horizontalRadius);
+        int paddedHeight = paddedDimension(resultBounds.height, verticalRadius);
+        int paddedSize = checkedImageSize((long) paddedWidth * paddedHeight);
+        int[] buffer = axisContext.backingBuffer;
+        if (buffer.length < paddedSize) {
+            throw new IllegalArgumentException("Reusable buffer is too small for the padded image");
+        }
+        Arrays.fill(buffer, 0, paddedSize, 0);
+
+        int[] masks = ((SinglePixelPackedSampleModel) source.getSampleModel()).getBitMasks();
+        BufferedImage image = createImageView(source.getColorModel(), buffer, masks, paddedWidth, paddedHeight);
+
+        Rectangle extendedBounds = new Rectangle(sourceBounds);
+        extendedBounds.translate(horizontalRadius - resultBounds.x, verticalRadius - resultBounds.y);
+        Graphics2D graphics = GraphicsUtil.createGraphics(image);
+        try {
+            // Align the complete available raster with its global device coordinates. If resultBounds
+            // was clipped by the backing image, unavailable samples stay transparent rather than
+            // becoming an artificial input edge.
+            graphics.drawImage(source,
+                    horizontalRadius - resultBounds.x,
+                    verticalRadius - resultBounds.y, null);
+            if (this != None && !extendedBounds.isEmpty()) {
+                if (horizontalRadius > 0) {
+                    paintExtendedAxis(graphics, image, extendedBounds, Axis.Horizontal);
+                    extendedBounds.x = 0;
+                    extendedBounds.width = paddedWidth;
+                }
+                if (verticalRadius > 0) {
+                    paintExtendedAxis(graphics, image, extendedBounds, Axis.Vertical);
+                }
+            }
+        } finally {
+            graphics.dispose();
+        }
+        return new EdgeModeImage(image, horizontalRadius, verticalRadius);
+    }
+
+    private void paintExtendedAxis(@NotNull Graphics2D graphics, @NotNull BufferedImage image,
+            @NotNull Rectangle sourceBounds, @NotNull Axis axis) {
+        if (this == Duplicate) {
+            paintDuplicateEdges(graphics, image, sourceBounds, axis);
+        } else {
+            paintRepeatedEdges(graphics, image, sourceBounds, axis);
+        }
+    }
+
+    private static void paintDuplicateEdges(@NotNull Graphics2D graphics, @NotNull BufferedImage image,
+            @NotNull Rectangle sourceBounds, @NotNull Axis axis) {
+        int left = sourceBounds.x;
+        int top = sourceBounds.y;
+        int right = left + sourceBounds.width;
+        int bottom = top + sourceBounds.height;
+        Insets insets = new Insets(top, left, bottom, right);
+        if (axis == Axis.Horizontal) {
+            paintHorizontalDuplicateEdges(graphics, image, insets);
+        } else {
+            paintVerticalDuplicateEdges(graphics, image, insets);
+        }
+    }
+
+    private static void paintHorizontalDuplicateEdges(@NotNull Graphics2D graphics, @NotNull BufferedImage image,
+            @NotNull Insets insets) {
+        int clippedTop = Math.max(0, insets.top);
+        int clippedBottom = Math.min(image.getHeight(), insets.bottom);
+        if (clippedTop >= clippedBottom) return;
+
+        int left = insets.left;
+        int right = insets.right;
+        if (left > 0 && left < image.getWidth()) {
+            graphics.drawImage(image, 0, clippedTop, left, clippedBottom,
+                    left, clippedTop, left + 1, clippedBottom, null);
+        }
+        if (right >= 1 && right < image.getWidth()) {
+            graphics.drawImage(image, right, clippedTop, image.getWidth(), clippedBottom,
+                    right - 1, clippedTop, right, clippedBottom, null);
+        }
+    }
+
+    private static void paintVerticalDuplicateEdges(@NotNull Graphics2D graphics, @NotNull BufferedImage image,
+            @NotNull Insets insets) {
+        int clippedLeft = Math.max(0, insets.left);
+        int clippedRight = Math.min(image.getWidth(), insets.right);
+        if (clippedLeft >= clippedRight) return;
+
+        int top = insets.top;
+        int bottom = insets.bottom;
+        if (top > 0 && top < image.getHeight()) {
+            graphics.drawImage(image, clippedLeft, 0, clippedRight, top,
+                    clippedLeft, top, clippedRight, top + 1, null);
+        }
+        if (bottom >= 1 && bottom < image.getHeight()) {
+            graphics.drawImage(image, clippedLeft, bottom, clippedRight, image.getHeight(),
+                    clippedLeft, bottom - 1, clippedRight, bottom, null);
+        }
+    }
+
+    private static void paintRepeatedEdges(@NotNull Graphics2D graphics, @NotNull BufferedImage image,
+            @NotNull Rectangle sourceBounds, @NotNull Axis axis) {
+        if (axis == Axis.Horizontal) {
+            int firstCopy = Math.floorDiv(-sourceBounds.x, sourceBounds.width);
+            for (int copy = firstCopy; sourceBounds.x + copy * sourceBounds.width < image.getWidth(); copy++) {
+                if (copy == 0) continue;
+                graphics.drawImage(image,
+                        sourceBounds.x + copy * sourceBounds.width, sourceBounds.y,
+                        sourceBounds.x + (copy + 1) * sourceBounds.width, sourceBounds.y + sourceBounds.height,
+                        sourceBounds.x, sourceBounds.y,
+                        sourceBounds.x + sourceBounds.width, sourceBounds.y + sourceBounds.height, null);
+            }
+        } else {
+            int firstCopy = Math.floorDiv(-sourceBounds.y, sourceBounds.height);
+            for (int copy = firstCopy; sourceBounds.y + copy * sourceBounds.height < image.getHeight(); copy++) {
+                if (copy == 0) continue;
+                graphics.drawImage(image,
+                        sourceBounds.x, sourceBounds.y + copy * sourceBounds.height,
+                        sourceBounds.x + sourceBounds.width, sourceBounds.y + (copy + 1) * sourceBounds.height,
+                        sourceBounds.x, sourceBounds.y,
+                        sourceBounds.x + sourceBounds.width, sourceBounds.y + sourceBounds.height, null);
+            }
+        }
+    }
+
+    private static @NotNull BufferedImage createImageView(@NotNull ColorModel colorModel,
+            int @NotNull [] workspace, int @NotNull [] masks, int width, int height) {
+        DataBufferInt dataBuffer = new DataBufferInt(workspace, workspace.length);
+        SampleModel sampleModel = new SinglePixelPackedSampleModel(
+                DataBuffer.TYPE_INT, width, height, width, masks);
+        WritableRaster raster = Raster.createWritableRaster(sampleModel, dataBuffer, new Point());
+        return new BufferedImage(colorModel, raster, true, null);
+    }
+
+    private static int paddedDimension(int size, int radius) {
+        if (radius < 0) {
+            throw new IllegalArgumentException("Convolution radius must not be negative");
+        }
+        long paddedSize = size + 2L * radius;
+        if (paddedSize > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Padded image dimension exceeds the supported integer range");
+        }
+        return (int) paddedSize;
+    }
+
+    private static int checkedBackingBufferSize(long horizontalSize, long verticalSize) {
+        return checkedImageSize(Math.max(horizontalSize, verticalSize));
+    }
+
+    private static int checkedImageSize(long size) {
+        if (size > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Padded image requires too many pixels");
+        }
+        return (int) size;
     }
 
     private static final class EdgeModeImage {
         private final @NotNull BufferedImage img;
         private final int xOff;
         private final int yOff;
-        private final int width;
-        private final int height;
-        private final @NotNull Rectangle sourceBounds;
 
-        private EdgeModeImage(@NotNull BufferedImage img, int xOff, int yOff, int width, int height,
-                @NotNull Rectangle sourceBounds) {
+        private EdgeModeImage(@NotNull BufferedImage img, int xOff, int yOff) {
             this.img = img;
             this.xOff = xOff;
             this.yOff = yOff;
-            this.width = width;
-            this.height = height;
-            this.sourceBounds = sourceBounds;
         }
-    }
-
-    private static EdgeModeImage prepareEdgeModeImage(@NotNull RenderContext context,
-            @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
-            @NotNull ConvolveOperation convolveOperation) {
-        Image img = context.platformSupport().createImage(producer);
-        int width = img.getWidth(null);
-        int height = img.getHeight(null);
-
-        Dimension kernelRadius = convolveOperation.kernelRadius();
-        int xOff = kernelRadius.width;
-        int yOff = kernelRadius.height;
-
-        BufferedImage bufferedImage = ImageUtil.createCompatibleTransparentImage(width + 2 * xOff, height + 2 * yOff,
-                ImageUtil.Premultiplied.Yes);
-        Graphics2D g = GraphicsUtil.createGraphics(bufferedImage);
-
-        g.translate(xOff, yOff);
-        g.drawImage(img, null, null);
-        g.dispose();
-
-        sourceBounds.translate(xOff, yOff);
-        return new EdgeModeImage(bufferedImage, xOff, yOff, width, height, sourceBounds);
-    }
-
-    private static @NotNull ImageProducer convolveDuplicate(@NotNull RenderContext context,
-            @NotNull FilterContext filterContext, @NotNull ImageProducer producer,
-            @NotNull Rectangle sourceBounds, @NotNull ConvolveOperation convolveOperation) {
-        EdgeModeImage edgeModeImage = prepareEdgeModeImage(context, producer, sourceBounds, convolveOperation);
-        int xOff = edgeModeImage.sourceBounds.x;
-        int yOff = edgeModeImage.sourceBounds.y;
-        int width = edgeModeImage.sourceBounds.width;
-        int height = edgeModeImage.sourceBounds.height;
-        if (width <= 0 || height <= 0) {
-            return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
-        }
-
-        Graphics2D g = GraphicsUtil.createGraphics(edgeModeImage.img);
-
-        BufferedImage img = edgeModeImage.img;
-        // Source coordinates may lie outside the allocated image. drawImage clips those reads,
-        // without treating the allocation boundary as an edge of the input region.
-        g.drawImage(img, xOff, 0, xOff + width, yOff,
-                xOff, yOff, xOff + width, yOff + 1, null);
-        g.drawImage(img, xOff, yOff + height, xOff + width, img.getHeight(),
-                xOff, yOff + height - 1, xOff + width, yOff + height, null);
-        g.drawImage(img, 0, yOff, xOff, yOff + height,
-                xOff, yOff, xOff + 1, yOff + height, null);
-        g.drawImage(img, xOff + width, yOff, img.getWidth(), yOff + height,
-                xOff + width - 1, yOff, xOff + width, yOff + height, null);
-
-        g.drawImage(img, 0, 0, xOff, yOff,
-                xOff, yOff, xOff + 1, yOff + 1, null);
-        g.drawImage(img, xOff + width, 0, img.getWidth(), yOff,
-                xOff + width - 1, yOff, xOff + width, yOff + 1, null);
-        g.drawImage(img, 0, yOff + height, xOff, img.getHeight(),
-                xOff, yOff + height - 1, xOff + 1, yOff + height, null);
-        g.drawImage(img, xOff + width, yOff + height, img.getWidth(), img.getHeight(),
-                xOff + width - 1, yOff + height - 1, xOff + width, yOff + height, null);
-
-        g.dispose();
-
-        return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
-    }
-
-    private static ImageProducer convolveWrap(@NotNull RenderContext context, @NotNull FilterContext filterContext,
-            @NotNull ImageProducer producer, @NotNull Rectangle sourceBounds,
-            @NotNull ConvolveOperation convolveOperation) {
-        EdgeModeImage edgeModeImage = prepareEdgeModeImage(context, producer, sourceBounds, convolveOperation);
-        int xOff = edgeModeImage.sourceBounds.x;
-        int yOff = edgeModeImage.sourceBounds.y;
-        int width = edgeModeImage.sourceBounds.width;
-        int height = edgeModeImage.sourceBounds.height;
-        int rightPadding = edgeModeImage.img.getWidth() - xOff - width;
-        int bottomPadding = edgeModeImage.img.getHeight() - yOff - height;
-        if (width <= 0 || height <= 0) {
-            return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
-        }
-
-        Graphics2D g = GraphicsUtil.createGraphics(edgeModeImage.img);
-
-        if (xOff > width || yOff > height || rightPadding > width || bottomPadding > height) {
-            // A border wider than the input needs more than one copy of its opposite edge.
-            paintRepeatedEdges(g, edgeModeImage.img, edgeModeImage.sourceBounds);
-        } else {
-            paintWrappedEdges(g, edgeModeImage.img, edgeModeImage.sourceBounds);
-        }
-        g.dispose();
-
-        return applyConvolutions(filterContext.renderingHints(), edgeModeImage, convolveOperation);
-    }
-
-    private static void paintRepeatedEdges(@NotNull Graphics2D g, @NotNull BufferedImage img,
-            @NotNull Rectangle sourceBounds) {
-        int xOff = sourceBounds.x;
-        int yOff = sourceBounds.y;
-        int width = sourceBounds.width;
-        int height = sourceBounds.height;
-        int rightPadding = img.getWidth() - xOff - width;
-        int bottomPadding = img.getHeight() - yOff - height;
-        if (xOff >= 0 && yOff >= 0 && rightPadding >= 0 && bottomPadding >= 0) {
-            BufferedImage tile = img.getSubimage(xOff, yOff, width, height);
-            g.setPaint(new TexturePaint(tile, sourceBounds));
-            g.fillRect(0, 0, img.getWidth(), yOff);
-            g.fillRect(0, yOff + height, img.getWidth(), bottomPadding);
-            g.fillRect(0, yOff, xOff, height);
-            g.fillRect(xOff + width, yOff, rightPadding, height);
-            return;
-        }
-        // Only part of the tile is allocated. Keep the full region's repetition period,
-        // and let drawImage clip source pixels outside the backing image.
-        for (int y = Math.floorDiv(-yOff, height); y * height < img.getHeight() - yOff; y++) {
-            for (int x = Math.floorDiv(-xOff, width); x * width < img.getWidth() - xOff; x++) {
-                if (x == 0 && y == 0) continue;
-                g.drawImage(img,
-                        xOff + x * width, yOff + y * height, xOff + (x + 1) * width, yOff + (y + 1) * height,
-                        xOff, yOff, xOff + width, yOff + height, null);
-            }
-        }
-    }
-
-    private static void paintWrappedEdges(@NotNull Graphics2D g, @NotNull BufferedImage img,
-            @NotNull Rectangle sourceBounds) {
-        int xOff = sourceBounds.x;
-        int yOff = sourceBounds.y;
-        int width = sourceBounds.width;
-        int height = sourceBounds.height;
-        int rightPadding = img.getWidth() - xOff - width;
-        int bottomPadding = img.getHeight() - yOff - height;
-        if (yOff > 0) {
-            g.drawImage(img, xOff, 0, xOff + width, yOff,
-                    xOff, height, xOff + width, yOff + height, null);
-        }
-        if (bottomPadding > 0) {
-            g.drawImage(img, xOff, yOff + height, xOff + width, img.getHeight(),
-                    xOff, yOff, xOff + width, yOff + bottomPadding, null);
-        }
-        if (xOff > 0) {
-            g.drawImage(img, 0, yOff, xOff, yOff + height,
-                    width, yOff, xOff + width, yOff + height, null);
-        }
-        if (rightPadding > 0) {
-            g.drawImage(img, xOff + width, yOff, img.getWidth(), yOff + height,
-                    xOff, yOff, xOff + rightPadding, yOff + height, null);
-        }
-        if (xOff > 0 && yOff > 0) {
-            g.drawImage(img, 0, 0, xOff, yOff,
-                    width, height, xOff + width, yOff + height, null);
-        }
-        if (rightPadding > 0 && yOff > 0) {
-            g.drawImage(img, xOff + width, 0, img.getWidth(), yOff,
-                    xOff, height, xOff + rightPadding, yOff + height, null);
-        }
-        if (xOff > 0 && bottomPadding > 0) {
-            g.drawImage(img, 0, yOff + height, xOff, img.getHeight(),
-                    width, yOff, xOff + width, yOff + bottomPadding, null);
-        }
-        if (rightPadding > 0 && bottomPadding > 0) {
-            g.drawImage(img, xOff + width, yOff + height, img.getWidth(), img.getHeight(),
-                    xOff, yOff, xOff + rightPadding, yOff + bottomPadding, null);
-        }
-    }
-
-    private static ImageProducer applyConvolutions(@Nullable RenderingHints hints, @NotNull EdgeModeImage image,
-            @NotNull ConvolveOperation convolveOperation) {
-        ImageProducer output = convolveOperation.convolve(image.img, hints, ConvolveOp.EDGE_NO_OP);
-        return new FilteredImageSource(output, new CropImageFilter(image.xOff, image.yOff, image.width, image.height));
     }
 
 }

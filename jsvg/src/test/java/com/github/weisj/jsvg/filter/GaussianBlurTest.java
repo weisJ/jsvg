@@ -25,6 +25,7 @@ import static com.github.weisj.jsvg.ImageComparison.*;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.Rectangle;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
+import com.github.weisj.jsvg.ImageComparison.ImageSource.MemoryImageSource;
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
 class GaussianBlurTest {
@@ -76,5 +78,23 @@ class GaussianBlurTest {
                 full.getSubimage(clip.x, clip.y, clip.width, clip.height),
                 partial.getSubimage(clip.x, clip.y, clip.width, clip.height),
                 "scaled-blur-repaint", 0, 0));
+    }
+
+    @Test
+    void hugeDeviationDoesNotRequireAQuadraticallyPaddedImage() {
+        String svg = """
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <filter id="blur">
+                        <feGaussianBlur stdDeviation="1000"/>
+                    </filter>
+                    <rect x="20" y="20" width="160" height="160" fill="seagreen" filter="url(#blur)"/>
+                </svg>
+                """;
+        BufferedImage sizeHint = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+
+        BufferedImage result = assertDoesNotThrow(
+                () -> actual(new MemoryImageSource("huge-gaussian-blur", svg), RenderType.JSVG).render(sizeHint));
+        assertEquals(500, result.getWidth());
+        assertEquals(500, result.getHeight());
     }
 }

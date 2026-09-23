@@ -34,7 +34,7 @@ import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
-import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeSourceBounds;
+import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
@@ -143,19 +143,102 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
                 + Math.abs(inverse.getShearX()) * vExtend);
         float vUserExtend = (float) (Math.abs(inverse.getShearY()) * hExtend
                 + Math.abs(inverse.getScaleY()) * vExtend);
-        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), input.sourceBounds());
-        // Wrapping can repeat content anywhere; duplication only adds content outside the input region.
-        boolean extendsInput = edgeMode == EdgeMode.Wrap
-                || (edgeMode == EdgeMode.Duplicate && !input.sourceBounds().contains(region));
-        boolean nonZeroKernel = sigma[0] > 0 || sigma[1] > 0;
-        CoversWholeSourceBounds coversWholeSourceBounds =
-                extendsInput && nonZeroKernel && !input.sourceBounds().isEmpty()
-                        ? CoversWholeSourceBounds.YES
-                        : CoversWholeSourceBounds.NO;
-        LayoutBounds bounds =
-                input.grow(hUserExtend, vUserExtend, filterLayoutContext)
-                        .withSourceBounds(region, coversWholeSourceBounds);
+        Rectangle2D sourceBounds = input.sourceBounds();
+        Rectangle2D outputSourceBounds = filterLayoutContext.filterPrimitiveRegion(impl(), sourceBounds);
+        Rectangle2D tightInputBounds = input.tightSourceBounds().createIntersection(sourceBounds);
+        LayoutBounds grownInput = input.withTightSourceBounds(tightInputBounds)
+                .grow(hUserExtend, vUserExtend, filterLayoutContext);
+
+        // sourceBounds is the logical image extent. Transparent space between it and the tight
+        // bounds is part of the input image, so all edge modes conceptually operate on the same
+        // outputSourceBounds. edgeMode only changes how samples outside sourceBounds are supplied.
+        // The tighter affected bounds below may still limit allocation and final output clipping to
+        // pixels that can actually become nontransparent.
+        LayoutBounds affectedBounds;
+        switch (edgeMode) {
+            case None:
+                affectedBounds = grownInput;
+                break;
+            case Duplicate:
+                Rectangle2D duplicatedBounds = duplicateAffectedBounds(
+                        tightInputBounds, sourceBounds, outputSourceBounds, hUserExtend, vUserExtend);
+                affectedBounds = grownInput.withTightSourceBounds(
+                        GeometryUtil.union(grownInput.tightSourceBounds(), duplicatedBounds));
+                break;
+            case Wrap:
+                Rectangle2D wrappedBounds = wrapAffectedBounds(
+                        tightInputBounds, outputSourceBounds, hUserExtend > 0, vUserExtend > 0);
+                affectedBounds = grownInput.withTightSourceBounds(
+                        GeometryUtil.union(grownInput.tightSourceBounds(), wrappedBounds));
+                // A clipped repaint at a logical input edge can read the opposite edge. Asking for
+                // the full logical span does not allocate its transparent padding: allocation is
+                // still intersected with tightSourceBounds.
+                Rectangle2D requiredInput = wrapInputBounds(
+                        sourceBounds, filterLayoutContext.clipBounds(), hUserExtend > 0, vUserExtend > 0);
+                affectedBounds = affectedBounds.ensuringRectIsAvailable(requiredInput, filterLayoutContext);
+                break;
+            default:
+                throw new IllegalStateException("Unknown edge mode: " + edgeMode);
+        }
+        // Do not intersect tightSourceBounds with the output subregion here. Samples just outside
+        // that subregion can still contribute to pixels inside it; saveResult performs the actual
+        // primitive-subregion clip.
+        LayoutBounds bounds = affectedBounds.withSourceBounds(outputSourceBounds);
         impl().saveLayoutResult(bounds, filterLayoutContext);
+    }
+
+    private static @NotNull Rectangle2D duplicateAffectedBounds(@NotNull Rectangle2D tightSourceBounds,
+            @NotNull Rectangle2D sourceBounds, @NotNull Rectangle2D outputSourceBounds,
+            float horizontalRadius, float verticalRadius) {
+        if (tightSourceBounds.isEmpty() || sourceBounds.isEmpty()) return new Rectangle2D.Double();
+
+        Rectangle2D grownBounds = GeometryUtil.grow(tightSourceBounds,
+                new FloatInsets(verticalRadius, horizontalRadius, verticalRadius, horizontalRadius));
+        double x = grownBounds.getX();
+        double y = grownBounds.getY();
+        double maxX = grownBounds.getMaxX();
+        double maxY = grownBounds.getMaxY();
+        if (horizontalRadius > 0 && tightSourceBounds.getMinX() <= sourceBounds.getMinX()) {
+            x = Math.min(x, outputSourceBounds.getMinX());
+        }
+        if (horizontalRadius > 0 && tightSourceBounds.getMaxX() >= sourceBounds.getMaxX()) {
+            maxX = Math.max(maxX, outputSourceBounds.getMaxX());
+        }
+        if (verticalRadius > 0 && tightSourceBounds.getMinY() <= sourceBounds.getMinY()) {
+            y = Math.min(y, outputSourceBounds.getMinY());
+        }
+        if (verticalRadius > 0 && tightSourceBounds.getMaxY() >= sourceBounds.getMaxY()) {
+            maxY = Math.max(maxY, outputSourceBounds.getMaxY());
+        }
+        return new Rectangle2D.Double(x, y, maxX - x, maxY - y);
+    }
+
+    private static @NotNull Rectangle2D wrapAffectedBounds(@NotNull Rectangle2D tightSourceBounds,
+            @NotNull Rectangle2D outputSourceBounds, boolean horizontal, boolean vertical) {
+        if (tightSourceBounds.isEmpty() || outputSourceBounds.isEmpty()) return new Rectangle2D.Double();
+
+        double x = horizontal
+                ? Math.min(tightSourceBounds.getMinX(), outputSourceBounds.getMinX())
+                : tightSourceBounds.getMinX();
+        double y = vertical
+                ? Math.min(tightSourceBounds.getMinY(), outputSourceBounds.getMinY())
+                : tightSourceBounds.getMinY();
+        double maxX = horizontal
+                ? Math.max(tightSourceBounds.getMaxX(), outputSourceBounds.getMaxX())
+                : tightSourceBounds.getMaxX();
+        double maxY = vertical
+                ? Math.max(tightSourceBounds.getMaxY(), outputSourceBounds.getMaxY())
+                : tightSourceBounds.getMaxY();
+        return new Rectangle2D.Double(x, y, maxX - x, maxY - y);
+    }
+
+    private static @NotNull Rectangle2D wrapInputBounds(@NotNull Rectangle2D inputBounds,
+            @NotNull Rectangle2D clipBounds, boolean horizontal, boolean vertical) {
+        double x = horizontal ? inputBounds.getX() : clipBounds.getX();
+        double y = vertical ? inputBounds.getY() : clipBounds.getY();
+        double maxX = horizontal ? inputBounds.getMaxX() : clipBounds.getMaxX();
+        double maxY = vertical ? inputBounds.getMaxY() : clipBounds.getMaxY();
+        return new Rectangle2D.Double(x, y, Math.max(0, maxX - x), Math.max(0, maxY - y));
     }
 
     @Override
@@ -179,7 +262,7 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         if (onlyAlpha) {
             inputChannel = inputChannel.alphaChannel();
         }
-        ImageProducer input = inputChannel.producer();
+        ImageProducer inputProducer = inputChannel.producer();
 
         Kernel xBlurKernel = null;
         Kernel yBlurKernel = null;
@@ -192,16 +275,40 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         if (ySigma > 0 && ySigma < BOX_BLUR_APPROXIMATION_THRESHOLD) {
             yBlurKernel = createConvolveKernel(dY, ySigma, false);
         }
+        int xRadius = convolutionRadius(xSigma, xBlurKernel, dX, true);
+        int yRadius = convolutionRadius(ySigma, yBlurKernel, dY, false);
 
-        Rectangle2D inputRegion = filterContext.layout(impl().inputChannelKey()).sourceBounds();
+        Rectangle2D inputSourceBounds = filterContext.layout(impl().inputChannelKey()).sourceBounds();
         Rectangle sourceBounds = GeometryUtil.transformBounds(
-                filterContext.info().output().transform(), inputRegion).getBounds();
-        ImageProducer output = edgeMode.convolve(context, filterContext, input, sourceBounds,
-                new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, dX, dY,
-                        !onlyAlpha && colorInterpolation(filterContext) == ColorInterpolation.LinearRGB));
-        impl().saveResult(new ImageProducerChannel(output), filterContext);
+                filterContext.info().output().transform(), inputSourceBounds).getBounds();
+        BufferedImage input = ImageUtil.copy(context, inputProducer, ImageUtil.Premultiplied.Yes);
+        boolean linearRGB = !onlyAlpha && colorInterpolation(filterContext) == ColorInterpolation.LinearRGB;
+        if (linearRGB) {
+            ImageUtil.mapPixels(input.getRaster(), ColorUtil::sRGBtoLinearRGBPre);
+        }
+        BufferedImage output = edgeMode.convolveSeparable(input, sourceBounds, filterContext.renderingHints(),
+                new MixedQualityConvolveOperation(xBlurKernel, yBlurKernel, xRadius, yRadius, dX, dY));
+        if (linearRGB) {
+            ImageUtil.mapPixels(output.getRaster(), ColorUtil::linearRGBtoSRGBPre);
+        }
+        impl().saveResult(new ImageProducerChannel(output.getSource()), filterContext);
     }
 
+    private static int convolutionRadius(double sigma, @Nullable Kernel kernel, int diameter,
+            boolean horizontal) {
+        if (sigma <= 0) {
+            // A zero stdDeviation component omits convolution on this axis. Since edgeMode only
+            // supplies samples required by a convolution kernel, an omitted pass needs no padding.
+            return 0;
+        }
+        int pixels;
+        if (kernel != null) {
+            pixels = horizontal ? kernel.getXOrigin() : kernel.getYOrigin();
+        } else {
+            pixels = boxRadius(diameter);
+        }
+        return pixels;
+    }
 
     private @NotNull Kernel createConvolveKernel(int diameter, double sigma, boolean horizontal) {
         if (horizontal && xBlur != null && xCurrent == sigma) return xBlur;
@@ -272,65 +379,64 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         return (diameter & 1) == 0 ? 3 * (diameter / 2) - 1 : 3 * (diameter / 2);
     }
 
-    private static final class MixedQualityConvolveOperation implements EdgeMode.ConvolveOperation {
+    private static final class MixedQualityConvolveOperation implements EdgeMode.SeparableConvolveOperation {
 
         private final @Nullable Kernel xKernel;
         private final @Nullable Kernel yKernel;
+        private final int xRadius;
+        private final int yRadius;
 
         private final int dX;
         private final int dY;
-        private final boolean linearRGB;
 
-        private MixedQualityConvolveOperation(@Nullable Kernel xKernel, @Nullable Kernel yKernel, int dX, int dY,
-                boolean linearRGB) {
+        private MixedQualityConvolveOperation(@Nullable Kernel xKernel, @Nullable Kernel yKernel,
+                int xRadius, int yRadius, int dX, int dY) {
             this.xKernel = xKernel;
             this.yKernel = yKernel;
+            this.xRadius = xRadius;
+            this.yRadius = yRadius;
             this.dX = dX;
             this.dY = dY;
-            this.linearRGB = linearRGB;
-        }
-
-
-        @Override
-        public @NotNull Dimension kernelRadius() {
-            return new Dimension(
-                    xKernel != null ? xKernel.getXOrigin() : boxRadius(dX),
-                    yKernel != null ? yKernel.getYOrigin() : boxRadius(dY));
         }
 
         @Override
-        public @NotNull ImageProducer convolve(@NotNull BufferedImage image, @Nullable RenderingHints hints,
-                int awtEdgeMode) {
+        public int radius(@NotNull EdgeMode.Axis axis) {
+            switch (axis) {
+                case Horizontal:
+                    return xRadius;
+                case Vertical:
+                    return yRadius;
+                default:
+                    throw new IllegalArgumentException("Unknown axis: " + axis);
+            }
+        }
+
+        @Override
+        public @NotNull EdgeMode.Axis firstAxis() {
+            return xKernel != null && yKernel == null && dY > 1
+                    ? EdgeMode.Axis.Vertical
+                    : EdgeMode.Axis.Horizontal;
+        }
+
+        @Override
+        public @NotNull BufferedImage convolve(@NotNull BufferedImage image, @NotNull EdgeMode.Axis axis,
+                @Nullable RenderingHints hints) {
             WritableRaster raster = image.getRaster();
             if (!image.getColorModel().isAlphaPremultiplied()) {
                 throw new IllegalStateException("Image should be premultiplied");
             }
 
-            if (linearRGB) {
-                ImageUtil.mapPixels(raster, ColorUtil::sRGBtoLinearRGBPre);
-            }
-            BufferedImage result;
-            if (xKernel != null && yKernel != null) {
-                BufferedImageOp op = new MultiConvolveOp(new ConvolveOp[] {
-                        new ConvolveOp(xKernel, awtEdgeMode, hints),
-                        new ConvolveOp(yKernel, awtEdgeMode, hints)
-                });
-                result = op.filter(image, null);
-            } else if (xKernel != null) {
-                verticalBoxBlur(raster);
-                result = new ConvolveOp(xKernel, awtEdgeMode, hints).filter(image, null);
+            if (axis == EdgeMode.Axis.Horizontal) {
+                if (xKernel != null) {
+                    return new ConvolveOp(xKernel, ConvolveOp.EDGE_NO_OP, hints).filter(image, null);
+                }
+                horizontalBoxBlur(raster);
             } else if (yKernel != null) {
-                horizontalBoxBlur(raster);
-                result = new ConvolveOp(yKernel, awtEdgeMode, hints).filter(image, null);
+                return new ConvolveOp(yKernel, ConvolveOp.EDGE_NO_OP, hints).filter(image, null);
             } else {
-                horizontalBoxBlur(raster);
                 verticalBoxBlur(raster);
-                result = image;
             }
-            if (linearRGB) {
-                ImageUtil.mapPixels(result.getRaster(), ColorUtil::linearRGBtoSRGBPre);
-            }
-            return result.getSource();
+            return image;
         }
 
         private void horizontalBoxBlur(@NotNull WritableRaster raster) {
