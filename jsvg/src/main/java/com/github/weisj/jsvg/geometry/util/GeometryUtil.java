@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class GeometryUtil {
     private static final float EPS = 0.0001f;
+    private static final int PIXEL_ALIGNMENT_ULPS = 8;
 
     private GeometryUtil() {}
 
@@ -161,6 +162,52 @@ public final class GeometryUtil {
         r2.setFrameFromDiagonal(transform.transform(p3, p3), transform.transform(p4, p4));
         Rectangle2D.union(r1, r2, r1);
         return r1;
+    }
+
+    /**
+     * Returns the integral bounds of {@code rect} after applying {@code transform}, or {@code null} if the transformed
+     * bounds are not pixel-aligned. A small, magnitude-dependent tolerance accounts for floating-point round-off
+     * without treating genuinely fractional coordinates as aligned.
+     */
+    public static @Nullable Rectangle pixelAlignedBounds(@NotNull AffineTransform transform,
+            @NotNull Rectangle2D rect) {
+        if (!isAxisAligned(transform)) return null;
+
+        Rectangle2D transformedBounds = containingBoundsAfterTransform(transform, rect);
+        double tolerance = pixelAlignmentTolerance(transform, rect);
+        Integer left = alignedPixel(transformedBounds.getMinX(), tolerance);
+        Integer top = alignedPixel(transformedBounds.getMinY(), tolerance);
+        Integer right = alignedPixel(transformedBounds.getMaxX(), tolerance);
+        Integer bottom = alignedPixel(transformedBounds.getMaxY(), tolerance);
+        if (left == null || top == null || right == null || bottom == null) return null;
+
+        long width = (long) right - left;
+        long height = (long) bottom - top;
+        if (width <= 0 || height <= 0 || width > Integer.MAX_VALUE || height > Integer.MAX_VALUE) return null;
+        return new Rectangle(left, top, (int) width, (int) height);
+    }
+
+    private static @Nullable Integer alignedPixel(double coordinate, double tolerance) {
+        if (!Double.isFinite(coordinate) || !Double.isFinite(tolerance)) return null;
+
+        double nearestPixel = Math.rint(coordinate);
+        if (nearestPixel < Integer.MIN_VALUE || nearestPixel > Integer.MAX_VALUE
+                || Math.abs(coordinate - nearestPixel) > tolerance) {
+            return null;
+        }
+        return (int) nearestPixel;
+    }
+
+    private static double pixelAlignmentTolerance(@NotNull AffineTransform transform,
+            @NotNull Rectangle2D rect) {
+        double maxX = Math.max(Math.abs(rect.getMinX()), Math.abs(rect.getMaxX()));
+        double maxY = Math.max(Math.abs(rect.getMinY()), Math.abs(rect.getMaxY()));
+        double transformedX = Math.abs(transform.getScaleX()) * maxX
+                + Math.abs(transform.getShearX()) * maxY + Math.abs(transform.getTranslateX());
+        double transformedY = Math.abs(transform.getShearY()) * maxX
+                + Math.abs(transform.getScaleY()) * maxY + Math.abs(transform.getTranslateY());
+        double calculationMagnitude = Math.max(1, Math.max(transformedX, transformedY));
+        return PIXEL_ALIGNMENT_ULPS * Math.ulp(calculationMagnitude);
     }
 
     public static @NotNull Shape transformBounds(@NotNull AffineTransform transform, @NotNull Rectangle2D rect) {

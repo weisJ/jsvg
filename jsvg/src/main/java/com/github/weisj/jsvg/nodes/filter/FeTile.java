@@ -99,17 +99,15 @@ public final class FeTile extends AbstractFilterPrimitive {
             if (filterContext.renderingHints() != null) {
                 graphics.setRenderingHints(filterContext.renderingHints());
             }
-            // Axis-aligned tiles (including quarter turns) can share the input raster.
-            Rectangle2D pixelRegion = GeometryUtil.containingBoundsAfterTransform(userToPixel, tileRegion);
-            Rectangle pixelBounds = pixelRegion.getBounds();
             Rectangle imageBounds = new Rectangle(0, 0, info.imageWidth, info.imageHeight);
-            boolean axisAligned = GeometryUtil.isAxisAligned(userToPixel);
-            if (axisAligned
-                    && pixelRegion.equals(pixelBounds) && input instanceof BufferedImage
-                    && imageBounds.contains(pixelBounds)) {
+            // Axis-aligned, pixel-aligned tiles (including quarter turns) can share the input raster.
+            Rectangle pixelBounds = input instanceof BufferedImage
+                    ? GeometryUtil.pixelAlignedBounds(userToPixel, tileRegion)
+                    : null;
+            if (pixelBounds != null && imageBounds.contains(pixelBounds)) {
                 BufferedImage tile = ((BufferedImage) input).getSubimage(
                         pixelBounds.x, pixelBounds.y, pixelBounds.width, pixelBounds.height);
-                graphics.setPaint(new TexturePaint(tile, pixelRegion));
+                graphics.setPaint(new TexturePaint(tile, pixelBounds));
                 graphics.fillRect(0, 0, imageBounds.width, imageBounds.height);
             } else {
                 Rectangle2D outputRegion = primitiveRegion.createIntersection(info.imageBounds());
