@@ -58,6 +58,7 @@ final class DataUri {
     private static final String CHARSET_OPTION_NAME = "charset";
     private static final String FILENAME_OPTION_NAME = "filename";
     private static final String CONTENT_DISPOSITION_OPTION_NAME = "content-disposition";
+    private static final Collection<String> SUPPORTED_CONTENT_ENCODINGS = Collections.singletonList("base64");
 
     private final @NotNull String mime;
     private final @Nullable Charset charset;
@@ -127,6 +128,20 @@ final class DataUri {
         }
     }
 
+    private static final class HeaderParseState {
+        private String mimeType = "text/plain";
+        private String contentEncoding = "";
+        private boolean contentEncodingAlreadySet;
+        private final Map<String, String> supportedValues = new HashMap<>();
+        private final Set<String> supportedValueSetBits = new HashSet<>();
+
+        private HeaderParseState() {
+            supportedValues.put(CHARSET_OPTION_NAME, "");
+            supportedValues.put(FILENAME_OPTION_NAME, "");
+            supportedValues.put(CONTENT_DISPOSITION_OPTION_NAME, "");
+        }
+    }
+
     /**
      * Tries to parse a data URI described in RFC2397
      *
@@ -139,154 +154,8 @@ final class DataUri {
      *     process
      */
     public static DataUri parse(@NotNull String uri, Charset charset) throws MalformedDataUriException {
-
-        // If URI does not start with a case-insensitive "data:": Throw a MALFORMED_URI exception.
-        if (!uri.toLowerCase(Locale.ENGLISH).startsWith(DATA_SCHEME))
-            throw new MalformedDataUriException("URI must start with a case-insensitive `data:'");
-
-        // If URI does not contain a ",": Throw a MALFORMED_URI exception.
-        if (-1 == uri.indexOf(',')) throw new MalformedDataUriException("URI must contain a `,'");
-
-        // Let supportedContentEncodings be an array of strings
-        // representing the supported content encodings. (["base64"] for example)
-        Collection<String> supportedContentEncodings = Collections.singletonList("base64");
-
-        // Let mimeType be a string with the value "text/plain".
-        String mimeType = "text/plain";
-
-        // Let contentEncoding be an empy string.
-        String contentEncoding = "";
-
-        /*
-         * Let contentEncodingAlreadySet be a boolean with a value of false.
-         */
-        boolean contentEncodingAlreadySet = false;
-
-        // Let supportedValues be a map of string:string pairs where the
-        // first string in each pair represents the name of the
-        // supported value and the second string in each pair represents
-        // an empty string or default string value.
-        // (Example: {"charset" : "", "filename" : "", "content-disposition" : ""})
-        final Map<String, String> supportedValues = new HashMap<>();
-        supportedValues.put(CHARSET_OPTION_NAME, "");
-        supportedValues.put(FILENAME_OPTION_NAME, "");
-        supportedValues.put(CONTENT_DISPOSITION_OPTION_NAME, "");
-
-        // Let supportedValueSetBits be a map of string:bool pairs
-        // representing each of the names in supportedValues with each
-        // name set to false.
-        final Map<String, Boolean> supportedValueSetBits = new HashMap<>();
-        for (String key : supportedValues.keySet()) {
-            supportedValueSetBits.put(key, false);
-        }
-
-        // Let comma be the position of the first "," found in URI.
-        int comma = uri.indexOf(',');
-
-        // Let temp be the substring of URI from, and including,
-        // position 5 to, and excluding, the comma position. (between "data:" and first ",")
-        String temp = uri.substring(DATA_SCHEME.length(), comma);
-
-        // Let headers be an array of strings returned by splitting temp by ";".
-        String[] headers = temp.split(";");
-
-        // For each string s in headers:
-        for (int header = 0; header < headers.length; ++header) {
-            String s = headers[header];
-
-            // Let s equal the lowercase version of s
-            s = s.toLowerCase(Locale.ENGLISH);
-
-            // Let eq be the position result of searching for "=" in s.
-            int eq = s.indexOf('=');
-
-            // Let name and value be empty strings.
-            String name;
-            String value = "";
-
-            // If eq is not a valid position in s:
-            if (-1 == eq) {
-
-                // Let name equal the result of percent-decoding s.
-                name = UriUtil.percentDecode(s, charset);
-
-                // Let name equal the result of trimming leading and trailing white-space from name.
-                name = name.trim();
-
-                // Else:
-            } else {
-
-                // Let name equal the substring of s from position 0 to, but not including, position eq.
-                name = s.substring(0, eq);
-
-                // Let name equal the result of percent-decoding name.
-                name = UriUtil.percentDecode(name, charset);
-
-                // Let name equal the result of trimming leading and trailing white-space from name.
-                name = name.trim();
-
-                // Let value equal the substring of s from position eq + 1 to the end of s.
-                value = s.substring(eq + 1);
-
-                // Let value equal the result of percent-decoding value.
-                value = UriUtil.percentDecode(value, charset);
-
-                // Let value equal the result of trimming leading and trailing white-space from value.
-                value = value.trim();
-            }
-
-            // If s is the first element in headers and eq is not a valid position in s and the length
-            // of name is greater than 0:
-            if ((0 == header) && (-1 == eq) && !name.isEmpty()) {
-
-                // Let mimeType equal name.
-                mimeType = name;
-
-                // Else:
-            } else {
-
-                // If eq is not a valid position in s:
-                if (-1 == eq) {
-
-                    // If name is found case-insensitively in supportedContentEncodings:
-                    final String nameCaseInsensitive = name.toLowerCase(Locale.ENGLISH);
-
-                    if (supportedContentEncodings.contains(nameCaseInsensitive) && !contentEncodingAlreadySet) {
-                        // Let contentEncoding equal name.
-                        contentEncoding = name;
-
-                        // Let contentEncodingAlreadySet equal true.
-                        contentEncodingAlreadySet = true;
-                    }
-
-                    // Else:
-                } else {
-
-                    // If the length of value is greater than 0 and name is found case-insensitively
-                    // in supportedValues:
-                    final String nameCaseInsensitive = name.toLowerCase(Locale.ENGLISH);
-
-                    if (!value.isEmpty() && supportedValues.containsKey(nameCaseInsensitive)) {
-
-                        // If the corresponding value for name found (case-insensitively) in
-                        // supportedValueSetBits is false:
-                        boolean valueSet = supportedValueSetBits.get(nameCaseInsensitive);
-
-                        if (!valueSet) {
-
-                            // Let the corresponding value for name found (case-insensitively)
-                            // in supportedValues equal value.
-                            supportedValues.put(nameCaseInsensitive, value);
-
-                            // Let the corresponding value for name found (case-insensitively)
-                            // in supportedValueSetBits equal true.
-                            supportedValueSetBits.put(nameCaseInsensitive, true);
-                        }
-                    }
-                }
-            }
-
-        }
+        int comma = headerEnd(uri);
+        HeaderParseState headerState = parseHeaders(uri.substring(DATA_SCHEME.length(), comma), charset);
 
         // Let data be the substring of URI from position comma + 1 to the end of URI.
         String data = uri.substring(comma + 1);
@@ -296,20 +165,21 @@ final class DataUri {
 
         // Let dataURIObject be an object consisting of the mimeType,
         // contentEncoding, data and supportedValues objects.
-        final String finalMimeType = mimeType;
-        final Charset finalCharset = supportedValues.get(CHARSET_OPTION_NAME).isEmpty()
+        final String finalMimeType = headerState.mimeType;
+        final Charset finalCharset = headerState.supportedValues.get(CHARSET_OPTION_NAME).isEmpty()
                 ? null
-                : Charset.forName(supportedValues.get(CHARSET_OPTION_NAME));
-        final String finalFilename = supportedValues.get(FILENAME_OPTION_NAME).isEmpty()
+                : Charset.forName(headerState.supportedValues.get(CHARSET_OPTION_NAME));
+        final String finalFilename = headerState.supportedValues.get(FILENAME_OPTION_NAME).isEmpty()
                 ? null
-                : supportedValues.get(FILENAME_OPTION_NAME);
-        final String finalContentDisposition = supportedValues.get(CONTENT_DISPOSITION_OPTION_NAME).isEmpty()
-                ? null
-                : supportedValues.get(CONTENT_DISPOSITION_OPTION_NAME);
+                : headerState.supportedValues.get(FILENAME_OPTION_NAME);
+        final String finalContentDisposition =
+                headerState.supportedValues.get(CONTENT_DISPOSITION_OPTION_NAME).isEmpty()
+                        ? null
+                        : headerState.supportedValues.get(CONTENT_DISPOSITION_OPTION_NAME);
 
         final byte[] finalData;
         try {
-            finalData = "base64".equalsIgnoreCase(contentEncoding)
+            finalData = "base64".equalsIgnoreCase(headerState.contentEncoding)
                     ? Base64.getMimeDecoder().decode(data)
                     : data.getBytes(charset);
         } catch (RuntimeException e) {
@@ -323,6 +193,69 @@ final class DataUri {
                 finalFilename,
                 finalContentDisposition,
                 finalData);
+    }
+
+    private static int headerEnd(@NotNull String uri) throws MalformedDataUriException {
+        // If URI does not start with a case-insensitive "data:": Throw a MALFORMED_URI exception.
+        if (!uri.toLowerCase(Locale.ENGLISH).startsWith(DATA_SCHEME))
+            throw new MalformedDataUriException("URI must start with a case-insensitive `data:'");
+
+        // If URI does not contain a ",": Throw a MALFORMED_URI exception.
+        int comma = uri.indexOf(',');
+        if (-1 == comma) throw new MalformedDataUriException("URI must contain a `,'");
+        return comma;
+    }
+
+    private static @NotNull HeaderParseState parseHeaders(@NotNull String headerString, @NotNull Charset charset) {
+        HeaderParseState state = new HeaderParseState();
+        String[] headers = headerString.split(";");
+        for (int header = 0; header < headers.length; ++header) {
+            parseHeader(headers[header], header, charset, state);
+        }
+        return state;
+    }
+
+    private static void parseHeader(@NotNull String rawHeader, int index, @NotNull Charset charset,
+            @NotNull HeaderParseState state) {
+        String header = rawHeader.toLowerCase(Locale.ENGLISH);
+        int eq = header.indexOf('=');
+        String name = decodeHeaderName(header, eq, charset);
+
+        if ((0 == index) && (-1 == eq) && !name.isEmpty()) {
+            state.mimeType = name;
+        } else if (-1 == eq) {
+            applyContentEncoding(name, state);
+        } else {
+            applySupportedValue(name, decodeHeaderValue(header, eq, charset), state);
+        }
+    }
+
+    private static @NotNull String decodeHeaderName(@NotNull String header, int eq, @NotNull Charset charset) {
+        String name = eq == -1 ? header : header.substring(0, eq);
+        return UriUtil.percentDecode(name, charset).trim();
+    }
+
+    private static @NotNull String decodeHeaderValue(@NotNull String header, int eq, @NotNull Charset charset) {
+        return UriUtil.percentDecode(header.substring(eq + 1), charset).trim();
+    }
+
+    private static void applyContentEncoding(@NotNull String name, @NotNull HeaderParseState state) {
+        String nameCaseInsensitive = name.toLowerCase(Locale.ENGLISH);
+        if (SUPPORTED_CONTENT_ENCODINGS.contains(nameCaseInsensitive) && !state.contentEncodingAlreadySet) {
+            state.contentEncoding = name;
+            state.contentEncodingAlreadySet = true;
+        }
+    }
+
+    private static void applySupportedValue(@NotNull String name, @NotNull String value,
+            @NotNull HeaderParseState state) {
+        String nameCaseInsensitive = name.toLowerCase(Locale.ENGLISH);
+        if (!value.isEmpty()
+                && state.supportedValues.containsKey(nameCaseInsensitive)
+                && !state.supportedValueSetBits.contains(nameCaseInsensitive)) {
+            state.supportedValues.put(nameCaseInsensitive, value);
+            state.supportedValueSetBits.add(nameCaseInsensitive);
+        }
     }
 
     @Override

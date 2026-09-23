@@ -339,11 +339,13 @@ public final class AttributeNode {
         return token != null && token.isOneOfKeywords(keywords);
     }
 
+    @SuppressWarnings("java:S2583") // Sonarcloud does not understand that map lookups can return null
     public @Nullable String getValue(@NotNull String key, @NotNull Supplier<@Nullable String> fallback) {
         String value = getValue(key);
         return value != null ? value : fallback.get();
     }
 
+    @SuppressWarnings("java:S2637") // Sonarcloud dous not support @Contract
     public @NotNull Color getColor(@NotNull String key) {
         return getColor(key, Color.BLACK);
     }
@@ -411,24 +413,28 @@ public final class AttributeNode {
 
     private @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
         for (int i = 0; i < tokens.size(); i++) {
-            ComponentValue token = tokens.get(i);
-            String url = urlOf(token);
-            if (url != null) {
-                SVGPaint paint = getElementByHref(
-                        SVGPaint.class, url, ElementRelation.PAINT_SERVER);
-                if (paint != null) return paint;
-                List<ComponentValue> fallback = tokens.subList(i + 1, tokens.size());
-                boolean hasFallback = false;
-                for (ComponentValue fallbackToken : fallback) {
-                    if (fallbackToken != Token.Static.WHITESPACE) {
-                        hasFallback = true;
-                        break;
-                    }
-                }
-                return hasFallback ? parser().parsePaint(fallback) : PredefinedPaints.NONE;
+            String urlString = urlOf(tokens.get(i));
+            if (urlString != null) {
+                return parseReferencedPaint(tokens, i, urlString);
             }
         }
         return parser().parsePaint(tokens);
+    }
+
+    private @Nullable SVGPaint parseReferencedPaint(@NotNull List<@NotNull ComponentValue> tokens,
+            int urlIndex, @NotNull String url) {
+        SVGPaint paint = getElementByHref(SVGPaint.class, url, ElementRelation.PAINT_SERVER);
+        if (paint != null) return paint;
+
+        List<ComponentValue> fallback = tokens.subList(urlIndex + 1, tokens.size());
+        return hasPaintFallback(fallback) ? parser().parsePaint(fallback) : PredefinedPaints.NONE;
+    }
+
+    private static boolean hasPaintFallback(@NotNull List<@NotNull ComponentValue> fallback) {
+        for (ComponentValue fallbackToken : fallback) {
+            if (fallbackToken != Token.Static.WHITESPACE) return true;
+        }
+        return false;
     }
 
     public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension) {
@@ -458,21 +464,25 @@ public final class AttributeNode {
             value = fallback;
         }
 
-        if (animatable == Animatable.YES) {
-            LengthValue initial = value;
-            if (initial == null) {
-                initial = inherited == Inherited.YES
-                        ? Length.INHERITED
-                        : NeutralElements.NEUTRAL_LENGTH;
-            }
-            if (initial instanceof AnimatedLength) {
-                initial = ((AnimatedLength) initial).initial();
-            }
-            AnimatedLength animatedLength = getAnimatedLength(key, initial, dimension);
-            if (animatedLength != null) return animatedLength;
-        }
+        return animatable == Animatable.YES
+                ? applyLengthAnimation(key, dimension, value, inherited)
+                : value;
+    }
 
-        return value;
+    private @Nullable LengthValue applyLengthAnimation(@NotNull String key, @NotNull PercentageDimension dimension,
+            @Nullable LengthValue value, @NotNull Inherited inherited) {
+        LengthValue initial = value != null ? value : inheritedLengthValue(inherited);
+        if (initial instanceof AnimatedLength) {
+            initial = ((AnimatedLength) initial).initial();
+        }
+        AnimatedLength animatedLength = getAnimatedLength(key, initial, dimension);
+        return animatedLength != null ? animatedLength : value;
+    }
+
+    private static @NotNull LengthValue inheritedLengthValue(@NotNull Inherited inherited) {
+        return inherited == Inherited.YES
+                ? Length.INHERITED
+                : NeutralElements.NEUTRAL_LENGTH;
     }
 
     /** SMIL-only, so never CSS-sourced. */
@@ -579,20 +589,25 @@ public final class AttributeNode {
             value = fallback;
         }
 
-        if (animatable == Animatable.YES) {
-            PercentageValue initial = value;
-            if (initial == null) {
-                initial = inherited == Inherited.YES
-                        ? Percentage.INHERITED
-                        : NeutralElements.NEUTRAL_PERCENTAGE;
-            }
-            if (initial instanceof AnimatedPercentage) {
-                initial = ((AnimatedPercentage) initial).initial();
-            }
-            AnimatedPercentage animatedPercentage = getAnimatedPercentage(key, initial);
-            if (animatedPercentage != null) return animatedPercentage;
+        return animatable == Animatable.YES
+                ? applyPercentageAnimation(key, value, inherited)
+                : value;
+    }
+
+    private @Nullable PercentageValue applyPercentageAnimation(@NotNull String key, @Nullable PercentageValue value,
+            @NotNull Inherited inherited) {
+        PercentageValue initial = value != null ? value : inheritedPercentageValue(inherited);
+        if (initial instanceof AnimatedPercentage) {
+            initial = ((AnimatedPercentage) initial).initial();
         }
-        return value;
+        AnimatedPercentage animatedPercentage = getAnimatedPercentage(key, initial);
+        return animatedPercentage != null ? animatedPercentage : value;
+    }
+
+    private static @NotNull PercentageValue inheritedPercentageValue(@NotNull Inherited inherited) {
+        return inherited == Inherited.YES
+                ? Percentage.INHERITED
+                : NeutralElements.NEUTRAL_PERCENTAGE;
     }
 
     public @NotNull Length @NotNull [] getLengthList(@NotNull String key, @NotNull PercentageDimension dimension) {
@@ -724,21 +739,25 @@ public final class AttributeNode {
                 ? createTransformValueFromParts(parts)
                 : null;
 
-        if (animatable == Animatable.YES) {
-            TransformValue initial = value;
-            if (initial == null) {
-                initial = inherited == Inherited.YES
-                        ? ConstantLengthTransform.INHERITED
-                        : NeutralElements.NEUTRAL_TRANSFORM;
-            }
-            if (initial instanceof AnimatedTransform) {
-                initial = ((AnimatedTransform) initial).initial();
-            }
-            AnimatedTransform animatedTransform = getAnimatedTransform(key, initial);
-            if (animatedTransform != null) return animatedTransform;
-        }
+        return animatable == Animatable.YES
+                ? applyTransformAnimation(key, value, inherited)
+                : value;
+    }
 
-        return value;
+    private @Nullable TransformValue applyTransformAnimation(@NotNull String key, @Nullable TransformValue value,
+            @NotNull Inherited inherited) {
+        TransformValue initial = value != null ? value : inheritedTransformValue(inherited);
+        if (initial instanceof AnimatedTransform) {
+            initial = ((AnimatedTransform) initial).initial();
+        }
+        AnimatedTransform animatedTransform = getAnimatedTransform(key, initial);
+        return animatedTransform != null ? animatedTransform : value;
+    }
+
+    private static @NotNull TransformValue inheritedTransformValue(@NotNull Inherited inherited) {
+        return inherited == Inherited.YES
+                ? ConstantLengthTransform.INHERITED
+                : NeutralElements.NEUTRAL_TRANSFORM;
     }
 
     public boolean hasAttribute(@NotNull String name) {
