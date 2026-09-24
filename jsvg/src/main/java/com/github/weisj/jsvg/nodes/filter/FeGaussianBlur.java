@@ -138,11 +138,10 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         float hExtend = extendForKernelDiameter(sigma[0], dX);
         float vExtend = extendForKernelDiameter(sigma[1], dY);
         // Kernel sizes are rounded in device pixels; layout grows in user coordinates.
-        AffineTransform inverse = filterLayoutContext.inverseTransform();
-        float hUserExtend = (float) (Math.abs(inverse.getScaleX()) * hExtend
-                + Math.abs(inverse.getShearX()) * vExtend);
-        float vUserExtend = (float) (Math.abs(inverse.getShearY()) * hExtend
-                + Math.abs(inverse.getScaleY()) * vExtend);
+        FloatInsets userSpaceExtend = userSpaceInsetsForDeviceSpaceRadii(
+                filterLayoutContext.inverseTransform(), hExtend, vExtend);
+        float hUserExtend = userSpaceExtend.left();
+        float vUserExtend = userSpaceExtend.top();
         Rectangle2D sourceBounds = input.sourceBounds();
         Rectangle2D outputSourceBounds = filterLayoutContext.filterPrimitiveRegion(impl(), sourceBounds);
         Rectangle2D tightInputBounds = input.tightSourceBounds().createIntersection(sourceBounds);
@@ -262,8 +261,6 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         if (onlyAlpha) {
             inputChannel = inputChannel.alphaChannel();
         }
-        ImageProducer inputProducer = inputChannel.producer();
-
         Kernel xBlurKernel = null;
         Kernel yBlurKernel = null;
         int dX = kernelDiameterForStandardDeviation(xSigma);
@@ -277,6 +274,16 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         }
         int xRadius = convolutionRadius(xSigma, xBlurKernel, dX, true);
         int yRadius = convolutionRadius(ySigma, yBlurKernel, dY, false);
+
+        // A normalized Gaussian kernel preserves a constant color if every sample needed by the
+        // output region has that color.
+        Rectangle2D requiredInputRegion = constantInputRegion(filterContext, xRadius, yRadius);
+        if (inputChannel.isConstant()
+                && filterContext.channelOutputCovers(impl().inputChannelKey(), requiredInputRegion)) {
+            impl().saveResult(inputChannel, filterContext);
+            return;
+        }
+        ImageProducer inputProducer = inputChannel.producer();
 
         Rectangle2D inputSourceBounds = filterContext.layout(impl().inputChannelKey()).sourceBounds();
         Rectangle sourceBounds = GeometryUtil.transformBounds(
@@ -292,6 +299,29 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             ImageUtil.mapPixels(output.getRaster(), ColorUtil::linearRGBtoSRGBPre);
         }
         impl().saveResult(new ImageProducerChannel(output.getSource()), filterContext);
+    }
+
+    private @NotNull Rectangle2D constantInputRegion(@NotNull FilterContext filterContext,
+            int horizontalRadius, int verticalRadius) {
+        Rectangle2D outputRegion = filterContext.primitiveRegion(impl());
+        if (edgeMode != EdgeMode.None) return outputRegion;
+
+        AffineTransform inverse = GeometryUtil.createInverse(filterContext.info().output().transform());
+        return GeometryUtil.grow(outputRegion,
+                userSpaceInsetsForDeviceSpaceRadii(inverse, horizontalRadius, verticalRadius));
+    }
+
+    /**
+     * Returns the user-space axis-aligned bounds of an axis-aligned device-space sampling radius.
+     */
+    private static @NotNull FloatInsets userSpaceInsetsForDeviceSpaceRadii(
+            @NotNull AffineTransform inverseTransform, float horizontalRadius, float verticalRadius) {
+        float horizontalUserRadius = (float) (Math.abs(inverseTransform.getScaleX()) * horizontalRadius
+                + Math.abs(inverseTransform.getShearX()) * verticalRadius);
+        float verticalUserRadius = (float) (Math.abs(inverseTransform.getShearY()) * horizontalRadius
+                + Math.abs(inverseTransform.getScaleY()) * verticalRadius);
+        return new FloatInsets(
+                verticalUserRadius, horizontalUserRadius, verticalUserRadius, horizontalUserRadius);
     }
 
     private static int convolutionRadius(double sigma, @Nullable Kernel kernel, int diameter,

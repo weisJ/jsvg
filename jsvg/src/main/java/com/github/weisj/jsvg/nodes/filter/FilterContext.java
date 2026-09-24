@@ -39,6 +39,7 @@ public final class FilterContext {
     private final @NotNull UnitType primitiveUnits;
     private final @Nullable ColorInterpolation colorInterpolation;
     private final @Nullable RenderingHints renderingHints;
+    private final @NotNull ConstantColorChannel zeroChannel;
 
     public FilterContext(@NotNull Filter.FilterInfo info, @NotNull UnitType primitiveUnits,
             @Nullable ColorInterpolation colorInterpolation, @Nullable RenderingHints renderingHints) {
@@ -46,6 +47,7 @@ public final class FilterContext {
         this.primitiveUnits = primitiveUnits;
         this.colorInterpolation = colorInterpolation;
         this.renderingHints = renderingHints;
+        this.zeroChannel = new ConstantColorChannel(info.imageWidth, info.imageHeight, 0);
     }
 
     public @NotNull Filter.FilterInfo info() {
@@ -77,10 +79,24 @@ public final class FilterContext {
         return resultChannels.get(key);
     }
 
+    /**
+     * Whether the output of {@code channelKey} is available throughout {@code area}. Infinite
+     * channels cover every area; finite channels cover their layout output region.
+     */
+    public boolean channelOutputCovers(@NotNull FilterChannelKey channelKey, @NotNull Rectangle2D area) {
+        Channel channel = getChannel(channelKey);
+        return channel.isInfiniteExtent() || layout(channelKey).sourceBounds().contains(area);
+    }
+
     public ColorInterpolation colorInterpolation(ColorInterpolation colorInterpolation) {
         if (colorInterpolation != ColorInterpolation.Inherit) {
             return colorInterpolation;
         }
         return this.colorInterpolation;
+    }
+
+    public ConstantColorChannel createConstantChannel(int rgba) {
+        if (rgba == 0) return zeroChannel;
+        return new ConstantColorChannel(info.imageWidth, info.imageHeight, rgba);
     }
 }

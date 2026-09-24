@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.FilteredImageSource;
@@ -43,32 +42,59 @@ public final class ConstantColorChannel implements Channel, PixelProvider {
     private final int width;
     private final int height;
     private final int color;
+    private final boolean infiniteExtent;
     private @Nullable ImageProducer producer;
     private @Nullable BufferedImage image;
 
     public ConstantColorChannel(int width, int height, int color) {
+        this(width, height, color, false);
+    }
+
+    private ConstantColorChannel(int width, int height, int color, boolean infiniteExtent) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Image dimensions must be positive");
         }
         this.width = width;
         this.height = height;
         this.color = color;
+        this.infiniteExtent = infiniteExtent;
     }
 
-    public int color() {
+    /**
+     * Creates a finite raster view of a color that is conceptually constant over the entire plane.
+     */
+    public static @NotNull ConstantColorChannel infinite(int width, int height, int color) {
+        return new ConstantColorChannel(width, height, color, true);
+    }
+
+    @Override
+    public boolean isInfiniteExtent() {
+        return infiniteExtent;
+    }
+
+    @Override
+    public boolean isConstant() {
+        return true;
+    }
+
+    @Override
+    public int constantColor() {
         return color;
     }
 
-    public @NotNull ConstantColorChannel withColor(int color) {
+    @Override
+    public @NotNull ConstantColorChannel withConstantColor(int color) {
         if (this.color == color) return this;
-        return new ConstantColorChannel(width, height, color);
+        return new ConstantColorChannel(width, height, color, infiniteExtent);
     }
 
     public @NotNull ConstantColorChannel composite(@NotNull ConstantColorChannel source,
             @NotNull Composite composite) {
         if (GraphicsUtil.isSourceOver(composite)) {
             if (source.color >>> 24 == 0) return this;
-            if (source.color >>> 24 == 255) return withColor(source.color);
+            if (source.color >>> 24 == 255) {
+                return new ConstantColorChannel(width, height, source.color, source.infiniteExtent);
+            }
         }
         // Use the same color model and compositing rules as the raster path, for a single pixel.
         ColorModel colorModel = ColorModel.getRGBdefault();
@@ -81,17 +107,11 @@ public final class ConstantColorChannel implements Channel, PixelProvider {
         try {
             context.compose(src, dst, dst);
             dst.getDataElements(0, 0, result);
-            return withColor(result[0]);
+            boolean resultHasInfiniteExtent = infiniteExtent && source.infiniteExtent;
+            return new ConstantColorChannel(width, height, result[0], resultHasInfiniteExtent);
         } finally {
             context.dispose();
         }
-    }
-
-    @Override
-    public @NotNull Channel clip(@NotNull Rectangle2D region, @NotNull FilterContext context) {
-        // Transparent black remains identical both inside and outside every primitive subregion.
-        if (color == 0) return this;
-        return Channel.super.clip(region, context);
     }
 
     @Override
@@ -141,11 +161,11 @@ public final class ConstantColorChannel implements Channel, PixelProvider {
 
     @Override
     public int pixelAt(double x, double y) {
-        return x >= 0 && y >= 0 && x < width && y < height ? color : 0;
+        return infiniteExtent || x >= 0 && y >= 0 && x < width && y < height ? color : 0;
     }
 
     @Override
     public @NotNull Channel alphaChannel() {
-        return withColor(color & 0xff000000);
+        return withConstantColor(color & 0xff000000);
     }
 }

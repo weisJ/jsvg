@@ -36,6 +36,39 @@ import com.github.weisj.jsvg.util.ImageUtil;
 
 public interface Channel {
 
+    /**
+     * Whether this channel has pixels at every point of the input plane. The backing image remains
+     * finite; this flag describes the conceptual filter input represented by it.
+     */
+    default boolean isInfiniteExtent() {
+        return false;
+    }
+
+    /**
+     * Whether all pixels inside this channel's output region have the same color.
+     */
+    default boolean isConstant() {
+        return false;
+    }
+
+    /**
+     * Returns the color shared by all pixels inside this channel's output region.
+     *
+     * @throws IllegalStateException if {@link #isConstant()} is {@code false}
+     */
+    default int constantColor() {
+        throw new IllegalStateException("Channel is not constant");
+    }
+
+    /**
+     * Replaces the color inside this channel's output region while preserving that region.
+     *
+     * @throws IllegalStateException if {@link #isConstant()} is {@code false}
+     */
+    default @NotNull Channel withConstantColor(int color) {
+        throw new IllegalStateException("Channel is not constant");
+    }
+
     @NotNull
     ImageProducer producer();
 
@@ -75,7 +108,11 @@ public interface Channel {
         Filter.FilterInfo info = context.info();
         AffineTransform transform = info.output().transform();
         Shape clip = GeometryUtil.transformBounds(transform, region);
-        if (clip.contains(0, 0, info.imageWidth, info.imageHeight)) return this;
+        // A finite primitive subregion ends an infinite input's extent even when it happens to
+        // contain the complete backing raster.
+        if (!isInfiniteExtent()
+                && clip.contains(0, 0, info.imageWidth, info.imageHeight))
+            return this;
         if (this instanceof ClippedChannel) {
             return ((ClippedChannel) this).clipTo(clip);
         } else {

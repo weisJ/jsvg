@@ -72,7 +72,6 @@ public final class FeFlood extends AbstractFilterPrimitive {
 
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
-        Filter.FilterInfo info = filterContext.info();
         float opacity = floodOpacity.get(context.measureContext());
         Color color = RenderContextAccessor.instance().resolveColor(context, floodColor);
         if (color == null) {
@@ -80,7 +79,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
         }
         int argb = opacity == 0 ? 0
                 : (Math.round(color.getAlpha() * opacity) << 24) | (color.getRGB() & 0xffffff);
-        impl().saveResult(new ConstantColorChannel(info.imageWidth, info.imageHeight, argb), filterContext);
+        impl().saveResult(filterContext.createConstantChannel(argb), filterContext);
     }
 
 }

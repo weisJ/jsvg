@@ -181,16 +181,22 @@ public class FeComponentTransfer extends ContainerNode implements FilterPrimitiv
         Channel input = filterPrimitiveBase.inputChannel(filterContext);
         Channel result;
         if (constantOutput) {
-            Filter.FilterInfo info = filterContext.info();
-            result = new ConstantColorChannel(info.imageWidth, info.imageHeight, filterColor(lookup, 0));
-        } else if (input instanceof ConstantColorChannel) {
-            ConstantColorChannel constant = (ConstantColorChannel) input;
-            result = constant.withColor(filterColor(lookup, constant.color()));
+            result = filterContext.createConstantChannel(filterColor(lookup, 0));
+        } else if (input.isConstant() && isConstantOnConstantInput(filterContext, lookup)) {
+            result = input.withConstantColor(filterColor(lookup, input.constantColor()));
         } else {
             ImageFilter f = new BufferedImageFilter(new LookupOp(lookup, filterContext.renderingHints()));
             result = input.applyFilter(f);
         }
         filterPrimitiveBase.saveResult(result, filterContext);
+    }
+
+    private boolean isConstantOnConstantInput(@NotNull FilterContext filterContext, @NotNull LookupTable lookup) {
+        boolean isPreservingTransparentBlack = filterColor(lookup, 0) == 0;
+        boolean isConstantOnConstantInput = filterContext.channelOutputCovers(
+                filterPrimitiveBase.inputChannelKey(),
+                filterContext.primitiveRegion(filterPrimitiveBase));
+        return isPreservingTransparentBlack || isConstantOnConstantInput;
     }
 
     private static int filterColor(@NotNull LookupTable lookup, int argb) {

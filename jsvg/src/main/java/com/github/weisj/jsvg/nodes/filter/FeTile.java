@@ -83,18 +83,23 @@ public final class FeTile extends AbstractFilterPrimitive {
         }
 
         if (tileRegion.isEmpty() || primitiveRegion.isEmpty()) {
-            impl().saveResult(new ConstantColorChannel(info.imageWidth, info.imageHeight, 0), filterContext);
+            impl().saveResult(filterContext.createConstantChannel(0), filterContext);
             return;
         }
 
         Channel inputChannel = impl().inputChannel(filterContext);
-        if (inputChannel instanceof ConstantColorChannel) {
-            impl().saveResult(inputChannel, filterContext);
+        AffineTransform userToPixel = info.output().transform();
+        Rectangle pixelTileBounds = GeometryUtil.pixelAlignedBounds(userToPixel, tileRegion);
+        // A clipped constant is still constant inside its tile region, but a fractional region
+        // produces partially covered boundary pixels which must be repeated with the tile. Only
+        // collapse it to a flat fill when there is no such sampling boundary.
+        if (inputChannel.isConstant()
+                && (inputChannel.isInfiniteExtent() || pixelTileBounds != null)) {
+            impl().saveResult(filterContext.createConstantChannel(inputChannel.constantColor()), filterContext);
             return;
         }
         BufferedImage output = ImageUtil.createCompatibleTransparentImage(info.imageWidth, info.imageHeight);
         Image input = inputChannel.toImage(context);
-        AffineTransform userToPixel = info.output().transform();
         Graphics2D graphics = output.createGraphics();
         try {
             if (filterContext.renderingHints() != null) {
@@ -102,9 +107,7 @@ public final class FeTile extends AbstractFilterPrimitive {
             }
             Rectangle imageBounds = new Rectangle(0, 0, info.imageWidth, info.imageHeight);
             // Axis-aligned, pixel-aligned tiles (including quarter turns) can share the input raster.
-            Rectangle pixelBounds = input instanceof BufferedImage
-                    ? GeometryUtil.pixelAlignedBounds(userToPixel, tileRegion)
-                    : null;
+            Rectangle pixelBounds = input instanceof BufferedImage ? pixelTileBounds : null;
             if (pixelBounds != null && imageBounds.contains(pixelBounds)) {
                 BufferedImage tile = ((BufferedImage) input).getSubimage(
                         pixelBounds.x, pixelBounds.y, pixelBounds.width, pixelBounds.height);

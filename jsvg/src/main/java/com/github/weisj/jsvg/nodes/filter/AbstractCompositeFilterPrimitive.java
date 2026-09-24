@@ -78,9 +78,13 @@ abstract class AbstractCompositeFilterPrimitive extends AbstractFilterPrimitive 
         Channel source = sourceChannel(impl, filterContext);
         Channel destination = destinationChannel(impl, filterContext);
         Composite composite = computeComposite(filterContext);
-        if (source instanceof ConstantColorChannel && destination instanceof ConstantColorChannel) {
-            impl.saveResult(((ConstantColorChannel) destination).composite((ConstantColorChannel) source, composite),
-                    filterContext);
+        Rectangle2D primitiveRegion = filterContext.primitiveRegion(impl);
+        if (source.isConstant() && destination.isConstant()
+                && filterContext.channelOutputCovers(impl.inputChannelKey(), primitiveRegion)
+                && filterContext.channelOutputCovers(inputChannel2, primitiveRegion)) {
+            ConstantColorChannel constantDestination = filterContext.createConstantChannel(destination.constantColor());
+            ConstantColorChannel constantSource = filterContext.createConstantChannel(source.constantColor());
+            impl.saveResult(constantDestination.composite(constantSource, composite), filterContext);
             return;
         }
         BufferedImage dst = destination.toBufferedImageNonAliased(context);

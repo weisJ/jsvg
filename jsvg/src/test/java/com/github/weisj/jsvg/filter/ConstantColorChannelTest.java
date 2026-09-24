@@ -26,15 +26,31 @@ import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.nodes.filter.ConstantColorChannel;
 
 class ConstantColorChannelTest {
+
+    @Test
+    void tracksInfiniteExtentIndependentlyOfTheBackingImage() {
+        ConstantColorChannel finite = new ConstantColorChannel(10, 10, 0xff4080c0);
+        ConstantColorChannel infinite = ConstantColorChannel.infinite(10, 10, 0xff4080c0);
+
+        assertFalse(finite.isInfiniteExtent());
+        assertTrue(infinite.isInfiniteExtent());
+        assertTrue(infinite.withConstantColor(0xffc08040).isInfiniteExtent());
+        assertFalse(new ConstantColorChannel(10, 10, 0).isInfiniteExtent());
+        assertTrue(finite.isConstant());
+    }
 
     @TestFactory
     Stream<DynamicTest> referenceImages() {
@@ -57,7 +73,9 @@ class ConstantColorChannelTest {
                 "mergeConstantOrder",
                 "mergeMixedInputs",
                 "compositeConstantWithArtwork",
-                "constantCompositeClips")
+                "constantCompositeClips",
+                "gaussianConstantCoverage",
+                "paintChannels")
                 .map(name -> DynamicTest.dynamicTest(name, () -> assertEquals(SUCCESS, compareImages(new CompareInfo(
                         expected(new PathImageSource("filter/constantColor/" + name + "_ref.svg"), RenderType.JSVG),
                         actual(new PathImageSource("filter/constantColor/" + name + ".svg"), RenderType.JSVG), 0,

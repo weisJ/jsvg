@@ -126,18 +126,27 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
             return;
         }
         f.setConvertToLinear(colorInterpolation(filterContext) == ColorInterpolation.LinearRGB);
-        Channel input = impl().inputChannel(filterContext);
-        Channel result;
+        impl().saveResult(computeResultChannel(filterContext, f), filterContext);
+    }
+
+    private @NotNull Channel computeResultChannel(@NotNull FilterContext filterContext,
+            @NotNull AffineRGBImageFilter f) {
         if (f.isConstant()) {
-            Filter.FilterInfo info = filterContext.info();
-            result = new ConstantColorChannel(info.imageWidth, info.imageHeight, f.filterRGB(0, 0, 0));
-        } else if (input instanceof ConstantColorChannel) {
-            ConstantColorChannel constant = (ConstantColorChannel) input;
-            result = constant.withColor(f.filterRGB(0, 0, constant.color()));
-        } else {
-            result = input.applyFilter(f);
+            return filterContext.createConstantChannel(f.filterRGB(0, 0, 0));
         }
-        impl().saveResult(result, filterContext);
+        Channel input = impl().inputChannel(filterContext);
+
+        if (input.isConstant() && isConstantOnConstantInput(filterContext, f)) {
+            return input.withConstantColor(f.filterRGB(0, 0, input.constantColor()));
+        }
+        return input.applyFilter(f);
+    }
+
+    private boolean isConstantOnConstantInput(@NotNull FilterContext filterContext, @NotNull AffineRGBImageFilter f) {
+        boolean isPreservingTransparentBlack = f.filterRGB(0, 0, 0) == 0;
+        boolean isConstantOnConstantInput = filterContext.channelOutputCovers(
+                impl().inputChannelKey(), filterContext.primitiveRegion(impl()));
+        return isPreservingTransparentBlack || isConstantOnConstantInput;
     }
 
     private abstract static class AffineRGBImageFilter extends ColorSpaceAwareRGBImageFilter {

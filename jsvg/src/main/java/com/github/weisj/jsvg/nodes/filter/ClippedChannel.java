@@ -52,6 +52,23 @@ final class ClippedChannel implements Channel {
         this.empty = !clip.intersects(bounds);
     }
 
+    @Override
+    public boolean isConstant() {
+        // The clip defines this channel's finite output region. Within that region, the input's
+        // constant-color property is preserved.
+        return input.isConstant();
+    }
+
+    @Override
+    public int constantColor() {
+        return input.constantColor();
+    }
+
+    @Override
+    public @NotNull Channel withConstantColor(int color) {
+        return new ClippedChannel(input.withConstantColor(color), clip, bounds.width, bounds.height);
+    }
+
     @NotNull
     Channel clipTo(@NotNull Shape region) {
         if (clip.equals(region) || region.contains(clip.getBounds2D())) return this;
@@ -76,6 +93,11 @@ final class ClippedChannel implements Channel {
     @Override
     public @NotNull Channel applyFilter(@NotNull ImageFilter filter) {
         return new ImageProducerChannel(new FilteredImageSource(producer(), filter));
+    }
+
+    @Override
+    public @NotNull Channel alphaChannel() {
+        return new ClippedChannel(input.alphaChannel(), clip, bounds.width, bounds.height);
     }
 
     @Override

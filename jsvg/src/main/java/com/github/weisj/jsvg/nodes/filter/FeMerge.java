@@ -113,28 +113,34 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     @Override
     public void applyFilter(@NotNull RenderContext context, @NotNull FilterContext filterContext) {
         if (inputChannels.length == 0) {
-            Filter.FilterInfo info = filterContext.info();
-            Channel result = new ConstantColorChannel(info.imageWidth, info.imageHeight, 0);
-            filterPrimitiveBase.saveResult(result, filterContext);
+            filterPrimitiveBase.saveResult(filterContext.createConstantChannel(0), filterContext);
             return;
         }
 
         Composite composite = CompositeModeComposite.inColorSpace(AlphaComposite.SrcOver,
                 colorInterpolation(filterContext));
         Channel result = filterPrimitiveBase.channel(inputChannels[0], filterContext);
+        Rectangle2D primitiveRegion = filterContext.primitiveRegion(filterPrimitiveBase);
+        boolean resultCoversPrimitive = filterContext.channelOutputCovers(inputChannels[0], primitiveRegion);
         if (isTransparentConstant(result)) {
             // Remove any zero alpha colors.
-            result = ((ConstantColorChannel) result).withColor(0);
+            result = filterContext.createConstantChannel(0);
+            resultCoversPrimitive = true;
         }
         int i = 1;
         // Transparent constants are identities even after the result ceases to be constant.
         while (i < inputChannels.length) {
             Channel channel = filterPrimitiveBase.channel(inputChannels[i], filterContext);
             if (!isTransparentConstant(channel)) {
-                if (!(result instanceof ConstantColorChannel && channel instanceof ConstantColorChannel)) {
+                boolean channelCoversPrimitive = filterContext.channelOutputCovers(
+                        inputChannels[i], primitiveRegion);
+                if (!(result.isConstant() && channel.isConstant()
+                        && resultCoversPrimitive && channelCoversPrimitive)) {
                     break;
                 }
-                result = ((ConstantColorChannel) result).composite((ConstantColorChannel) channel, composite);
+                ConstantColorChannel constantResult = filterContext.createConstantChannel(result.constantColor());
+                ConstantColorChannel constantChannel = filterContext.createConstantChannel(channel.constantColor());
+                result = constantResult.composite(constantChannel, composite);
             }
             i++;
         }
@@ -158,7 +164,7 @@ public final class FeMerge extends ContainerNode implements FilterPrimitive {
     }
 
     private static boolean isTransparentConstant(@NotNull Channel channel) {
-        return channel instanceof ConstantColorChannel && ((ConstantColorChannel) channel).color() >>> 24 == 0;
+        return channel.isConstant() && channel.constantColor() >>> 24 == 0;
     }
 
     @Override

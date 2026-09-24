@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"
+	viewBox="0 0 600 600">
+	<defs>
+		<!-- A finite flood does not cover this blur's output region, so its edges 
+			must blur. -->
+		<filter id="finiteFlood" filterUnits="userSpaceOnUse" x="0"
+			y="0" width="300" height="300" color-interpolation-filters="sRGB">
+			<feFlood x="100" y="100" width="100" height="100"
+				flood-color="#2e8b57" result="flood" />
+			<feGaussianBlur in="flood" x="0" y="0" width="300"
+				height="300" stdDeviation="30" />
+		</filter>
+
+		<!-- This finite flood covers the output plus the complete sampling radius. -->
+		<filter id="coveringFlood" filterUnits="userSpaceOnUse" x="0"
+			y="0" width="300" height="300" color-interpolation-filters="sRGB">
+			<feFlood x="0" y="0" width="300" height="300"
+				flood-color="#a05020" result="flood" />
+			<feGaussianBlur in="flood" x="100" y="100" width="100"
+				height="100" stdDeviation="25" />
+		</filter>
+
+		<!-- FillPaint and StrokePaint are infinite inputs, independent of target 
+			geometry. -->
+		<filter id="fillPaint" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="300" height="300">
+			<feGaussianBlur in="FillPaint" x="0" y="0" width="300"
+				height="300" stdDeviation="100" />
+		</filter>
+		<filter id="strokePaint" filterUnits="userSpaceOnUse" x="0"
+			y="0" width="300" height="300">
+			<feGaussianBlur in="StrokePaint" x="25" y="25"
+				width="250" height="250" stdDeviation="100" />
+		</filter>
+	</defs>
+
+	<rect width="300" height="300" fill="transparent"
+		filter="url(#finiteFlood)" />
+	<g transform="translate(300 0)">
+		<rect width="300" height="300" fill="transparent"
+			filter="url(#coveringFlood)" />
+	</g>
+	<g transform="translate(0 300)">
+		<rect x="100" y="100" width="100" height="100" fill="#336699"
+			fill-opacity="0.5" filter="url(#fillPaint)" />
+	</g>
+	<g transform="translate(300 300)">
+		<circle cx="150" cy="150" r="50" fill="none" stroke="#8050b0"
+			stroke-opacity="0.75" filter="url(#strokePaint)" />
+	</g>
+</svg>

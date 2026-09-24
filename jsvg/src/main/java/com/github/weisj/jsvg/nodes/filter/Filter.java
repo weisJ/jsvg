@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.nodes.filter;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
@@ -49,11 +51,15 @@ import com.github.weisj.jsvg.nodes.container.ContainerNode;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
+import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.util.BlittableImage;
+import com.github.weisj.jsvg.util.ImageUtil;
 import com.github.weisj.jsvg.util.OffscreenImage;
 import com.github.weisj.jsvg.util.TransformedBlittableImage;
 
@@ -155,6 +161,12 @@ public final class Filter extends ContainerNode {
         LayoutBounds elementLayoutBounds = LayoutBounds.createInitial(elementBounds.sourceBox(), filterRegion);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceGraphic, elementLayoutBounds);
         filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha, elementLayoutBounds);
+        // FillPaint and StrokePaint are conceptually infinite. LayoutBounds only needs to describe
+        // the part which can contribute inside this filter; the runtime Channel retains the
+        // infinite-extent distinction used by sampling operations.
+        LayoutBounds paintLayoutBounds = LayoutBounds.createInitial(filterRegion, filterRegion);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.FillPaint, paintLayoutBounds);
+        filterLayoutContext.resultChannels().addResult(DefaultFilterChannel.StrokePaint, paintLayoutBounds);
         filterLayoutContext.resultChannels().addAlias(DefaultFilterChannel.LastResult,
                 DefaultFilterChannel.SourceGraphic);
 
@@ -200,6 +212,10 @@ public final class Filter extends ContainerNode {
         filterContext.resultChannels().addAlias(DefaultFilterChannel.LastResult, DefaultFilterChannel.SourceGraphic);
         filterContext.resultChannels().addResult(DefaultFilterChannel.SourceAlpha,
                 () -> new SourceAlphaChannel(sourceChannel.alphaChannel().producer()));
+        filterContext.resultChannels().addResult(DefaultFilterChannel.FillPaint,
+                () -> createPaintChannel(context.fillPaint(), context.fillOpacity(), context, filterInfo));
+        filterContext.resultChannels().addResult(DefaultFilterChannel.StrokePaint,
+                () -> createPaintChannel(context.strokePaint(), context.strokeOpacity(), context, filterInfo));
 
         // TODO: Track if a primitive is actually used and skip applying unused primitives.
         for (SVGNode child : children()) {
@@ -214,6 +230,35 @@ public final class Filter extends ContainerNode {
 
         Channel result = Objects.requireNonNull(filterContext.getChannel(DefaultFilterChannel.LastResult));
         return result.toBufferedImageNonAliased(context);
+    }
+
+    private static @NotNull Channel createPaintChannel(@NotNull SVGPaint paint, float opacity,
+            @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
+        Color color = RenderContextAccessor.instance().resolveColor(context, paint);
+        if (!paint.isVisible(context) || opacity <= 0) {
+            return ConstantColorChannel.infinite(filterInfo.imageWidth, filterInfo.imageHeight, 0);
+        }
+        if (color != null) {
+            int alpha = Math.round(color.getAlpha() * opacity);
+            int argb = (alpha << 24) | (color.getRGB() & 0xffffff);
+            return ConstantColorChannel.infinite(filterInfo.imageWidth, filterInfo.imageHeight, argb);
+        }
+
+        BufferedImage image = ImageUtil.createCompatibleTransparentImage(
+                filterInfo.imageWidth, filterInfo.imageHeight);
+        Graphics2D graphics = image.createGraphics();
+        if (filterInfo.output().renderingHints() != null) {
+            graphics.setRenderingHints(filterInfo.output().renderingHints());
+        }
+        Output paintOutput = new Graphics2DOutput(graphics);
+        try {
+            paintOutput.setTransform(filterInfo.output().transform());
+            paintOutput.applyOpacity(opacity);
+            paint.fillShape(paintOutput, context, filterInfo.imageBounds(), filterInfo.elementBounds());
+        } finally {
+            paintOutput.dispose();
+        }
+        return new InfiniteExtentChannel(image.getSource());
     }
 
     static void layoutPrimitive(@NotNull FilterPrimitive primitive, @NotNull RenderContext context,
@@ -336,5 +381,21 @@ public final class Filter extends ContainerNode {
             super(producer);
         }
 
+    }
+
+    private static final class InfiniteExtentChannel extends ImageProducerChannel {
+        private InfiniteExtentChannel(@NotNull ImageProducer producer) {
+            super(producer);
+        }
+
+        @Override
+        public boolean isInfiniteExtent() {
+            return true;
+        }
+
+        @Override
+        public @NotNull Channel applyFilter(@NotNull ImageFilter filter) {
+            return new InfiniteExtentChannel(new FilteredImageSource(producer(), filter));
+        }
     }
 }
