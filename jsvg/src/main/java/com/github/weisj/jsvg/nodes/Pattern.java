@@ -73,6 +73,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     private UnitType patternUnits;
     private UnitType patternContentUnits;
     private TransformValue patternTransform;
+    private Pattern patternProvidingChildren;
 
     @Override
     public @NotNull String tagName() {
@@ -105,6 +106,11 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         Pattern template = parseTemplate(attributeNode);
+        // A pattern inherits the referenced pattern's child content only when it has no children of its
+        // own.
+        patternProvidingChildren = children().isEmpty() && template != null
+                ? template.patternProvidingChildren()
+                : this;
 
         if (viewBox == null && template != null) viewBox = template.viewBox;
         preserveAspectRatio = template != null ? template.preserveAspectRatio : preserveAspectRatio;
@@ -138,6 +144,10 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         Pattern template =
                 attributeNode.getElementByHref(Pattern.class, attributeNode.getHref(), ElementRelation.TEMPLATE);
         return template != this ? template : null;
+    }
+
+    private @NotNull Pattern patternProvidingChildren() {
+        return patternProvidingChildren != null ? patternProvidingChildren : this;
     }
 
     @Override
@@ -180,7 +190,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
                 ctx.translate(out, patternBounds.getX(), patternBounds.getY());
             }
             RenderContext innerContext = createInnerContextForViewBox(new FloatSize(patternBounds), viewBox, ctx, out);
-            render(innerContext, out);
+            patternProvidingChildren().render(innerContext, out);
         });
 
         // Fixme: When patternTransform != null antialiasing is broken
