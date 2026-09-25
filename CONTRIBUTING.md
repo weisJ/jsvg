@@ -43,11 +43,18 @@ Run the complete module test suite with:
 
 ## External rendering suites
 
-The resvg, W3C SVG 1.1, and Web Platform Test suites are optional Git submodules. Their tests are
+The ReSVG, W3C SVG 1.1, and Web Platform Test suites are optional Git submodules. Their tests are
 skipped when the corresponding submodule is not available. To initialize all three, run:
 
 ```sh
 git submodule update --init resvg-test-suite w3c-svg-11-test-suite wpt-test-suite
+```
+
+The ReSVG tests live in the ReSVG monorepo. Only its test directory is needed, so configure that
+submodule as a sparse checkout after initializing it:
+
+```sh
+git -C resvg-test-suite sparse-checkout set crates/resvg/tests
 ```
 
 Each suite can be run on its own:

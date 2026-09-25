@@ -77,7 +77,8 @@ tasks {
             workingDir = File(project.rootDir, "build/ref_test").also { it.mkdirs() }
         }
         environment(
-            "RESVG_TEST_SUITE_PATH" to rootProject.file("resvg-test-suite/tests").absolutePath,
+            "RESVG_TEST_SUITE_PATH" to
+                rootProject.file("resvg-test-suite/crates/resvg/tests/tests").absolutePath,
             "WPT_TEST_SUITE_PATH" to rootProject.file("wpt-test-suite").absolutePath,
             "W3C_SVG_11_TEST_SUITE_PATH" to
                 rootProject.file("w3c-svg-11-test-suite/W3C_SVG_11_TestSuite").absolutePath,
@@ -88,7 +89,11 @@ tasks {
                 include("svg/**", "fonts/**", "images/**", "css/support/**")
             },
             rootProject.fileTree("resvg-test-suite") {
-                include("tests/**", "fonts/**")
+                include(
+                    "crates/resvg/tests/tests/**",
+                    "crates/resvg/tests/fonts/**",
+                    "crates/resvg/tests/resources/**",
+                )
             },
             rootProject.fileTree("w3c-svg-11-test-suite/W3C_SVG_11_TestSuite") {
                 include("svg/**", "png/**", "images/**", "resources/**")
@@ -109,7 +114,10 @@ tasks {
         dependsOn(testClasses, jar)
         classpath = sourceSets.test.get().runtimeClasspath
         mainClass.set("com.github.weisj.jsvg.ReSvgTestAudit")
-        environment("RESVG_TEST_SUITE_PATH", rootProject.file("resvg-test-suite/tests").absolutePath)
+        environment(
+            "RESVG_TEST_SUITE_PATH",
+            rootProject.file("resvg-test-suite/crates/resvg/tests/tests").absolutePath,
+        )
         val reportDirectory = layout.buildDirectory.dir("reports/resvg-audit")
         systemProperty("resvg.audit.reportDir", reportDirectory.get().asFile.absolutePath)
         doFirst {
