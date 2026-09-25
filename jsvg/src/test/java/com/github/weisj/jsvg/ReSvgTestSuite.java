@@ -25,6 +25,7 @@ import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ImageSource.*;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -51,6 +52,9 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.attributes.font.FontStretch;
+import com.github.weisj.jsvg.parser.DomElement;
+import com.github.weisj.jsvg.parser.DomProcessor;
+import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.renderer.FontLoader;
 import com.github.weisj.jsvg.renderer.RenderConfig;
 
@@ -60,7 +64,7 @@ class ReSvgTestSuite {
     private static final String RESVG_TEST_SUITE_PATH = System.getenv("RESVG_TEST_SUITE_PATH");
 
     // JSVG render type carrying the fonts bundled with the suite (set up in @BeforeAll).
-    private static @NotNull RenderType jsvgRenderType = RenderType.JSVG;
+    private static @NotNull RenderType.JSVGType jsvgRenderType = RenderType.JSVG;
 
     static Collection<DynamicTest> checkDirectory(@NotNull String name) {
         return checkDirectory(name, Collections.emptySet());
@@ -137,6 +141,46 @@ class ReSvgTestSuite {
         return new BundledFontSupport(fonts, extraCondensedFonts);
     }
 
+    private static @NotNull RenderType.JSVGType renderTypeWithPreProcessor(@NotNull DomProcessor preProcessor) {
+        LoaderContext base = jsvgRenderType.loaderContext();
+        DomProcessor basePreProcessor = base.preProcessor();
+        LoaderContext loaderContext = LoaderContext.builder()
+                .preProcessor(root -> {
+                    if (basePreProcessor != null) basePreProcessor.process(root);
+                    preProcessor.process(root);
+                })
+                .resourceLoader(base.resourceLoader())
+                .elementLoader(base.elementLoader())
+                .externalResourcePolicy(base.externalResourcePolicy())
+                .documentLimits(base.documentLimits())
+                .cssHints(base.cssHints())
+                .build();
+        return new RenderType.JSVGType(loaderContext, jsvgRenderType.renderConfig());
+    }
+
+    private static final class UndefinedBehaviorDetector implements DomProcessor {
+        private boolean undefinedBehavior;
+
+        @Override
+        public void process(@NotNull DomElement root) {
+            for (DomElement child : root.children()) {
+                if (!"title".equals(child.tagName())) continue;
+
+                StringBuilder title = new StringBuilder();
+                child.textContent().contentAfterChildIndex(-1)
+                        .forEach(segment -> title.append(segment.text()));
+                if (title.toString().stripTrailing().endsWith("(UB)")) {
+                    undefinedBehavior = true;
+                    return;
+                }
+            }
+        }
+
+        boolean isUndefinedBehavior() {
+            return undefinedBehavior;
+        }
+    }
+
     private static class BundledFontSupport implements FontLoader {
         private final @NotNull Map<String, Font> fonts;
         private final @NotNull Map<String, Font> extraCondensedFonts;
@@ -182,7 +226,6 @@ class ReSvgTestSuite {
                 "with-clip-path.svg",
                 "with-filter-on-the-same-element.svg",
                 "with-filter.svg",
-                "with-mask.svg",
                 "with-opacity-1.svg",
                 "with-opacity-2.svg",
                 "with-opacity-3.svg",
@@ -200,9 +243,7 @@ class ReSvgTestSuite {
         return checkDirectory("filters/feColorMatrix", Set.of(
                 "invalid-type.svg",
                 "type=matrix-with-non-normalized-values.svg",
-                "type=matrix.svg",
-                "type=saturate-with-a-large-coefficient.svg",
-                "type=saturate-with-negative-coefficient.svg"));
+                "type=matrix.svg"));
     }
 
     @TestFactory
@@ -233,13 +274,7 @@ class ReSvgTestSuite {
                 "order-with-a-negative-value-2.svg",
                 "order=0.svg",
                 "targetX=-1.svg",
-                "targetX=3.svg",
-                // The suite explicitly labels these expected images as undefined behavior. They
-                // remain excluded even when JSVG happens to produce matching pixels.
-                "bias=-0.5.svg",
-                "bias=0.5.svg",
-                "bias=9999.svg",
-                "edgeMode=wrap-with-matrix-larger-than-target.svg"));
+                "targetX=3.svg"));
     }
 
     @TestFactory
@@ -366,7 +401,6 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> filters_feTile() {
         return checkDirectory("filters/feTile", Set.of(
-                "complex-transform.svg",
                 "simple-case.svg",
                 "with-subregion-2.svg"));
     }
@@ -390,7 +424,6 @@ class ReSvgTestSuite {
                 "seed=-20.svg",
                 "seed=1.5.svg",
                 "seed=20.svg",
-                "stitchTiles=stitch.svg",
                 "type=invalid.svg"));
     }
 
@@ -410,12 +443,6 @@ class ReSvgTestSuite {
                 "in=BackgroundAlpha.svg",
                 "in=BackgroundImage-with-enable-background.svg",
                 "in=BackgroundImage.svg",
-                "in=FillPaint-on-g-without-children.svg",
-                "in=FillPaint-with-gradient.svg",
-                "in=FillPaint-with-pattern.svg",
-                "in=FillPaint-with-target-on-g.svg",
-                "in=FillPaint.svg",
-                "in=StrokePaint.svg",
                 "initial-transform.svg",
                 "invalid-FuncIRI.svg",
                 "invalid-filterUnits.svg",
@@ -428,7 +455,6 @@ class ReSvgTestSuite {
                 "negative-subregion.svg",
                 "no-children.svg",
                 "on-group-with-child-outside-of-canvas.svg",
-                "on-the-root-svg.svg",
                 "primitiveUnits=objectBoundingBox.svg",
                 "recursive-xlink-href.svg",
                 "region-with-stroke.svg",
@@ -485,7 +511,6 @@ class ReSvgTestSuite {
                 "hue-rotate-function-999deg.svg",
                 "nested-filters.svg",
                 "one-invalid-url-in-list.svg",
-                "two-exact-urls.svg",
                 "two-urls.svg",
                 "url-and-grayscale.svg"));
     }
@@ -538,7 +563,6 @@ class ReSvgTestSuite {
                 "mixed-clip-rule.svg",
                 "multiple-children.svg",
                 "nested-clip-path.svg",
-                "on-the-root-svg-without-size.svg",
                 "recursive-on-child.svg",
                 "recursive-on-self.svg",
                 "transform-on-clipPath.svg"));
@@ -555,7 +579,6 @@ class ReSvgTestSuite {
                 "mask-type=luminance.svg",
                 "maskUnits=userSpaceOnUse-without-rect.svg",
                 "on-a-horizontal-line.svg",
-                "recursive-on-child.svg",
                 "recursive-on-self.svg",
                 "recursive.svg",
                 "self-recursive.svg",
@@ -569,10 +592,8 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> paint_servers_linearGradient() {
         return checkDirectory("paint-servers/linearGradient", Set.of(
-                "hsla-color.svg",
                 "invalid-child-1.svg",
                 "invalid-child-2.svg",
-                "invalid-gradientTransform.svg",
                 "no-stops.svg",
                 "recursive-xlink-href-2.svg",
                 "single-stop-with-opacity-used-by-fill-and-stroke.svg",
@@ -587,14 +608,12 @@ class ReSvgTestSuite {
                 "children-via-xlink-href.svg",
                 "display=none-on-child.svg",
                 "everything-via-xlink-href.svg",
-                "invalid-patternTransform.svg",
                 "invalid-patternUnits-and-patternContentUnits.svg",
                 "missing-height.svg",
                 "missing-width.svg",
                 "nested-objectBoundingBox.svg",
                 "no-children.svg",
                 "out-of-order-referencing.svg",
-                "overflow=visible.svg",
                 "pattern-on-child.svg",
                 "patternContentUnits-with-viewBox.svg",
                 "patternContentUnits=objectBoundingBox.svg",
@@ -619,13 +638,7 @@ class ReSvgTestSuite {
     Collection<DynamicTest> paint_servers_radialGradient() {
         return checkDirectory("paint-servers/radialGradient", Set.of(
                 "focal-point-correction.svg",
-                "fr=-1.svg",
-                "fr=0.5.svg",
                 "fr=0.7.svg",
-                "hsla-color.svg",
-                "invalid-gradientTransform.svg",
-                "invalid-gradientUnits.svg",
-                "negative-r.svg",
                 "no-stops.svg",
                 "spreadMethod=repeat.svg",
                 "stops-via-xlink-href-from-rect.svg"));
@@ -633,12 +646,7 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> paint_servers_stop() {
-        return checkDirectory("paint-servers/stop", Set.of(
-                "hsla-color.svg",
-                "stop-color-with-currentColor-1.svg",
-                "stop-color-with-currentColor-2.svg",
-                "stop-color-with-currentColor-3.svg",
-                "stop-color-with-inherit-1.svg"));
+        return checkDirectory("paint-servers/stop");
     }
 
     @TestFactory
@@ -694,13 +702,11 @@ class ReSvgTestSuite {
                 "hsl-999-100percent-25percent.svg",
                 "hsl-with-alpha.svg",
                 "hsla-with-percentage-s-and-l-values.svg",
-                "icc-color.svg",
                 "invalid-FuncIRI-with-a-currentColor-fallback.svg",
                 "invalid-FuncIRI-with-a-fallback-color.svg",
                 "none.svg",
                 "pattern-on-text.svg",
                 "radial-gradient-on-text.svg",
-                "rgb-int-int-int.svg",
                 "rgba-0-127-0-50percent.svg",
                 "rgba-0-50percent-0-0.5.svg",
                 "transparent.svg",
@@ -747,11 +753,9 @@ class ReSvgTestSuite {
                 "percent-values.svg",
                 "recursive-3.svg",
                 "recursive-5.svg",
-                "target-with-subpaths-2.svg",
                 "the-marker-property.svg",
                 "with-a-large-stroke.svg",
-                "with-an-image-child.svg",
-                "with-viewBox-1.svg"));
+                "with-an-image-child.svg"));
     }
 
     @TestFactory
@@ -853,8 +857,7 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> painting_stroke_linejoin() {
-        return checkDirectory("painting/stroke-linejoin", Set.of(
-                "arcs.svg"));
+        return checkDirectory("painting/stroke-linejoin");
     }
 
     @TestFactory
@@ -873,7 +876,6 @@ class ReSvgTestSuite {
         return checkDirectory("painting/stroke-width", Set.of(
                 "bold.svg",
                 "default.svg",
-                "negative.svg",
                 "percentage.svg"));
     }
 
@@ -973,16 +975,12 @@ class ReSvgTestSuite {
                 "external-svg-with-transform.svg",
                 "external-svgz.svg",
                 "external-webp.svg",
-                "float-size.svg",
                 "image-with-float-size-scaling.svg",
                 "nested-embedded-png.svg",
                 "nested-external-png.svg",
                 "no-height-non-square.svg",
-                "no-height-on-svg.svg",
                 "no-height.svg",
-                "no-width-and-height-on-svg.svg",
                 "no-width-and-height.svg",
-                "no-width-on-svg.svg",
                 "no-width.svg",
                 "objectBoundingBox-clip-on-sliced-image.svg",
                 "preserveAspectRatio=none-on-svg.svg",
@@ -1030,8 +1028,6 @@ class ReSvgTestSuite {
                 "elements-via-ENTITY-reference-1.svg",
                 "elements-via-ENTITY-reference-2.svg",
                 "elements-via-ENTITY-reference-3.svg",
-                "funcIRI-parsing.svg",
-                "funcIRI-with-invalid-characters.svg",
                 "invalid-id-attribute-1.svg",
                 "invalid-id-attribute-2.svg",
                 "mixed-namespaces.svg",
@@ -1098,8 +1094,6 @@ class ReSvgTestSuite {
     @TestFactory
     Collection<DynamicTest> text_alignment_baseline() {
         return checkDirectory("text/alignment-baseline", Set.of(
-                "after-edge.svg",
-                "baseline.svg",
                 "before-edge.svg",
                 "central.svg",
                 "hanging-and-baseline-shift-eq-20-on-tspan.svg",
@@ -1107,11 +1101,9 @@ class ReSvgTestSuite {
                 "hanging-on-vertical.svg",
                 "hanging-with-underline.svg",
                 "hanging.svg",
-                "ideographic.svg",
                 "inherit.svg",
                 "mathematical.svg",
                 "middle-on-textPath.svg",
-                "text-after-edge.svg",
                 "text-before-edge.svg",
                 "two-textPath-with-middle-on-first.svg"));
     }
@@ -1147,11 +1139,9 @@ class ReSvgTestSuite {
                 "inherit.svg",
                 "mathematical.svg",
                 "nested.svg",
-                "reset-size.svg",
                 "sequential.svg",
                 "text-after-edge.svg",
-                "text-before-edge.svg",
-                "use-script.svg"));
+                "text-before-edge.svg"));
     }
 
     @TestFactory
@@ -1175,8 +1165,7 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> text_font_size() {
-        return checkDirectory("text/font-size", Set.of(
-                "negative-size.svg"));
+        return checkDirectory("text/font-size");
     }
 
     @TestFactory
@@ -1256,7 +1245,6 @@ class ReSvgTestSuite {
         return checkDirectory("text/letter-spacing", Set.of(
                 "5percent.svg",
                 "filter-bbox.svg",
-                "large-negative.svg",
                 "mixed-scripts.svg",
                 "non-ASCII-character.svg",
                 "on-Arabic.svg"));
@@ -1267,7 +1255,6 @@ class ReSvgTestSuite {
         return checkDirectory("text/text", Set.of(
                 "bidi-reordering.svg",
                 "complex-graphemes.svg",
-                "complex-grapheme-split-by-tspan.svg",
                 "complex-graphemes-and-coordinates-list.svg",
                 "compound-emojis-and-coordinates-list.svg",
                 "compound-emojis.svg",
@@ -1356,7 +1343,6 @@ class ReSvgTestSuite {
     Collection<DynamicTest> text_textPath() {
         return checkDirectory("text/textPath", Set.of(
                 "closed-path.svg",
-                "complex.svg",
                 "dy-with-tiny-coordinates.svg",
                 "invalid-link.svg",
                 "invalid-textPath-in-the-middle.svg",
@@ -1380,7 +1366,6 @@ class ReSvgTestSuite {
                 "tspan-with-relative-position.svg",
                 "two-paths.svg",
                 "very-long-text.svg",
-                "with-baseline-shift-and-rotate.svg",
                 "with-baseline-shift.svg",
                 "with-coordinates-on-text.svg",
                 "with-coordinates-on-textPath.svg",
@@ -1447,8 +1432,7 @@ class ReSvgTestSuite {
                 "-5.svg",
                 "10.svg",
                 "2mm.svg",
-                "5percent.svg",
-                "large-negative.svg"));
+                "5percent.svg"));
     }
 
     @Disabled("Vertical writing modes are not supported; passing fixtures are no-op cases.")
@@ -1466,11 +1450,20 @@ class ReSvgTestSuite {
         public void execute() throws Throwable {
             assumeTrue(!excluded, "Excluded resvg reference test: " + testFile.getFileName());
             var pngRef = testFile.resolveSibling(testFile.getFileName().toString().replace(".svg", ".png"));
-            var result = ImageComparison.compareImages(new ImageComparison.CompareInfo(
+            var undefinedBehaviorDetector = new UndefinedBehaviorDetector();
+            var compareInfo = new ImageComparison.CompareInfo(
                     expected(new UrlImageSource(pngRef.toUri().toURL()),
                             RenderType.DiskImage),
                     actual(new UrlImageSource(testFile.toUri().toURL()),
-                            jsvgRenderType)));
+                            renderTypeWithPreProcessor(undefinedBehaviorDetector)));
+            var expectedImage = compareInfo.expected().render(null);
+            var actualImage = assertDoesNotThrow(() -> compareInfo.actual().render(expectedImage));
+
+            assumeTrue(!undefinedBehaviorDetector.isUndefinedBehavior(),
+                    "Undefined behavior resvg reference test: " + testFile.getFileName());
+            var result = ImageComparison.compareImageRasterization(
+                    expectedImage, actualImage, compareInfo.name(),
+                    compareInfo.tolerance(), compareInfo.pixelTolerance());
             assertEquals(SUCCESS, result);
         }
     }

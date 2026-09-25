@@ -71,8 +71,11 @@ public final class StrokeResolver {
             throw new IllegalStateException("miterLimit is unspecified");
         }
 
+        // BasicStroke rejects negative widths. SVG leaves their rendering undefined, so treat them
+        // like a zero-width stroke rather than allowing malformed input to abort rendering.
+        float resolvedStrokeWidth = Math.max(0, strokeWidth.resolve(measureContext));
         // In practice, any miter join will exceed a miter limit between 0 and 1.
-        return new BasicStroke(strokeWidth.resolve(measureContext), lineCap.awtCode(),
+        return new BasicStroke(resolvedStrokeWidth, lineCap.awtCode(),
                 lineJoin.awtCode(), Math.max(1, context.miterLimit));
     }
 }
