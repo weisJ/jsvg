@@ -109,7 +109,7 @@ public enum VectorEffect implements HasMatchName {
      *
      * @see <a href="https://svgwg.org/svg2-draft/painting.html#PaintingVectorEffects">Vector effects</a>
      */
-    public static @Nullable Shape nonScalingStrokeShape(@NotNull Set<VectorEffect> effects,
+    public static @NotNull Shape nonScalingStrokeShape(@NotNull Set<VectorEffect> effects,
             @NotNull AffineTransform transform,
             @NotNull RenderContext context, @NotNull Stroke stroke, @NotNull Shape shape) {
         // For the stroke not to be scaled we have to pre-multiply the shape by the transform and then paint
