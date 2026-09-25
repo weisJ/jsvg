@@ -35,12 +35,37 @@ public final class ColorUtil {
         return (x + (x >> 8)) >> 8;
     }
 
+    /** Converts a packed straight-alpha ARGB color to premultiplied ARGB. */
+    public static int premultiply(int argb) {
+        int alpha = argb >>> 24;
+        if (alpha == 0) return 0;
+        if (alpha == 255) return argb;
+        int red = div255(((argb >>> 16) & 0xff) * alpha);
+        int green = div255(((argb >>> 8) & 0xff) * alpha);
+        int blue = div255((argb & 0xff) * alpha);
+        return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
+    /** Converts a packed premultiplied ARGB color to straight-alpha ARGB. */
+    public static int unpremultiply(int argb) {
+        int alpha = argb >>> 24;
+        if (alpha == 0 || alpha == 255) return argb;
+        int red = unpremultiply((argb >>> 16) & 0xff, alpha);
+        int green = unpremultiply((argb >>> 8) & 0xff, alpha);
+        int blue = unpremultiply(argb & 0xff, alpha);
+        return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
+    private static int unpremultiply(int component, int alpha) {
+        return toRgbRange((component * 255.0) / alpha);
+    }
+
     public static int computeLuminance(int r, int g, int b) {
         return toRgbRange(0.2125 * r + 0.7164 * g + 0.0712 * b);
     }
 
     public static int toRgbRange(double value) {
-        return (int) Math.max(Math.min(Math.round(value), 255), 0);
+        return (int) clampColor(Math.round(value));
     }
 
     public static Color withAlpha(@NotNull Color c, float alpha) {
@@ -327,6 +352,10 @@ public final class ColorUtil {
     }
 
     public static int clampColor(int v) {
+        return Math.max(Math.min(255, v), 0);
+    }
+
+    public static double clampColor(double v) {
         return Math.max(Math.min(255, v), 0);
     }
 }

@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.util.ImageUtil;
 public enum EdgeMode {
     Duplicate,
     Wrap,
+    Mirror,
     None;
 
     public enum Axis {
@@ -57,15 +58,43 @@ public enum EdgeMode {
         }
     }
 
+    public interface ConvolveOperation {
+
+        /**
+         * Convolves {@code image} and returns the pixels in {@code resultRegion}. The source image
+         * already contains the edge-mode extension required around that region.
+         */
+        @NotNull
+        BufferedImage convolve(@NotNull BufferedImage image, @NotNull Rectangle resultRegion,
+                @Nullable RenderingHints hints);
+    }
+
+    public @NotNull BufferedImage convolve(@NotNull BufferedImage image,
+            @NotNull Rectangle sourceBounds, @NotNull Insets samplingInsets,
+            @Nullable RenderingHints hints, @NotNull ConvolveOperation operation) {
+        validateInputImage(image);
+        validateInsets(samplingInsets);
+
+        Rectangle resultBounds = resultBounds(image);
+        if (resultBounds.isEmpty()) return image;
+
+        int paddedWidth = paddedDimension(resultBounds.width, samplingInsets.left, samplingInsets.right);
+        int paddedHeight = paddedDimension(resultBounds.height, samplingInsets.top, samplingInsets.bottom);
+        int[] buffer = new int[checkedImageSize((long) paddedWidth * paddedHeight)];
+        EdgeModeImage extended = createExtendedImage(image, sourceBounds, resultBounds, samplingInsets, buffer);
+        Rectangle resultRegion = new Rectangle(
+                extended.xOff, extended.yOff, resultBounds.width, resultBounds.height);
+        BufferedImage result = operation.convolve(extended.img, resultRegion, hints);
+        if (result.getWidth() != resultBounds.width || result.getHeight() != resultBounds.height) {
+            throw new IllegalArgumentException("Convolution result must have the unpadded image dimensions");
+        }
+        return result;
+    }
+
     public @NotNull BufferedImage convolveSeparable(@NotNull BufferedImage image,
             @NotNull Rectangle sourceBounds, @Nullable RenderingHints hints,
             @NotNull SeparableConvolveOperation operation) {
-        if (!image.getColorModel().isAlphaPremultiplied()) {
-            throw new IllegalArgumentException("Image must be premultiplied");
-        }
-        if (!ImageUtil.is_INT_PACK_Data(image.getSampleModel(), true)) {
-            throw new IllegalArgumentException("Image must use packed integer ARGB samples");
-        }
+        validateInputImage(image);
 
         Rectangle resultBounds = resultBounds(image);
         if (resultBounds.isEmpty()) return image;
@@ -150,8 +179,9 @@ public enum EdgeMode {
 
         int horizontalRadius = axis == Axis.Horizontal ? radius : 0;
         int verticalRadius = axis == Axis.Vertical ? radius : 0;
-        EdgeModeImage extended = createExtendedImage(axisContext, unpaddedImage, sourceBounds,
-                horizontalRadius, verticalRadius);
+        Insets samplingInsets = new Insets(verticalRadius, horizontalRadius, verticalRadius, horizontalRadius);
+        EdgeModeImage extended = createExtendedImage(unpaddedImage, sourceBounds, resultBounds,
+                samplingInsets, axisContext.backingBuffer);
 
         BufferedImage filteredImage = axisContext.operation.convolve(extended.img, axis, axisContext.hints);
         if (filteredImage.getWidth() != extended.img.getWidth()
@@ -168,15 +198,12 @@ public enum EdgeMode {
         return new Rectangle(0, 0, source.getWidth(), source.getHeight());
     }
 
-    private @NotNull EdgeModeImage createExtendedImage(@NotNull AxisConvolutionContext axisContext,
-            @NotNull BufferedImage source,
-            @NotNull Rectangle sourceBounds,
-            int horizontalRadius, int verticalRadius) {
-        Rectangle resultBounds = axisContext.resultBounds;
-        int paddedWidth = paddedDimension(resultBounds.width, horizontalRadius);
-        int paddedHeight = paddedDimension(resultBounds.height, verticalRadius);
+    private @NotNull EdgeModeImage createExtendedImage(@NotNull BufferedImage source,
+            @NotNull Rectangle sourceBounds, @NotNull Rectangle resultBounds,
+            @NotNull Insets samplingInsets, int @NotNull [] buffer) {
+        int paddedWidth = paddedDimension(resultBounds.width, samplingInsets.left, samplingInsets.right);
+        int paddedHeight = paddedDimension(resultBounds.height, samplingInsets.top, samplingInsets.bottom);
         int paddedSize = checkedImageSize((long) paddedWidth * paddedHeight);
-        int[] buffer = axisContext.backingBuffer;
         if (buffer.length < paddedSize) {
             throw new IllegalArgumentException("Reusable buffer is too small for the padded image");
         }
@@ -186,37 +213,42 @@ public enum EdgeMode {
         BufferedImage image = createImageView(source.getColorModel(), buffer, masks, paddedWidth, paddedHeight);
 
         Rectangle extendedBounds = new Rectangle(sourceBounds);
-        extendedBounds.translate(horizontalRadius - resultBounds.x, verticalRadius - resultBounds.y);
+        extendedBounds.translate(samplingInsets.left - resultBounds.x,
+                samplingInsets.top - resultBounds.y);
         Graphics2D graphics = GraphicsUtil.createGraphics(image);
         try {
             // Align the complete available raster with its global device coordinates. If resultBounds
             // was clipped by the backing image, unavailable samples stay transparent rather than
             // becoming an artificial input edge.
             graphics.drawImage(source,
-                    horizontalRadius - resultBounds.x,
-                    verticalRadius - resultBounds.y, null);
+                    samplingInsets.left - resultBounds.x,
+                    samplingInsets.top - resultBounds.y, null);
             if (this != None && !extendedBounds.isEmpty()) {
-                if (horizontalRadius > 0) {
+                if (samplingInsets.left > 0 || samplingInsets.right > 0) {
                     paintExtendedAxis(graphics, image, extendedBounds, Axis.Horizontal);
                     extendedBounds.x = 0;
                     extendedBounds.width = paddedWidth;
                 }
-                if (verticalRadius > 0) {
+                if (samplingInsets.top > 0 || samplingInsets.bottom > 0) {
                     paintExtendedAxis(graphics, image, extendedBounds, Axis.Vertical);
                 }
             }
         } finally {
             graphics.dispose();
         }
-        return new EdgeModeImage(image, horizontalRadius, verticalRadius);
+        return new EdgeModeImage(image, samplingInsets.left, samplingInsets.top);
     }
 
     private void paintExtendedAxis(@NotNull Graphics2D graphics, @NotNull BufferedImage image,
             @NotNull Rectangle sourceBounds, @NotNull Axis axis) {
         if (this == Duplicate) {
             paintDuplicateEdges(graphics, image, sourceBounds, axis);
-        } else {
+        } else if (this == Wrap) {
             paintRepeatedEdges(graphics, image, sourceBounds, axis);
+        } else if (this == Mirror) {
+            paintMirroredEdges(graphics, image, sourceBounds, axis);
+        } else {
+            throw new IllegalStateException("Cannot extend edges for mode " + this);
         }
     }
 
@@ -295,6 +327,38 @@ public enum EdgeMode {
         }
     }
 
+    private static void paintMirroredEdges(@NotNull Graphics2D graphics, @NotNull BufferedImage image,
+            @NotNull Rectangle sourceBounds, @NotNull Axis axis) {
+        if (axis == Axis.Horizontal) {
+            int top = Math.max(0, sourceBounds.y);
+            int bottom = Math.min(image.getHeight(), sourceBounds.y + sourceBounds.height);
+            if (top >= bottom) return;
+            for (int x = 0; x < image.getWidth(); x++) {
+                if (x >= sourceBounds.x && x < sourceBounds.x + sourceBounds.width) continue;
+                int sourceX = mirroredCoordinate(x, sourceBounds.x, sourceBounds.width);
+                graphics.drawImage(image, x, top, x + 1, bottom,
+                        sourceX, top, sourceX + 1, bottom, null);
+            }
+        } else {
+            int left = Math.max(0, sourceBounds.x);
+            int right = Math.min(image.getWidth(), sourceBounds.x + sourceBounds.width);
+            if (left >= right) return;
+            for (int y = 0; y < image.getHeight(); y++) {
+                if (y >= sourceBounds.y && y < sourceBounds.y + sourceBounds.height) continue;
+                int sourceY = mirroredCoordinate(y, sourceBounds.y, sourceBounds.height);
+                graphics.drawImage(image, left, y, right, y + 1,
+                        left, sourceY, right, sourceY + 1, null);
+            }
+        }
+    }
+
+    private static int mirroredCoordinate(int coordinate, int start, int length) {
+        long period = 2L * length;
+        long offset = Math.floorMod((long) coordinate - start, period);
+        if (offset >= length) offset = period - 1 - offset;
+        return start + (int) offset;
+    }
+
     private static @NotNull BufferedImage createImageView(@NotNull ColorModel colorModel,
             int @NotNull [] workspace, int @NotNull [] masks, int width, int height) {
         DataBufferInt dataBuffer = new DataBufferInt(workspace, workspace.length);
@@ -305,14 +369,33 @@ public enum EdgeMode {
     }
 
     private static int paddedDimension(int size, int radius) {
-        if (radius < 0) {
-            throw new IllegalArgumentException("Convolution radius must not be negative");
+        return paddedDimension(size, radius, radius);
+    }
+
+    private static int paddedDimension(int size, int before, int after) {
+        if (before < 0 || after < 0) {
+            throw new IllegalArgumentException("Convolution padding must not be negative");
         }
-        long paddedSize = size + 2L * radius;
+        long paddedSize = size + (long) before + after;
         if (paddedSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Padded image dimension exceeds the supported integer range");
         }
         return (int) paddedSize;
+    }
+
+    private static void validateInsets(@NotNull Insets insets) {
+        if (insets.top < 0 || insets.left < 0 || insets.bottom < 0 || insets.right < 0) {
+            throw new IllegalArgumentException("Convolution padding must not be negative");
+        }
+    }
+
+    private static void validateInputImage(@NotNull BufferedImage image) {
+        if (!image.getColorModel().isAlphaPremultiplied()) {
+            throw new IllegalArgumentException("Image must be premultiplied");
+        }
+        if (!ImageUtil.is_INT_PACK_Data(image.getSampleModel(), true)) {
+            throw new IllegalArgumentException("Image must use packed integer ARGB samples");
+        }
     }
 
     private static int checkedBackingBufferSize(long horizontalSize, long verticalSize) {

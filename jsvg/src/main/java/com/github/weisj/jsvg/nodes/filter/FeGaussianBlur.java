@@ -33,7 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.EdgeMode;
-import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.geometry.size.FloatInsets;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -50,7 +49,7 @@ import com.github.weisj.jsvg.util.ImageUtil;
 @PermittedContent(
     anyOf = {Animate.class, Set.class}
 )
-public final class FeGaussianBlur extends AbstractFilterPrimitive {
+public final class FeGaussianBlur extends AbstractConvolveFilter {
     public static final String TAG = "fegaussianblur";
     private static final double SQRT_2_PI = Math.sqrt(2 * Math.PI);
     private static final double THREE_QUARTER_SQRT_2_PI = SQRT_2_PI * 3f / 4f;
@@ -129,7 +128,6 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        LayoutBounds input = impl().layoutInput(filterLayoutContext);
         AffineTransform transform = filterLayoutContext.transform();
         double[] sigma = computeAbsoluteStdDeviation(transform,
                 filterLayoutContext.primitiveUnits(), filterLayoutContext.elementBounds());
@@ -138,106 +136,10 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
         float hExtend = extendForKernelDiameter(sigma[0], dX);
         float vExtend = extendForKernelDiameter(sigma[1], dY);
         // Kernel sizes are rounded in device pixels; layout grows in user coordinates.
-        FloatInsets userSpaceExtend = userSpaceInsetsForDeviceSpaceRadii(
-                filterLayoutContext.inverseTransform(), hExtend, vExtend);
-        float hUserExtend = userSpaceExtend.left();
-        float vUserExtend = userSpaceExtend.top();
-        Rectangle2D sourceBounds = input.sourceBounds();
-        Rectangle2D outputSourceBounds = filterLayoutContext.filterPrimitiveRegion(impl(), sourceBounds);
-        Rectangle2D tightInputBounds = input.tightSourceBounds().createIntersection(sourceBounds);
-        LayoutBounds grownInput = input.withTightSourceBounds(tightInputBounds)
-                .grow(hUserExtend, vUserExtend, filterLayoutContext);
-
-        // sourceBounds is the logical image extent. Transparent space between it and the tight
-        // bounds is part of the input image, so all edge modes conceptually operate on the same
-        // outputSourceBounds. edgeMode only changes how samples outside sourceBounds are supplied.
-        // The tighter affected bounds below may still limit allocation and final output clipping to
-        // pixels that can actually become nontransparent.
-        LayoutBounds affectedBounds;
-        switch (edgeMode) {
-            case None:
-                affectedBounds = grownInput;
-                break;
-            case Duplicate:
-                Rectangle2D duplicatedBounds = duplicateAffectedBounds(
-                        tightInputBounds, sourceBounds, outputSourceBounds, hUserExtend, vUserExtend);
-                affectedBounds = grownInput.withTightSourceBounds(
-                        GeometryUtil.union(grownInput.tightSourceBounds(), duplicatedBounds));
-                break;
-            case Wrap:
-                Rectangle2D wrappedBounds = wrapAffectedBounds(
-                        tightInputBounds, outputSourceBounds, hUserExtend > 0, vUserExtend > 0);
-                affectedBounds = grownInput.withTightSourceBounds(
-                        GeometryUtil.union(grownInput.tightSourceBounds(), wrappedBounds));
-                // A clipped repaint at a logical input edge can read the opposite edge. Asking for
-                // the full logical span does not allocate its transparent padding: allocation is
-                // still intersected with tightSourceBounds.
-                Rectangle2D requiredInput = wrapInputBounds(
-                        sourceBounds, filterLayoutContext.clipBounds(), hUserExtend > 0, vUserExtend > 0);
-                affectedBounds = affectedBounds.ensuringRectIsAvailable(requiredInput, filterLayoutContext);
-                break;
-            default:
-                throw new IllegalStateException("Unknown edge mode: " + edgeMode);
-        }
-        // Do not intersect tightSourceBounds with the output subregion here. Samples just outside
-        // that subregion can still contribute to pixels inside it; saveResult performs the actual
-        // primitive-subregion clip.
-        LayoutBounds bounds = affectedBounds.withSourceBounds(outputSourceBounds);
-        impl().saveLayoutResult(bounds, filterLayoutContext);
-    }
-
-    private static @NotNull Rectangle2D duplicateAffectedBounds(@NotNull Rectangle2D tightSourceBounds,
-            @NotNull Rectangle2D sourceBounds, @NotNull Rectangle2D outputSourceBounds,
-            float horizontalRadius, float verticalRadius) {
-        if (tightSourceBounds.isEmpty() || sourceBounds.isEmpty()) return new Rectangle2D.Double();
-
-        Rectangle2D grownBounds = GeometryUtil.grow(tightSourceBounds,
-                new FloatInsets(verticalRadius, horizontalRadius, verticalRadius, horizontalRadius));
-        double x = grownBounds.getX();
-        double y = grownBounds.getY();
-        double maxX = grownBounds.getMaxX();
-        double maxY = grownBounds.getMaxY();
-        if (horizontalRadius > 0 && tightSourceBounds.getMinX() <= sourceBounds.getMinX()) {
-            x = Math.min(x, outputSourceBounds.getMinX());
-        }
-        if (horizontalRadius > 0 && tightSourceBounds.getMaxX() >= sourceBounds.getMaxX()) {
-            maxX = Math.max(maxX, outputSourceBounds.getMaxX());
-        }
-        if (verticalRadius > 0 && tightSourceBounds.getMinY() <= sourceBounds.getMinY()) {
-            y = Math.min(y, outputSourceBounds.getMinY());
-        }
-        if (verticalRadius > 0 && tightSourceBounds.getMaxY() >= sourceBounds.getMaxY()) {
-            maxY = Math.max(maxY, outputSourceBounds.getMaxY());
-        }
-        return new Rectangle2D.Double(x, y, maxX - x, maxY - y);
-    }
-
-    private static @NotNull Rectangle2D wrapAffectedBounds(@NotNull Rectangle2D tightSourceBounds,
-            @NotNull Rectangle2D outputSourceBounds, boolean horizontal, boolean vertical) {
-        if (tightSourceBounds.isEmpty() || outputSourceBounds.isEmpty()) return new Rectangle2D.Double();
-
-        double x = horizontal
-                ? Math.min(tightSourceBounds.getMinX(), outputSourceBounds.getMinX())
-                : tightSourceBounds.getMinX();
-        double y = vertical
-                ? Math.min(tightSourceBounds.getMinY(), outputSourceBounds.getMinY())
-                : tightSourceBounds.getMinY();
-        double maxX = horizontal
-                ? Math.max(tightSourceBounds.getMaxX(), outputSourceBounds.getMaxX())
-                : tightSourceBounds.getMaxX();
-        double maxY = vertical
-                ? Math.max(tightSourceBounds.getMaxY(), outputSourceBounds.getMaxY())
-                : tightSourceBounds.getMaxY();
-        return new Rectangle2D.Double(x, y, maxX - x, maxY - y);
-    }
-
-    private static @NotNull Rectangle2D wrapInputBounds(@NotNull Rectangle2D inputBounds,
-            @NotNull Rectangle2D clipBounds, boolean horizontal, boolean vertical) {
-        double x = horizontal ? inputBounds.getX() : clipBounds.getX();
-        double y = vertical ? inputBounds.getY() : clipBounds.getY();
-        double maxX = horizontal ? inputBounds.getMaxX() : clipBounds.getMaxX();
-        double maxY = vertical ? inputBounds.getMaxY() : clipBounds.getMaxY();
-        return new Rectangle2D.Double(x, y, Math.max(0, maxX - x), Math.max(0, maxY - y));
+        FloatInsets deviceSpaceExtend = new FloatInsets(vExtend, hExtend, vExtend, hExtend);
+        FloatInsets userSpaceExtend = userSpaceInsetsForDeviceSpaceInsets(
+                filterLayoutContext.inverseTransform(), deviceSpaceExtend);
+        saveConvolutionLayout(filterLayoutContext, edgeMode, userSpaceExtend, false);
     }
 
     @Override
@@ -277,7 +179,8 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
 
         // A normalized Gaussian kernel preserves a constant color if every sample needed by the
         // output region has that color.
-        Rectangle2D requiredInputRegion = constantInputRegion(filterContext, xRadius, yRadius);
+        FloatInsets samplingInsets = new FloatInsets(yRadius, xRadius, yRadius, xRadius);
+        Rectangle2D requiredInputRegion = constantInputRegion(filterContext, edgeMode, samplingInsets);
         if (inputChannel.isConstant()
                 && filterContext.channelOutputCovers(impl().inputChannelKey(), requiredInputRegion)) {
             impl().saveResult(inputChannel, filterContext);
@@ -299,29 +202,6 @@ public final class FeGaussianBlur extends AbstractFilterPrimitive {
             ImageUtil.mapPixels(output.getRaster(), ColorUtil::linearRGBtoSRGBPre);
         }
         impl().saveResult(new ImageProducerChannel(output.getSource()), filterContext);
-    }
-
-    private @NotNull Rectangle2D constantInputRegion(@NotNull FilterContext filterContext,
-            int horizontalRadius, int verticalRadius) {
-        Rectangle2D outputRegion = filterContext.primitiveRegion(impl());
-        if (edgeMode != EdgeMode.None) return outputRegion;
-
-        AffineTransform inverse = GeometryUtil.createInverse(filterContext.info().output().transform());
-        return GeometryUtil.grow(outputRegion,
-                userSpaceInsetsForDeviceSpaceRadii(inverse, horizontalRadius, verticalRadius));
-    }
-
-    /**
-     * Returns the user-space axis-aligned bounds of an axis-aligned device-space sampling radius.
-     */
-    private static @NotNull FloatInsets userSpaceInsetsForDeviceSpaceRadii(
-            @NotNull AffineTransform inverseTransform, float horizontalRadius, float verticalRadius) {
-        float horizontalUserRadius = (float) (Math.abs(inverseTransform.getScaleX()) * horizontalRadius
-                + Math.abs(inverseTransform.getShearX()) * verticalRadius);
-        float verticalUserRadius = (float) (Math.abs(inverseTransform.getShearY()) * horizontalRadius
-                + Math.abs(inverseTransform.getScaleY()) * verticalRadius);
-        return new FloatInsets(
-                verticalUserRadius, horizontalUserRadius, verticalUserRadius, horizontalUserRadius);
     }
 
     private static int convolutionRadius(double sigma, @Nullable Kernel kernel, int diameter,

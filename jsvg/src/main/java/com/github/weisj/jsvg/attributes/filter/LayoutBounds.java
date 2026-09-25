@@ -106,9 +106,12 @@ public final class LayoutBounds {
     }
 
     public @NotNull LayoutBounds grow(float horizontal, float vertical, @NotNull FilterLayoutContext context) {
+        return grow(new FloatInsets(vertical, horizontal, vertical, horizontal), context);
+    }
+
+    public @NotNull LayoutBounds grow(@NotNull FloatInsets growInsets, @NotNull FilterLayoutContext context) {
         if (tightSourceBounds.isEmpty()) return this;
         Rectangle2D clipBounds = context.clipBounds();
-        FloatInsets growInsets = new FloatInsets(vertical, horizontal, vertical, horizontal);
         Rectangle2D newBounds = GeometryUtil.grow(tightSourceBounds, growInsets);
         FloatInsets requiredInsets = GeometryUtil.sum(clipBoundsEscapeInsets, growInsets);
         FloatInsets ins = GeometryUtil.min(GeometryUtil.overhangInsets(clipBounds, newBounds), requiredInsets);

@@ -114,6 +114,7 @@ public final class NodeSupplier {
         constructorMap.put(FeBlend.TAG, () -> new FeBlend());
         constructorMap.put(FeColorMatrix.TAG, () -> new FeColorMatrix());
         constructorMap.put(FeComposite.TAG, () -> new FeComposite());
+        constructorMap.put(FeConvolveMatrix.TAG, () -> new FeConvolveMatrix());
         constructorMap.put(FeDiffuseLighting.TAG, () -> new FeDiffuseLighting());
         constructorMap.put(FeDisplacementMap.TAG, () -> new FeDisplacementMap());
         constructorMap.put(FeDistantLight.TAG, () -> new FeDistantLight());
@@ -148,7 +149,6 @@ public final class NodeSupplier {
     }
 
     private void populateDummyNodeConstructors() {
-        constructorMap.put("feConvolveMatrix", () -> new DummyFilterPrimitive("feConvolveMatrix"));
         constructorMap.put("feImage", () -> new DummyFilterPrimitive("feImage"));
         constructorMap.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
         constructorMap.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));

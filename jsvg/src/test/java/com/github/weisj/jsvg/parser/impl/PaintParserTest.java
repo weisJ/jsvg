@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.awt.*;
 import java.util.Collections;
 
+import com.github.weisj.jsvg.util.ColorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +52,7 @@ class PaintParserTest {
     }
 
     private static int clamp(float p) {
-        return Math.min(255, Math.max(0, (int) (p * 255)));
+        return ColorUtil.toRgbRange(p * 255);
     }
 
     private static @NotNull SVGPaint color(int r, int g, int b, float a) {
