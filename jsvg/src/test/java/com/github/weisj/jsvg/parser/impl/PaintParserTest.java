@@ -26,14 +26,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.awt.*;
 import java.util.Collections;
+import java.util.Map;
 
-import com.github.weisj.jsvg.util.ColorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.util.ColorUtil;
 
 class PaintParserTest {
 
@@ -45,6 +48,11 @@ class PaintParserTest {
 
     private static SVGPaint parsePaint(@NotNull String value) {
         return attributeNode.parser().parsePaint(value, attributeNode);
+    }
+
+    private static SVGPaint parseCssPaint(@NotNull String value) {
+        AttributeNode node = ParserTestUtil.createDummyAttributeNode(Map.of("fill", value));
+        return node.getPaint("fill", null, Inherited.NO, Animatable.NO);
     }
 
     private static @NotNull SVGPaint colorFromFloat(float r, float g, float b, float a) {
@@ -86,6 +94,33 @@ class PaintParserTest {
         assertEquals(colorFromFloat(0.1f, 0.2f, 0.3f, 0.12f), parsePaint("rgba(10% 20% 30% 12%)"));
         assertEquals(colorFromFloat(0.4f, 0.5f, 0.6f, 0.34f), parsePaint("rGba(40%,50%,60% 34%)"));
         assertEquals(colorFromFloat(0.7f, 0.8f, 0.9f, 0.56f), parsePaint("rgBa(70%,80% 90% 56%)"));
+    }
+
+    @Test
+    void testHslLiteral() {
+        SVGPaint lightGreen = color(128, 255, 128, 255);
+        SVGPaint translucentYellow = color(255, 255, 0, 128);
+
+        assertEquals(lightGreen, parsePaint("hsl(120, 100%, 75%)"));
+        assertEquals(lightGreen, parseCssPaint("hsl(120 100% 75%)"));
+        assertEquals(translucentYellow, parsePaint("hsla(60, 100%, 50%, 0.5)"));
+        assertEquals(translucentYellow, parseCssPaint("hsl(60 100% 50% / 50%)"));
+    }
+
+    @Test
+    void testHslHueUnitsAndClamping() {
+        SVGPaint green = color(0, 128, 0, 255);
+        assertEquals(green, parseCssPaint("hsl(120deg 100% 25%)"));
+        assertEquals(green, parseCssPaint("hsl(133.333333grad 100% 25%)"));
+        assertEquals(green, parseCssPaint("hsl(2.094395102rad 100% 25%)"));
+        assertEquals(green, parseCssPaint("hsl(0.333333333turn 200% 25%)"));
+        assertEquals(parseCssPaint("hsl(279 100% 25%)"), parseCssPaint("hsl(999 100% 25%)"));
+    }
+
+    @Test
+    void testInvalidHslLiteral() {
+        assertNull(parsePaint("hsl(120, 0.5, 0.5)"));
+        assertNull(parseCssPaint("hsl(120 50% 50% 50% 50%)"));
     }
 
     @Test

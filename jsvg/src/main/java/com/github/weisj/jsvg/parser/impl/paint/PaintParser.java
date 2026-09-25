@@ -32,6 +32,8 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.geometry.size.Angle;
+import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
 import com.github.weisj.jsvg.paint.SVGPaint;
@@ -50,30 +52,67 @@ public final class PaintParser {
     public static final @NotNull Color DEFAULT_COLOR = Color.BLACK;
     public static final @NotNull Color TRANSPARENT_BLACK = new Color(0, true);
 
-    // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
+    private final @NotNull AttributeParser attributeParser;
+
+    public PaintParser() {
+        this(AttributeParser.INSTANCE);
+    }
+
+    public PaintParser(@NotNull AttributeParser attributeParser) {
+        this.attributeParser = attributeParser;
+    }
+
     public @Nullable Color parseColor(@NotNull String value) {
         if (value.isEmpty()) return null;
         try {
             if (value.charAt(0) == '#') {
                 return parseHexColor(value.substring(1));
-            } else if (value.length() > 3 && value.substring(0, 3).equalsIgnoreCase("rgb")) {
-                boolean isRgba = value.length() > 4 && (value.charAt(3) == 'a' || value.charAt(3) == 'A');
-                int startIndex = isRgba ? 5 : 4;
-                String[] values = ParserUtil.parseStringList(
-                        value.substring(startIndex, value.length() - 1), SeparatorMode.COMMA_AND_WHITESPACE);
-                isRgba = isRgba && values.length >= 4;
+            }
+
+            String[] values = rgbAttributes(value);
+            if (values != null) {
+                boolean isRgba = values.length >= 4 && values[3] != null;
                 return new Color(
                         parseColorComponent(values[0], false),
                         parseColorComponent(values[1], false),
                         parseColorComponent(values[2], false),
                         isRgba ? parseColorComponent(values[3], true) : 255);
             }
+
+            values = hslAttributes(value);
+            if (values != null) {
+                return parseHslColor(values);
+            }
+
             return ColorLookup.colorMap().get(value.toLowerCase(Locale.ENGLISH));
         } catch (Exception e) {
             LOGGER.log(Logger.Level.INFO, e.getMessage(), e);
             return null;
         }
     }
+
+    private @Nullable String @Nullable [] rgbAttributes(@NotNull String value) {
+        boolean hasRgbPrefix = value.length() > 3 && value.substring(0, 3).equalsIgnoreCase("rgb");
+        if (!hasRgbPrefix) return null;
+        boolean isRgba = value.length() > 4 && (value.charAt(3) == 'a' || value.charAt(3) == 'A');
+        int startIndex = isRgba ? 5 : 4;
+        String[] values = ParserUtil.parseStringList(
+                value.substring(startIndex, value.length() - 1), SeparatorMode.COMMA_AND_WHITESPACE);
+        if (!isRgba && values.length >= 4) {
+            values[3] = null;
+        }
+        return values;
+    }
+
+    private @NotNull String @Nullable [] hslAttributes(@NotNull String value) {
+        boolean isHSLA = value.regionMatches(true, 0, "hsla(", 0, 5);
+        boolean isHSL = !isHSLA && value.regionMatches(true, 0, "hsl(", 0, 4);
+        if (!isHSL && !isHSLA) return null;
+        int startIndex = isHSLA ? 5 : 4;
+        String arguments = value.substring(startIndex, value.length() - 1).replace('/', ' ');
+        return ParserUtil.parseStringList(arguments, SeparatorMode.COMMA_AND_WHITESPACE);
+    }
+
 
     public @Nullable SVGPaint parsePaint(@Nullable String value) {
         if (value == null) return null;
@@ -152,19 +191,93 @@ public final class PaintParser {
 
     private @Nullable Color parseColorFunction(@NotNull ComponentValue.FunctionBlock function) {
         String name = function.name().toLowerCase(Locale.ENGLISH);
-        if (!"rgb".equals(name) && !"rgba".equals(name)) return null;
         List<ComponentValue> components = new ArrayList<>();
         for (ComponentValue value : function.value()) {
-            if (value == Token.Static.WHITESPACE || value == Token.Static.COMMA) continue;
+            if (value == Token.Static.WHITESPACE || value == Token.Static.COMMA || value.isSlash()) continue;
             components.add(value);
         }
-        if (components.size() < 3) return null;
-        int alpha = components.size() >= 4 ? colorComponent(components.get(3), true) : 255;
-        return new Color(
-                colorComponent(components.get(0), false),
-                colorComponent(components.get(1), false),
-                colorComponent(components.get(2), false),
-                alpha);
+        if ("rgb".equals(name) || "rgba".equals(name)) {
+            if (components.size() < 3) return null;
+            int alpha = components.size() >= 4 ? colorComponent(components.get(3), true) : 255;
+            return new Color(
+                    colorComponent(components.get(0), false),
+                    colorComponent(components.get(1), false),
+                    colorComponent(components.get(2), false),
+                    alpha);
+        }
+        if ("hsl".equals(name) || "hsla".equals(name)) {
+            return parseHslColor(components);
+        }
+        return null;
+    }
+
+    private @Nullable Color parseHslColor(@NotNull String @NotNull [] components) {
+        if (components.length < 3 || components.length > 4) return null;
+        double hue = parseHue(components[0]);
+        double saturation = parseHslPercentage(components[1]);
+        double lightness = parseHslPercentage(components[2]);
+        double alpha = components.length == 4 ? parseAlpha(components[3]) : 1;
+        return hslColor(hue, saturation, lightness, alpha);
+    }
+
+    private @Nullable Color parseHslColor(@NotNull List<@NotNull ComponentValue> components) {
+        if (components.size() < 3 || components.size() > 4) return null;
+        double hue = parseHue(components.get(0));
+        double saturation = parseHslPercentage(components.get(1));
+        double lightness = parseHslPercentage(components.get(2));
+        double alpha = components.size() == 4 ? parseAlpha(components.get(3)) : 1;
+        return hslColor(hue, saturation, lightness, alpha);
+    }
+
+    private static @Nullable Color hslColor(double hueDegrees, double saturation, double lightness, double alpha) {
+        if (!Double.isFinite(hueDegrees) || !Double.isFinite(saturation)
+                || !Double.isFinite(lightness) || !Double.isFinite(alpha)) {
+            return null;
+        }
+        return ColorUtil.fromHsl(hueDegrees, saturation, lightness, alpha);
+    }
+
+    private double parseHue(@NotNull ComponentValue component) {
+        if (isNone(component)) return 0;
+        Angle angle = attributeParser.parseAngle(Collections.singletonList(component), Angle.UNSPECIFIED);
+        return angle.isSpecified() ? Math.toDegrees(angle.radians()) : Double.NaN;
+    }
+
+    private double parseHslPercentage(@NotNull ComponentValue component) {
+        if (isNone(component)) return 0;
+        if (!(component instanceof Token.Percentage)) return Double.NaN;
+        Percentage percentage = attributeParser.parsePercentage(Collections.singletonList(component), null);
+        return percentage != null ? percentage.value() : Double.NaN;
+    }
+
+    private double parseAlpha(@NotNull ComponentValue component) {
+        if (isNone(component)) return 0;
+        if (!(component instanceof Token.Percentage) && !(component instanceof Token.Number)) return Double.NaN;
+        Percentage alpha = attributeParser.parsePercentage(Collections.singletonList(component), null);
+        return alpha != null ? alpha.value() : Double.NaN;
+    }
+
+    private static boolean isNone(@NotNull ComponentValue component) {
+        return component.isOneOfKeywords("none");
+    }
+
+    private double parseHue(@NotNull String component) {
+        if ("none".equalsIgnoreCase(component)) return 0;
+        Angle angle = attributeParser.parseAngle(component, Angle.UNSPECIFIED);
+        return angle.isSpecified() ? Math.toDegrees(angle.radians()) : Double.NaN;
+    }
+
+    private double parseHslPercentage(@NotNull String component) {
+        if ("none".equalsIgnoreCase(component)) return 0;
+        if (!component.endsWith("%")) return Double.NaN;
+        Percentage percentage = attributeParser.parsePercentage(component, null);
+        return percentage != null ? percentage.value() : Double.NaN;
+    }
+
+    private double parseAlpha(@NotNull String component) {
+        if ("none".equalsIgnoreCase(component)) return 0;
+        Percentage alpha = attributeParser.parsePercentage(component, null);
+        return alpha != null ? alpha.value() : Double.NaN;
     }
 
     private int colorComponent(@NotNull ComponentValue token, boolean alpha) {
@@ -179,7 +292,7 @@ public final class PaintParser {
     }
 
     private static int clampComponent(double value) {
-        return Math.min(255, Math.max(0, (int) value));
+        return ColorUtil.toRgbRange(value);
     }
 
     private int parseColorComponent(String value, boolean percentage) {
@@ -192,7 +305,7 @@ public final class PaintParser {
             parsed = ParserUtil.parseFloat(value, 0);
             if (percentage) parsed *= 255;
         }
-        return ColorUtil.clampColor((int) parsed);
+        return ColorUtil.toRgbRange(parsed);
     }
 
     private int parseHex(char[] chars) {

@@ -60,11 +60,18 @@ import com.github.weisj.jsvg.renderer.CssHints;
 public final class AttributeParser {
 
     public static final @NotNull AttributeParser INSTANCE =
-            new AttributeParser(new PaintParser(), new FullCssParser());
+            new AttributeParser(new FullCssParser());
 
     private static final Logger LOGGER = LogFactory.createLogger(AttributeParser.class);
     private final @NotNull PaintParser paintParser;
     private final @NotNull CssParser cssParser;
+
+    private AttributeParser(@NotNull CssParser cssParser) {
+        this.cssParser = cssParser;
+        // Paint parsing delegates units and percentages back to this parser, so wire the pair only
+        // after this AttributeParser exists instead of reading INSTANCE during its initialization.
+        this.paintParser = new PaintParser(this);
+    }
 
     AttributeParser(@NotNull PaintParser paintParser, @NotNull CssParser cssParser) {
         this.paintParser = paintParser;
