@@ -32,9 +32,11 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeSourceBounds;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
 import com.github.weisj.jsvg.geometry.util.GeometryUtil;
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
@@ -63,7 +65,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
 
     private float surfaceScale;
     private float diffuseConstant;
-    private Color lightingColor;
+    private ColorValue lightingColor;
     private double @Nullable [] kernelUnitLength;
     private @Nullable LightSource lightSource;
 
@@ -78,7 +80,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
 
         surfaceScale = attributeNode.getFloat("surfaceScale", 1);
         diffuseConstant = attributeNode.getNonNegativeFloat("diffuseConstant", 1);
-        lightingColor = attributeNode.getColor("lighting-color", Color.WHITE);
+        lightingColor = attributeNode.getColorValue("lighting-color", Color.WHITE, Animatable.YES);
 
         double[] values = attributeNode.getDoubleList("kernelUnitLength");
         if ((values.length == 1 || values.length == 2) && values[0] > 0
@@ -150,8 +152,9 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
         Rectangle2D inputRegion = GeometryUtil.transformBounds(
                 primitiveToImage, filterContext.layout(impl().inputChannelKey()).sourceBounds()).getBounds2D();
         filterContext.primitiveUnits().applyToTransform(primitiveToImage, filterContext.info().elementBounds());
-        ImageFilter lightingFilter = new BufferedImageFilter(
-                new DiffuseLightingOp(lightSource, primitiveToImage, inputRegion, colorInterpolation(filterContext)));
+        Color computedLightColor = lightingColor.get(context.measureContext());
+        ImageFilter lightingFilter = new BufferedImageFilter(new DiffuseLightingOp(lightSource, computedLightColor,
+                primitiveToImage, inputRegion, colorInterpolation(filterContext)));
         impl().saveResult(impl().inputChannel(filterContext).applyFilter(lightingFilter), filterContext);
     }
 
@@ -165,8 +168,10 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
         private final double normalScaleY;
         private final @NotNull Rectangle2D inputRegion;
         private final @Nullable ColorInterpolation colorInterpolation;
+        private final @NotNull Color computedLightColor;
 
-        private DiffuseLightingOp(@NotNull LightSource lightSource, @NotNull AffineTransform primitiveToImage,
+        private DiffuseLightingOp(@NotNull LightSource lightSource, @NotNull Color computedLightColor,
+                @NotNull AffineTransform primitiveToImage,
                 @NotNull Rectangle2D inputRegion, @Nullable ColorInterpolation colorInterpolation) {
             this.lightSource = lightSource;
             this.inputRegion = inputRegion;
@@ -179,6 +184,7 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             normalScaleX = -surfaceScale * scaleX / sampleStep.x;
             normalScaleY = -surfaceScale * scaleY / sampleStep.y;
             this.colorInterpolation = colorInterpolation;
+            this.computedLightColor = computedLightColor;
         }
 
         @Override
@@ -210,7 +216,8 @@ public final class FeDiffuseLighting extends AbstractFilterPrimitive implements 
             WritableRaster raster = result.getRaster();
             int w = raster.getWidth();
             int h = raster.getHeight();
-            int[] lightColor = {lightingColor.getRed(), lightingColor.getGreen(), lightingColor.getBlue(), 255};
+            int[] lightColor =
+                    {computedLightColor.getRed(), computedLightColor.getGreen(), computedLightColor.getBlue(), 255};
             boolean linearRGB = colorInterpolation != ColorInterpolation.S_RGB;
             if (linearRGB) ColorUtil.sRGBtoLinearRGBinPlace(lightColor);
 
