@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-package com.github.weisj.jsvg.util;
+package com.github.weisj.jsvg.parser.impl;
 
 import static com.github.weisj.jsvg.parser.impl.AnimationHelper.animatedLength;
 
@@ -35,7 +35,6 @@ import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.value.LengthValue;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 public final class AttributeUtil {
     private AttributeUtil() {}

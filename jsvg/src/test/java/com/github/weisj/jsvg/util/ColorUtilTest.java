@@ -23,6 +23,8 @@ package com.github.weisj.jsvg.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.awt.Color;
+
 import org.junit.jupiter.api.Test;
 
 class ColorUtilTest {
@@ -38,5 +40,13 @@ class ColorUtilTest {
     void unpremultipliesPackedArgb() {
         assertEquals(0x80804020, ColorUtil.unpremultiply(0x80402010));
         assertEquals(0xff123456, ColorUtil.unpremultiply(0xff123456));
+    }
+
+    @Test
+    void createsColorFromHslComponents() {
+        assertEquals(new Color(128, 255, 128), ColorUtil.fromHsl(120, 1, 0.75, 1));
+        assertEquals(new Color(0, 128, 0), ColorUtil.fromHsl(120, 2, 0.25, 1));
+        assertEquals(ColorUtil.fromHsl(279, 1, 0.25, 1), ColorUtil.fromHsl(999, 1, 0.25, 1));
+        assertEquals(new Color(255, 255, 0, 128), ColorUtil.fromHsl(60, 1, 0.5, 0.5));
     }
 }

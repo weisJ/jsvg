@@ -26,6 +26,12 @@ import java.awt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.value.AnimatedColor;
+import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
+import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
+import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.path.BezierPathCommand;
 import com.github.weisj.jsvg.geometry.path.PathParser;
 import com.github.weisj.jsvg.geometry.size.Percentage;
@@ -34,8 +40,12 @@ import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.util.ColorUtil;
+import com.github.weisj.jsvg.view.FloatSize;
 
 @ElementCategories(Category.Gradient)
 @PermittedContent(
@@ -43,8 +53,11 @@ import com.github.weisj.jsvg.util.ColorUtil;
 )
 public final class Stop extends AbstractSVGNode {
     public static final String TAG = "stop";
+    private static final MeasureContext INITIAL_MEASURE_CONTEXT =
+            MeasureContext.createInitial(new FloatSize(0, 0), 0, 0, AnimationState.NO_ANIMATION);
 
-    private @NotNull Color color = Color.BLACK;
+    private @NotNull ColorValue color = RGBColor.DEFAULT;
+    private @NotNull PercentageValue opacity = Percentage.ONE;
     private Percentage offset;
     private @Nullable BezierPathCommand path;
 
@@ -53,8 +66,19 @@ public final class Stop extends AbstractSVGNode {
         return TAG;
     }
 
+    public @NotNull Color color(@NotNull MeasureContext context) {
+        Color resolved = color.get(context);
+        float combinedAlpha = resolved.getAlpha() / 255f * opacity.get(context);
+        return ColorUtil.withAlpha(resolved, combinedAlpha);
+    }
+
+    /** The unanimated color, retained for mesh gradients and API compatibility. */
     public @NotNull Color color() {
-        return color;
+        return color(INITIAL_MEASURE_CONTEXT);
+    }
+
+    public boolean hasAnimatedColor() {
+        return color instanceof AnimatedColor || opacity instanceof AnimatedPercentage;
     }
 
     public @NotNull Percentage offset() {
@@ -66,12 +90,11 @@ public final class Stop extends AbstractSVGNode {
     }
 
     @Override
-    @SuppressWarnings("javabugs:S2259") // getColor supplies the non-null default color.
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        Color c = attributeNode.getColor("stop-color");
-        float opacity = attributeNode.getPercentage("stop-opacity", new Percentage(c.getAlpha() / 255f)).value();
-        color = ColorUtil.withAlpha(c, opacity);
+        color = attributeNode.getColorValue("stop-color", Color.BLACK, Animatable.YES);
+        opacity = attributeNode.getPercentage("stop-opacity", Percentage.ONE,
+                Inherited.NO, Animatable.YES);
         offset = attributeNode.getPercentage("offset", Percentage.ZERO);
         String pathData = attributeNode.getValue("path");
         path = pathData != null ? new PathParser(pathData).parseMeshCommand() : null;

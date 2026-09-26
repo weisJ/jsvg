@@ -30,8 +30,8 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeParser;
+import com.github.weisj.jsvg.parser.impl.AttributeUtil;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
-import com.github.weisj.jsvg.util.AttributeUtil;
 
 public final class PaintOrder {
 

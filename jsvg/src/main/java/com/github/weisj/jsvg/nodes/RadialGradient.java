@@ -116,7 +116,6 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
                 ", fr=" + fr +
                 ", fx=" + fx +
                 ", fy=" + fy +
-                ", colors=" + Arrays.toString(colors()) +
                 ", offsets=" + Arrays.toString(offsets()) +
                 '}';
     }

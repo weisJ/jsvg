@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -68,7 +68,12 @@ public final class AnimatedColor implements SVGPaint, ColorValue {
             c = RGBColor.DEFAULT;
         }
         if (c == null) return this;
-        return new AnimatedColor(track, c, values);
+        return derive(c);
+    }
+
+    public @NotNull AnimatedColor derive(@NotNull ColorValue value) {
+        if (this.initial != RGBColor.INHERITED) return this;
+        return new AnimatedColor(track, value, values);
     }
 
     @Override

@@ -48,17 +48,18 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     protected UnitType gradientUnits;
     protected SpreadMethod spreadMethod;
 
-    private @NotNull Color[] colors;
+    private @NotNull Stop[] stops;
     private Percentage[] offsets;
 
+    private Color[] tmpColors;
     private float[] tmpFractions;
 
     public final Percentage[] offsets() {
         return offsets;
     }
 
-    public final @NotNull Color[] colors() {
-        return colors;
+    private @NotNull Stop[] stops() {
+        return stops;
     }
 
     @Override
@@ -77,12 +78,12 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
             gradientTransform = template.gradientTransform;
 
 
-        List<Stop> stops = childrenOfType(Stop.class);
-        if (stops.isEmpty() && template != null) {
-            colors = template.colors();
+        List<Stop> stopsList = childrenOfType(Stop.class);
+        if (stopsList.isEmpty() && template != null) {
+            stops = template.stops();
             offsets = template.offsets();
         } else {
-            parseStops(stops);
+            parseStops(stopsList);
         }
 
         // noinspection unchecked
@@ -91,51 +92,44 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         children().clear();
     }
 
-    private void parseStops(@NotNull List<Stop> stops) {
-        List<Color> colorsList = new ArrayList<>();
+    private void parseStops(@NotNull List<Stop> stopsList) {
+        List<Stop> newStopsList = new ArrayList<>();
         List<Percentage> offsetsList = new ArrayList<>();
 
-        boolean realGradient = false;
         float previousOffset = 0;
-        for (Stop stop : stops) {
+        for (Stop stop : stopsList) {
             // Preserve document order and clamp decreasing offsets to the preceding offset.
             float stopOffset = Math.max(previousOffset, Math.min(1, stop.offset().value()));
             previousOffset = stopOffset;
-            Color stopColor = stop.color();
 
             boolean isFirstStop = offsetsList.isEmpty();
             boolean effectiveStop = isFirstStop
-                    || isEffectiveStop(stopOffset, stopColor, offsetsList, colorsList);
-            realGradient |= !isFirstStop && effectiveStop;
+                    || stopOffset > offsetsList.get(offsetsList.size() - 1).value()
+                    || stop.hasAnimatedColor()
+                    || newStopsList.get(newStopsList.size() - 1).hasAnimatedColor()
+                    || !stop.color().equals(newStopsList.get(newStopsList.size() - 1).color());
 
             if (isFirstStop && stopOffset != 0) {
                 // If the first stop is not at 0, we need to extend its color to the beginning.
                 offsetsList.add(Percentage.ZERO);
-                colorsList.add(stopColor);
+                newStopsList.add(stop);
             }
 
             if (effectiveStop) {
                 offsetsList.add(new Percentage(stopOffset));
-                colorsList.add(stopColor);
+                newStopsList.add(stop);
             }
         }
 
         if (!offsetsList.isEmpty() && offsetsList.get(offsetsList.size() - 1).value() != 1f) {
             // If the last stop is not at 1, we need to extend its color to the end.
             offsetsList.add(Percentage.ONE);
-            colorsList.add(colorsList.get(colorsList.size() - 1));
+            newStopsList.add(newStopsList.get(newStopsList.size() - 1));
         }
 
-        if (!realGradient && !colorsList.isEmpty()) {
-            // If all stops are equal, we can just use the first color.
-            // This never gets passed to the radial gradient hence we don't need to provide a second stop.
-            colors = new Color[] {colorsList.get(0)};
-            offsets = new Percentage[] {Percentage.ZERO};
-        } else {
-            colors = colorsList.toArray(new Color[0]);
-            offsets = offsetsList.toArray(new Percentage[0]);
-            makeStrictlyIncreasing(offsets);
-        }
+        stops = newStopsList.toArray(new Stop[0]);
+        offsets = offsetsList.toArray(new Percentage[0]);
+        makeStrictlyIncreasing(offsets);
     }
 
     private static void makeStrictlyIncreasing(@NotNull Percentage @NotNull [] offsets) {
@@ -164,13 +158,6 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
         }
     }
 
-    private static boolean isEffectiveStop(float stopOffset, @NotNull Color stopColor,
-            @NotNull List<@NotNull Percentage> offsetsList,
-            @NotNull List<@NotNull Color> colorsList) {
-        return stopOffset > offsetsList.get(offsetsList.size() - 1).value()
-                || !stopColor.equals(colorsList.get(colorsList.size() - 1));
-    }
-
     private @Nullable AbstractGradient<?> parseTemplate(@NotNull AttributeNode attributeNode) {
         AbstractGradient<?> template = attributeNode.getElementByHref(AbstractGradient.class, attributeNode.getHref(),
                 ElementRelation.TEMPLATE);
@@ -183,7 +170,7 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setPaint(() -> paintForBounds(context.measureContext(), b));
+        output.setPaint(() -> paintForBounds(context, b));
         output.fillShape(shape);
     }
 
@@ -191,15 +178,35 @@ abstract class AbstractGradient<Self extends AbstractGradient<Self>> extends Con
     public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
         Rectangle2D b = bounds != null ? bounds : shape.getBounds2D();
-        output.setPaint(() -> paintForBounds(context.measureContext(), b));
+        output.setPaint(() -> paintForBounds(context, b));
         output.drawShape(shape);
     }
 
-    private @NotNull Paint paintForBounds(@NotNull MeasureContext context, @NotNull Rectangle2D bounds) {
-        Color[] gradColors = colors();
+    private @NotNull Paint paintForBounds(@NotNull RenderContext context, @NotNull Rectangle2D bounds) {
+        Color[] gradColors = resolveColors(context.measureContext());
         if (gradColors.length == 0) return new Color(0, true);
-        if (gradColors.length == 1) return gradColors[0];
-        return gradientForBounds(gradientUnits.deriveMeasure(context), bounds, offsets(), gradColors);
+        if (allColorsEqual(gradColors)) return gradColors[0];
+        return gradientForBounds(gradientUnits.deriveMeasure(context.measureContext()), bounds, offsets(), gradColors);
+    }
+
+    private @NotNull Color[] resolveColors(@NotNull MeasureContext context) {
+        Color[] colors = tmpColors != null && tmpColors.length == stops.length
+                ? tmpColors
+                : new Color[stops.length];
+        for (int i = 0; i < stops.length; i++) {
+            colors[i] = stops[i].color(context);
+        }
+        tmpColors = colors;
+        return colors;
+    }
+
+    private static boolean allColorsEqual(@NotNull Color[] colors) {
+        if (colors.length <= 1) return true;
+        Color first = colors[0];
+        for (int i = 1; i < colors.length; i++) {
+            if (!first.equals(colors[i])) return false;
+        }
+        return true;
     }
 
     protected float[] offsetsToFractions(Percentage[] gradOffsets) {

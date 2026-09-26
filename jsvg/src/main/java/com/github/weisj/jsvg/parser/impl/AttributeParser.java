@@ -21,7 +21,7 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
-import static com.github.weisj.jsvg.util.AttributeUtil.toNonnullArray;
+import static com.github.weisj.jsvg.parser.impl.AttributeUtil.toNonnullArray;
 
 import java.awt.Color;
 import java.util.ArrayList;

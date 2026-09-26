@@ -39,10 +39,10 @@ import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.TextContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.AttributeUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.output.Output;
-import com.github.weisj.jsvg.util.AttributeUtil;
 
 @ElementCategories({Category.Graphic, Category.TextContent})
 @PermittedContent(

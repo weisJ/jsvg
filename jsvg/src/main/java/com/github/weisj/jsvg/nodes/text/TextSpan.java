@@ -36,10 +36,10 @@ import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.TextContent;
+import com.github.weisj.jsvg.parser.impl.AttributeUtil;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
-import com.github.weisj.jsvg.util.AttributeUtil;
 
 @ElementCategories({Category.TextContent, Category.TextContentChild})
 @PermittedContent(
