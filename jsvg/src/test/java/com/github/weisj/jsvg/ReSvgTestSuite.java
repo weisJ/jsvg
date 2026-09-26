@@ -282,9 +282,6 @@ class ReSvgTestSuite {
         return checkDirectory("filters/feDiffuseLighting", Set.of(
                 "complex-transform.svg",
                 "diffuseConstant=-1.svg",
-                "lighting-color=currentColor-without-color.svg",
-                "lighting-color=currentColor.svg",
-                "lighting-color=hsla.svg",
                 "lighting-color=inherit.svg",
                 "linearRGB-color-interpolation.svg",
                 "multiple-light-sources.svg",
@@ -517,9 +514,7 @@ class ReSvgTestSuite {
 
     @TestFactory
     Collection<DynamicTest> filters_flood_color() {
-        return checkDirectory("filters/flood-color", Set.of(
-                "hsla-color.svg",
-                "inheritance-3.svg"));
+        return checkDirectory("filters/flood-color");
     }
 
     @TestFactory
@@ -696,12 +691,6 @@ class ReSvgTestSuite {
     Collection<DynamicTest> painting_fill() {
         return checkDirectory("painting/fill", Set.of(
                 "currentColor-without-parent.svg",
-                "hsl-120-100percent-25percent.svg",
-                "hsl-120-200percent-25percent.svg",
-                "hsl-360-100percent-25percent.svg",
-                "hsl-999-100percent-25percent.svg",
-                "hsl-with-alpha.svg",
-                "hsla-with-percentage-s-and-l-values.svg",
                 "invalid-FuncIRI-with-a-currentColor-fallback.svg",
                 "invalid-FuncIRI-with-a-fallback-color.svg",
                 "none.svg",

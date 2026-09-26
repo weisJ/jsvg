@@ -147,7 +147,6 @@ class W3cSvg11TestSuite {
     Collection<DynamicTest> color() throws IOException {
         return checkCategory("color", Set.of(
                 "color-prof-01-f.svg",
-                "color-prop-01-b.svg",
                 "color-prop-04-t.svg",
                 "color-prop-05-t.svg"));
     }
@@ -176,7 +175,6 @@ class W3cSvg11TestSuite {
                 "filters-background-01-f.svg",
                 "filters-blend-01-b.svg",
                 "filters-composite-02-b.svg",
-                "filters-composite-03-f.svg",
                 "filters-composite-04-f.svg",
                 "filters-conv-01-f.svg",
                 "filters-conv-02-f.svg",
