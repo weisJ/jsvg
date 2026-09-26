@@ -34,6 +34,7 @@ import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.attributes.stroke.StrokeResolver;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
 import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
@@ -159,7 +160,19 @@ public final class RenderContext {
 
             @Override
             public @Nullable Color resolveColor(@NotNull RenderContext context, @Nullable SVGPaint paint) {
-                return context.resolveColor(paint);
+                return PaintResolver.resolveColor(paint,
+                        context.paintContext, context.contextElementAttributes, context.measureContext);
+            }
+
+            @Override
+            public @Nullable Color resolveColor(@NotNull RenderContext context, @Nullable ColorValue colorValue) {
+                return PaintResolver.resolveColor(colorValue != null ? colorValue.asSVGPaint() : null,
+                        context.paintContext, context.contextElementAttributes, context.measureContext);
+            }
+
+            @Override
+            public @NotNull SVGPaint resolvePaint(@NotNull RenderContext context, @Nullable SVGPaint paint) {
+                return PaintResolver.resolvePaint(paint, context.paintContext, context.contextElementAttributes);
             }
 
             @Override
@@ -390,10 +403,6 @@ public final class RenderContext {
 
     private @NotNull String defaultFontFamily() {
         return environment.defaultFontFamily;
-    }
-
-    private @Nullable Color resolveColor(@Nullable SVGPaint paint) {
-        return PaintResolver.resolveColor(paint, paintContext, contextElementAttributes, measureContext);
     }
 
     private @NotNull FillRule fillRule() {

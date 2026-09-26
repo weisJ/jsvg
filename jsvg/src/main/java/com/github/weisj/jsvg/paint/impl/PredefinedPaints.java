@@ -30,7 +30,6 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 public final class PredefinedPaints {
     public static final @NotNull AwtSVGPaint DEFAULT_PAINT = new AwtSVGPaint(Color.BLACK);
     public static final @NotNull SVGPaint NONE = new NonePaint();
-    public static final @NotNull SVGPaint CURRENT_COLOR = new SentinelPaint("currentColor");
     public static final @NotNull SVGPaint CONTEXT_FILL = new SentinelPaint("contextFill");
     public static final @NotNull SVGPaint CONTEXT_STROKE = new SentinelPaint("contextStroke");
     public static final @NotNull SVGPaint INHERITED = new SentinelPaint("inherited");

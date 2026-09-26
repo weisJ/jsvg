@@ -234,10 +234,10 @@ public final class Filter extends ContainerNode {
 
     private static @NotNull Channel createPaintChannel(@NotNull SVGPaint paint, float opacity,
             @NotNull RenderContext context, @NotNull FilterInfo filterInfo) {
-        Color color = RenderContextAccessor.instance().resolveColor(context, paint);
         if (!paint.isVisible(context) || opacity <= 0) {
             return ConstantColorChannel.infinite(filterInfo.imageWidth, filterInfo.imageHeight, 0);
         }
+        Color color = RenderContextAccessor.instance().resolveColor(context, paint);
         if (color != null) {
             int alpha = Math.round(color.getAlpha() * opacity);
             int argb = (alpha << 24) | (color.getRGB() & 0xffffff);

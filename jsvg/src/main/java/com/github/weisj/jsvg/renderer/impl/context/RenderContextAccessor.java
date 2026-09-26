@@ -31,6 +31,7 @@ import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.PaintOrder;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.renderer.FontLoader;
@@ -94,6 +95,12 @@ public final class RenderContextAccessor {
 
         @Nullable
         Color resolveColor(@NotNull RenderContext context, @Nullable SVGPaint paint);
+
+        @Nullable
+        Color resolveColor(@NotNull RenderContext context, @Nullable ColorValue colorValue);
+
+        @NotNull
+        SVGPaint resolvePaint(@NotNull RenderContext context, @Nullable SVGPaint paint);
 
         void setTransforms(@NotNull RenderContext context, @NotNull AffineTransform rootTransform);
 

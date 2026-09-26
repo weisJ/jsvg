@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg.util;
 
+import static com.github.weisj.jsvg.parser.impl.AnimationHelper.animatedLength;
+
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -84,9 +86,9 @@ public final class AttributeUtil {
             // First try if either is specified through animation.
             // Then fallback to the other if not.
             rx = notNullOrElse(
-                    node.getAnimatedLength(xAttr, fallback, PercentageDimension.WIDTH), initialRx);
+                    animatedLength(node, xAttr, fallback, PercentageDimension.WIDTH), initialRx);
             ry = notNullOrElse(
-                    node.getAnimatedLength(yAttr, fallback, PercentageDimension.HEIGHT), initialRy);
+                    animatedLength(node, yAttr, fallback, PercentageDimension.HEIGHT), initialRy);
             if (rx == Length.UNSPECIFIED) {
                 rx = ry;
             } else if (ry == Length.UNSPECIFIED) {
@@ -96,22 +98,22 @@ public final class AttributeUtil {
             // rx is unspecified, but ry is specified.
             // Use ry as value for rx.
             ry = notNullOrElse(
-                    node.getAnimatedLength(yAttr, initialRy, PercentageDimension.HEIGHT), initialRy);
+                    animatedLength(node, yAttr, initialRy, PercentageDimension.HEIGHT), initialRy);
             rx = notNullOrElse(
-                    node.getAnimatedLength(xAttr, ry, PercentageDimension.WIDTH), ry);
+                    animatedLength(node, xAttr, ry, PercentageDimension.WIDTH), ry);
         } else if (initialRy == Length.UNSPECIFIED) {
             // ry is unspecified, but rx is specified.
             // Use rx as value for ry.
             rx = notNullOrElse(
-                    node.getAnimatedLength(xAttr, initialRx, PercentageDimension.WIDTH), initialRx);
+                    animatedLength(node, xAttr, initialRx, PercentageDimension.WIDTH), initialRx);
             ry = notNullOrElse(
-                    node.getAnimatedLength(yAttr, rx, PercentageDimension.HEIGHT), rx);
+                    animatedLength(node, yAttr, rx, PercentageDimension.HEIGHT), rx);
         } else {
             // Both rx and ry are specified.
             rx = notNullOrElse(
-                    node.getAnimatedLength(xAttr, initialRx, PercentageDimension.WIDTH), initialRx);
+                    animatedLength(node, xAttr, initialRx, PercentageDimension.WIDTH), initialRx);
             ry = notNullOrElse(
-                    node.getAnimatedLength(yAttr, initialRy, PercentageDimension.HEIGHT), initialRy);
+                    animatedLength(node, yAttr, initialRy, PercentageDimension.HEIGHT), initialRy);
         }
 
         if (rx == Length.UNSPECIFIED) rx = fallback;

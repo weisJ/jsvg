@@ -43,7 +43,15 @@ import com.github.weisj.jsvg.ImageComparison.CompareInfo;
 import com.github.weisj.jsvg.ImageComparison.ImageSource.MemoryImageSource;
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.ImageComparison.RenderType;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
+import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.renderer.impl.PaintResolver;
+import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
+import com.github.weisj.jsvg.view.FloatSize;
 
 class PaintsTest {
     @TempDir
@@ -52,6 +60,41 @@ class PaintsTest {
     @Test
     void testCurrentColor() {
         assertEquals(SUCCESS, compareImages("paint/currentColor.svg"));
+    }
+
+    @Test
+    void colorValuePaintIsEvaluatedAtRenderTime() {
+        ColorValue value = context -> context.timestamp() == 10 ? Color.RED : Color.BLUE;
+        SVGPaint paint = value.asSVGPaint();
+        PaintContext paintContext = PaintContext.createDefault(PredefinedPaints.DEFAULT_PAINT);
+
+        MeasureContext atTen = MeasureContext.createInitial(
+                new FloatSize(1, 1), 16, 8, new AnimationState(0, 10));
+        MeasureContext atTwenty = MeasureContext.createInitial(
+                new FloatSize(1, 1), 16, 8, new AnimationState(0, 20));
+
+        assertEquals(Color.RED, PaintResolver.resolveColor(paint, paintContext, null, atTen));
+        assertEquals(Color.BLUE, PaintResolver.resolveColor(paint, paintContext, null, atTwenty));
+    }
+
+    @Test
+    void animatedPaintKeepsCurrentColorAsItsInitialValue() {
+        var source = new MemoryImageSource("animated-current-color-initial", """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+                  <rect width="500" height="500" color="red" fill="currentColor">
+                    <animate attributeName="fill" from="blue" to="green" begin="1s" dur="1s"/>
+                  </rect>
+                </svg>
+                """);
+        var reference = new MemoryImageSource("red", """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+                  <rect width="500" height="500" fill="red"/>
+                </svg>
+                """);
+
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(reference, RenderType.JSVG),
+                actual(source, RenderType.JSVG.withAnimationState(AnimationState.NO_ANIMATION)), 0, 0)));
     }
 
     @Test

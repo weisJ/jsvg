@@ -5,8 +5,8 @@
 			<feFlood flood-color="currentColor" flood-opacity="0.5" />
 		</filter>
 	</defs>
-	<!-- One filter is reused with a different render-context color for each 
-		shape. -->
+	<!-- The filter keeps its definition-tree color when reused by shapes with 
+		different colors. -->
 	<rect x="10" y="10" width="30" height="40" fill="red"
 		filter="url(#flood)" />
 	<rect x="60" y="10" width="30" height="40" color="#339966"

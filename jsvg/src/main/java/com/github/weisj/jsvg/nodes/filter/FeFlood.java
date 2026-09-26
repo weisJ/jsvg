@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
 import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.animation.Animate;
@@ -36,7 +37,6 @@ import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
-import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
@@ -48,7 +48,7 @@ import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 public final class FeFlood extends AbstractFilterPrimitive {
     public static final String TAG = "feflood";
 
-    private SVGPaint floodColor;
+    private ColorValue floodColor;
     private PercentageValue floodOpacity;
 
     @Override
@@ -59,7 +59,7 @@ public final class FeFlood extends AbstractFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        floodColor = attributeNode.getColor("flood-color", Color.BLACK, Animatable.YES);
+        floodColor = attributeNode.getColorValue("flood-color", Color.BLACK, Animatable.YES);
         floodOpacity = attributeNode.getPercentage("flood-opacity", Percentage.ONE,
                 Inherited.NO, Animatable.YES);
     }

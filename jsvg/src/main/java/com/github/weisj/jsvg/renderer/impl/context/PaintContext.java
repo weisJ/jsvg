@@ -22,12 +22,9 @@
 package com.github.weisj.jsvg.renderer.impl.context;
 
 
-import java.awt.*;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.animation.value.AnimatedColor;
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.FillRule;
 import com.github.weisj.jsvg.attributes.Inherited;
@@ -36,9 +33,8 @@ import com.github.weisj.jsvg.attributes.value.PercentageValue;
 import com.github.weisj.jsvg.geometry.size.Percentage;
 import com.github.weisj.jsvg.nodes.prototype.Mutator;
 import com.github.weisj.jsvg.paint.SVGPaint;
-import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.ColorPropertyPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
-import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 
 public final class PaintContext implements Mutator<PaintContext> {
@@ -84,7 +80,7 @@ public final class PaintContext implements Mutator<PaintContext> {
 
     public static @NotNull PaintContext parse(@NotNull AttributeNode attributeNode) {
         return new PaintContext(
-                parseColorAttribute(attributeNode),
+                attributeNode.getColorProperty(Animatable.YES),
                 attributeNode.getPaint("fill", Inherited.YES, Animatable.YES),
                 attributeNode.getPercentage("fill-opacity", Inherited.YES, Animatable.YES),
                 attributeNode.getPaint("stroke", Inherited.YES, Animatable.YES),
@@ -95,17 +91,9 @@ public final class PaintContext implements Mutator<PaintContext> {
                 FillRule.parse(attributeNode));
     }
 
-    private static @Nullable SVGPaint parseColorAttribute(@NotNull AttributeNode attributeNode) {
-        Color c = attributeNode.getColor("color", null);
-        if (c == null) return null;
-        AnimatedColor animatedColor = attributeNode.getAnimatedColor("color", new RGBColor(c));
-        if (animatedColor != null) return animatedColor;
-        return new AwtSVGPaint(c);
-    }
-
     public @NotNull PaintContext derive(@NotNull PaintContext context) {
         return new PaintContext(
-                SVGPaint.derive(color, context.color),
+                resolveColorProperty(color, context.color),
                 SVGPaint.derive(fillPaint, context.fillPaint),
                 context.fillOpacity != null ? context.fillOpacity : fillOpacity,
                 SVGPaint.derive(strokePaint, context.strokePaint),
@@ -118,6 +106,15 @@ public final class PaintContext implements Mutator<PaintContext> {
                 context.fillRule != null && context.fillRule != FillRule.Inherit
                         ? context.fillRule
                         : this.fillRule);
+    }
+
+    private static @NotNull SVGPaint resolveColorProperty(@Nullable SVGPaint inherited,
+            @Nullable SVGPaint specified) {
+        if (specified instanceof ColorPropertyPaint) {
+            return ((ColorPropertyPaint) specified).resolve(inherited);
+        }
+        SVGPaint resolved = SVGPaint.derive(inherited, specified);
+        return resolved != null ? resolved : PredefinedPaints.DEFAULT_PAINT;
     }
 
     @Override

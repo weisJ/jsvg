@@ -155,7 +155,6 @@ public final class PaintParser {
 
     private static @Nullable SVGPaint paintKeyword(@NotNull String lower) {
         if ("none".equals(lower) || "transparent".equals(lower)) return PredefinedPaints.NONE;
-        if ("currentcolor".equals(lower)) return PredefinedPaints.CURRENT_COLOR;
         if ("context-fill".equals(lower)) return PredefinedPaints.CONTEXT_FILL;
         if ("context-stroke".equals(lower)) return PredefinedPaints.CONTEXT_STROKE;
         return null;

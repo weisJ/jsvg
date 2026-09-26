@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.*;
 import java.util.Collections;
@@ -35,7 +36,9 @@ import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.ColorValueSVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.util.ColorUtil;
 
 class PaintParserTest {
@@ -150,7 +153,10 @@ class PaintParserTest {
     void testSpecialColors() {
         assertEquals(PredefinedPaints.NONE, parsePaint("none"));
         assertEquals(PredefinedPaints.NONE, parsePaint("transparent"));
-        assertEquals(PredefinedPaints.CURRENT_COLOR, parsePaint("currentcolor"));
+        SVGPaint parsedCurrentColor = parsePaint("currentcolor");
+        assertTrue(parsedCurrentColor instanceof ColorValueSVGPaint);
+        ColorValueSVGPaint currentColor = (ColorValueSVGPaint) parsedCurrentColor;
+        assertEquals(RGBColor.DEFAULT, currentColor.colorValue());
         assertEquals(PredefinedPaints.CONTEXT_FILL, parsePaint("context-fill"));
         assertEquals(PredefinedPaints.CONTEXT_STROKE, parsePaint("context-stroke"));
     }

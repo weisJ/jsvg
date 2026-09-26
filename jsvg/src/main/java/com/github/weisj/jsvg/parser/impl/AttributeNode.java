@@ -26,27 +26,16 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.animation.time.Duration;
-import com.github.weisj.jsvg.animation.value.AnimatedColor;
-import com.github.weisj.jsvg.animation.value.AnimatedFloatList;
-import com.github.weisj.jsvg.animation.value.AnimatedLength;
-import com.github.weisj.jsvg.animation.value.AnimatedPaint;
-import com.github.weisj.jsvg.animation.value.AnimatedPercentage;
-import com.github.weisj.jsvg.animation.value.AnimatedTransform;
-import com.github.weisj.jsvg.animation.value.NeutralElements;
 import com.github.weisj.jsvg.attributes.Animatable;
 import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
@@ -66,15 +55,9 @@ import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
 import com.github.weisj.jsvg.nodes.SVGNode;
-import com.github.weisj.jsvg.nodes.animation.Animate;
-import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
-import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.paint.SVGPaint;
-import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
-import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
-import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.data.Declaration;
 import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
@@ -109,29 +92,6 @@ public final class AttributeNode {
     private static final MeasureContext DUMMY_MEASURE_CONTEXT =
             MeasureContext.createInitial(new FloatSize(0, 0), 0, 0, new AnimationState(0, 0));
 
-    /**
-     * Presentation attributes that are also CSS properties (SVG 2 §6.1): when declared on an element their value is
-     * run through the CSS grammar and shorthands expanded. Non-shorthand properties are parsed on demand, so this list
-     * need not be complete.
-     */
-    private static final Set<String> CSS_ATTRIBUTES = new HashSet<>(Arrays.asList(
-            "fill", "fill-opacity", "fill-rule",
-            "stroke", "stroke-opacity", "stroke-width", "stroke-linecap", "stroke-linejoin",
-            "stroke-miterlimit", "stroke-dasharray", "stroke-dashoffset",
-            "color", "opacity",
-            "font", "font-family", "font-size", "font-size-adjust", "font-stretch",
-            "font-style", "font-variant", "font-weight", "line-height",
-            "marker", "marker-start", "marker-mid", "marker-end",
-            "text-anchor", "dominant-baseline", "alignment-baseline", "baseline-shift",
-            "direction", "letter-spacing", "word-spacing", "text-decoration", "writing-mode",
-            "visibility", "display", "overflow",
-            "color-interpolation", "color-interpolation-filters", "shape-rendering", "image-rendering",
-            "clip", "clip-path", "clip-rule", "mask", "filter",
-            "stop-color", "stop-opacity", "flood-color", "flood-opacity", "lighting-color",
-            "solid-color", "solid-opacity",
-            "paint-order", "vector-effect", "mix-blend-mode", "isolation", "pointer-events",
-            "transform", "transform-origin", "transform-box", "transform-style"));
-
     private final @NotNull String tagName;
     /** SVG attributes declared directly on the node; used for matching attribute selectors */
     private final @NotNull Map<@NotNull String, @NotNull String> declaredAttributes;
@@ -139,6 +99,7 @@ public final class AttributeNode {
     private final @NotNull StyleSheets styleSheets;
 
     private ParsedElement element = null;
+    private boolean prepared;
 
     public AttributeNode(@NotNull String tagName, @NotNull Map<@NotNull String, @NotNull String> declaredAttributes,
             @NotNull StyleSheets styleSheets) {
@@ -159,6 +120,7 @@ public final class AttributeNode {
         AttributeNode node = new AttributeNode(tagName, new HashMap<>(declaredAttributes), styleSheets);
         node.resolvedAttributes.putAll(resolvedAttributes);
         node.setElement(element);
+        node.prepared = prepared;
         return node;
     }
 
@@ -174,12 +136,14 @@ public final class AttributeNode {
     }
 
     void prepareForNodeBuilding() {
+        if (prepared) return;
+        prepared = true;
         CssParser cssParser = parser().cssParser();
 
         // Presentation attributes: CSS properties are tokenized and shorthand-expanded so the CSS grammar
         // applies to them; other (SVG-only) attributes are kept as raw strings.
         for (Map.Entry<String, String> entry : declaredAttributes.entrySet()) {
-            if (CSS_ATTRIBUTES.contains(entry.getKey())) {
+            if (Attributes.CSS_ATTRIBUTES.contains(entry.getKey())) {
                 Declaration declaration =
                         new Declaration(entry.getKey(), cssParser.parseCssAttribute(entry.getValue()), false);
                 for (NormalizedProperty property : ShorthandExpander.expand(declaration)) {
@@ -212,6 +176,17 @@ public final class AttributeNode {
     @NotNull
     StyleSheets styleSheets() {
         return styleSheets;
+    }
+
+    @Nullable
+    AttributeNode parentAttributeNode() {
+        ParsedElement parentElement = element().parent();
+        if (parentElement == null) return null;
+        AttributeNode parent = parentElement.attributeNode();
+        // A referenced definition may be built without building its otherwise non-rendered
+        // ancestors. Their cascaded values are still needed for definition-tree inheritance.
+        parent.prepareForNodeBuilding();
+        return parent;
     }
 
     private <T> @Nullable T getElementByUrl(@NotNull Class<T> type, @Nullable String value) {
@@ -270,11 +245,6 @@ public final class AttributeNode {
         return resolvedAttributes;
     }
 
-    /** Sets a raw (non-CSS) string value on the resolved attribute map, e.g. synthesized scratch attributes. */
-    public void setResolvedNonCssValue(@NotNull String key, @NotNull String value) {
-        resolvedAttributes.put(key, new AttributeValue.PlainString(value));
-    }
-
     public @NotNull String tagName() {
         return tagName;
     }
@@ -318,7 +288,8 @@ public final class AttributeNode {
     }
 
     /** Shared token-vs-string dispatch; {@code absent} when there is no value. */
-    private <T> T parseValue(@NotNull String key, T absent,
+    @Contract("_,!null,_,_ -> !null")
+    private <T> @Nullable T parseValue(@NotNull String key, @Nullable T absent,
             @NotNull Function<@NotNull List<@NotNull ComponentValue>, T> fromTokens,
             @NotNull Function<@NotNull String, T> fromString) {
         AttributeValue value = resolvedAttributes.get(key);
@@ -352,23 +323,17 @@ public final class AttributeNode {
 
     @Contract("_,!null -> !null")
     public @Nullable Color getColor(@NotNull String key, @Nullable Color fallback) {
-        // Color attributes are all CSS properties, so a set value is token-valued.
-        List<ComponentValue> tokens = getTokens(key);
-        Color c = tokens != null ? parser().parseColor(tokens) : null;
-        return c != null ? c : fallback;
+        return ColorPaintHelper.getColor(this, key, fallback);
     }
 
-    @Contract("_,!null,_ -> !null")
-    public @Nullable SVGPaint getColor(@NotNull String key, @Nullable Color fallback, @NotNull Animatable animatable) {
-        boolean currentColor = "currentColor".equalsIgnoreCase(getValue(key));
-        Color color = currentColor ? null : getColor(key, fallback);
-        if (animatable == Animatable.YES) {
-            ColorValue initial = color != null ? new RGBColor(color) : RGBColor.INHERITED;
-            AnimatedColor animatedColor = getAnimatedColor(key, initial);
-            if (animatedColor != null) return animatedColor;
-        }
-        if (currentColor) return PredefinedPaints.CURRENT_COLOR;
-        return color != null ? new AwtSVGPaint(color) : null;
+    public @NotNull ColorValue getColorValue(@NotNull String key, @NotNull Color fallback,
+            @NotNull Animatable animatable) {
+        return ColorPaintHelper.getColorValue(this, key, fallback, animatable);
+    }
+
+    @SuppressWarnings("java:S2589") // Sonarcloud does not understand that map lookups can return null
+    public @NotNull SVGPaint getColorProperty(@NotNull Animatable animatable) {
+        return ColorPaintHelper.getColorProperty(this, animatable);
     }
 
     public @Nullable SVGPaint getPaint(@NotNull String key, Inherited inherited, Animatable animatable) {
@@ -378,63 +343,12 @@ public final class AttributeNode {
     @Contract("_,!null,_,_ -> !null")
     public @Nullable SVGPaint getPaint(@NotNull String key, @Nullable SVGPaint fallback,
             Inherited inherited, Animatable animatable) {
-        // Paint attributes are all CSS properties, so a set value is token-valued.
-        List<ComponentValue> tokens = getTokens(key);
-        SVGPaint paint = tokens != null ? parsePaint(tokens) : null;
-        SVGPaint value = paint != null ? paint : fallback;
-        if (animatable == Animatable.YES) {
-            SVGPaint initial = value;
-            if (initial == null) {
-                initial = inherited == Inherited.YES
-                        ? PredefinedPaints.INHERITED
-                        : PredefinedPaints.DEFAULT_PAINT;
-            }
-            AnimatedPaint animatedPaint = getAnimatedPaint(key, initial);
-            if (animatedPaint != null) return animatedPaint;
-        }
-        return value;
+        return ColorPaintHelper.getPaint(this, key, fallback, inherited, animatable);
     }
 
-    public @Nullable SVGPaint parsePaint(@Nullable String value) {
-        if (value == null) return null;
-        String reference = value;
-        String fallback = value;
-        if (value.startsWith("url(")) {
-            int end = Url.functionEnd(value);
-            if (end < 0) return null;
-            reference = value.substring(0, end + 1);
-            fallback = value.substring(end + 1).trim();
-            if (fallback.isEmpty()) fallback = "none";
-        }
-        SVGPaint paint = getElementByHref(SVGPaint.class, reference, ElementRelation.PAINT_SERVER);
-        if (paint != null) return paint;
-        return parser().parsePaint(fallback, this);
-    }
-
-    private @Nullable SVGPaint parsePaint(@NotNull List<@NotNull ComponentValue> tokens) {
-        for (int i = 0; i < tokens.size(); i++) {
-            String urlString = urlOf(tokens.get(i));
-            if (urlString != null) {
-                return parseReferencedPaint(tokens, i, urlString);
-            }
-        }
-        return parser().parsePaint(tokens);
-    }
-
-    private @Nullable SVGPaint parseReferencedPaint(@NotNull List<@NotNull ComponentValue> tokens,
-            int urlIndex, @NotNull String url) {
-        SVGPaint paint = getElementByHref(SVGPaint.class, url, ElementRelation.PAINT_SERVER);
-        if (paint != null) return paint;
-
-        List<ComponentValue> fallback = tokens.subList(urlIndex + 1, tokens.size());
-        return hasPaintFallback(fallback) ? parser().parsePaint(fallback) : PredefinedPaints.NONE;
-    }
-
-    private static boolean hasPaintFallback(@NotNull List<@NotNull ComponentValue> fallback) {
-        for (ComponentValue fallbackToken : fallback) {
-            if (fallbackToken != Token.Static.WHITESPACE) return true;
-        }
-        return false;
+    @NotNull
+    SVGPaint currentColorPaint() {
+        return ColorPaintHelper.currentColorPaint(this);
     }
 
     public @Nullable Length getLength(@NotNull String key, @NotNull PercentageDimension dimension) {
@@ -465,24 +379,8 @@ public final class AttributeNode {
         }
 
         return animatable == Animatable.YES
-                ? applyLengthAnimation(key, dimension, value, inherited)
+                ? AnimationHelper.applyLengthAnimation(this, key, dimension, value, inherited)
                 : value;
-    }
-
-    private @Nullable LengthValue applyLengthAnimation(@NotNull String key, @NotNull PercentageDimension dimension,
-            @Nullable LengthValue value, @NotNull Inherited inherited) {
-        LengthValue initial = value != null ? value : inheritedLengthValue(inherited);
-        if (initial instanceof AnimatedLength) {
-            initial = ((AnimatedLength) initial).initial();
-        }
-        AnimatedLength animatedLength = getAnimatedLength(key, initial, dimension);
-        return animatedLength != null ? animatedLength : value;
-    }
-
-    private static @NotNull LengthValue inheritedLengthValue(@NotNull Inherited inherited) {
-        return inherited == Inherited.YES
-                ? Length.INHERITED
-                : NeutralElements.NEUTRAL_LENGTH;
     }
 
     /** SMIL-only, so never CSS-sourced. */
@@ -590,24 +488,8 @@ public final class AttributeNode {
         }
 
         return animatable == Animatable.YES
-                ? applyPercentageAnimation(key, value, inherited)
+                ? AnimationHelper.applyPercentageAnimation(this, key, value, inherited)
                 : value;
-    }
-
-    private @Nullable PercentageValue applyPercentageAnimation(@NotNull String key, @Nullable PercentageValue value,
-            @NotNull Inherited inherited) {
-        PercentageValue initial = value != null ? value : inheritedPercentageValue(inherited);
-        if (initial instanceof AnimatedPercentage) {
-            initial = ((AnimatedPercentage) initial).initial();
-        }
-        AnimatedPercentage animatedPercentage = getAnimatedPercentage(key, initial);
-        return animatedPercentage != null ? animatedPercentage : value;
-    }
-
-    private static @NotNull PercentageValue inheritedPercentageValue(@NotNull Inherited inherited) {
-        return inherited == Inherited.YES
-                ? Percentage.INHERITED
-                : NeutralElements.NEUTRAL_PERCENTAGE;
     }
 
     public @NotNull Length @NotNull [] getLengthList(@NotNull String key, @NotNull PercentageDimension dimension) {
@@ -633,14 +515,7 @@ public final class AttributeNode {
                 : null;
 
         if (animatable == Animatable.YES) {
-            if (initial == null) {
-                if (inherited == Inherited.YES) {
-                    throw new IllegalStateException("Inherited values for float lists aren't implemented yet");
-                }
-                initial = NeutralElements.NEUTRAL_FLOAT_LIST;
-            }
-            AnimatedFloatList animatedLength = getAnimatedFloatList(key, initial);
-            if (animatedLength != null) return animatedLength;
+            return AnimationHelper.applyFloatListAnimation(this, key, initial, inherited);
         }
         return initial != null ? initial : ConstantFloatList.EMPTY;
     }
@@ -697,7 +572,7 @@ public final class AttributeNode {
         return token != null ? urlOf(token) : null;
     }
 
-    private static @Nullable String urlOf(@NotNull ComponentValue token) {
+    static @Nullable String urlOf(@NotNull ComponentValue token) {
         if (token instanceof Token.Url) return ((Token.Url) token).value();
         if (token instanceof ComponentValue.FunctionBlock) {
             ComponentValue.FunctionBlock function = (ComponentValue.FunctionBlock) token;
@@ -740,24 +615,8 @@ public final class AttributeNode {
                 : null;
 
         return animatable == Animatable.YES
-                ? applyTransformAnimation(key, value, inherited)
+                ? AnimationHelper.applyTransformAnimation(this, key, value, inherited)
                 : value;
-    }
-
-    private @Nullable TransformValue applyTransformAnimation(@NotNull String key, @Nullable TransformValue value,
-            @NotNull Inherited inherited) {
-        TransformValue initial = value != null ? value : inheritedTransformValue(inherited);
-        if (initial instanceof AnimatedTransform) {
-            initial = ((AnimatedTransform) initial).initial();
-        }
-        AnimatedTransform animatedTransform = getAnimatedTransform(key, initial);
-        return animatedTransform != null ? animatedTransform : value;
-    }
-
-    private static @NotNull TransformValue inheritedTransformValue(@NotNull Inherited inherited) {
-        return inherited == Inherited.YES
-                ? ConstantLengthTransform.INHERITED
-                : NeutralElements.NEUTRAL_TRANSFORM;
     }
 
     public boolean hasAttribute(@NotNull String name) {
@@ -817,81 +676,5 @@ public final class AttributeNode {
 
     public @Nullable URI resolveResourceURI(@NotNull String url) {
         return loadHelper().externalResourcePolicy().resolveResourceURI(document().rootURI(), url);
-    }
-
-    private <T extends BaseAnimationNode> List<@NotNull T> animateNodes(@NotNull String property, Class<T> type) {
-        List<ParsedElement> parsedElements = element.animationElements().get(property);
-        if (parsedElements == null || parsedElements.isEmpty()) return Collections.emptyList();
-
-        List<T> animateNodes = parsedElements
-                .stream()
-                .filter(n -> type.isInstance(n.node()))
-                .map(n -> type.cast(n.nodeEnsuringBuildStatus(
-                        document().currentNestingDepth(), ParsedElement.BuildMode.ALL)))
-                .filter(n -> n != null)
-                .collect(Collectors.toList());
-        for (T animateNode : animateNodes) {
-            document().registerAnimatedElement(animateNode);
-        }
-        return animateNodes;
-    }
-
-    private static <T, A extends T, N extends BaseAnimationNode> @Nullable A makeAnimated(
-            @NotNull List<N> animationNodes,
-            @NotNull T initial,
-            @NotNull BiFunction<@NotNull N, @NotNull T, A> factory) {
-        if (animationNodes.isEmpty()) return null;
-
-        @NotNull T currentInitial = initial;
-        @Nullable A lastAnimationValue = null;
-        for (N animate : animationNodes) {
-            A animated = factory.apply(animate, currentInitial);
-            if (animated != null) {
-                currentInitial = animated;
-                lastAnimationValue = animated;
-            }
-        }
-        return lastAnimationValue;
-    }
-
-    public @Nullable AnimatedLength getAnimatedLength(@NotNull String property, @NotNull LengthValue initial,
-            @NotNull PercentageDimension dimension) {
-        return makeAnimated(
-                animateNodes(property, Animate.class), initial,
-                (animate, currentInitial) -> animate.animatedLength(currentInitial, dimension, this));
-    }
-
-    private @Nullable AnimatedFloatList getAnimatedFloatList(@NotNull String property,
-            @NotNull FloatListValue initial) {
-        return makeAnimated(
-                animateNodes(property, Animate.class), initial,
-                // NOTE: For some reason on some configurations the compiler needs these type hints here
-                (Animate animate, FloatListValue currentInitial) -> animate.animatedFloatList(currentInitial, this));
-    }
-
-    private @Nullable AnimatedPercentage getAnimatedPercentage(@NotNull String property,
-            @NotNull PercentageValue initial) {
-        return makeAnimated(
-                animateNodes(property, Animate.class), initial,
-                (animate, currentInitial) -> animate.animatedPercentage(currentInitial, this));
-    }
-
-    private @Nullable AnimatedPaint getAnimatedPaint(@NotNull String property, @NotNull SVGPaint initial) {
-        return makeAnimated(
-                animateNodes(property, Animate.class), initial,
-                (animate, currentInitial) -> animate.animatedPaint(currentInitial, this));
-    }
-
-    public @Nullable AnimatedColor getAnimatedColor(@NotNull String property, @NotNull ColorValue initial) {
-        return makeAnimated(
-                animateNodes(property, Animate.class), initial,
-                (animate, currentInitial) -> animate.animatedColor(currentInitial, this));
-    }
-
-    public @Nullable AnimatedTransform getAnimatedTransform(@NotNull String property,
-            @NotNull TransformValue initial) {
-        return makeAnimated(
-                animateNodes(property, AnimateTransform.class), initial,
-                (animate, currentInitial) -> animate.animatedTransform(currentInitial, this));
     }
 }

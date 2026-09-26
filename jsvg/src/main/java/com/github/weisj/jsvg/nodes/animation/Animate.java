@@ -37,6 +37,7 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.ColorPaintHelper;
 
 @ElementCategories(Category.Animation)
 @PermittedContent(categories = {Category.Descriptive})
@@ -105,7 +106,7 @@ public final class Animate extends BaseAnimationNode {
             if (isPlaceholder(values[i])) {
                 paints[i] = PredefinedPaints.NONE;
             } else {
-                SVGPaint p = attributeNode.parsePaint(this.values[i]);
+                SVGPaint p = ColorPaintHelper.parsePaint(attributeNode, this.values[i]);
                 if (p == null) return null;
                 paints[i] = p;
             }

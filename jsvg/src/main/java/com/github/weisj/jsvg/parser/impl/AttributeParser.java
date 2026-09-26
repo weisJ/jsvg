@@ -232,6 +232,9 @@ public final class AttributeParser {
     }
 
     public @Nullable SVGPaint parsePaint(@Nullable String value, @NotNull AttributeNode attributeNode) {
+        if (value != null && Attributes.Keyword.CURRENT_COLOR.equalsIgnoreCase(value.trim())) {
+            return attributeNode.currentColorPaint();
+        }
         return paintParser.parsePaint(value);
     }
 

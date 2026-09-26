@@ -54,7 +54,7 @@ class FeFloodTest {
     }
 
     @Test
-    void currentColorFollowsTheAnimatedRenderContext() {
+    void currentColorFollowsTheAnimatedDefinitionContext() {
         assertFrame("animated-current-color", 0, "red");
         assertFrame("animated-current-color", 500, "purple");
         assertFrame("animated-current-color", 1500, "blue");
