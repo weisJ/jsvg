@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -154,6 +154,8 @@ public final class ShapeRenderer {
             @Nullable Stroke stroke, boolean willBeFilledAfterwards) {
         PaintWithOpacity paintWithOpacity = new PaintWithOpacity(context.strokePaint(), context.strokeOpacity());
         if (!(stroke != null && paintWithOpacity.isVisible(context))) return;
+        // SVG paints nothing for width 0; BasicStroke would draw a hairline
+        if (stroke instanceof BasicStroke && ((BasicStroke) stroke).getLineWidth() <= 0) return;
         output.applyOpacity(paintWithOpacity.opacity);
         output.setStroke(stroke);
 

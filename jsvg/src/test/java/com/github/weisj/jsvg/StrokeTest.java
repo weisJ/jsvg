@@ -39,6 +39,12 @@ class StrokeTest {
     }
 
     @Test
+    void zeroStrokeWidthPaintsNothing() {
+        // zero tolerance: a black hairline on transparent only differs in alpha
+        assertEquals(SUCCESS, compareImages("stroke/stroke_width_zero.svg", 0, 0));
+    }
+
+    @Test
     void invalidMiterlimitTest() {
         assertEquals(SUCCESS, compareImages("stroke/stroke_miterlimit_invalid.svg"));
     }
