@@ -33,10 +33,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.font.AWTSVGFont;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.nodes.text.Glyph;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
 import com.github.weisj.jsvg.parser.impl.ParserTestUtil;
@@ -110,6 +112,34 @@ class FontTest {
                 entry("font-family", "Univers 45Light"),
                 entry("font-size", "12")), MEASURE_CONTEXT, support);
         Assertions.assertEquals("univers 45light", queriedFontFamily);
+    }
+
+    @Test
+    void defaultIgnorableCodepointsTakeNoSpace() {
+        AWTSVGFont font = new AWTSVGFont(new Font(Font.SANS_SERIF, Font.PLAIN, 100));
+        String[] ignorable = {
+                "­", "͏", "؜", "឴", "᠋", "᠏", "​", "‍", "‏",
+                "‪", "‮", "⁠", "⁯", "︀", "️", "﻿", "￸",
+                "𝅳", "󠀀", "󠀁", "󠿿", "​​"};
+        for (String codepoint : ignorable) {
+            Glyph glyph = font.codepointGlyph(codepoint);
+            String label = "U+" + Integer.toHexString(codepoint.codePointAt(0));
+            Assertions.assertEquals(0, glyph.advance(), label);
+            Assertions.assertFalse(glyph.isRendered(), label);
+            Assertions.assertEquals(0, font.kerningAdjustment("A", codepoint), label);
+            Assertions.assertEquals(0, font.kerningAdjustment(codepoint, "V"), label);
+        }
+    }
+
+    @Test
+    void visibleCodepointsKeepTheirAdvance() {
+        AWTSVGFont font = new AWTSVGFont(new Font(Font.SANS_SERIF, Font.PLAIN, 100));
+        Assertions.assertTrue(font.codepointGlyph("A").isRendered());
+        String[] visible = {"A", " ", "¬", "®", "‐", "A️", "ㅤ"};
+        for (String codepoint : visible) {
+            String label = "U+" + Integer.toHexString(codepoint.codePointAt(0));
+            Assertions.assertTrue(font.codepointGlyph(codepoint).advance() > 0, label);
+        }
     }
 
     @Test
