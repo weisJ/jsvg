@@ -144,6 +144,49 @@ class FontTest {
                 "line-height", "normal",
                 "font-family", "\"Fira Sans\", sans-serif"));
 
+        // each "normal" takes one of the four style/variant/weight/stretch slots
+        assertFontShorthand("normal normal 12px sans-serif",
+            mapOf(
+                "font-style", "normal",
+                "font-variant", "normal",
+                "font-weight", "normal",
+                "font-stretch", "normal",
+                "font-size", "12px",
+                "line-height", "normal",
+                "font-family", "sans-serif"));
+        assertFontShorthand("normal italic normal bold 12px sans-serif",
+            mapOf(
+                "font-style", "italic",
+                "font-variant", "normal",
+                "font-weight", "bold",
+                "font-stretch", "normal",
+                "font-size", "12px",
+                "line-height", "normal",
+                "font-family", "sans-serif"));
+        assertFontShorthand("normal normal normal normal 12px sans-serif",
+            mapOf(
+                "font-style", "normal",
+                "font-variant", "normal",
+                "font-weight", "normal",
+                "font-stretch", "normal",
+                "font-size", "12px",
+                "line-height", "normal",
+                "font-family", "sans-serif"));
+        assertFontShorthand("italic normal 12px sans-serif",
+            mapOf(
+                "font-style", "italic",
+                "font-variant", "normal",
+                "font-weight", "normal",
+                "font-stretch", "normal",
+                "font-size", "12px",
+                "line-height", "normal",
+                "font-family", "sans-serif"));
+
+        // more than four or repeated prefix keywords are invalid
+        assertFontShorthand("normal normal normal normal normal 12px sans-serif", mapOf());
+        assertFontShorthand("italic small-caps bold condensed normal 12px sans-serif", mapOf());
+        assertFontShorthand("bold bold 12px sans-serif", mapOf());
+
         // system font
         assertFontShorthand("caption", mapOf("font", "caption"));
 
