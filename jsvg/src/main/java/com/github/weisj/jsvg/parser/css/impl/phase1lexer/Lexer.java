@@ -22,7 +22,6 @@
 package com.github.weisj.jsvg.parser.css.impl.phase1lexer;
 
 import java.util.function.IntPredicate;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
@@ -477,29 +476,11 @@ public final class Lexer {
         return (c >= 0 && c <= 0x08) || c == 0x0B || (c >= 0x0E && c <= 0x1F) || c == 0x7F;
     }
 
-    /**
-     * §4.3.13 Converts a string to a number. Computed in double, then narrowed to the float used
-     * throughout the geometry layer. Assumes that the string is a valid CSS number.
-     */
+    /** §4.3.13 Converts a string to a number; parseFloat gives that exact value, rounded to float once. */
     private static float convertStringToNumber(String str) {
-        Matcher matcher = NUMBER_PATTERN.matcher(str);
-        if (!matcher.matches())
+        if (!NUMBER_PATTERN.matcher(str).matches())
             throw new ParserException();
-        String sign = matcher.group("s") != null ? matcher.group("s") : "";
-        String integer = matcher.group("i") != null ? matcher.group("i") : "";
-        String fraction = matcher.group("f") != null ? matcher.group("f") : "";
-        String exponentSign = matcher.group("t") != null ? matcher.group("t") : "";
-        String exponent = matcher.group("e") != null ? matcher.group("e") : "";
-
-        int s = sign.equals("-") ? -1 : 1; // sign of the number
-        long i = integer.isEmpty() ? 0 : Long.parseUnsignedLong(integer); // integer part
-        // fractional part as integer
-        long f = fraction.isEmpty() ? 0 : Long.parseUnsignedLong(fraction.replaceFirst("^0+", ""));
-        int d = fraction.length(); // number of fractional digits
-        int t = exponentSign.equals("-") ? -1 : 1; // exponent sign
-        long e = exponent.isEmpty() ? 0 : Long.parseUnsignedLong(exponent); // exponent
-
-        return (float) (s * (i + f * Math.pow(10, -d)) * Math.pow(10, t * e));
+        return Float.parseFloat(str);
     }
 
     private static boolean equalsIgnoreCaseAscii(@NotNull String a, @NotNull String b) {
@@ -514,8 +495,9 @@ public final class Lexer {
         return true;
     }
 
+    // §4 <number-token> railroad diagram; rejects parseFloat extras like NaN, hex or a trailing 'f'
     private static final Pattern NUMBER_PATTERN =
-            Pattern.compile("^(?<s>[-+]?)(?<i>[0-9]*+)\\.?(?<f>[0-9]*+)(?:[eE](?<t>[-+]?)(?<e>[0-9]*+))?$");
+            Pattern.compile("^[-+]?(?:[0-9]++(?:\\.[0-9]++)?|\\.[0-9]++)(?:[eE][-+]?[0-9]++)?$");
 
     /**
      * Sliding window of code points over a {@link PreProcessor}. Owns the circular-buffer
