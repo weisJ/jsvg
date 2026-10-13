@@ -97,6 +97,22 @@ class FontTest {
     }
 
     @Test
+    void unquotedFamilyNameKeepsIntegers() {
+        PlatformSupport support = getSupport();
+
+        // Not a valid <custom-ident>+ sequence, but emitted by SVG generators (e.g. ECharts)
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "Frutiger LT Com 47 Light Cn"),
+                entry("font-size", "12")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals("frutiger lt com 47 light cn", queriedFontFamily);
+
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "Univers 45Light"),
+                entry("font-size", "12")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals("univers 45light", queriedFontFamily);
+    }
+
+    @Test
     void checkFontShorthandExpansion() {
         //@formatter:off
 

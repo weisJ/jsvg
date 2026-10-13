@@ -213,16 +213,30 @@ public final class FontParser {
         return families;
     }
 
-    /** {@code <family-name> = <string> | <custom-ident>+}; idents joined by spaces. */
+    /** {@code <family-name> = <string> | <custom-ident>+}, leniently also integer number/dimension tokens. */
     private static @NotNull String familyName(@NotNull List<@NotNull ComponentValue> group) {
         StringBuilder name = new StringBuilder();
         for (ComponentValue token : group) {
             if (token instanceof Token.Str) return ((Token.Str) token).value();
-            if (!(token instanceof Token.Ident)) continue;
+            String part = familyNamePart(token);
+            if (part == null) continue;
             if (name.length() > 0) name.append(' ');
-            name.append(((Token.Ident) token).name());
+            name.append(part);
         }
         return name.toString();
+    }
+
+    private static @Nullable String familyNamePart(@NotNull ComponentValue token) {
+        if (token instanceof Token.Ident) return ((Token.Ident) token).name();
+        // lossy: drops a '+' sign and leading zeros; non-integers are skipped
+        if (token instanceof Token.Number && ((Token.Number) token).numericType() == Token.NumericType.INTEGER) {
+            return ((Token.Number) token).serialize();
+        }
+        if (token instanceof Token.Dimension
+                && ((Token.Dimension) token).numericType() == Token.NumericType.INTEGER) {
+            return ((Token.Dimension) token).serialize();
+        }
+        return null;
     }
 
     private static @NotNull String stripQuotes(@NotNull String str, char quoteChar) {
