@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -141,7 +142,7 @@ public final class FontResolver {
     private enum FontCache {
         INSTANCE;
 
-        private final HashMap<CacheKey, SVGFont> cache = new HashMap<>();
+        private final ConcurrentHashMap<CacheKey, SVGFont> cache = new ConcurrentHashMap<>();
 
         private static final class CacheKey {
             private final @NotNull MeasurableFontSpec spec;

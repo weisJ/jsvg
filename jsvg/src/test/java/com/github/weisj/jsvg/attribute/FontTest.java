@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
@@ -66,6 +67,21 @@ class FontTest {
         SVGFont font1 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
         SVGFont font2 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
         Assertions.assertSame(font1, font2);
+    }
+
+    @Test
+    void concurrentResolveDoesNotFail() {
+        MeasurableFontSpec fontSpec = createFontSpec(
+                entry("font-family", "sans-serif"),
+                entry("font-size", "11"));
+        // Every distinct viewport size is a new cache key,
+        // so concurrent calls all insert into the cache.
+        IntStream.range(0, 2000).parallel().forEach(i -> {
+            MeasureContext context = MeasureContext.createInitial(
+                    new FloatSize(100 + i, 100), 12, 6,
+                    AnimationState.NO_ANIMATION);
+            FontResolver.resolve(fontSpec, context, NullPlatformSupport.INSTANCE);
+        });
     }
 
     @Test
