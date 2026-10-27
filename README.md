@@ -622,6 +622,19 @@ content.add(button, BorderLayout.SOUTH);
 frame.setContentPane(content);
 ````
 
+### External CSS styling
+
+A stylesheet can be applied to every loaded document without modifying the SVG, e.g. for theming.
+Its rules are placed after the rules of the document's own `<style>` elements and follow the regular CSS cascade
+(specificity, `!important`), so on equal specificity they override the document's rules.
+
+````java
+SVGDocument document = loader.load(svgUrl,
+    LoaderContext.builder()
+                 .externalStyleSheet(".icon { fill: white; }")
+                 .build());
+````
+
 ### Animations (Swing)
 
 JSVG provides a helper class `AnimationPlayer` for implementing animations in Swing components.

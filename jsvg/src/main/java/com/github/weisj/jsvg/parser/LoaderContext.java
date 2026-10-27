@@ -61,6 +61,16 @@ public interface LoaderContext {
     @NotNull
     CssHints cssHints();
 
+    /**
+     * An additional stylesheet applied to every loaded document, or {@code null} if none is set.
+     * It is parsed with {@link #cssParser()} and {@link #cssHints()} for each document.
+     *
+     * @see Builder#externalStyleSheet(String)
+     */
+    @ApiStatus.Experimental
+    @Nullable
+    String externalStyleSheet();
+
     static @NotNull Builder builder() {
         return MutableLoaderContext.createDefault();
     }
@@ -95,6 +105,17 @@ public interface LoaderContext {
         @ApiStatus.Experimental
         @NotNull
         Builder cssHints(@NotNull CssHints cssHints);
+
+        /**
+         * Sets CSS text that is applied to every loaded document in addition to its own {@code <style>} elements.
+         * The rules are placed after all rules of the document, so on equal specificity (and importance) they win
+         * over the document's rules. Inline {@code style} attributes still take precedence over non-important rules.
+         *
+         * @param css the stylesheet source, or {@code null} to remove a previously set stylesheet.
+         */
+        @ApiStatus.Experimental
+        @NotNull
+        Builder externalStyleSheet(@Nullable String css);
 
         @NotNull
         LoaderContext build();

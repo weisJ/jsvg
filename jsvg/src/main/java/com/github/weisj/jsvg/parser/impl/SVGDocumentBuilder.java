@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.parser.impl;
 import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -190,7 +191,8 @@ public final class SVGDocumentBuilder {
     }
 
     private void processStyleSheets() {
-        if (styleElements.isEmpty()) return;
+        String externalStyleSheet = loaderContext.externalStyleSheet();
+        if (styleElements.isEmpty() && externalStyleSheet == null) return;
         CssParser cssParser = loaderContext.cssParser();
         CssHints cssHints = loaderContext.cssHints();
         for (ParsedElement styleElement : styleElements) {
@@ -198,6 +200,11 @@ public final class SVGDocumentBuilder {
             Style styleNode = (Style) styleElement.node();
             styleNode.parseStyleSheet(styleElement.attributeNode(), cssParser, cssHints);
             styleSheets.add(styleNode.styleSheet());
+        }
+        // Added last, so it wins over document rules of equal specificity.
+        if (externalStyleSheet != null) {
+            styleSheets.add(
+                    cssParser.parseStyleSheet(Collections.singletonList(externalStyleSheet.toCharArray()), cssHints));
         }
     }
 

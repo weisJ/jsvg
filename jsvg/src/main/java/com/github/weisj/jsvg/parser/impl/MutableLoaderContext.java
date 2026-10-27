@@ -53,6 +53,7 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     private @NotNull ResourcePolicy resourcePolicy = ResourcePolicy.DENY_EXTERNAL;
     private @NotNull DocumentLimits documentLimits = DocumentLimits.DEFAULT;
     private @ApiStatus.Experimental @NotNull CssHints cssHints = CssHints.DEFAULT;
+    private @ApiStatus.Experimental @Nullable String externalStyleSheet = null;
 
     public static @NotNull MutableLoaderContext createDefault() {
         return new MutableLoaderContext();
@@ -97,6 +98,12 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     @Override
     public @NotNull CssHints cssHints() {
         return cssHints;
+    }
+
+    @ApiStatus.Experimental
+    @Override
+    public @Nullable String externalStyleSheet() {
+        return externalStyleSheet;
     }
 
     @Override
@@ -145,6 +152,13 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     @Override
     public @NotNull Builder cssHints(@NotNull CssHints cssHints) {
         this.cssHints = cssHints;
+        return this;
+    }
+
+    @ApiStatus.Experimental
+    @Override
+    public @NotNull Builder externalStyleSheet(@Nullable String css) {
+        this.externalStyleSheet = css;
         return this;
     }
 
