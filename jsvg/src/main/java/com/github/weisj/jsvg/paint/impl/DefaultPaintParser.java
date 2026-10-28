@@ -46,13 +46,17 @@ import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 public final class DefaultPaintParser implements PaintParser {
     private static final Logger LOGGER = LogFactory.createLogger(DefaultPaintParser.class);
 
-    // Todo: Handle hsl(), hsla() per the SVG 2.0 spec requirement
     @Override
     public @Nullable Color parseColor(@NotNull String value) {
         if (value.isEmpty()) return null;
         try {
             if (value.charAt(0) == '#') {
                 return parseHexColor(value.substring(1));
+            } else if (value.length() > 5 && value.endsWith(")")
+                    && (value.regionMatches(true, 0, "hsl(", 0, 4)
+                            || value.regionMatches(true, 0, "hsla(", 0, 5))) {
+                int startIndex = value.charAt(3) == '(' ? 4 : 5;
+                return parseHslColor(value.substring(startIndex, value.length() - 1));
             } else if (value.length() > 3 && value.substring(0, 3).equalsIgnoreCase("rgb")) {
                 boolean isRgba = value.length() > 4 && (value.charAt(3) == 'a' || value.charAt(3) == 'A');
                 int startIndex = isRgba ? 5 : 4;
@@ -152,6 +156,10 @@ public final class DefaultPaintParser implements PaintParser {
 
     private @Nullable Color parseColorFunction(@NotNull ComponentValue.FunctionBlock function) {
         String name = function.name().toLowerCase(Locale.ENGLISH);
+        if ("hsl".equals(name) || "hsla".equals(name)) {
+            String serialized = function.serialize();
+            return parseHslColor(serialized.substring(function.name().length() + 1, serialized.length() - 1));
+        }
         if (!"rgb".equals(name) && !"rgba".equals(name)) return null;
         List<ComponentValue> components = new ArrayList<>();
         for (ComponentValue value : function.value()) {
@@ -165,6 +173,89 @@ public final class DefaultPaintParser implements PaintParser {
                 colorComponent(components.get(1), false),
                 colorComponent(components.get(2), false),
                 alpha);
+    }
+
+    private static @Nullable Color parseHslColor(@NotNull String value) {
+        String[] components;
+        boolean legacySyntax = value.contains(",");
+        if (legacySyntax) {
+            components = value.split(",", -1);
+            if (components.length != 3 && components.length != 4) return null;
+            for (String component : components) {
+                if (component.trim().isEmpty() || component.contains("/") || component.trim().contains(" ")) {
+                    return null;
+                }
+            }
+        } else {
+            components = value.trim().replace("/", " / ").split("\\s+");
+            if (components.length != 3 && (components.length != 5 || !"/".equals(components[3]))) {
+                return null;
+            }
+        }
+
+        double hue = parseHue(components[0].trim());
+        double saturation = parseHslPercentage(components[1].trim(), legacySyntax);
+        double lightness = parseHslPercentage(components[2].trim(), legacySyntax);
+        int alpha = 255;
+        if (components.length == 4 || components.length == 5) {
+            String alphaValue = components[components.length - 1].trim();
+            if (alphaValue.endsWith("%")) {
+                alpha = clampComponent(parseFiniteDouble(alphaValue.substring(0, alphaValue.length() - 1)) * 2.55);
+            } else {
+                alpha = clampComponent(parseFiniteDouble(alphaValue) * 255);
+            }
+        }
+
+        hue = ((hue % 360) + 360) % 360;
+        saturation = Math.max(0, Math.min(1, saturation));
+        lightness = Math.max(0, Math.min(1, lightness));
+        double chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+        double x = chroma * (1 - Math.abs((hue / 60) % 2 - 1));
+        double m = lightness - chroma / 2;
+        double r = 0, g = 0, b = 0;
+        if (hue < 60) {
+            r = chroma;
+            g = x;
+        } else if (hue < 120) {
+            r = x;
+            g = chroma;
+        } else if (hue < 180) {
+            g = chroma;
+            b = x;
+        } else if (hue < 240) {
+            g = x;
+            b = chroma;
+        } else if (hue < 300) {
+            r = x;
+            b = chroma;
+        } else {
+            r = chroma;
+            b = x;
+        }
+        return new Color(clampComponent(Math.round((r + m) * 255)),
+                clampComponent(Math.round((g + m) * 255)),
+                clampComponent(Math.round((b + m) * 255)), alpha);
+    }
+
+    private static double parseHue(@NotNull String value) {
+        String lower = value.toLowerCase(Locale.ENGLISH);
+        if (lower.endsWith("turn")) return parseFiniteDouble(lower.substring(0, lower.length() - 4)) * 360;
+        if (lower.endsWith("grad")) return parseFiniteDouble(lower.substring(0, lower.length() - 4)) * 0.9;
+        if (lower.endsWith("rad")) return Math.toDegrees(parseFiniteDouble(lower.substring(0, lower.length() - 3)));
+        if (lower.endsWith("deg")) return parseFiniteDouble(lower.substring(0, lower.length() - 3));
+        return parseFiniteDouble(lower);
+    }
+
+    private static double parseHslPercentage(@NotNull String value, boolean legacySyntax) {
+        if (value.endsWith("%")) return parseFiniteDouble(value.substring(0, value.length() - 1)) / 100;
+        if (legacySyntax) throw new NumberFormatException("Expected HSL percentage: " + value);
+        return parseFiniteDouble(value) / 100;
+    }
+
+    private static double parseFiniteDouble(@NotNull String value) {
+        double parsed = Double.parseDouble(value);
+        if (!Double.isFinite(parsed)) throw new NumberFormatException("Non-finite color component: " + value);
+        return parsed;
     }
 
     private int colorComponent(@NotNull ComponentValue token, boolean alpha) {

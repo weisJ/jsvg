@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,8 +22,10 @@
 package com.github.weisj.jsvg.parser.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +33,10 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.parser.css.data.ComponentValue;
+import com.github.weisj.jsvg.parser.css.data.Token;
 
 class PaintParserTest {
 
@@ -84,6 +89,41 @@ class PaintParserTest {
         assertEquals(colorFromFloat(0.1f, 0.2f, 0.3f, 0.12f), parsePaint("rgba(10% 20% 30% 12%)"));
         assertEquals(colorFromFloat(0.4f, 0.5f, 0.6f, 0.34f), parsePaint("rGba(40%,50%,60% 34%)"));
         assertEquals(colorFromFloat(0.7f, 0.8f, 0.9f, 0.56f), parsePaint("rgBa(70%,80% 90% 56%)"));
+    }
+
+    @Test
+    void testHslLiteral() {
+        assertEquals(color(255, 0, 0, 255), parsePaint("hsl(0, 100%, 50%)"));
+        assertEquals(color(0, 255, 0, 255), parsePaint("HSL(120 100% 50%)"));
+        assertEquals(color(0, 0, 255, 255), parsePaint("hsl(240deg 100% 50%)"));
+        assertEquals(color(255, 0, 0, 255), parsePaint("hsl(1turn 100 50)"));
+        assertEquals(color(255, 0, 0, 255), parsePaint("hsl(-360 100% 50%)"));
+        assertEquals(color(128, 128, 128, 255), parsePaint("hsl(0 0% 50%)"));
+    }
+
+    @Test
+    void testHslaLiteral() {
+        assertEquals(color(255, 0, 0, 127), parsePaint("hsla(0, 100%, 50%, 0.5)"));
+        assertEquals(color(0, 255, 0, 127), parsePaint("hsl(120 100% 50% / 50%)"));
+        assertEquals(color(0, 0, 255, 255), parsePaint("HSLA(0.6666667turn 100% 50% / 1)"));
+    }
+
+    @Test
+    void testHslCssTokens() {
+        ComponentValue.FunctionBlock hsl = new ComponentValue.FunctionBlock("hsl", Arrays.asList(
+                new Token.Dimension(120, Token.NumericType.INTEGER, "deg"), Token.Static.WHITESPACE,
+                new Token.Percentage(100), Token.Static.WHITESPACE, new Token.Percentage(50),
+                Token.Static.WHITESPACE, new Token.Delim('/'), Token.Static.WHITESPACE,
+                new Token.Percentage(50)));
+        assertEquals(color(0, 255, 0, 127),
+                new DefaultPaintParser().parsePaint(Collections.singletonList(hsl)));
+    }
+
+    @Test
+    void testInvalidHslLiteral() {
+        assertNull(parsePaint("hsl(0, 100%, 50% / 0.5)"));
+        assertNull(parsePaint("hsl(0 100% 50% 0.5)"));
+        assertNull(parsePaint("hsl(0, 100%, 50)"));
     }
 
     @Test
