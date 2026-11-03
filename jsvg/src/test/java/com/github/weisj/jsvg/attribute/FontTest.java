@@ -99,6 +99,50 @@ class FontTest {
     }
 
     @Test
+    void customFontReceivesWeightAndStyle() {
+        float[] queriedWeight = new float[1];
+        boolean[] queriedItalic = new boolean[1];
+        Font stub = new Font(Font.DIALOG, Font.PLAIN, 1);
+        PlatformSupport support = new PlatformSupport() {
+            @Override
+            public ImageObserver imageObserver() {
+                return null;
+            }
+
+            @Override
+            public TargetSurface targetSurface() {
+                return null;
+            }
+
+            @Override
+            public @NotNull Font customFont(@NotNull String family, float weight, boolean italic) {
+                queriedWeight[0] = weight;
+                queriedItalic[0] = italic;
+                return stub;
+            }
+        };
+
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "NoSuchFamily")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals(400f, queriedWeight[0]);
+        Assertions.assertFalse(queriedItalic[0]);
+
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "NoSuchFamily"),
+                entry("font-weight", "bold"),
+                entry("font-style", "italic")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals(700f, queriedWeight[0]);
+        Assertions.assertTrue(queriedItalic[0]);
+
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "NoSuchFamily"),
+                entry("font-weight", "600"),
+                entry("font-style", "oblique")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals(600f, queriedWeight[0]);
+        Assertions.assertTrue(queriedItalic[0]);
+    }
+
+    @Test
     void unquotedFamilyNameKeepsIntegers() {
         PlatformSupport support = getSupport();
 
