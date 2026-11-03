@@ -43,6 +43,13 @@ import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.SeparatorMode;
 
 public final class FontParser {
+    private static final String[] STYLE_KEYWORDS = {"italic", "left", "right", "oblique"};
+    private static final String[] VARIANT_KEYWORDS = {"small-caps"};
+    private static final String[] WEIGHT_KEYWORDS = {"bold", "bolder", "lighter"};
+    private static final String[] STRETCH_KEYWORDS = {
+            "ultra-condensed", "extra-condensed", "condensed", "semi-condensed",
+            "semi-expanded", "expanded", "extra-expanded", "ultra-expanded"};
+
     private FontParser() {}
 
     // Todo: font-variant
@@ -86,9 +93,15 @@ public final class FontParser {
         @Nullable List<ComponentValue> fontVariant = null;
         @Nullable List<ComponentValue> fontWeight = null;
         @Nullable List<ComponentValue> fontStretch = null;
-        while (!parser.isEof()) {
+        for (int slots = 0; slots < 4 && !parser.isEof(); slots++) {
+            // "normal" fits any of the four and is the default
+            if (parser.isCurrentOneOfKeywords("normal")) {
+                parser.advance();
+                continue;
+            }
+
             // font-style: normal | italic | left | right| oblique [<angle>]?
-            if (fontStyle == null && parser.isCurrentOneOfKeywords("normal", "italic", "left", "right", "oblique")) {
+            if (fontStyle == null && parser.isCurrentOneOfKeywords(STYLE_KEYWORDS)) {
                 if (parser.isCurrentOneOfKeywords("oblique") && isAngleDimension(parser.peekNext())) {
                     // a non-angle dimension is the font-size
                     fontStyle = Arrays.asList(parser.current(), parser.peekNext());
@@ -101,14 +114,14 @@ public final class FontParser {
             }
 
             // font-variant: normal | small-caps
-            if (fontVariant == null && parser.isCurrentOneOfKeywords("small-caps")) {
+            if (fontVariant == null && parser.isCurrentOneOfKeywords(VARIANT_KEYWORDS)) {
                 fontVariant = Collections.singletonList(parser.current());
                 parser.advance();
                 continue;
             }
 
             // font-weight: normal | bold | bolder | lighter | 1-1000
-            if (fontWeight == null && (parser.isCurrentOneOfKeywords("bold", "bolder", "lighter")
+            if (fontWeight == null && (parser.isCurrentOneOfKeywords(WEIGHT_KEYWORDS)
                     || parser.current().isANumberInRange(1, 1000))) {
                 fontWeight = Collections.singletonList(parser.current());
                 parser.advance();
@@ -117,15 +130,7 @@ public final class FontParser {
 
             // font-stretch: normal | ultra-condensed | extra-condensed | condensed | semi-condensed |
             // semi-expanded | expanded | extra-expanded | ultra-expanded
-            if (fontStretch == null && parser.isCurrentOneOfKeywords(
-                    "ultra-condensed",
-                    "extra-condensed",
-                    "condensed",
-                    "semi-condensed",
-                    "semi-expanded",
-                    "expanded",
-                    "extra-expanded",
-                    "ultra-expanded")) {
+            if (fontStretch == null && parser.isCurrentOneOfKeywords(STRETCH_KEYWORDS)) {
                 fontStretch = Collections.singletonList(parser.current());
                 parser.advance();
                 continue;
@@ -138,6 +143,9 @@ public final class FontParser {
         // Parse required font-size
         if (parser.isEof()) {
             return Collections.emptyMap(); // Invalid: font-size is required
+        }
+        if (isFontPrefixKeyword(parser)) {
+            return Collections.emptyMap(); // Invalid: more than four or repeated prefix keywords
         }
         @NotNull List<ComponentValue> fontSize = Collections.singletonList(parser.current());
         parser.advance();
@@ -170,6 +178,14 @@ public final class FontParser {
         return result;
     }
 
+    private static boolean isFontPrefixKeyword(@NotNull ComponentValueGrammarParser parser) {
+        return parser.isCurrentOneOfKeywords("normal")
+                || parser.isCurrentOneOfKeywords(STYLE_KEYWORDS)
+                || parser.isCurrentOneOfKeywords(VARIANT_KEYWORDS)
+                || parser.isCurrentOneOfKeywords(WEIGHT_KEYWORDS)
+                || parser.isCurrentOneOfKeywords(STRETCH_KEYWORDS);
+    }
+
     /** A {@code <dimension>} with an angle unit. */
     private static boolean isAngleDimension(@Nullable ComponentValue value) {
         if (!(value instanceof Token.Dimension)) return false;
@@ -197,16 +213,30 @@ public final class FontParser {
         return families;
     }
 
-    /** {@code <family-name> = <string> | <custom-ident>+}; idents joined by spaces. */
+    /** {@code <family-name> = <string> | <custom-ident>+}, leniently also integer number/dimension tokens. */
     private static @NotNull String familyName(@NotNull List<@NotNull ComponentValue> group) {
         StringBuilder name = new StringBuilder();
         for (ComponentValue token : group) {
             if (token instanceof Token.Str) return ((Token.Str) token).value();
-            if (!(token instanceof Token.Ident)) continue;
+            String part = familyNamePart(token);
+            if (part == null) continue;
             if (name.length() > 0) name.append(' ');
-            name.append(((Token.Ident) token).name());
+            name.append(part);
         }
         return name.toString();
+    }
+
+    private static @Nullable String familyNamePart(@NotNull ComponentValue token) {
+        if (token instanceof Token.Ident) return ((Token.Ident) token).name();
+        // lossy: drops a '+' sign and leading zeros; non-integers are skipped
+        if (token instanceof Token.Number && ((Token.Number) token).numericType() == Token.NumericType.INTEGER) {
+            return ((Token.Number) token).serialize();
+        }
+        if (token instanceof Token.Dimension
+                && ((Token.Dimension) token).numericType() == Token.NumericType.INTEGER) {
+            return ((Token.Dimension) token).serialize();
+        }
+        return null;
     }
 
     private static @NotNull String stripQuotes(@NotNull String str, char quoteChar) {

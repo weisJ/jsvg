@@ -27,6 +27,7 @@ import java.awt.font.GlyphMetrics;
 import java.awt.font.GlyphVector;
 import java.awt.font.LineMetrics;
 import java.awt.font.TextAttribute;
+import java.awt.geom.Path2D;
 import java.text.Bidi;
 import java.util.Collections;
 import java.util.HashMap;
@@ -80,6 +81,7 @@ public final class AWTSVGFont implements SVGFont {
     }
 
     private float computeKerningAdjustment(@NotNull String leftCodepoint, @NotNull String rightCodepoint) {
+        if (isDefaultIgnorable(leftCodepoint) || isDefaultIgnorable(rightCodepoint)) return 0;
         Glyph leftGlyph = codepointGlyph(leftCodepoint);
         Glyph rightGlyph = codepointGlyph(rightCodepoint);
         if (leftGlyph instanceof EmojiGlyph || rightGlyph instanceof EmojiGlyph) return 0;
@@ -174,6 +176,10 @@ public final class AWTSVGFont implements SVGFont {
 
     @NotNull
     private Glyph createGlyph(char @NotNull [] codepoint) {
+        // invisible even if the font has no glyph or a visible one
+        if (isDefaultIgnorable(String.valueOf(codepoint))) {
+            return new Glyph(new Path2D.Float(), 0, true);
+        }
         GlyphVector glyphVector = font.createGlyphVector(frc, codepoint);
         GlyphMetrics gm = glyphVector.getGlyphMetrics(0);
         float advance = gm.getAdvanceX();
@@ -184,6 +190,39 @@ public final class AWTSVGFont implements SVGFont {
 
         Shape shape = glyphVector.getOutline(0, 0);
         return new Glyph(shape, advance, gm.getBounds2D().isEmpty());
+    }
+
+    /** True if every code point is Default_Ignorable_Code_Point. */
+    private static boolean isDefaultIgnorable(@NotNull String codepoint) {
+        if (codepoint.isEmpty()) return false;
+        for (int i = 0; i < codepoint.length();) {
+            int cp = codepoint.codePointAt(i);
+            if (!isDefaultIgnorable(cp)) return false;
+            i += Character.charCount(cp);
+        }
+        return true;
+    }
+
+    /**
+     * Except Hangul fillers and U+1BCA0..1BCA3, which keep their spacing glyphs as in HarfBuzz.
+     *
+     * @see <a href="https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt">Unicode data</a>
+     */
+    private static boolean isDefaultIgnorable(int cp) {
+        if (cp < 0x00AD) return false;
+        return cp == 0x00AD
+                || cp == 0x034F
+                || cp == 0x061C
+                || (cp >= 0x17B4 && cp <= 0x17B5)
+                || (cp >= 0x180B && cp <= 0x180F)
+                || (cp >= 0x200B && cp <= 0x200F)
+                || (cp >= 0x202A && cp <= 0x202E)
+                || (cp >= 0x2060 && cp <= 0x206F)
+                || (cp >= 0xFE00 && cp <= 0xFE0F)
+                || cp == 0xFEFF
+                || (cp >= 0xFFF0 && cp <= 0xFFF8)
+                || (cp >= 0x1D173 && cp <= 0x1D17A)
+                || (cp >= 0xE0000 && cp <= 0xE0FFF);
     }
 
     private static boolean isPossibleEmoji(char @NotNull [] codepoint) {

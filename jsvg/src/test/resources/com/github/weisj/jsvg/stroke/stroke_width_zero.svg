@@ -1,0 +1,31 @@
+<svg width="400" height="300" viewBox="0 0 200 150"
+	xmlns="http://www.w3.org/2000/svg" version="1.1">
+	<defs>
+		<linearGradient id="g">
+			<stop offset="0" stop-color="red" />
+			<stop offset="1" stop-color="blue" />
+		</linearGradient>
+		<style>.zero { stroke-width: 0 }</style>
+	</defs>
+	<rect x="10" y="10" width="180" height="20" fill="none"
+		stroke="black" stroke-width="0" />
+	<line x1="10" y1="40" x2="190" y2="40" stroke="black"
+		stroke-width="0" />
+	<path d="M 10 50 L 100 60 L 190 50" fill="none" stroke="black"
+		style="stroke-width: 0px" />
+	<g stroke="black" stroke-width="0" fill="none">
+		<circle cx="20" cy="80" r="10" />
+	</g>
+	<circle cx="50" cy="80" r="10" fill="none" stroke="black"
+		class="zero" />
+	<circle cx="80" cy="80" r="10" fill="none" stroke="black"
+		stroke-width="0" stroke-dasharray="4 2" />
+	<circle cx="110" cy="80" r="10" fill="none" stroke="url(#g)"
+		stroke-width="0" />
+	<circle cx="140" cy="80" r="10" fill="none" stroke="black"
+		stroke-width="0%" />
+	<circle cx="170" cy="80" r="10" fill="none" stroke="black"
+		stroke-width="0" vector-effect="non-scaling-stroke" />
+	<text x="10" y="130" font-size="30" fill="none" stroke="black"
+		stroke-width="0">Text</text>
+</svg>

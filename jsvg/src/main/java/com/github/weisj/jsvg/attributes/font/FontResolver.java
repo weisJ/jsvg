@@ -89,7 +89,8 @@ public final class FontResolver {
                 return new Font(attributes);
             }
             // If no predefined font was found, try to find a custom font.
-            Font customFont = platformSupport.customFont(family);
+            Font customFont = platformSupport.customFont(family, fontSpec.currentWeight(),
+                    !(fontSpec.style() instanceof FontStyle.Normal));
             if (customFont != null) {
                 // No FAMILY attribute: deriveFont discards the created font handle if it doesn't
                 // match the font's name exactly and falls back to a system font lookup.

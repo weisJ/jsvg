@@ -66,6 +66,13 @@ public interface PlatformSupport {
         return null;
     }
 
+    /** Like {@link #customFont(String)}, but lets the platform pick the face closest to the requested
+     * CSS weight (e.g. 400 normal, 700 bold) and style; whatever the face lacks is synthesized. */
+    @ApiStatus.Experimental
+    default @Nullable Font customFont(@NotNull String family, float weight, boolean italic) {
+        return customFont(family);
+    }
+
     default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
         return Toolkit.getDefaultToolkit().createImage(imageProducer);
     }

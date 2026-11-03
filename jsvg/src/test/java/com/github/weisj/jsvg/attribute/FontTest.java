@@ -33,10 +33,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.font.AWTSVGFont;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.nodes.text.Glyph;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
 import com.github.weisj.jsvg.parser.impl.ParserTestUtil;
@@ -97,6 +99,94 @@ class FontTest {
     }
 
     @Test
+    void customFontReceivesWeightAndStyle() {
+        float[] queriedWeight = new float[1];
+        boolean[] queriedItalic = new boolean[1];
+        Font stub = new Font(Font.DIALOG, Font.PLAIN, 1);
+        PlatformSupport support = new PlatformSupport() {
+            @Override
+            public ImageObserver imageObserver() {
+                return null;
+            }
+
+            @Override
+            public TargetSurface targetSurface() {
+                return null;
+            }
+
+            @Override
+            public @NotNull Font customFont(@NotNull String family, float weight, boolean italic) {
+                queriedWeight[0] = weight;
+                queriedItalic[0] = italic;
+                return stub;
+            }
+        };
+
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "NoSuchFamily")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals(400f, queriedWeight[0]);
+        Assertions.assertFalse(queriedItalic[0]);
+
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "NoSuchFamily"),
+                entry("font-weight", "bold"),
+                entry("font-style", "italic")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals(700f, queriedWeight[0]);
+        Assertions.assertTrue(queriedItalic[0]);
+
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "NoSuchFamily"),
+                entry("font-weight", "600"),
+                entry("font-style", "oblique")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals(600f, queriedWeight[0]);
+        Assertions.assertTrue(queriedItalic[0]);
+    }
+
+    @Test
+    void unquotedFamilyNameKeepsIntegers() {
+        PlatformSupport support = getSupport();
+
+        // Not a valid <custom-ident>+ sequence, but emitted by SVG generators (e.g. ECharts)
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "Frutiger LT Com 47 Light Cn"),
+                entry("font-size", "12")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals("frutiger lt com 47 light cn", queriedFontFamily);
+
+        FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "Univers 45Light"),
+                entry("font-size", "12")), MEASURE_CONTEXT, support);
+        Assertions.assertEquals("univers 45light", queriedFontFamily);
+    }
+
+    @Test
+    void defaultIgnorableCodepointsTakeNoSpace() {
+        AWTSVGFont font = new AWTSVGFont(new Font(Font.SANS_SERIF, Font.PLAIN, 100));
+        String[] ignorable = {
+                "­", "͏", "؜", "឴", "᠋", "᠏", "​", "‍", "‏",
+                "‪", "‮", "⁠", "⁯", "︀", "️", "﻿", "￸",
+                "𝅳", "󠀀", "󠀁", "󠿿", "​​"};
+        for (String codepoint : ignorable) {
+            Glyph glyph = font.codepointGlyph(codepoint);
+            String label = "U+" + Integer.toHexString(codepoint.codePointAt(0));
+            Assertions.assertEquals(0, glyph.advance(), label);
+            Assertions.assertFalse(glyph.isRendered(), label);
+            Assertions.assertEquals(0, font.kerningAdjustment("A", codepoint), label);
+            Assertions.assertEquals(0, font.kerningAdjustment(codepoint, "V"), label);
+        }
+    }
+
+    @Test
+    void visibleCodepointsKeepTheirAdvance() {
+        AWTSVGFont font = new AWTSVGFont(new Font(Font.SANS_SERIF, Font.PLAIN, 100));
+        Assertions.assertTrue(font.codepointGlyph("A").isRendered());
+        String[] visible = {"A", " ", "¬", "®", "‐", "A️", "ㅤ"};
+        for (String codepoint : visible) {
+            String label = "U+" + Integer.toHexString(codepoint.codePointAt(0));
+            Assertions.assertTrue(font.codepointGlyph(codepoint).advance() > 0, label);
+        }
+    }
+
+    @Test
     void checkFontShorthandExpansion() {
         //@formatter:off
 
@@ -143,6 +233,49 @@ class FontTest {
                 "font-size", "1.2em",
                 "line-height", "normal",
                 "font-family", "\"Fira Sans\", sans-serif"));
+
+        // each "normal" takes one of the four style/variant/weight/stretch slots
+        assertFontShorthand("normal normal 12px sans-serif",
+            mapOf(
+                "font-style", "normal",
+                "font-variant", "normal",
+                "font-weight", "normal",
+                "font-stretch", "normal",
+                "font-size", "12px",
+                "line-height", "normal",
+                "font-family", "sans-serif"));
+        assertFontShorthand("normal italic normal bold 12px sans-serif",
+            mapOf(
+                "font-style", "italic",
+                "font-variant", "normal",
+                "font-weight", "bold",
+                "font-stretch", "normal",
+                "font-size", "12px",
+                "line-height", "normal",
+                "font-family", "sans-serif"));
+        assertFontShorthand("normal normal normal normal 12px sans-serif",
+            mapOf(
+                "font-style", "normal",
+                "font-variant", "normal",
+                "font-weight", "normal",
+                "font-stretch", "normal",
+                "font-size", "12px",
+                "line-height", "normal",
+                "font-family", "sans-serif"));
+        assertFontShorthand("italic normal 12px sans-serif",
+            mapOf(
+                "font-style", "italic",
+                "font-variant", "normal",
+                "font-weight", "normal",
+                "font-stretch", "normal",
+                "font-size", "12px",
+                "line-height", "normal",
+                "font-family", "sans-serif"));
+
+        // more than four or repeated prefix keywords are invalid
+        assertFontShorthand("normal normal normal normal normal 12px sans-serif", mapOf());
+        assertFontShorthand("italic small-caps bold condensed normal 12px sans-serif", mapOf());
+        assertFontShorthand("bold bold 12px sans-serif", mapOf());
 
         // system font
         assertFontShorthand("caption", mapOf("font", "caption"));
