@@ -75,4 +75,18 @@ class LexerTest {
         assertEquals(List.of(new Token.Function("rgb")), tokens("rgb("));
         assertEquals(List.of(new Token.Function("urls")), tokens("urls(")); // any ident + '(' is a function
     }
+
+    @Test
+    void numbers() {
+        assertEquals(List.of(new Token.Number(1f, Token.NumericType.NUMBER)), tokens("1.0"));
+        assertEquals(List.of(new Token.Number(0f, Token.NumericType.NUMBER)), tokens("0.00"));
+        assertEquals(List.of(new Token.Number(-2f, Token.NumericType.NUMBER)), tokens("-2.0"));
+        assertEquals(List.of(new Token.Number(1.5f, Token.NumericType.NUMBER)), tokens("1.50"));
+        assertEquals(List.of(new Token.Number(0.5f, Token.NumericType.NUMBER)), tokens("+.5"));
+        assertEquals(List.of(new Token.Number(1000f, Token.NumericType.NUMBER)), tokens("1e3"));
+        assertEquals(List.of(new Token.Number(0.25f, Token.NumericType.NUMBER)), tokens("25E-2"));
+        assertEquals(List.of(new Token.Number(7f, Token.NumericType.INTEGER)), tokens("7"));
+        assertEquals(List.of(new Token.Percentage(50f)), tokens("50.0%"));
+        assertEquals(List.of(new Token.Dimension(1f, Token.NumericType.NUMBER, "px")), tokens("1.0px"));
+    }
 }
