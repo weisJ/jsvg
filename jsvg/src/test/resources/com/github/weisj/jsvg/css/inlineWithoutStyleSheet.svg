@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+	<rect x="0" y="0" width="50" height="100" fill="green" />
+	<rect x="50" y="0" width="50" height="100" fill="blue"
+		style="fill:green" />
+	<rect x="100" y="0" width="50" height="100"
+		style="fill:blue;fill:green!important" />
+	<rect x="150" y="0" width="50" height="100"
+		style=" fill : green ; stroke:none;" />
+</svg>
