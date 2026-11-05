@@ -70,13 +70,23 @@ class StyleAttributeFastPathTest {
             "a:-b", "a:--b", "a:-", "a:_", "a:b-", "a:<!--", "a:-->", "a:b:c", "a::b", "a:b c:d;e:f",
             "-inkscape-font-specification:'Sans, Normal';font-family:Sans",
             "font:12px serif;fill:red", "fill:red;font:12px serif;stroke:blue", "FONT:12px serif", "a:1!important;b:2",
-            "a:url(a'b)c'd);e:f", "a:url(a\"b)c\"d);e:f", "a:foo('x');b:c", "a:foo('x)');b:c");
+            "a:url(a'b)c'd);e:f", "a:url(a\"b)c\"d);e:f", "a:foo('x');b:c", "a:foo('x)');b:c",
+            "a:]", "a:[", "a:b];c:d", "a:b[;c:d", "]:a", "a:'x!y'", "a:'x!important'", "a:foo(!)", "A:b;C:d", "aB-c:1",
+            "a:b;;c:d", "a:b;@x", "a:b;c:d/e", "!:a", "a!:b", "a:b;!", "marker:none!important",
+            "transform:matrix(1,0,0,1,2,3)", "a:matrix(1,2,3,4,5,6);b:url(#c)", "font-family:'A b';fill:red");
 
     private static final List<String> ATTRIBUTE_VALUES = List.of(
             "", " 1 ", "1 ", "red", "Red", "-a", "--a", "_a", "#abc", "#1a", "#-a", "#", "1", "01", "1.0", "1.50", "1.",
             ".5", "-1", "+1", "1e3", "1E-3", "1em", "1ex", "1.5px", "1_x", "1-x", "50%", "50.5%", "50%%", "url(#x)",
             "URL(#x)", "url(a.png)", "url(a/b.png)", "url(#x y)", "url()", "url('#x')", "matrix(1 0 0 1 2 3)", "1 2",
-            "a b", "rgb(1,2,3)");
+            "a b", "rgb(1,2,3)",
+            "matrix(1,0,0,1,2,3)", "translate(-1.5,2)", "translate( 1 , 2 )", "scale(1\t2)", "scale(1\n2)",
+            "scale(1\r\n2)", "scale(1\f2)", "rotate(1deg)", "rotate(1e3)", "rotate(.5)", "rotate(+1)", "rotate(1.)",
+            "rotate(1-2)", "rotate(1,)", "rotate(,1)", "rotate()", "rotate(", "rotate(1", "a(1)b(2)", "a(1) b(2)",
+            "translate(1,2) scale(3)", "URL(1)", "url(1)", "Url(1)", "uRl(a)", "-a(1)", "a-b(1)", "a_1(2)", "1a(2)",
+            "a (1)", "a(b(1))", "a(-)", "a(--1)", "a(-1.5.5)", "a(1%)", "a(1px)", "a(00.10)", "a(-0)", "a(1e-3)",
+            "a(1E3,2)", "a(1e)", "a(1e-)", "a(1e+3)", "a(1ex)", "a(-2.5e-7 3)", "a(99999999999999999999)", "a(ä)",
+            "a(1)x", "MATRIX(1,2,3,4,5,6)", "'a b'", "'", "a'b'", "'a' 'b'");
 
     private static List<NormalizedProperty> full(String style) {
         return CssNormalizer

@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.parser.css.impl;
 
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,7 +59,8 @@ final class LazyComponentValues extends AbstractList<ComponentValue> {
         char first = s.charAt(0);
         if (isIdentStart(first)) {
             if (isIdentRest(s, 1)) return new Token.Ident(s);
-            return parseUrl(s);
+            ComponentValue url = parseUrl(s);
+            return url != null ? url : parseNumericFunction(s);
         }
         if (first == '#') {
             if (s.length() < 2 || !isIdentRest(s, 1)) return null;
@@ -77,6 +79,48 @@ final class LazyComponentValues extends AbstractList<ComponentValue> {
             if (!isIdentChar(c) && c != '#' && c != '.') return null;
         }
         return new Token.Url(s.substring(4, end));
+    }
+
+    /** Tokenizes {@code name(1,-2.5 3)}, the form of nearly all transforms, or returns {@code null} for any other. */
+    private static @Nullable ComponentValue parseNumericFunction(@NotNull String s) {
+        int end = s.length() - 1;
+        int open = s.indexOf('(');
+        if (open <= 0 || s.charAt(end) != ')' || !isIdentRest(s.substring(0, open), 0)) return null;
+        String name = s.substring(0, open);
+        if (name.equalsIgnoreCase("url")) return null;
+        List<ComponentValue> args = new ArrayList<>();
+        int i = open + 1;
+        while (i < end) {
+            char c = s.charAt(i);
+            if (c == ',') {
+                args.add(Token.Static.COMMA);
+                i++;
+            } else if (isWhitespace(c)) {
+                args.add(Token.Static.WHITESPACE);
+                while (isWhitespace(s.charAt(i)))
+                    i++;
+            } else {
+                int digits = c == '-' ? i + 1 : i;
+                int numberEnd = skipDigits(s, digits);
+                if (numberEnd == digits) return null;
+                Token.NumericType type = Token.NumericType.INTEGER;
+                if (s.charAt(numberEnd) == '.') {
+                    int fractionEnd = skipDigits(s, numberEnd + 1);
+                    if (fractionEnd == numberEnd + 1) return null;
+                    numberEnd = fractionEnd;
+                    type = Token.NumericType.NUMBER;
+                }
+                char next = s.charAt(numberEnd);
+                if (next != ',' && next != ')' && !isWhitespace(next)) return null;
+                args.add(new Token.Number((float) Double.parseDouble(s.substring(i, numberEnd)), type));
+                i = numberEnd;
+            }
+        }
+        return new ComponentValue.FunctionBlock(name, args);
+    }
+
+    private static boolean isWhitespace(char c) {
+        return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f';
     }
 
     private static @Nullable ComponentValue parseNumeric(@NotNull String s) {
