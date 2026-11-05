@@ -28,6 +28,17 @@ import static com.github.weisj.jsvg.ImageComparison.renderJsvg;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+import javax.imageio.ImageIO;
+
 import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.ImageComparison.CompareInfo;
@@ -35,6 +46,7 @@ import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 import com.github.weisj.jsvg.ImageComparison.ReferenceTestResult;
 import com.github.weisj.jsvg.ImageComparison.RenderType;
 import com.github.weisj.jsvg.parser.LoaderContext;
+import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 
 class ImageTest {
@@ -59,5 +71,27 @@ class ImageTest {
     void embeddedImageTest() {
         // Batik doesn't support data uris
         assertDoesNotThrow(() -> renderJsvg("image/imageBase64.svg"));
+    }
+
+    @Test
+    void embeddedImageIsDecoded() throws IOException {
+        BufferedImage image = new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
+        Graphics2D imageGraphics = image.createGraphics();
+        imageGraphics.setColor(Color.RED);
+        imageGraphics.fillRect(0, 0, 8, 8);
+        imageGraphics.dispose();
+        ByteArrayOutputStream png = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", png);
+
+        String svg = "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'"
+                + " width='8' height='8'><image width='8' height='8' xlink:href='data:image/png;base64,"
+                + Base64.getEncoder().encodeToString(png.toByteArray()) + "'/></svg>";
+        SVGDocument document = new SVGLoader().load(new ByteArrayInputStream(svg.getBytes(StandardCharsets.UTF_8)),
+                null, LoaderContext.createDefault());
+        BufferedImage rendered = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = rendered.createGraphics();
+        document.render(null, g);
+        g.dispose();
+        assertEquals(0xffff0000, rendered.getRGB(4, 4));
     }
 }

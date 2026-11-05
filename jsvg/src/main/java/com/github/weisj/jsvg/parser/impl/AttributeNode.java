@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Contract;
@@ -70,7 +69,7 @@ import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
 import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
+import com.github.weisj.jsvg.nodes.prototype.spec.NodeSpec;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.parser.PaintParser;
@@ -193,10 +192,27 @@ public final class AttributeNode {
                 ? cssParser.parseStyleAttribute(styleStr, document().loaderContext().cssHints())
                 : Collections.emptyList();
 
+        if (styleSheets.isEmpty() && tryApplyInlineDeclarations(inlineCssDeclarations)) return;
+
         // FIXME: Only use the highest priority *valid* definition of a property value.
         CascadeResult cascadeResult = styleSheets().matchAndCascade(inlineCssDeclarations, element);
         // CSS attributes override SVG presentation attributes (CSS Cascade 4 §6.4).
         resolvedAttributes.putAll(cascadeResult.attributes);
+    }
+
+    /**
+     * Applies the declarations of a document without rules, or returns {@code false} if one is !important.
+     * The first declaration of a name wins, hence the backwards iteration.
+     */
+    private boolean tryApplyInlineDeclarations(@NotNull List<@NotNull NormalizedProperty> declarations) {
+        for (int i = 0; i < declarations.size(); i++) {
+            if (declarations.get(i).important()) return false;
+        }
+        for (int i = declarations.size() - 1; i >= 0; i--) {
+            NormalizedProperty property = declarations.get(i);
+            resolvedAttributes.put(property.name(), new AttributeValue.Parsed(property.value()));
+        }
+        return true;
     }
 
     public @NotNull ParsedDocument document() {
@@ -254,10 +270,8 @@ public final class AttributeNode {
             @Nullable String value, ElementRelation relation) {
         T e = getElementByUrl(type, value);
         if (e == null) return null;
-        for (Category cat : e.getClass().getAnnotation(ElementCategories.class).value()) {
-            if (cat == category) return recordIndirectChild(e, value, relation);
-        }
-        return null;
+        SVGNode node = (SVGNode) e;
+        return NodeSpec.of(node).hasCategory(node, category) ? recordIndirectChild(e, value, relation) : null;
     }
 
     public @NotNull Map<String, String> declaredAttributes() {
@@ -307,19 +321,6 @@ public final class AttributeNode {
             return ((AttributeValue.PlainString) value).string();
         } else {
             return ((AttributeValue.Parsed) value).reserialize();
-        }
-    }
-
-    /** Shared token-vs-string dispatch; {@code absent} when there is no value. */
-    private <T> T parseValue(@NotNull String key, T absent,
-            @NotNull Function<@NotNull List<@NotNull ComponentValue>, T> fromTokens,
-            @NotNull Function<@NotNull String, T> fromString) {
-        AttributeValue value = resolvedAttributes.get(key);
-        if (value == null) return absent;
-        if (value instanceof AttributeValue.Parsed) {
-            return fromTokens.apply(((AttributeValue.Parsed) value).tokens());
-        } else {
-            return fromString.apply(((AttributeValue.PlainString) value).string());
         }
     }
 
@@ -439,21 +440,27 @@ public final class AttributeNode {
     }
 
     private @NotNull Length getLengthInternal(@NotNull String key, @NotNull PercentageDimension dimension) {
-        return parseValue(key, FALLBACK_LENGTH,
-                tokens -> parser().parseLength(tokens, FALLBACK_LENGTH, dimension),
-                text -> parser().parseLength(text, FALLBACK_LENGTH, dimension));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return FALLBACK_LENGTH;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseLength(((AttributeValue.Parsed) value).tokens(), FALLBACK_LENGTH, dimension);
+        return parser().parseLength(((AttributeValue.PlainString) value).string(), FALLBACK_LENGTH, dimension);
     }
 
     public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key) {
-        return parseValue(key, Length.ZERO,
-                this::getHorizontalReferenceLength,
-                this::getHorizontalReferenceLength);
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return Length.ZERO;
+        if (value instanceof AttributeValue.Parsed)
+            return getHorizontalReferenceLength(((AttributeValue.Parsed) value).tokens());
+        return getHorizontalReferenceLength(((AttributeValue.PlainString) value).string());
     }
 
     public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key) {
-        return parseValue(key, Length.ZERO,
-                this::getVerticalReferenceLength,
-                this::getVerticalReferenceLength);
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return Length.ZERO;
+        if (value instanceof AttributeValue.Parsed)
+            return getVerticalReferenceLength(((AttributeValue.Parsed) value).tokens());
+        return getVerticalReferenceLength(((AttributeValue.PlainString) value).string());
     }
 
     private static @Nullable Length horizontalKeyword(@Nullable String value) {
@@ -510,9 +517,11 @@ public final class AttributeNode {
 
     @Contract("_,!null -> !null")
     public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
-        return parseValue(key, fallback,
-                tokens -> parser().parsePercentage(tokens, fallback),
-                text -> parser().parsePercentage(text, fallback));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return fallback;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parsePercentage(((AttributeValue.Parsed) value).tokens(), fallback);
+        return parser().parsePercentage(((AttributeValue.PlainString) value).string(), fallback);
     }
 
     @Contract("_,!null,_,_ -> !null")
@@ -559,9 +568,11 @@ public final class AttributeNode {
     @Contract("_,!null,_ -> !null")
     public @NotNull Length @Nullable [] getLengthList(@NotNull String key, @NotNull Length @Nullable [] fallback,
             @NotNull PercentageDimension dimension) {
-        return parseValue(key, fallback,
-                tokens -> parser().parseLengthList(tokens, fallback, dimension),
-                text -> parser().parseLengthList(text, fallback, dimension));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return fallback;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseLengthList(((AttributeValue.Parsed) value).tokens(), fallback, dimension);
+        return parser().parseLengthList(((AttributeValue.PlainString) value).string(), fallback, dimension);
     }
 
     public float @NotNull [] getFloatList(@NotNull String key) {
@@ -596,9 +607,11 @@ public final class AttributeNode {
     }
 
     public <E extends Enum<E>> @Nullable E getEnumNullable(@NotNull String key, @NotNull Class<E> enumType) {
-        return parseValue(key, null,
-                tokens -> parser().parseEnum(tokens, enumType),
-                text -> parser().parseEnum(text, enumType));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return null;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseEnum(((AttributeValue.Parsed) value).tokens(), enumType);
+        return parser().parseEnum(((AttributeValue.PlainString) value).string(), enumType);
     }
 
     public @Nullable ClipPath getClipPath() {
@@ -657,9 +670,11 @@ public final class AttributeNode {
     }
 
     private @Nullable List<TransformPart> parseTransformParts(@NotNull String key) {
-        return parseValue(key, null,
-                tokens -> parser().parseTransform(tokens),
-                text -> parser().parseTransform(text));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return null;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseTransform(((AttributeValue.Parsed) value).tokens());
+        return parser().parseTransform(((AttributeValue.PlainString) value).string());
     }
 
     private @NotNull TransformValue createTransformValueFromParts(@NotNull List<TransformPart> parts) {
@@ -710,9 +725,11 @@ public final class AttributeNode {
     }
 
     public float getFloat(@NotNull String name, float fallback) {
-        return parseValue(name, fallback,
-                tokens -> parser().parseFloat(tokens, fallback),
-                text -> parser().parseFloat(text, fallback));
+        AttributeValue value = resolvedAttributes.get(name);
+        if (value == null) return fallback;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseFloat(((AttributeValue.Parsed) value).tokens(), fallback);
+        return parser().parseFloat(((AttributeValue.PlainString) value).string(), fallback);
     }
 
     public float getNonNegativeFloat(@NotNull String name, float fallback) {

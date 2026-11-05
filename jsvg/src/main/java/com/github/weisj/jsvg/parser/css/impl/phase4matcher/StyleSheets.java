@@ -24,6 +24,7 @@ package com.github.weisj.jsvg.parser.css.impl.phase4matcher;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
 import com.github.weisj.jsvg.parser.css.data.StyleRule;
@@ -31,14 +32,24 @@ import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
 import com.github.weisj.jsvg.parser.impl.ParsedElement;
 
 public class StyleSheets {
-    private final @NotNull StyleRuleMatcher rules = new StyleRuleMatcher();
+    // Created on demand: most documents have no stylesheet and never need the matcher classes.
+    private @Nullable StyleRuleMatcher rules;
     private int sourceOrder = 0;
 
     public void add(@NotNull StyleRuleList styleRuleList) {
         for (StyleRule rule : styleRuleList.rules()) {
             updateSourceOrders(rule);
-            rules.add(rule);
+            rules().add(rule);
         }
+    }
+
+    public boolean isEmpty() {
+        return rules == null;
+    }
+
+    private @NotNull StyleRuleMatcher rules() {
+        if (rules == null) rules = new StyleRuleMatcher();
+        return rules;
     }
 
     /**
@@ -49,11 +60,11 @@ public class StyleSheets {
             @NotNull List<@NotNull NormalizedProperty> inlineDeclarations,
             @NotNull ParsedElement targetElement) {
 
-        return rules.matchAndCascade(inlineDeclarations, targetElement);
+        return rules().matchAndCascade(inlineDeclarations, targetElement);
     }
 
     public boolean selectorsUseElementPositionInDom(@NotNull ParsedElement targetElement) {
-        return rules.selectorsUseElementPositionInDom(targetElement);
+        return rules != null && rules.selectorsUseElementPositionInDom(targetElement);
     }
 
     private void updateSourceOrders(@NotNull StyleRule rule) {
