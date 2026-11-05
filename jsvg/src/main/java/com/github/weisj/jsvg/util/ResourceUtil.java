@@ -34,6 +34,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,7 +104,9 @@ public final class ResourceUtil {
 
     private static @Nullable BufferedImage readPossiblyCorruptedFile(@NotNull InputStream inputStream)
             throws IOException {
-        ImageInputStream input = ImageIO.createImageInputStream(inputStream);
+        // The data is in memory already, so skip the provider lookup and temp file of
+        // createImageInputStream.
+        ImageInputStream input = new MemoryCacheImageInputStream(inputStream);
         Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
         if (!readers.hasNext()) return null;
 
