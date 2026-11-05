@@ -31,7 +31,7 @@ import com.github.weisj.jsvg.nodes.AbstractSVGNode;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.nodes.prototype.spec.NodeSpec;
 
 public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Container<E> {
     private static final boolean EXHAUSTIVE_CHECK = true;
@@ -60,18 +60,18 @@ public abstract class BaseContainerNode<E> extends AbstractSVGNode implements Co
     }
 
     protected boolean isAcceptableType(@NotNull SVGNode node) {
-        PermittedContent allowedNodes = getClass().getAnnotation(PermittedContent.class);
-        if (allowedNodes == null) {
+        NodeSpec allowedNodes = NodeSpec.of(this);
+        if (!allowedNodes.hasPermittedContent()) {
             throw new IllegalStateException(
                     String.format("Element <%s> doesn't specify permitted content information", tagName()));
         }
-        if (allowedNodes.any()) return true;
+        if (allowedNodes.anyContent()) return true;
 
-        Category[] categories = Category.elementCategoriesOf(node).value();
+        Category[] categories = NodeSpec.of(node).categories(node);
         Class<? extends SVGNode> nodeType = node.getClass();
-        CategoryCheckResult result = doIntersect(allowedNodes.categories(), categories);
+        CategoryCheckResult result = doIntersect(allowedNodes.permittedCategories(), categories);
         if (result == CategoryCheckResult.Allowed) return true;
-        for (Class<? extends SVGNode> type : allowedNodes.anyOf()) {
+        for (Class<? extends SVGNode> type : allowedNodes.permittedTypes()) {
             if (type.isAssignableFrom(nodeType)) return true;
         }
         if (EXHAUSTIVE_CHECK && result != CategoryCheckResult.Excluded) {

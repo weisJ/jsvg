@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,10 +39,9 @@ import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.Container;
 import com.github.weisj.jsvg.nodes.prototype.Renderable;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.nodes.prototype.spec.NodeSpec;
 import com.github.weisj.jsvg.parser.DomElement;
 import com.github.weisj.jsvg.parser.TextContent;
-import com.github.weisj.jsvg.util.supplier.LazySupplier;
 
 public final class ParsedElement implements DomElement {
     private static final Logger LOGGER = LogFactory.createLogger(ParsedElement.class);
@@ -66,8 +64,7 @@ public final class ParsedElement implements DomElement {
     private final int oneBasedIndexAmongSiblingsWithSameTagName;
     private final @NotNull AttributeNode attributeNode;
     private final @NotNull SVGNode node;
-    private final @NotNull Supplier<@NotNull CategoryMetadata> categoryMetadata = new LazySupplier<>(
-            () -> new CategoryMetadata(Category.elementCategoriesOf(node())));
+    private final @NotNull NodeSpec nodeSpec;
 
     private final @NotNull List<@NotNull ParsedElement> children = new ArrayList<>();
     private final @NotNull Map<String, Integer> childCountsByTagName = new HashMap<>();
@@ -95,11 +92,11 @@ public final class ParsedElement implements DomElement {
         this.attributeNode = element;
         this.node = node;
         this.id = id;
-        PermittedContent permittedContent = node.getClass().getAnnotation(PermittedContent.class);
-        if (permittedContent == null) {
+        this.nodeSpec = NodeSpec.of(node);
+        if (!nodeSpec.hasPermittedContent()) {
             throw new IllegalStateException("Element <" + node.tagName() + "> doesn't specify permitted content");
         }
-        if (permittedContent.charData()) {
+        if (nodeSpec.charData()) {
             characterDataParser = new CharacterDataParser();
         } else {
             characterDataParser = null;
@@ -256,7 +253,7 @@ public final class ParsedElement implements DomElement {
     }
 
     void addChild(@NotNull ParsedElement parsedElement) {
-        if (categoryMetadata.get().hasCategory(Category.Animation)) {
+        if (nodeSpec.hasCategory(node, Category.Animation)) {
             String attributeName = BaseAnimationNode.attributeName(parsedElement.attributeNode());
             animationElements.computeIfAbsent(attributeName, k -> new ArrayList<>()).add(parsedElement);
         }
@@ -337,18 +334,16 @@ public final class ParsedElement implements DomElement {
 
     @SuppressWarnings({"RedundantIfStatement", "java:S1126"})
     private boolean participatesInRenderedTree() {
-        CategoryMetadata metadata = categoryMetadata.get();
-
-        if (metadata.isNeverRendered()) return false;
+        if (nodeSpec.neverRendered(node)) return false;
 
         // Filter definitions and their processing nodes produce an effect when referenced; they are not
         // rendered as ordinary document-tree elements.
         // https://www.w3.org/TR/filter-effects-1/#FilterElement
         // https://www.w3.org/TR/filter-effects-1/#FilterPrimitivesOverview
         if (Filter.TAG.equals(tagName())
-                || metadata.hasCategory(Category.FilterPrimitive)
-                || metadata.hasCategory(Category.LightSource)
-                || metadata.hasCategory(Category.TransferFunctionElement))
+                || nodeSpec.hasCategory(node, Category.FilterPrimitive)
+                || nodeSpec.hasCategory(node, Category.LightSource)
+                || nodeSpec.hasCategory(node, Category.TransferFunctionElement))
             return false;
 
         return true;

@@ -69,7 +69,7 @@ import com.github.weisj.jsvg.nodes.animation.AnimateTransform;
 import com.github.weisj.jsvg.nodes.animation.BaseAnimationNode;
 import com.github.weisj.jsvg.nodes.filter.Filter;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
-import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
+import com.github.weisj.jsvg.nodes.prototype.spec.NodeSpec;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.parser.PaintParser;
@@ -270,10 +270,8 @@ public final class AttributeNode {
             @Nullable String value, ElementRelation relation) {
         T e = getElementByUrl(type, value);
         if (e == null) return null;
-        for (Category cat : e.getClass().getAnnotation(ElementCategories.class).value()) {
-            if (cat == category) return recordIndirectChild(e, value, relation);
-        }
-        return null;
+        SVGNode node = (SVGNode) e;
+        return NodeSpec.of(node).hasCategory(node, category) ? recordIndirectChild(e, value, relation) : null;
     }
 
     public @NotNull Map<String, String> declaredAttributes() {

@@ -21,10 +21,6 @@
  */
 package com.github.weisj.jsvg.nodes.prototype.spec;
 
-import org.jetbrains.annotations.NotNull;
-
-import com.github.weisj.jsvg.nodes.SVGNode;
-
 public enum Category {
     // Animations aren't supported
     Animation(false),
@@ -57,15 +53,5 @@ public enum Category {
 
     public boolean isEffectivelyAllowed() {
         return effectivelyAllowed;
-    }
-
-    public static @NotNull ElementCategories elementCategoriesOf(@NotNull SVGNode node) {
-        Class<? extends SVGNode> nodeType = node.getClass();
-        ElementCategories categories = nodeType.getAnnotation(ElementCategories.class);
-        if (categories == null) {
-            throw new IllegalStateException(
-                    "Element <" + node.tagName() + "> doesn't specify element category information");
-        }
-        return categories;
     }
 }

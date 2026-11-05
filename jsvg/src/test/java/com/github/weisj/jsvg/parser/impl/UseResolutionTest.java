@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.Use;
-import com.github.weisj.jsvg.nodes.prototype.spec.Category;
+import com.github.weisj.jsvg.nodes.prototype.spec.NodeSpec;
 import com.github.weisj.jsvg.parser.LoaderContext;
 
 class UseResolutionTest {
@@ -129,7 +129,7 @@ class UseResolutionTest {
                 "pattern", "radialgradient", "script", "style", "title", "symbol"
         }) {
             SVGNode node = Objects.requireNonNull(nodeSupplier.create(tagName));
-            assertTrue(Category.elementCategoriesOf(node).neverRendered(), tagName);
+            assertTrue(NodeSpec.of(node).neverRendered(node), tagName);
         }
     }
 
