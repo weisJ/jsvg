@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Contract;
@@ -327,19 +326,6 @@ public final class AttributeNode {
         }
     }
 
-    /** Shared token-vs-string dispatch; {@code absent} when there is no value. */
-    private <T> T parseValue(@NotNull String key, T absent,
-            @NotNull Function<@NotNull List<@NotNull ComponentValue>, T> fromTokens,
-            @NotNull Function<@NotNull String, T> fromString) {
-        AttributeValue value = resolvedAttributes.get(key);
-        if (value == null) return absent;
-        if (value instanceof AttributeValue.Parsed) {
-            return fromTokens.apply(((AttributeValue.Parsed) value).tokens());
-        } else {
-            return fromString.apply(((AttributeValue.PlainString) value).string());
-        }
-    }
-
     /** Whether the value is exactly the given keyword, reading the ident token directly (no serialize). */
     public boolean valueIsOneOfKeywords(@NotNull String key, @NotNull String... keywords) {
         // Callers (display, visibility) are CSS properties, so a set value is token-valued.
@@ -456,21 +442,27 @@ public final class AttributeNode {
     }
 
     private @NotNull Length getLengthInternal(@NotNull String key, @NotNull PercentageDimension dimension) {
-        return parseValue(key, FALLBACK_LENGTH,
-                tokens -> parser().parseLength(tokens, FALLBACK_LENGTH, dimension),
-                text -> parser().parseLength(text, FALLBACK_LENGTH, dimension));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return FALLBACK_LENGTH;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseLength(((AttributeValue.Parsed) value).tokens(), FALLBACK_LENGTH, dimension);
+        return parser().parseLength(((AttributeValue.PlainString) value).string(), FALLBACK_LENGTH, dimension);
     }
 
     public @NotNull Length getHorizontalReferenceLengthFromKey(@NotNull String key) {
-        return parseValue(key, Length.ZERO,
-                this::getHorizontalReferenceLength,
-                this::getHorizontalReferenceLength);
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return Length.ZERO;
+        if (value instanceof AttributeValue.Parsed)
+            return getHorizontalReferenceLength(((AttributeValue.Parsed) value).tokens());
+        return getHorizontalReferenceLength(((AttributeValue.PlainString) value).string());
     }
 
     public @NotNull Length getVerticalReferenceLengthFromKey(@NotNull String key) {
-        return parseValue(key, Length.ZERO,
-                this::getVerticalReferenceLength,
-                this::getVerticalReferenceLength);
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return Length.ZERO;
+        if (value instanceof AttributeValue.Parsed)
+            return getVerticalReferenceLength(((AttributeValue.Parsed) value).tokens());
+        return getVerticalReferenceLength(((AttributeValue.PlainString) value).string());
     }
 
     private static @Nullable Length horizontalKeyword(@Nullable String value) {
@@ -527,9 +519,11 @@ public final class AttributeNode {
 
     @Contract("_,!null -> !null")
     public @Nullable Percentage getPercentage(@NotNull String key, @Nullable Percentage fallback) {
-        return parseValue(key, fallback,
-                tokens -> parser().parsePercentage(tokens, fallback),
-                text -> parser().parsePercentage(text, fallback));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return fallback;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parsePercentage(((AttributeValue.Parsed) value).tokens(), fallback);
+        return parser().parsePercentage(((AttributeValue.PlainString) value).string(), fallback);
     }
 
     @Contract("_,!null,_,_ -> !null")
@@ -576,9 +570,11 @@ public final class AttributeNode {
     @Contract("_,!null,_ -> !null")
     public @NotNull Length @Nullable [] getLengthList(@NotNull String key, @NotNull Length @Nullable [] fallback,
             @NotNull PercentageDimension dimension) {
-        return parseValue(key, fallback,
-                tokens -> parser().parseLengthList(tokens, fallback, dimension),
-                text -> parser().parseLengthList(text, fallback, dimension));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return fallback;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseLengthList(((AttributeValue.Parsed) value).tokens(), fallback, dimension);
+        return parser().parseLengthList(((AttributeValue.PlainString) value).string(), fallback, dimension);
     }
 
     public float @NotNull [] getFloatList(@NotNull String key) {
@@ -613,9 +609,11 @@ public final class AttributeNode {
     }
 
     public <E extends Enum<E>> @Nullable E getEnumNullable(@NotNull String key, @NotNull Class<E> enumType) {
-        return parseValue(key, null,
-                tokens -> parser().parseEnum(tokens, enumType),
-                text -> parser().parseEnum(text, enumType));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return null;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseEnum(((AttributeValue.Parsed) value).tokens(), enumType);
+        return parser().parseEnum(((AttributeValue.PlainString) value).string(), enumType);
     }
 
     public @Nullable ClipPath getClipPath() {
@@ -674,9 +672,11 @@ public final class AttributeNode {
     }
 
     private @Nullable List<TransformPart> parseTransformParts(@NotNull String key) {
-        return parseValue(key, null,
-                tokens -> parser().parseTransform(tokens),
-                text -> parser().parseTransform(text));
+        AttributeValue value = resolvedAttributes.get(key);
+        if (value == null) return null;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseTransform(((AttributeValue.Parsed) value).tokens());
+        return parser().parseTransform(((AttributeValue.PlainString) value).string());
     }
 
     private @NotNull TransformValue createTransformValueFromParts(@NotNull List<TransformPart> parts) {
@@ -727,9 +727,11 @@ public final class AttributeNode {
     }
 
     public float getFloat(@NotNull String name, float fallback) {
-        return parseValue(name, fallback,
-                tokens -> parser().parseFloat(tokens, fallback),
-                text -> parser().parseFloat(text, fallback));
+        AttributeValue value = resolvedAttributes.get(name);
+        if (value == null) return fallback;
+        if (value instanceof AttributeValue.Parsed)
+            return parser().parseFloat(((AttributeValue.Parsed) value).tokens(), fallback);
+        return parser().parseFloat(((AttributeValue.PlainString) value).string(), fallback);
     }
 
     public float getNonNegativeFloat(@NotNull String name, float fallback) {
