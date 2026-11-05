@@ -216,6 +216,11 @@ class CssParserTest {
     }
 
     @Test
+    void inlineStyleWithoutStyleSheet() {
+        assertEquals(SUCCESS, compareImages("css/inlineWithoutStyleSheet.svg"));
+    }
+
+    @Test
     void precedence() {
         assertEquals(SUCCESS, compareImages("css/precedence.svg"));
     }

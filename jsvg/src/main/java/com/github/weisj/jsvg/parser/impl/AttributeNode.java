@@ -193,10 +193,27 @@ public final class AttributeNode {
                 ? cssParser.parseStyleAttribute(styleStr, document().loaderContext().cssHints())
                 : Collections.emptyList();
 
+        if (styleSheets.isEmpty() && tryApplyInlineDeclarations(inlineCssDeclarations)) return;
+
         // FIXME: Only use the highest priority *valid* definition of a property value.
         CascadeResult cascadeResult = styleSheets().matchAndCascade(inlineCssDeclarations, element);
         // CSS attributes override SVG presentation attributes (CSS Cascade 4 §6.4).
         resolvedAttributes.putAll(cascadeResult.attributes);
+    }
+
+    /**
+     * Applies the declarations of a document without rules, or returns {@code false} if one is !important.
+     * The first declaration of a name wins, hence the backwards iteration.
+     */
+    private boolean tryApplyInlineDeclarations(@NotNull List<@NotNull NormalizedProperty> declarations) {
+        for (int i = 0; i < declarations.size(); i++) {
+            if (declarations.get(i).important()) return false;
+        }
+        for (int i = declarations.size() - 1; i >= 0; i--) {
+            NormalizedProperty property = declarations.get(i);
+            resolvedAttributes.put(property.name(), new AttributeValue.Parsed(property.value()));
+        }
+        return true;
     }
 
     public @NotNull ParsedDocument document() {
