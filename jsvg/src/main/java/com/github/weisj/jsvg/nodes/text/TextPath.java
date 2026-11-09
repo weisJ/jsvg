@@ -55,12 +55,12 @@ import com.github.weisj.jsvg.nodes.text.TextSegment.RenderableSegment.UseTextLen
 import com.github.weisj.jsvg.parser.TextContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
+import com.github.weisj.jsvg.parser.impl.AttributeUtil;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.TextOutput;
-import com.github.weisj.jsvg.util.AttributeUtil;
 import com.github.weisj.jsvg.util.PathUtil;
 
 @ElementCategories({Category.Graphic, Category.TextContent, Category.TextContentChild})

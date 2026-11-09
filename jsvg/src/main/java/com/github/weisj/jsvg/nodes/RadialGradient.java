@@ -93,7 +93,7 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
             return gradColors[gradColors.length - 1];
         }
 
-        if (focusRadius == 0) {
+        if (focusRadius <= 0) {
             // If possible use built-in RadialGradientPaint as it profits from hardware acceleration
             return new RadialGradientPaint(center, radius, focusCenter,
                     offsetsToFractions(gradOffsets), gradColors, spreadMethod.cycleMethod(),
@@ -116,7 +116,6 @@ public final class RadialGradient extends AbstractGradient<RadialGradient> {
                 ", fr=" + fr +
                 ", fx=" + fx +
                 ", fy=" + fy +
-                ", colors=" + Arrays.toString(colors()) +
                 ", offsets=" + Arrays.toString(offsets()) +
                 '}';
     }

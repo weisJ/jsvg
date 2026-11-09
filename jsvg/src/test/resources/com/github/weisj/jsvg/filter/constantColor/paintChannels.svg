@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"
+	viewBox="0 0 600 600">
+	<defs>
+		<linearGradient id="paint"
+			gradientUnits="userSpaceOnUse" x1="100" y1="0" x2="500" y2="0">
+			<stop offset="0" stop-color="#204080" />
+			<stop offset="1" stop-color="#e0a040" />
+		</linearGradient>
+		<filter id="fillPaint" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="600" height="600">
+			<feOffset in="FillPaint" x="0" y="0" width="600"
+				height="600" />
+		</filter>
+	</defs>
+	<rect x="100" y="100" width="400" height="400" fill="url(#paint)"
+		filter="url(#fillPaint)" />
+</svg>

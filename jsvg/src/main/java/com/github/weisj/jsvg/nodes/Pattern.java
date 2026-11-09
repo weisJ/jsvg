@@ -43,7 +43,6 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.TransformedPaint;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode.ElementRelation;
 import com.github.weisj.jsvg.renderer.MeasureContext;
@@ -74,6 +73,7 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     private UnitType patternUnits;
     private UnitType patternContentUnits;
     private TransformValue patternTransform;
+    private Pattern patternProvidingChildren;
 
     @Override
     public @NotNull String tagName() {
@@ -106,6 +106,11 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
         Pattern template = parseTemplate(attributeNode);
+        // A pattern inherits the referenced pattern's child content only when it has no children of its
+        // own.
+        patternProvidingChildren = children().isEmpty() && template != null
+                ? template.patternProvidingChildren()
+                : this;
 
         if (viewBox == null && template != null) viewBox = template.viewBox;
         preserveAspectRatio = template != null ? template.preserveAspectRatio : preserveAspectRatio;
@@ -141,9 +146,13 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
         return template != this ? template : null;
     }
 
+    private @NotNull Pattern patternProvidingChildren() {
+        return patternProvidingChildren != null ? patternProvidingChildren : this;
+    }
+
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return !width.isZero() && !height.isZero() && SVGPaint.super.isVisible(context);
+        return !width.isZero() && !height.isZero() && !hasEmptyViewBox() && SVGPaint.super.isVisible(context);
     }
 
     @Override
@@ -174,13 +183,14 @@ public final class Pattern extends BaseInnerViewContainer implements SVGPaint, S
                 ImageUtil::createCompatibleTransparentImage, context, null,
                 patternBounds, bounds, patternContentUnits);
 
-        if (blittableImage == null) return PaintParser.DEFAULT_COLOR;
+        if (blittableImage == null) return Color.BLACK;
 
         blittableImage.render(output, (out, ctx) -> {
             if (patternContentUnits == UnitType.UserSpaceOnUse) {
                 ctx.translate(out, patternBounds.getX(), patternBounds.getY());
             }
-            renderWithSize(new FloatSize(patternBounds), viewBox, ctx, out);
+            RenderContext innerContext = createInnerContextForViewBox(new FloatSize(patternBounds), viewBox, ctx, out);
+            patternProvidingChildren().render(innerContext, out);
         });
 
         // Fixme: When patternTransform != null antialiasing is broken

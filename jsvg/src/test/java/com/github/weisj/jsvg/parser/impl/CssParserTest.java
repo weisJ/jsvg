@@ -241,21 +241,30 @@ class CssParserTest {
     void fractionalNumbersParseCorrectly() {
         FullCssParser parser = new FullCssParser();
 
-        // Tolerance is float-precision: token values are narrowed to float in the lexer.
-        assertEquals(0.7, dimensionValue(parser, "0.7em"), 1e-6);
-        assertEquals(0.8, dimensionValue(parser, "0.8em"), 1e-6);
-        assertEquals(1.5, dimensionValue(parser, "1.5em"), 1e-6);
-        assertEquals(2.0, dimensionValue(parser, "2em"), 1e-6);
-        assertEquals(10.25, dimensionValue(parser, "10.25px"), 1e-6);
-        assertEquals(-0.25, dimensionValue(parser, "-0.25px"), 1e-6);
+        assertEquals(0.7, dimensionValue(parser, "0.7em"));
+        assertEquals(0.8, dimensionValue(parser, "0.8em"));
+        assertEquals(1.5, dimensionValue(parser, "1.5em"));
+        assertEquals(2.0, dimensionValue(parser, "2em"));
+        assertEquals(10.25, dimensionValue(parser, "10.25px"));
+        assertEquals(-0.25, dimensionValue(parser, "-0.25px"));
 
         // Scientific notation.
-        assertEquals(0.015, dimensionValue(parser, "1.5e-2px"), 1e-6);
-        assertEquals(150.0, dimensionValue(parser, "1.5e2px"), 1e-6);
+        assertEquals(0.015, dimensionValue(parser, "1.5e-2px"));
+        assertEquals(150.0, dimensionValue(parser, "1.5e2px"));
 
         // Plain numbers and percentages share the same code path.
-        assertEquals(0.5, numberValue(parser, "0.5"), 1e-6);
-        assertEquals(12.5, percentageValue(parser, "12.5%"), 1e-6);
+        assertEquals(0.5, numberValue(parser, "0.5"));
+        assertEquals(12.5, percentageValue(parser, "12.5%"));
+    }
+
+    @Test
+    void numericTokensRetainDoublePrecision() {
+        FullCssParser parser = new FullCssParser();
+
+        assertEquals(0.123456789012345, numberValue(parser, "0.123456789012345"));
+        assertEquals(0.123456789012345, dimensionValue(parser, "0.123456789012345px"));
+        assertEquals(0.123456789012345, percentageValue(parser, "0.123456789012345%"));
+        assertEquals(1e-50, numberValue(parser, "0.00000000000000000000000000000000000000000000000001"));
     }
 
     private static double dimensionValue(@NotNull FullCssParser parser, @NotNull String value) {

@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="32">
+	<!-- Each red transfer result clamps to 255; green and blue are unchanged. -->
+	<rect width="96" height="32" fill="#ff80c0" />
+</svg>

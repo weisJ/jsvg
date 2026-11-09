@@ -1,0 +1,149 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024-2026 Jannis Weis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+package com.github.weisj.jsvg.parser.impl;
+
+import static com.github.weisj.jsvg.parser.impl.AnimationHelper.animatedLength;
+
+import java.util.Objects;
+import java.util.function.Function;
+
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.PercentageDimension;
+import com.github.weisj.jsvg.geometry.size.Length;
+
+public final class AttributeUtil {
+    private AttributeUtil() {}
+
+    public static boolean isBlank(@NotNull String s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isWhitespace(s.charAt(i))) return false;
+        }
+        return true;
+    }
+
+    @SafeVarargs
+    public static <T> @NotNull T @Nullable [] toNonnullArray(@Nullable T... values) {
+        if (values == null) return null;
+        for (T value : values) {
+            if (value == null) return null;
+        }
+        // noinspection NullableProblems
+        return values;
+    }
+
+    public static <T> @NotNull T notNullOrElse(@Nullable T value, @NotNull T defaultValue) {
+        return value != null ? value : defaultValue;
+    }
+
+    public static @NotNull AxisPair parseAxisPair(
+            @NotNull AttributeNode node,
+            @NotNull String xAttr, @NotNull String yAttr,
+            @NotNull Length fallback, Inherited inherited,
+            @NotNull Function<@NotNull LengthValue, @Nullable LengthValue> validator) {
+        LengthValue initialRx =
+                node.getLength(xAttr, PercentageDimension.WIDTH, Length.UNSPECIFIED,
+                        inherited, Animatable.NO);
+        initialRx = validator.apply(initialRx);
+        if (initialRx == null) initialRx = Length.UNSPECIFIED;
+
+        LengthValue initialRy =
+                node.getLength(yAttr, PercentageDimension.HEIGHT, initialRx,
+                        inherited, Animatable.NO);
+        initialRy = validator.apply(initialRy);
+        if (initialRy == null) initialRy = Length.UNSPECIFIED;
+
+        LengthValue rx;
+        LengthValue ry;
+
+        if (initialRx == Length.UNSPECIFIED && initialRy == Length.UNSPECIFIED) {
+            // Neither rx nor ry is specified.
+            // First try if either is specified through animation.
+            // Then fallback to the other if not.
+            rx = notNullOrElse(
+                    animatedLength(node, xAttr, fallback, PercentageDimension.WIDTH), initialRx);
+            ry = notNullOrElse(
+                    animatedLength(node, yAttr, fallback, PercentageDimension.HEIGHT), initialRy);
+            if (rx == Length.UNSPECIFIED) {
+                rx = ry;
+            } else if (ry == Length.UNSPECIFIED) {
+                ry = rx;
+            }
+        } else if (initialRx == Length.UNSPECIFIED) {
+            // rx is unspecified, but ry is specified.
+            // Use ry as value for rx.
+            ry = notNullOrElse(
+                    animatedLength(node, yAttr, initialRy, PercentageDimension.HEIGHT), initialRy);
+            rx = notNullOrElse(
+                    animatedLength(node, xAttr, ry, PercentageDimension.WIDTH), ry);
+        } else if (initialRy == Length.UNSPECIFIED) {
+            // ry is unspecified, but rx is specified.
+            // Use rx as value for ry.
+            rx = notNullOrElse(
+                    animatedLength(node, xAttr, initialRx, PercentageDimension.WIDTH), initialRx);
+            ry = notNullOrElse(
+                    animatedLength(node, yAttr, rx, PercentageDimension.HEIGHT), rx);
+        } else {
+            // Both rx and ry are specified.
+            rx = notNullOrElse(
+                    animatedLength(node, xAttr, initialRx, PercentageDimension.WIDTH), initialRx);
+            ry = notNullOrElse(
+                    animatedLength(node, yAttr, initialRy, PercentageDimension.HEIGHT), initialRy);
+        }
+
+        if (rx == Length.UNSPECIFIED) rx = fallback;
+        if (ry == Length.UNSPECIFIED) ry = fallback;
+
+        return new AxisPair(rx, ry);
+    }
+
+    @Contract(pure = true)
+    public static <T> boolean arrayContains(T @NotNull [] arr, T element) {
+        for (T t : arr) {
+            if (Objects.equals(t, element)) return true;
+        }
+        return false;
+    }
+
+    public static final class AxisPair {
+        private final @NotNull LengthValue xAxis;
+        private final @NotNull LengthValue yAxis;
+
+        public AxisPair(@NotNull LengthValue xAxis, @NotNull LengthValue yAxis) {
+            this.xAxis = xAxis;
+            this.yAxis = yAxis;
+        }
+
+        public @NotNull LengthValue xAxis() {
+            return xAxis;
+        }
+
+        public @NotNull LengthValue yAxis() {
+            return yAxis;
+        }
+    }
+}

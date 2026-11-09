@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40"
+	viewBox="0 0 60 20">
+	<defs>
+		<filter id="tile" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="60" height="20">
+			<feTile in="SourceGraphic" x="0.5" y="0" width="7.5"
+				height="20" />
+			<feTile />
+		</filter>
+	</defs>
+	<g filter="url(#tile)">
+		<rect x="0.5" width="3.5" height="20" fill="red" />
+		<rect x="4" width="4" height="20" fill="blue" />
+	</g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"
+	fill="none" stroke="blue" stroke-width="3">
+	<path d="M10 10 L30 10 L30 20 Z" />
+	<path d="M70 10 L90 10 L90 20 Z L70 30" />
+	<path d="M10 50 L30 50" />
+	<path d="M40 50 L60 50 Z" />
+</svg>

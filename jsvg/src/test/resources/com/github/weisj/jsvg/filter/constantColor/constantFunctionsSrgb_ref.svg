@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="220"
+	viewBox="0 0 440 220">
+	<!-- constantMatrixSrgb -->
+	<g transform="translate(0 0)">
+		<rect height="100" x="0" y="0" fill="#336699" width="100" />
+	</g>
+	<!-- constantTableSrgb -->
+	<g transform="translate(110 0)">
+		<rect height="100" x="0" y="0" fill="#336699" width="100" />
+	</g>
+	<!-- constantDiscreteSrgb -->
+	<g transform="translate(220 0)">
+		<rect height="100" x="0" y="0" fill="#336699" width="100" />
+	</g>
+	<!-- constantLinearSrgb -->
+	<g transform="translate(330 0)">
+		<rect height="100" x="0" y="0" fill="#336699" width="100" />
+	</g>
+	<!-- constantGammaSrgb -->
+	<g transform="translate(0 110)">
+		<rect height="100" x="0" y="0" fill="#336699" width="100" />
+	</g>
+</svg>

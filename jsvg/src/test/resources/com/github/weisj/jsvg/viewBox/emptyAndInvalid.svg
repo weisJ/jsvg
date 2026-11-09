@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="80">
+	<defs>
+		<marker id="markerWidth" viewBox="0 0 0 10" markerWidth="10"
+			markerHeight="10" markerUnits="userSpaceOnUse">
+			<rect width="10" height="10" fill="red" />
+		</marker>
+		<marker id="markerHeight" viewBox="0 0 10 0" markerWidth="10"
+			markerHeight="10" markerUnits="userSpaceOnUse">
+			<rect width="10" height="10" fill="red" />
+		</marker>
+		<symbol id="symbolWidth" viewBox="0 0 0 10">
+			<rect width="10" height="10" fill="red" />
+		</symbol>
+		<symbol id="symbolHeight" viewBox="0 0 10 0">
+			<rect width="10" height="10" fill="red" />
+		</symbol>
+		<pattern id="patternWidth" viewBox="0 0 0 10"
+			patternUnits="userSpaceOnUse" width="20" height="20">
+			<rect width="10" height="10" fill="red" />
+		</pattern>
+		<pattern id="patternHeight" viewBox="0 0 10 0"
+			patternUnits="userSpaceOnUse" width="20" height="20">
+			<rect width="10" height="10" fill="red" />
+		</pattern>
+	</defs>
+	<!-- Zero width or height suppresses marker content. -->
+	<path d="M20 10 H60" fill="none" stroke="black"
+		marker-start="url(#markerWidth)" marker-end="url(#markerHeight)" />
+	<use xlink:href="#symbolWidth" x="80" width="20" height="20" />
+	<use xlink:href="#symbolHeight" x="100" width="20" height="20" />
+	<rect x="120" width="20" height="20" fill="url(#patternWidth)" />
+	<rect x="140" width="20" height="20" fill="url(#patternHeight)" />
+	<svg y="40" width="20" height="20" viewBox="0 0 0 10">
+		<rect width="20" height="20" fill="red" />
+	</svg>
+	<svg x="20" y="40" width="20" height="20" viewBox="0 0 10 0">
+		<rect width="20" height="20" fill="red" />
+	</svg>
+	<!-- Negative dimensions invalidate viewBox, including a zero side. -->
+	<svg x="80" y="40" width="20" height="20" viewBox="0 0 -1 10">
+		<rect width="20" height="20" fill="green" />
+	</svg>
+	<svg x="110" y="40" width="20" height="20" viewBox="0 0 0 -1">
+		<rect width="20" height="20" fill="green" />
+	</svg>
+	<!-- A valid viewBox continues to scale content. -->
+	<svg x="140" y="40" width="20" height="20" viewBox="0 0 10 10">
+		<rect width="10" height="10" fill="green" />
+	</svg>
+</svg>

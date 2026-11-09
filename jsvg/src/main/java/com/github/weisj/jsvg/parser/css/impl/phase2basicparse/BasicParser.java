@@ -360,7 +360,7 @@ public final class BasicParser {
 
     private static @NotNull String describe(@NotNull ComponentValue cv) {
         if (cv instanceof Token) {
-            return ((Token) cv).type().name().toLowerCase() + "-token";
+            return ((Token) cv).type().name().toLowerCase(Locale.ROOT) + "-token";
         }
         if (cv instanceof ComponentValue.SimpleBlock.Brace) return "{}-block";
         if (cv instanceof ComponentValue.SimpleBlock.Bracket) return "[]-block";

@@ -25,5 +25,5 @@
 		<use id="use19" xlink:href="#use18" />
 		<use id="use20" xlink:href="#use19" />
 	</defs>
-	<use xlink:href="#use10" />
+	<use xlink:href="#use20" />
 </svg>

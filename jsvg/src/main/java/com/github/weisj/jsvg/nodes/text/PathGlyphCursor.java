@@ -64,7 +64,9 @@ final class PathGlyphCursor extends GlyphCursor {
 
     private void setupInitialData() {
         this.currentSegment = segmentIterator.currentSegment();
-        this.segmentLength = this.remainingSegmentLength = (float) currentSegment.length();
+        float currentSegmentLength = (float) currentSegment.length();
+        this.remainingSegmentLength = currentSegmentLength;
+        this.segmentLength = currentSegmentLength;
         this.x = currentSegment.xStart;
         this.y = currentSegment.yStart;
     }
@@ -76,6 +78,8 @@ final class PathGlyphCursor extends GlyphCursor {
         this.segmentIterator = pathCursor.segmentIterator;
         this.remainingSegmentLength = pathCursor.remainingSegmentLength;
         this.segmentLength = pathCursor.segmentLength;
+        this.retainedLengthAtStart = pathCursor.retainedLengthAtStart;
+        this.shouldRenderCurrentGlyph = pathCursor.shouldRenderCurrentGlyph;
         this.currentSegment = pathCursor.currentSegment;
     }
 
@@ -91,6 +95,8 @@ final class PathGlyphCursor extends GlyphCursor {
         PathGlyphCursor glyphCursor = (PathGlyphCursor) local;
         remainingSegmentLength = glyphCursor.remainingSegmentLength;
         segmentLength = glyphCursor.segmentLength;
+        retainedLengthAtStart = glyphCursor.retainedLengthAtStart;
+        shouldRenderCurrentGlyph = glyphCursor.shouldRenderCurrentGlyph;
         currentSegment = glyphCursor.currentSegment;
     }
 

@@ -26,7 +26,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
-import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javafx.scene.canvas.GraphicsContext;
@@ -206,7 +205,7 @@ public final class FXOutputImpl implements Output, CurrentColorProvider {
         int width = (int) ctx.getCanvas().getWidth();
         int height = (int) ctx.getCanvas().getHeight();
 
-        BufferedImage debugImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage debugImage = ImageUtil.createCompatibleTransparentImage(width, height);
         Graphics2D debugGraphics = debugImage.createGraphics();
         debugGraphics.setRenderingHints(renderingHints);
         debugGraphics.setPaint(currentPaint);
@@ -228,7 +227,7 @@ public final class FXOutputImpl implements Output, CurrentColorProvider {
 
     @Override
     public @NotNull Rectangle2D clipBounds() {
-        Rectangle2D bounds = canvasBounds();// clipStack.getClipBounds();
+        Rectangle2D bounds = canvasBounds();
         return GeometryUtil.createInverse(transform()).createTransformedShape(bounds).getBounds2D();
     }
 
@@ -345,10 +344,6 @@ public final class FXOutputImpl implements Output, CurrentColorProvider {
             if (saveClip == SaveClipStack.YES) {
                 fxOutput.ctx.save();
             }
-        }
-
-        public @NotNull GraphicsContext context() {
-            return fxOutput.ctx;
         }
 
         @Override

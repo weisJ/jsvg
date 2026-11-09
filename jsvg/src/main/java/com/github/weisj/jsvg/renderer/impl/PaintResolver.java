@@ -21,11 +21,19 @@
  */
 package com.github.weisj.jsvg.renderer.impl;
 
+import java.awt.*;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.animation.value.AnimatedColor;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
 import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.SimplePaintSVGPaint;
+import com.github.weisj.jsvg.paint.impl.ColorPropertyPaint;
+import com.github.weisj.jsvg.paint.impl.ColorValueSVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.impl.context.ContextElementAttributes;
 import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
 
@@ -38,8 +46,7 @@ public final class PaintResolver {
         if (p == PredefinedPaints.DEFAULT_PAINT) {
             return PredefinedPaints.DEFAULT_PAINT;
         }
-        if (p == PredefinedPaints.CURRENT_COLOR) {
-            // color can only hold resolved values being declared as literals
+        if (p instanceof ColorPropertyPaint) {
             return coerceNonNull(paintContext.color);
         }
         if (p == PredefinedPaints.CONTEXT_STROKE) {
@@ -57,5 +64,18 @@ public final class PaintResolver {
 
     private static @NotNull SVGPaint coerceNonNull(@Nullable SVGPaint p) {
         return p != null ? p : PredefinedPaints.DEFAULT_PAINT;
+    }
+
+    public static @Nullable Color resolveColor(@Nullable SVGPaint paint, @NotNull PaintContext paintContext,
+            @Nullable ContextElementAttributes contextElementAttributes, @NotNull MeasureContext measureContext) {
+        SVGPaint resolved = resolvePaint(paint, paintContext, contextElementAttributes);
+        if (resolved instanceof AnimatedColor) {
+            resolved = ((AnimatedColor) resolved).derive(coerceNonNull(paintContext.color));
+        }
+        Object color = resolved instanceof SimplePaintSVGPaint ? ((SimplePaintSVGPaint) resolved).paint() : resolved;
+        if (color instanceof ColorValueSVGPaint) color = ((ColorValueSVGPaint) color).colorValue();
+        if (color instanceof Color) return (Color) color;
+        if (color instanceof ColorValue) return ((ColorValue) color).get(measureContext);
+        return null;
     }
 }

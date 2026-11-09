@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40">
+	<!-- Half opacity exceeds the 0.5 threshold; alpha must not be converted 
+		to linear RGB first. -->
+	<defs>
+		<filter id="f" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="linearRGB">
+			<feComponentTransfer>
+				<feFuncA type="discrete" tableValues="0 1" />
+			</feComponentTransfer>
+		</filter>
+	</defs>
+	<rect width="80" height="40" fill="white" />
+	<rect x="8" y="8" width="64" height="24" fill="red"
+		fill-opacity="0.5" filter="url(#f)" />
+</svg>

@@ -25,46 +25,13 @@ import java.awt.*;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.attributes.font.SVGFont;
-
 public interface PlatformSupport {
-
-    /**
-     * @deprecated This class is no longer used and will be removed in a future version.
-     */
-    @Deprecated
-    interface TargetSurface {
-        void repaint();
-    }
 
     @Nullable
     ImageObserver imageObserver();
-
-    /**
-     * @deprecated This method is no longer used and will be removed in a future version.
-     */
-    @Nullable
-    @Deprecated
-    TargetSurface targetSurface();
-
-    default float fontSize() {
-        return SVGFont.defaultFontSize();
-    }
-
-    default @NotNull String fontFamily() {
-        return SVGFont.defaultFontFamily();
-    }
-
-    /** Custom font for a family not registered with the platform, or null if none is provided.
-     * The family is CSS-canonicalized (lower-cased); implementations must match accordingly. */
-    @ApiStatus.Experimental
-    default @Nullable Font customFont(@NotNull String family) {
-        return null;
-    }
 
     default @NotNull Image createImage(@NotNull ImageProducer imageProducer) {
         return Toolkit.getDefaultToolkit().createImage(imageProducer);

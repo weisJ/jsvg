@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -39,5 +39,9 @@ class IsolationEffects {
         this.filter = filter;
         this.mask = mask;
         this.clipPath = clipPath;
+    }
+
+    public boolean hasEffects() {
+        return filter != null || mask != null || clipPath != null;
     }
 }

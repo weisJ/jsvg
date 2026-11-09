@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,10 +25,8 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.ColorModel;
-import java.awt.image.DataBufferInt;
 import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
-import java.awt.image.SinglePixelPackedSampleModel;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -36,6 +34,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.util.ColorUtil;
+import com.github.weisj.jsvg.util.ImageUtil;
 
 /*
  * Copyright (c) 2006, 2018, Oracle and/or its affiliates. All rights reserved. DO NOT ALTER OR
@@ -75,7 +74,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * The PaintContext's ColorModel.  This is ARGB if colors are not all
      * opaque, otherwise it is RGB.
      */
-    protected ColorModel model;
+    protected @NotNull ColorModel model;
 
     /**
      * Color model used if gradient colors are all opaque.
@@ -238,7 +237,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
             }
         } else {
             // use the values cached in the MultipleGradientPaint instance
-            this.model = mgp.model;
+            this.model = Objects.requireNonNull(mgp.model);
             this.normalizedIntervals = mgp.normalizedIntervals;
             this.isSimpleLookup = mgp.isSimpleLookup;
             this.gradient = grad;
@@ -565,11 +564,10 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
         // stride.
         // These calls make the DataBuffer non-acceleratable, but the
         // Raster is never Stable long enough to accelerate anyway...
-        DataBufferInt rasterDB = (DataBufferInt) raster.getDataBuffer();
-        int[] pixels = rasterDB.getData(0);
-        int off = rasterDB.getOffset();
-        int scanlineStride = ((SinglePixelPackedSampleModel) raster.getSampleModel()).getScanlineStride();
-        int adjust = scanlineStride - w;
+        int[] pixels = ImageUtil.getINT_RGBA_DataBank(raster);
+        int off = ImageUtil.getINT_RGBA_DataOffset(raster);
+        // The cached raster may be wider than the requested region.
+        int adjust = ImageUtil.getINT_RGBA_ScanlineStride(raster) - w;
 
         fillRaster(pixels, off, adjust, x, y, w, h); // delegate to subclass
 
@@ -584,7 +582,7 @@ abstract class SVGMultipleGradientPaintContext implements PaintContext {
      * rasters for use by any other instance, as long as they are sufficiently
      * large.
      */
-    private static synchronized Raster getCachedRaster(ColorModel cm, int w, int h) {
+    private static synchronized Raster getCachedRaster(@NotNull ColorModel cm, int w, int h) {
         if (Objects.equals(cm, cachedModel) && cached != null) {
             Raster ras = cached.get();
             if (ras != null && ras.getWidth() >= w && ras.getHeight() >= h) {

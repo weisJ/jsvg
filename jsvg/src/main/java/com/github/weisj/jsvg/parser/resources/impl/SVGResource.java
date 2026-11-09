@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -24,18 +24,24 @@ package com.github.weisj.jsvg.parser.resources.impl;
 import java.awt.geom.AffineTransform;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.resources.RenderableResource;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.View;
 
 public class SVGResource implements RenderableResource {
     private final @NotNull SVGDocument document;
+    private final @Nullable View view;
 
-    public SVGResource(@NotNull SVGDocument document) {
+    public SVGResource(@NotNull SVGDocument document, @Nullable View view) {
         this.document = document;
+        this.view = view;
     }
 
     @Override
@@ -46,6 +52,13 @@ public class SVGResource implements RenderableResource {
     @Override
     public void render(@NotNull Output output, @NotNull RenderContext context, @NotNull AffineTransform imgTransform) {
         output.applyTransform(imgTransform);
-        document.renderWithPlatform(context.platformSupport(), output, null);
+        RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
+        document.render(output, RenderConfig.builder()
+                .platformSupport(context.platformSupport())
+                .fontLoader(accessor.fontLoader(context))
+                .fontSize(context.measureContext().defaultEm())
+                .defaultFontFamily(accessor.defaultFontFamily(context))
+                .view(view)
+                .build());
     }
 }

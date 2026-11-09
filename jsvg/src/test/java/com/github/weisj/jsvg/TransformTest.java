@@ -25,7 +25,6 @@ import static com.github.weisj.jsvg.ImageComparison.*;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
 import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -43,9 +42,14 @@ class TransformTest {
         assertEquals(SUCCESS, compareImages("transform/scale.svg"));
         assertEquals(SUCCESS, compareImages("transform/skewX.svg"));
         assertEquals(SUCCESS, compareImages("transform/skewY.svg"));
+    }
 
-        // Batik does not implement transform on <svg> elements
-        assertDoesNotThrow(() -> compareImages("transform/SVGinSVG.svg"));
+    @Test
+    void transformsOnSvgElements() {
+        // The reference uses explicit geometry because Batik ignores transforms on SVG elements.
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("transform/SVGinSVG_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("transform/SVGinSVG.svg"), RenderType.JSVG), 0, 0)));
     }
 
     @Test

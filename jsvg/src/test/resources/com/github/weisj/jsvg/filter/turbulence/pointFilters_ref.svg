@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="24">
+	<!-- A quarter of 127 rounds to 32; linear 32 encodes as sRGB 99. Half of 
+		alpha 127 rounds to 64. -->
+	<rect width="24" height="24" fill="#636363" />
+	<rect x="24" width="24" height="24" fill="#202020" />
+	<rect x="48" width="24" height="24" fill="#bbbbbb"
+		fill-opacity="0.2509803922" />
+	<rect x="72" width="24" height="24" fill="#7f7f7f"
+		fill-opacity="0.2509803922" />
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="80">
+	<defs>
+		<filter id="crop" filterUnits="userSpaceOnUse" x="10" y="20"
+			width="40" height="20">
+			<feColorMatrix x="14" y="24" width="8" height="8" />
+		</filter>
+		<symbol id="content" viewBox="10 20 40 20" filter="url(#crop)">
+			<rect x="14" y="24" width="16" height="8" fill="red" />
+		</symbol>
+	</defs>
+	<!-- The use-site size establishes the viewport before the referenced container's 
+		filter. -->
+	<use xlink:href="#content" x="24" y="16" width="80" height="40" />
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+	<!-- Non-uniform scaling and shear change the path and fill, but not its 
+		six-unit stroke. -->
+	<path transform="matrix(2 0 0.5 1 20 20)" d="M0 0 H24 V24 Z"
+		fill="#ccddee" stroke="#234567" stroke-width="6"
+		vector-effect="non-scaling-stroke" />
+
+	<!-- Dash lengths, dash offset and round caps are measured along the transformed 
+		path. -->
+	<path transform="translate(16 76) scale(3 2)" d="M0 0 H40"
+		fill="none" stroke="black" stroke-width="4" stroke-dasharray="10 6"
+		stroke-dashoffset="3" stroke-linecap="round"
+		vector-effect="non-scaling-stroke" />
+
+	<!-- Reflection and shear retain square caps and a bevel join in viewport 
+		coordinates. -->
+	<path transform="matrix(-2 0 1 1 140 116)" d="M0 0 H32 V18"
+		fill="none" stroke="black" stroke-width="6" stroke-linecap="square"
+		stroke-linejoin="bevel" vector-effect="non-scaling-stroke" />
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="80">
+	<!-- Position independent copies of the noise artwork, without feTile. -->
+	<defs>
+		<filter id="noise" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="20" height="20">
+			<feTurbulence type="fractalNoise" baseFrequency="0.08"
+				numOctaves="1" seed="4" />
+		</filter>
+		<rect id="seed" width="20" height="20" filter="url(#noise)" />
+	</defs>
+	<use xlink:href="#seed" x="0" y="0" />
+	<use xlink:href="#seed" x="20" y="0" />
+	<use xlink:href="#seed" x="40" y="0" />
+	<use xlink:href="#seed" x="60" y="0" />
+	<use xlink:href="#seed" x="80" y="0" />
+	<use xlink:href="#seed" x="100" y="0" />
+	<use xlink:href="#seed" x="0" y="20" />
+	<use xlink:href="#seed" x="20" y="20" />
+	<use xlink:href="#seed" x="40" y="20" />
+	<use xlink:href="#seed" x="60" y="20" />
+	<use xlink:href="#seed" x="80" y="20" />
+	<use xlink:href="#seed" x="100" y="20" />
+	<use xlink:href="#seed" x="0" y="40" />
+	<use xlink:href="#seed" x="20" y="40" />
+	<use xlink:href="#seed" x="40" y="40" />
+	<use xlink:href="#seed" x="60" y="40" />
+	<use xlink:href="#seed" x="80" y="40" />
+	<use xlink:href="#seed" x="100" y="40" />
+	<use xlink:href="#seed" x="0" y="60" />
+	<use xlink:href="#seed" x="20" y="60" />
+	<use xlink:href="#seed" x="40" y="60" />
+	<use xlink:href="#seed" x="60" y="60" />
+	<use xlink:href="#seed" x="80" y="60" />
+	<use xlink:href="#seed" x="100" y="60" />
+</svg>

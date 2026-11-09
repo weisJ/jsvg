@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+	<defs>
+		<filter id="blur" filterUnits="userSpaceOnUse" x="-80" y="-80"
+			width="160" height="160" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="6" />
+		</filter>
+	</defs>
+	<!-- Equal primitive deviations become unequal image deviations, then rotate 
+		away from image axes. -->
+	<g transform="translate(80 80) rotate(45) scale(3 1)">
+		<ellipse rx="4" ry="12" fill="black" filter="url(#blur)" />
+	</g>
+</svg>

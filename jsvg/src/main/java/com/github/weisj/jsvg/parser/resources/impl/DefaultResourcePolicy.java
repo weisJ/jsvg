@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.parser.resources.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,8 @@ public class DefaultResourcePolicy implements ResourcePolicy {
     public static final int FLAG_ALLOW_ABSOLUTE = 1 << 1;
     public static final int FLAG_ALLOW_NON_LOCAL = 1 << 2;
     public static final int FLAG_ALLOW_EMBEDDED_DATA = 1 << 3;
+
+    private static final @NotNull Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
 
     private final int flags;
 
@@ -62,7 +65,10 @@ public class DefaultResourcePolicy implements ResourcePolicy {
 
     private static @NotNull String cleanup(@NotNull String path) {
         if (path.startsWith("data")) {
-            return path.replace(" ", "");
+            // Preserve whitespace in the payload while making it legal URI syntax. This also accepts
+            // newlines produced by programs which encode them as &#10;.
+            // See https://github.com/weisJ/jsvg/issues/164
+            return WHITESPACE_PATTERN.matcher(path).replaceAll("%20");
         }
         return path;
     }

@@ -25,8 +25,11 @@ import java.awt.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.CompositeMode;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.util.ColorUtil;
+import com.github.weisj.jsvg.util.LinearRGBComposite;
 
 public final class CompositeModeComposite {
 
@@ -37,6 +40,24 @@ public final class CompositeModeComposite {
     }
 
     public @NotNull Composite composite() {
+        return composite;
+    }
+
+    boolean affectsTransparentBlack() {
+        return composite instanceof ArithmeticComposite && ((ArithmeticComposite) composite).k4 > 0;
+    }
+
+    static @NotNull Composite inColorSpace(@NotNull Composite composite,
+            @NotNull ColorInterpolation colorInterpolation) {
+        boolean linearRGB = colorInterpolation == ColorInterpolation.LinearRGB;
+        if (composite instanceof AbstractBlendComposite) {
+            ((AbstractBlendComposite) composite).setConvertToLinearRGB(linearRGB);
+        } else if (linearRGB) {
+            if (AlphaComposite.SrcOver.equals(composite)) return LinearRGBComposite.SrcOver;
+            if (AlphaComposite.SrcAtop.equals(composite)) return LinearRGBComposite.SrcAtop;
+            if (AlphaComposite.Xor.equals(composite)) return LinearRGBComposite.Xor;
+        }
+        // In and out only scale one input's color and alpha; no color mixing is needed.
         return composite;
     }
 
@@ -97,7 +118,7 @@ public final class CompositeModeComposite {
         private int arithmetic(int src, int dst) {
             double s = src / 255.0;
             double d = dst / 255.0;
-            return Math.max(0, Math.min(255, (int) Math.round(255 * (k1 * s * d + k2 * s + k3 * d + k4))));
+            return ColorUtil.clampColor((int) Math.round(255 * (k1 * s * d + k2 * s + k3 * d + k4)));
         }
     }
 

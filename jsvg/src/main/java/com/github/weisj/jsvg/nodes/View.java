@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,14 +22,19 @@
 package com.github.weisj.jsvg.nodes;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
+import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.view.ViewBox;
 
 /**
- * There currently isn't any mechanism to instantiate a view. Therefore,
- * this element is a meta node for now.
+ * A predefined SVG view.
+ *
+ * @see <a href="https://www.w3.org/TR/SVG2/linking.html#ViewElement">SVG 2 view element</a>
  */
 @ElementCategories({/* None */})
 @PermittedContent(
@@ -37,9 +42,28 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 )
 public final class View extends MetaSVGNode {
     public static final String TAG = "view";
+    private @Nullable ViewBox viewBox;
+    private @Nullable PreserveAspectRatio preserveAspectRatio;
 
     @Override
     public @NotNull String tagName() {
         return TAG;
+    }
+
+    @Override
+    public void build(@NotNull AttributeNode attributeNode) {
+        viewBox = attributeNode.getViewBox();
+        String preserveAspectRatioValue = attributeNode.getValue("preserveAspectRatio");
+        preserveAspectRatio = preserveAspectRatioValue != null
+                ? PreserveAspectRatio.parse(preserveAspectRatioValue, attributeNode.parser())
+                : null;
+    }
+
+    public @Nullable ViewBox viewBox() {
+        return viewBox;
+    }
+
+    public @Nullable PreserveAspectRatio preserveAspectRatio() {
+        return preserveAspectRatio;
     }
 }

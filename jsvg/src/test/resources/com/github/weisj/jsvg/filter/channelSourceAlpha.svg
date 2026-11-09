@@ -5,7 +5,7 @@
 	<defs>
 		<filter id="b">
 			<feMerge>
-				<feMergeNode in="SourceGraphic" />
+				<feMergeNode in="SourceAlpha" />
 			</feMerge>
 		</filter>
 	</defs>

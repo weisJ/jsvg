@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.geometry.size.Length;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.output.Output;
 
+@SuppressWarnings("java:S1452") // The covariant list prevents mutation through this internal API.
 interface TextLayoutGroup {
 
     @NotNull

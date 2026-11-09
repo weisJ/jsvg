@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" width="80" height="32">
+	<defs>
+		<rect id="surface" x="6" y="6" width="16" height="12" />
+		<filter id="zeroY" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="32" height="32" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="2">
+				<feDistantLight azimuth="45" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+		<filter id="negativeY" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="32" height="32" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="2">
+				<feDistantLight azimuth="45" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+	</defs>
+	<!-- Omitting kernelUnitLength uses the default sampling distance for both 
+		axes. -->
+	<g filter="url(#zeroY)">
+		<use xlink:href="#surface" />
+	</g>
+	<g transform="translate(40 0)">
+		<g filter="url(#negativeY)">
+			<use xlink:href="#surface" />
+		</g>
+	</g>
+</svg>

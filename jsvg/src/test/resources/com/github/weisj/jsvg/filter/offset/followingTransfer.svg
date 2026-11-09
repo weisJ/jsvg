@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="128">
+	<defs>
+		<filter id="near" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="160" height="128" color-interpolation-filters="sRGB">
+			<feOffset dx="-12" dy="8" />
+			<!-- Make transparent pixels opaque while preserving any remaining artwork 
+				colors. -->
+			<feComponentTransfer>
+				<feFuncA type="linear" slope="0" intercept="1" />
+			</feComponentTransfer>
+		</filter>
+		<filter id="outside" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="160" height="128" color-interpolation-filters="sRGB">
+			<feOffset dx="-240" dy="-160" />
+			<!-- Make transparent pixels opaque while preserving any remaining artwork 
+				colors. -->
+			<feComponentTransfer>
+				<feFuncA type="linear" slope="0" intercept="1" />
+			</feComponentTransfer>
+		</filter>
+	</defs>
+	<g filter="url(#near)">
+		<rect x="36" y="32" width="12" height="16" fill="#e08040" />
+		<rect x="48" y="32" width="12" height="16" fill="#204060" />
+	</g>
+	<g transform="translate(160 0)">
+		<g filter="url(#outside)">
+			<rect x="36" y="32" width="12" height="16" fill="#e08040" />
+			<rect x="48" y="32" width="12" height="16" fill="#204060" />
+		</g>
+	</g>
+</svg>

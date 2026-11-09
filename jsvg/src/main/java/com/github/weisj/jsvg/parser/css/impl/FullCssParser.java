@@ -28,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.logging.Logger;
 import com.github.weisj.jsvg.logging.impl.LogFactory;
-import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.data.DeclarationListItem;
 import com.github.weisj.jsvg.parser.css.data.NormalizedProperty;
@@ -39,7 +38,7 @@ import com.github.weisj.jsvg.parser.css.impl.phase2basicparse.BasicParserInput;
 import com.github.weisj.jsvg.parser.css.impl.phase3ruleparse.CssNormalizer;
 import com.github.weisj.jsvg.renderer.CssHints;
 
-public class FullCssParser implements CssParser {
+public final class FullCssParser implements CssParser {
 
     @Override
     public @NotNull StyleRuleList parseStyleSheet(@NotNull List<char[]> input, @NotNull CssHints hints) {

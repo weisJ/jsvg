@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="110"
+	viewBox="0 0 440 110">
+	<!-- reuseMatrix -->
+	<g transform="translate(0 0)">
+		<defs>
+			<filter id="f0" filterUnits="userSpaceOnUse" y="0" x="0"
+				height="100" width="100" color-interpolation-filters="sRGB">
+				<feFlood x="10" y="10" width="10" height="10" result="seed" />
+				<feColorMatrix
+					values="0 0 0 0 1
+                    0 0 0 0 0
+                    0 0 0 0 0
+                    0 0 0 0 1"
+					x="50" y="50" width="20" height="20" result="generated" />
+				<feMerge>
+					<feMergeNode in="seed" />
+					<feMergeNode in="generated" />
+				</feMerge>
+			</filter>
+		</defs>
+		<rect x="10" y="10" width="10" height="10" fill="red"
+			filter="url(#f0)" />
+	</g>
+	<!-- reuseTransfer -->
+	<g transform="translate(110 0)">
+		<defs>
+			<filter id="f1" filterUnits="userSpaceOnUse" y="0" x="0"
+				height="100" width="100" color-interpolation-filters="sRGB">
+				<feFlood x="10" y="10" width="10" height="10" result="seed" />
+				<feComponentTransfer x="50" y="50" width="20"
+					height="20" result="generated">
+					<feFuncA type="linear" slope="0" intercept="1" />
+				</feComponentTransfer>
+				<feMerge>
+					<feMergeNode in="seed" />
+					<feMergeNode in="generated" />
+				</feMerge>
+			</filter>
+		</defs>
+		<rect x="10" y="10" width="10" height="10" fill="red"
+			filter="url(#f1)" />
+	</g>
+	<!-- reuseComposite -->
+	<g transform="translate(220 0)">
+		<defs>
+			<filter id="f2" filterUnits="userSpaceOnUse" y="0" x="0"
+				height="100" width="100" color-interpolation-filters="sRGB">
+				<feFlood x="10" y="10" width="10" height="10" result="seed" />
+				<feComposite in2="seed" operator="arithmetic" k4="1"
+					x="50" y="50" width="20" height="20" result="generated" />
+				<feMerge>
+					<feMergeNode in="seed" />
+					<feMergeNode in="generated" />
+				</feMerge>
+			</filter>
+		</defs>
+		<rect x="10" y="10" width="10" height="10" fill="red"
+			filter="url(#f2)" />
+	</g>
+	<!-- reuseLighting -->
+	<g transform="translate(330 0)">
+		<defs>
+			<filter id="f3" filterUnits="userSpaceOnUse" y="0" x="0"
+				height="100" width="100" color-interpolation-filters="sRGB">
+				<feFlood x="10" y="10" width="10" height="10" result="seed" />
+				<feDiffuseLighting x="50" y="50" width="20"
+					height="20" result="generated">
+					<feDistantLight elevation="90" />
+				</feDiffuseLighting>
+				<feMerge>
+					<feMergeNode in="seed" />
+					<feMergeNode in="generated" />
+				</feMerge>
+			</filter>
+		</defs>
+		<rect x="10" y="10" width="10" height="10" fill="red"
+			filter="url(#f3)" />
+	</g>
+</svg>

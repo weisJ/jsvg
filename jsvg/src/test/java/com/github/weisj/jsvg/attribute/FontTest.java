@@ -22,7 +22,7 @@
 package com.github.weisj.jsvg.attribute;
 
 import java.awt.Font;
-import java.awt.image.ImageObserver;
+import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.font.AWTSVGFont;
 import com.github.weisj.jsvg.attributes.font.FontParser;
 import com.github.weisj.jsvg.attributes.font.FontResolver;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
@@ -40,9 +41,8 @@ import com.github.weisj.jsvg.attributes.font.SVGFont;
 import com.github.weisj.jsvg.parser.css.data.ComponentValue;
 import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
 import com.github.weisj.jsvg.parser.impl.ParserTestUtil;
+import com.github.weisj.jsvg.renderer.FontLoader;
 import com.github.weisj.jsvg.renderer.MeasureContext;
-import com.github.weisj.jsvg.renderer.NullPlatformSupport;
-import com.github.weisj.jsvg.renderer.PlatformSupport;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.view.FloatSize;
 
@@ -63,9 +63,9 @@ class FontTest {
         Supplier<MeasurableFontSpec> fontSpec = () -> createFontSpec(
                 entry("font-family", "sans-serif"),
                 entry("font-size", "11"));
-        SVGFont font1 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
-        SVGFont font2 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
-        Assertions.assertSame(font1, font2);
+        SVGFont font1 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, SVGFont.defaultFontFamily(), null);
+        SVGFont font2 = FontResolver.resolve(fontSpec.get(), MEASURE_CONTEXT, SVGFont.defaultFontFamily(), null);
+        Assertions.assertSame(awtFont(font1), awtFont(font2));
     }
 
     @Test
@@ -75,7 +75,8 @@ class FontTest {
                 // Quoted: system names like macOS ".AppleSystemUIFont" aren't valid <custom-ident>s.
                 entry("font-family", '"' + fontName + '"'),
                 entry("font-size", "3em"));
-        SVGFont font = FontResolver.resolveWithoutCache(fontSpec, MEASURE_CONTEXT, NullPlatformSupport.INSTANCE);
+        SVGFont font = FontResolver.resolveWithoutCache(
+                fontSpec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), null);
         Assertions.assertEquals(fontName, font.family());
         Assertions.assertEquals(3 * MEASURE_CONTEXT.em(), font.size());
     }
@@ -84,13 +85,14 @@ class FontTest {
 
     @Test
     void customFontIsUsed() {
-        PlatformSupport support = getSupport();
+        FontLoader fontLoader = getFontLoader();
 
         // "NoSuchFamily" is not a registered AWT family, so the custom hook must be used.
         MeasurableFontSpec fontSpec = createFontSpec(
                 entry("font-family", "NoSuchFamily"),
                 entry("font-size", "12"));
-        SVGFont font = FontResolver.resolveWithoutCache(fontSpec, MEASURE_CONTEXT, support);
+        SVGFont font = FontResolver.resolveWithoutCache(
+                fontSpec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), fontLoader);
 
         Assertions.assertEquals("nosuchfamily", queriedFontFamily); // CSS-canonicalized
         Assertions.assertEquals(12f, font.size());
@@ -165,26 +167,64 @@ class FontTest {
         return map;
     }
 
-    private @NotNull PlatformSupport getSupport() {
+    @Test
+    void customFontOverridesGenericFamily() {
+        SVGFont font = FontResolver.resolveWithoutCache(createFontSpec(
+                entry("font-family", "serif"),
+                entry("font-size", "12")), MEASURE_CONTEXT, SVGFont.defaultFontFamily(), getFontLoader());
+
+        Assertions.assertEquals(Font.SERIF, queriedFontFamily);
+        Assertions.assertEquals(12f, font.size());
+    }
+
+    @Test
+    void customFontMissUsesRequestedPlatformFamily() {
+        MeasurableFontSpec spec = createFontSpec(entry("font-family", "monospace"));
+        FontLoader fontLoader = (family, attributes) -> null;
+        SVGFont cached = FontResolver.resolve(spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), fontLoader);
+        SVGFont uncached = FontResolver.resolveWithoutCache(
+                spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), fontLoader);
+
+        Assertions.assertEquals(Font.MONOSPACED, cached.family());
+        Assertions.assertEquals(uncached.family(), cached.family());
+        Assertions.assertSame(awtFont(cached), awtFont(FontResolver.resolve(
+                spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), fontLoader)));
+    }
+
+    @Test
+    void customFontCachesAreScopedToLoader() {
+        MeasurableFontSpec spec = createFontSpec(entry("font-family", "serif"));
+        SVGFont platform = FontResolver.resolve(spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), null);
+        FontLoader first = (family, attributes) -> new Font(Font.DIALOG, Font.PLAIN, 1).deriveFont(attributes);
+        FontLoader second = (family, attributes) -> new Font(Font.MONOSPACED, Font.PLAIN, 1).deriveFont(attributes);
+        SVGFont firstFont = FontResolver.resolve(spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), first);
+        SVGFont secondFont = FontResolver.resolve(spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), second);
+
+        Assertions.assertEquals(Font.SERIF, platform.family());
+        Assertions.assertEquals(Font.DIALOG, firstFont.family());
+        Assertions.assertEquals(Font.MONOSPACED, secondFont.family());
+        Assertions.assertSame(awtFont(firstFont), awtFont(FontResolver.resolve(
+                spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), first)));
+        Assertions.assertSame(awtFont(secondFont), awtFont(FontResolver.resolve(
+                spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), second)));
+        Assertions.assertSame(awtFont(platform),
+                awtFont(FontResolver.resolve(spec, MEASURE_CONTEXT, SVGFont.defaultFontFamily(), null)));
+    }
+
+    private static @NotNull Font awtFont(@NotNull SVGFont font) {
+        return ((AWTSVGFont) font).font();
+    }
+
+    private @NotNull FontLoader getFontLoader() {
         Font stub = new Font(Font.DIALOG, Font.PLAIN, 1);
-        PlatformSupport support = new PlatformSupport() {
+        return new FontLoader() {
             @Override
-            public ImageObserver imageObserver() {
-                return null;
-            }
-
-            @Override
-            public TargetSurface targetSurface() {
-                return null;
-            }
-
-            @Override
-            public @NotNull Font customFont(@NotNull String family) {
+            public @NotNull Font customFont(@NotNull String family,
+                    @NotNull Map<@NotNull TextAttribute, Object> attributes) {
                 queriedFontFamily = family;
-                return stub;
+                return stub.deriveFont(attributes);
             }
         };
-        return support;
     }
 
     private static @NotNull MeasurableFontSpec createFontSpec(@NotNull AttributeEntry... attributes) {

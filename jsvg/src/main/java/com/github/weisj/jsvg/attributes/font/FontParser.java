@@ -167,7 +167,7 @@ public final class FontParser {
         result.put("font-size", fontSize);
         result.put("line-height", lineHeight != null ? lineHeight : normal);
         result.put("font-family", fontFamily);
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     /** A {@code <dimension>} with an angle unit. */

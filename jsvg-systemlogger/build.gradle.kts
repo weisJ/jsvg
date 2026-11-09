@@ -7,7 +7,9 @@ dependencies {
     compileOnly(projects.jsvg)
     compileOnly(libs.nullabilityAnnotations)
     compileOnly(libs.osgiAnnotations)
-    compileOnly(libs.bndAnnotations)
+    compileOnly(libs.bndAnnotations) {
+        isTransitive = false
+    }
 }
 
 tasks {

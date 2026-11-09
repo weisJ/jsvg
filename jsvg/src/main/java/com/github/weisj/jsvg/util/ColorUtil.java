@@ -35,22 +35,98 @@ public final class ColorUtil {
         return (x + (x >> 8)) >> 8;
     }
 
+    /** Converts a packed straight-alpha ARGB color to premultiplied ARGB. */
+    public static int premultiply(int argb) {
+        int alpha = argb >>> 24;
+        if (alpha == 0) return 0;
+        if (alpha == 255) return argb;
+        int red = div255(((argb >>> 16) & 0xff) * alpha);
+        int green = div255(((argb >>> 8) & 0xff) * alpha);
+        int blue = div255((argb & 0xff) * alpha);
+        return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
+    /** Converts a packed premultiplied ARGB color to straight-alpha ARGB. */
+    public static int unpremultiply(int argb) {
+        int alpha = argb >>> 24;
+        if (alpha == 0 || alpha == 255) return argb;
+        int red = unpremultiply((argb >>> 16) & 0xff, alpha);
+        int green = unpremultiply((argb >>> 8) & 0xff, alpha);
+        int blue = unpremultiply(argb & 0xff, alpha);
+        return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
+    private static int unpremultiply(int component, int alpha) {
+        return toRgbRange((component * 255.0) / alpha);
+    }
+
     public static int computeLuminance(int r, int g, int b) {
         return toRgbRange(0.2125 * r + 0.7164 * g + 0.0712 * b);
     }
 
     public static int toRgbRange(double value) {
-        return (int) Math.max(Math.min(Math.round(value), 255), 0);
+        return (int) clampColor(Math.round(value));
+    }
+
+    /**
+     * Creates an sRGB color from CSS HSL components.
+     *
+     * @param hueDegrees hue in degrees; values wrap around the color wheel
+     * @param saturation saturation in the range {@code [0, 1]}; out-of-range values are clamped
+     * @param lightness lightness in the range {@code [0, 1]}; out-of-range values are clamped
+     * @param alpha alpha in the range {@code [0, 1]}; out-of-range values are clamped
+     */
+    public static @NotNull Color fromHsl(double hueDegrees, double saturation, double lightness, double alpha) {
+        double hue = ((hueDegrees % 360) + 360) % 360 / 360;
+        saturation = clampUnit(saturation);
+        lightness = clampUnit(lightness);
+        alpha = clampUnit(alpha);
+
+        double red = lightness;
+        double green = lightness;
+        double blue = lightness;
+        if (saturation != 0) {
+            double max = lightness < 0.5
+                    ? lightness * (1 + saturation)
+                    : lightness + saturation - lightness * saturation;
+            double min = 2 * lightness - max;
+            red = hueToRgb(min, max, hue + 1.0 / 3.0);
+            green = hueToRgb(min, max, hue);
+            blue = hueToRgb(min, max, hue - 1.0 / 3.0);
+        }
+        return new Color(
+                toRgbRange(red * 255),
+                toRgbRange(green * 255),
+                toRgbRange(blue * 255),
+                toRgbRange(alpha * 255));
+    }
+
+    private static double hueToRgb(double min, double max, double hue) {
+        if (hue < 0) hue += 1;
+        if (hue > 1) hue -= 1;
+        if (hue * 6 < 1) return min + (max - min) * hue * 6;
+        if (hue * 2 < 1) return max;
+        if (hue * 3 < 2) return min + (max - min) * (2.0 / 3.0 - hue) * 6;
+        return min;
+    }
+
+    private static double clampUnit(double value) {
+        return Math.min(1, Math.max(0, value));
     }
 
     public static Color withAlpha(@NotNull Color c, float alpha) {
-        int a = Math.max(Math.min(255, (int) (alpha * 255)), 0);
+        int a = clampColor((int) (alpha * 255));
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), a);
     }
 
     public static String toString(@Nullable Color c) {
         if (c == null) return "null";
         return String.format("Color[%d,%d,%d,%d]", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+    }
+
+    /** The CSS compositing Lum function; input and result use the same component scale. */
+    public static double luminosity(double red, double green, double blue) {
+        return 0.3 * red + 0.59 * green + 0.11 * blue;
     }
 
     public static void convertRGBPretoHSL(int r, int g, int b, int a, float @NotNull [] hsl) {
@@ -129,61 +205,10 @@ public final class ColorUtil {
     }
 
     public static void convertHSLtoRGB(float h, float s, float l, int @NotNull [] rgb) {
-        if (h < 0)
-            h = 0.0f;
-        else if (h > 1.0f) h = 1.0f;
-        if (s < 0)
-            s = 0.0f;
-        else if (s > 1.0f) s = 1.0f;
-        if (l < 0)
-            l = 0.0f;
-        else if (l > 1.0f) l = 1.0f;
-
-        int r;
-        int g;
-        int b;
-
-        if (s - 0.01f <= 0.0f) {
-            r = (int) (l * 255.0f);
-            g = (int) (l * 255.0f);
-            b = (int) (l * 255.0f);
-        } else {
-            float x;
-            float y;
-            if (l < 0.5f) {
-                y = l * (1 + s);
-            } else {
-                y = (l + s) - (s * l);
-            }
-            x = 2 * l - y;
-
-            r = (int) (255.0f * hue2RGB(x, y, h + (1.0f / 3.0f)));
-            g = (int) (255.0f * hue2RGB(x, y, h));
-            b = (int) (255.0f * hue2RGB(x, y, h - (1.0f / 3.0f)));
-        }
-
-        rgb[0] = r;
-        rgb[1] = g;
-        rgb[2] = b;
-    }
-
-    private static float hue2RGB(float v1, float v2, float vH) {
-        if (vH < 0.0f) {
-            vH += 1.0f;
-        }
-        if (vH > 1.0f) {
-            vH -= 1.0f;
-        }
-        if ((6.0f * vH) < 1.0f) {
-            return (v1 + (v2 - v1) * 6.0f * vH);
-        }
-        if ((2.0f * vH) < 1.0f) {
-            return v2;
-        }
-        if ((3.0f * vH) < 2.0f) {
-            return (v1 + (v2 - v1) * ((2.0f / 3.0f) - vH) * 6.0f);
-        }
-        return v1;
+        Color color = fromHsl(h * 360, s, l, 1);
+        rgb[0] = color.getRed();
+        rgb[1] = color.getGreen();
+        rgb[2] = color.getBlue();
     }
 
     /**
@@ -241,6 +266,20 @@ public final class ColorUtil {
         argb[0] = table[argb[0]];
         argb[1] = table[argb[1]];
         argb[2] = table[argb[2]];
+    }
+
+    /** Converts packed premultiplied sRGB to premultiplied linearRGB, preserving alpha. */
+    public static int sRGBtoLinearRGBPre(int argb) {
+        int[] table = SRGBtoLinearRGBPre[argb >>> 24];
+        return (argb & 0xff000000) | (table[(argb >>> 16) & 0xff] << 16)
+                | (table[(argb >>> 8) & 0xff] << 8) | table[argb & 0xff];
+    }
+
+    /** Converts packed premultiplied linearRGB to premultiplied sRGB, preserving alpha. */
+    public static int linearRGBtoSRGBPre(int argb) {
+        int[] table = LinearRGBtoSRGBPre[argb >>> 24];
+        return (argb & 0xff000000) | (table[(argb >>> 16) & 0xff] << 16)
+                | (table[(argb >>> 8) & 0xff] << 8) | table[argb & 0xff];
     }
 
     public static int sRGBtoLinearRGBBand(int value) {
@@ -308,6 +347,10 @@ public final class ColorUtil {
     }
 
     public static int clampColor(int v) {
+        return Math.max(Math.min(255, v), 0);
+    }
+
+    public static double clampColor(double v) {
         return Math.max(Math.min(255, v), 0);
     }
 }

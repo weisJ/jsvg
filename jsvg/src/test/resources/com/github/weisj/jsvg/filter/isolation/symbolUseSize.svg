@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">
+	<defs>
+		<filter id="crop" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="40" height="20">
+			<feColorMatrix x="4" y="4" width="8" height="8" />
+		</filter>
+		<symbol id="content" viewBox="0 0 40 20" filter="url(#crop)">
+			<rect x="4" y="4" width="16" height="8" fill="red" />
+		</symbol>
+	</defs>
+	<!-- The use-site size establishes the viewport before the referenced container's 
+		filter. -->
+	<use href="#content" x="24" y="16" width="80" height="40" />
+</svg>

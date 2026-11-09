@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -60,15 +60,16 @@ public final class StrokeContext {
     private static Length @Nullable [] validateDashPattern(Length @Nullable [] pattern) {
         if (pattern == null) return null;
         if (pattern.length == 0) return pattern;
+        boolean hasNonZero = false;
         for (Length length : pattern) {
             if (length.raw() < 0) {
-                // Dash length is negative. Bail
-                return new Length[0];
+                // Ignore the invalid declaration so the inherited dash pattern can be used.
+                return null;
             }
-            if (!length.isZero()) return pattern;
+            hasNonZero |= !length.isZero();
         }
-        // All values are zero. Bail.
-        return new Length[0];
+        // An all-zero list is valid and specifies a solid stroke.
+        return hasNonZero ? pattern : new Length[0];
     }
 
     public @NotNull StrokeContext derive(@Nullable StrokeContext context) {
@@ -103,7 +104,7 @@ public final class StrokeContext {
                 attributeNode.getEnumNullable("stroke-linejoin", LineJoin.class),
                 attributeNode.getNonNegativeFloat("stroke-miterlimit", Length.UNSPECIFIED_RAW),
                 attributeNode.getLengthList("stroke-dasharray", null, PercentageDimension.LENGTH),
-                attributeNode.getLength("stroke-dashoffset", PercentageDimension.CUSTOM,
+                attributeNode.getLength("stroke-dashoffset", PercentageDimension.LENGTH,
                         Inherited.YES, Animatable.YES));
     }
 

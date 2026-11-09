@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.output.Output;
 import com.github.weisj.jsvg.renderer.output.impl.Graphics2DOutput;
 import com.github.weisj.jsvg.view.FloatSize;
@@ -159,10 +160,10 @@ class ToShapeTest {
         BufferedImage img = prepareImage(document);
         Graphics2D g = img.createGraphics();
         g.setColor(Color.BLACK);
-        document.renderWithPlatform(
-                NullPlatformSupport.INSTANCE,
-                new BlackAndWhiteOutput(g),
-                new ViewBox(0, 0, img.getWidth(), img.getHeight()));
+        document.render(new BlackAndWhiteOutput(g), RenderConfig.builder()
+                .platformSupport(NullPlatformSupport.INSTANCE)
+                .viewport(new ViewBox(0, 0, img.getWidth(), img.getHeight()))
+                .build());
         g.dispose();
         return img;
     }

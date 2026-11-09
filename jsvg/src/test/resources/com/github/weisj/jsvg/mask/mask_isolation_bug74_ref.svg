@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"
+	viewBox="0 0 100 100">
+	<defs>
+		<linearGradient id="whiteFade"
+			gradientUnits="userSpaceOnUse" x1="10" x2="90">
+			<stop offset="0" stop-color="white" stop-opacity="0" />
+			<stop offset="1" stop-color="white" stop-opacity="1" />
+		</linearGradient>
+		<linearGradient id="blackFade"
+			gradientUnits="userSpaceOnUse" x1="10" x2="90">
+			<stop offset="0" stop-color="black" stop-opacity="0" />
+			<stop offset="1" stop-color="black" stop-opacity="1" />
+		</linearGradient>
+	</defs>
+
+	<!-- The white rectangle completely covers the red one before the group 
+		is masked. The mask spans (10,10) to (90,90), retaining only the inner half 
+		of the two-unit stroke. Draw the visible interior and border without overlap, 
+		with the mask's opacity gradient. -->
+	<rect x="11" y="11" width="78" height="78" fill="url(#whiteFade)" />
+	<path d="M10 10 H90 V90 H10 Z M11 11 V89 H89 V11 Z"
+		fill-rule="evenodd" fill="url(#blackFade)" />
+</svg>

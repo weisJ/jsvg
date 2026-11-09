@@ -43,7 +43,7 @@ public final class MeasureContext {
     private final float parentEm;
     private final @NotNull AnimationState animationState;
 
-    public MeasureContext(float vw, float vh, float em, float ex, float rem, float defaultEm, float parentEm,
+    private MeasureContext(float vw, float vh, float em, float ex, float rem, float defaultEm, float parentEm,
             @NotNull AnimationState animationState) {
         this.vw = vw;
         this.vh = vh;

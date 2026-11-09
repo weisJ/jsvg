@@ -25,14 +25,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.github.weisj.jsvg.paint.impl.DefaultPaintParser;
 import com.github.weisj.jsvg.parser.DocumentLimits;
 import com.github.weisj.jsvg.parser.DomProcessor;
 import com.github.weisj.jsvg.parser.ElementLoader;
 import com.github.weisj.jsvg.parser.LoaderContext;
-import com.github.weisj.jsvg.parser.PaintParser;
-import com.github.weisj.jsvg.parser.css.CssParser;
-import com.github.weisj.jsvg.parser.css.impl.FullCssParser;
 import com.github.weisj.jsvg.parser.resources.ResourceLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.parser.resources.impl.DefaultResourcePolicy;
@@ -43,11 +39,7 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     private static final ResourceLoader DEFAULT_RESOURCE_LOADER = new SynchronousResourceLoader();
     private static final ElementLoader DEFAULT_ELEMENT_LOADER =
             new DefaultElementLoader(DefaultElementLoader.AllowExternalResources.DENY);
-    private static final CssParser DEFAULT_CSS_PARSER = new FullCssParser();
-    private static final PaintParser DEFAULT_PAINT_PARSER = new DefaultPaintParser();
     private @Nullable DomProcessor preProcessor = null;
-    private @NotNull CssParser cssParser = DEFAULT_CSS_PARSER;
-    private @NotNull PaintParser paintParser = DEFAULT_PAINT_PARSER;
     private @NotNull ResourceLoader resourceLoader = DEFAULT_RESOURCE_LOADER;
     private @NotNull ElementLoader elementLoader = DEFAULT_ELEMENT_LOADER;
     private @NotNull ResourcePolicy resourcePolicy = ResourcePolicy.DENY_EXTERNAL;
@@ -61,16 +53,6 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     @Override
     public @Nullable DomProcessor preProcessor() {
         return preProcessor;
-    }
-
-    @Override
-    public @NotNull CssParser cssParser() {
-        return cssParser;
-    }
-
-    @Override
-    public @NotNull PaintParser paintParser() {
-        return paintParser;
     }
 
     @Override
@@ -102,18 +84,6 @@ public final class MutableLoaderContext implements LoaderContext, LoaderContext.
     @Override
     public @NotNull Builder preProcessor(@Nullable DomProcessor preProcessor) {
         this.preProcessor = preProcessor;
-        return this;
-    }
-
-    @Override
-    public @NotNull Builder cssParser(@NotNull CssParser cssParser) {
-        this.cssParser = cssParser;
-        return this;
-    }
-
-    @Override
-    public @NotNull Builder paintParser(@NotNull PaintParser paintParser) {
-        this.paintParser = paintParser;
         return this;
     }
 

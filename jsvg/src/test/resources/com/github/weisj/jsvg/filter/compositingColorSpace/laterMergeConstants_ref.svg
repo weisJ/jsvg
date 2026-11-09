@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20">
+	<!-- Half red then half blue over opaque black: linear red 1/4 and blue 
+		1/2. -->
+	<rect width="16" height="16" fill="#8900bc" />
+	<rect x="20" width="16" height="16" fill="#8900bc" />
+</svg>

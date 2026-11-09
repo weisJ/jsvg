@@ -40,6 +40,7 @@ public interface Token extends ComponentValue {
     @NotNull
     TokenType type();
 
+    @Override
     String serialize();
 
     /** Type flag of a {@code <hash-token>} per §4.2. */
@@ -386,16 +387,17 @@ public interface Token extends ComponentValue {
 
     /** {@code <number-token>} per §4.2: numeric value plus type flag. */
     @Immutable
+    @SuppressWarnings("JavaLangClash") // CSS calls this token kind a number.
     final class Number implements Token {
-        private final float value;
+        private final double value;
         private final @NotNull NumericType numericType;
 
-        public Number(float value, @NotNull NumericType numericType) {
+        public Number(double value, @NotNull NumericType numericType) {
             this.value = value;
             this.numericType = numericType;
         }
 
-        public float value() {
+        public double value() {
             return value;
         }
 
@@ -411,9 +413,9 @@ public interface Token extends ComponentValue {
         @Override
         public String serialize() {
             if (numericType == NumericType.NUMBER) {
-                return Float.toString(value);
+                return Double.toString(value);
             } else {
-                return Integer.toString((int) value);
+                return Long.toString((long) value);
             }
         }
 
@@ -439,13 +441,13 @@ public interface Token extends ComponentValue {
     /** {@code <percentage-token>} per §4.2: numeric value only (no type flag). */
     @Immutable
     final class Percentage implements Token {
-        private final float value;
+        private final double value;
 
-        public Percentage(float value) {
+        public Percentage(double value) {
             this.value = value;
         }
 
-        public float value() {
+        public double value() {
             return value;
         }
 
@@ -480,17 +482,17 @@ public interface Token extends ComponentValue {
     /** {@code <dimension-token>} per §4.2: numeric value, type flag, and unit ident. */
     @Immutable
     final class Dimension implements Token {
-        private final float value;
+        private final double value;
         private final @NotNull NumericType numericType;
         private final @NotNull String unit;
 
-        public Dimension(float value, @NotNull NumericType numericType, @NotNull String unit) {
+        public Dimension(double value, @NotNull NumericType numericType, @NotNull String unit) {
             this.value = value;
             this.numericType = numericType;
             this.unit = unit;
         }
 
-        public float value() {
+        public double value() {
             return value;
         }
 
@@ -513,7 +515,7 @@ public interface Token extends ComponentValue {
             if (numericType == NumericType.NUMBER) {
                 return value + unit;
             } else {
-                return ((int) value) + unit;
+                return ((long) value) + unit;
             }
         }
 

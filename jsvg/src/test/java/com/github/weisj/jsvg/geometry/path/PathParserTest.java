@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2024 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -42,8 +42,8 @@ class PathParserTest {
         Assertions.assertTrue(cmds[0] instanceof MoveTo);
         Assertions.assertTrue(cmds[1] instanceof LineTo);
         LineTo cmd = (LineTo) cmds[1];
-        Assertions.assertEquals(cmd.x(), 1e5);
-        Assertions.assertEquals(cmd.y(), .5);
+        Assertions.assertEquals(1e5, cmd.x());
+        Assertions.assertEquals(.5, cmd.y());
     }
 
     @Test

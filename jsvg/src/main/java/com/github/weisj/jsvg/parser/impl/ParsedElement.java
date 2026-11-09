@@ -256,7 +256,7 @@ public final class ParsedElement implements DomElement {
     }
 
     void addChild(@NotNull ParsedElement parsedElement) {
-        if (categoryMetadata.get().hasCategory(Category.Animation)) {
+        if (parsedElement.categoryMetadata.get().hasCategory(Category.Animation)) {
             String attributeName = BaseAnimationNode.attributeName(parsedElement.attributeNode());
             animationElements.computeIfAbsent(attributeName, k -> new ArrayList<>()).add(parsedElement);
         }

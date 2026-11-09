@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+	<defs>
+		<filter id="blur" primitiveUnits="objectBoundingBox"
+			filterUnits="userSpaceOnUse" x="0" y="0" width="128" height="128"
+			color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="0.1" />
+		</filter>
+	</defs>
+	<!-- Equal deviations in bounding-box units become unequal on a non-square 
+		object. -->
+	<g transform="rotate(30 64 64)">
+		<rect x="44" y="59" width="40" height="10" filter="url(#blur)" />
+	</g>
+</svg>

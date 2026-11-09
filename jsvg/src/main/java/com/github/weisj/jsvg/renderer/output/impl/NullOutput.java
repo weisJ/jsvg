@@ -86,11 +86,6 @@ public class NullOutput implements Output, Output.SafeState {
     }
 
     @Override
-    public void setClip(@Nullable Shape shape) {
-        /* do nothing */
-    }
-
-    @Override
     public @NotNull Output createChild() {
         return this;
     }

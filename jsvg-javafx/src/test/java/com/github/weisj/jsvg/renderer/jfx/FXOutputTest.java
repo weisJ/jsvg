@@ -48,6 +48,7 @@ import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.parser.resources.ResourcePolicy;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.SVGTestFiles;
 import com.github.weisj.jsvg.renderer.jfx.impl.bridge.FXRenderingHintsUtil;
 import com.github.weisj.jsvg.renderer.output.Output;
@@ -125,8 +126,8 @@ class FXOutputTest {
             "nonScalingStroke_bug139_with_filter.svg" // Due to smallish deviations.
     );
 
-    // SVG files that are expected to fail loading due to invalid structure (e.g., use cycles or
-    // excessive nesting). These are tested explicitly to verify they produce no valid document.
+    // SVG files that are expected to fail loading because they exceed configured document limits.
+    // These are tested explicitly to verify they produce no valid document.
     private static final Set<String> INVALID_SVG_FILES = Set.of(
             "manyImplicitPathsThroughUse.svg",
             "useNesting.svg");
@@ -165,7 +166,9 @@ class FXOutputTest {
         Graphics2D g = image.createGraphics();
         Output output = Output.createForGraphics(g);
         FXRenderingHintsUtil.setupDefaultJFXRenderingHints(output);
-        svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null);
+        svgDocument.render(output, RenderConfig.builder()
+                .platformSupport(NullPlatformSupport.INSTANCE)
+                .build());
         g.dispose();
         return image;
     }
@@ -179,7 +182,9 @@ class FXOutputTest {
             canvas.getGraphicsContext2D().clearRect(0, 0, (int) size.width, (int) size.height);
 
             Output output = FXOutput.createForGraphicsContext(canvas.getGraphicsContext2D());
-            svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, null, null);
+            svgDocument.render(output, RenderConfig.builder()
+                    .platformSupport(NullPlatformSupport.INSTANCE)
+                    .build());
             output.dispose();
 
             SnapshotParameters snapshotParameters = new SnapshotParameters();

@@ -93,7 +93,6 @@ public final class LinearGradient extends AbstractGradient<LinearGradient> {
                 ", x2=" + x2 +
                 ", y1=" + y1 +
                 ", y2=" + y2 +
-                ", colors=" + Arrays.toString(colors()) +
                 ", offsets=" + Arrays.toString(offsets()) +
                 '}';
     }

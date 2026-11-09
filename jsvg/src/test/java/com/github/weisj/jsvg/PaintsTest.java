@@ -21,6 +21,8 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.actual;
+import static com.github.weisj.jsvg.ImageComparison.ImageInfo.expected;
 import static com.github.weisj.jsvg.ImageComparison.ReferenceTestResult.SUCCESS;
 import static com.github.weisj.jsvg.ImageComparison.compareImages;
 import static com.github.weisj.jsvg.ImageComparison.renderJsvg;
@@ -28,16 +30,71 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.io.TempDir;
 
+import com.github.weisj.jsvg.ImageComparison.CompareInfo;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.MemoryImageSource;
+import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
+import com.github.weisj.jsvg.ImageComparison.RenderType;
+import com.github.weisj.jsvg.attributes.value.ColorValue;
+import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.renderer.MeasureContext;
+import com.github.weisj.jsvg.renderer.animation.AnimationState;
+import com.github.weisj.jsvg.renderer.impl.PaintResolver;
+import com.github.weisj.jsvg.renderer.impl.context.PaintContext;
+import com.github.weisj.jsvg.view.FloatSize;
 
 class PaintsTest {
+    @TempDir
+    Path directory;
 
     @Test
     void testCurrentColor() {
         assertEquals(SUCCESS, compareImages("paint/currentColor.svg"));
+    }
+
+    @Test
+    void colorValuePaintIsEvaluatedAtRenderTime() {
+        ColorValue value = context -> context.timestamp() == 10 ? Color.RED : Color.BLUE;
+        SVGPaint paint = value.asSVGPaint();
+        PaintContext paintContext = PaintContext.createDefault(PredefinedPaints.DEFAULT_PAINT);
+
+        MeasureContext atTen = MeasureContext.createInitial(
+                new FloatSize(1, 1), 16, 8, new AnimationState(0, 10));
+        MeasureContext atTwenty = MeasureContext.createInitial(
+                new FloatSize(1, 1), 16, 8, new AnimationState(0, 20));
+
+        assertEquals(Color.RED, PaintResolver.resolveColor(paint, paintContext, null, atTen));
+        assertEquals(Color.BLUE, PaintResolver.resolveColor(paint, paintContext, null, atTwenty));
+    }
+
+    @Test
+    void animatedPaintKeepsCurrentColorAsItsInitialValue() {
+        var source = new MemoryImageSource("animated-current-color-initial", """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+                  <rect width="500" height="500" color="red" fill="currentColor">
+                    <animate attributeName="fill" from="blue" to="green" begin="1s" dur="1s"/>
+                  </rect>
+                </svg>
+                """);
+        var reference = new MemoryImageSource("red", """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+                  <rect width="500" height="500" fill="red"/>
+                </svg>
+                """);
+
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(reference, RenderType.JSVG),
+                actual(source, RenderType.JSVG.withAnimationState(AnimationState.NO_ANIMATION)), 0, 0)));
     }
 
     @Test
@@ -52,5 +109,43 @@ class PaintsTest {
     @Test
     void testStringRepresentation() {
         assertEquals("AwtSVGPaint{paint=Color{r=0,g=0,b=0,a=255}}", new AwtSVGPaint(Color.BLACK).toString());
+    }
+
+    @Test
+    void urlResolution() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("paint/urlResolution_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("paint/urlResolution.svg"), RenderType.JSVG), 0, 0)));
+    }
+
+    @Test
+    void quotedAndEscapedPaintUrlsAndFallbacks() {
+        assertEquals(SUCCESS, compareImages(new CompareInfo(
+                expected(new PathImageSource("paint/urlsAndFallbacks_ref.svg"), RenderType.JSVG),
+                actual(new PathImageSource("paint/urlsAndFallbacks.svg"), RenderType.JSVG), 0, 0)));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> quotedAndEscapedExternalPaintUrls() throws Exception {
+        Files.writeString(directory.resolve("paint).svg"), """
+                <svg xmlns="http://www.w3.org/2000/svg">
+                  <linearGradient id="blue"><stop stop-color="blue"/></linearGradient>
+                </svg>
+                """);
+        var reference = new MemoryImageSource("blue", """
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                  <rect width="16" height="16" fill="blue"/>
+                </svg>
+                """);
+        return Stream.of("url('paint).svg#blue') red", "url(paint\\).svg#blue) red")
+                .map(paint -> DynamicTest.dynamicTest(paint, () -> {
+                    var source = new MemoryImageSource("external-paint", """
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                              <rect width="16" height="16" fill="%s"/>
+                            </svg>
+                            """.formatted(paint), directory.resolve("document.svg").toUri().toURL());
+                    assertEquals(SUCCESS, compareImages(new CompareInfo(expected(reference, RenderType.Batik),
+                            actual(source, RenderType.JSVG), 0, 0)));
+                }));
     }
 }

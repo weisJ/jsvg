@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -34,25 +34,6 @@ public final class AwtComponentPlatformSupport implements PlatformSupport {
 
     public AwtComponentPlatformSupport(@NotNull Component component) {
         this.component = component;
-    }
-
-    @Override
-    public float fontSize() {
-        Font font = component.getFont();
-        if (font != null) return font.getSize2D();
-        return PlatformSupport.super.fontSize();
-    }
-
-    @Override
-    public @NotNull String fontFamily() {
-        Font font = component.getFont();
-        if (font != null) return font.getFamily();
-        return PlatformSupport.super.fontFamily();
-    }
-
-    @Override
-    public @NotNull TargetSurface targetSurface() {
-        return component::repaint;
     }
 
     @Override

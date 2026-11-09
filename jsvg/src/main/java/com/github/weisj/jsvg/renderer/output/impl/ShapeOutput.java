@@ -133,13 +133,6 @@ public class ShapeOutput implements Output {
     }
 
     @Override
-    public void setClip(@Nullable Shape shape) {
-        currentClip = shape != null
-                ? ShapeUtil.transformShape(shape, currentTransform)
-                : null;
-    }
-
-    @Override
     public @NotNull Output createChild() {
         return new ShapeOutput(this);
     }

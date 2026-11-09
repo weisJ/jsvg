@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -25,15 +25,16 @@ package com.github.weisj.jsvg.nodes.filter;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
+import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.DefaultFilterChannel;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 import com.github.weisj.jsvg.attributes.value.PercentageDimension;
 import com.github.weisj.jsvg.geometry.size.Length;
-import com.github.weisj.jsvg.geometry.size.Unit;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.ParsedElement;
 
-public final class FilterPrimitiveBase {
+public final class FilterPrimitiveBase implements FilterChannelKey {
 
     final @NotNull Length x;
     final @NotNull Length y;
@@ -45,10 +46,20 @@ public final class FilterPrimitiveBase {
     private final ColorInterpolation colorInterpolation;
 
     public FilterPrimitiveBase(@NotNull AttributeNode attributeNode) {
-        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(0));
-        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(0));
-        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Unit.PERCENTAGE_WIDTH.valueOf(100));
-        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Unit.PERCENTAGE_HEIGHT.valueOf(100));
+        // The parent filter's attributes are prepared before its children, but its node is built after
+        // them.
+        ParsedElement parent = attributeNode.element().parent();
+        UnitType primitiveUnits = parent != null
+                ? parent.attributeNode().getEnum("primitiveUnits", UnitType.UserSpaceOnUse)
+                : UnitType.UserSpaceOnUse;
+        x = attributeNode.getLength("x", PercentageDimension.WIDTH, Length.UNSPECIFIED)
+                .coercePercentageToCorrectUnit(primitiveUnits, PercentageDimension.WIDTH);
+        y = attributeNode.getLength("y", PercentageDimension.HEIGHT, Length.UNSPECIFIED)
+                .coercePercentageToCorrectUnit(primitiveUnits, PercentageDimension.HEIGHT);
+        width = attributeNode.getLength("width", PercentageDimension.WIDTH, Length.UNSPECIFIED)
+                .coercePercentageToCorrectUnit(primitiveUnits, PercentageDimension.WIDTH);
+        height = attributeNode.getLength("height", PercentageDimension.HEIGHT, Length.UNSPECIFIED)
+                .coercePercentageToCorrectUnit(primitiveUnits, PercentageDimension.HEIGHT);
 
         inputChannel = attributeNode.getFilterChannelKey("in", DefaultFilterChannel.LastResult);
         resultChannel = attributeNode.getFilterChannelKey("result", DefaultFilterChannel.LastResult);
@@ -58,6 +69,16 @@ public final class FilterPrimitiveBase {
 
     public ColorInterpolation colorInterpolation(@NotNull FilterContext filterContext) {
         return filterContext.colorInterpolation(colorInterpolation);
+    }
+
+    @Override
+    public @NotNull Object key() {
+        return this;
+    }
+
+    @NotNull
+    FilterChannelKey inputChannelKey() {
+        return inputChannel;
     }
 
     public @NotNull Channel channel(@NotNull FilterChannelKey key, @NotNull FilterContext context) {
@@ -76,18 +97,19 @@ public final class FilterPrimitiveBase {
         saveResult(inputChannel(context), context);
     }
 
-    public void saveLayoutResult(@NotNull LayoutBounds outputBounds, @NotNull FilterLayoutContext filterLayoutContext) {
-        saveResultImpl(outputBounds, filterLayoutContext.resultChannels());
+    public void saveLayoutResult(@NotNull LayoutBounds bounds, @NotNull FilterLayoutContext context) {
+        saveResultImpl(bounds, context.resultChannels());
     }
 
     public void saveResult(@NotNull Channel output, @NotNull FilterContext filterContext) {
-        saveResultImpl(output, filterContext.resultChannels());
+        saveResultImpl(output.clip(filterContext.primitiveRegion(this), filterContext), filterContext.resultChannels());
     }
 
     private <T> void saveResultImpl(@NotNull T value, @NotNull ChannelStorage<T> storage) {
-        storage.addResult(resultChannel, value);
+        storage.addResult(this, value);
+        storage.addAlias(DefaultFilterChannel.LastResult, this);
         if (resultChannel != DefaultFilterChannel.LastResult) {
-            storage.addResult(DefaultFilterChannel.LastResult, value);
+            storage.addAlias(resultChannel, this);
         }
     }
 }

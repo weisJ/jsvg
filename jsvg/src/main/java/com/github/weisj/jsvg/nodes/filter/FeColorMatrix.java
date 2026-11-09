@@ -23,6 +23,7 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import static com.github.weisj.jsvg.util.ColorUtil.toRgbRange;
 
+import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds.CoversWholeSourceBounds;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
@@ -59,8 +61,7 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
     @Override
     public void build(@NotNull AttributeNode attributeNode) {
         super.build(attributeNode);
-        String type = attributeNode.getValue("type");
-        if (type == null) type = "matrix";
+        String type = attributeNode.getValue("type", "matrix");
         filter = null;
         switch (type.toLowerCase(Locale.ENGLISH)) {
             case "matrix":
@@ -86,15 +87,15 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
                 break;
             case "huerotate":
                 float hueRotate = attributeNode.getFloat(KEY_VALUES, 0);
-                if (hueRotate != 1) {
+                if (hueRotate != 0) {
                     double radians = Math.toRadians(hueRotate);
                     double sin = Math.sin(radians);
                     double cos = Math.cos(radians);
                     //@formatter:off
                     filter = new NoAlphaMatrixRGBFilter(
-                        0.213 + cos * 0.787 - sin * 0.2127, 0.715 - 0.715 * cos - 0.715 * sin,0.072 - 0.072 * cos + 0.982 * sin,
+                        0.213 + cos * 0.787 - sin * 0.213, 0.715 - 0.715 * cos - 0.715 * sin,0.072 - 0.072 * cos + 0.928 * sin,
                         0.213 - cos * 0.213 + sin * 0.143, 0.715 + 0.285 * cos + 0.140 * sin,0.072 - 0.072 * cos - 0.283 * sin,
-                        0.213 - cos * 0.213 - sin * 0.787, 0.715 - 0.715 * cos + 0.715 * sin,0.072 + 0.982 * cos + 0.072 * sin);
+                        0.213 - cos * 0.213 - sin * 0.787, 0.715 - 0.715 * cos + 0.715 * sin,0.072 + 0.928 * cos + 0.072 * sin);
                     //@formatter:on
                 }
                 break;
@@ -108,12 +109,12 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
 
     @Override
     public void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext) {
-        // Doesn't change the input bounds regardless whether filter is specified or not.
-        // If the filter is null or linear we can operate only on the visible area of the element.
-        // Otherwise, we need to consider the whole filter region.
-        LayoutBounds bounds = impl()
-                .layoutInput(filterLayoutContext)
-                .withFlags(new LayoutBounds.ComputeFlags(filter != null && !filter.isLinear()));
+        LayoutBounds bounds = impl().layoutInput(filterLayoutContext);
+        Rectangle2D region = filterLayoutContext.filterPrimitiveRegion(impl(), bounds.sourceBounds());
+        bounds = bounds.withSourceBounds(region,
+                filter != null && !filter.isLinear()
+                        ? CoversWholeSourceBounds.YES
+                        : CoversWholeSourceBounds.NO);
         impl().saveLayoutResult(bounds, filterLayoutContext);
     }
 
@@ -125,12 +126,36 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
             return;
         }
         f.setConvertToLinear(colorInterpolation(filterContext) == ColorInterpolation.LinearRGB);
-        impl().saveResult(impl().inputChannel(filterContext).applyFilter(f), filterContext);
+        impl().saveResult(computeResultChannel(filterContext, f), filterContext);
+    }
+
+    private @NotNull Channel computeResultChannel(@NotNull FilterContext filterContext,
+            @NotNull AffineRGBImageFilter f) {
+        if (f.isConstant()) {
+            return filterContext.createConstantChannel(f.filterRGB(0, 0, 0));
+        }
+        Channel input = impl().inputChannel(filterContext);
+
+        if (input.isConstant() && isConstantOnConstantInput(filterContext, f)) {
+            return input.withConstantColor(f.filterRGB(0, 0, input.constantColor()));
+        }
+        return input.applyFilter(f);
+    }
+
+    private boolean isConstantOnConstantInput(@NotNull FilterContext filterContext, @NotNull AffineRGBImageFilter f) {
+        boolean isPreservingTransparentBlack = f.filterRGB(0, 0, 0) == 0;
+        boolean isConstantOnConstantInput = filterContext.channelOutputCovers(
+                impl().inputChannelKey(), filterContext.primitiveRegion(impl()));
+        return isPreservingTransparentBlack || isConstantOnConstantInput;
     }
 
     private abstract static class AffineRGBImageFilter extends ColorSpaceAwareRGBImageFilter {
 
         abstract boolean isLinear();
+
+        boolean isConstant() {
+            return false;
+        }
     }
 
     private static final class MatrixRGBFilter extends AffineRGBImageFilter {
@@ -185,6 +210,14 @@ public final class FeColorMatrix extends AbstractFilterPrimitive {
         @Override
         boolean isLinear() {
             return r5 == 0 && g5 == 0 && b5 == 0 && a5 == 0;
+        }
+
+        @Override
+        boolean isConstant() {
+            return r1 == 0 && r2 == 0 && r3 == 0 && r4 == 0
+                    && g1 == 0 && g2 == 0 && g3 == 0 && g4 == 0
+                    && b1 == 0 && b2 == 0 && b3 == 0 && b4 == 0
+                    && a1 == 0 && a2 == 0 && a3 == 0 && a4 == 0;
         }
 
         @Override

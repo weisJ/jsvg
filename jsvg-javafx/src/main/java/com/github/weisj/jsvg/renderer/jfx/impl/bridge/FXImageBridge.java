@@ -31,6 +31,8 @@ import javafx.scene.image.WritableImage;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.github.weisj.jsvg.util.ImageUtil;
+
 public final class FXImageBridge {
 
     private FXImageBridge() {}
@@ -54,7 +56,7 @@ public final class FXImageBridge {
         }
         int width = image.getWidth(null);
         int height = image.getHeight(null);
-        BufferedImage dst = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage dst = ImageUtil.createCompatibleTransparentImage(width, height);
         Graphics2D graphics = dst.createGraphics();
         if (hasOpacity) {
             Composite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) globalOpacity);

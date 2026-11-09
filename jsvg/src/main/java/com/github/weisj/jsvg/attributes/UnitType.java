@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2025 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -48,13 +48,19 @@ public enum UnitType {
     }
 
     public @NotNull AffineTransform viewTransform(@NotNull Rectangle2D bounds) {
+        return applyToTransform(new AffineTransform(), bounds);
+    }
+
+    /**
+     * Concatenates the unit coordinate system onto {@code transform} and returns the same transform.
+     */
+    public @NotNull AffineTransform applyToTransform(@NotNull AffineTransform transform,
+            @NotNull Rectangle2D bounds) {
         if (this == ObjectBoundingBox) {
-            AffineTransform at = AffineTransform.getTranslateInstance(bounds.getX(), bounds.getY());
-            at.scale(bounds.getWidth(), bounds.getHeight());
-            return at;
-        } else {
-            return new AffineTransform();
+            transform.translate(bounds.getX(), bounds.getY());
+            transform.scale(bounds.getWidth(), bounds.getHeight());
         }
+        return transform;
     }
 
     public @NotNull Rectangle2D.Double computeViewBounds(

@@ -169,7 +169,7 @@ public class StyleRuleMatcher {
         for (NormalizedProperty property : inlineDeclarations) {
             MatchedValue max = mostSpecificValuePerAttributeName.get(property.name());
             MatchedValue match = MatchedValue.fromInlineDeclaration(property);
-            if (max == null || match.compareTo(max) > 0) {
+            if (max == null || match.hasHigherPriorityThan(max)) {
                 mostSpecificValuePerAttributeName.put(property.name(), match);
             }
         }
@@ -182,7 +182,7 @@ public class StyleRuleMatcher {
                     for (NormalizedProperty property : candidateRule.declarations()) {
                         MatchedValue max = mostSpecificValuePerAttributeName.get(property.name());
                         MatchedValue match = MatchedValue.fromStylesheetDeclaration(candidateRule.selector(), property);
-                        if (max == null || match.compareTo(max) > 0) {
+                        if (max == null || match.hasHigherPriorityThan(max)) {
                             mostSpecificValuePerAttributeName.put(property.name(), match);
                         }
                     }
@@ -225,7 +225,7 @@ public class StyleRuleMatcher {
         for (Map.Entry<String, String> declaredAttr : targetElement.attributeNode().declaredAttributes().entrySet()) {
             String name = declaredAttr.getKey();
             String value = declaredAttr.getValue();
-            String valueLc = value.toLowerCase();
+            String valueLc = value.toLowerCase(Locale.ROOT);
 
             consumer.accept(attributeRules.hasAttributeName.getOrDefault(name, Collections.emptyList()));
 
@@ -301,7 +301,7 @@ public class StyleRuleMatcher {
      * case-sensitive; attribute names are always case-sensitive). Per the
      * <a href="https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors">HTML Standard</a>.
      */
-    public static final @NotNull Set<String> ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES = new HashSet<>(Arrays.asList(
+    private static final @NotNull Set<String> ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES = new HashSet<>(Arrays.asList(
             "accept",
             "accept-charset",
             "align",
@@ -348,4 +348,8 @@ public class StyleRuleMatcher {
             "valign",
             "valuetype",
             "vlink"));
+
+    public static boolean isAttributeValueCaseInsensitive(@NotNull String name) {
+        return ATTRIBUTES_WITH_CASE_INSENSITIVE_VALUES.contains(name);
+    }
 }

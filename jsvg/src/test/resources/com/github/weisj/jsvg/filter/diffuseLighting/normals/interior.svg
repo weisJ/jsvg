@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="24" y="24"
+			width="80" height="80" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="4"
+				kernelUnitLength="1">
+				<feDistantLight azimuth="45" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+	</defs>
+	<g filter="url(#f)">
+		<rect x="48" y="48" width="32" height="32" />
+	</g>
+</svg>

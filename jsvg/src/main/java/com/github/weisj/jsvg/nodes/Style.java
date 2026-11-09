@@ -31,9 +31,9 @@ import org.jetbrains.annotations.NotNull;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.TextContent;
-import com.github.weisj.jsvg.parser.css.CssParser;
 import com.github.weisj.jsvg.parser.css.data.StyleRuleList;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.AttributeParser;
 import com.github.weisj.jsvg.renderer.CssHints;
 
 @ElementCategories(value = {}, neverRendered = true)
@@ -45,13 +45,13 @@ public final class Style extends MetaSVGNode {
 
     private final List<char @NotNull []> data = new ArrayList<>();
 
-    public void parseStyleSheet(@NotNull AttributeNode attributeNode, @NotNull CssParser cssParser,
+    public void parseStyleSheet(@NotNull AttributeNode attributeNode, @NotNull AttributeParser attributeParser,
             @NotNull CssHints cssHints) {
         // Only type "text/css" (or an empty/absent one) is a stylesheet (SVG 1.1 § 6.3).
         String type = attributeNode.getValue("type");
         boolean cssType = type == null || type.trim().isEmpty() || "text/css".equalsIgnoreCase(type.trim());
         styleSheet = cssType
-                ? cssParser.parseStyleSheet(data, cssHints)
+                ? attributeParser.parseStyleSheet(data, cssHints)
                 : new StyleRuleList(Collections.emptyList());
         data.clear();
     }

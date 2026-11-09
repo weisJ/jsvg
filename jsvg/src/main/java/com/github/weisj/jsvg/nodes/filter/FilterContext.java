@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2024 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.nodes.filter;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.ColorInterpolation;
 import com.github.weisj.jsvg.attributes.UnitType;
 import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
+import com.github.weisj.jsvg.attributes.filter.LayoutBounds;
 
 public final class FilterContext {
 
@@ -37,6 +39,7 @@ public final class FilterContext {
     private final @NotNull UnitType primitiveUnits;
     private final @Nullable ColorInterpolation colorInterpolation;
     private final @Nullable RenderingHints renderingHints;
+    private final @NotNull ConstantColorChannel zeroChannel;
 
     public FilterContext(@NotNull Filter.FilterInfo info, @NotNull UnitType primitiveUnits,
             @Nullable ColorInterpolation colorInterpolation, @Nullable RenderingHints renderingHints) {
@@ -44,6 +47,7 @@ public final class FilterContext {
         this.primitiveUnits = primitiveUnits;
         this.colorInterpolation = colorInterpolation;
         this.renderingHints = renderingHints;
+        this.zeroChannel = new ConstantColorChannel(info.imageWidth, info.imageHeight, 0);
     }
 
     public @NotNull Filter.FilterInfo info() {
@@ -62,8 +66,26 @@ public final class FilterContext {
         return resultChannels;
     }
 
+    public @NotNull Rectangle2D primitiveRegion(@NotNull FilterPrimitiveBase primitive) {
+        return info.layout(primitive).sourceBounds();
+    }
+
+    public @NotNull LayoutBounds layout(@NotNull FilterChannelKey key) {
+        // Rendering's aliases identify the input at this pass, even after the layout pass has finished.
+        return info.layout(resultChannels.resolveKey(key));
+    }
+
     public @NotNull Channel getChannel(@NotNull FilterChannelKey key) {
         return resultChannels.get(key);
+    }
+
+    /**
+     * Whether the output of {@code channelKey} is available throughout {@code area}. Infinite
+     * channels cover every area; finite channels cover their layout output region.
+     */
+    public boolean channelOutputCovers(@NotNull FilterChannelKey channelKey, @NotNull Rectangle2D area) {
+        Channel channel = getChannel(channelKey);
+        return channel.isInfiniteExtent() || layout(channelKey).sourceBounds().contains(area);
     }
 
     public ColorInterpolation colorInterpolation(ColorInterpolation colorInterpolation) {
@@ -71,5 +93,10 @@ public final class FilterContext {
             return colorInterpolation;
         }
         return this.colorInterpolation;
+    }
+
+    public ConstantColorChannel createConstantChannel(int rgba) {
+        if (rgba == 0) return zeroChannel;
+        return new ConstantColorChannel(info.imageWidth, info.imageHeight, rgba);
     }
 }

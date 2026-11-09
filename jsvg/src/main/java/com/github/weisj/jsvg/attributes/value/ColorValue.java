@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.animation.value.AnimatedColor;
 import com.github.weisj.jsvg.annotations.Sealed;
+import com.github.weisj.jsvg.paint.SVGPaint;
+import com.github.weisj.jsvg.paint.impl.ColorValueSVGPaint;
 import com.github.weisj.jsvg.paint.impl.RGBColor;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 
@@ -34,4 +36,9 @@ import com.github.weisj.jsvg.renderer.MeasureContext;
 public interface ColorValue {
     @NotNull
     Color get(@NotNull MeasureContext context);
+
+    /** Exposes this value as a paint without evaluating it before rendering. */
+    default @NotNull SVGPaint asSVGPaint() {
+        return ColorValueSVGPaint.create(this);
+    }
 }

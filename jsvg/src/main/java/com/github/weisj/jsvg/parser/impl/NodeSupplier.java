@@ -40,7 +40,7 @@ import com.github.weisj.jsvg.nodes.text.Text;
 import com.github.weisj.jsvg.nodes.text.TextPath;
 import com.github.weisj.jsvg.nodes.text.TextSpan;
 
-@SuppressWarnings("Convert2MethodRef")
+@SuppressWarnings({"Convert2MethodRef", "java:S1612"}) // Lambdas defer loading the implementation classes.
 public final class NodeSupplier {
 
     private final Map<String, Supplier<SVGNode>> constructorMap;
@@ -114,6 +114,7 @@ public final class NodeSupplier {
         constructorMap.put(FeBlend.TAG, () -> new FeBlend());
         constructorMap.put(FeColorMatrix.TAG, () -> new FeColorMatrix());
         constructorMap.put(FeComposite.TAG, () -> new FeComposite());
+        constructorMap.put(FeConvolveMatrix.TAG, () -> new FeConvolveMatrix());
         constructorMap.put(FeDiffuseLighting.TAG, () -> new FeDiffuseLighting());
         constructorMap.put(FeDisplacementMap.TAG, () -> new FeDisplacementMap());
         constructorMap.put(FeDistantLight.TAG, () -> new FeDistantLight());
@@ -122,6 +123,7 @@ public final class NodeSupplier {
         constructorMap.put(FeGaussianBlur.TAG, () -> new FeGaussianBlur());
         constructorMap.put(FeMerge.TAG, () -> new FeMerge());
         constructorMap.put(FeMergeNode.TAG, () -> new FeMergeNode());
+        constructorMap.put(FeTile.TAG, () -> new FeTile());
         constructorMap.put(FeTurbulence.TAG, () -> new FeTurbulence());
         constructorMap.put(FeOffset.TAG, () -> new FeOffset());
         constructorMap.put(FePointLight.TAG, () -> new FePointLight());
@@ -147,11 +149,9 @@ public final class NodeSupplier {
     }
 
     private void populateDummyNodeConstructors() {
-        constructorMap.put("feConvolveMatrix", () -> new DummyFilterPrimitive("feConvolveMatrix"));
         constructorMap.put("feImage", () -> new DummyFilterPrimitive("feImage"));
         constructorMap.put("feMorphology", () -> new DummyFilterPrimitive("feMorphology"));
         constructorMap.put("feSpecularLighting", () -> new DummyFilterPrimitive("feSpecularLighting"));
-        constructorMap.put("feTile", () -> new DummyFilterPrimitive("feTile"));
     }
 
 }

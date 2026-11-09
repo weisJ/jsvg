@@ -23,13 +23,13 @@ package com.github.weisj.jsvg.nodes.filter;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.weisj.jsvg.attributes.filter.FilterChannelKey;
 import com.github.weisj.jsvg.nodes.animation.Animate;
 import com.github.weisj.jsvg.nodes.animation.Set;
 import com.github.weisj.jsvg.nodes.prototype.spec.Category;
 import com.github.weisj.jsvg.nodes.prototype.spec.ElementCategories;
 import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.AttributeValue;
 
 @ElementCategories(Category.FilterPrimitive)
 @PermittedContent(
@@ -50,40 +50,41 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
         super.build(attributeNode);
 
         AttributeNode child = attributeNode.copy();
+        // The outer primitive clips the completed shadow, not its intermediate results.
+        child.attributes().remove("x");
+        child.attributes().remove("y");
+        child.attributes().remove("width");
+        child.attributes().remove("height");
 
         String resultKey = "result";
 
-        FilterChannelKey inputId = attributeNode.getFilterChannelKey("in", outerLastResult);
-        String resultId = child.getValue(resultKey);
-        if (resultId == null) {
-            resultId = "dropshadow-" + attributeNode.hashCode();
-        }
-        child.setResolvedNonCssValue(resultKey, resultId);
+        String resultId = child.getValue(resultKey, "dropshadow-" + attributeNode.hashCode());
+        putValue(child, resultKey, resultId);
 
         FeGaussianBlur blur = new FeGaussianBlur();
         blur.build(child);
         blur.setOnlyAlpha(true);
 
-        child.setResolvedNonCssValue("in", resultId);
+        putValue(child, "in", resultId);
 
         String offsetResultId = resultId + "-offset-" + resultId.hashCode();
-        child.setResolvedNonCssValue(resultKey, offsetResultId);
+        putValue(child, resultKey, offsetResultId);
         FeOffset offset = new FeOffset();
         offset.build(child);
 
-        child.setResolvedNonCssValue(resultKey, resultId);
+        putValue(child, resultKey, resultId);
         FeFlood flood = new FeFlood();
         flood.build(child);
 
-        child.setResolvedNonCssValue("in2", offsetResultId);
-        child.setResolvedNonCssValue("operator", "in");
+        putValue(child, "in2", offsetResultId);
+        putValue(child, "operator", "in");
         FeComposite composite = new FeComposite();
         composite.build(child);
 
         FeMergeNode node1 = new FeMergeNode();
         node1.build(child);
 
-        child.setResolvedNonCssValue("in", inputId.key().toString());
+        putValue(child, "in", outerLastResult.key().toString());
         FeMergeNode node2 = new FeMergeNode();
         node2.build(child);
 
@@ -99,6 +100,10 @@ public final class FeDropShadow extends ChainedFilterPrimitive {
                 composite,
                 merge
         };
+    }
+
+    private static void putValue(AttributeNode attributeNode, String key, String value) {
+        attributeNode.attributes().put(key, new AttributeValue.PlainString(value));
     }
 
     @Override

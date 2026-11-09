@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.jfx.FXOutput;
 import com.github.weisj.jsvg.renderer.output.Output;
@@ -73,7 +74,11 @@ final class FXSVGRendererJavaFX implements FXSVGRenderer {
             graphics.clearRect(0, 0, width, height);
 
             Output output = FXOutput.createForGraphicsContext(graphics);
-            svgDocument.renderWithPlatform(NullPlatformSupport.INSTANCE, output, viewBox, animationState);
+            svgDocument.render(output, RenderConfig.builder()
+                    .platformSupport(NullPlatformSupport.INSTANCE)
+                    .viewport(viewBox)
+                    .animationState(animationState)
+                    .build());
             output.dispose();
         } finally {
             graphics.restore();

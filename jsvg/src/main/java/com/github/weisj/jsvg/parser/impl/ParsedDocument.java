@@ -42,7 +42,8 @@ public class ParsedDocument implements DomDocument {
     private final @NotNull LoaderContext loaderContext;
     private final @NotNull LoadHelper loadHelper;
     /** Final render target per local {@code <use>} source; copied targets are created lazily. */
-    private final @NotNull Map<ParsedElement, Supplier<ParsedElement>> useTargets = new IdentityHashMap<>();
+    private final @NotNull IdentityHashMap<ParsedElement, Supplier<ParsedElement>> useTargets =
+            new IdentityHashMap<>();
     private int currentDepth;
 
     private @NotNull AnimationPeriod animationPeriod = new AnimationPeriod(0, 0, false);

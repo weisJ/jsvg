@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="500"
+	viewBox="0 0 144 80">
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="-100" y="-100"
+			width="344" height="280" color-interpolation-filters="sRGB">
+			<feGaussianBlur stdDeviation="1.5 0" edgeMode="none" />
+		</filter>
+		<pattern id="tile" x="32" y="24" width="24" height="16"
+			patternUnits="userSpaceOnUse">
+			<rect width="12" height="8" fill="#e08040" />
+			<rect x="12" width="12" height="8" fill="#40c080" />
+			<rect y="8" width="12" height="8" fill="#204060" />
+			<rect x="12" y="8" width="12" height="8" fill="#8040c0" />
+		</pattern>
+	</defs>
+	<rect width="144" height="80" fill="#d8d8d8" />
+	<!-- Supply the horizontal wrapped samples explicitly. -->
+	<rect x="-100" y="24" width="344" height="16" fill="url(#tile)"
+		filter="url(#f)" />
+</svg>

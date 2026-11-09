@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.ImageComparison.ImageSource.MemoryImageSource;
 import com.github.weisj.jsvg.ImageComparison.ImageSource.PathImageSource;
 
 class PatternTest {
@@ -41,5 +42,25 @@ class PatternTest {
         assertEquals(SUCCESS, compareImages(new ImageComparison.CompareInfo(
                 expected(new PathImageSource("pattern/patternContentUnits_ref.svg"), RenderType.JSVG),
                 actual(new PathImageSource("pattern/patternContentUnits.svg"), RenderType.JSVG))));
+    }
+
+    @Test
+    void referencedPatternProvidesChildren() {
+        String actualSvg = """
+                <svg xmlns="http://www.w3.org/2000/svg" width="600" height="500">
+                  <defs>
+                    <pattern id="base" patternUnits="userSpaceOnUse" width="100" height="100">
+                      <rect width="50" height="50" fill="grey"/>
+                      <rect x="50" y="50" width="50" height="50" fill="green"/>
+                    </pattern>
+                    <pattern id="derived" href="#base"/>
+                  </defs>
+                  <rect width="600" height="500" fill="url(#derived)"/>
+                </svg>
+                """;
+        String referenceSvg = actualSvg.replace("url(#derived)", "url(#base)");
+        assertEquals(SUCCESS, compareImages(new ImageComparison.CompareInfo(
+                expected(new MemoryImageSource("base-pattern", referenceSvg), RenderType.JSVG),
+                actual(new MemoryImageSource("referenced-pattern", actualSvg), RenderType.JSVG), 0, 0)));
     }
 }

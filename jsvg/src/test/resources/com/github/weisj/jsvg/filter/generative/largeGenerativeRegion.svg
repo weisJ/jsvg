@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+	<!-- Generated pixels fill the viewport even though the source is small 
+		and both regions are huge. -->
+	<defs>
+		<filter id="f" filterUnits="userSpaceOnUse" x="-1000" y="-1000"
+			width="2000" height="2000" color-interpolation-filters="sRGB">
+			<feColorMatrix x="-1000" y="-1000" width="2000"
+				height="2000"
+				values="0 0 0 0 1
+                                   0 0 0 0 0
+                                   0 0 0 0 0
+                                   0 0 0 0 1" />
+		</filter>
+	</defs>
+	<rect x="10" y="10" width="10" height="10" fill="blue"
+		filter="url(#f)" />
+</svg>

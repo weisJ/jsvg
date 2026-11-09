@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
+	<defs>
+		<linearGradient id="height"
+			gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="255" y2="0">
+			<stop offset="0" stop-opacity="0" />
+			<stop offset="1" stop-opacity="1" />
+		</linearGradient>
+		<filter id="lighting" filterUnits="userSpaceOnUse" x="0" y="0"
+			width="255" height="255" color-interpolation-filters="sRGB">
+			<feDiffuseLighting surfaceScale="64"
+				kernelUnitLength="0.75 1.25">
+				<feDistantLight azimuth="0" elevation="45" />
+			</feDiffuseLighting>
+		</filter>
+	</defs>
+	<!-- Interpolating between pixels of a linear ramp preserves its slope, 
+		including when the sampling distance is smaller than one pixel. -->
+	<g transform="translate(-80 -80)">
+		<rect width="255" height="255" fill="url(#height)"
+			filter="url(#lighting)" />
+	</g>
+</svg>

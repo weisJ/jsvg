@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,8 +36,8 @@ import com.github.weisj.jsvg.nodes.prototype.spec.PermittedContent;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.paint.impl.RGBColor;
-import com.github.weisj.jsvg.parser.PaintParser;
 import com.github.weisj.jsvg.parser.impl.AttributeNode;
+import com.github.weisj.jsvg.parser.impl.ColorPaintHelper;
 
 @ElementCategories(Category.Animation)
 @PermittedContent(categories = {Category.Descriptive})
@@ -106,7 +106,7 @@ public final class Animate extends BaseAnimationNode {
             if (isPlaceholder(values[i])) {
                 paints[i] = PredefinedPaints.NONE;
             } else {
-                SVGPaint p = attributeNode.parsePaint(this.values[i]);
+                SVGPaint p = ColorPaintHelper.parsePaint(attributeNode, this.values[i]);
                 if (p == null) return null;
                 paints[i] = p;
             }
@@ -119,9 +119,9 @@ public final class Animate extends BaseAnimationNode {
         RGBColor[] paints = new RGBColor[this.values.length];
         for (int i = 0; i < this.values.length; i++) {
             if (isPlaceholder(values[i])) {
-                paints[i] = new RGBColor(PaintParser.DEFAULT_COLOR);
+                paints[i] = new RGBColor(Color.BLACK);
             } else {
-                Color c = attributeNode.parser().paintParser().parseColor(this.values[i]);
+                Color c = attributeNode.parser().parseColor(this.values[i]);
                 if (c == null) return null;
                 paints[i] = new RGBColor(c);
             }

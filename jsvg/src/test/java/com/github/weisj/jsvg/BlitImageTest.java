@@ -81,6 +81,8 @@ class BlitImageTest {
         return RenderContextAccessor.instance().createInitial(
                 null,
                 NullPlatformSupport.INSTANCE,
+                null,
+                SVGFont.defaultFontFamily(),
                 MeasureContext.createInitial(
                         new FloatSize(vw, vh),
                         SVGFont.defaultFontSize(),

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Jannis Weis
+ * Copyright (c) 2025-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,16 +21,19 @@
  */
 package com.github.weisj.jsvg.parser.impl;
 
+import java.util.Map;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.nodes.SVG;
+import com.github.weisj.jsvg.nodes.View;
 
 public class DocumentConstructorAccessor {
 
     public interface DocumentConstructor {
         @NotNull
-        SVGDocument create(@NotNull SVG rootNode);
+        SVGDocument create(@NotNull SVG rootNode, @NotNull Map<@NotNull String, @NotNull View> views);
     }
 
     private static DocumentConstructor documentConstructor;

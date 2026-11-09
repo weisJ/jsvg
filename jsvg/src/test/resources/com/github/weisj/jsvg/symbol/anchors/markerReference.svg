@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">
+	<defs>
+		<marker id="content" markerUnits="userSpaceOnUse"
+			markerWidth="80" markerHeight="40" viewBox="10 20 40 20" refX="14"
+			refY="24" orient="0">
+			<rect x="14" y="24" width="16" height="8" fill="red" />
+		</marker>
+	</defs>
+	<!-- The marker's content reference point is anchored at the path start. -->
+	<path d="M24 16 L30 16" fill="none" marker-start="url(#content)" />
+</svg>

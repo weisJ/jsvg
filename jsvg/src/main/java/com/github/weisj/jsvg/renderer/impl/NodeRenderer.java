@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 import com.github.weisj.jsvg.attributes.font.MeasurableFontSpec;
 import com.github.weisj.jsvg.nodes.ClipPath;
 import com.github.weisj.jsvg.nodes.Mask;
-import com.github.weisj.jsvg.nodes.SVG;
 import com.github.weisj.jsvg.nodes.SVGNode;
 import com.github.weisj.jsvg.nodes.container.BaseInnerViewContainer;
 import com.github.weisj.jsvg.nodes.filter.Filter;
@@ -47,30 +46,21 @@ import com.github.weisj.jsvg.view.ViewBox;
 public final class NodeRenderer {
     private NodeRenderer() {}
 
-    public static void renderRootSVG(@NotNull SVG svgRoot, @NotNull RenderContext context, @NotNull Output output) {
-        try (Info info = createRenderInfo(svgRoot, context, output, null)) {
-            if (info != null) ((SVG) info.renderable()).renderWithEstablishedViewBox(info.context(), info.output());
-        }
-    }
-
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output) {
         renderNode(node, context, output, null);
     }
 
     public static void renderNode(@NotNull SVGNode node, @NotNull RenderContext context, @NotNull Output output,
             @Nullable Instantiator instantiator) {
-        try (Info info = createRenderInfo(node, context, output, instantiator)) {
+        try (Info info = createRenderInfo(node, context, output, instantiator, null)) {
             if (info != null) info.renderable().render(info.context(), info.output());
         }
     }
 
-    public static void renderWithSize(@NotNull BaseInnerViewContainer node, @NotNull FloatSize size,
-            @NotNull RenderContext context, @NotNull Output output,
-            @Nullable Instantiator instantiator) {
-        try (Info info = createRenderInfo(node, context, output, instantiator)) {
-            // Only a declared viewBox may introduce a scaling transform. Synthesizing one from the
-            // element's own size would wrongly scale content when the use-site size differs.
-            if (info != null) node.renderWithSize(size, node.declaredViewBox(), info.context(), info.output());
+    public static <T extends SVGNode & ViewContainer> void renderWithSize(@NotNull T node, @NotNull FloatSize size,
+            @NotNull RenderContext context, @NotNull Output output, @Nullable Instantiator instantiator) {
+        try (Info info = createRenderInfo(node, context, output, instantiator, size)) {
+            if (info != null) info.renderable().render(info.context(), info.output());
         }
     }
 
@@ -80,42 +70,114 @@ public final class NodeRenderer {
     }
 
     private static @Nullable Info createRenderInfo(@NotNull SVGNode node, @NotNull RenderContext context,
-            @NotNull Output output, @Nullable Instantiator instantiator) {
+            @NotNull Output output, @Nullable Instantiator instantiator, @Nullable FloatSize useSiteSize) {
+        Renderable renderable = renderableNode(node, context, instantiator);
+        if (renderable == null) return null;
+
+        RenderSetup setup = createInitialSetup(node, renderable, context, output, instantiator);
+        setupViewBoxIfNeeded(node, setup, useSiteSize);
+
+        IsolationEffects isolation = setupIsolationEffects(renderable, setup);
+        if (isolation == null) {
+            setup.output.dispose();
+            return null;
+        }
+        return createInfoWithIsolation(renderable, setup.context, setup.output, setup.elementBounds, isolation);
+    }
+
+    private static final class RenderSetup {
+        private RenderContext context;
+        private Output output;
+        private ElementBounds elementBounds;
+
+        private RenderSetup(@NotNull RenderContext context, @NotNull Output output,
+                @NotNull ElementBounds elementBounds) {
+            this.context = context;
+            this.output = output;
+            this.elementBounds = elementBounds;
+        }
+    }
+
+    private static @Nullable Renderable renderableNode(@NotNull SVGNode node, @NotNull RenderContext context,
+            @Nullable Instantiator instantiator) {
         if (!(node instanceof Renderable)) return null;
 
         Renderable renderable = (Renderable) node;
-
         if (!checkInstantiation(node, instantiator, renderable)) return null;
-        if (!renderable.isVisible(context)) return null;
+        return renderable.isVisible(context) ? renderable : null;
+    }
 
+    private static @NotNull RenderSetup createInitialSetup(@NotNull SVGNode node, @NotNull Renderable renderable,
+            @NotNull RenderContext context, @NotNull Output output, @Nullable Instantiator instantiator) {
         RenderContext childContext = createChildContext(renderable, context, instantiator);
         Output childOutput = output.createChild();
         ElementBounds elementBounds = new ElementBounds(node, childContext);
 
-        applyTransform(renderable, childOutput, childContext, elementBounds);
+        if (instantiator != DocumentInstantiator.INSTANCE_OVERRIDE_TRANSFORM) {
+            applyTransform(renderable, childOutput, childContext, elementBounds);
+        }
+        return new RenderSetup(childContext, childOutput, elementBounds);
+    }
 
+    private static void setupViewBoxIfNeeded(@NotNull SVGNode node, @NotNull RenderSetup setup,
+            @Nullable FloatSize useSiteSize) {
+        if (!(node instanceof ViewContainer) || !((ViewContainer) node).establishesViewBox()) return;
+
+        ViewContainer view = (ViewContainer) node;
+        FloatSize viewSize = useSiteSize != null ? useSiteSize : view.size(setup.context);
+        ViewBox viewBox = viewBoxForUseSite(view, setup.context, useSiteSize);
+        RenderContext childContext = view.createInnerContextForViewBox(viewSize, viewBox, setup.context, setup.output);
+        setup.context = childContext;
+        setup.elementBounds = new ElementBounds(node, childContext);
+    }
+
+    private static @Nullable ViewBox viewBoxForUseSite(@NotNull ViewContainer view, @NotNull RenderContext context,
+            @Nullable FloatSize useSiteSize) {
+        // At a use site, only an explicitly declared viewBox may scale the referenced content.
+        // A viewBox synthesized from the referenced element's own size would introduce scaling
+        // when the use-site width or height differs.
+        return useSiteSize != null && view instanceof BaseInnerViewContainer
+                ? ((BaseInnerViewContainer) view).declaredViewBox()
+                : view.viewBox(context);
+    }
+
+    private static @Nullable IsolationEffects setupIsolationEffects(@NotNull Renderable renderable,
+            @NotNull RenderSetup setup) {
         Mask maskForIsolation = null;
         ClipPath clipPathForIsolation = null;
-        if (renderable instanceof HasClip) {
-            maskForIsolation = setupMask((HasClip) renderable, elementBounds, childOutput, childContext);
+        Filter filter = null;
 
-            ClipPath clipPath = setupClip((HasClip) renderable, elementBounds, childContext, childOutput);
+        if (renderable instanceof HasClip) {
+            HasClip clippedRenderable = (HasClip) renderable;
+            maskForIsolation = setupMask(clippedRenderable, setup.elementBounds, setup.output, setup.context);
+            ClipPath clipPath = setupClip(clippedRenderable, setup.elementBounds, setup.context, setup.output);
             // Elements with an invalid clip shouldn't be painted
             if (clipPath != null && !clipPath.isValid()) return null;
 
-            if (useAccurateMasking(childOutput)) {
+            if (useAccurateMasking(setup.output)) {
                 clipPathForIsolation = clipPath;
             }
         }
 
-        Filter filter = null;
         if (renderable instanceof HasFilter) {
-            filter = setupFilter((HasFilter) renderable, childOutput);
+            filter = setupFilter((HasFilter) renderable, setup.output);
         }
 
-        Info info = Info.InfoWithIsolation.create(renderable, childContext, childOutput, elementBounds,
-                new IsolationEffects(filter, maskForIsolation, clipPathForIsolation));
+        return new IsolationEffects(filter, maskForIsolation, clipPathForIsolation);
+    }
+
+    // The isolation factory returns null for absent effects or an empty/unallocatable surface.
+    @SuppressWarnings("java:S2589")
+    private static @Nullable Info createInfoWithIsolation(@NotNull Renderable renderable,
+            @NotNull RenderContext childContext, @NotNull Output childOutput, @NotNull ElementBounds elementBounds,
+            @NotNull IsolationEffects isolation) {
+        Info info = Info.InfoWithIsolation.create(renderable, childContext, childOutput, elementBounds, isolation);
         if (info != null) return info;
+
+        if (isolation.hasEffects()) {
+            childOutput.dispose();
+            return null;
+        }
 
         return new Info(renderable, childContext, childOutput);
     }
@@ -149,7 +211,7 @@ public final class NodeRenderer {
         Mask mask = renderable.mask();
         if (mask == null) return null;
 
-        Rectangle2D bounds = elementBounds.geometryBox();
+        Rectangle2D bounds = elementBounds.outputBox();
         if (bounds.isEmpty()) return null;
 
         if (useAccurateMasking(childOutput)) return mask;

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"
+	viewBox="0 0 128 128">
+	<defs>
+		<filter id="band" filterUnits="userSpaceOnUse" x="-64" y="-64"
+			width="256" height="256" color-interpolation-filters="sRGB">
+			<!-- Explicitly supply the values sampled beyond the left and right borders. -->
+			<feFlood x="-64" y="48" width="256" height="32"
+				flood-color="black" result="band" />
+			<feGaussianBlur in="band" stdDeviation="1 0"
+				edgeMode="none" />
+		</filter>
+	</defs>
+	<g transform="rotate(30 64 64)">
+		<rect x="48" y="48" width="32" height="32" filter="url(#band)" />
+	</g>
+</svg>

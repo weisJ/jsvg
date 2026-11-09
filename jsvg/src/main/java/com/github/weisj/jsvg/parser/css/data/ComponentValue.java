@@ -49,6 +49,7 @@ public interface ComponentValue {
      * {@link Rule.QualifiedRule#block()} is typed as {@link Brace}).
      */
     @Immutable
+    @SuppressWarnings({"Immutable", "java:S1452"}) // Internal ownership and covariance are intentional.
     abstract class SimpleBlock implements ComponentValue {
 
         protected final @NotNull List<? extends @NotNull ComponentValue> value;
@@ -157,6 +158,7 @@ public interface ComponentValue {
 
     /** A function block (§5.4.9): {@code name(value)}. */
     @Immutable
+    @SuppressWarnings({"Immutable", "java:S1452"}) // Internal ownership and covariance are intentional.
     final class FunctionBlock implements ComponentValue {
         private final @NotNull String name;
         private final @NotNull List<? extends @NotNull ComponentValue> value;

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Jannis Weis
+ * Copyright (c) 2022-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,16 +22,24 @@
 package com.github.weisj.jsvg.parser.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.*;
 import java.util.Collections;
+import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import com.github.weisj.jsvg.attributes.Animatable;
+import com.github.weisj.jsvg.attributes.Inherited;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.AwtSVGPaint;
+import com.github.weisj.jsvg.paint.impl.ColorValueSVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
+import com.github.weisj.jsvg.paint.impl.RGBColor;
+import com.github.weisj.jsvg.util.ColorUtil;
 
 class PaintParserTest {
 
@@ -45,12 +53,17 @@ class PaintParserTest {
         return attributeNode.parser().parsePaint(value, attributeNode);
     }
 
+    private static SVGPaint parseCssPaint(@NotNull String value) {
+        AttributeNode node = ParserTestUtil.createDummyAttributeNode(Map.of("fill", value));
+        return node.getPaint("fill", null, Inherited.NO, Animatable.NO);
+    }
+
     private static @NotNull SVGPaint colorFromFloat(float r, float g, float b, float a) {
         return color(clamp(r), clamp(g), clamp(b), clamp(a));
     }
 
     private static int clamp(float p) {
-        return Math.min(255, Math.max(0, (int) (p * 255)));
+        return ColorUtil.toRgbRange(p * 255);
     }
 
     private static @NotNull SVGPaint color(int r, int g, int b, float a) {
@@ -87,6 +100,33 @@ class PaintParserTest {
     }
 
     @Test
+    void testHslLiteral() {
+        SVGPaint lightGreen = color(128, 255, 128, 255);
+        SVGPaint translucentYellow = color(255, 255, 0, 128);
+
+        assertEquals(lightGreen, parsePaint("hsl(120, 100%, 75%)"));
+        assertEquals(lightGreen, parseCssPaint("hsl(120 100% 75%)"));
+        assertEquals(translucentYellow, parsePaint("hsla(60, 100%, 50%, 0.5)"));
+        assertEquals(translucentYellow, parseCssPaint("hsl(60 100% 50% / 50%)"));
+    }
+
+    @Test
+    void testHslHueUnitsAndClamping() {
+        SVGPaint green = color(0, 128, 0, 255);
+        assertEquals(green, parseCssPaint("hsl(120deg 100% 25%)"));
+        assertEquals(green, parseCssPaint("hsl(133.333333grad 100% 25%)"));
+        assertEquals(green, parseCssPaint("hsl(2.094395102rad 100% 25%)"));
+        assertEquals(green, parseCssPaint("hsl(0.333333333turn 200% 25%)"));
+        assertEquals(parseCssPaint("hsl(279 100% 25%)"), parseCssPaint("hsl(999 100% 25%)"));
+    }
+
+    @Test
+    void testInvalidHslLiteral() {
+        assertNull(parsePaint("hsl(120, 0.5, 0.5)"));
+        assertNull(parseCssPaint("hsl(120 50% 50% 50% 50%)"));
+    }
+
+    @Test
     void testHexLiteral() {
         assertEquals(color(255, 0, 0, 255), parsePaint("#F00"));
         assertEquals(color(255, 0, 0, 255), parsePaint("#f00"));
@@ -96,13 +136,27 @@ class PaintParserTest {
         assertEquals(color(255, 0, 0, 17), parsePaint("#f001"));
         assertEquals(color(0, 241, 0, 18), parsePaint("#00F10012"));
         assertEquals(color(0, 241, 0, 18), parsePaint("#00f10012"));
+        assertEquals(color(0x12, 0xab, 0x34, 255), parsePaint("#12Ab34"));
+        assertEquals(color(0x11, 0xaa, 0x33, 0xcc), parsePaint("#1a3c"));
+        assertEquals(color(0x89, 0xab, 0xcd, 0xef), parsePaint("#89abcdef"));
+    }
+
+    @Test
+    void testInvalidHexLiteral() {
+        for (String value : new String[] {"#", "#12", "#12345", "#1234567", "#q00", "#00z", "#-00", "#ff0000gg",
+                "#+ff", "#１２３", "#١٢٣"}) {
+            assertNull(parsePaint(value), value);
+        }
     }
 
     @Test
     void testSpecialColors() {
         assertEquals(PredefinedPaints.NONE, parsePaint("none"));
         assertEquals(PredefinedPaints.NONE, parsePaint("transparent"));
-        assertEquals(PredefinedPaints.CURRENT_COLOR, parsePaint("currentcolor"));
+        SVGPaint parsedCurrentColor = parsePaint("currentcolor");
+        assertTrue(parsedCurrentColor instanceof ColorValueSVGPaint);
+        ColorValueSVGPaint currentColor = (ColorValueSVGPaint) parsedCurrentColor;
+        assertEquals(RGBColor.DEFAULT, currentColor.colorValue());
         assertEquals(PredefinedPaints.CONTEXT_FILL, parsePaint("context-fill"));
         assertEquals(PredefinedPaints.CONTEXT_STROKE, parsePaint("context-stroke"));
     }

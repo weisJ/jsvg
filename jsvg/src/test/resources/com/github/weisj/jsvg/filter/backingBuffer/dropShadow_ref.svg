@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+	<defs>
+		<filter id="shadow" filterUnits="userSpaceOnUse" x="-64"
+			y="-64" width="256" height="256" color-interpolation-filters="sRGB">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="4 1" />
+			<feOffset dx="8" dy="6" />
+			<feMerge>
+				<feMergeNode />
+				<feMergeNode in="SourceGraphic" />
+			</feMerge>
+		</filter>
+	</defs>
+	<g transform="rotate(30 64 64)">
+		<rect x="48" y="48" width="24" height="24" filter="url(#shadow)" />
+	</g>
+</svg>

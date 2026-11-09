@@ -33,6 +33,7 @@ import com.github.weisj.jsvg.renderer.RenderContext;
 
 public final class GeometryUtil {
     private static final float EPS = 0.0001f;
+    private static final int PIXEL_ALIGNMENT_ULPS = 8;
 
     private GeometryUtil() {}
 
@@ -54,6 +55,12 @@ public final class GeometryUtil {
 
     public static boolean approximatelyPositive(double a) {
         return a > -EPS;
+    }
+
+    /** Whether transformed coordinate axes remain aligned with the image axes, including quarter turns. */
+    public static boolean isAxisAligned(@NotNull AffineTransform transform) {
+        return (transform.getShearX() == 0 && transform.getShearY() == 0)
+                || (transform.getScaleX() == 0 && transform.getScaleY() == 0);
     }
 
     public static double scaleXOfTransform(@Nullable AffineTransform at) {
@@ -157,6 +164,76 @@ public final class GeometryUtil {
         return r1;
     }
 
+    /**
+     * Returns the integral bounds of {@code rect} after applying {@code transform}, or {@code null} if the transformed
+     * bounds are not pixel-aligned. A small, magnitude-dependent tolerance accounts for floating-point round-off
+     * without treating genuinely fractional coordinates as aligned.
+     */
+    public static @Nullable Rectangle pixelAlignedBounds(@NotNull AffineTransform transform,
+            @NotNull Rectangle2D rect) {
+        if (!isAxisAligned(transform)) return null;
+
+        Rectangle2D transformedBounds = containingBoundsAfterTransform(transform, rect);
+        double tolerance = pixelAlignmentTolerance(transform, rect);
+        Integer left = alignedPixel(transformedBounds.getMinX(), tolerance);
+        Integer top = alignedPixel(transformedBounds.getMinY(), tolerance);
+        Integer right = alignedPixel(transformedBounds.getMaxX(), tolerance);
+        Integer bottom = alignedPixel(transformedBounds.getMaxY(), tolerance);
+        if (left == null || top == null || right == null || bottom == null) return null;
+
+        long width = (long) right - left;
+        long height = (long) bottom - top;
+        if (width <= 0 || height <= 0 || width > Integer.MAX_VALUE || height > Integer.MAX_VALUE) return null;
+        return new Rectangle(left, top, (int) width, (int) height);
+    }
+
+    private static @Nullable Integer alignedPixel(double coordinate, double tolerance) {
+        if (!Double.isFinite(coordinate) || !Double.isFinite(tolerance)) return null;
+
+        double nearestPixel = Math.rint(coordinate);
+        if (nearestPixel < Integer.MIN_VALUE || nearestPixel > Integer.MAX_VALUE
+                || Math.abs(coordinate - nearestPixel) > tolerance) {
+            return null;
+        }
+        return (int) nearestPixel;
+    }
+
+    private static double pixelAlignmentTolerance(@NotNull AffineTransform transform,
+            @NotNull Rectangle2D rect) {
+        double maxX = Math.max(Math.abs(rect.getMinX()), Math.abs(rect.getMaxX()));
+        double maxY = Math.max(Math.abs(rect.getMinY()), Math.abs(rect.getMaxY()));
+        double transformedX = Math.abs(transform.getScaleX()) * maxX
+                + Math.abs(transform.getShearX()) * maxY + Math.abs(transform.getTranslateX());
+        double transformedY = Math.abs(transform.getShearY()) * maxX
+                + Math.abs(transform.getScaleY()) * maxY + Math.abs(transform.getTranslateY());
+        double calculationMagnitude = Math.max(1, Math.max(transformedX, transformedY));
+        return PIXEL_ALIGNMENT_ULPS * Math.ulp(calculationMagnitude);
+    }
+
+    public static @NotNull Shape transformBounds(@NotNull AffineTransform transform, @NotNull Rectangle2D rect) {
+        if (rect.isEmpty() || transform.isIdentity()) return rect;
+
+        if (transform.getShearX() == 0 && transform.getShearY() == 0) {
+            double x = transform.getScaleX() * rect.getX() + transform.getTranslateX();
+            double y = transform.getScaleY() * rect.getY() + transform.getTranslateY();
+            double width = transform.getScaleX() * rect.getWidth();
+            double height = transform.getScaleY() * rect.getHeight();
+            return new Rectangle2D.Double(
+                    Math.min(x, x + width), Math.min(y, y + height),
+                    Math.abs(width), Math.abs(height));
+        }
+        if (transform.getScaleX() == 0 && transform.getScaleY() == 0) {
+            double x = transform.getShearX() * rect.getY() + transform.getTranslateX();
+            double y = transform.getShearY() * rect.getX() + transform.getTranslateY();
+            double width = transform.getShearX() * rect.getHeight();
+            double height = transform.getShearY() * rect.getWidth();
+            return new Rectangle2D.Double(
+                    Math.min(x, x + width), Math.min(y, y + height),
+                    Math.abs(width), Math.abs(height));
+        }
+        return transform.createTransformedShape(rect);
+    }
+
     public static float left(@NotNull Rectangle2D rect) {
         return (float) rect.getX();
     }
@@ -171,6 +248,14 @@ public final class GeometryUtil {
 
     public static float bottom(@NotNull Rectangle2D rect) {
         return (float) (rect.getY() + rect.getHeight());
+    }
+
+    public static @NotNull FloatInsets sum(@NotNull FloatInsets a, @NotNull FloatInsets b) {
+        return new FloatInsets(
+                a.top() + b.top(),
+                a.left() + b.left(),
+                a.bottom() + b.bottom(),
+                a.right() + b.right());
     }
 
     public static @NotNull Rectangle2D grow(@NotNull Rectangle2D bounds, FloatInsets grow) {
@@ -272,6 +357,17 @@ public final class GeometryUtil {
             pathIterator.next();
         }
         return lastPoint;
+    }
+
+    public static Rectangle2D union(@NotNull Rectangle2D a, @NotNull Rectangle2D b) {
+        if (a.isEmpty()) return b;
+        if (b.isEmpty() || b.equals(a)) return a;
+        return a.createUnion(b);
+    }
+
+    public static @NotNull Rectangle2D.Double toDoubleRectangle(@NotNull Rectangle2D r) {
+        if (r instanceof Rectangle2D.Double) return (Rectangle2D.Double) r;
+        return new Rectangle2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
     }
 
     public enum Space {

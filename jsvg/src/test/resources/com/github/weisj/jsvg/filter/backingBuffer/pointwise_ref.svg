@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+	<defs>
+		<filter id="identity" filterUnits="userSpaceOnUse" x="-64"
+			y="-64" width="256" height="256">
+			<feColorMatrix type="matrix"
+				values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0" />
+		</filter>
+	</defs>
+	<g transform="rotate(30 64 64)">
+		<rect x="48" y="48" width="24" height="24" />
+	</g>
+</svg>

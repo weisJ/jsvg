@@ -111,7 +111,9 @@ public final class HasGeometryContextImpl implements HasGeometryContext {
                 originY = second;
             }
         }
-        return new Coordinate<>(node.getHorizontalReferenceLength(originX), node.getVerticalReferenceLength(originY));
+        return new Coordinate<>(
+                node.getHorizontalReferenceLength(originX, Length.ZERO),
+                node.getVerticalReferenceLength(originY, Length.ZERO));
     }
 
     @Override

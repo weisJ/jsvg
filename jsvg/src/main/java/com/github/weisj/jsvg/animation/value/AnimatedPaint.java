@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024-2025 Jannis Weis
+ * Copyright (c) 2024-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -32,6 +32,7 @@ import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.paint.impl.PredefinedPaints;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.RenderContext;
+import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
 
 public class AnimatedPaint implements SVGPaint {
@@ -82,17 +83,21 @@ public class AnimatedPaint implements SVGPaint {
     @Override
     public void fillShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        current(context.measureContext()).fillShape(output, context, shape, bounds);
+        resolvedCurrent(context).fillShape(output, context, shape, bounds);
     }
 
     @Override
     public void drawShape(@NotNull Output output, @NotNull RenderContext context, @NotNull Shape shape,
             @Nullable Rectangle2D bounds) {
-        current(context.measureContext()).drawShape(output, context, shape, bounds);
+        resolvedCurrent(context).drawShape(output, context, shape, bounds);
     }
 
     @Override
     public boolean isVisible(@NotNull RenderContext context) {
-        return current(context.measureContext()).isVisible(context);
+        return resolvedCurrent(context).isVisible(context);
+    }
+
+    private @NotNull SVGPaint resolvedCurrent(@NotNull RenderContext context) {
+        return RenderContextAccessor.instance().resolvePaint(context, current(context.measureContext()));
     }
 }

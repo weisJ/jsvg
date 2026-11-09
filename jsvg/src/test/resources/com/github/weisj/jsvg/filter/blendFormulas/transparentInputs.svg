@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="40">
+	<!-- Each affected mode: a transparent source leaves lime, a transparent 
+		backdrop leaves red. -->
+	<defs>
+		<filter id="overlay0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="overlay" />
+		</filter>
+		<filter id="overlay1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="overlay" />
+		</filter>
+		<filter id="hard-light0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="hard-light" />
+		</filter>
+		<filter id="hard-light1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="hard-light" />
+		</filter>
+		<filter id="color-dodge0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="color-dodge" />
+		</filter>
+		<filter id="color-dodge1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="color-dodge" />
+		</filter>
+		<filter id="color-burn0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="color-burn" />
+		</filter>
+		<filter id="color-burn1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="color-burn" />
+		</filter>
+		<filter id="exclusion0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="exclusion" />
+		</filter>
+		<filter id="exclusion1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="exclusion" />
+		</filter>
+		<filter id="hue0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="hue" />
+		</filter>
+		<filter id="hue1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="hue" />
+		</filter>
+		<filter id="saturation0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="saturation" />
+		</filter>
+		<filter id="saturation1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="saturation" />
+		</filter>
+		<filter id="color0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="color" />
+		</filter>
+		<filter id="color1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="color" />
+		</filter>
+		<filter id="luminosity0" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0" result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="luminosity" />
+		</filter>
+		<filter id="luminosity1" x="0" y="0" width="1" height="1"
+			color-interpolation-filters="sRGB">
+			<feFlood flood-color="red" flood-opacity="0.6666666666666666"
+				result="source" />
+			<feBlend in="source" in2="SourceGraphic" mode="luminosity" />
+		</filter>
+	</defs>
+	<rect x="0" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#overlay0)" />
+	<rect x="0" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#overlay1)" />
+	<rect x="20" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#hard-light0)" />
+	<rect x="20" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#hard-light1)" />
+	<rect x="40" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#color-dodge0)" />
+	<rect x="40" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#color-dodge1)" />
+	<rect x="60" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#color-burn0)" />
+	<rect x="60" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#color-burn1)" />
+	<rect x="80" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#exclusion0)" />
+	<rect x="80" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#exclusion1)" />
+	<rect x="100" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#hue0)" />
+	<rect x="100" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#hue1)" />
+	<rect x="120" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#saturation0)" />
+	<rect x="120" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#saturation1)" />
+	<rect x="140" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#color0)" />
+	<rect x="140" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#color1)" />
+	<rect x="160" y="0" width="16" height="16" fill="lime"
+		fill-opacity="0.6666666666666666" filter="url(#luminosity0)" />
+	<rect x="160" y="20" width="16" height="16" fill="lime"
+		fill-opacity="0" filter="url(#luminosity1)" />
+</svg>

@@ -21,29 +21,43 @@
  */
 package com.github.weisj.jsvg;
 
+import static com.github.weisj.jsvg.renderer.impl.DocumentInstantiator.INSTANCE_OVERRIDE_TRANSFORM;
+
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JComponent;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.weisj.jsvg.attributes.Coordinate;
+import com.github.weisj.jsvg.attributes.PreserveAspectRatio;
 import com.github.weisj.jsvg.attributes.font.SVGFont;
+import com.github.weisj.jsvg.attributes.transform.TransformBox;
+import com.github.weisj.jsvg.attributes.value.LengthValue;
+import com.github.weisj.jsvg.attributes.value.TransformValue;
 import com.github.weisj.jsvg.nodes.SVG;
+import com.github.weisj.jsvg.nodes.View;
+import com.github.weisj.jsvg.nodes.prototype.Transformable;
 import com.github.weisj.jsvg.paint.SVGPaint;
 import com.github.weisj.jsvg.parser.impl.DocumentConstructorAccessor;
 import com.github.weisj.jsvg.renderer.MeasureContext;
 import com.github.weisj.jsvg.renderer.NullPlatformSupport;
 import com.github.weisj.jsvg.renderer.PlatformSupport;
+import com.github.weisj.jsvg.renderer.RenderConfig;
 import com.github.weisj.jsvg.renderer.RenderContext;
 import com.github.weisj.jsvg.renderer.animation.Animation;
-import com.github.weisj.jsvg.renderer.animation.AnimationState;
 import com.github.weisj.jsvg.renderer.awt.AwtComponentPlatformSupport;
+import com.github.weisj.jsvg.renderer.impl.ElementBounds;
 import com.github.weisj.jsvg.renderer.impl.NodeRenderer;
 import com.github.weisj.jsvg.renderer.impl.context.RenderContextAccessor;
 import com.github.weisj.jsvg.renderer.output.Output;
@@ -51,18 +65,22 @@ import com.github.weisj.jsvg.renderer.output.impl.CurrentColorProvider;
 import com.github.weisj.jsvg.renderer.output.impl.ShapeOutput;
 import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
+import com.github.weisj.jsvg.view.impl.ResolvedView;
+import com.github.weisj.jsvg.view.impl.ViewImpl;
 
 public final class SVGDocument {
     private static final boolean DEBUG = false;
     private final @NotNull SVG root;
+    private final @NotNull Map<@NotNull String, @NotNull View> views;
     private final @NotNull FloatSize size;
 
     static {
         DocumentConstructorAccessor.setDocumentConstructor(SVGDocument::new);
     }
 
-    private SVGDocument(@NotNull SVG root) {
+    private SVGDocument(@NotNull SVG root, @NotNull Map<@NotNull String, @NotNull View> views) {
         this.root = root;
+        this.views = views;
         this.size = sizeForViewport(null);
     }
 
@@ -79,13 +97,17 @@ public final class SVGDocument {
         return root.staticViewBox(size());
     }
 
+    public @NotNull Set<@NotNull String> viewNames() {
+        return Collections.unmodifiableSet(views.keySet());
+    }
+
     public @NotNull Shape computeShape() {
         return computeShape(null);
     }
 
-    public @NotNull Shape computeShape(@Nullable ViewBox viewBox) {
+    public @NotNull Shape computeShape(@Nullable ViewBox viewport) {
         Area accumulator = new Area(new Path2D.Float());
-        renderWithPlatform(NullPlatformSupport.INSTANCE, new ShapeOutput(accumulator), viewBox);
+        render(new ShapeOutput(accumulator), RenderConfig.builder().viewport(viewport).build());
         return accumulator;
     }
 
@@ -105,29 +127,34 @@ public final class SVGDocument {
         PlatformSupport platformSupport = component != null
                 ? new AwtComponentPlatformSupport(component)
                 : NullPlatformSupport.INSTANCE;
-        renderWithPlatform(platformSupport, graphics2D, bounds);
+        RenderConfig.Builder config = RenderConfig.builder()
+                .platformSupport(platformSupport)
+                .viewport(bounds);
+        Font componentFont = component != null ? component.getFont() : null;
+        if (componentFont != null) {
+            config.fontSize(componentFont.getSize2D())
+                    .defaultFontFamily(componentFont.getFamily());
+        }
+        render(graphics2D, config.build());
     }
 
-    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Graphics2D graphics2D,
-            @Nullable ViewBox bounds) {
+    public void render(@NotNull Graphics2D graphics2D, @NotNull RenderConfig config) {
         Output output = Output.createForGraphics(graphics2D);
-        renderWithPlatform(platformSupport, output, bounds);
-        output.dispose();
+        try {
+            render(output, config);
+        } finally {
+            output.dispose();
+        }
     }
 
-    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
-            @Nullable ViewBox viewportBounds) {
-        renderWithPlatform(platformSupport, output, viewportBounds, null);
-    }
-
-    public void renderWithPlatform(@NotNull PlatformSupport platformSupport, @NotNull Output output,
-            @Nullable ViewBox viewportBounds, @Nullable AnimationState animationState) {
+    public void render(@NotNull Output output, @NotNull RenderConfig config) {
+        ViewBox viewportBounds = config.viewport();
 
         if (viewportBounds != null) {
             output.translate(viewportBounds.x, viewportBounds.y);
         }
 
-        RenderContext context = prepareRenderContext(platformSupport, output, viewportBounds, animationState);
+        RenderContext context = prepareRenderContext(config, output);
 
         // Needed for the non-scaling-stroke vector-effect to work properly.
         RenderContextAccessor.Accessor accessor = RenderContextAccessor.instance();
@@ -144,9 +171,13 @@ public final class SVGDocument {
             });
         }
 
-        ViewBox rootViewBox = root.viewBox(context);
+        ResolvedView selectedView = resolveView(config);
+        ViewBox rootViewBox = selectedView.viewBox(root.viewBox(context));
+        if (rootViewBox != null && (rootViewBox.width == 0 || rootViewBox.height == 0)) return;
+
+        PreserveAspectRatio preserveAspectRatio = selectedView.preserveAspectRatio(root.preserveAspectRatio());
         RenderContext viewContext = root.createInnerContextForViewBox(
-                viewportBounds.size(), rootViewBox, context, output);
+                viewportBounds.size(), rootViewBox, preserveAspectRatio, context, output);
 
         // Needed for other vector-effects to work properly.
         accessor.setTransforms(viewContext, output.transform());
@@ -154,26 +185,68 @@ public final class SVGDocument {
         ViewBox clipViewbox = rootViewBox != null ? rootViewBox : fallbackViewbox;
         output.applyClip(clipViewbox);
 
-        NodeRenderer.renderRootSVG(root, viewContext, output);
+        TransformValue transformOverride = selectedView.transformOverride();
+        if (transformOverride != null) {
+            // Manually apply the transform.
+            new RootSVGTransformable(root, transformOverride)
+                    .applyTransform(output, context, new ElementBounds(root, context));
+            NodeRenderer.renderNode(root, viewContext, output, INSTANCE_OVERRIDE_TRANSFORM);
+        } else {
+            NodeRenderer.renderNode(root, viewContext, output);
+        }
+    }
+
+    private @NotNull ResolvedView resolveView(@NotNull RenderConfig config) {
+        com.github.weisj.jsvg.view.View view = config.view();
+        if (view == null) return ResolvedView.DEFAULT;
+        if (!(view instanceof ViewImpl)) {
+            throw new IllegalArgumentException("Views must be created through the factory methods on View");
+        }
+        return ((ViewImpl) view).resolve(views, size);
     }
 
     private @NotNull RenderContext prepareRenderContext(
-            @NotNull PlatformSupport platformSupport,
-            @NotNull Output output,
-            @Nullable ViewBox viewportBounds,
-            @Nullable AnimationState animationState) {
-        float defaultEm = platformSupport.fontSize();
+            @NotNull RenderConfig config,
+            @NotNull Output output) {
+        PlatformSupport platformSupport = config.platformSupport();
+        ViewBox viewportBounds = config.viewport();
+        float defaultEm = config.fontSize();
         float defaultEx = SVGFont.exFromEm(defaultEm);
-        AnimationState animState = animationState != null ? animationState : AnimationState.NO_ANIMATION;
-        MeasureContext initialMeasure = viewportBounds != null
-                ? MeasureContext.createInitial(viewportBounds.size(), defaultEm, defaultEx, animState)
-                : MeasureContext.createInitial(root.sizeForTopLevel(null, defaultEm, defaultEx),
-                        defaultEm, defaultEx, animState);
+        FloatSize initialViewportSize = viewportBounds != null
+                ? viewportBounds.size()
+                : root.sizeForTopLevel(null, defaultEm, defaultEx);
+        MeasureContext initialMeasure =
+                MeasureContext.createInitial(initialViewportSize, defaultEm, defaultEx, config.animationState());
         SVGPaint currentColor = null;
         if (output instanceof CurrentColorProvider) {
             currentColor = ((CurrentColorProvider) output).currentColor();
         }
-        return RenderContextAccessor.instance().createInitial(currentColor, platformSupport, initialMeasure);
+        return RenderContextAccessor.instance().createInitial(
+                currentColor, platformSupport, config.fontLoader(), config.defaultFontFamily(), initialMeasure);
     }
 
+    private static final class RootSVGTransformable implements Transformable {
+        private final @NotNull SVG root;
+        private final @NotNull TransformValue transform;
+
+        RootSVGTransformable(@NotNull SVG root, @NotNull TransformValue transform) {
+            this.root = root;
+            this.transform = transform;
+        }
+
+        @Override
+        public @NotNull TransformValue transform() {
+            return transform;
+        }
+
+        @Override
+        public @NotNull Coordinate<LengthValue> transformOrigin() {
+            return root.transformOrigin();
+        }
+
+        @Override
+        public TransformBox transformBox() {
+            return root.transformBox();
+        }
+    }
 }

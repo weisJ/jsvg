@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"
+	fill="none" stroke="blue" stroke-width="3">
+	<!-- Retain the triangle when invalid data follows closepath. -->
+	<path d="M10 10 l20 0 0 10 z # L100 70" />
+	<!-- Explicit commands after closepath remain valid. -->
+	<path d="M70 10 l20 0 0 10 z l0 20" />
+	<!-- Discard the incomplete segment, but keep the preceding line. -->
+	<path d="M10 50 l20 0 5" />
+	<!-- Closepath cannot accept an implicit numeric argument. -->
+	<path d="M40 50 l20 0 z 99 99" />
+	<!-- Missing and empty path data must not produce a stroked point. -->
+	<path transform="translate(10 70)" />
+	<path transform="translate(30 70)" d="" />
+</svg>

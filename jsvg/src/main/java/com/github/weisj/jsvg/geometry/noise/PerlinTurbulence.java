@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021-2023 Jannis Weis
+ * Copyright (c) 2021-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,6 +22,7 @@
 package com.github.weisj.jsvg.geometry.noise;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -84,14 +85,19 @@ public final class PerlinTurbulence {
     private void init(int seed) {
         int lSeed = setupSeed(seed);
 
-        int i, j, k;
+        int i;
+        int j;
+        int k;
 
         for (k = 0; k < 4; k++) {
             for (i = 0; i < BSize; i++) {
-                double u, v;
+                double u;
+                double v;
                 do {
-                    u = ((lSeed = random(lSeed)) % (BSize + BSize)) - (double) BSize;
-                    v = ((lSeed = random(lSeed)) % (BSize + BSize)) - (double) BSize;
+                    lSeed = random(lSeed);
+                    u = (lSeed % (BSize + BSize)) - (double) BSize;
+                    lSeed = random(lSeed);
+                    v = (lSeed % (BSize + BSize)) - (double) BSize;
                 } while (u == 0 && v == 0);
 
                 double s = Math.sqrt(u * u + v * v);
@@ -106,7 +112,8 @@ public final class PerlinTurbulence {
 
         while (--i > 0) {
             k = uLatticeSelector[i];
-            j = (lSeed = random(lSeed)) % BSize;
+            lSeed = random(lSeed);
+            j = lSeed % BSize;
             uLatticeSelector[i] = uLatticeSelector[j];
             uLatticeSelector[j] = k;
 
@@ -192,19 +199,19 @@ public final class PerlinTurbulence {
         double baseFrequencyX = xFrequency;
         double baseFrequencyY = yFrequency;
         if (stitchInfo != null) {
-            assert tile != null;
+            Rectangle2D.Double tileBounds = Objects.requireNonNull(tile, "tile");
             if (baseFrequencyX != 0) {
-                baseFrequencyX = adjustFrequency(baseFrequencyX, tile.width);
+                baseFrequencyX = adjustFrequency(baseFrequencyX, tileBounds.width);
             }
             if (baseFrequencyY != 0) {
-                baseFrequencyY = adjustFrequency(baseFrequencyY, tile.height);
+                baseFrequencyY = adjustFrequency(baseFrequencyY, tileBounds.height);
             }
 
-            stitchInfo.width = (int) (tile.width * baseFrequencyX + 0.5f);
-            stitchInfo.wrapX = (int) (tile.x * baseFrequencyX + PerlinN + stitchInfo.width);
+            stitchInfo.width = (int) (tileBounds.width * baseFrequencyX + 0.5f);
+            stitchInfo.wrapX = (int) (tileBounds.x * baseFrequencyX + PerlinN + stitchInfo.width);
 
-            stitchInfo.height = (int) (tile.height * baseFrequencyY + 0.5f);
-            stitchInfo.wrapY = (int) (tile.y * baseFrequencyY + PerlinN + stitchInfo.height);
+            stitchInfo.height = (int) (tileBounds.height * baseFrequencyY + 0.5f);
+            stitchInfo.wrapY = (int) (tileBounds.y * baseFrequencyY + PerlinN + stitchInfo.height);
         }
 
         final double[] fSum = fractalSum
@@ -235,11 +242,11 @@ public final class PerlinTurbulence {
                 // adding it afterward simplifies to subtracting it once.
                 stitchInfo.width *= 2;
                 stitchInfo.wrapX *= 2;
-                stitchInfo.wrapX += (int) PerlinN;
+                stitchInfo.wrapX -= (int) PerlinN;
 
                 stitchInfo.height *= 2;
                 stitchInfo.wrapY *= 2;
-                stitchInfo.wrapY += (int) PerlinN;
+                stitchInfo.wrapY -= (int) PerlinN;
             }
         }
 

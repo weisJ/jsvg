@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Jannis Weis
+ * Copyright (c) 2023-2026 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -44,6 +44,15 @@ public interface FilterPrimitive {
 
     default boolean isValid() {
         return true;
+    }
+
+    /**
+     * Whether this primitive needs image pixels aligned with primitive coordinates for the supplied
+     * user-to-image transform. Pointwise operations and operations that already map their samples
+     * through the transform can keep the destination-aligned surface.
+     */
+    default boolean requiresAlignedBuffer(@NotNull FilterLayoutContext context) {
+        return false;
     }
 
     void layoutFilter(@NotNull RenderContext context, @NotNull FilterLayoutContext filterLayoutContext);
